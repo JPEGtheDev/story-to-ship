@@ -292,7 +292,6 @@ All Particle-Viewer stories should confirm:
 ### Documentation
 - [ ] Public API has comments/docstrings
 - [ ] New build flags documented (if any)
-- [ ] CHANGELOG.md updated
 - [ ] README.md updated (if user-facing)
 
 ### CI/CD Integration

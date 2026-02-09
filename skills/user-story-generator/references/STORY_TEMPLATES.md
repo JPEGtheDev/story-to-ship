@@ -67,7 +67,6 @@ Template examples for different story types. Customize based on your domain and 
 - [ ] Integration tested on Linux CI with Xvfb
 - [ ] No new compiler warnings or linter errors
 - [ ] Comments/docs for public API
-- [ ] CHANGELOG.md updated
 - [ ] Ready to merge to main branch
 ```
 

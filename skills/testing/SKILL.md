@@ -5,7 +5,7 @@ license: MIT
 compatibility: Designed for GitHub Copilot and similar AI coding agents
 metadata:
   author: JPEGtheDev
-  version: "1.1"
+  version: "1.2"
   category: testing
   project: Particle-Viewer
 ---
@@ -185,6 +185,9 @@ Before presenting tests, verify:
 - [ ] Visual regression tests use production classes (Particle, Camera) — no duplicated test helpers
 - [ ] Group related configuration into structs/POCOs instead of flat variables
 - [ ] Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
+- [ ] Test `SetUp()` ensures all output directories exist (artifacts/, baselines/, diffs/)
+- [ ] Artifact `save()` return values are checked, not silently ignored
+- [ ] Visual test resolution matches viewer defaults (1280x720) unless specifically testing other resolutions
 - [ ] Tests compile and pass
 
 ---
@@ -198,6 +201,18 @@ Before presenting tests, verify:
 3. **Clean up GL resources.** Every test that creates GL objects (VAOs, VBOs, FBOs, textures) must clean them up. Check for leaks in `cleanup()` / destructors.
 
 4. **Binary file I/O.** Always open binary data files with `"rb"` mode (not `"r"`) for cross-platform correctness.
+
+5. **Ensure output directories exist.** In test `SetUp()`, create all output directories (artifacts/, baselines/, diffs/) before tests run. Check `save()` return values so failures are actionable, not silent.
+
+6. **Visual test resolution.** Use the viewer's default resolution (1280x720) for visual regression tests unless specifically testing other resolutions. Non-default resolutions can cause warping and scaling artifacts.
+
+7. **Camera positioning for visual tests.** Don't blindly copy debug camera coordinates — debug shows interactive state, not ideal test framing. Extract the viewing **direction** from debug output, then calculate **distance** based on desired viewport coverage: `distance = subject_size / (coverage_% * tan(FOV/2))`. See `docs/visual-regression/camera-positioning-lessons-learned.md`.
+
+---
+
+## Self-Evaluation
+
+After completing test work, run the `self-evaluation` skill (`.github/skills/self-evaluation/`) to capture any new testing patterns learned during the session.
 
 ---
 

@@ -1,0 +1,134 @@
+# Lessons Learned Patterns
+
+Concrete examples of lessons captured from past sessions and how they were incorporated into project skills.
+
+---
+
+## Code Quality Lessons
+
+### Binary File I/O (PR #73)
+
+**Problem:** `getCOM()` opened binary data files with text mode (`"r"`), which on Windows translates `\r\n` bytes and corrupts binary reads.
+
+**Lesson:** Always open binary data files with `"rb"` mode for cross-platform correctness.
+
+**Added to:** `copilot-instructions.md` → Error Handling section, `testing` skill → Key Design Principles
+
+### Return By Const Reference (PR #73)
+
+**Problem:** `getProjection()` returned a `glm::mat4` by value, copying a 4x4 matrix every frame in the render loop.
+
+**Lesson:** Return large objects (matrices, vectors, structs) by `const&` from getters when the member is stored in the class.
+
+**Added to:** `copilot-instructions.md` → Common Pitfalls
+
+### GLFW Key Bounds Check (PR #73)
+
+**Problem:** `keys_[key]` indexed without validation. GLFW can pass `GLFW_KEY_UNKNOWN` (-1), causing out-of-bounds access.
+
+**Lesson:** Bounds-check GLFW key callbacks — `GLFW_KEY_UNKNOWN` is -1.
+
+**Added to:** `copilot-instructions.md` → OpenGL Usage section
+
+---
+
+## Testing Lessons
+
+### Separate Act and Assert (PR #64)
+
+**Problem:** Tests combined `// Act & Assert` phases, making failures harder to diagnose.
+
+**Lesson:** Always keep Act and Assert as separate phases, even when they seem naturally combined.
+
+**Added to:** `testing` skill → Critical Rules, `TESTING_EXAMPLES.md` → Incorrect Examples
+
+### Production Classes in Tests (PR #73)
+
+**Problem:** Visual regression test helper duplicated Particle's cube generation logic, creating a maintenance burden and false confidence.
+
+**Lesson:** Use production classes (e.g., `Particle`) directly in tests — never duplicate production logic in test helpers.
+
+**Added to:** `testing` skill → Key Design Principles, `TESTING_EXAMPLES.md` → correct/incorrect patterns
+
+### Ensure Output Directories Exist (PR #72)
+
+**Problem:** Tests saved artifacts to `artifacts/` but only ensured `baselines/` existed. Silent write failures in CI.
+
+**Lesson:** Ensure all output directories exist in test `SetUp()`, and check `save()` return values.
+
+**Added to:** `testing` skill → Self-Review Checklist
+
+### Camera Positioning for Visual Tests (PR #71)
+
+**Problem:** Debug camera output was blindly copied as test camera coordinates, but debug shows interactive state, not ideal framing.
+
+**Lesson:** Extract viewing direction from debug output, but calculate distance based on desired viewport coverage. Formula: `distance = subject_size / (coverage_% * tan(FOV/2))`.
+
+**Added to:** `copilot-instructions.md` → Visual Regression Tests section, `docs/visual-regression/camera-positioning-lessons-learned.md`
+
+---
+
+## Architecture Lessons
+
+### Group Related State Into Structs (PR #73)
+
+**Problem:** `ViewerApp` had 10+ flat member variables for window, rendering, recording state.
+
+**Lesson:** Group related member variables into POCOs/structs (e.g., `WindowConfig`, `RenderResources`). Structs should provide their own defaults.
+
+**Added to:** `copilot-instructions.md` → Data Organization, `testing` skill → Key Design Principles
+
+### Headers Must Be Self-Contained (PR #70)
+
+**Problem:** `debugOverlay.hpp` used `std::cerr` without including `<iostream>`, relying on transitive includes.
+
+**Lesson:** Headers must include all their own dependencies. Don't rely on transitive includes from other headers.
+
+**Added to:** `copilot-instructions.md` → Common Pitfalls
+
+### GL Resource Cleanup (PR #73)
+
+**Problem:** `cleanup()` only deleted FBO, leaking other GL objects (textures, renderbuffers, VAOs, VBOs).
+
+**Lesson:** Clean up ALL GL resources in destructors — VAOs, VBOs, FBOs, RBOs, textures. Check for non-zero before deleting.
+
+**Added to:** `copilot-instructions.md` → Memory Management
+
+---
+
+## Process Lessons
+
+### Don't Modify README Unless Asked (PR #64)
+
+**Problem:** Agent added visual regression testing docs to README, which wasn't requested.
+
+**Lesson:** Don't update README unless specifically asked by the user.
+
+### Skills Should Cross-Reference (PR #64)
+
+**Problem:** Testing skill duplicated CI pipeline rules from workflow skill.
+
+**Lesson:** Minimize duplication across skills. Each skill owns one domain. Skills reference other skills instead of repeating content.
+
+**Added to:** `copilot-instructions.md` → Skill Architecture section
+
+### Always Upload Current Images (PR #64)
+
+**Problem:** Visual regression CI only uploaded artifacts on failure, making it hard to review passing tests.
+
+**Lesson:** Always save and upload current rendered images, even when tests pass. Use `if: always()` on upload steps.
+
+**Added to:** `workflow` skill → Artifact Upload Pattern
+
+---
+
+## Quick Reference: Where to Add Lessons
+
+| If the lesson is about... | Add to... |
+|---|---|
+| Code patterns, naming, error handling | `copilot-instructions.md` |
+| Test writing, AAA, mocking, visual regression | `.github/skills/testing/SKILL.md` |
+| CI/CD workflows, artifacts, permissions | `.github/skills/workflow/SKILL.md` |
+| Documentation format, linking, content | `.github/skills/documentation/SKILL.md` |
+| User story creation, estimation | `.github/skills/user-story-generator/SKILL.md` |
+| Meta/process (skill creation, evaluation) | `.github/skills/self-evaluation/SKILL.md` |

@@ -56,7 +56,7 @@ src/
 1. **Global State in clutter.hpp** – Contains `framebuffer`, `window`, `part`, `set`, `cam` as globals
 2. **Tight Coupling** – Main loop directly manages all concerns
 3. **No Dependency Injection** – Hard to test rendering independently
-4. **Limited Test Coverage** – No unit tests, no visual regression tests
+4. **Limited Test Coverage** – Unit tests exist (229+), but no visual regression tests against real GPU renders yet
 
 ---
 
@@ -148,44 +148,63 @@ The project should follow a layering approach (target state):
 
 ## Visual Regression Testing Stories
 
+### Implemented Infrastructure
+
+The visual regression testing infrastructure is now in place:
+
+- **Image** (`src/Image.hpp`) — Core RGBA image class with `save()`/`load()` for PPM and PNG formats
+- **PixelComparator** (`src/testing/PixelComparator.hpp`) — RGBA image comparison with configurable tolerance
+- **VisualTestHelpers** (`tests/visual-regression/VisualTestHelpers.hpp`) — Test fixture, EXPECT_VISUAL_MATCH macros, test image helpers
+- **GitHub Actions Workflow** (`.github/workflows/unit-tests.yml (visual-regression job)`) — CI with Xvfb, inline image display, PR comments
+
+The `Image` class is the base type for all image operations. Use it for creating, comparing, saving, and loading test images.
+
 ### Particle-Viewer-Specific Requirements
 
-Stories in the visual regression testing initiative should:
+Stories involving visual regression testing should:
 
-1. **Support Headless Mode**  
+1. **Use the Image class** as the base type for all image data (defined in `src/Image.hpp`)
+
+2. **Follow AAA Pattern** in tests — use the `testing` skill (`.github/skills/testing/`) for guidelines:
+   - Do not combine Arrange and Act into `// Arrange & Act`
+   - Omit `// Arrange` if no setup is needed
+   - Put expected values as named variables in Arrange
+
+3. **Follow CI pipeline rules** — use the `workflow` skill (`.github/skills/workflow/`) for guidelines
+
+3. **Support Headless Mode**  
    - No display required (works with Xvfb on CI)
    - Must not assume real GPU
 
-2. **Baseline Image Management**  
+4. **Baseline Image Management**  
    - Include logic for updating baselines when rendering intentionally changes
    - Store baseline images in `tests/visual-regression/baselines/`
 
-3. **Cross-Platform Compatibility**  
+5. **Cross-Platform Compatibility**  
    - Mesa on Linux ✅
    - (Windows support TBD)
 
-4. **CI Integration**  
+6. **CI Integration**  
    - Artifacts (diff images) uploaded to GitHub Actions
    - Comment on PR with visual diff summary
+   - See `.github/workflows/unit-tests.yml (visual-regression job)`
 
-### Example Visual Regression Story
+### Example Visual Regression Story (Implemented)
 
 **Title:** "Integrate Visual Regression Tests into GitHub Actions"
 
 **Acceptance Criteria:**
-- [ ] Tests run headless with `xvfb-run` on Ubuntu runner
+- [x] Tests run headless with `xvfb-run` on Ubuntu runner
+- [x] Test failure produces diff image (current vs baseline)
+- [x] GitHub Action publishes diff as artifact
+- [x] PR comment auto-posts screenshot comparison
 - [ ] Baseline images committed to `tests/visual-regression/baselines/`
-- [ ] Test failure produces diff image (current vs baseline)
-- [ ] GitHub Action publishes diff as artifact
-- [ ] PR comment auto-posts screenshot comparison
 
 **Definition of Done:**
-- [ ] GitHub Actions workflow written and tested in branch
-- [ ] Documentation in `docs/visual-regression-testing.md`
-- [ ] One example baseline image and corresponding test
+- [x] GitHub Actions workflow written and tested in branch
+- [x] Documentation in `docs/testing/visual-regression.md`
+- [x] Example tests and corresponding helpers
 - [ ] All CI checks passing
-
----
 
 ## Refactoring Story Guidelines
 

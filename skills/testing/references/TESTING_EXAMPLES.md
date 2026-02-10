@@ -101,6 +101,32 @@ TEST_F(VisualRegressionTest, TolerantMatch_SlightlyDifferentImages_Passes)
 }
 ```
 
+### Visual Regression: Using Production Particle Class
+
+```cpp
+TEST_F(RenderingRegressionTest, RenderSingleParticle_CenteredView_MatchesBaseline)
+{
+    // Arrange
+    Shader particleShader(vertexPath.c_str(), fragmentPath.c_str());
+    std::vector<glm::vec4> data = {glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)};
+    Particle particles(1, data.data());  // Use production Particle class
+    glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 3000.0f);
+
+    // Act
+    glContext_.bindFramebuffer();
+    renderParticle(particles, particleShader, view, projection);
+    Image currentImage = glContext_.captureFramebuffer();
+
+    // Assert
+    ASSERT_TRUE(currentImage.valid());
+    Image baseline = Image::load(baselinePath, ImageFormat::PNG);
+    PixelComparator comparator;
+    ComparisonResult result = comparator.compare(baseline, currentImage, tolerance, true);
+    EXPECT_TRUE(result.matches);
+}
+```
+
 ### Image Save/Load: Round-Trip (RGB preserved, alpha discarded)
 
 ```cpp
@@ -211,9 +237,54 @@ TEST(CameraTest, Update)            // <-- WRONG
 
 **Fix:** Use `UnitName_StateUnderTest_ExpectedResult` format.
 
+### ❌ Duplicating Production Logic in Test Helpers
+
+```cpp
+// BAD: Test helper class recreates Particle's cube generation logic
+class ParticleRenderer {
+    void createDefaultCube() {
+        // Duplicated from Particle() constructor  <-- WRONG
+        for (int i = 0; i < 64000; i++) {
+            particleData_[i] = glm::vec4(i % 40 * 1.25, ...);
+        }
+    }
+};
+```
+
+**Fix:** Use `Particle` directly — tests stay in sync with production code automatically.
+
+```cpp
+// GOOD: Use production class
+Particle particles;  // Default cube, same as app
+// Or with custom data:
+std::vector<glm::vec4> data = {glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)};
+Particle particles(1, data.data());
+```
+
 ---
 
 ## Key Types Reference
+
+### Particle (src/particle.hpp)
+
+```cpp
+class Particle
+{
+  public:
+    long n;                              // number of bodies
+    GLuint instanceVBO;                  // GL instance buffer
+    std::vector<glm::vec4> translations; // positions (x, y, z, colorValue)
+    std::vector<glm::vec4> velocities;   // velocity data
+
+    Particle();                                        // Default: 64,000 particles in 40×40×40 grid
+    Particle(long number_of_bodies, const glm::vec4* positions); // Custom data (copies)
+
+    void changeTranslations(long count, const glm::vec4* new_positions);
+    void changeVelocities(const glm::vec4* new_velocities);
+    void pushVBO();            // Upload translations to GPU
+    void setUpInstanceArray(); // Configure vertex attribs for instancing
+};
+```
 
 ### Image (src/Image.hpp)
 
@@ -287,12 +358,12 @@ Image createGradientImage(uint32_t w, uint32_t h,
 
 ```
 tests/
-├── core/               # Unit tests (CameraTests.cpp, ShaderTests.cpp, etc.)
+├── core/               # Unit tests (CameraTests.cpp, ParticleTests.cpp, etc.)
 ├── integration/        # Multi-component tests
 ├── testing/            # Tests for PixelComparator, Image
-├── visual-regression/  # Visual comparison tests
-│   ├── VisualTestHelpers.hpp
-│   └── VisualRegressionTests.cpp
+├── visual-regression/  # Visual comparison tests (uses production Particle class)
+│   ├── baselines/      # Baseline images (committed, never modified by tests)
+│   └── RenderingRegressionTests.cpp
 ├── mocks/              # MockOpenGL.hpp/.cpp
 ├── stb_image_write_impl.cpp
 └── CMakeLists.txt

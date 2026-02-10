@@ -5,7 +5,7 @@ license: MIT
 compatibility: Designed for GitHub Copilot and similar AI coding agents
 metadata:
   author: JPEGtheDev
-  version: "1.0"
+  version: "1.1"
   category: testing
   project: Particle-Viewer
 ---
@@ -65,6 +65,7 @@ TEST(SuiteName, MethodName_Condition_ExpectedResult)
 ### Critical Rules
 
 1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
+   - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.
 2. **If no Arrange is needed**, omit `// Arrange` entirely — start with `// Act`.
 3. **Move expected values to Arrange** as named variables, not inline in Assert.
 4. **One logical concept per test** — split if testing multiple behaviors.
@@ -124,21 +125,28 @@ TEST(DataLoadingPipelineTest, LoadSettings_ValidFile_PopulatesParticles)
 
 ### Visual Regression Tests (tests/visual-regression/)
 
-Use `PixelComparator` and the `Image` struct for pixel comparison.
+Use production classes (e.g., `Particle`) directly — **never duplicate production logic in test helpers**.
+Use `PixelComparator` and the `Image` class for pixel comparison.
 
 ```cpp
-TEST_F(VisualRegressionTest, Compare_IdenticalImages_ReturnsMatch)
+TEST_F(RenderingRegressionTest, RenderDefaultCube_AngledView_MatchesBaseline)
 {
     // Arrange
-    Image baseline = createTestImage(16, 16, 255, 0, 0);
-    Image current = createTestImage(16, 16, 255, 0, 0);
+    Shader particleShader(vertexPath.c_str(), fragmentPath.c_str());
+    Particle particles;  // Uses production Particle class directly
+    glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 3000.0f);
 
     // Act
-    ComparisonResult result = comparator_.compare(baseline, current, 0.0f, true);
+    glContext_.bindFramebuffer();
+    renderParticle(particles, particleShader, view, projection);
+    Image currentImage = glContext_.captureFramebuffer();
 
     // Assert
+    Image baseline = Image::load(baselinePath, ImageFormat::PNG);
+    PixelComparator comparator;
+    ComparisonResult result = comparator.compare(baseline, currentImage, tolerance, true);
     EXPECT_TRUE(result.matches);
-    EXPECT_TRUE(result.error.empty());
 }
 ```
 
@@ -164,17 +172,32 @@ Within a file, order tests: basic → complex, common → edge cases.
 
 ---
 
-## Step 5: Review Checklist
+## Step 5: Self-Review Checklist
 
 Before presenting tests, verify:
 
-- [ ] Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no combinations)
+- [ ] Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no `// Arrange & Act`)
 - [ ] Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
 - [ ] Expected values are named variables in Arrange (not inline literals in Assert)
 - [ ] One logical concept per test
 - [ ] External dependencies are mocked (OpenGL, file I/O)
 - [ ] No testing of external libraries (std::, third-party code)
+- [ ] Visual regression tests use production classes (Particle, Camera) — no duplicated test helpers
+- [ ] Group related configuration into structs/POCOs instead of flat variables
+- [ ] Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
 - [ ] Tests compile and pass
+
+---
+
+## Key Design Principles (Learned from Review Feedback)
+
+1. **Use production classes in tests.** Visual regression tests should use `Particle` directly instead of re-implementing particle creation logic in a test helper class. This ensures tests stay in sync with production code.
+
+2. **Group related data into POCOs/structs.** When a test or test helper has many flat member variables, group them into domain-specific structs (e.g., `RenderConfig`, `CameraSetup`). This mirrors the production code pattern.
+
+3. **Clean up GL resources.** Every test that creates GL objects (VAOs, VBOs, FBOs, textures) must clean them up. Check for leaks in `cleanup()` / destructors.
+
+4. **Binary file I/O.** Always open binary data files with `"rb"` mode (not `"r"`) for cross-platform correctness.
 
 ---
 
@@ -186,6 +209,7 @@ Before presenting tests, verify:
 | `ComparisonResult` | `src/testing/PixelComparator.hpp` | Match status, similarity, diff image |
 | `PixelComparator` | `src/testing/PixelComparator.hpp` | Pixel comparison engine |
 | `ImageFormat` | `src/Image.hpp` | Format enum (PPM, PNG) for Image::save/load |
+| `Particle` | `src/particle.hpp` | Production particle data (std::vector<glm::vec4>) |
 
 ---
 

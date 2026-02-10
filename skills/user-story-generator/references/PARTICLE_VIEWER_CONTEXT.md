@@ -41,22 +41,30 @@ Project-specific guidelines, conventions, and constraints for generating user st
 ### Current Structure
 ```
 src/
-├── main.cpp              # Entry point, main loop
-├── clutter.hpp           # Global state (NEEDS REFACTORING)
+├── main.cpp              # Entry point (creates ViewerApp)
+├── viewer_app.hpp/.cpp   # Application class (owns all state and main loop)
 ├── camera.hpp            # Camera management
-├── particle.hpp          # Particle data structure
+├── particle.hpp          # Particle data structure (std::vector<glm::vec4>)
 ├── shader.hpp            # Shader loading/compilation
 ├── settingsIO.hpp        # Configuration file loading
 ├── osFile.hpp            # OS-specific file operations
+├── debugOverlay.hpp      # Camera debug overlay
+├── Image.hpp/.cpp        # Core RGBA image class
 ├── glad/                 # OpenGL loader (auto-generated)
 └── shaders/              # GLSL shader files
 ```
 
-### Key Issues to Address
-1. **Global State in clutter.hpp** – Contains `framebuffer`, `window`, `part`, `set`, `cam` as globals
-2. **Tight Coupling** – Main loop directly manages all concerns
-3. **No Dependency Injection** – Hard to test rendering independently
-4. **Limited Test Coverage** – Unit tests exist (229+), but no visual regression tests against real GPU renders yet
+### Architecture Notes
+- **ViewerApp** encapsulates all application state (replaces former `clutter.hpp` globals)
+- State is organized into POCOs: `WindowConfig`, `RenderResources`, `SphereParams`, `RecordingState`, `ShaderPaths`
+- GLFW callbacks delegate to ViewerApp via user pointer pattern
+- `Particle` uses `std::vector<glm::vec4>` for safe memory management
+
+### Remaining Issues to Address
+1. **SettingsIO Decomposition** — Mixes file I/O, playback state, and UI (file dialogs)
+2. **Camera Separation** — Mixes input handling and GL rendering
+3. **No Dependency Injection** — Hard to test rendering independently
+4. **Resolution-Dependent Scaling** — Sphere scale is hand-tuned per resolution
 
 ---
 
@@ -212,10 +220,10 @@ Stories involving visual regression testing should:
 
 Current refactoring priorities:
 
-1. **Global State Elimination** (Priority: High)
-   - Extract global variables from `clutter.hpp`
-   - Create manager classes for framebuffer, window, particle data, camera, playback
-   - Use dependency injection
+1. **Global State Elimination** (✅ Done)
+   - Extracted global variables from former `clutter.hpp` into `ViewerApp` class
+   - State grouped into POCOs: `WindowConfig`, `RenderResources`, `SphereParams`, `RecordingState`, `ShaderPaths`
+   - GLFW callbacks use user pointer pattern
 
 2. **Main Loop Simplification** (Priority: Medium)
    - Separate concerns: input handling, data loading, rendering
@@ -230,10 +238,9 @@ Current refactoring priorities:
    - Centralize shader loading/compilation
    - Support shader reloading for development (hot-reload)
 
-5. **Test Infrastructure** (Priority: High)
-   - Add GoogleTest framework
-   - Create reusable test fixtures for OpenGL context setup
-   - Visual regression testing for rendering verification
+5. **Resolution-Independent Rendering** (Priority: Low)
+   - Sphere scale values are currently hand-tuned per resolution
+   - Move scaling to shader side for automatic resolution independence
 
 ### Refactoring Story Template for Particle-Viewer
 
@@ -257,7 +264,7 @@ Current refactoring priorities:
 ### Acceptance Criteria
 
 - [ ] New class in `src/[component]/[ClassName].hpp`
-- [ ] Old code removed from `clutter.hpp` (no dead code)
+- [ ] Old code removed or consolidated (no dead code)
 - [ ] All existing tests pass without modification
 - [ ] New class has ≥85% test coverage in `tests/[component]/[ClassNameTests.cpp]`
 - [ ] Constructor + public methods clearly documented with comments

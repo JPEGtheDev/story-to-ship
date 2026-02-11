@@ -112,7 +112,51 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 ---
 
+## ImGui Integration Lessons
+
+### FetchContent for Libraries Without CMakeLists.txt (PR #79, updated PR #82)
+
+**Problem:** ImGui doesn't ship a CMakeLists.txt, so `FetchContent_MakeAvailable()` tries to call `add_subdirectory()` and fails. Using `FetchContent_Populate()` works but is deprecated in CMake 3.31+.
+
+**Lesson:** Use `FetchContent_Declare()` with `SOURCE_SUBDIR` set to a non-existent path, then call `FetchContent_MakeAvailable()`. This downloads the source without attempting `add_subdirectory()`, and avoids the `FetchContent_Populate()` deprecation warning. Then add the source files manually to your target.
+
+**Added to:** `copilot-instructions.md` → ImGui Integration
+
+### GLFW Callback Chaining Order (PR #79)
+
+**Problem:** ImGui's GLFW backend saves and chains to existing callbacks when `install_callbacks=true`. If ImGui is initialized before ViewerApp sets its callbacks, the chain is broken.
+
+**Lesson:** Set application GLFW callbacks (e.g., `glfwSetKeyCallback`) **before** calling `ImGui_ImplGlfw_InitForOpenGL(window, true)`. ImGui saves the current callbacks and chains to them, ensuring both ImGui and the application receive input events.
+
+**Added to:** `copilot-instructions.md` → ImGui Integration
+
+### ImGui Renders to Default Framebuffer (PR #79)
+
+**Problem:** Needed to ensure ImGui menus don't appear in FBO-based screenshots and frame recordings.
+
+**Lesson:** ImGui renders to the default framebuffer after the FBO blit pass. Since recording reads pixels from the offscreen FBO (before the blit), ImGui content is naturally excluded. This is an architectural advantage of the FBO pipeline — no special handling needed.
+
+**Added to:** `copilot-instructions.md` → ImGui Integration
+
+### Debug Overlay Must Offset for Menu Bar (PR #79)
+
+**Problem:** Debug overlay positioned at y=5 was hidden behind the ImGui menu bar (~25px high). The first line (including FPS counter) was not visible.
+
+**Lesson:** Use ImGui windows instead of raw GL overlays — `ImGui::GetFrameHeight()` gives the actual menu bar height for dynamic positioning. This avoids hard-coded offsets that break with DPI/font scaling changes.
+
+**Added to:** `copilot-instructions.md` → ImGui Integration
+
+---
+
 ## Process Lessons
+
+### Fix Issues at the Source, Not in CI (PR #82)
+
+**Problem:** Visual regression test artifacts used names like `single_particle_720p.png` that didn't match the CI workflow regex `_baseline|_current|_diff`. The quick fix was to expand the regex; the correct fix was to rename artifacts at the source.
+
+**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code — not the CI regex. CI patterns should enforce conventions, not accommodate deviations.
+
+**Added to:** Self-evaluation skill (this file)
 
 ### Don't Modify README Unless Asked (PR #64)
 

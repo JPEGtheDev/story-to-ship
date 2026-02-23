@@ -112,7 +112,21 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 ---
 
-## ImGui Integration Lessons
+## Code Formatting and Verification Lessons
+
+### Silent Tool Output Does Not Mean Success (S5 code-quality audit)
+
+**Problem:** Session 5 ran `clang-format --dry-run -Werror src/shader.hpp` which had no output. Agent interpreted "no output = all files are clean" and skipped detailed verification. Later, an external formatting check failed, revealing that shader.hpp had three formatting issues: (1) exception caught by value instead of const reference, (2) unnecessary semicolons after function closing braces, (3) empty constructor using `{}` instead of `= default`.
+
+**Lesson:** Never rely on tool output silence to mean success. Always:
+1. After running `clang-format -i`, check `git diff` to see actual changes
+2. Visually spot-check modified files for common patterns (trailing semicolons after `}`, exception handling, multi-declarations, bracing)
+3. Only then run the dry-run verification
+
+**Added to:** `code-quality` skill → Step 1 (Pre-Commit Checklist) + new Step 3 (Human-Reviewable Formatting Patterns table)
+
+---
+
 
 ### FetchContent for Libraries Without CMakeLists.txt (PR #79, updated PR #82)
 
@@ -180,6 +194,46 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `workflow` skill → Artifact Upload Pattern
 
+---
+
+## SDL3 Migration Lessons
+
+### SDL3 MSAA Strict Enforcement (SDL3 migration PR)
+
+**Problem:** `SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` caused `SDL_CreateWindow` to return NULL in Mesa/Xvfb environments. GLFW silently fell back to no MSAA; SDL3 strictly refuses to create the window if the requested visual isn't available.
+
+**Lesson:** Always add a fallback retry for MSAA: attempt creation with 4x MSAA first; if that returns NULL, reset the attribute to 0 and retry. This ensures headless/CI tests can run on software renderers.
+
+**Added to:** `copilot-instructions.md` → OpenGL Usage section
+
+---
+
+### FetchContent Ordering With Full-CMake Dependencies (SDL3 migration PR)
+
+**Problem:** Adding SDL3 via `FetchContent_MakeAvailable(SDL3)` (which has its own `CMakeLists.txt`) corrupted CMake 3.31's internal FetchContent state, causing subsequent `FetchContent_MakeAvailable(googletest)` to fail with "Internal error: SUBBUILD_DIR not set".
+
+**Lesson:** When mixing FetchContent dependencies, make all lightweight/header-only deps (ImGui) and all non-subdirectory deps (GoogleTest) available **before** a full-CMakeLists dep (SDL3). Declare all deps at the top, then call `FetchContent_MakeAvailable` in a safe order.
+
+**Added to:** `copilot-instructions.md` → ImGui Integration / Architecture section
+
+---
+
+### Search All Files During Backend Migration (SDL3 migration PR)
+
+**Problem:** During GLFW→SDL3 migration, `src/ui/imgui_menu.cpp` still included `<GLFW/glfw3.h>` and called `glfwGetPrimaryMonitor()`. Initial grep missed it because the search targeted `viewer_app*`, `camera*`, and `main.cpp` but not the UI layer.
+
+**Lesson:** When migrating a windowing/graphics backend, search ALL source files (`find src -name "*.cpp" -o -name "*.hpp" | xargs grep OLDLIBNAME`) rather than targeting specific files by name. The old API may appear in unexpected locations (monitor queries in menu code, etc.).
+
+**Added to:** `copilot-instructions.md` → Common Pitfalls (as a Build Issues entry)
+
+| If the lesson is about... | Add to... |
+|---|---|
+| Code patterns, naming, error handling | `copilot-instructions.md` |
+| Test writing, AAA, mocking, visual regression | `.github/skills/testing/SKILL.md` |
+| CI/CD workflows, artifacts, permissions | `.github/skills/workflow/SKILL.md` |
+| Documentation format, linking, content | `.github/skills/documentation/SKILL.md` |
+| User story creation, estimation | `.github/skills/user-story-generator/SKILL.md` |
+| Meta/process (skill creation, evaluation) | `.github/skills/self-evaluation/SKILL.md` |
 ---
 
 ## Quick Reference: Where to Add Lessons

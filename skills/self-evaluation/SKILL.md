@@ -5,7 +5,7 @@ license: MIT
 compatibility: Designed for GitHub Copilot and similar AI coding agents
 metadata:
   author: JPEGtheDev
-  version: "1.0"
+  version: "1.2"
   category: meta
   project: Particle-Viewer
 ---
@@ -14,8 +14,7 @@ metadata:
 
 ## How This Skill is Invoked
 
-This skill should be invoked:
-- **At the end of every coding session**, before the final `report_progress` call
+This skill is **mandatory** — `copilot-instructions.md` § Session Lifecycle requires it before every final message. You will also be invoked:
 - When explicitly asked: "Run self-evaluation", "What did you learn?", "Improve skills"
 - After addressing code review feedback that reveals a recurring pattern
 
@@ -44,12 +43,12 @@ Classify each lesson into one of these categories:
 
 | Category | Examples | Update Target |
 |----------|----------|---------------|
-| **Code quality** | Binary file modes, const refs, resource cleanup | `copilot-instructions.md` |
+| **Code quality** | Binary file modes, const refs, resource cleanup | `code-quality` skill |
 | **Testing** | AAA violations, missing directory setup, save checks | `testing` skill |
 | **CI/CD** | Workflow structure, artifact patterns | `workflow` skill |
 | **Documentation** | Link fixes, formatting, content standards | `documentation` skill |
-| **Architecture** | Design patterns, struct grouping, DI | `copilot-instructions.md` |
-| **Process** | PR title format, commit conventions | `copilot-instructions.md` |
+| **Build** | CMake, dependencies, Flatpak packaging | `build` skill |
+| **Versioning** | PR title format, commit conventions, releases | `versioning` skill |
 
 ---
 

@@ -72,14 +72,40 @@ Why all three are needed:
 **Detection heuristic** (requires `--device=all` finish-arg in manifest):
 
 ```cpp
-const bool nvidia_dev  = access("/dev/nvidia0", F_OK) == 0;
-const char* ld         = getenv("LD_LIBRARY_PATH");
-const bool ext_active  = ld && strstr(ld, "nvidia");
-if (nvidia_dev && !ext_active) { /* set the three vars */ }
+// Gate on Flatpak — native systems have drivers installed normally.
+if (access("/.flatpak-info", F_OK) != 0) return false;
+
+const bool nvidia_dev = access("/dev/nvidia0", F_OK) == 0;
+// Scan /usr/lib/*/GL/ for nvidia-* directories (architecture-agnostic).
+const bool ext_mounted = isNvidiaGlExtensionMounted();
+if (nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
+
+**Important:** Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" — Flatpak
+mounts the GL extension into `/usr/lib/<triplet>/GL/nvidia-<ver>` and GLVND
+resolves it via the directory structure, not via `LD_LIBRARY_PATH`.
 
 This must run **before** the first `SDL_Init` call. Setting env vars after
 SDL_Init (once NVIDIA's `libGL` is already loaded by GLVND) has no effect.
+
+---
+
+## Gate Flatpak workarounds on `/.flatpak-info`
+
+Any runtime workaround that exists solely for the Flatpak sandbox (e.g.
+NVIDIA GL extension checks, Mesa software fallbacks) **must** be gated on
+actually running inside Flatpak. The canonical check:
+
+```cpp
+static bool isRunningInFlatpak() {
+    return access("/.flatpak-info", F_OK) == 0;
+}
+```
+
+Without this gate, the workaround will misfire on native systems — e.g.
+scanning `/usr/lib/*/GL/nvidia-*` on a native NVIDIA system finds nothing
+(those directories only exist inside the Flatpak sandbox) and incorrectly
+forces software rendering.
 
 ---
 

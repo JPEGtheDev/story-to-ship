@@ -226,6 +226,56 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `copilot-instructions.md` → Common Pitfalls (as a Build Issues entry)
 
+---
+
+### SDL3 Subsystem Flag Missing Causes Silent Failure (gamepad PR)
+
+**Problem:** Gamepad input was implemented and merged but never worked on any device (Steam Deck, Bluetooth, USB). `SDL_Init(SDL_INIT_VIDEO)` was never updated when the gamepad subsystem was added. Without `SDL_INIT_GAMEPAD`, `SDL_GetGamepads()` returns empty, `SDL_EVENT_GAMEPAD_ADDED` is never fired, and all controllers are invisible — no error, no warning.
+
+**Lesson:** Every SDL3 subsystem needs its `SDL_INIT_*` flag in the `SDL_Init` call in `SDL3Context.cpp`. Adding a new SDL3 feature (gamepad, audio, haptic) **always** requires updating this call. Missing a flag is a silent failure — SDL3 does not warn that the subsystem was never started.
+
+**Added to:** `code-quality` skill → OpenGL Usage section
+
+---
+
+### SDL3 `*ForID` Functions Avoid Unnecessary Device Open/Close (gamepad PR)
+
+**Problem:** In `addXInputMapping()`, the GUID was retrieved by calling `SDL_OpenJoystick()`, reading the GUID with `SDL_GetJoystickGUID()`, then calling `SDL_CloseJoystick()`. SDL3 provides `SDL_GetJoystickGUIDForID(instance_id)` specifically to avoid this open/close dance.
+
+**Lesson:** When querying joystick properties by instance ID, always check for a `SDL_Get*ForID()` variant first: `SDL_GetJoystickGUIDForID`, `SDL_GetJoystickTypeForID`, `SDL_GetJoystickVendorForID`, `SDL_GetJoystickProductForID`, etc. Opening a device to read a property and immediately closing it wastes a file handle and SDL3 reference counts unnecessarily.
+
+**Added to:** `code-quality` skill → OpenGL Usage section
+
+---
+
+### SDL3 Joystick Type Is Distro-Dependent (gamepad PR)
+
+**Problem:** `SDL_GetJoystickTypeForID()` returns `SDL_JOYSTICK_TYPE_GAMEPAD` on SteamOS for the 8BitDo 2.4GHz dongle, but `SDL_JOYSTICK_TYPE_UNKNOWN` on OpenSuse Tumbleweed (and presumably other non-SteamOS distros). The SDL3 joystick type is derived from udev properties that Valve sets via custom rules on SteamOS but are absent on stock Linux. The fallback that only checked `SDL_JOYSTICK_TYPE_GAMEPAD` silently skipped the device on OpenSuse.
+
+**Lesson:** Never rely on `SDL_GetJoystickTypeForID() == SDL_JOYSTICK_TYPE_GAMEPAD` alone for cross-distro gamepad detection. Always pair it with a capability-based fallback for `SDL_JOYSTICK_TYPE_UNKNOWN` devices: open the joystick briefly, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, close it, and treat as a gamepad candidate if the heuristic passes.
+
+**Added to:** `code-quality` skill → OpenGL Usage section
+
+---
+
+### Gamepad Hold-Button → KeyReader Routing Causes Repeated Single-Press Events (gamepad PR)
+
+**Problem:** To mirror Shift-key speed boost on the B gamepad button, initial implementation called `cam_->KeyReader(SDL_SCANCODE_LSHIFT, held)` every frame. `KeyReader` has a `if (is_pressed)` single-press dispatch block — calling it every frame with `is_pressed=true` would fire any single-press handlers for that scancode on every frame, not just on the initial press.
+
+**Lesson:** For gamepad hold-buttons that mirror keyboard *held* keys (e.g. B → Shift for speed boost), **never** route through `Camera::KeyReader()`. Instead, add a dedicated thin method that sets only the key state directly (e.g. `Camera::setSpeedBoost(bool active) { keys[SDL_SCANCODE_LSHIFT] = active; }`). Call it every frame with the current hold state — it's safe because it bypasses the single-press dispatch entirely.
+
+**Added to:** `code-quality` skill → OpenGL Usage section
+
+---
+
+### Don't Remove Camera API Methods When Only the Call Site Changes (gamepad PR)
+
+**Problem:** When L3/R3 sphere distance controls were removed at user request, `isRenderingSphere()` was also deleted from `Camera` because `viewer_app.cpp` was the only caller. One session later, the user re-requested L3/R3, requiring `isRenderingSphere()` to be restored — unnecessary rework.
+
+**Lesson:** When removing a call site in `viewer_app.cpp` (e.g. a gamepad feature), **do not also delete the supporting `Camera` public method**. The Camera API is stable; call sites in `viewer_app` are volatile (controlled by user preference). Only remove a Camera method if it is architecturally incorrect or duplicates something, not merely because it has no callers at the moment.
+
+**Added to:** `code-quality` skill → Step 7: Adding a Feature / Fixing a Bug
+
 | If the lesson is about... | Add to... |
 |---|---|
 | Code patterns, naming, error handling | `copilot-instructions.md` |

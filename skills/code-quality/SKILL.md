@@ -5,7 +5,7 @@ license: MIT
 compatibility: Designed for GitHub Copilot and similar AI coding agents
 metadata:
   author: JPEGtheDev
-  version: "1.1"
+  version: "1.7"
   category: code-quality
   project: Particle-Viewer
 ---
@@ -161,6 +161,10 @@ Header filter excludes embedded libs: `glad`, `tinyFileDialogs`, `stb_*`.
 - Prefer `glGetIntegerv(GL_VIEWPORT, ...)` over cached viewport values in render paths where viewport may change
 - `gl_PointSize` clamped by `GL_POINT_SIZE_RANGE` (max 256px on Mesa/llvmpipe)
 - For Flatpak/SDL3/GL gotchas: see `.github/skills/workflow/references/FLATPAK_GL_GOTCHAS.md`
+- **SDL3 subsystem flags:** `SDL_Init` in `SDL3Context.cpp` must include the flag for every SDL3 subsystem used. Adding gamepad input requires `SDL_INIT_GAMEPAD`; adding audio requires `SDL_INIT_AUDIO`; etc. Missing a flag causes the subsystem to silently fail — no error, no events, no devices.
+- **SDL3 `*ForID` query functions:** When querying joystick properties by instance ID, prefer the `SDL_Get*ForID()` variants (e.g. `SDL_GetJoystickGUIDForID`, `SDL_GetJoystickTypeForID`, `SDL_GetJoystickVendorForID`) over opening the joystick just to read the value and closing it. Opening a device unnecessarily consumes a file handle and triggers internal SDL3 reference counting.
+- **SDL3 joystick type is distro-dependent:** `SDL_GetJoystickTypeForID()` returns `SDL_JOYSTICK_TYPE_GAMEPAD` on SteamOS for hardware like the 8BitDo 2.4GHz dongle, but `SDL_JOYSTICK_TYPE_UNKNOWN` on generic Linux (OpenSuse, Ubuntu, etc.) because stock udev rules don't set the GAMEPAD property. Any SDL3 input fallback that only checks `SDL_JOYSTICK_TYPE_GAMEPAD` will silently fail on non-SteamOS distros. Always pair type-based detection with a capability-based fallback: open the joystick, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, then close it.
+- **Don't route gamepad hold-button state through `Camera::KeyReader()`:** `KeyReader` has a single-press dispatch block — calling it every frame with `is_pressed=true` would repeatedly fire single-press handlers for that key. For gamepad hold-buttons that mirror keyboard held keys (e.g. B → Shift for speed boost), add a dedicated method that sets only the key state directly (e.g. `Camera::setSpeedBoost(bool)`). See `src/camera.hpp` for the existing pattern.
 
 ### Headers
 - Every header must include all headers it directly uses (no transitive include reliance)
@@ -174,11 +178,15 @@ Header filter excludes embedded libs: `glad`, `tinyFileDialogs`, `stb_*`.
 ## Step 7: Adding a Feature / Fixing a Bug
 
 ### New Feature Workflow
-1. Make code changes following naming conventions
-2. Add unit tests in `tests/core/` (see `testing` skill)
-3. Run `clang-format -i` on ALL changed files
-4. Build and verify tests pass
-5. Commit: `feat: description`
+1. **Scan the class interface** — before writing integration code that calls methods on an existing class, verify which members are public/private. Classes like `Camera` have a mix; don't assume public.
+2. Make code changes following naming conventions
+3. Add unit tests in `tests/core/` (see `testing` skill)
+4. Run `clang-format -i` on ALL changed files
+5. Build and verify tests pass
+6. Commit: `feat: description`
+
+### Removing Features / User-Requested Changes
+When removing a gamepad feature or call site from `viewer_app.cpp` at user request, **do not also delete the supporting `Camera` public method**. The Camera API is stable across sessions; call sites in `viewer_app` change frequently with user preferences. Removing `isRenderingSphere()` when L3/R3 was dropped meant restoring it when L3/R3 came back one session later. Only remove a Camera method if it is architecturally wrong, not merely unused at the current moment.
 
 ### Bug Fix Workflow
 1. Write a failing test that reproduces the bug

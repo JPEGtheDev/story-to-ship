@@ -1,74 +1,55 @@
 ---
 name: testing
-description: Write tests for Particle-Viewer following AAA pattern, naming conventions, and project testing standards. Use when writing unit tests, integration tests, visual regression tests, or reviewing test code. Covers Google Test patterns, mock usage, and visual comparison testing.
 license: MIT
-compatibility: Designed for GitHub Copilot and similar AI coding agents
-metadata:
-  author: JPEGtheDev
-  version: "1.2"
-  category: testing
-  project: Particle-Viewer
+description: Use when writing or reviewing any test for Particle-Viewer.
 ---
 
-# Instructions for Agent
+## Iron Law
 
-## How This Skill is Invoked
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+```
 
-In VS Code, users will activate this skill by:
-- Typing `@workspace /testing [description]` in Copilot Chat
-- Or asking: "Write a test for [feature]", "Add visual regression tests", "Review my test code"
+YOU MUST write a failing test before writing any production code. No exceptions.
 
-When activated, write tests that strictly follow the project's testing standards.
+Write the test. Watch it fail. THEN write code.
+
+If you wrote code before the test: **Delete it. Start over.** No exceptions.
+- Don't keep it as "reference"
+- Don't "adapt" it while writing tests
+- Don't look at it while writing tests
+- Delete means delete
+
+**Announce at start:** "I am using the testing skill to [write/review/fix] [specific test description]."
 
 ---
 
-## Core Approach: Standards-First Testing
+## TDD Cycle
 
-**Every test MUST follow the Arrange-Act-Assert (AAA) pattern with all three phases as separate sections.**
+**RED → GREEN → REFACTOR. In that order. Every time.**
 
-Before writing any test, **load and review** [references/TESTING_EXAMPLES.md](references/TESTING_EXAMPLES.md) for concrete examples of correct and incorrect patterns.
+- **RED:** Write one failing test. Name: `UnitName_Condition_ExpectedResult`. YOU MUST SEE IT FAIL — confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
+- **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
+- **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
+
+For PV test runner commands, see `references/PV_TEST_CONVENTIONS.md`.
 
 ---
 
 ## Step 1: Determine Test Type
 
-Ask the user what they need:
-
-> "What would you like to test? I support:
-> 1. **Unit tests** — Test a single class/function in isolation
-> 2. **Integration tests** — Test component interactions
-> 3. **Visual regression tests** — Compare images pixel-by-pixel
-> 4. **Test review** — Check existing tests against our standards"
+- **Unit test** — single class/function in isolation → `tests/core/`
+- **Integration test** — component interactions → `tests/integration/`
+- **Visual regression test** — pixel comparison → load `visual-regression-testing` skill
+- **Test review** — check existing tests against standards → apply checklist in Step 3
 
 ---
 
 ## Step 2: Write Tests Following AAA Pattern
 
-### The Three Phases (ALWAYS separate)
+Every test MUST have three distinct comment sections: `// Arrange`, `// Act`, `// Assert`.
 
-Every test MUST have three distinct comment sections:
-
-```cpp
-TEST(SuiteName, MethodName_Condition_ExpectedResult)
-{
-    // Arrange
-    // Set up test preconditions, create objects, define expected values
-
-    // Act
-    // Execute the single operation being tested
-
-    // Assert
-    // Verify the outcome
-}
-```
-
-### Critical Rules
-
-1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
-   - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.
-2. **If no Arrange is needed**, omit `// Arrange` entirely — start with `// Act`.
-3. **Move expected values to Arrange** as named variables, not inline in Assert.
-4. **One logical concept per test** — split if testing multiple behaviors.
+For the complete AAA rule set, code examples, and advanced patterns, see `references/TESTING_EXAMPLES.md`.
 
 ### Naming Convention
 
@@ -76,103 +57,14 @@ Use format: `UnitName_StateUnderTest_ExpectedResult`
 
 Examples:
 - `MoveForward_IncreasesZPosition`
-- `Compare_IdenticalImages_ReturnsMatch`
-- `ParsePPM_InvalidFile_ReturnsEmptyData`
+
+See `references/TESTING_EXAMPLES.md` for PV naming examples.
+
+For PV-specific test patterns (Camera, SettingsIO examples), test double taxonomy, file organization, and test size taxonomy, see `references/PV_TEST_CONVENTIONS.md`. For visual regression, see the `visual-regression-testing` skill.
 
 ---
 
-## Step 3: Choose the Right Test Pattern
-
-### Unit Tests (tests/core/)
-
-Test a single class method in isolation. Use MockOpenGL for OpenGL calls.
-
-```cpp
-TEST(CameraTest, MoveForward_DefaultSpeed_IncreasesPosition)
-{
-    // Arrange
-    Camera camera(800, 600);
-    camera.cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-    camera.setSpeed(1.0f);
-
-    // Act
-    camera.moveForward();
-
-    // Assert
-    EXPECT_LT(camera.cameraPos.z, 0.0f);
-}
-```
-
-### Integration Tests (tests/integration/)
-
-Test component interactions. May involve multiple classes.
-
-```cpp
-TEST(DataLoadingPipelineTest, LoadSettings_ValidFile_PopulatesParticles)
-{
-    // Arrange
-    SettingsIO settings;
-    std::string test_file = createTestSettingsFile();
-
-    // Act
-    bool result = settings.loadSettings(test_file);
-
-    // Assert
-    EXPECT_TRUE(result);
-    EXPECT_GT(settings.getParticleCount(), 0u);
-}
-```
-
-### Visual Regression Tests (tests/visual-regression/)
-
-Use production classes (e.g., `Particle`) directly — **never duplicate production logic in test helpers**.
-Use `PixelComparator` and the `Image` class for pixel comparison.
-
-```cpp
-TEST_F(RenderingRegressionTest, RenderDefaultCube_AngledView_MatchesBaseline)
-{
-    // Arrange
-    Shader particleShader(vertexPath.c_str(), fragmentPath.c_str());
-    Particle particles;  // Uses production Particle class directly
-    glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 3000.0f);
-
-    // Act
-    glContext_.bindFramebuffer();
-    renderParticle(particles, particleShader, view, projection);
-    Image currentImage = glContext_.captureFramebuffer();
-
-    // Assert
-    Image baseline = Image::load(baselinePath, ImageFormat::PNG);
-    PixelComparator comparator;
-    ComparisonResult result = comparator.compare(baseline, currentImage, tolerance, true);
-    EXPECT_TRUE(result.matches);
-}
-```
-
----
-
-## Step 4: Apply Test File Organization
-
-### Directory Structure
-
-- `tests/core/` — Unit tests for `src/*.hpp` classes
-- `tests/integration/` — Multi-component tests
-- `tests/testing/` — Tests for test utilities (PixelComparator, Image)
-- `tests/visual-regression/` — Visual regression tests
-- `tests/mocks/` — Mock implementations
-
-### File Naming
-
-Each test file matches its source: `CameraTests.cpp` tests `camera.hpp`.
-
-### Test Ordering
-
-Within a file, order tests: basic → complex, common → edge cases.
-
----
-
-## Step 5: Self-Review Checklist
+## Step 3: Self-Review Checklist
 
 Before presenting tests, verify:
 
@@ -180,63 +72,74 @@ Before presenting tests, verify:
 - [ ] Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
 - [ ] Expected values are named variables in Arrange (not inline literals in Assert)
 - [ ] One logical concept per test
+- [ ] Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
 - [ ] External dependencies are mocked (OpenGL, file I/O)
 - [ ] No testing of external libraries (std::, third-party code)
-- [ ] Visual regression tests use production classes (Particle, Camera) — no duplicated test helpers
 - [ ] Group related configuration into structs/POCOs instead of flat variables
 - [ ] Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
-- [ ] Test `SetUp()` ensures all output directories exist (artifacts/, baselines/, diffs/)
-- [ ] Artifact `save()` return values are checked, not silently ignored
-- [ ] Visual test resolution matches viewer defaults (1280x720) unless specifically testing other resolutions
 - [ ] Tests compile and pass
+- [ ] For visual regression tests: see visual-regression-testing skill checklist
+
+✓ All met → proceed
+✗ Any unmet → write the test first before touching implementation code
 
 ---
 
-## Key Design Principles (Learned from Review Feedback)
+## Red Flags — STOP
 
-1. **Use production classes in tests.** Visual regression tests should use `Particle` directly instead of re-implementing particle creation logic in a test helper class. This ensures tests stay in sync with production code.
+If you catch yourself thinking any of these, STOP and start over with RED:
 
-2. **Group related data into POCOs/structs.** When a test or test helper has many flat member variables, group them into domain-specific structs (e.g., `RenderConfig`, `CameraSetup`). This mirrors the production code pattern.
+- Writing implementation code before writing a test
+- "I'll write tests after to verify it works"
+- "The visual regression test will cover this"
+- "It's too complex to unit test with MockOpenGL" (MockOpenGL exists for exactly this)
+- "I already manually tested it"
+- Test passes immediately without seeing it fail first
+- Fixed a bug without writing a regression test that reproduces it first
 
-3. **Clean up GL resources.** Every test that creates GL objects (VAOs, VBOs, FBOs, textures) must clean them up. Check for leaks in `cleanup()` / destructors.
+**All of these mean: Delete any code written before the test. Start over with RED.**
 
-4. **Binary file I/O.** Always open binary data files with `"rb"` mode (not `"r"`) for cross-platform correctness.
+See `references/TESTING_EXAMPLES.md` for the Agile Alarm Bell warning on refactoring without tests.
 
-5. **Ensure output directories exist.** In test `SetUp()`, create all output directories (artifacts/, baselines/, diffs/) before tests run. Check `save()` return values so failures are actionable, not silent.
+---
 
-6. **Visual test resolution.** Use the viewer's default resolution (1280x720) for visual regression tests unless specifically testing other resolutions. Non-default resolutions can cause warping and scaling artifacts.
+## Rationalization Prevention
 
-7. **Camera positioning for visual tests.** Don't blindly copy debug camera coordinates — debug shows interactive state, not ideal test framing. Extract the viewing **direction** from debug output, then calculate **distance** based on desired viewport coverage: `distance = subject_size / (coverage_% * tan(FOV/2))`. See `docs/visual-regression/camera-positioning-lessons-learned.md`.
+| Excuse | Reality |
+|--------|---------|
+| "Too simple to test" | Simple code breaks. The test takes 30 seconds. |
+| "I'll write tests after" | Tests passing immediately after implementation prove nothing. |
+| "Visual regression test will cover it" | Visual tests are slow and test pixels, not logic. Unit test the logic. |
+| "Too complex to test in isolation" | That's a design signal. Simplify the interface. MockOpenGL is there for GL calls. |
+| "Already manually tested it" | Manual testing is ad-hoc. No record, can't re-run, misses edge cases. |
+| "TDD slows me down" | TDD is faster than debugging production failures. |
 
 ---
 
 ## Self-Evaluation
 
-After completing test work, run the `self-evaluation` skill (`.github/skills/self-evaluation/`) to capture any new testing patterns learned during the session.
-
----
-
-## Key Types for Visual Regression
-
-| Type | Location | Purpose |
-|------|----------|---------|
-| `Image` | `src/Image.hpp` | RGBA pixel buffer with save/load (PPM, PNG) |
-| `ComparisonResult` | `src/testing/PixelComparator.hpp` | Match status, similarity, diff image |
-| `PixelComparator` | `src/testing/PixelComparator.hpp` | Pixel comparison engine |
-| `ImageFormat` | `src/Image.hpp` | Format enum (PPM, PNG) for Image::save/load |
-| `Particle` | `src/particle.hpp` | Production particle data (std::vector<glm::vec4>) |
-
----
-
-## Common Edge Cases to Handle
-
-- Ask if the user wants `EXPECT_*` (non-fatal) or `ASSERT_*` (fatal) assertions
-- For visual tests: recommend `0.0f` tolerance for synthetic data, `2.0f/255.0f` for GPU-rendered
-- If a test seems to test external library behavior, suggest focusing on the wrapper/integration instead
-- If Arrange and Act seem identical, the test might be a constructor test — put expected values in Arrange, constructor call in Act
+When test work is complete, load the `self-evaluation` skill and follow its steps.
 
 ---
 
 ## CI Pipeline Rules
 
-For CI workflow rules (artifact uploads, permissions, PR comments), see the `workflow` skill (`.github/skills/workflow/`).
+For CI workflow rules (artifact uploads, permissions, PR comments), see the `workflow` skill.
+
+---
+
+## Related Skills
+
+- `contract-testing` — sub-domain skill; every abstract type or interface requires a contract test fixture — load this skill when the type has 2+ implementations
+- `visual-regression-testing` — sub-domain skill; pixel-level output testing boundary; unit and contract tests do not replace visual regression
+- `code-quality` — clang-format and naming conventions apply to test code too
+
+**Testing principles (T2–T4):** See the `contract-testing` skill — unit tests as constraints, acceptance vs unit boundary, simplicity check
+
+---
+
+## Reference Files
+
+- `references/testing-anti-patterns.md` — common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green)
+- `references/TEST_SMELLS.md` — test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
+

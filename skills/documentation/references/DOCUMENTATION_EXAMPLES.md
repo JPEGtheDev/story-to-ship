@@ -4,80 +4,117 @@ This reference provides templates and examples for writing documentation in Part
 
 ---
 
-## Skill File Template (SKILL.md)
+## Domain Taxonomy
 
-```markdown
----
-name: skill-name
-description: One-line description of what this skill does and when to use it.
-license: MIT
-compatibility: Designed for GitHub Copilot and similar AI coding agents
-metadata:
-  author: JPEGtheDev
-  version: "1.0"
-  category: category-name
-  project: Particle-Viewer
+| Domain | Subdomains | Location |
+|--------|-----------|----------|
+| `testing` | `unit-testing`, `integration-testing`, `visual-regression` | `docs/testing/` |
+| `coding` | `naming`, `formatting`, `memory-management`, `patterns` | `docs/coding/` |
+| `build` | `cmake`, `flatpak`, `dependencies` | `docs/build/` |
+| `workflow` | `ci-cd`, `releases`, `branching` | `docs/workflow/` |
+| `architecture` | `opengl`, `sdl3`, `imgui`, `camera` | `docs/architecture/` |
+| `cross-cutting` | standards, process | `docs/` (flat, UPPERCASE filename) |
+
 ---
 
-# Instructions for Agent
+## YAML Frontmatter Template
 
-## How This Skill is Invoked
-[How users activate this skill]
+Every `docs/` file MUST begin with this block:
 
-## Core Principle
-[One sentence summarizing the key principle]
-
-## Step 1: Understand the Request
-[Questions to ask the user]
-
-## Step 2: Apply Rules
-[Domain-specific rules and patterns]
-
-## Step 3: Review Checklist
-[Verification checklist before presenting results]
-
-## Reference
-For examples, see [references/EXAMPLES.md](references/EXAMPLES.md).
+```yaml
+---
+title: "Short Descriptive Title"
+description: "One sentence describing exactly what this doc covers."
+domain: testing
+subdomain: unit-testing
+tags: [testing, unit-testing, gtest, c++]
+related:
+  - "../TESTING_STANDARDS.md"
+  - "integration-tests.md"
+---
 ```
 
-### Key Rules for Skills
+**Field rules:**
+- `description` — the primary field for semantic (vector) search; make it specific and concrete
+- `tags` — MUST include the domain and subdomain as the first two entries
+- `related` — relative paths from the file's own directory; verified to exist before adding
 
-1. **Minimize duplication** — if another skill covers a topic, reference it:
-   ```markdown
-   For CI pipeline rules, see the `workflow` skill (`.github/skills/workflow/`).
-   ```
-2. **Keep SKILL.md focused** — rules and workflow only
-3. **Put examples in `references/`** — not in SKILL.md itself (unless inline for clarity)
+**Cross-cutting standard files** (`docs/UPPERCASE.md`):
+```yaml
+---
+title: "Testing Standards"
+description: "AAA pattern, naming conventions, and coverage expectations for all Particle-Viewer tests."
+domain: cross-cutting
+subdomain: ""
+tags: [testing, standards, gtest, aaa]
+related:
+  - "testing/unit-testing/naming.md"
+  - "testing/visual-regression.md"
+---
+```
 
 ---
 
-## Guide Document Template
+## Domain Guide Template
 
 ```markdown
-# Feature Name Guide
-
-Brief description of what this guide covers.
-
-## Table of Contents
-1. [Overview](#overview)
-2. [Getting Started](#getting-started)
-3. [Usage](#usage)
-4. [Best Practices](#best-practices)
-
 ---
+title: "Concept Name"
+description: "One concrete sentence about exactly what this covers."
+domain: testing
+subdomain: unit-testing
+tags: [testing, unit-testing, gtest]
+related:
+  - "../TESTING_STANDARDS.md"
+---
+
+# Concept Name
+
+Brief one-paragraph description. ≤600 words total for the full file.
 
 ## Overview
-[What it is, why it exists, key components]
 
-## Getting Started
-[Prerequisites, setup steps, first example]
+What it is and why it matters for this project.
 
 ## Usage
-[Detailed usage with code examples]
 
-## Best Practices
-[Do's and don'ts with concrete examples]
+```cpp
+// Concrete code example
+TEST(ClassName, Action_ExpectedResult) {
+    // Arrange
+    // Act
+    // Assert
+}
 ```
+
+## Rules
+
+Numbered list of rules. Specific, concrete, no soft language.
+
+## Related
+
+- [Testing Standards](../TESTING_STANDARDS.md) — AAA pattern and naming conventions
+- [Integration Tests](integration-tests.md) — multi-component test patterns
+```
+
+---
+
+## Related Section Template
+
+Every doc file MUST end with a `## Related` section:
+
+```markdown
+## Related
+
+- [Link Text](relative/path.md) — one-line description of why it's related
+- [Another Doc](../other.md) — one-line description
+```
+
+Rules:
+- Use relative paths from the file's own directory
+- Verify all paths exist before adding
+- At least one link is required
+- One-line descriptions are mandatory — naked links are not acceptable
 
 ---
 
@@ -105,13 +142,72 @@ See [Visual Regression Guide](testing/visual-regression.md) for image comparison
 
 ---
 
-## Type Reference Table Template
+## Copilot Skill File Template (SKILL.md)
+
+Skills follow a strict 5-element anatomy. See the `writing-skills` skill for the full authoring standard.
+
+Minimal structure:
 
 ```markdown
-| Type | Location | Purpose |
-|------|----------|---------|
-| `ClassName` | `src/File.hpp` | Brief description |
-| `StructName` | `src/other/File.hpp` | Brief description |
+---
+name: skill-name
+description: Use when [triggering conditions only].
+---
+
+## Iron Law
+
+​```
+ALL CAPS RULE — NO EXCEPTIONS
+​```
+
+Violating the letter of this rule is violating the spirit of this rule.
+
+YOU MUST [action]. No exceptions.
+
+**Announce at start:** "I am using the [skill-name] skill to [purpose]."
+
+---
+
+## BEFORE PROCEEDING
+
+1. [Condition]
+2. [Condition]
+
+✓ All met → proceed
+✗ Any unmet → [specific required action]
+
+---
+
+## Rationalization Prevention
+
+| Excuse | Reality |
+|--------|---------|
+| "[rationalization]" | [counter] |
+```
+
+Key rules:
+- Minimize duplication — if another skill covers a topic, reference it with a one-line pointer
+- `SKILL.md` contains workflow and rules only
+- Heavy content, examples, and templates go in `references/`
+
+---
+
+## copilot-instructions.md Update Pattern
+
+When adding a new skill, update these 4 locations in `copilot-instructions.md`:
+
+```markdown
+<!-- 1. Skills Directory table — add a row -->
+| `skill-name` | `.github/skills/skill-name/` | Domain description |
+
+<!-- 2. Before Every Response checklist — add if HARD-GATE trigger -->
+8. **Unclear approach or design impact?** → HARD-GATE: load `brainstorming`...
+
+<!-- 3. Minimum skill loads table — add the row -->
+| Writing or editing a skill file | `writing-skills` |
+
+<!-- 4. Instruction Priority Hierarchy — only if new priority tier -->
+(usually no change needed)
 ```
 
 ---
@@ -140,15 +236,11 @@ steps:
 
 ---
 
-## copilot-instructions.md Style Guide
+## Type Reference Table Template
 
-The instructions file should:
-1. **Summarize, don't duplicate** — point to skills and docs for details
-2. **Use this pattern for referencing skills:**
-   ```markdown
-   **CRITICAL: Read `docs/TESTING_STANDARDS.md` before writing tests.**
-   For detailed guidelines, examples, and patterns, use the `testing` skill
-   (`.github/skills/testing/`).
-   ```
-3. **Keep examples to bare minimum** — only include examples that are essential for onboarding
-4. **Group related information** — use clear headings and sections
+```markdown
+| Type | Location | Purpose |
+|------|----------|---------|
+| `ClassName` | `src/File.hpp` | Brief description |
+| `StructName` | `src/other/File.hpp` | Brief description |
+```

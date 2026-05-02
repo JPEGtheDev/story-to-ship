@@ -276,18 +276,10 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `code-quality` skill → Step 7: Adding a Feature / Fixing a Bug
 
-| If the lesson is about... | Add to... |
-|---|---|
-| Code patterns, naming, error handling | `copilot-instructions.md` |
-| Test writing, AAA, mocking, visual regression | `.github/skills/testing/SKILL.md` |
-| CI/CD workflows, artifacts, permissions | `.github/skills/workflow/SKILL.md` |
-| Documentation format, linking, content | `.github/skills/documentation/SKILL.md` |
-| User story creation, estimation | `.github/skills/user-story-generator/SKILL.md` |
-| Meta/process (skill creation, evaluation) | `.github/skills/self-evaluation/SKILL.md` |
----
-
 ## Quick Reference: Where to Add Lessons
 
+Use this for fast question-based lookup — "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.
+
 | If the lesson is about... | Add to... |
 |---|---|
 | Code patterns, naming, error handling | `copilot-instructions.md` |
@@ -296,3 +288,18 @@ Concrete examples of lessons captured from past sessions and how they were incor
 | Documentation format, linking, content | `.github/skills/documentation/SKILL.md` |
 | User story creation, estimation | `.github/skills/user-story-generator/SKILL.md` |
 | Meta/process (skill creation, evaluation) | `.github/skills/self-evaluation/SKILL.md` |
+
+---
+
+## Category Classification Table
+
+Use this when classifying a captured lesson into a skill update. The Examples column gives concrete signals for each category.
+
+| Category | Examples | Update Target |
+|----------|----------|---------------|
+| **Code quality** | Binary file modes, const refs, resource cleanup | `code-quality` skill |
+| **Testing** | AAA violations, missing directory setup, save checks | `testing` skill |
+| **CI/CD** | Workflow structure, artifact patterns | `workflow` skill |
+| **Documentation** | Link fixes, formatting, content standards | `documentation` skill |
+| **Build** | CMake, dependencies, Flatpak packaging | `build` skill |
+| **Versioning** | PR title format, commit conventions, releases | `versioning` skill |

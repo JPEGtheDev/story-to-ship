@@ -1,13 +1,22 @@
 ---
 name: build
-description: Build, configure, and troubleshoot the Particle-Viewer CMake project. Use when building, adding dependencies, configuring CMake options, troubleshooting build failures, or managing Flatpak packaging.
 license: MIT
-compatibility: Designed for GitHub Copilot and similar AI coding agents
-metadata:
-  author: JPEGtheDev
-  version: "1.0"
-  category: build
-  project: Particle-Viewer
+description: Use when building, adding dependencies, configuring CMake options, troubleshooting build failures, or managing Flatpak packaging for Particle-Viewer.
+---
+
+## Iron Law
+
+```
+YOU MUST BUILD LOCALLY AND VERIFY IT PASSES BEFORE EVERY PUSH.
+No exceptions.
+```
+
+Violating the letter of this rule is violating the spirit of this rule.
+
+YOU MUST run `cmake --build build` locally and verify it exits 0 before pushing. No exceptions.
+
+**Announce at start:** "I am using the build skill to [build/configure/troubleshoot] [description]."
+
 ---
 
 # Instructions for Agent
@@ -81,6 +90,31 @@ cmake --install build
 - Visual regression tests are a hard requirement — must pass without modification unless the approver is explicitly shown the new output
 - Test updates for API changes (e.g., GoogleTest) are acceptable
 
+### One Version Rule
+
+**Iron Gate:** One version of each dependency in the build. No version aliases, no parallel installations, no `if(FOUND v1) else(use v2)` chains.
+
+**Rule:** Before adding or upgrading any dependency:
+1. Check if that library is already a transitive dependency of another component
+2. If it is: use the existing version — upgrade if needed, never add a parallel version
+3. If a diamond dependency arises (A needs lib@v1, B needs lib@v2): resolve by upgrading to the higher version and confirming both A and B still work
+4. Document the version pin (tag or commit SHA) in `CMakeLists.txt` — never use `HEAD` or `main` as a `FetchContent` ref in production builds
+
+**Gate:** `grep -r "FetchContent_Declare" CMakeLists.txt` — every `FetchContent_Declare` must have a `GIT_TAG` pinned to a specific version, not a branch name.
+
+✓ All tags pinned to a version tag or commit SHA → proceed to add or upgrade the dependency
+✗ Any tag references a branch name → fix the ref before proceeding
+
+```cmake
+# CORRECT — pinned to tag
+FetchContent_Declare(some_lib GIT_REPOSITORY ... GIT_TAG v1.2.3)
+
+# WRONG — pinned to branch (non-reproducible)
+FetchContent_Declare(some_lib GIT_REPOSITORY ... GIT_TAG main)
+```
+
+**Rationalization:** "The HEAD version has the fix we need." Counter: pin to the commit SHA that contains the fix, not to `HEAD`. Unpinned `HEAD` = a different build every `cmake` run.
+
 ---
 
 ## Step 4: Build Notes
@@ -103,12 +137,39 @@ Install OpenGL development packages. Ensure `OpenGL::GL` CMake target is availab
 Run from the build directory, or ensure `Viewer-Assets/shaders/` exists alongside the binary.
 
 **Flatpak build issues:**
-See the `workflow` skill and [FLATPAK_GL_GOTCHAS.md](../workflow/references/FLATPAK_GL_GOTCHAS.md).
+See the `flatpak` skill (`.github/skills/flatpak/`) for MSAA fallback, SDL3 module setup, NVIDIA GL workarounds, and setenv gotchas.
+
+---
+
+## Rationalization Prevention
+
+| Excuse | Reality |
+|--------|---------|
+| "Small change, can't break the build" | Even single-line changes break builds. Run `cmake --build build` first. |
+| "CI will catch it if the build fails" | CI is a safety net. Don't push broken builds intentionally. |
+| "It built fine yesterday" | Dependencies change. State changes. Build locally before every push. |
+| "The CMake error is too confusing to parse" | Read the first 10 lines of error output — that's always where the root cause is. |
+| "I'll fix the FetchContent pin later" | Unpinned dependencies produce non-reproducible builds. Pin to tag/commit now. |
+| "The tests don't need to be in the build target" | All test targets must build cleanly. No orphaned test binaries. |
+
+---
+
+## Red Flags — STOP
+
+If you catch yourself thinking any of these, stop and follow the rule:
+- "I'll push and see if CI builds it"
+- "This small change couldn't break CMake"
+- "The dependency version doesn't really matter"
+- "I don't understand the CMake error but it probably works"
+- "I'll update the dependency pin in a follow-up"
+- About to push without running `cmake --build build` locally
+
+**All of these mean: Run `cmake --build build` locally. Read the full output. Fix errors before pushing.**
 
 ---
 
 ## Reference
 
 - Flatpak manifest: `flatpak/org.particleviewer.ParticleViewer.yaml`
-- Flatpak GL/SDL3 gotchas: `.github/skills/workflow/references/FLATPAK_GL_GOTCHAS.md`
+- Flatpak GL/SDL3 gotchas: see the `flatpak` skill (`.github/skills/flatpak/`)
 - Build scripts: `scripts/linuxBuildAndInstall.sh`, `scripts/build-flatpak.sh`

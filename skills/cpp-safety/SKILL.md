@@ -36,6 +36,21 @@ Throwing from a destructor during stack unwinding calls `std::terminate` — no 
 
 If the constructor acquires resource A then throws while acquiring resource B, A leaks — the destructor is never called on a partially-constructed object. Each acquisition must be handed to its own scope-bound guard before the next acquisition begins.
 
+**When acquisition happens in a factory method (not a constructor) using raw pointers:** if `unique_ptr` cannot be used (e.g., the pointer is a member reset by a helper method), wrap the second `new` in try-catch — delete and null the first pointer before rethrowing:
+
+```cpp
+void createResources() {
+    executor_ = new Executor();
+    try {
+        cache_ = new Cache(*executor_);
+    } catch (...) {
+        delete executor_;
+        executor_ = nullptr;
+        throw;
+    }
+}
+```
+
 See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples.
 
 ---

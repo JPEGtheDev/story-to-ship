@@ -227,6 +227,47 @@ TEST(ImageTest, PixelVector_Resizes)
 
 **Fix:** Only test YOUR code — wrapper logic, integration, or behavior you own.
 
+### ❌ EXPECT_LE When the Value Is Deterministic
+
+```cpp
+// BAD: LE masks regressions where the code under-enqueues
+EXPECT_LE(callCount, window);  // passes even if callCount is 0 or window-1
+```
+
+**Fix:** Use `EXPECT_EQ` when the value is deterministic. Reserve `EXPECT_LE`/`EXPECT_GE` only for inherently non-deterministic results (e.g., timing, OS scheduling).
+
+```cpp
+// GOOD: fails immediately if cap logic changes
+EXPECT_EQ(callCount, window);
+```
+
+### ❌ Binary File Test Missing Required Record Count
+
+When testing that a binary reader correctly handles a frame-N seek, a file with fewer than N+1 records causes `fseek` to go past EOF, so `fread` returns 0 (EOF/truncated), not a record with the wrong field. This means the test ends up exercising the truncation branch instead of the intended branch (e.g., field mismatch):
+
+```cpp
+// BAD: single-record file; seeking to frame=1 goes past EOF → fread returns 0
+// (tests truncation, not the intended field-mismatch path)
+FILE* f = fopen(path.c_str(), "wb");
+float r0[4] = {1.0f, 2.0f, 3.0f, 0.0f};  // frame 0 only
+fwrite(r0, sizeof(float), 4, f);
+fclose(f);
+getCOM(/*frame=*/1, out);  // seeks to byte 16 — past EOF
+```
+
+**Fix:** Write N+1 records so `fseek` lands within the file and `fread` succeeds:
+
+```cpp
+// GOOD: two records; seeking to frame=1 reads the second record's w field
+FILE* f = fopen(path.c_str(), "wb");
+float r0[4] = {0, 0, 0, 0};        // padding for frame 0
+float r1[4] = {1.0f, 2.0f, 3.0f, 99.0f};  // frame 1, w=99 (wrong type to trigger mismatch)
+fwrite(r0, sizeof(float), 4, f);
+fwrite(r1, sizeof(float), 4, f);
+fclose(f);
+getCOM(/*frame=*/1, out);  // reads r1; w=99 ≠ frame=1 → mismatch branch
+```
+
 ### ❌ Vague Test Name
 
 ```cpp

@@ -138,6 +138,7 @@ DRY means every piece of **knowledge** has a single authoritative representation
 
 - **DRY violation signal:** "If this constant changes, I need to update it in N places."
 - **False DRY signal:** "These two functions look the same." Looks are not knowledge. Check whether they represent the same concept before extracting.
+- **Interface exposure signal:** If a call site derives a value from an interface (e.g., computes `frame_count * element_size` to get bytes), and the derivation is the same everywhere, add the derived quantity as a virtual method on the interface. The concrete class is the single source of truth; callers never re-derive it.
 
 ---
 

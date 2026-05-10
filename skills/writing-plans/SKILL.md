@@ -59,6 +59,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 4. Sanity-check: does the plan address every acceptance criterion?
 5. Name known downsides proactively — trade-offs, risks, limitations the user did not ask about
 6. Disclose decision rationale — name alternatives considered and why chosen approach was preferred
+7. **Token budget gate:** If todo count ≥ 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens × 42+ dispatches minimum. Compute this upfront — not after 3 rate-limit hits.
 
 ### No-Placeholder Rule
 
@@ -106,6 +107,8 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 
 ✓ All 5 questions answered with no gaps → proceed to review gate or implementation
 ✗ Any unanswered question or revealed gap → stop, revise the plan, then re-run the gate
+
+**For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan. A feature with invisible async state has no failure-diagnosis path.
 
 For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. The routing depends on whether Discovery ran:
 

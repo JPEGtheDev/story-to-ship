@@ -53,6 +53,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - Do NOT suggest improvements or refactoring
 - Do NOT praise the implementation
 - "Tests pass" is not evidence that requirements are met — evaluate the implementation, not the test results
+- For any class whose state is displayed in the UI: verify each UI-displayed field has a traceable public accessor (class method → `MenuState` field → menu render call). A UI acceptance criterion without a class API path is a spec gap — report it as MISSING, not FULL.
 
 ### Duplication Check for Extension Tasks
 

@@ -65,7 +65,9 @@ Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-Before touching any tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
+**First: verify your test runner CWD.** Run `pwd` and confirm it matches the required execution directory (e.g., `…/build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures — a failing test caused by wrong CWD is not a regression and requires no fix.
+
+Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
 See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structured tactic selection.
 
@@ -156,6 +158,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it — patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
+| "I already started debugging before loading this skill — I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
 
 ---
 

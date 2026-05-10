@@ -58,6 +58,8 @@ Use format: `UnitName_StateUnderTest_ExpectedResult`
 Examples:
 - `MoveForward_IncreasesZPosition`
 
+**`_ExpectedResult` must describe the behavior or invariant proven — not the return value.** The result name should answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
+
 See `references/TESTING_EXAMPLES.md` for PV naming examples.
 
 For PV-specific test patterns (Camera, SettingsIO examples), test double taxonomy, file organization, and test size taxonomy, see `references/PV_TEST_CONVENTIONS.md`. For visual regression, see the `visual-regression-testing` skill.
@@ -78,6 +80,8 @@ Before presenting tests, verify:
 - [ ] Group related configuration into structs/POCOs instead of flat variables
 - [ ] Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
 - [ ] Tests compile and pass
+- [ ] For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
+- [ ] For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
 - [ ] For visual regression tests: see visual-regression-testing skill checklist
 
 ✓ All met → proceed

@@ -183,6 +183,7 @@ These thoughts mean stop immediately:
 | "I remember that..." | Memory is always unverified — dispatch |
 | "Based on how it usually works..." | Dispatch to confirm the actual behavior |
 | "Dispatching a file-modifying agent without creating a worktree first" | STOP. Create the worktree and load `using-git-worktrees` before dispatch. |
+| "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first — every time, without exception. The session-bootstrap On Start table maps "Parallel agent work / A/B testing" to this skill. Creating worktrees without it is a retroactive-load violation. |
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.github/agents/`. Do not reinvent it. |
 
 ---

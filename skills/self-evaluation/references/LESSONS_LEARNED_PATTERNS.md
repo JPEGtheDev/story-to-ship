@@ -276,6 +276,102 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `code-quality` skill → Step 7: Adding a Feature / Fixing a Bug
 
+### EXPECT_EQ Over EXPECT_LE for Deterministic Counts (PR #112)
+
+**Problem:** `FrameCache` pending-cap test used `EXPECT_LE(callCount, window)`. The count is deterministically equal to `window` — using LE hid the fact that a regression (under-enqueue) would still pass.
+
+**Lesson:** Use `EXPECT_EQ` when the value is deterministic. `EXPECT_LE`/`EXPECT_GE` are for inherently non-deterministic values (timing, OS scheduling). An overly lenient bound masks regressions.
+
+**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+
+---
+
+### Binary File Tests: Record Count Must Cover Target Frame (PR #112)
+
+**Problem:** `COMFileProvider_FrameIndexMismatch_ReturnsFalse` was written with a single-record file and a request for frame 1. `fseek` to frame 1 went past EOF, so `fread` returned 0 (truncation), exercising the wrong branch.
+
+**Lesson:** When writing a binary file test that seeks to frame N, write at least N+1 records so `fseek` lands within the file and `fread` actually reads the target record. A single-record file will always produce a truncation result for any frame > 0.
+
+**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+
+---
+
+### Full Docstring Rewrite Required When void→bool (PR #112)
+
+**Problem:** After changing `getCOM()` from void to bool, the docstring was patched to mention the return value, but the first sentence still said "caller must call checkCOM() first" while a later sentence said "no extra checkCOM round-trip". The two sentences contradicted each other.
+
+**Lesson:** When changing a function's calling contract (especially void→bool), rewrite the *entire* docstring — don't patch it. The new contract (all false-return cases, what the caller need not do) renders the old docstring structurally incorrect and patching a structurally wrong docstring still leaves it wrong.
+
+**Added to:** Self-evaluation skill (this file)
+
+---
+
+### Test Names Must Describe Behavior Proven, Not Return Value (PR #112, round 2)
+
+**Problem:** `GetCOM_ValidFile_Frame1_ReturnsTrue` described the return value, not what property was being verified. Code review renamed it to `GetCOM_ValidFile_Frame1_SeekIsAbsolute` — the test was specifically checking that `SEEK_SET` (absolute seek) was used.
+
+**Lesson:** The `_ExpectedResult` segment of `UnitName_StateUnderTest_ExpectedResult` must encode the *invariant or property proven*, not just the return value. `_SeekIsAbsolute` answers "what holds?"; `_ReturnsTrue` answers "what came back?" — the latter masks what the test is actually verifying.
+
+**Added to:** `testing` skill → Naming Convention section
+
+---
+
+### Failure-Path Tests Must Assert Output Parameters Are Unchanged (PR #112, round 2)
+
+**Problem:** Failure-path tests for `getCOM()` only called `EXPECT_FALSE(...)` without asserting that the output parameter `value` was unchanged. A regression that modified `value` even on failure would pass all tests.
+
+**Lesson:** For any function returning bool/error-code: in failure-path tests, always assert output parameters remain at their initial value (`EXPECT_EQ(outValue, glm::vec3(0.f))` after `EXPECT_FALSE(...)`). Initialize output params to a known value in Arrange so the Assert is meaningful.
+
+**Added to:** `testing` skill → Self-Review Checklist
+
+---
+
+### Two-Step Factory Method Exception Safety (PR #112, round 2)
+
+**Problem:** `createCOMInfrastructure()` allocated `com_executor_` then `com_cache_`. If `COMCache` constructor threw, `com_executor_` leaked because the destructor was never called (method-level allocation, not a constructor).
+
+**Lesson:** When a factory method (not a constructor) sequentially allocates two raw pointers, wrap the second `new` in try-catch: delete and null the first pointer before rethrowing. This is the raw-pointer equivalent of scope-bound guards when `unique_ptr` is impractical.
+
+**Added to:** `cpp-safety` skill → Constructor Rule section
+
+---
+
+### Expose Derived Quantities on the Interface to Prevent DRY Violations (PR #112, round 2)
+
+**Problem:** `viewer_app.cpp` computed `bytes_used = frame_cache_->capacity() * particles_per_frame * sizeof(glm::vec4)` — duplicating `FrameCache`'s internal `frame_size_bytes` formula. If per-particle data layout changed, the call site would silently produce wrong values.
+
+**Lesson:** When a call site derives a value from an interface (counts, sizes, compound formulas), add the derived quantity as a virtual method on the interface. The concrete class is the single source of truth; callers receive the value without re-deriving it. Signal: "if the formula changes, I need to update it in N places."
+
+**Added to:** `cpp-patterns` skill → DRY section
+
+**Problem:** `FrameCache` pending-cap test used `EXPECT_LE(callCount, window)`. The count is deterministically equal to `window` — using LE hid the fact that a regression (under-enqueue) would still pass.
+
+**Lesson:** Use `EXPECT_EQ` when the value is deterministic. `EXPECT_LE`/`EXPECT_GE` are for inherently non-deterministic values (timing, OS scheduling). An overly lenient bound masks regressions.
+
+**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+
+---
+
+### Binary File Tests: Record Count Must Cover Target Frame (PR #112)
+
+**Problem:** `COMFileProvider_FrameIndexMismatch_ReturnsFalse` was written with a single-record file and a request for frame 1. `fseek` to frame 1 went past EOF, so `fread` returned 0 (truncation), exercising the wrong branch.
+
+**Lesson:** When writing a binary file test that seeks to frame N, write at least N+1 records so `fseek` lands within the file and `fread` actually reads the target record. A single-record file will always produce a truncation result for any frame > 0.
+
+**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+
+---
+
+### Full Docstring Rewrite Required When void→bool (PR #112)
+
+**Problem:** After changing `getCOM()` from void to bool, the docstring was patched to mention the return value, but the first sentence still said "caller must call checkCOM() first" while a later sentence said "no extra checkCOM round-trip". The two sentences contradicted each other.
+
+**Lesson:** When changing a function's calling contract (especially void→bool), rewrite the *entire* docstring — don't patch it. The new contract (all false-return cases, what the caller need not do) renders the old docstring structurally incorrect and patching a structurally wrong docstring still leaves it wrong.
+
+**Added to:** Self-evaluation skill (this file)
+
+---
+
 ## Quick Reference: Where to Add Lessons
 
 Use this for fast question-based lookup — "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.

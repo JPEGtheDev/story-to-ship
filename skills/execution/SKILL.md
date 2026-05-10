@@ -93,7 +93,7 @@ If you catch yourself thinking any of these:
 
 ## Prove It Before You Ship It
 
-**REQUIRED: Use the `verification-before-completion` skill.**
+**REQUIRED: Load and invoke the `verification-before-completion` skill** — this means calling the `skill` tool, not referencing the skill name in text. A completion claim made without a `skill.invoked` event for `verification-before-completion` is a protocol violation. Runtime user-visible bugs found after a "fully implemented" claim are the direct cost of skipping this load.
 
 Before claiming any task done:
 - Diff: `git --no-pager diff --staged` — read every hunk for accidental changes. **Applies to ALL file types including documentation. Documentation commits are not exempt.**
@@ -207,6 +207,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
 | "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. If the fix is a structural change (heading level, path format, sentence replacement), dispatch a re-review or apply only to content you can verify in the same view call. |
 | "After a rate limit, I can resume dispatching immediately — my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
+| "User correction deferred 'for the self-review later' — I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a SQL todo or session note. "I'll remember" is not a commitment mechanism. |
 
 ---
 

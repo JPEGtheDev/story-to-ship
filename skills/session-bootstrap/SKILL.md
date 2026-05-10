@@ -137,6 +137,7 @@ behavior is habitual, not conditional.
 - Starting implementation when SQL has pending todos from a prior session without dispatching Skeptic — **STOP. Dispatch Skeptic before the first implementation step.**
 - Starting to code before reading the required skill — **STOP. Load the skill now. Do not write one line first.**
 - Skipping the skill-load announcement — **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
+- Announced "I am using skill X" without invoking the skill tool in the same response — **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` — **STOP. Read `.github/skills/self-evaluation/SKILL.md` now.**
 - Treating the "On Finish" steps as optional — **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" — **STOP. Memory degrades. Skills update. Load fresh every session.**

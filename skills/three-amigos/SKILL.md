@@ -23,16 +23,18 @@ YOU MUST dispatch all three amigos in parallel and collect all verdicts before a
 
 ## When to Invoke
 
-| # | Signal | Ceremony | Output |
-|---|--------|----------|--------|
-| 1 | New or unclear AC | Discovery | Feature Specification written to plan.md |
-| 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT |
-| 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED |
-| 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
-| 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
-| 6 | Feature merged and closed | Retrospective | Process improvement items |
+| # | Signal | Ceremony | Output | Model |
+|---|--------|----------|--------|-------|
+| 1 | New or unclear AC | Discovery | Feature Specification written to plan.md | `claude-haiku-4.5` |
+| 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT | `claude-sonnet-4.6` |
+| 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED | `claude-haiku-4.5` |
+| 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON | `claude-sonnet-4.6` |
+| 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED | `claude-sonnet-4.6` |
+| 6 | Feature merged and closed | Retrospective | Process improvement items | `claude-haiku-4.5` |
 
 Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
+
+**Model rationale:** Discovery, Progress Check, and Retrospective are question-generation or summary tasks (reading spec, identifying gaps, listing lessons). Haiku handles these adequately. Refinement, Pivot Assessment, and Signoff require multi-file analysis, nuanced tradeoff evaluation, and condition resolution — Sonnet is worth the cost there.
 
 ---
 

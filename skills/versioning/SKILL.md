@@ -32,7 +32,7 @@ When activated, ensure all commits and PR titles follow conventional commits for
 
 ## Core Principle: Commit Messages Drive Releases
 
-This project uses **zero-manual releases**. Every push to master triggers an automated release. The commit message (which comes from the squash-merged PR title) determines the version bump.
+This project uses **zero-manual releases**. Every push to main triggers an automated release. The commit message (which comes from the squash-merged PR title) determines the version bump.
 
 ---
 
@@ -61,7 +61,7 @@ Every commit type triggers at least a PATCH bump. The release workflow specifica
 
 ## Step 2: PR Title Rules
 
-**This project uses squash merging.** The PR title becomes the single commit message on master, which determines the version bump.
+**This project uses squash merging.** The PR title becomes the single commit message on main, which determines the version bump.
 
 ### Creating a New PR
 
@@ -120,7 +120,7 @@ At build time, version is resolved in this order:
 Verify the commit message/PR title uses the correct type. Manual override via `workflow_dispatch` if needed.
 
 **Need a release:**
-Just push conventional commits to master — it's automatic.
+Just push conventional commits to main — it's automatic.
 
 ---
 

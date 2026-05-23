@@ -82,7 +82,6 @@ cmake --install build
 
 ### Embedded Libraries (no management needed)
 - `src/glad/` — GLAD OpenGL loader
-- `src/tinyFileDialogs/` — File dialog library
 - `src/stb_*.h` — stb single-header libraries
 
 ### Dependency Upgrades

@@ -185,6 +185,7 @@ These thoughts mean stop immediately:
 | "Dispatching a file-modifying agent without creating a worktree first" | STOP. Create the worktree and load `using-git-worktrees` before dispatch. |
 | "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first — every time, without exception. The session-bootstrap On Start table maps "Parallel agent work / A/B testing" to this skill. Creating worktrees without it is a retroactive-load violation. |
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.github/agents/`. Do not reinvent it. |
+| "These two todos form a 'Phase N' — I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 
 ---
 
@@ -303,6 +304,7 @@ subagent inherits your assumptions | | Reporting DONE before 2 - stage review | 
 | "The skill says use worktrees — I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check — not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step verification above first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt — it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.github/agents/` are the single source of truth. Use them. |
+| "These todos form a natural 'Phase N' — I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate — the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one dispatch, always. |
 | "I already know what to do — the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
 | "The two stages of review are redundant — I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then code-quality-reviewer.md. Writing carefully is not a substitute for independent review. |
 | "I dispatched an audit subagent — that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification — an incomplete specification produces an incomplete audit. |

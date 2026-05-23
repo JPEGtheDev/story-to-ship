@@ -55,6 +55,32 @@ The output MUST NOT be `main` or the parent development branch name.
 - Do NOT push to main or the parent branch
 - Commit to your branch: `agent/{{AGENT_NAME}}`
 
+## Scope Estimate Gate — Before Any Implementation
+
+Before writing any code, state your scope estimate:
+
+```
+Scope estimate:
+- Files to touch: [list each file]
+- File count: [N]
+- Estimated tool calls: [N]
+```
+
+If **file count > 2** or **estimated tool calls > 25**, return immediately:
+
+```
+STATUS: NEEDS_CONTEXT
+Missing context: This task as described requires touching [N] files and an estimated [N] tool
+calls, which exceeds the per-todo sizing limit (≤2 files, ≤25 tool calls). The orchestrator
+must split this task before dispatching. Suggested split:
+  - Subtask A: [description, files, estimated tool calls]
+  - Subtask B: [description, files, estimated tool calls]
+```
+
+Do NOT proceed with an oversized task. Return the split recommendation and stop.
+
+---
+
 ## Language-Agnostic Reference Files
 
 When writing or extending a language-agnostic reference file (a skill reference file that must apply to any programming language, not just C++), **do not write any C++ syntax in code examples**. Use pseudocode only.

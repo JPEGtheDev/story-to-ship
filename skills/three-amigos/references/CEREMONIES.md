@@ -73,6 +73,7 @@ After all three Discovery amigos return:
 3. Is the dependency order correct? Can all todos be completed in stated order?
 4. Are there missing edge cases, error handling, or failure modes?
 5. Does the plan risk introducing breaking changes to existing behavior?
+6. Is each todo scoped to ≤2 files and ≤25 tool calls? Any todo exceeding either limit must be split before this plan is approved.
 
 ---
 

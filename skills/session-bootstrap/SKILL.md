@@ -71,6 +71,7 @@ domains, read multiple skills in parallel (they are independent reads).
 | Bug fixes or error resolution                | `execution`, `systematic-debugging`                |
 | Any failure or unexpected behavior           | `systematic-debugging`, `verification-before-completion` |
 | Dispatching subagents                        | `subagent-driven-development`                      |
+| Executing any plan that has pending todos (picking up plan.md or a todo list) | `subagent-driven-development` — load BEFORE dispatching the first implementer, not after |
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`, `skill-reviewer`                 |
@@ -135,6 +136,7 @@ behavior is habitual, not conditional.
 
 - A task just completed and no new user message has arrived — **STOP. Is this the session's last task? If so, treat it as session end. Load self-evaluation NOW before responding.**
 - Starting implementation when SQL has pending todos from a prior session without dispatching Skeptic — **STOP. Dispatch Skeptic before the first implementation step.**
+- Picking up plan todos without `subagent-driven-development` loaded — **STOP. Load `subagent-driven-development` before dispatching the first implementer. The skill contains the review protocol that every todo requires.**
 - Starting to code before reading the required skill — **STOP. Load the skill now. Do not write one line first.**
 - Skipping the skill-load announcement — **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response — **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**

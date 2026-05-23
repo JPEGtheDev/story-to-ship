@@ -72,7 +72,9 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 ### Task Granularity (TDD Steps)
 
-Each task MUST be one concrete action (2–5 minutes). For implementation tasks, follow TDD structure:
+Each task MUST be one concrete action (2–5 minutes), touch ≤2 files, and is estimated at ≤25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
+
+For implementation tasks, follow TDD structure:
 
 ```
 Task N: [Feature or component name]
@@ -157,6 +159,7 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 | "I'll update todos later" | Later never comes — update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
 | "We'll probably need this later" | YAGNI — not in criteria means not in this plan |
+| "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ files = compounding scope. Split on file boundaries before the plan is presented. |
 | "The plan looks good — I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' — that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
@@ -184,6 +187,7 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched — **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final — review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description — **STOP. Fill every description before starting.**
+- A single todo touches 3+ files or is estimated at 30+ tool calls — **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement — **STOP. Measure first. Run `wc -w` or `wc -l`.**
 - Next todo started without prior todo's 2-stage review passing — **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval — **STOP. Wait for "go ahead."**

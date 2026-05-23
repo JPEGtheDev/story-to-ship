@@ -41,7 +41,7 @@ Configuration in `.clang-tidy` enforces:
 - `cppcoreguidelines-*` — Microsoft C++ Core Guidelines
 - `performance-*`, `bugprone-*`, `portability-*`, `clang-analyzer-*`
 
-Header filter excludes embedded libs: `glad`, `tinyFileDialogs`, `stb_*`.
+Header filter excludes embedded libs: `glad`, `stb_*`.
 
 **CI status:** clang-tidy runs in CI as advisory (non-blocking). clang-format is blocking.
 

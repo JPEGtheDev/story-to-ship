@@ -15,6 +15,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the receiving-code-review skill to process review feedback on [PR/change]."
 
+Each new round of PR review comments requires a fresh skill invocation. A load from an earlier round does not carry forward. If new comments arrive after the skill was previously loaded, invoke the skill tool again before triaging.
+
 ---
 
 ## BEFORE PROCEEDING
@@ -23,9 +25,10 @@ Violating the letter of this rule is violating the spirit of this rule.
 - [ ] Every comment is categorized (must-fix / defer / discuss)
 - [ ] No must-fix comment is dismissed without investigation
 - [ ] I am not about to defend rather than understand
+- [ ] If new comments arrived since the last round, I have invoked this skill again before triaging them
 
 ✓ All met → proceed to address comments
-✗ Any unmet → complete the triage before taking action
+✗ Any unmet → complete the triage and reload the skill for the current review round before taking action
 
 ---
 
@@ -72,6 +75,14 @@ For every comment, before responding:
 - "Thanks for the feedback" (as a standalone response that closes the thread)
 - "I'll address this separately" (without creating and linking a tracking issue)
 - "I think this is fine as-is" (without explaining why)
+
+## Definition of "Addressed"
+
+"Addressed" requires two things:
+1. The code change is committed.
+2. The PR thread has a reply explaining what was done.
+
+Declaring a comment "addressed" before both are complete is an IL-6 violation.
 
 ---
 
@@ -122,6 +133,7 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 
 ## Red Flags — STOP
 
+- If you have read any PR comment and have not yet invoked this skill: **STOP. Load the skill NOW. Work done before loading the skill is unverified by the skill's gates.**
 - Dismissing feedback without investigation
 - Responding to feedback with "that's out of scope"
 - Closing a comment without addressing it or explicitly deferring it with a tracking issue

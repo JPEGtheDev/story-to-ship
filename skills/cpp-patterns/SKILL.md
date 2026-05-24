@@ -24,9 +24,10 @@ YOU MUST clean up all GL resources in destructors and update documentation in th
 - [ ] Am I about to introduce a GL resource without RAII?
 - [ ] Am I about to duplicate logic that already exists in the codebase?
 - [ ] Has the class or function I am changing been read — not recalled from memory?
+- [ ] Before declaring a new type: is this part of the public API, or an implementation detail used only in one TU? If implementation detail → declare in `.cpp`, not the header.
 
 ✓ All met → proceed
-✗ Any unmet → load the code-quality skill, apply RAII, search for existing implementations, or read the target code before writing any production code
+✗ Any unmet → load the code-quality skill, apply RAII, search for existing implementations, read the target code, or move the implementation detail into the `.cpp` before writing any production code
 
 ---
 
@@ -219,6 +220,7 @@ These smells are not caught by clang-tidy. Catch them in code review.
 | "Docs can be updated separately" | Stale docs mislead the next developer. Same commit is the rule. |
 | "It's a transitive include, it works" | Transitive includes break when source headers change. Be explicit. |
 | "Removing the call site is enough to remove the feature" | If the Camera method is architecturally valid, keep it. Only the call site was user preference. |
+| "The caller ensures this field is valid before I use it." | No guard + no test = a wish. If there is no `static_assert`, no bounds check, and no test enforcing the invariant, it is unspecified behavior. Add the guard. |
 
 ---
 

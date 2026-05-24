@@ -66,6 +66,13 @@ Choose one of these four options — do not mix them:
 | **Keep all commits** | Each commit is already clean, atomic, and independently meaningful |
 | **Interactive rebase** | Mix of clean and messy commits — clean up before squashing |
 
+**Squash prescribed command:** Use `git reset --mixed HEAD~N`. Use `--mixed`, not `--soft`. `--soft` carries staged hunks forward and can silently include unintended changes. `--mixed` clears the index so the new commit starts from a clean slate.
+
+After reset:
+1. Run `git status` -- confirm working tree is unchanged, index is empty.
+2. Re-stage and commit with your squash message.
+3. Run `git show --stat HEAD` -- verify the squash commit contains exactly the files you intended and nothing else.
+
 **Every resulting commit must:**
 - Build and pass tests on its own
 - Use conventional commit format: `<type>[scope]: <description>`

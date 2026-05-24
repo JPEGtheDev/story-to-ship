@@ -50,6 +50,17 @@ Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery featur
 
 ---
 
+## Discovery -- Mandatory Agenda Questions
+
+When dispatching Ceremony 1 (Discovery), each amigo MUST address ALL of the following in addition to the standard agenda in `references/CEREMONIES.md`:
+
+1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labelled `[UNCLEAR: optional?]` in the Feature Specification. Never assume required unless the AC explicitly states it.
+2. **UI dialog entry paths:** For any UI dialog or panel in the acceptance criteria: enumerate every menu path and keyboard shortcut that opens it. Any path not mentioned in the ACs MUST be flagged as `[UNPLANNED: entry-path]` in the Feature Specification.
+
+A Feature Specification that does not address both questions is incomplete and MUST be revised before Ceremony 2 (Refinement).
+
+---
+
 ## Discovery Tracking Mechanism
 
 **Context:** Ceremony 2 routing and Signoff only. Not for non-Discovery features.

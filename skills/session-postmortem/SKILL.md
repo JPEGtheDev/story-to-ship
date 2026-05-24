@@ -25,9 +25,10 @@ Before starting the postmortem analysis:
 1. The session being analyzed has completed — no further work is planned for that session.
 2. The session's `events.jsonl` log is accessible at `[SESSION_ID]/events.jsonl`.
 3. You are running as an EXTERNAL reviewer — you have not been the agent in the session being analyzed.
+4. Before writing the self-assessment, read `checkpoints/index.md` to determine the full session scope. Context compaction does not shorten the session. A self-assessment that covers only the final task of a 9-hour session is incomplete.
 
-✓ All 3 met → proceed through all postmortem parts in order
-✗ Any unmet → wait for the session to complete, locate the events log, or dispatch a separate external reviewer before proceeding
+✓ All 4 met → proceed through all postmortem parts in order
+✗ Any unmet → wait for the session to complete, locate the events log, dispatch a separate external reviewer, or read `checkpoints/index.md` before proceeding
 
 ---
 

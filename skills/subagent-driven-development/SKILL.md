@@ -65,6 +65,7 @@ Stage 2: Dispatch code-quality-reviewer (code-quality-reviewer.md)
          |
          v
 Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
+After each push: check for new automated review threads before picking up the next todo. Do not wait for the user to surface review feedback.
 Pick up next todo.
     |
     v
@@ -200,9 +201,9 @@ These thoughts mean stop immediately:
 | Code review (per-file) | Yes | code-review agent, 1 per file |
 | Skill review | Yes | general-purpose + skill-reviewer skill |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
-| Quick grep/glob in 1–2 files | No | do inline |
+| Quick grep/glob in 1–2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |
-| Single-step trivial command | No | do inline |
+| Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos require subagent dispatch regardless of size) |
 
 **Max 4 concurrent agents.** Beyond that, results compete for context and quality drops.
 
@@ -310,6 +311,7 @@ subagent inherits your assumptions | | Reporting DONE before 2 - stage review | 
 | "I dispatched an audit subagent — that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification — an incomplete specification produces an incomplete audit. |
 | "The concerns are nits — not a correctness or scope risk, so I'll skip Ceremony 4" | "Correctness or scope risk" is objective: does it affect behavior, API surface, or stated requirements? If yes, dispatch Ceremony 4. "Feels minor" is not a valid exemption. |
 | "No `## Feature Specification` in plan.md — that means Ceremony 5 doesn't apply" | Absence of the section means Discovery never ran. That is a gap to surface, not a skip condition. Invoke Ceremony 5 before merge regardless. |
+| "Todo is short — I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation — the outlier case always exists. |
 
 ---
 
@@ -348,6 +350,7 @@ Task to delegate
               |
               v
     Mark todo done. Reload skills (session-bootstrap refresh rule).
+    After each push: check for new automated review threads before picking up the next todo.
     Pick up next todo.
               |
               v

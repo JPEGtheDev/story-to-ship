@@ -66,6 +66,26 @@ See `references/FORMATTING_RULES.md` for formatting rule details.
 
 See `references/NAMING_TABLES.md` for full naming examples.
 
+## Naming Pre-Flight
+
+Before naming a new `enum`, struct field, or constant: open `docs/CODING_STANDARDS.md` and verify the naming convention. Enumerators: `UPPER_CASE`.
+
+---
+
+## Self-Documenting Code
+
+**Readability is more important than development speed or execution speed.** Time spent on clarity is recovered many times over in maintenance, review, and debugging.
+
+**Comments are not intent.** Comments can go stale; code cannot. When a comment exists to explain what a value means, that is a signal the code should be rewritten — not the comment improved.
+
+| Signal | Wrong fix | Right fix |
+|--------|-----------|-----------|
+| `// 0=Fullscreen, 1=AutoCOM...` comment above a switch | Add a better comment | Replace magic numbers with a named enum |
+| `magic_value = 42; // timeout in ms` | Document the constant | `constexpr int kTimeoutMs = 42;` |
+| Function with a `bool` parameter | Comment at the call site | Replace with an enum or named overloads |
+
+**Rule:** If a comment is explaining what a value *is*, the comment is a code smell. Make the code say it directly.
+
 ---
 
 ## Adding a Feature / Fixing a Bug

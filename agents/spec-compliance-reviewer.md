@@ -54,6 +54,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - Do NOT praise the implementation
 - "Tests pass" is not evidence that requirements are met — evaluate the implementation, not the test results
 - For any class whose state is displayed in the UI: verify each UI-displayed field has a traceable public accessor (class method → `MenuState` field → menu render call). A UI acceptance criterion without a class API path is a spec gap — report it as MISSING, not FULL.
+- For each acceptance criterion containing sub-assertions (e.g., "hidden, greyed not absent" contains two distinct assertions): cite evidence for each sub-assertion independently. A criterion with N behavioral distinctions requires N evidence citations. Approving a criterion without per-sub-assertion citation is a PARTIAL finding, not FULL.
 
 ### Duplication Check for Extension Tasks
 

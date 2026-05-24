@@ -159,6 +159,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it — patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
 | "I already started debugging before loading this skill — I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
+| "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
 
 ---
 

@@ -80,6 +80,7 @@ domains, read multiple skills in parallel (they are independent reads).
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |
 | Any new plan with 2+ todos | `writing-plans`; dispatch Skeptic before first implementation step |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
+| Task references a GitHub issue number (#NNN), OR task description contains "AC:", "acceptance criteria", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
 
 If unsure, read `code-quality` — it applies to every code task.
 
@@ -97,6 +98,7 @@ If unsure, read `code-quality` — it applies to every code task.
 - [ ] Skill load announcement made for each loaded skill
 - [ ] `git status` checked in main working tree — if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work. Ghost commits from prior agents are a recurring risk.
 - [ ] If resuming a prior session: SQL pending todos checked; Skeptic dispatched before first implementation step
+- [ ] If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 - [ ] Stored memories checked for user-specified model preference overrides — applies to all agent dispatch decisions this session
 - [ ] If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched — NOT done inline
 - [ ] Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session — no auto-loading is available
@@ -141,6 +143,7 @@ behavior is habitual, not conditional.
 - Skipping the skill-load announcement — **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response — **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` — **STOP. Read `.github/skills/self-evaluation/SKILL.md` now.**
+- Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional — **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" — **STOP. Memory degrades. Skills update. Load fresh every session.**
 - Branch about to be created, but the plan the user approved was the pre-Skeptic version — **STOP. Re-present the post-Skeptic revised plan. Wait for explicit user approval before creating the branch.**

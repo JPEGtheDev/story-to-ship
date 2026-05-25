@@ -4,6 +4,7 @@ license: MIT
 description: Use when building, adding dependencies, configuring CMake options, troubleshooting build failures, or managing Flatpak packaging for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
@@ -16,6 +17,21 @@ Violating the letter of this rule is violating the spirit of this rule.
 YOU MUST run `cmake --build build` locally and verify it exits 0 before pushing. No exceptions.
 
 **Announce at start:** "I am using the build skill to [build/configure/troubleshoot] [description]."
+
+---
+
+## BEFORE PROCEEDING
+
+Before pushing any change:
+
+1. `cmake --build build` exits 0 - no build errors
+2. `./build/tests/ParticleViewerTests` exits 0 - all tests pass
+3. Every `FetchContent_Declare` has a `GIT_TAG` pinned to a tag or commit SHA, not a branch name
+4. No new dependency duplicates an existing transitive dependency at a different version
+5. If shader files were changed: build was re-run so `Viewer-Assets/shaders/` is current
+
+✓ All met → proceed to push
+✗ Any unmet → fix before pushing
 
 ---
 

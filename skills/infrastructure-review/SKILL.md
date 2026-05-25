@@ -4,6 +4,7 @@ license: MIT
 description: Use when adding workflows, modifying CMakeLists.txt, or updating Flatpak manifests for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
@@ -18,19 +19,34 @@ YOU MUST review every change to `.github/workflows/`, `CMakeLists.txt`, and `fla
 
 ---
 
+## BEFORE PROCEEDING
+
+Before reviewing any infrastructure change:
+
+1. The diff has been obtained -- `git diff main...HEAD` covers all changed files in the PR
+2. At least one of these files is present in the diff: `.github/workflows/*.yml`, `CMakeLists.txt`, or `flatpak/`
+3. Every review area below is applied -- no section skipped because a change "looks small"
+4. Every checklist item in all three review areas is answered YES or NO -- no items left unanswered
+5. Any item answered NO produces a row in the violations table before the verdict is written
+
+✓ All met → proceed through the three review areas
+✗ Any unmet → resolve the unmet item before writing a verdict
+
+---
+
 ## Review Areas
 
 ### 1. CI/CD Pipeline Checks
 
 Run every item for each changed `.github/workflows/*.yml` file:
 
-- [ ] No `git commit` or `git push` in any workflow step — pipelines are read-only (see `workflow` skill)
-- [ ] All `permissions:` blocks are minimal — read-only where possible; write only where explicitly justified
-- [ ] Artifacts uploaded with correct retention — short for PRs (7 days), longer for releases (90 days)
-- [ ] No secrets hardcoded — all sensitive values via `${{ secrets.X }}` only
-- [ ] Workflow triggers are intentional — `push` and `pull_request` events correct; no unintended `workflow_run` chains
-- [ ] Matrix builds cover required platforms (Linux at minimum; Windows/macOS if the project targets them)
-- [ ] `actions/checkout` and other third-party actions pinned to a specific SHA, not a floating tag
+1. No `git commit` or `git push` in any workflow step — pipelines are read-only (see `workflow` skill)
+2. All `permissions:` blocks are minimal — read-only where possible; write only where explicitly justified
+3. Artifacts uploaded with correct retention — short for PRs (7 days), longer for releases (90 days)
+4. No secrets hardcoded — all sensitive values via `${{ secrets.X }}` only
+5. Workflow triggers are intentional — `push` and `pull_request` events correct; no unintended `workflow_run` chains
+6. Matrix builds cover required platforms (Linux at minimum; Windows/macOS if the project targets them)
+7. `actions/checkout` and other third-party actions pinned to a specific SHA, not a floating tag
 
 ✓ All pass → pipeline is safe to merge
 ✗ Any unmet → verdict: ISSUES FOUND — document in review report
@@ -39,11 +55,11 @@ Run every item for each changed `.github/workflows/*.yml` file:
 
 Run every item for each changed `CMakeLists.txt`:
 
-- [ ] All dependencies declared explicitly (no reliance on ambient system packages not listed in the build file)
-- [ ] `FetchContent` sources pinned to a specific tag or commit hash — never `main`, `master`, or `latest`
-- [ ] Test targets (`ParticleViewerTests`) are separated from production targets (`Viewer`)
-- [ ] Install rules present for release builds (`install(TARGETS ...)`)
-- [ ] No hardcoded absolute paths — all paths relative or constructed via CMake variables
+1. All dependencies declared explicitly (no reliance on ambient system packages not listed in the build file)
+2. `FetchContent` sources pinned to a specific tag or commit hash — never `main`, `master`, or `latest`
+3. Test targets (`ParticleViewerTests`) are separated from production targets (`Viewer`)
+4. Install rules present for release builds (`install(TARGETS ...)`)
+5. No hardcoded absolute paths — all paths relative or constructed via CMake variables
 
 ✓ All pass → build is reproducible
 ✗ Any unmet → verdict: ISSUES FOUND — document in review report
@@ -52,11 +68,11 @@ Run every item for each changed `CMakeLists.txt`:
 
 Run every item for any changed file under `flatpak/`:
 
-- [ ] OpenGL extension permissions declared — required for GPU access in Flatpak sandbox (see `flatpak` skill)
-- [ ] SDL3 permissions correct for display and input device access
-- [ ] App ID matches `com.jpegthedev.ParticleViewer` naming convention
-- [ ] Runtime version pinned to a specific release (not a floating `latest`)
-- [ ] `--share=network` absent from finish-args unless network access is explicitly required and documented
+1. OpenGL extension permissions declared — required for GPU access in Flatpak sandbox (see `flatpak` skill)
+2. SDL3 permissions correct for display and input device access
+3. App ID matches `com.jpegthedev.ParticleViewer` naming convention
+4. Runtime version pinned to a specific release (not a floating `latest`)
+5. `--share=network` absent from finish-args unless network access is explicitly required and documented
 
 ✓ All pass → Flatpak manifest is compliant
 ✗ Any unmet → verdict: ISSUES FOUND — document in review report

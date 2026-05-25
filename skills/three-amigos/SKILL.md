@@ -4,7 +4,6 @@ license: MIT
 description: Use when a feature has new or unclear acceptance criteria, a plan has 2+ todos and Discovery ran, or an implementer signals BLOCKED or DONE_WITH_CONCERNS.
 ---
 
-<!-- Tier 1 — Methodology. No project-specific references in this file. -->
 
 ## Iron Law
 
@@ -38,7 +37,7 @@ Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery featur
 
 ---
 
-## BEFORE DISPATCHING
+## BEFORE PROCEEDING
 
 1. Which ceremony? (see When to Invoke)
 2. Did Discovery run? Check plan.md for `## Feature Specification`.

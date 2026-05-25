@@ -2,8 +2,8 @@
 name: subagent-driven-development
 license: MIT
 description: Use when delegating implementation tasks, confirming theories, running parallel research, or reviewing completed work.
-token-budget: over-budget by design — this is a large Tier 1 reference skill; compression requires a dedicated pass
 ---
+
 
 ## Iron Laws
 
@@ -83,7 +83,7 @@ Pick up next todo.
 
 ---
 
-## BEFORE PROCEEDING — SDD Dispatch Gate
+## BEFORE PROCEEDING
 
 Before dispatching any subagent:
 
@@ -92,32 +92,27 @@ Before dispatching any subagent:
 3. A worktree exists for this agent. **All agents — read-only and write-side alike — run in a worktree.** Run these checks before dispatch:
 
    ```bash
-# 1. Ensure.worktrees / is gitignored before first use
+# 1. Ensure .worktrees/ is gitignored before first use
    git check-ignore -q .worktrees || echo "ADD .worktrees TO .gitignore FIRST — stop here"
 
 # 2. Create the worktree
    git worktree add .worktrees/agent-<name> -b agent/<name>
-#If nonzero exit : log error, do NOT dispatch, surface to user.Common causes:
-#- stale lock file : git worktree prune; then retry
-#- path already exists : remove it or rename
-#- branch name already registered : choose a different branch name
+# If nonzero exit: log error, do NOT dispatch, surface to user. Common causes:
+# - stale lock file: git worktree prune; then retry
+# - path already exists: remove it or rename
+# - branch name already registered: choose a different branch name
 
-# 3. Verify path is a worktree(not the main repo root)
+# 3. Verify path is a worktree (not the main repo root)
    git -C .worktrees/agent-<name> rev-parse --show-toplevel
-#Output must be the absolute path of.worktrees / agent - < name> — NOT the main repo root
+# Output must be the absolute path of .worktrees/agent-<name> — NOT the main repo root
 
-# 4. Write - side agents only — verify branch isolation
+# 4. Write-side agents only — verify branch isolation
    git -C .worktrees/agent-<name> branch --show-current
-#Output must NOT equal the current development branch(e.g.docs / execution - skill - overhaul or main)
-#Read - only agents(explorer, researcher, reviewers, skeptic, postmortem) skip step 4.
+# Output must NOT equal the current development branch (e.g. feat/my-branch or main)
+# Read-only agents (explorer, researcher, reviewers, skeptic, postmortem) skip step 4.
    ```
 
-   The worktree path confirmed above is the value to pass as `
-{
-    {
-        WORKTREE_PATH
-    }
-}` in the agent prompt.
+   The worktree path confirmed above is the value to pass as `{{WORKTREE_PATH}}` in the agent prompt.
 
    **Why read-only agents also need worktrees:** The main context continues making commits while agents run. Without a worktree, a read-only agent observes a dirty working tree or partially-committed state — producing findings against a snapshot that no longer matches any branch. A worktree gives every agent a stable, isolated view at dispatch time.
 4. If a pre-built template exists in `.github/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `architecture-reviewer.md`, `infrastructure-reviewer.md`.
@@ -240,16 +235,11 @@ Stage 2: Code Quality Review        ← ONLY after Stage 1 passes (code-quality-
 
 ### Stage 1: Spec Compliance Review
 
-Use `spec-compliance-reviewer.md` with full requirements and the implementation diff;
-if GAPS
-    are returned, implementer fixes and Stage 1 re -
-                      runs before proceeding.
+Use `spec-compliance-reviewer.md` with full requirements and the implementation diff; if GAPS returned, implementer fixes and Stage 1 re-runs before proceeding.
 
-                      ## #Stage 2 : Code Quality Review
+### Stage 2: Code Quality Review
 
-                                        Use `code -
-                      quality - reviewer.md` — one agent per file changed;
-if REQUEST CHANGES, implementer fixes and Stage 2 re-runs before proceeding.
+Use `code-quality-reviewer.md` — one agent per file changed; if REQUEST CHANGES, implementer fixes and Stage 2 re-runs before proceeding.
 
 See `references/REVIEW_PROTOCOL.md` for full protocol.
 
@@ -273,9 +263,9 @@ See `references/MODEL_SELECTION.md` for model tier table and concurrency rules.
 - **Assign Problems Not Tasks:** delegate the outcome, not the steps — see the `writing-plans` skill — 'Assign Problems Not Tasks' principle.
 - **State the return format explicitly** — tell it exactly what to give back
 - **Provide complete context** — subagents are stateless
-- **Fresh context per task** — never share session history;
-it contaminates the subagent's search - **Accept findings unless they conflict with evidence you verified yourself* *
-                                            -**If a subagent finds something unexpected : **treat it as a hypothesis; verify before acting
+- **Fresh context per task** — never share session history; it contaminates the subagent's search
+- **Accept findings unless they conflict with evidence you verified yourself**
+- **If a subagent finds something unexpected: treat it as a hypothesis; verify before acting**
 
 ---
 
@@ -284,12 +274,12 @@ it contaminates the subagent's search - **Accept findings unless they conflict w
 | Anti-pattern | Why it fails |
 |---|---|
 | "I'll check this myself" (for 5+ files) | Fills context, biased by assumptions |
-| Skipping Stage 1 review because "it looks right" | Spec gaps ship;
-quality review doesn't catch them | | One agent reviewing multiple large files | Coverage is shallow;
-1 per file is the rule | | Acting on subagent findings without verifying |
-    Subagents can be wrong — findings are hypotheses | | Dispatching without a clear return format |
-    Agent returns noise | | Sharing full session history as context | Contaminates search;
-subagent inherits your assumptions | | Reporting DONE before 2 - stage review | Code exists; correctness unverified |
+| Skipping Stage 1 review because "it looks right" | Spec gaps ship; quality review doesn't catch them |
+| One agent reviewing multiple large files | Coverage is shallow; 1 per file is the rule |
+| Acting on subagent findings without verifying | Subagents can be wrong — findings are hypotheses |
+| Dispatching without a clear return format | Agent returns noise |
+| Sharing full session history as context | Contaminates search; subagent inherits your assumptions |
+| Reporting DONE before 2-stage review | Code exists; correctness unverified |
 
 ---
 

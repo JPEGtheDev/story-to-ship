@@ -4,6 +4,7 @@ license: MIT
 description: Use when starting any multi-step task, story, or feature work.
 ---
 
+
 ## Iron Law
 
 ```
@@ -93,6 +94,21 @@ COMMIT todo: git add / git commit -m "feat[scope]: description"
 ```
 
 Each step must be its own todo with a distinct status.
+
+---
+
+## BEFORE PROCEEDING
+
+Before building or presenting any plan:
+
+1. Requirements restated in own words — ambiguities labeled `[UNCLEAR:]`
+2. Every acceptance criterion is mapped to a verifiable checkpoint
+3. Todo list has no placeholders — every item is concrete and executable
+4. Plan has been reviewed by Skeptic Agent (or Three Amigos Refinement if Discovery ran)
+5. No todo touches 3+ files or exceeds 25 tool calls without being split
+
+✓ All met → present the plan and wait for explicit user approval
+✗ Any unmet → resolve the unmet item; do not start implementation
 
 ---
 

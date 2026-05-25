@@ -4,6 +4,7 @@ license: MIT
 description: Use when completing any session.
 ---
 
+
 ## Iron Law
 
 ```
@@ -17,15 +18,15 @@ YOU MUST complete all 7 steps and include the `### Session Self-Evaluation` bloc
 
 Read this skill BEFORE your final message. If you skip it: the session's lessons are lost. Every time.
 
-**Announce at start:** "I am running the self-evaluation skill for this session."
+**Announce at start:** "I am using the self-evaluation skill for this session."
 
 ---
 
 ## BEFORE PROCEEDING
 
-- [ ] The session's primary task is complete — no further implementation work is planned for this session.
-- [ ] All commits from this session have been pushed or are staged and ready.
-- [ ] You have NOT yet sent the final message to the user.
+1. The session's primary task is complete — no further implementation work is planned for this session.
+2. All commits from this session have been pushed or are staged and ready.
+3. You have NOT yet sent the final message to the user.
 
 ✓ All met → proceed through all 7 steps in order
 ✗ Any unmet → complete remaining session work first; once no further work is planned, return here and execute all 7 steps

@@ -4,6 +4,7 @@ license: MIT
 description: Use when preparing to request a code review on a PR or change.
 ---
 
+
 ## Iron Law
 
 ```
@@ -13,16 +14,18 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
+YOU MUST state what to look for in every review request. No exceptions.
+
 **Announce at start:** "I am using the requesting-code-review skill to prepare a review request for [PR/change]."
 
 ---
 
 ## BEFORE PROCEEDING
 
-- [ ] CI is green on the branch
-- [ ] `verification-before-completion` gate has been run in this session
-- [ ] PR description is complete (see `finishing-a-development-branch` Step 4)
-- [ ] You have reviewed your own diff and addressed obvious issues
+1. CI is green on the branch
+2. `verification-before-completion` gate has been run in this session
+3. PR description is complete (see `finishing-a-development-branch` Step 4)
+4. You have reviewed your own diff and addressed obvious issues
 
 ✓ All met → proceed to request review
 ✗ Any unmet → resolve all unmet items before requesting review

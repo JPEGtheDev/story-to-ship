@@ -4,6 +4,7 @@ license: MIT
 description: Use when running parallel agent work, testing an approach in isolation, or keeping the main branch clean while a subagent operates on a separate branch.
 ---
 
+
 ## Iron Law
 
 ```
@@ -75,7 +76,7 @@ git branch -d agent/<name>   # only after merging or discarding
 
 ---
 
-## BEFORE Creating a Worktree Gate
+## BEFORE PROCEEDING
 
 ```
 BEFORE creating a worktree, verify:
@@ -133,6 +134,7 @@ This pattern replaces "I think approach A is better" with measurable output.
 - Merging a worktree branch before reviewing the full diff: `git diff main..agent/<name>`
 - Using `git worktree list | wc -l` to check if you are in a worktree — **STOP. This does NOT tell you which worktree you are in. Use `git rev-parse --show-toplevel` and compare against the expected path.**
 - "I reviewed the diff mentally — running `git diff main..agent/<name>` explicitly is redundant" — **STOP. Run the diff command. Mental review is not a structural check.**
+- Using `git worktree add ../name` (relative `../` path) — **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
 
 ---
 

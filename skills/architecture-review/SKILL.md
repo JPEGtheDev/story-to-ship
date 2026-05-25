@@ -4,6 +4,7 @@ license: MIT
 description: Use when adding new classes, refactoring code, or reviewing PRs for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
@@ -62,16 +63,18 @@ The codebase has a **dirty zone** (data that has not been validated) and a **cle
 
 ---
 
+## BEFORE PROCEEDING
+
 Run every item for each file under review:
 
-- [ ] Does the new or modified class belong to a defined layer?
-- [ ] Does it import or call code from an outer layer? (VIOLATION if yes)
-- [ ] Does `ViewerApp` orchestrate or implement? (must orchestrate only — rendering logic belongs in Shader/Particle classes)
-- [ ] Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
-- [ ] Do any `src/` files import from `tests/`? (VIOLATION — production code must never depend on test code)
-- [ ] Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
-- [ ] Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
-- [ ] Are there circular `#include` dependencies between any two files in the same layer?
+1. Does the new or modified class belong to a defined layer?
+2. Does it import or call code from an outer layer? (VIOLATION if yes)
+3. Does `ViewerApp` orchestrate or implement? (must orchestrate only — rendering logic belongs in Shader/Particle classes)
+4. Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
+5. Do any `src/` files import from `tests/`? (VIOLATION — production code must never depend on test code)
+6. Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
+7. Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
+8. Are there circular `#include` dependencies between any two files in the same layer?
 
 ✓ All pass → verdict: CLEAN
 ✗ Any fail → verdict: VIOLATIONS FOUND — document every failure in the Review Report

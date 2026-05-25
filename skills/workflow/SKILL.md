@@ -4,20 +4,25 @@ license: MIT
 description: Use when creating GitHub Actions workflows, adding CI jobs, configuring artifact uploads, or reviewing pipeline configuration for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
 PIPELINES ARE READ-ONLY — NEVER COMMIT FROM CI
+YOU MUST ensure every workflow step is read-only — no commits, no pushes, no write-backs.
+No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-CI workflows read code, run tests, and publish artifacts. They never write code. No exceptions.
+CI workflows read code, run tests, and publish artifacts. They never write code.
 
 **Second Iron Law:**
 
 ```
 BROKEN PIPELINE = HIGHEST PRIORITY — STOP ALL MERGES UNTIL GREEN
+YOU MUST stop all merges and fix a broken main pipeline before any other work.
+No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -140,18 +145,18 @@ Use `needs:` to enforce execution order:
 
 ---
 
-## Step 4: Review Checklist
+## BEFORE PROCEEDING
 
 Before presenting workflow changes, verify:
 
-- [ ] No `git commit`, `git push`, or write-back operations in any step
-- [ ] No `data:` URIs in PR comment bodies
-- [ ] Permissions are minimal (`contents: read` unless writing comments/checks)
-- [ ] Generated files uploaded as artifacts (not committed)
-- [ ] PR comments are idempotent (update existing, don't duplicate)
-- [ ] Job dependencies are correct (`needs:` ordering)
-- [ ] `if: always()` on artifact upload and PR comment steps where needed
-- [ ] Artifact retention set appropriately (default: 30 days)
+1. No `git commit`, `git push`, or write-back operations in any step
+2. No `data:` URIs in PR comment bodies
+3. Permissions are minimal (`contents: read` unless writing comments/checks)
+4. Generated files uploaded as artifacts (not committed)
+5. PR comments are idempotent (update existing, don't duplicate)
+6. Job dependencies are correct (`needs:` ordering)
+7. `if: always()` on artifact upload and PR comment steps where needed
+8. Artifact retention set appropriately (default: 30 days)
 
 ✓ All met → proceed with presenting workflow changes
 ✗ Any unmet → fix before presenting
@@ -189,4 +194,4 @@ If you catch yourself thinking any of these, stop and follow the rule:
 
 For concrete workflow examples and patterns, see [references/WORKFLOW_EXAMPLES.md](references/WORKFLOW_EXAMPLES.md).
 
-For Flatpak packaging, SDL3 display backend configuration, NVIDIA GL extension issues, and `setenv` behaviour inside the Flatpak sandbox, see the `flatpak` skill (`.github/skills/flatpak/`) or [references/FLATPAK_GL_GOTCHAS.md](references/FLATPAK_GL_GOTCHAS.md) for the detailed reference.
+For Flatpak packaging, SDL3 display backend configuration, NVIDIA GL extension issues, and `setenv` behavior inside the Flatpak sandbox, see the `flatpak` skill or [references/FLATPAK_GL_GOTCHAS.md](references/FLATPAK_GL_GOTCHAS.md) for the detailed reference.

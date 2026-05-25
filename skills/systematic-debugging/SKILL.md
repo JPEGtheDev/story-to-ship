@@ -4,6 +4,7 @@ license: MIT
 description: Use when encountering any bug, test failure, build error, or unexpected behavior.
 ---
 
+
 # Instructions for Agent
 
 ## How This Skill is Invoked
@@ -26,15 +27,17 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
+YOU MUST investigate root cause before proposing any fix. No exceptions.
+
 **Announce at start:** "I am using the systematic-debugging skill to [brief description of issue]."
 
 ---
 
 ## BEFORE PROCEEDING
 
-- [ ] The full error output has been read completely — not just the last line
-- [ ] The failure reproduces consistently with identified reproduction steps
-- [ ] I can state: "The root cause is X because Y" with evidence
+1. The full error output has been read completely — not just the last line
+2. The failure reproduces consistently with identified reproduction steps
+3. I can state: "The root cause is X because Y" with evidence
 
 ✓ All met → proceed
 ✗ Any unmet → continue Phase 1 investigation; do not proceed

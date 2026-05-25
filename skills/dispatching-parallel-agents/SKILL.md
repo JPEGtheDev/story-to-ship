@@ -4,6 +4,7 @@ license: MIT
 description: Use when multiple independent read-only research tasks can run simultaneously, or when you need to fan out investigation across many files or hypotheses.
 ---
 
+
 ## Iron Law
 
 ```
@@ -104,10 +105,10 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 ## BEFORE PROCEEDING
 
-- [ ] All tasks are truly independent — no agent needs another agent's output to start
-- [ ] Return format is explicitly defined for every agent before dispatch
-- [ ] No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-- [ ] Read-only agents have no shared write targets; write agents each have an isolated worktree
+1. All tasks are truly independent — no agent needs another agent's output to start
+2. Return format is explicitly defined for every agent before dispatch
+3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
+4. Read-only agents have no shared write targets; write agents each have an isolated worktree
 
 ✓ All met → dispatch agents
 ✗ Any unmet → resolve the dependency, define the return format, or serialize the dispatch before proceeding

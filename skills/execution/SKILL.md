@@ -4,6 +4,7 @@ license: MIT
 description: Use when executing any non-trivial implementation work.
 ---
 
+
 ## Iron Law
 
 ```
@@ -19,6 +20,21 @@ For planning a multi-step task → invoke **writing-plans** skill first.
 For subagent dispatch or delegation → invoke **subagent-driven-development** skill.
 For debugging → invoke **systematic-debugging** skill.
 For completion claims → invoke **verification-before-completion** skill.
+
+---
+
+## BEFORE PROCEEDING
+
+Before writing any code or claiming any task done:
+
+1. Requirements restated in own words — ambiguities labeled `[UNCLEAR:]`
+2. For multi-step tasks (3+ steps): a written plan with SQL todos exists
+3. Required skills for this domain are loaded (check session-bootstrap On Start table)
+4. No placeholders in any todo — every item is concrete and executable
+5. Verification method is identified — know what command proves success before starting
+
+✓ All met → begin execution
+✗ Any unmet → resolve now; do not write a single line of code first
 
 ---
 

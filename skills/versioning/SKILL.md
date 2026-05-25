@@ -4,15 +4,18 @@ license: MIT
 description: Use when creating PRs, writing commit messages, understanding version bumps, or troubleshooting release issues for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
 EVERY COMMIT AND PR TITLE MUST USE CONVENTIONAL FORMAT
+YOU MUST use conventional format for every commit message and PR title.
+No exceptions. Wrong format breaks release automation.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-`<type>[scope]: <description>` — no exceptions. Wrong format breaks release automation.
+`<type>[scope]: <description>`
 
 **Announce at start:** "I am using the versioning skill to [create commit/PR for] [description]."
 
@@ -87,16 +90,16 @@ The PR title **MUST** use conventional commits format:
 
 ---
 
-## Step 3: PR Requirements Checklist
+## BEFORE PROCEEDING
 
-Before a PR can merge:
+Before opening or merging a PR:
 
-- [ ] PR title uses conventional commits format
-- [ ] All commits use conventional commits format
-- [ ] Code formatted with `clang-format` (see `code-quality` skill)
-- [ ] Build succeeds on all platforms
-- [ ] Unit tests pass
-- [ ] CI formatting checks pass
+1. PR title uses conventional commits format
+2. All commits use conventional commits format
+3. Code formatted with `clang-format` (see `code-quality` skill)
+4. Build succeeds on all platforms
+5. Unit tests pass
+6. CI formatting checks pass
 
 ✓ All met → PR is ready to merge
 ✗ Any unmet → resolve before opening or merging the PR
@@ -155,4 +158,4 @@ If you catch yourself thinking any of these, stop and follow the rule:
 
 - Full commit format examples: [`docs/CONVENTIONAL_COMMITS.md`](../../../docs/CONVENTIONAL_COMMITS.md)
 - Release pipeline details: [`docs/RELEASE_PROCESS.md`](../../../docs/RELEASE_PROCESS.md)
-- CI workflow rules: `workflow` skill (`.github/skills/workflow/`)
+- CI workflow rules: `workflow` skill

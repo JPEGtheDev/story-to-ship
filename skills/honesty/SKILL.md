@@ -6,6 +6,7 @@ description: >
   to every session, every turn, every task.
 ---
 
+
 ## Iron Law
 
 ```
@@ -135,11 +136,11 @@ here's how I'll find out." No space for language that hedges both ways simultane
 
 ## BEFORE PROCEEDING
 
-- [ ] No banned vocabulary ("should work", "that should do it") is present in the draft — this applies to ALL output: chat responses, PR comment replies, commit messages, and any text sent via CLI tools
-- [ ] Any completion claim ("done", "fixed", "works") has inline verification output attached
-- [ ] Any confidence expression has empirical evidence cited inline
-- [ ] No forbidden hedge phrases from the Talk Straight table are present
-- [ ] No emdashes (—) are present; use hyphens (-) or separate sentences instead
+1. No banned vocabulary ("should work", "that should do it") is present in the draft — this applies to ALL output: chat responses, PR comment replies, commit messages, and any text sent via CLI tools
+2. Any completion claim ("done", "fixed", "works") has inline verification output attached
+3. Any confidence expression has empirical evidence cited inline
+4. No forbidden hedge phrases from the Talk Straight table are present
+5. No emdashes (—) are present; use hyphens (-) or separate sentences instead
 
 ✓ All met → send the response
 ✗ Any unmet → rewrite the offending phrase or run the required verification before sending

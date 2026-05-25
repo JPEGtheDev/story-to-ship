@@ -4,12 +4,11 @@ license: MIT
 description: Use when creating, editing, or reviewing a skill file.
 ---
 
-<!-- Tier 1 — Methodology. No project-specific references in this file. -->
 
 ## Iron Law
 
 ```
-NO SKILL SHIPS WITHOUT MEETING THE 5-ELEMENT ANATOMY CHECK
+YOU MUST: VERIFY ALL FIVE GATE ELEMENTS BEFORE SHIPPING ANY SKILL. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -52,11 +51,6 @@ Before creating, editing, or shipping any skill or agent template:
    - Enumerate every audit dimension explicitly in each agent's prompt
    - The anatomy gate above applies to editing skills — audit use cases require their own dimension list; unnamed dimensions will not be checked
 
-6. **What tier is this skill?** Every new skill MUST declare its tier:
-   - **Tier 1 — Methodology:** no project names, paths, or tech stacks in any core section.
-   - **Tier 2 — Domain/Project:** project references allowed; use `docs/` first — DO NOT create a skill when `docs/` is sufficient; only create if it must function as a behavioral gate.
-   - See `## Project-Agnostic Authoring Rule` below for full definition.
-
 ✓ All met → proceed
 ✗ Any unmet → resolve the unmet item before touching the skill file
 ↳ Auditing (not creating/editing)? → The ✓/✗ above applies to creation/editing only. For auditing, run the step 5 sub-tasks; proceed once all dimensions are named in each agent's prompt.
@@ -94,30 +88,6 @@ Every skill belongs to exactly one bounded context. Place new skills in the corr
 | **BEHAVIOR** | How the agent behaves honestly and bootstraps | honesty, session-bootstrap |
 
 **Sub-domain skills** (e.g., `visual-regression-testing` under QUALITY) are valid when they have a distinct iron law and are invoked independently of the parent skill.
-
----
-
-## Project-Agnostic Authoring Rule
-
-**Context:** Applies when creating any new skill or agent template. Does NOT apply to `copilot-instructions.md`, dispatch prompt parameters, or `docs/` reference files — those are intentionally project-specific.
-
-**Forces:** Skills embedded with project names, file paths, or tech stacks cannot be read in isolation. A reader needs external project context to interpret them. When the skill is adopted by a different project, it becomes misleading rather than useful.
-
-**Solution:** Every skill declares one of two tiers at creation time. State the tier at the top of the skill body.
-
-| Tier | Domain | Rule |
-|------|--------|------|
-| **Tier 1 — Methodology** | Planning, testing, debugging, workflow gates | No project names, file paths, or project-specific tech stacks in any core skill section. Project context belongs in `copilot-instructions.md` and in dispatch prompts via `{{PARAMETERS}}`. A Tier 1 skill must be portable: any project adopting it updates `copilot-instructions.md` alone. |
-| **Tier 2 — Domain/Project** | Build tooling, deployment, project-specific operations | Project references are permitted when the domain IS the project context. Use project-specific documentation (`docs/`) first — DO NOT create a skill when `docs/` is sufficient. Only create a Tier 2 skill when it must function as a loaded behavioral gate — not for reference material alone. |
-
-**Declare tier at the top of the skill body.** Example:
-```
-<!-- Tier 1 — Methodology. No project-specific references in this file. -->
-```
-
-**Consequences:** Tier 1 skills require translating project-specific context into `{{PARAMETERS}}` at dispatch time rather than hardcoding it. This adds one dispatch-authoring step but makes the skill reusable across projects.
-
-**Existing skills:** Audited and updated for tier compliance incrementally over time — no big-bang retrofit required. All new skills must comply from creation.
 
 ---
 

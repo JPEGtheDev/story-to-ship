@@ -4,6 +4,7 @@ license: MIT
 description: Use after a session completes.
 ---
 
+
 ## Iron Law
 
 ```
@@ -14,11 +15,11 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 YOU MUST examine the session for rationalization patterns. A clean outcome does not prove a clean process. No exceptions.
 
-**Announce at start:** "I am running the session-postmortem skill to analyze [session description]."
+**Announce at start:** "I am using the session-postmortem skill to analyze [session description]."
 
 ---
 
-## BEFORE PROCEEDING — Postmortem Gate
+## BEFORE PROCEEDING
 
 Before starting the postmortem analysis:
 

@@ -4,6 +4,7 @@ license: MIT
 description: Use when a task needs design exploration before any implementation begins. Required for any task with unclear approach, significant architecture impact, or multiple valid solutions.
 ---
 
+
 ## Iron Law
 
 ```
@@ -122,17 +123,17 @@ Answer all applicable questions before writing a single line of production code.
 
 ---
 
-## Phase 4: Design Gate Checklist
+## BEFORE PROCEEDING
 
 Every item MUST be checked before handing off to `writing-plans`.
 
-- [ ] All `[UNCLEAR:]` ambiguities resolved — none remain
-- [ ] Simplest approach identified and chosen or explicitly rejected with reason
-- [ ] All trade-offs named — none left implicit
-- [ ] Exact file paths named — no "somewhere in src/"
-- [ ] Out-of-scope items explicitly listed
-- [ ] Architecture impact assessed (layer boundaries, dependency direction)
-- [ ] Test strategy stated
+1. All `[UNCLEAR:]` ambiguities resolved — none remain
+2. Simplest approach identified and chosen or explicitly rejected with reason
+3. All trade-offs named — none left implicit
+4. Exact file paths named — no "somewhere in src/"
+5. Out-of-scope items explicitly listed
+6. Architecture impact assessed (layer boundaries, dependency direction)
+7. Test strategy stated
 
 ✓ All checked → output Design Decision Record → hand off to `writing-plans`
 ✗ Any unchecked → STOP. Return to the relevant phase. Do not proceed.

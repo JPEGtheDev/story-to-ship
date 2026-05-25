@@ -4,6 +4,7 @@ license: MIT
 description: Use when receiving code review feedback on a PR or code change.
 ---
 
+
 ## Iron Law
 
 ```
@@ -13,6 +14,8 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
+YOU MUST categorize and address every review comment. No exceptions.
+
 **Announce at start:** "I am using the receiving-code-review skill to process review feedback on [PR/change]."
 
 Each new round of PR review comments requires a fresh skill invocation. A load from an earlier round does not carry forward. If new comments arrive after the skill was previously loaded, invoke the skill tool again before triaging.
@@ -21,11 +24,11 @@ Each new round of PR review comments requires a fresh skill invocation. A load f
 
 ## BEFORE PROCEEDING
 
-- [ ] I have read every comment fully before drafting any response
-- [ ] Every comment is categorized (must-fix / defer / discuss)
-- [ ] No must-fix comment is dismissed without investigation
-- [ ] I am not about to defend rather than understand
-- [ ] If new comments arrived since the last round, I have invoked this skill again before triaging them
+1. I have read every comment fully before drafting any response
+2. Every comment is categorized (must-fix / defer / discuss)
+3. No must-fix comment is dismissed without investigation
+4. I am not about to defend rather than understand
+5. If new comments arrived since the last round, I have invoked this skill again before triaging them
 
 ✓ All met → proceed to address comments
 ✗ Any unmet → complete the triage and reload the skill for the current review round before taking action

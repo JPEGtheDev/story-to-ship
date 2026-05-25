@@ -4,6 +4,7 @@ license: MIT
 description: Use at the start of every session.
 ---
 
+
 ## Iron Law
 
 ```
@@ -92,17 +93,17 @@ If unsure, read `code-quality` — it applies to every code task.
 
 ## BEFORE PROCEEDING
 
-- [ ] `honesty` invoked first — before any other skill
-- [ ] Task type(s) identified from the On Start table above
-- [ ] All required skills for this task type loaded (in parallel if multiple domains)
-- [ ] Skill load announcement made for each loaded skill
-- [ ] `git status` checked in main working tree — if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work. Ghost commits from prior agents are a recurring risk.
-- [ ] If resuming a prior session: SQL pending todos checked; Skeptic dispatched before first implementation step
-- [ ] If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
-- [ ] Stored memories checked for user-specified model preference overrides — applies to all agent dispatch decisions this session
-- [ ] If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched — NOT done inline
-- [ ] Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session — no auto-loading is available
-- [ ] If a hook config fix was committed during this session: that fix is NOT active until the NEXT session. Do NOT claim hooks are working. The CLI reads hooks.json once at session start — in-session commits to hook files do not take effect until the session is restarted.
+1. `honesty` invoked first — before any other skill
+2. Task type(s) identified from the On Start table above
+3. All required skills for this task type loaded (in parallel if multiple domains)
+4. Skill load announcement made for each loaded skill
+5. `git status` checked in main working tree — if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work. Ghost commits from prior agents are a recurring risk.
+6. If resuming a prior session: SQL pending todos checked; Skeptic dispatched before first implementation step
+7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
+8. Stored memories checked for user-specified model preference overrides — applies to all agent dispatch decisions this session
+9. If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched — NOT done inline
+10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session — no auto-loading is available
+11. If a hook config fix was committed during this session: that fix is NOT active until the NEXT session. Do NOT claim hooks are working. The CLI reads hooks.json once at session start — in-session commits to hook files do not take effect until the session is restarted.
 
 ✓ All met → proceed with session work
 ✗ Any unmet → complete the unmet step now before writing code or sending a plan

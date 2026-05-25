@@ -4,6 +4,7 @@ license: MIT
 description: Use when a development branch is complete and ready to merge.
 ---
 
+
 ## Iron Law
 
 ```
@@ -13,7 +14,24 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
+YOU MUST complete all five branch-closing steps before merging. No exceptions.
+
 **Announce at start:** "I am using the finishing-a-development-branch skill to close out [branch name]."
+
+---
+
+## BEFORE PROCEEDING
+
+Before beginning the branch ceremony:
+
+1. All acceptance criteria from the original task are addressed (DONE or tracked in a new issue)
+2. `cmake --build build` exits 0 - no build errors
+3. `./build/tests/ParticleViewerTests` exits 0 - all tests pass
+4. Every commit on the branch uses conventional commit format
+5. No debug-only, WIP, or dead code remains in the diff
+
+✓ All met → proceed through Steps 1-5
+✗ Any unmet → resolve the unmet item before starting the branch ceremony
 
 ---
 

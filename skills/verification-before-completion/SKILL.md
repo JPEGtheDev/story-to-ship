@@ -4,6 +4,7 @@ license: MIT
 description: Use when about to claim work is complete, fixed, or passing, before any completion claim, commit, or PR.
 ---
 
+
 # Instructions for Agent
 
 When activated, announce: **"I am using the verification-before-completion skill. Running verification now."**
@@ -19,6 +20,8 @@ No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
+
+YOU MUST run all verification commands in this session before any completion claim. No exceptions.
 
 **Announce at start:** "I am using the verification-before-completion skill to verify [work item] before claiming completion."
 
@@ -41,7 +44,7 @@ For Particle-Viewer–specific Done stages, see `references/PV_DONE_DEFINITION.m
 
 ---
 
-## The Gate Function
+## BEFORE PROCEEDING
 
 Apply this BEFORE any completion claim or expression of satisfaction:
 

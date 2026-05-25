@@ -4,6 +4,7 @@ license: MIT
 description: Use when implementing C++ code for Particle-Viewer, handling GL resources, working with SDL3, or applying DRY/deprecation/docs-commit patterns.
 ---
 
+
 ## Iron Law
 
 ```
@@ -20,11 +21,11 @@ YOU MUST clean up all GL resources in destructors and update documentation in th
 
 ## BEFORE PROCEEDING
 
-- [ ] Have I loaded the code-quality skill?
-- [ ] Am I about to introduce a GL resource without RAII?
-- [ ] Am I about to duplicate logic that already exists in the codebase?
-- [ ] Has the class or function I am changing been read — not recalled from memory?
-- [ ] Before declaring a new type: is this part of the public API, or an implementation detail used only in one TU? If implementation detail → declare in `.cpp`, not the header.
+1. Have I loaded the code-quality skill?
+2. Am I about to introduce a GL resource without RAII?
+3. Am I about to duplicate logic that already exists in the codebase?
+4. Has the class or function I am changing been read — not recalled from memory?
+5. Before declaring a new type: is this part of the public API, or an implementation detail used only in one TU? If implementation detail → declare in `.cpp`, not the header.
 
 ✓ All met → proceed
 ✗ Any unmet → load the code-quality skill, apply RAII, search for existing implementations, read the target code, or move the implementation detail into the `.cpp` before writing any production code

@@ -4,6 +4,7 @@ license: MIT
 description: Use when estimating effort, premium request counts, or model tier selection for user stories or agent dispatches.
 ---
 
+
 ## Iron Law
 
 ```
@@ -12,6 +13,8 @@ No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
+
+YOU MUST include an effort estimate and model recommendation in every story you generate. No exceptions.
 
 **Announce at start:** "I am using the user-story-estimation skill to estimate effort for [story name]."
 
@@ -113,11 +116,11 @@ For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elim
 
 ## BEFORE PROCEEDING
 
-- [ ] The story has been validated against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)
-- [ ] All unknowns are identified and noted in the estimate
-- [ ] The task breakdown reflects the actual work, not a best-case scenario
-- [ ] All skill dispatches needed have been identified
-- [ ] If the story requires >3 agents, the Wave structure has been accounted for
+1. The story has been validated against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)
+2. All unknowns are identified and noted in the estimate
+3. The task breakdown reflects the actual work, not a best-case scenario
+4. All skill dispatches needed have been identified
+5. If the story requires >3 agents, the Wave structure has been accounted for
 
 ✓ All met → commit to the estimate
 ✗ Any unmet → resolve unknowns and recheck INVEST compliance before estimating

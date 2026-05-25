@@ -4,6 +4,7 @@ license: MIT
 description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a MockOpenGL unit test.
 ---
 
+
 ## Iron Law
 
 ```
@@ -23,10 +24,10 @@ A visual regression test proves output **hasn't changed**, not that it was corre
 
 ## BEFORE PROCEEDING
 
-- [ ] Any associated logic (non-pixel behavior) has a passing MockOpenGL or unit test already.
-- [ ] The test file is in `tests/visual-regression/` — not mixed with unit or integration tests.
-- [ ] If updating an existing baseline: the old baseline has been deleted and the test is confirmed failing.
-- [ ] Human baseline approval is an explicit, scheduled step in the workflow — not auto-commit.
+1. Any associated logic (non-pixel behavior) has a passing MockOpenGL or unit test already.
+2. The test file is in `tests/visual-regression/` — not mixed with unit or integration tests.
+3. If updating an existing baseline: the old baseline has been deleted and the test is confirmed failing.
+4. Human baseline approval is an explicit, scheduled step in the workflow — not auto-commit.
 
 ✓ All met → proceed
 ✗ Any unmet → resolve the unmet condition before writing any test code or committing any baseline

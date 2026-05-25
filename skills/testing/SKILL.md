@@ -4,13 +4,16 @@ license: MIT
 description: Use when writing or reviewing any test for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
 NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+YOU MUST write a failing test before writing any production code.
+No exceptions.
 ```
 
-YOU MUST write a failing test before writing any production code. No exceptions.
+Violating the letter of this rule is violating the spirit of this rule.
 
 Write the test. Watch it fail. THEN write code.
 
@@ -41,7 +44,7 @@ For PV test runner commands, see `references/PV_TEST_CONVENTIONS.md`.
 - **Unit test** — single class/function in isolation → `tests/core/`
 - **Integration test** — component interactions → `tests/integration/`
 - **Visual regression test** — pixel comparison → load `visual-regression-testing` skill
-- **Test review** — check existing tests against standards → apply checklist in Step 3
+- **Test review** — check existing tests against standards → apply the `## BEFORE PROCEEDING` checklist
 
 ---
 
@@ -66,23 +69,23 @@ For PV-specific test patterns (Camera, SettingsIO examples), test double taxonom
 
 ---
 
-## Step 3: Self-Review Checklist
+## BEFORE PROCEEDING
 
 Before presenting tests, verify:
 
-- [ ] Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no `// Arrange & Act`)
-- [ ] Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
-- [ ] Expected values are named variables in Arrange (not inline literals in Assert)
-- [ ] One logical concept per test
-- [ ] Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
-- [ ] External dependencies are mocked (OpenGL, file I/O)
-- [ ] No testing of external libraries (std::, third-party code)
-- [ ] Group related configuration into structs/POCOs instead of flat variables
-- [ ] Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
-- [ ] Tests compile and pass
-- [ ] For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
-- [ ] For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
-- [ ] For visual regression tests: see visual-regression-testing skill checklist
+1. Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no `// Arrange & Act`)
+2. Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
+3. Expected values are named variables in Arrange (not inline literals in Assert)
+4. One logical concept per test
+5. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
+6. External dependencies are mocked (OpenGL, file I/O)
+7. No testing of external libraries (std::, third-party code)
+8. Group related configuration into structs/POCOs instead of flat variables
+9. Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
+10. Tests compile and pass
+11. For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
+12. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
+13. For visual regression tests: see visual-regression-testing skill checklist
 
 ✓ All met → proceed
 ✗ Any unmet → write the test first before touching implementation code

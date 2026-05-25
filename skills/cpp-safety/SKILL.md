@@ -4,6 +4,7 @@ license: MIT
 description: Use when writing or reviewing any C++ class that owns resources, has a destructor, or acquires in a constructor.
 ---
 
+
 ## Iron Law
 
 ```
@@ -20,9 +21,9 @@ YOU MUST wrap every destructor body in try/catch and ensure every resource acqui
 
 ## BEFORE PROCEEDING
 
-- [ ] Does this class own heap memory, handles, or OS resources?
-- [ ] Can its destructor fail or throw?
-- [ ] Does its constructor acquire multiple resources?
+1. Does this class own heap memory, handles, or OS resources?
+2. Can its destructor fail or throw?
+3. Does its constructor acquire multiple resources?
 
 ✓ No owned resources → skip this skill  ✗ Any owned resource → apply the rules below
 
@@ -63,11 +64,22 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 | "`std::terminate` is acceptable here" | Not during stack unwinding — it prevents all remaining destructors from running. |
 | "The second allocation almost never fails" | "Almost never" is not a safety guarantee. Wrap in a scope-bound guard. |
 | "Owning guards add boilerplate" | The boilerplate is the guarantee. Inline cleanup is a future leak. |
+| "The partial construction case never happens in practice" | "Never in practice" is not a structural guarantee. Scope-bound guards prevent the case unconditionally -- no statistical argument required. |
+
+---
+
+## Red Flags -- STOP
+
+- About to write a destructor that can throw -- **STOP. Wrap the entire body in try/catch. Never rethrow.**
+- Constructor acquires two or more resources without scope-bound guards between each acquisition -- **STOP. Assign each resource to its own guard before the next `new` or open call.**
+- About to use raw `delete` instead of a scope-bound guard -- **STOP. Replace with `unique_ptr` or a custom RAII wrapper.**
+- "This resource is always released before the destructor runs" -- **STOP. Prove it structurally with a guard, not by argument.**
+- Class owns handles (file, socket, GL buffer) with no custom destructor or deleter -- **STOP. Every owned resource needs a defined release path.**
 
 ---
 
 ## Related Skills
 
-- [`cpp-patterns`](.github/skills/cpp-patterns/) — parent skill; OpenGL smell catalog and DRY patterns
-- [`oop-principles`](.github/skills/oop-principles/) — sibling; resource-owning types also need the Is-A / Has-A gate
-- [`systematic-debugging`](.github/skills/systematic-debugging/) — sibling; use when a crash points to destructor failure
+- `cpp-patterns` -- parent skill; OpenGL smell catalog and DRY patterns
+- `oop-principles` -- sibling; resource-owning types also need the Is-A / Has-A gate
+- `systematic-debugging` -- sibling; use when a crash points to destructor failure

@@ -4,6 +4,7 @@ license: MIT
 description: Use when authoring or updating skill files.
 ---
 
+
 ## Iron Law
 
 ```
@@ -31,21 +32,21 @@ Every skill MUST contain ALL of the following. Missing any one element is an aut
 
 ---
 
-## Review Checklist
+## BEFORE PROCEEDING
 
 Run every item for each skill file under review:
 
-- [ ] Iron Law block present and uses hard language ("YOU MUST", "No exceptions", bright-line rule)?
-- [ ] Announcement requirement is explicit (exact wording required, not implied)?
-- [ ] Gate Function present (at least one BEFORE PROCEEDING gate with numbered conditions and YES/NO branches)?
-- [ ] Rationalization Prevention table present with ≥5 rows?
-- [ ] Red Flags→STOP section present with ≥5 trigger thoughts?
-- [ ] Skill-specific commands present (not generic placeholder examples)?
-- [ ] Cross-references to at least 1 related skill?
-- [ ] No cross-skill file path references (other skills referenced by skill name, not by `../other-skill/references/FILE.md` paths)?
-- [ ] If any cross-skill path was fixed during this review: replacement text itself checked for embedded path fragments (`/references/`, `../`, `.md` filename referencing another skill's content)?
-- [ ] Domain language matches skill scope — language-specific skills use appropriate conventions; generic skills use language-agnostic terminology?
-- [ ] No absolute paths (no machine-specific prefixes — use `[REPO_ROOT]`, template variables, or relative references only)?
+1. Iron Law block present and uses hard language ("YOU MUST", "No exceptions", bright-line rule)?
+2. Announcement requirement is explicit (exact wording required, not implied)?
+3. Gate Function present (at least one BEFORE PROCEEDING gate with numbered conditions and YES/NO branches)?
+4. Rationalization Prevention table present with ≥5 rows?
+5. Red Flags→STOP section present with ≥5 trigger thoughts?
+6. Skill-specific commands present (not generic placeholder examples)?
+7. Cross-references to at least 1 related skill?
+8. No cross-skill file path references (other skills referenced by skill name, not by `../other-skill/references/FILE.md` paths)?
+9. If any cross-skill path was fixed during this review: replacement text itself checked for embedded path fragments (`/references/`, `../`, `.md` filename referencing another skill's content)?
+10. Domain language matches skill scope — language-specific skills use appropriate conventions; generic skills use language-agnostic terminology?
+11. No absolute paths (no machine-specific prefixes — use `[REPO_ROOT]`, template variables, or relative references only)?
 
 ✓ All pass → verdict: PASS
 ✗ Any unmet → verdict: NEEDS WORK — list every failing item in the Issues Found section

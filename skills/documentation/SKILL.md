@@ -4,6 +4,7 @@ license: MIT
 description: Use when creating docs, updating guides, writing API references, or reviewing documentation for Particle-Viewer.
 ---
 
+
 ## Iron Law
 
 ```
@@ -18,7 +19,7 @@ YOU MUST keep every doc file under 600 words, include YAML frontmatter on every 
 
 ---
 
-## BEFORE PROCEEDING — Domain Classification Gate
+## BEFORE PROCEEDING
 
 Before writing any documentation:
 
@@ -86,14 +87,14 @@ Skipping any location makes the skill effectively invisible. For templates and c
 
 Before presenting documentation, verify:
 
-- [ ] YAML frontmatter is present with all required fields
-- [ ] File is in the correct domain/subdomain directory
-- [ ] File is ≤600 words
-- [ ] All relative links resolve correctly from the file's directory
-- [ ] Code examples have language tags
-- [ ] No content duplicated from another file — linked instead
-- [ ] `## Related` section is present at the bottom
-- [ ] Documentation matches current code state
+1. YAML frontmatter is present with all required fields
+2. File is in the correct domain/subdomain directory
+3. File is ≤600 words
+4. All relative links resolve correctly from the file's directory
+5. Code examples have language tags
+6. No content duplicated from another file — linked instead
+7. `## Related` section is present at the bottom
+8. Documentation matches current code state
 
 ✓ All pass → documentation is ready to present
 ✗ Any unmet → resolve all failing items before presenting

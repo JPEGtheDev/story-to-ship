@@ -4,6 +4,7 @@ license: MIT
 description: Use when summarizing external resources (articles, web pages, local files) to extract knowledge and lessons.
 ---
 
+
 ## Iron Law
 
 ```

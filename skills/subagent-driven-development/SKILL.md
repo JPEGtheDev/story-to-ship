@@ -194,7 +194,7 @@ These thoughts mean stop immediately:
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic Agent (see writing-plans skill) |
 | Code review (per-file) | Yes | code-review agent, 1 per file |
-| Skill review | Yes | general-purpose + skill-reviewer skill |
+| Skill review | Yes | `writing-skills` + `skill-reviewer` agent template |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
 | Quick grep/glob in 1–2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |

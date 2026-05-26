@@ -127,8 +127,7 @@ Before presenting documentation, verify:
 
 ## Related Skills
 
-- `writing-skills` — skill authoring standards and anatomy gate
-- `skill-reviewer` — validates completed skills
+- `writing-skills` — skill authoring standards, anatomy gate, and skill-reviewer dispatch pattern for validating completed skills
 
 ## Reference
 

@@ -75,7 +75,7 @@ domains, read multiple skills in parallel (they are independent reads).
 | Executing any plan that has pending todos (picking up plan.md or a todo list) | `subagent-driven-development` — load BEFORE dispatching the first implementer, not after |
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
-| Creating or editing a skill file             | `writing-skills`, `skill-reviewer`                 |
+| Creating or editing a skill file             | `writing-skills`                                   |
 | Resuming from a prior session with pending SQL todos | `writing-plans`; dispatch Skeptic before first implementation step |
 | Schema design, new data structure, or plan with ≥5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |

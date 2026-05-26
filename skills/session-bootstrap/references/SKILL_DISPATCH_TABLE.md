@@ -23,7 +23,7 @@
 | Dispatching subagents                        | `subagent-driven-development`                      |
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
-| Creating or editing a skill file             | `writing-skills`, `skill-reviewer`                 |
+| Creating or editing a skill file             | `writing-skills`                                   |
 | Resuming from a prior session with pending SQL todos | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch Skeptic, before first implementation step |
 | Schema design, new data structure, or plan with ≥5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |

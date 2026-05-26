@@ -1,4 +1,4 @@
-#Skill Anatomy — Element Reference
+# Skill Anatomy -- Element Reference
 
 Full schemas and examples for each of the 5 required skill elements.
 
@@ -121,3 +121,29 @@ Rationalization tables are the most powerful element — they preemptively name 
 **Example (from `subagent-driven-development`):**
 > Before dispatching any agent, state: `` `Worktree: [output of: git -C .worktrees/agent-<name> rev-parse --show-toplevel]` ``
 > This is the observable signal that BEFORE PROCEEDING step 3 was executed, not skipped. The canary raises the cost of skipping for compliant agents — it is not cryptographically bound to execution.
+
+---
+
+## Alexandrian Pattern Form
+
+Every non-trivial rule in a skill file MUST answer four questions. Rules that omit Context and Forces are applied by rote and misfire in edge cases.
+
+```
+Context:      When does this rule apply? What situation triggers it?
+              When does it NOT apply? What are the explicit exceptions?
+Forces:       What tension or constraint does this rule resolve?
+              What goes wrong without it?
+Solution:     The rule itself -- what to do.
+Consequences: What does this approach sacrifice or trade off?
+```
+
+**Example -- bare rule (wrong):**
+> Never swallow errors silently.
+
+**Example -- Alexandrian form (correct):**
+> **Context:** Applies when writing any call to an external system that can fail (file I/O, network requests, resource allocation). Does NOT apply to polling loops where error accumulation is intentional.
+> **Forces:** Silent failures propagate broken state downstream, making root cause invisible at the point of symptom. Continuing in an unknown state causes more damage than stopping.
+> **Solution:** Always check return status after fallible calls. Log and terminate for unrecoverable state; log and return a failure indicator for recoverable failures.
+> **Consequences:** Terminates or surfaces errors on unrecoverable failures -- correct for developer builds; end-user releases may need a graceful degradation path instead.
+
+**Compliance gate:** New skills ship with Alexandrian form on every non-trivial rule. Existing skills add it incrementally when touched -- the big-batch rewrite anti-pattern applies here too.

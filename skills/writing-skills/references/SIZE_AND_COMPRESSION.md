@@ -6,13 +6,15 @@
 
 ## Token Count Targets
 
-| Skill type | Target | Hard limit |
-|------------|--------|------------|
+| Skill type | Target | Ideal max |
+|------------|--------|-----------|
 | EXECUTION / QUALITY (frequently loaded) | ≤ 650 tokens | 1,000 tokens |
 | DELIVERY / REVIEW / KNOWLEDGE | ≤ 800 tokens | 1,300 tokens |
 | Sub-domain skills | ≤ 300 tokens | 600 tokens |
-| Reference files (not SKILL.md) | No limit — loaded on demand |
-| All types (agentskills.io spec cap) | — | 5,000 tokens |
+| Reference files (not SKILL.md) | No limit — loaded on demand | — |
+
+**Ideal max** = the ceiling within which no refactor is required. Above it, compression is mandatory.
+**Hard limit** = 5,000 tokens — the agentskills.io spec recommendation for marketplace compatibility. Skills over 5,000 tokens may not load correctly in all agent implementations. Do not cross it.
 
 Token estimate: `chars / 4` is a reliable approximation for technical Markdown.
 
@@ -84,10 +86,10 @@ BAD: `"See [CONVENTIONAL_COMMITS.md](../versioning/references/CONVENTIONAL_COMMI
 
 ## Size Limits (Lines — secondary; token count above is primary)
 
-| Skill type | Target | Hard limit |
-|------------|--------|------------|
+| Skill type | Target | Ideal max |
+|------------|--------|-----------|
 | Frequently loaded (EXECUTION, QUALITY) | ≤300 lines | 500 lines |
 | Reference skills (DELIVERY, REVIEW) | ≤250 lines | 400 lines |
 | Sub-domain skills | ≤150 lines | 200 lines |
 
-When a skill exceeds its hard limit, split by domain. Each split must have a distinct iron law.
+When a skill exceeds its ideal max, split by domain. Each split must have a distinct iron law.

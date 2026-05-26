@@ -107,5 +107,5 @@ Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rati
 - `self-evaluation` — agent-run end-of-session review; complements but does not replace this skill
 - `execution` — iron laws this skill checks for compliance
 - `verification-before-completion` — the gate this skill checks was applied correctly
-- `skill-reviewer` — if skill gaps are found, dispatch skill-reviewer to verify the updated skill is complete
+- `writing-skills` — if skill gaps are found, use the skill-reviewer agent to verify the updated skill is complete
 

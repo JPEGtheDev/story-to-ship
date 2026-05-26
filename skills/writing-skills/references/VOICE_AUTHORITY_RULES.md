@@ -28,8 +28,8 @@ Replace soft language with authoritative language:
 
 Rules:
 - Use `[REPO]` or `git rev-parse --show-toplevel` to refer to the repository root
-- Use `[SESSION_ID]` and `~/.copilot/session-state/[SESSION_ID]/` for session workspace paths
-- Use template variables (`{{REPO_PATH}}`, `{{SESSION_ID}}`) in agent prompt templates
+- Use `scratch/` (project session workspace) or a named template variable for session-scoped paths
+- Use template variables (`{{REPO_PATH}}`, `{{SKILL_PATH}}`) in agent prompt templates
 - If a skill must reference a specific path, express it relative to a named variable, never as a literal absolute path
 
 **Violation:** Any skill or agent template containing a literal absolute path is an automatic NEEDS WORK in skill review.

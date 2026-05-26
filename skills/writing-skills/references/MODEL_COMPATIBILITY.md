@@ -12,9 +12,9 @@ The full production skill execution path is:
 
 ```
 task arrives
-    → agent reads copilot-instructions.md checklist
+    → agent reads AGENTS.md checklist
     → agent recognizes which skill applies
-    → agent calls skill("name") tool
+    → agent calls Skill tool
     → skill content is injected into context
     → agent applies gate before taking other actions
 ```
@@ -29,10 +29,10 @@ Specifically, we cannot test:
 
 ### The lower-model complication
 
-`copilot-instructions.md` is always injected in production, but **lower-capability models do not reliably read or apply its full content**. For lower-end models, the effective production state may be closer to "copilot-instructions.md partially processed" or "checklist ignored" than to the full iron-law enforcement that GPT-4.1 produces. This means:
+`AGENTS.md` is always injected in production, but **lower-capability models do not reliably read or apply its full content**. For lower-end models, the effective production state may be closer to "AGENTS.md partially processed" or "checklist ignored" than to the full iron-law enforcement that GPT-4.1 produces. This means:
 
 - A lower-end model may skip the checklist entirely and never reach the step where it recognizes which skill to load
-- The skill routing logic in copilot-instructions.md assumes the model reads and acts on the "Before Every Response" checklist — that assumption is not safe for lower-end models
+- The skill routing logic in AGENTS.md assumes the model reads and acts on the "Before Every Response" checklist -- that assumption is not safe for lower-end models
 - Skills must therefore be written to function as standalone documents, not just as extensions of the checklist
 
 ### What we can test (and what it tells us)
@@ -80,7 +80,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 
 ## Patterns Most Likely to Fail on Lower-End Models
 
-> **Note:** Lower-end models may not reliably process the full `copilot-instructions.md` checklist. The patterns below assume the skill content is loaded. If a lower-end model skips the checklist entirely, it may never load the skill in the first place — making the patterns below moot. Skills must be written to function as standalone documents regardless of checklist state.
+> **Note:** Lower-end models may not reliably process the full `AGENTS.md` checklist. The patterns below assume the skill content is loaded. If a lower-end model skips the checklist entirely, it may never load the skill in the first place -- making the patterns below moot. Skills must be written to function as standalone documents regardless of checklist state.
 
 ### 1. Multi-step gates with conditional branches
 **Skill:** `brainstorming` (Phase 1 Ambiguity Block), `systematic-debugging` (4-phase protocol)
@@ -90,7 +90,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 ### 2. "After every todo" rules
 **Skill:** `subagent-driven-development` (2-stage review), `execution` (work loop step 6)
 **Risk:** Model completes todos and skips reviewer dispatch — moves to next item silently
-**Mitigation:** Iron Law 10 in copilot-instructions.md + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
+**Mitigation:** Iron Law 10 in AGENTS.md + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
 
 ### 3. Announcement declarations
 **Skill:** All skills require "I am using the [skill] to [purpose]"
@@ -100,7 +100,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 ### 4. Honesty / vocabulary bans
 **Skill:** `honesty`, `verification-before-completion`
 **Risk:** Model uses "should work", "probably", "I'm confident" without catching itself
-**Mitigation:** Banned vocabulary in copilot-instructions Iron Law 6. Test by watching for banned phrases in responses.
+**Mitigation:** Banned vocabulary in AGENTS.md Iron Law 6. Test by watching for banned phrases in responses.
 
 ### 5. Skill refresh rule
 **Skill:** `session-bootstrap`

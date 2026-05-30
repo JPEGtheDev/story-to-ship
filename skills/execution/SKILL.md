@@ -231,19 +231,4 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 
 ## Quick Reference
 
-**Execution patterns (Profile Before Optimizing, Assign Problems Not Tasks, Technical Debt Visibility):** `references/EXECUTION_PATTERNS.md`
-
-```
-Task arrives
-    ↓
-Trivial (1 file, 1 step)? → Implement directly
-    ↓ (multi-step)
-Invoke writing-plans → clarify → plan → Skeptic Agent
-    ↓
-Per todo: in-progress → PPP gate → implement → prove → done → commit
-    ↓
-Bug? → systematic-debugging
-Stuck? → stop, re-plan
-    ↓
-All done? → verification-before-completion → ship
-```
+See `references/EXECUTION_PATTERNS.md` for: quick-reference flowchart, Profile Before Optimizing, Assign Problems Not Tasks, Technical Debt Visibility, Trade-Off Discipline template, and Continuous Refinement protocol.

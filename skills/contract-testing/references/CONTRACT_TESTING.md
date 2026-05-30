@@ -36,7 +36,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, IOpenGLContextTest, GLContextImpls);
 
 ## Two-Phase Composite Operation
 
-Validate all children before executing any. See `cpp-patterns/references/SAFETY_PATTERNS.md — Two-Phase Composite for GL State Safety` for the full C++ example.
+Validate all children before executing any. See the `cpp-patterns` skill for the full C++ example of Two-Phase Composite for GL State Safety.
 
 Behavioral contract angle: `validate()` must be idempotent and free of side effects. If validation raises an error, no execution has occurred — the system is in its original state. Test `validate()` and `execute()` independently.
 

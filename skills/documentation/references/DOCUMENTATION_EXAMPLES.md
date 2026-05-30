@@ -192,9 +192,9 @@ Key rules:
 
 ---
 
-## copilot-instructions.md Update Pattern
+## AGENTS.md Update Pattern
 
-When adding a new skill, update these 4 locations in `copilot-instructions.md`:
+When adding a new skill, update these 4 locations in `AGENTS.md`:
 
 ```markdown
 <!-- 1. Skills Directory table — add a row -->

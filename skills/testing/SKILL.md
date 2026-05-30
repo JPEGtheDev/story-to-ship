@@ -27,7 +27,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 ---
 
-## TDD Cycle
+## TDD (Test-Driven Development) Cycle
 
 **RED → GREEN → REFACTOR. In that order. Every time.**
 
@@ -48,7 +48,7 @@ For PV test runner commands, see `references/PV_TEST_CONVENTIONS.md`.
 
 ---
 
-## Step 2: Write Tests Following AAA Pattern
+## Step 2: Write Tests Following AAA (Arrange-Act-Assert) Pattern
 
 Every test MUST have three distinct comment sections: `// Arrange`, `// Act`, `// Assert`.
 
@@ -61,7 +61,7 @@ Use format: `UnitName_StateUnderTest_ExpectedResult`
 Examples:
 - `MoveForward_IncreasesZPosition`
 
-**`_ExpectedResult` must describe the behavior or invariant proven — not the return value.** The result name should answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
+**`_ExpectedResult` must describe the behavior or invariant proven — not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
 
 See `references/TESTING_EXAMPLES.md` for PV naming examples.
 

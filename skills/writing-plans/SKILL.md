@@ -9,9 +9,8 @@ description: Use when starting any multi-step task, story, or feature work.
 
 ```
 CLARIFY FIRST. PLAN BEFORE CODE. NO PLACEHOLDERS.
-```
-
 YOU MUST follow this law on every task. No exceptions.
+```
 
 Violating the letter of this rule is violating the spirit of this rule.
 
@@ -72,7 +71,7 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 - "Similar to Task N" (repeat the specifics — tasks may be read out of order)
 - Steps that describe what to do without showing how
 
-### Task Granularity (TDD Steps)
+### Task Granularity (TDD: Test-Driven Development Steps)
 
 Each task MUST be one concrete action (2–5 minutes), touch ≤2 files, and is estimated at ≤25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
 
@@ -157,7 +156,7 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 ## Heuristics: YAGNI · Simplest Thing · PPP
 
-**YAGNI:** If a todo cannot be traced to a specific acceptance criterion, cut it.
+**YAGNI (You Ain't Gonna Need It):** If a todo cannot be traced to a specific acceptance criterion, cut it.
 > Forbidden: "We'll probably need it later."
 
 **Simplest Thing That Could Possibly Work:** After the Smart Trust gate, verify a simpler implementation satisfies all criteria. Fewer files, fewer abstractions, fewer dependencies.
@@ -212,30 +211,6 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 ---
 
-## Quick Reference
-
-```
-Task arrives
-    ↓
-Trivial (1 file, 1 step)? → Implement directly
-    ↓ (multi-step)
-Step 0: Clarify Expectations — restate requirements, label [UNCLEAR:]
-    ↓
-Smart Trust Gate — answer 5 questions; if 2+ todos: check for `## Feature Specification` → three-amigos Refinement OR Skeptic
-    ↓
-Build todo list: YAGNI + PPP per item + No Placeholders
-    ↓
-TDD task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
-    ↓
-Plan review: covers all criteria? downsides named?
-    ↓
-Present plan to user — WAIT for explicit approval
-    ↓
-Begin execution (invoke execution skill)
-```
-
----
-
 ## References
 
-- Simplicity principles and dimensions: `references/SIMPLICITY_PRINCIPLES.md` — Simplest Thing gate, dimensions of simplicity table, assign problems not tasks
+- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks: `references/SIMPLICITY_PRINCIPLES.md`

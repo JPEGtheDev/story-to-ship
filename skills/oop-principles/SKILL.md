@@ -9,11 +9,10 @@ description: Use when adding inheritance, designing interfaces, or reviewing any
 
 ```
 CHECK IS-A / HAS-A AND SOLID BEFORE APPROVING ANY CLASS HIERARCHY
+YOU MUST run the Is-A / Has-A gate and verify all five SOLID principles before adding or approving any inheritance relationship. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST run the Is-A / Has-A gate and verify all five SOLID principles before adding or approving any inheritance relationship. No exceptions.
 
 **Announce at start:** "I am using the oop-principles skill to review [class/hierarchy]."
 

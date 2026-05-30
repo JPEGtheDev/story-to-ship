@@ -77,7 +77,7 @@ Do not refactor toward a theoretical canonical form. Do not refactor stable code
 
 ## One Active Failing Test
 
-See `contract-testing/references/CONTRACT_TESTING.md — One Active Failing Test` for the full rule.
+See the `contract-testing` skill for the full One Active Failing Test rule.
 
 Planning implication: one active implementation todo at a time. Completing todos serially, with verification at each step, is faster than parallel activation of many unfinished tasks. Stack future test names; do not activate them simultaneously.
 
@@ -115,7 +115,7 @@ Kent Beck's ordered checklist for assessing design quality: (1) Passes all tests
 
 ## Assign Problems, Not Tasks
 
-Delegate outcomes, not procedures. State what success looks like — the verifiable end state — and let the assignee determine the path. A task delegation says "do these five steps." A problem delegation says "the system must do X when Y; verify it." Task delegation creates followers who cannot adapt when the steps do not fit; problem delegation creates owners who can. This is the canonical definition. See `subagent-driven-development/SKILL.md` and `execution/SKILL.md` for project-level application. Source: C2 Wiki "AssignProblemsNotTasks".
+Delegate outcomes, not procedures. State what success looks like — the verifiable end state — and let the assignee determine the path. A task delegation says "do these five steps." A problem delegation says "the system must do X when Y; verify it." Task delegation creates followers who cannot adapt when the steps do not fit; problem delegation creates owners who can. This is the canonical definition. See the `subagent-driven-development` and `execution` skills for project-level application. Source: C2 Wiki "AssignProblemsNotTasks".
 
 ## Clear Requirements
 
@@ -200,3 +200,27 @@ The root cause is usually an incorrect domain model or missed abstraction. Stop 
 - `writing-plans` — YAGNI, PPP, Skeptic Agent gate
 - `brainstorming` — Structured Ideation reference for design exploration
 - `execution` — Make It Work → Make It Right → Make It Fast gate
+
+---
+
+## Planning Quick Reference
+
+```
+Task arrives
+    ↓
+Trivial (1 file, 1 step)? → Implement directly
+    ↓ (multi-step)
+Step 0: Clarify Expectations — restate requirements, label [UNCLEAR:]
+    ↓
+Smart Trust Gate — answer 5 questions; if 2+ todos: check for `## Feature Specification` → three-amigos Refinement OR Skeptic
+    ↓
+Build todo list: YAGNI + PPP per item + No Placeholders
+    ↓
+TDD task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
+    ↓
+Plan review: covers all criteria? downsides named?
+    ↓
+Present plan to user — WAIT for explicit approval
+    ↓
+Begin execution (invoke execution skill)
+```

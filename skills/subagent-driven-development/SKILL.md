@@ -19,67 +19,22 @@ Violating the letter of these rules is violating the spirit of these rules.
 
 ---
 
-## The SDD Loop
+## Workflow
 
-```
-Pick up todo
-    |
-    v
-Dispatch implementer subagent (implementer.md)
-    |
-    v
-Implementer returns status code
-    |
-    +-- NEEDS_CONTEXT --> Provide the missing information. Re-dispatch.
-    |
-    +-- BLOCKED --> Invoke `three-amigos` Pivot Assessment (Ceremony 4). CONTINUE/REVISE AC/REVISE PLAN/ABANDON.
-                    If no Three Amigos available: Assess. Provide context if possible. Otherwise escalate to user.
-    |
-    +-- PARTIAL --> Read completed/remaining split.
-    |                Verify what was completed (build + tests).
-    |                Create new todo(s) for remaining work.
-    |                Proceed to review for the completed portion only.
-    |
-    +-- DONE_WITH_CONCERNS --> Read concerns. If concerns indicate a correctness or scope risk:
-    |                          Invoke `three-amigos` Pivot Assessment (Ceremony 4).
-    |                          Otherwise proceed to canary + Stage 1 review.
-    |
-    +-- DONE
-         |
-         v
-Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"
-         |
-         v
-Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
-    |
-    +-- GAPS --> Implementer fixes gaps. Re-dispatch Stage 1.
-    |
-    +-- PASS
-         |
-         v
-Stage 2: Dispatch code-quality-reviewer (code-quality-reviewer.md)
-    |
-    +-- REQUEST CHANGES --> Implementer fixes. Re-dispatch Stage 2.
-    |
-    +-- APPROVE or APPROVE WITH NITS
-         |
-         v
-Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
-After each push: check for new automated review threads before picking up the next todo. Do not wait for the user to surface review feedback.
-Pick up next todo.
-    |
-    v
-(After all todos) → Check plan.md for `## Feature Specification`.
-    If present (Discovery ran): Invoke `three-amigos` Signoff (Ceremony 5) BEFORE finishing-a-development-branch.
-    If absent: Dispatch final code reviewer → finishing-a-development-branch
-```
+Pick up todo → Dispatch implementer → Handle status code → Stage 1 spec review → Stage 2 quality review → Mark done.
+
+**Status code branches:**
+- `NEEDS_CONTEXT` → Provide missing info. Re-dispatch.
+- `BLOCKED` → **Invoke Three Amigos Pivot Assessment (Ceremony 4).** If unavailable: assess, escalate to user.
+- `PARTIAL` → Verify completed portion. Create new todo(s) for remaining. Stage 1 for completed portion only.
+- `DONE_WITH_CONCERNS` → Read concerns. Correctness or scope risk? → **Ceremony 4.** Otherwise → canary + Stage 1.
+- `DONE` → Canary confirmation → Stage 1 → Stage 2 → mark done.
+
+**After all todos:** Check plan.md for `## Feature Specification`. Present → **Invoke Signoff (Ceremony 5)** before `finishing-a-development-branch`. Absent → dispatch final code reviewer → `finishing-a-development-branch`.
 
 **Do not advance past any todo until both Stage 1 and Stage 2 are PASS/APPROVE.**
 
-**Why these three gates exist:**
-- **BLOCKED → Ceremony 4:** A blocker is a fork in the feature, not a delay. Assessing without Business and Tester perspectives risks silent scope changes.
-- **DONE_WITH_CONCERNS → Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. Independent review before rework compounds cost.
-- **After all todos → Ceremony 5:** Merging without Signoff means Business and Tester have not confirmed delivered behavior matches the Feature Specification.
+See `references/SDD_LOOP.md` for the full decision tree with complete ASCII flow.
 
 ---
 
@@ -89,32 +44,8 @@ Before dispatching any subagent:
 
 1. The todo has a single, clear objective — no compound tasks bundled together.
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
-3. A worktree exists for this agent. **All agents — read-only and write-side alike — run in a worktree.** Run these checks before dispatch:
-
-   ```bash
-# 1. Ensure .worktrees/ is gitignored before first use
-   git check-ignore -q .worktrees || echo "ADD .worktrees TO .gitignore FIRST — stop here"
-
-# 2. Create the worktree
-   git worktree add .worktrees/agent-<name> -b agent/<name>
-# If nonzero exit: log error, do NOT dispatch, surface to user. Common causes:
-# - stale lock file: git worktree prune; then retry
-# - path already exists: remove it or rename
-# - branch name already registered: choose a different branch name
-
-# 3. Verify path is a worktree (not the main repo root)
-   git -C .worktrees/agent-<name> rev-parse --show-toplevel
-# Output must be the absolute path of .worktrees/agent-<name> — NOT the main repo root
-
-# 4. Write-side agents only — verify branch isolation
-   git -C .worktrees/agent-<name> branch --show-current
-# Output must NOT equal the current development branch (e.g. feat/my-branch or main)
-# Read-only agents (explorer, researcher, reviewers, skeptic, postmortem) skip step 4.
-   ```
-
-   The worktree path confirmed above is the value to pass as `{{WORKTREE_PATH}}` in the agent prompt.
-
-   **Why read-only agents also need worktrees:** The main context continues making commits while agents run. Without a worktree, a read-only agent observes a dirty working tree or partially-committed state — producing findings against a snapshot that no longer matches any branch. A worktree gives every agent a stable, isolated view at dispatch time.
+3. A worktree exists for this agent. **All agents — read-only and write-side alike — run in a worktree.**
+   See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value.
 4. If a pre-built template exists in `.github/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `architecture-reviewer.md`, `infrastructure-reviewer.md`.
 5. Agent type is correct for the task: explore for read-only research, code-review for analysis, general-purpose+worktree for file modifications, task for build/test/lint.
 
@@ -134,36 +65,6 @@ This is the observable signal that step 3 of BEFORE PROCEEDING was executed, not
 **Note:** The canary raises the cost of skipping for compliant agents — it is not cryptographically bound to execution.
 
 ---
-
-## Why Subagents Are Mandatory
-
-Using subagents is discipline, not convenience:
-
-- **Main context fills fast.** Once full, early instructions — including iron laws — are evicted. Keep context lean.
-- **Subagents search without your bias.** They confirm or deny theories precisely because they lack your assumptions.
-- **Parallel dispatch is faster.** Five explore agents simultaneously beat five sequential searches.
-- **Subagents keep your diff clean.** Exploratory dead-ends and interim summaries never pollute main context.
-
----
-
-## Empirical Evidence Mandate
-
-**No theory, assumption, or belief is acceptable as a basis for action. Every claim must be backed by empirical evidence.**
-
-**Acceptable evidence:**
-- Code you read yourself — opened the file, saw the line
-- Test output you ran yourself — executed the command, read the result
-- Documentation cross-checked against actual source code
-- A/B test results — implemented both, compared outcomes
-- A targeted test written to prove or disprove the theory
-
-**Not acceptable:**
-- Memory ("I remember this worked")
-- Confidence ("I'm sure the parser handles this")
-- Assumption ("It should work because Y")
-- Prior success ("It worked last time")
-
-If you cannot point to a specific file, line, or test run — dispatch a subagent.
 
 ## Red Flags — STOP
 
@@ -231,17 +132,13 @@ Stage 2: Code Quality Review        ← ONLY after Stage 1 passes (code-quality-
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
 
-**Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree. See Git Worktrees section below.
+**Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
 
-### Stage 1: Spec Compliance Review
+**Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
-Use `spec-compliance-reviewer.md` with full requirements and the implementation diff; if GAPS returned, implementer fixes and Stage 1 re-runs before proceeding.
+**Stage 2:** Use `code-quality-reviewer.md` — one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
 
-### Stage 2: Code Quality Review
-
-Use `code-quality-reviewer.md` — one agent per file changed; if REQUEST CHANGES, implementer fixes and Stage 2 re-runs before proceeding.
-
-See `references/REVIEW_PROTOCOL.md` for full protocol.
+See `references/REVIEW_PROTOCOL.md` for full protocol details.
 
 ---
 
@@ -257,29 +154,9 @@ See `references/MODEL_SELECTION.md` for model tier table and concurrency rules.
 
 ---
 
-## Delegation Quality Rules
+## Rationale, Evidence, Delegation, Anti-Patterns
 
-- **One clear objective per subagent** — no multi-part briefs
-- **Assign Problems Not Tasks:** delegate the outcome, not the steps — see the `writing-plans` skill — 'Assign Problems Not Tasks' principle.
-- **State the return format explicitly** — tell it exactly what to give back
-- **Provide complete context** — subagents are stateless
-- **Fresh context per task** — never share session history; it contaminates the subagent's search
-- **Accept findings unless they conflict with evidence you verified yourself**
-- **If a subagent finds something unexpected: treat it as a hypothesis; verify before acting**
-
----
-
-## Anti-Patterns
-
-| Anti-pattern | Why it fails |
-|---|---|
-| "I'll check this myself" (for 5+ files) | Fills context, biased by assumptions |
-| Skipping Stage 1 review because "it looks right" | Spec gaps ship; quality review doesn't catch them |
-| One agent reviewing multiple large files | Coverage is shallow; 1 per file is the rule |
-| Acting on subagent findings without verifying | Subagents can be wrong — findings are hypotheses |
-| Dispatching without a clear return format | Agent returns noise |
-| Sharing full session history as context | Contaminates search; subagent inherits your assumptions |
-| Reporting DONE before 2-stage review | Code exists; correctness unverified |
+See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirical evidence mandate, delegation quality rules, and anti-patterns.
 
 ---
 
@@ -300,51 +177,5 @@ See `references/MODEL_SELECTION.md` for model tier table and concurrency rules.
 | "The two stages of review are redundant — I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then code-quality-reviewer.md. Writing carefully is not a substitute for independent review. |
 | "I dispatched an audit subagent — that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification — an incomplete specification produces an incomplete audit. |
 | "The concerns are nits — not a correctness or scope risk, so I'll skip Ceremony 4" | "Correctness or scope risk" is objective: does it affect behavior, API surface, or stated requirements? If yes, dispatch Ceremony 4. "Feels minor" is not a valid exemption. |
-| "No `## Feature Specification` in plan.md — that means Ceremony 5 doesn't apply" | Absence of the section means Discovery never ran. That is a gap to surface, not a skip condition. Invoke Ceremony 5 before merge regardless. |
+| "No `## Feature Specification` in plan.md — that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear AC), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short — I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation — the outlier case always exists. |
-
----
-
-## Quick Reference
-
-```
-Task to delegate
-    |
-    +-- Read-only research? → dispatching-parallel-agents skill
-    |
-    +-- Needs file changes?
-         |
-         v
-    Create worktree (ALWAYS — never dispatch to main working tree)
-         |
-         v
-    Dispatch implementer (implementer.md)
-         |
-         v
-    Status code: DONE / DONE_WITH_CONCERNS / PARTIAL / NEEDS_CONTEXT / BLOCKED
-         |
-         +-- NEEDS_CONTEXT → provide info, re-dispatch
-         +-- BLOCKED → Pivot Assessment (Ceremony 4). If unavailable: assess, escalate
-         +-- PARTIAL → verify completed, create todos for remaining, proceed to canary + Stage 1
-         +-- DONE_WITH_CONCERNS → read concerns; correctness/scope risk? → Pivot Assessment (Ceremony 4); else proceed to canary + Stage 1
-         +-- DONE
-              |
-              v
-    Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"
-              |
-              v
-    Stage 1: spec-compliance-reviewer.md → GAPS? → implementer fixes → re-run Stage 1
-              |
-              v
-    Stage 2: code-quality-reviewer.md (1 per file) → REQUEST CHANGES? → implementer fixes → re-run Stage 2
-              |
-              v
-    Mark todo done. Reload skills (session-bootstrap refresh rule).
-    After each push: check for new automated review threads before picking up the next todo.
-    Pick up next todo.
-              |
-              v
-    (After all todos) → check plan.md for `## Feature Specification`
-        If present: Signoff (Ceremony 5) → finishing-a-development-branch
-        If absent: final code review → finishing-a-development-branch
-```

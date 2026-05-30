@@ -21,18 +21,6 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ---
 
-# Instructions for Agent
-
-## How This Skill is Invoked
-
-In VS Code, users will activate this skill by:
-- Typing `@workspace /versioning [description]` in Copilot Chat
-- Or asking: "What commit type should I use?", "Create a PR", "How does versioning work?"
-
-When activated, ensure all commits and PR titles follow conventional commits format.
-
----
-
 ## Core Principle: Commit Messages Drive Releases
 
 This project uses **zero-manual releases**. Every push to main triggers an automated release. The commit message (which comes from the squash-merged PR title) determines the version bump.

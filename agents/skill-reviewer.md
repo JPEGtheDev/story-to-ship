@@ -13,7 +13,7 @@ criteria. Read them in full, then follow the Review Process exactly.
 ## Worktree Check
 
 ```bash
-git rev-parse --show-toplevel
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.

@@ -61,7 +61,7 @@ Before naming a new `enum`, struct field, or constant: open `docs/CODING_STANDAR
 
 **Readability is more important than development speed or execution speed.** Time spent on clarity is recovered many times over in maintenance, review, and debugging.
 
-**Comments are not intent.** Comments can go stale; code cannot. When a comment exists to explain what a value means, that is a signal the code should be rewritten — not the comment improved.
+**Comments are not intent.** Comments can go stale; code cannot. When a comment exists to explain what a value means, that is a signal the code must be rewritten — not the comment improved.
 
 | Signal | Wrong fix | Right fix |
 |--------|-----------|-----------|

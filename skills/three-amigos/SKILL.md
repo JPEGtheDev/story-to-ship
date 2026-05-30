@@ -14,8 +14,6 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST dispatch all three amigos in parallel and collect all verdicts before acting.
-
 **Announce at start:** "I am using the three-amigos skill to [ceremony name] for [brief feature description]."
 
 ---
@@ -24,16 +22,14 @@ YOU MUST dispatch all three amigos in parallel and collect all verdicts before a
 
 | # | Signal | Ceremony | Output | Model |
 |---|--------|----------|--------|-------|
-| 1 | New or unclear AC | Discovery | Feature Specification written to plan.md | `claude-haiku-4.5` |
+| 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md | `claude-haiku-4.5` |
 | 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT | `claude-sonnet-4.6` |
 | 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED | `claude-haiku-4.5` |
 | 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON | `claude-sonnet-4.6` |
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED | `claude-sonnet-4.6` |
 | 6 | Feature merged and closed | Retrospective | Process improvement items | `claude-haiku-4.5` |
 
-Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
-
-**Model rationale:** Discovery, Progress Check, and Retrospective are question-generation or summary tasks (reading spec, identifying gaps, listing lessons). Haiku handles these adequately. Refinement, Pivot Assessment, and Signoff require multi-file analysis, nuanced tradeoff evaluation, and condition resolution — Sonnet is worth the cost there.
+Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas + model selection rationale: `references/CEREMONIES.md`.
 
 ---
 
@@ -41,8 +37,8 @@ Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery featur
 
 1. Which ceremony? (see When to Invoke)
 2. Did Discovery run? Check plan.md for `## Feature Specification`.
-   YES → Three Amigos for Ceremonies 2, 5, 6
-   NO  → Skeptic for Ceremony 2
+   ✓ → Three Amigos for Ceremonies 2, 5, 6
+   ✗ → Skeptic for Ceremony 2
 3. 3 worktrees, one per amigo. Inject `{{PERSONA}}` + `{{READ_FIRST}}` + `{{CEREMONY}}` + `{{AGENDA}}` into amigo.md.
 4. Collect all three verdicts before acting on any.
 5. Any single REJECT blocks. Majority does NOT override.
@@ -114,4 +110,4 @@ CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching an
 
 ## References
 
-- `three-amigos/references/CEREMONIES.md` — per-amigo sources, agenda lists, and output formats for all 6 ceremonies
+- `references/CEREMONIES.md` — per-amigo sources, agenda lists, output formats, and model selection rationale for all 6 ceremonies

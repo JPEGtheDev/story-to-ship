@@ -14,20 +14,7 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST include an effort estimate and model recommendation in every story you generate. No exceptions.
-
 **Announce at start:** "I am using the user-story-estimation skill to estimate effort for [story name]."
-
----
-
-# Instructions for Agent
-
-## When to Load This Skill
-
-Load this skill when:
-- Generating a story (called automatically from `user-story-generator`)
-- User asks "how many requests will this take?"
-- Deciding between Small/Standard/Advanced model for an agent dispatch
 
 ---
 

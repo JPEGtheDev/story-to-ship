@@ -9,11 +9,10 @@ description: Use when adding new classes, refactoring code, or reviewing PRs for
 
 ```
 DEPENDENCIES FLOW INWARD — INNER LAYERS NEVER DEPEND ON OUTER LAYERS
+YOU MUST verify dependency direction for every new class and every refactor. A layer violation in a PR means the PR is NOT mergeable until it is fixed. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST verify dependency direction for every new class and every refactor. A layer violation in a PR means the PR is NOT mergeable until it is fixed. No exceptions.
 
 **Announce at start:** "I am using the architecture-review skill to review [component/file]."
 
@@ -87,35 +86,11 @@ For Particle-Viewer specific violation examples and fixes, see `references/PV_LA
 
 ---
 
-## Review Report Format
+## Review Report Format and Dispatch Pattern
 
-```markdown
-## Architecture Review: [file/component]
-
-### Layer Assignment
-Component belongs to: Layer [N] ([name])
-Expected dependencies: Layers ≤[N]
-Actual dependencies found: [list includes/calls]
-
-### Violations Found
-| File | Line | Violation | Fix |
-|------|------|-----------|-----|
-
-### Verdict: CLEAN / VIOLATIONS FOUND
-```
+For the report table template and per-file dispatch instructions, see `references/ARCH_REVIEW_TEMPLATES.md`.
 
 A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in the violations table is resolved.
-
----
-
-## Dispatch Pattern
-
-For PR reviews or major refactors:
-
-1. Dispatch 1 `architecture-reviewer.md` agent per changed file (parallel) — use `agent_type: "code-review"`
-2. Provide: `{{FILE_PATH}}`, `{{INCLUDE_LIST}}`, and `{{DIFF_OR_EMPTY}}`
-3. Collect all reports before approving the PR
-4. Any VIOLATIONS FOUND verdict = block the PR
 
 ---
 
@@ -151,4 +126,4 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 - `infrastructure-review` — CMake build structure; architecture-review checks source structure
 - `oop-principles` — sub-domain skill; run Is-A / Has-A and SOLID gate for every class hierarchy change reviewed here
 
-**Design patterns and architectural principles:** `.github/skills/architecture-review/references/DESIGN_PATTERNS.md` and `.github/skills/architecture-review/references/ANTIPATTERNS.md`
+**Design patterns and architectural principles:** `references/DESIGN_PATTERNS.md` and `references/ANTIPATTERNS.md`

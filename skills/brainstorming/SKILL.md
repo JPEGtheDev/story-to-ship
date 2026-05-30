@@ -15,8 +15,6 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST complete Phases 1–4 and pass the Design Gate before writing any code or loading `writing-plans`. No exceptions.
-
 **Announce at start:** "I am using the brainstorming skill to explore design options for [brief description]. No code will be written until the gate is passed."
 
 ---
@@ -40,7 +38,7 @@ This skill is required before writing code when ANY of the following are true:
 
 ### Discovery Gate (run first)
 
-**Context:** A feature enters brainstorming with new or unclear AC.
+**Context:** A feature enters brainstorming with new or unclear Acceptance Criteria (AC).
 
 **Forces:** Brainstorming explores *how* to build. Discovery defines *what* to build. Designing how before defining what produces rework.
 
@@ -58,15 +56,7 @@ Label every ambiguity `[UNCLEAR: ...]`. Do NOT silently assume an answer to an u
 
 **AMBIGUITY BLOCK:** If any `[UNCLEAR:]` item remains unanswered, you MUST stop. Do not proceed to Phase 2. Ask the clarifying question. Wait for the answer. Then continue.
 
-Good clarifying questions:
-- "Should this work with existing data formats or a new format?"
-- "Is this feature gated by a user preference or always active?"
-- "Does 'fast' mean under 16ms per frame, or just noticeably faster?"
-
-Bad clarifying questions (don't ask):
-- Hypotheticals you can answer by reading the codebase
-- Questions where the existing architecture makes the answer obvious
-- Questions you are going to answer yourself anyway
+For examples of good vs. bad clarifying questions, see `references/STRUCTURED_IDEATION.md`.
 
 After all `[UNCLEAR:]` items are resolved: state "All ambiguities resolved. Proceeding to Phase 2."
 

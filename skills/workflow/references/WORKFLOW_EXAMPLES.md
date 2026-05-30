@@ -4,6 +4,62 @@ This reference provides concrete examples of correct and incorrect CI/CD workflo
 
 ---
 
+## Generic YAML Templates
+
+### Artifact Upload Template
+
+```yaml
+- name: Upload Test Artifacts
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: descriptive-artifact-name
+    path: |
+      path/to/generated/files/
+    retention-days: 30
+    if-no-files-found: ignore
+```
+
+### Idempotent PR Comment Template (Full Pattern)
+
+```yaml
+- name: Comment on PR
+  if: always() && github.event_name == 'pull_request'
+  uses: actions/github-script@v7
+  with:
+    script: |
+      const marker = 'Unique Report Title';
+      const body = `## ${marker}\n\nReport content here...`;
+
+      const { data: comments } = await github.rest.issues.listComments({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number,
+      });
+
+      const existing = comments.find(c =>
+        c.user.type === 'Bot' && c.body.includes(marker)
+      );
+
+      if (existing) {
+        await github.rest.issues.updateComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          comment_id: existing.id,
+          body: body
+        });
+      } else {
+        await github.rest.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: context.issue.number,
+          body: body
+        });
+      }
+```
+
+---
+
 ## Pipeline Safety — Correct Examples
 
 ### ✅ Upload Artifacts Instead of Committing

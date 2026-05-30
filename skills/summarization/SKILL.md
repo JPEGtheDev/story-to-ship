@@ -11,11 +11,10 @@ description: Use when summarizing external resources (articles, web pages, local
 NEVER SUMMARIZE WITHOUT THE SOURCE IN CONTEXT.
 DISPATCH ALL THREE METHODS. SYNTHESIZE AFTER ALL THREE RETURN.
 DO NOT WRITE OUTPUT UNTIL THE QUALITY GATE RUNS.
+YOU MUST dispatch all three method agents and wait for all three results before dispatching the synthesizer. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST dispatch all three method agents and wait for all three results before dispatching the synthesizer. No exceptions.
 
 **Announce at start:** "I am using the summarization skill to extract knowledge from [source title]."
 

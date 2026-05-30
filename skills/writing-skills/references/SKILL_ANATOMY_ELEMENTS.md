@@ -37,11 +37,20 @@ description: Use when writing or reviewing any test for Particle-Viewer.
 ## Iron Law
 
 ​```
-[ALL CAPS RULE — no exceptions language]
+YOU MUST [ALL CAPS RULE — the specific action required].
+No exceptions.
 ​```
 
 Violating the letter of this rule is violating the spirit of this rule.
+
+**Announce at start:** "I am using the [skill-name] skill to [purpose]."
 ```
+
+**Rules:**
+- `YOU MUST` and `No exceptions.` MUST be inside the backtick block — not outside it
+- The ALL CAPS rule states the specific prohibited or required action
+- The "letter/spirit" line is mandatory — it closes the rationalization gap
+- The Announcement line appears immediately after the "letter/spirit" line (not as a separate Element 3 block)
 
 The "letter/spirit" line is mandatory. It closes the rationalization gap where agents argue "technically I followed the rule" while violating its intent.
 

@@ -22,8 +22,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 Before creating, editing, or shipping any skill or agent template:
 
 1. **Creating a new skill?** Invoked in ≥1% of sessions? Place in the correct Domain-Driven Design (DDD) context (see AGENTS.md).
-   - YES → proceed
-   - NO → write a reference doc in the relevant skill's `references/` instead; do not create a skill
+   - ✓ → proceed
+   - ✗ → write a reference doc in the relevant skill's `references/` instead; do not create a skill
 
 2. **5-element anatomy check** -- all 5 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
    - FRONTMATTER: `name` + `description` starting with "Use when..."
@@ -53,7 +53,7 @@ Before creating, editing, or shipping any skill or agent template:
 - Description field contains "covers", "enforces", "provides", "includes" -- **STOP. Rewrite to "Use when [conditions]."**
 - Iron Law lacks "letter/spirit" line -- **STOP. Add "Violating the letter of this rule is violating the spirit of this rule." now.**
 - Iron Law lacks "YOU MUST" and "No exceptions." -- **STOP. Both phrases are required. Add them.**
-- No BEFORE PROCEEDING gate -- **STOP. Add a gate with explicit YES/NO branches before shipping.**
+- No BEFORE PROCEEDING gate -- **STOP. Add a gate with explicit ✓/✗ branches before shipping.**
 - No rationalization table -- **STOP. Add ≥5 rows now. A skill without one is a suggestion.**
 - Skill contains "should", "prefer", "consider" -- **STOP. Replace every instance with MUST, DO NOT, or an explicit imperative.**
 

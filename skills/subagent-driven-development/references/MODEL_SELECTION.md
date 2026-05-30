@@ -20,6 +20,6 @@ If the user states a model preference in the current session, store it as a memo
 
 **Using Premium for non-architecture tasks:** State the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
 
-**Concurrency:** Copilot Enterprise accounts have no practical agent concurrency limit. Dispatch as many parallel agents as the task warrants. Standard accounts: verify your limit before parallelizing.
+**Concurrency:** Verify your account's agent concurrency limit before dispatching parallel agents. See `dispatching-parallel-agents` skill for concurrency rules.
 
 **For parallel read-only research:** Use `dispatching-parallel-agents` skill.

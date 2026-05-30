@@ -9,11 +9,10 @@ description: Use when writing tests for any interface, abstract base class, or t
 
 ```
 EVERY ABSTRACT TYPE REQUIRES A CONTRACT TEST FIXTURE
+YOU MUST write a contract test fixture before shipping any interface with multiple implementations. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST write a contract test fixture before shipping any interface with multiple implementations. No exceptions.
 
 **Announce at start:** "I am using the contract-testing skill to write contract tests for [interface]."
 

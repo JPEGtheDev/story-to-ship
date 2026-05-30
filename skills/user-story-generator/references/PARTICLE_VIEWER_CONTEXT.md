@@ -57,7 +57,7 @@ src/
 ### Architecture Notes
 - **ViewerApp** encapsulates all application state (replaces former `clutter.hpp` globals)
 - State is organized into POCOs: `WindowConfig`, `RenderResources`, `SphereParams`, `RecordingState`, `ShaderPaths`
-- GLFW callbacks delegate to ViewerApp via user pointer pattern
+- SDL3 events delegate to ViewerApp via the event loop
 - `Particle` uses `std::vector<glm::vec4>` for safe memory management
 
 ### Remaining Issues to Address
@@ -173,12 +173,12 @@ Stories involving visual regression testing should:
 
 1. **Use the Image class** as the base type for all image data (defined in `src/Image.hpp`)
 
-2. **Follow AAA Pattern** in tests — use the `testing` skill (`.github/skills/testing/`) for guidelines:
+2. **Follow AAA Pattern** in tests — use the `testing` skill for guidelines:
    - Do not combine Arrange and Act into `// Arrange & Act`
    - Omit `// Arrange` if no setup is needed
    - Put expected values as named variables in Arrange
 
-3. **Follow CI pipeline rules** — use the `workflow` skill (`.github/skills/workflow/`) for guidelines
+3. **Follow CI pipeline rules** — use the `workflow` skill for guidelines
 
 3. **Support Headless Mode**  
    - No display required (works with Xvfb on CI)
@@ -223,7 +223,7 @@ Current refactoring priorities:
 1. **Global State Elimination** (✅ Done)
    - Extracted global variables from former `clutter.hpp` into `ViewerApp` class
    - State grouped into POCOs: `WindowConfig`, `RenderResources`, `SphereParams`, `RecordingState`, `ShaderPaths`
-   - GLFW callbacks use user pointer pattern
+   - SDL3 event loop delegates to ViewerApp
 
 2. **Main Loop Simplification** (Priority: Medium)
    - Separate concerns: input handling, data loading, rendering

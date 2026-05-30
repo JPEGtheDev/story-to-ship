@@ -124,6 +124,20 @@ After generation is complete: switch modes. Apply the Six Thinking Hats or a Ske
 
 ---
 
+## Phase 1 Clarifying Questions — Good vs. Bad Examples
+
+**Good clarifying questions:**
+- "Should this work with existing data formats or a new format?"
+- "Is this feature gated by a user preference or always active?"
+- "Does 'fast' mean under 16ms per frame, or just noticeably faster?"
+
+**Bad clarifying questions (don't ask):**
+- Hypotheticals you can answer by reading the codebase
+- Questions where the existing architecture makes the answer obvious
+- Questions you are going to answer yourself anyway
+
+---
+
 ## Related Skills
 
 - `brainstorming` — hard gate: load before any design with unclear approach

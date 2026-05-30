@@ -82,9 +82,7 @@ Test coverage is one form of white-box testing, but not the only one. Structural
 
 ## Virtual Functions Across Process Boundaries
 
-See `cpp-patterns/references/SAFETY_PATTERNS.md — Virtual Functions and Shared Memory Hazard` for full structural explanation.
-
-**Detection signal:** segfault on first virtual method call when the object was received via IPC — the vtable pointer is invalid in the receiving process's address space.
+**Detection signal:** segfault on first virtual method call when the object was received via IPC (Inter-Process Communication) -- the vtable pointer is invalid in the receiving process's address space.
 **Fix:** serialize to a plain-data structure on the sending side; reconstruct the polymorphic object on the receiving side.
 
 ---
@@ -129,7 +127,7 @@ A **BandAid** addresses the symptom without removing the cause. Signals:
 
 A **real fix** can be explained in terms of the root cause: "This failed because X; removing X prevents the failure."
 
-If you cannot explain the fix in terms of the root cause, stop. Find the root cause first. See also: `code-quality/references/DESIGN_PRINCIPLES.md — BandAid Anti-Pattern` for the design-level definition. Source: C2 Wiki "BandAid".
+If you cannot explain the fix in terms of the root cause, stop. Find the root cause first. See the `code-quality` skill for the BandAid Anti-Pattern design-level definition. Source: C2 Wiki "BandAid".
 
 ---
 
@@ -149,7 +147,7 @@ Applied to agent-assisted debugging: prompt the agent to explain the problem bef
 
 ## Fail Fast
 
-Terminate immediately on encountering irrecoverable state corruption rather than allowing corrupt state to propagate. General principle; see `cpp-patterns/references/SAFETY_PATTERNS.md — Fail Fast` for C++ implementation details (assertions, `std::terminate`, structured logging).
+Terminate immediately on encountering irrecoverable state corruption rather than allowing corrupt state to propagate. General principle; see the `cpp-patterns` skill for C++ implementation details (assertions, `std::terminate`, structured logging).
 
 ---
 

@@ -98,7 +98,7 @@ const bool ext_mounted = isNvidiaGlExtensionMounted();
 if (isRunningInFlatpak() && nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
 
-Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" — Flatpak mounts the GL extension into `/usr/lib/<triplet>/GL/nvidia-<ver>` and GLVND resolves it via the directory structure.
+Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" — Flatpak mounts the GL extension into a versioned, architecture-specific GL extension directory. GLVND resolves the vendor library by scanning that directory structure, not via `LD_LIBRARY_PATH`.
 
 This must run **before** the first `SDL_Init` call. Setting env vars after SDL_Init has no effect.
 

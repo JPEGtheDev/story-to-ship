@@ -1,7 +1,18 @@
 # PV Session Paths
 
 Path conventions for reviewing Particle-Viewer postmortem sessions.
-All paths are relative to the git root of the Particle-Viewer repository.
+
+## Claude Code Sessions
+
+```
+REPO:             [git root of Particle-Viewer]
+SESSION_ID:       [UUID — shown in JSONL filename]
+EVENTS_LOG:       ~/.claude/projects/<encoded-path>/<SESSION_ID>.jsonl
+MEMORY:           ~/.claude/projects/<encoded-path>/memory/
+SCRATCH:          [REPO]/scratch/
+```
+
+## GitHub Copilot Sessions (Legacy)
 
 ```
 REPO:             [git root of Particle-Viewer]

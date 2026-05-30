@@ -13,8 +13,6 @@ No exceptions.
 ```
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST validate every story against all six INVEST criteria (Independent, Negotiable, Valuable, Estimable, Small, Testable) and include at least one acceptance criterion before shipping. No exceptions.
-
 **Announce at start:** "I am using the user-story-generator skill to create/refine a story for [brief description]."
 
 ## BEFORE PROCEEDING

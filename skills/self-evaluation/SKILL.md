@@ -14,10 +14,6 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST complete all 7 steps and include the `### Session Self-Evaluation` block before your final message. No exceptions.
-
-Read this skill BEFORE your final message. If you skip it: the session's lessons are lost. Every time.
-
 **Announce at start:** "I am using the self-evaluation skill for this session."
 
 ---
@@ -37,7 +33,7 @@ Read this skill BEFORE your final message. If you skip it: the session's lessons
 
 ## How This Skill is Invoked
 
-This skill is **mandatory** — `copilot-instructions.md` § Session Lifecycle requires it before every final message. You will also be invoked:
+This skill is **mandatory** — `AGENTS.md` § Session Lifecycle requires it before every final message. You will also be invoked:
 - When explicitly asked: "Run self-evaluation", "What did you learn?", "Improve skills"
 - After addressing code review feedback that reveals a recurring pattern
 
@@ -81,7 +77,7 @@ Classify each lesson into one of these categories. For the full routing table wi
 
 Before proposing updates, verify the lesson is not already documented:
 
-1. Check `copilot-instructions.md` — Is this pattern already listed?
+1. Check `AGENTS.md` — Is this pattern already listed?
 2. Check the relevant skill's `SKILL.md` — Is this rule already stated?
 3. Check skill `references/` — Is there already an example?
 
@@ -207,18 +203,6 @@ Produce a brief summary of lessons captured:
 
 ---
 
-## Objectivity Block Is Structural
-
-Humans are structurally poor at evaluating their own work. The block is not a personal failing — it is an architectural constraint of human cognition. The response is not "try harder to be objective" but "use structural mechanisms that bypass the block":
-
-- Dispatch a separate reviewer agent rather than self-reviewing
-- Compare against the requirements written before the work began, not a remembered version
-- Use a checklist created before the session, not reconstructed from memory after it
-
-The corollary for session self-evaluation: the self-evaluation block applies here too. The evaluation in this section is imperfect by construction. Use it to surface what you can, knowing that a separate postmortem reviewer will catch what you cannot. Source: C2 Wiki "HumansAreLousyAtSelfEvaluation".
-
----
-
 ## Red Flags — STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
@@ -229,10 +213,11 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - "I already know what I'd write — no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
 
-**All of these mean: Read `.github/skills/self-evaluation/SKILL.md` and complete every step. Then include the `### Session Self-Evaluation` block before your final message.**
+**All of these mean: Load the `self-evaluation` skill and complete every step. Then include the `### Session Self-Evaluation` block before your final message.**
 
 ---
 
-## Reference
+## References
 
-For detailed examples of lessons learned and how they were incorporated, see [references/LESSONS_LEARNED_PATTERNS.md](references/LESSONS_LEARNED_PATTERNS.md).
+- Lesson examples and routing table: `references/LESSONS_LEARNED_PATTERNS.md`
+- Why structural mechanisms beat "try harder" (Objectivity Block rationale): `references/LESSONS_LEARNED_PATTERNS.md`

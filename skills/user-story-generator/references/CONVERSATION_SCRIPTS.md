@@ -2,10 +2,6 @@
 
 ## How This Skill is Invoked
 
-In VS Code, users will activate this skill by:
-- Typing `@workspace /user-story-generator [description]` in Copilot Chat
-- Or simply asking: "Create a user story for [feature/task]" when this skill is available
-
 When activated, engage in a conversational process to build the story collaboratively.
 
 ---

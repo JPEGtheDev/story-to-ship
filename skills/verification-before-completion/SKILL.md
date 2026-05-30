@@ -5,12 +5,6 @@ description: Use when about to claim work is complete, fixed, or passing, before
 ---
 
 
-# Instructions for Agent
-
-When activated, announce: **"I am using the verification-before-completion skill. Running verification now."**
-
----
-
 ## Iron Law
 
 ```
@@ -20,8 +14,6 @@ No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST run all verification commands in this session before any completion claim. No exceptions.
 
 **Announce at start:** "I am using the verification-before-completion skill to verify [work item] before claiming completion."
 

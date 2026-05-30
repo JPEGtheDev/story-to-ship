@@ -9,11 +9,10 @@ description: Use when creating docs, updating guides, writing API references, or
 
 ```
 EVERY DOC IS SMALL, TAGGED, AND LINKED — ONE CONCEPT PER FILE
+YOU MUST keep every doc file under 600 words, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST keep every doc file under 600 words, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
 
 **Announce at start:** "I am using the documentation skill to [write/update/review] [description]."
 
@@ -39,9 +38,9 @@ Before writing any documentation:
 | API/class reference | Header file comments (≤5 lines inline; longer → `docs/`) |
 | Domain guides | `docs/<domain>/<subdomain>/` — one concept per file, ≤600 words |
 | Cross-cutting standards | `docs/UPPERCASE.md` |
-| Copilot skills | `.github/skills/<name>/SKILL.md` |
+| Agent skills | `.github/skills/<name>/SKILL.md` |
 | Skill reference content | `.github/skills/<name>/references/*.md` |
-| Agent onboarding | `.github/copilot-instructions.md` — summarize only |
+| Agent onboarding | `AGENTS.md` — summarize only |
 
 ---
 
@@ -71,7 +70,7 @@ All files in `docs/` MUST be **Document Mode** — readable independently, with 
 
 ---
 
-## Step 3: Update copilot-instructions.md When Adding a New Skill
+## Step 3: Update AGENTS.md When Adding a New Skill
 
 Update all 4 locations:
 1. **Skills Directory table** — add row with name, path, domain
@@ -133,4 +132,4 @@ Before presenting documentation, verify:
 
 For the domain taxonomy, frontmatter schema, and guide template, see [references/DOCUMENTATION_EXAMPLES.md](references/DOCUMENTATION_EXAMPLES.md).
 
-**Documentation principles (Doc1–Doc5, SelfDocumentingCode, LiterateProgramming):** `.github/skills/documentation/references/DOCUMENTATION_PRINCIPLES.md`
+**Documentation principles (Doc1–Doc5, SelfDocumentingCode, LiterateProgramming):** `references/DOCUMENTATION_PRINCIPLES.md`

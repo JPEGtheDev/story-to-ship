@@ -167,3 +167,22 @@ After any mistake or user correction:
 - **Temporal declaration:** When a plan requires more turns than the user likely expects, state this proactively at plan time: "This will take approximately N responses. Here is what each will deliver: [sequence]." Do not surface this mid-execution — declare it at plan time.
 - **Attention cost:** Before sending any response longer than 200 words or creating new work for the user, ask: is this the most respectful use of their attention? Compress or defer non-essential content.
 - When all items are complete, give a brief accounting of files touched, tests added, and notable decisions.
+
+---
+
+## Quick Reference Flowchart
+
+```
+Task arrives
+    ↓
+Trivial (1 file, 1 step)? → Implement directly
+    ↓ (multi-step)
+Invoke writing-plans → clarify → plan → Skeptic Agent
+    ↓
+Per todo: in-progress → PPP gate → implement → prove → done → commit
+    ↓
+Bug? → systematic-debugging
+Stuck? → stop, re-plan
+    ↓
+All done? → verification-before-completion → ship
+```

@@ -1,7 +1,7 @@
 ---
 name: session-bootstrap
 license: MIT
-description: Use at the start of every session.
+description: Use when starting a new session.
 ---
 
 
@@ -9,11 +9,11 @@ description: Use at the start of every session.
 
 ```
 READ THE SKILL. THEN ACT. NEVER ACT THEN READ.
+YOU MUST read all required skills before writing any code or sending any plan. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-YOU MUST read all required skills before writing any code or sending any plan. No exceptions.
 Skills contain rules that change what you do. Reading a skill AFTER acting defeats the purpose.
 
 **Announce at start:** "I am using the session-bootstrap skill to load required skills for this session."
@@ -116,7 +116,7 @@ If unsure, read `code-quality` — it applies to every code task.
 
 **Before your final message to the user**, execute all of the following:
 
-1. **Read** `.github/skills/self-evaluation/SKILL.md` and follow its steps.
+1. **Load** the `self-evaluation` skill and follow its steps.
 2. **Identify lessons learned** — mistakes made, user corrections, patterns discovered.
 3. **Check existing skills** — is the lesson already documented? If yes, skip.
 4. **Apply updates** — for High/Medium priority lessons, update the relevant skill file
@@ -143,7 +143,7 @@ behavior is habitual, not conditional.
 - Starting to code before reading the required skill — **STOP. Load the skill now. Do not write one line first.**
 - Skipping the skill-load announcement — **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response — **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
-- Finishing a session without running `self-evaluation` — **STOP. Read `.github/skills/self-evaluation/SKILL.md` now.**
+- Finishing a session without running `self-evaluation` — **STOP. Load the `self-evaluation` skill now.**
 - Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional — **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" — **STOP. Memory degrades. Skills update. Load fresh every session.**

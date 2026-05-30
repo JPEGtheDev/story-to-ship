@@ -154,4 +154,4 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "They misunderstood what I was doing" | Maybe. But if a reviewer misunderstands, the code is unclear. Clarify the code or the comment. |
 | "This is a style preference" | If it violates `code-quality` standards, it is not a preference — it is a defect. |
 | "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context — do not dismiss the feedback. |
-**Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `.github/skills/receiving-code-review/references/REVIEW_PRINCIPLES.md`
+**Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

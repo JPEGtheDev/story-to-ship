@@ -9,11 +9,10 @@ description: Use when writing or reviewing any C++ class that owns resources, ha
 
 ```
 DESTRUCTORS NEVER THROW — EVERY RESOURCE IS OWNED BY A SCOPE-BOUND GUARD
+YOU MUST wrap every destructor body in try/catch and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST wrap every destructor body in try/catch and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
 
 **Announce at start:** "I am using the cpp-safety skill to review [class]."
 

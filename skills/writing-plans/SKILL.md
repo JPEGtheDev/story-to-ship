@@ -20,7 +20,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## Step 0: Clarify Expectations
 
-**Before building a plan** — restate requirements in your own words. Earliest-possible catch for "solved the wrong problem."
+**Before building a plan** -- restate requirements in your own words. Earliest-possible catch for "solved the wrong problem."
 
 ```
 "Here is what I understand you're asking for:
@@ -31,7 +31,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 My optimization target: [user's stated outcome], not [convenient proxy]."
 ```
 
-- Label every ambiguity `[UNCLEAR: ...]` — never silently assume
+- Label every ambiguity `[UNCLEAR: ...]` -- never silently assume
 - For each acceptance criterion that references a field with possible optionality (required, optional, conditional, nullable): state the optionality explicitly. If the issue text does not resolve it, label `[UNCLEAR: optional?]`. Assuming a field is required when the AC intended optional ships as a defect.
 - If requirements have gaps: name the gap and state your assumption
 - Map each acceptance criterion to a verifiable test
@@ -43,37 +43,37 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 | Situation | Response |
 |---|---|
-| Obvious single-file fix | Implement immediately — no plan needed |
+| Obvious single-file fix | Implement immediately -- no plan needed |
 | 2+ files touched | Outline sequence before coding |
 | Architectural decision | Specify approach before touching code |
-| Ambiguous requirements | Clarify first — do not plan around unknowns |
+| Ambiguous requirements | Clarify first -- do not plan around unknowns |
 | User story with acceptance criteria | Map each criterion to a checkpoint |
-| "Can you test X?" or "evaluate X?" without stated methodology | `[UNCLEAR: what does success look like? what is the baseline? does methodology matter?]` — ask before designing anything |
+| "Can you test X?" or "evaluate X?" without stated methodology | `[UNCLEAR: what does success look like? what is the baseline? does methodology matter?]` -- ask before designing anything |
 
 ---
 
 ## Building the Plan
 
 1. Create a todo list (`sql` tool) with concrete, verifiable items
-2. Specify expected file changes up front — files, functions, test additions
-3. Bake in proof steps — plan how to verify each change
+2. Specify expected file changes up front -- files, functions, test additions
+3. Bake in proof steps -- plan how to verify each change
 4. Sanity-check: does the plan address every acceptance criterion?
-5. Name known downsides proactively — trade-offs, risks, limitations the user did not ask about
-6. Disclose decision rationale — name alternatives considered and why chosen approach was preferred
-7. **Token budget gate:** If todo count ≥ 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens × 42+ dispatches minimum. Compute this upfront — not after 3 rate-limit hits.
+5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
+6. Disclose decision rationale -- name alternatives considered and why chosen approach was preferred
+7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
 
 ### No-Placeholder Rule
 
-Every todo must contain what an engineer needs to execute it. These are **plan failures** — never write them:
+Every todo must contain what an engineer needs to execute it. These are **plan failures** -- never write them:
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" (without specifying what)
 - "Write tests for the above" (without naming what to test)
-- "Similar to Task N" (repeat the specifics — tasks may be read out of order)
+- "Similar to Task N" (repeat the specifics -- tasks may be read out of order)
 - Steps that describe what to do without showing how
 
 ### Task Granularity (TDD: Test-Driven Development Steps)
 
-Each task MUST be one concrete action (2–5 minutes), touch ≤2 files, and is estimated at ≤25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
+Each task MUST be one concrete action (2-5 minutes), touch <=2 files, and is estimated at <=25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
 
 For implementation tasks, follow TDD structure:
 
@@ -85,10 +85,10 @@ Files:
   - Test:   tests/path/to/TestFile.<ext>
 
 RED   todo: Write the failing test for [behavior]
-RED   todo: Run test — verify it fails for the right reason
+RED   todo: Run test -- verify it fails for the right reason
 GREEN todo: Write minimal implementation to pass the test
-GREEN todo: Run full suite — verify all tests pass
-REFACTOR todo: Clean up — rename, extract, remove duplication; tests must stay green
+GREEN todo: Run full suite -- verify all tests pass
+REFACTOR todo: Clean up -- rename, extract, remove duplication; tests must stay green
 COMMIT todo: git add / git commit -m "feat[scope]: description"
 ```
 
@@ -100,14 +100,14 @@ Each step must be its own todo with a distinct status.
 
 Before building or presenting any plan:
 
-1. Requirements restated in own words — ambiguities labeled `[UNCLEAR:]`
+1. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
 2. Every acceptance criterion is mapped to a verifiable checkpoint
-3. Todo list has no placeholders — every item is concrete and executable
+3. Todo list has no placeholders -- every item is concrete and executable
 4. Plan has been reviewed by Skeptic Agent (or Three Amigos Refinement if Discovery ran)
 5. No todo touches 3+ files or exceeds 25 tool calls without being split
 
-✓ All met → present the plan and wait for explicit user approval
-✗ Any unmet → resolve the unmet item; do not start implementation
+[+] All met -> present the plan and wait for explicit user approval
+[-] Any unmet -> resolve the unmet item; do not start implementation
 
 ---
 
@@ -123,8 +123,8 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 | 4 | **Do I have the capability?** Any libraries or patterns requiring research before coding? | Wrong assumptions |
 | 5 | **What would a skeptic say?** Strongest argument against this approach | Comfort choices |
 
-✓ All 5 questions answered with no gaps → proceed to review gate or implementation
-✗ Any unanswered question or revealed gap → stop, revise the plan, then re-run the gate
+[+] All 5 questions answered with no gaps -> proceed to review gate or implementation
+[-] Any unanswered question or revealed gap -> stop, revise the plan, then re-run the gate
 
 **For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan. A feature with invisible async state has no failure-diagnosis path.
 
@@ -138,7 +138,7 @@ Dispatch a **Skeptic Agent**:
 
 ```
 You are a Skeptic Agent. Find what this plan is missing.
-Do not validate what looks correct — find what is wrong.
+Do not validate what looks correct -- find what is wrong.
 
 Requirements: [FULL TEXT]
 Plan: [FULL PLAN WITH TODOS]
@@ -154,14 +154,14 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 ---
 
-## Heuristics: YAGNI · Simplest Thing · PPP
+## Heuristics: YAGNI - Simplest Thing - PPP
 
 **YAGNI (You Ain't Gonna Need It):** If a todo cannot be traced to a specific acceptance criterion, cut it.
 > Forbidden: "We'll probably need it later."
 
 **Simplest Thing That Could Possibly Work:** After the Smart Trust gate, verify a simpler implementation satisfies all criteria. Fewer files, fewer abstractions, fewer dependencies.
 
-**PPP — Plain Programmer's Purpose:** Per todo: "This [function/class] takes [X] and does [Y]." Can't state it simply? Decompose.
+**PPP -- Plain Programmer's Purpose:** Per todo: "This [function/class] takes [X] and does [Y]." Can't state it simply? Decompose.
 
 ---
 
@@ -171,20 +171,20 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 |--------|---------|
 | "I'll start coding, plan as I go" | Unplanned work creates cascading mistakes |
 | "It's obvious what needs to be done" | Obvious tasks still have sequencing risks |
-| "The todo list wastes time" | The list is the audit trail — skipped items accumulate silently |
-| "I'll update todos later" | Later never comes — update before starting, after finishing |
+| "The todo list wastes time" | The list is the audit trail -- skipped items accumulate silently |
+| "I'll update todos later" | Later never comes -- update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
-| "We'll probably need this later" | YAGNI — not in criteria means not in this plan |
+| "We'll probably need this later" | YAGNI -- not in criteria means not in this plan |
 | "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ files = compounding scope. Split on file boundaries before the plan is presented. |
-| "The plan looks good — I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
+| "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
-| "The user said 'autopilot' / 'just go' — that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
-| "I listed all the main files — the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find .github/skills -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
-| "I found the bug — fixing it now" | A request to debug or research is not a request to fix. Present findings first. Wait for instruction. |
+| "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
+| "I listed all the main files -- the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find .github/skills -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
+| "I found the bug -- fixing it now" | A request to debug or research is not a request to fix. Present findings first. Wait for instruction. |
 | "Plan states a numerical estimate (word count, file size, line count) without measuring" | Measure before writing. Run `wc -w` or `wc -l`. Unverified numerical claims in plans cause failed acceptance criteria. |
 | "It's just a quick test, I don't need todos" | Any multi-step task without SQL todos has no review gate. The Skeptic and Three Amigos dispatch rules cannot fire if todos were never created. Create todos first, then execute. |
-| "Implementation revealed a dependency on a second file — I'll modify it" | Scope expansion requires user authorization. STOP. State the dependency and ask before touching any file not in the original plan. |
-| "Skeptic or Refinement approved with conditions, I addressed them — I can proceed" | NO. Review findings change the plan — user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
+| "Implementation revealed a dependency on a second file -- I'll modify it" | Scope expansion requires user authorization. STOP. State the dependency and ask before touching any file not in the original plan. |
+| "Skeptic or Refinement approved with conditions, I addressed them -- I can proceed" | NO. Review findings change the plan -- user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
 
 ---
 
@@ -197,17 +197,17 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
-- Code or file edits before Step 0 (restate requirements) is complete — **STOP. Do Step 0 now.**
-- **HARD-GATE:** Plan has 2+ todos, review not dispatched — **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. No first edit until review result is read.**
-- **HARD-GATE:** About to send a message presenting a design or plan as final — review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. The review must be in-flight or complete before the plan is presented as finished.**
-- Any todo lacks a concrete description — **STOP. Fill every description before starting.**
-- A single todo touches 3+ files or is estimated at 30+ tool calls — **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
-- Plan states a numerical estimate without a `wc` measurement — **STOP. Measure first. Run `wc -w` or `wc -l`.**
-- Next todo started without prior todo's 2-stage review passing — **STOP. Both stages required before advancing.**
-- Implementation started before user gives explicit plan approval — **STOP. Wait for "go ahead."**
-- About to dispatch audit or research agents without listing every dimension the agent must check — **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
+- Code or file edits before Step 0 (restate requirements) is complete -- **STOP. Do Step 0 now.**
+- **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. No first edit until review result is read.**
+- **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. The review must be in-flight or complete before the plan is presented as finished.**
+- Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
+- A single todo touches 3+ files or is estimated at 30+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
+- Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
+- Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
+- Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
+- About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
 
 ---
 

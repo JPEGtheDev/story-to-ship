@@ -1,15 +1,15 @@
-# Visual Regression Testing — Examples and Utilities
+# Visual Regression Testing -- Examples and Utilities
 
 ## Writing a Visual Regression Test
 
-Use production classes directly — **never duplicate production logic in test helpers**.
+Use production classes directly -- **never duplicate production logic in test helpers**.
 
 ```cpp
 TEST_F(RenderingRegressionTest, RenderDefaultCube_AngledView_MatchesBaseline)
 {
     // Arrange
     Shader particleShader(vertexPath.c_str(), fragmentPath.c_str());
-    Particle particles;  // Production class directly — no test helper duplication
+    Particle particles;  // Production class directly -- no test helper duplication
     glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 3000.0f);
 

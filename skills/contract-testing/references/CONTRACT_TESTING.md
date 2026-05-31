@@ -1,6 +1,6 @@
 # Contract Testing Reference
 
-Source: Ward Cunningham's C2 wiki audit — patterns for writing tests against interfaces and abstract types.
+Source: Ward Cunningham's C2 wiki audit -- patterns for writing tests against interfaces and abstract types.
 
 ---
 
@@ -9,7 +9,7 @@ Source: Ward Cunningham's C2 wiki audit — patterns for writing tests against i
 Write a test fixture for the abstract type using a minimal mock implementation. This test fixture becomes the contract: every concrete subclass must pass it.
 
 ```cpp
-// Abstract typed fixture — parameterised over each concrete implementation
+// Abstract typed fixture -- parameterised over each concrete implementation
 template <typename T>
 class IOpenGLContextTest : public ::testing::Test {
 protected:
@@ -25,12 +25,12 @@ TYPED_TEST_P(IOpenGLContextTest, Clear_DoesNotThrow) {
 
 REGISTER_TYPED_TEST_SUITE_P(IOpenGLContextTest, Clear_DoesNotThrow);
 
-// Instantiate once per concrete type — all contract tests run automatically:
+// Instantiate once per concrete type -- all contract tests run automatically:
 using GLContextImpls = ::testing::Types<MockOpenGLContext>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, IOpenGLContextTest, GLContextImpls);
 ```
 
-`std::unique_ptr` owns the context — no manual `TearDown` required. If any inherited test is inappropriate for a concrete subclass, that signals the behavior does not belong in the base type — redesign the hierarchy.
+`std::unique_ptr` owns the context -- no manual `TearDown` required. If any inherited test is inappropriate for a concrete subclass, that signals the behavior does not belong in the base type -- redesign the hierarchy.
 
 ---
 
@@ -38,7 +38,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, IOpenGLContextTest, GLContextImpls);
 
 Validate all children before executing any. See the `cpp-patterns` skill for the full C++ example of Two-Phase Composite for GL State Safety.
 
-Behavioral contract angle: `validate()` must be idempotent and free of side effects. If validation raises an error, no execution has occurred — the system is in its original state. Test `validate()` and `execute()` independently.
+Behavioral contract angle: `validate()` must be idempotent and free of side effects. If validation raises an error, no execution has occurred -- the system is in its original state. Test `validate()` and `execute()` independently.
 
 ---
 
@@ -46,12 +46,12 @@ Behavioral contract angle: `validate()` must be idempotent and free of side effe
 
 One failing test at a time. The loop:
 
-1. Write one assertion (the expected result — before the code exists)
-2. Compile → fail (no method)
-3. Add stub method → compile
-4. Run → fail (assertion fails)
+1. Write one assertion (the expected result -- before the code exists)
+2. Compile -> fail (no method)
+3. Add stub method -> compile
+4. Run -> fail (assertion fails)
 5. Add one line of implementation
-6. Compile and run → pass
+6. Compile and run -> pass
 7. Refactor
 8. Repeat
 
@@ -61,7 +61,7 @@ Write assertions **first** (Write Tests Backwards): state the expected outcome b
 
 ## One Active Failing Test
 
-Maintain exactly one active failing test at a time. When a test reveals that several more tests are needed, write their names on a list — do not make them all fail simultaneously. Work through the list one entry at a time.
+Maintain exactly one active failing test at a time. When a test reveals that several more tests are needed, write their names on a list -- do not make them all fail simultaneously. Work through the list one entry at a time.
 
 This prevents analysis paralysis from dozens of simultaneous failures blocking feedback.
 
@@ -83,7 +83,7 @@ Skipping boundary tests is the primary source of boundary-condition bugs.
 
 ## Requirements as Executable Code
 
-Write acceptance criteria as passing tests — not paper documents. Tests are unambiguous and cannot fall out of sync with the implementation. Unit tests express expected behavior; acceptance tests demonstrate working features.
+Write acceptance criteria as passing tests -- not paper documents. Tests are unambiguous and cannot fall out of sync with the implementation. Unit tests express expected behavior; acceptance tests demonstrate working features.
 
 ---
 
@@ -105,11 +105,11 @@ In practice: integrate tests into the build target so `cmake --build build` also
 
 ## Unit Tests as Specification Constraints
 
-Unit tests are not just regression guards — they are programmer-defined compile-time constraints expressed at runtime. A test that cannot fail is not a test; it is a comment. When you write a test, you are asserting that a specific behavior is permanently required. Future implementers must not change the behavior; they must pass the constraint. Source: C2 Wiki "UnitTestsThatDontBreak".
+Unit tests are not just regression guards -- they are programmer-defined compile-time constraints expressed at runtime. A test that cannot fail is not a test; it is a comment. When you write a test, you are asserting that a specific behavior is permanently required. Future implementers must not change the behavior; they must pass the constraint. Source: C2 Wiki "UnitTestsThatDontBreak".
 
 ## Acceptance Test vs Unit Test Boundary
 
-Acceptance tests verify behavior from the outside (user-visible outcomes, system boundaries). Unit tests verify behavior from the inside (individual unit contracts). Never use an acceptance test where a unit test suffices — acceptance tests are slower and hide the specific locus of failure. Never use a unit test to verify acceptance criteria — the test may pass while the user-visible behavior is broken. The boundary is: does this test require the full system? If yes, it is an acceptance test. Source: C2 Wiki "AcceptanceTests".
+Acceptance tests verify behavior from the outside (user-visible outcomes, system boundaries). Unit tests verify behavior from the inside (individual unit contracts). Never use an acceptance test where a unit test suffices -- acceptance tests are slower and hide the specific locus of failure. Never use a unit test to verify acceptance criteria -- the test may pass while the user-visible behavior is broken. The boundary is: does this test require the full system? If yes, it is an acceptance test. Source: C2 Wiki "AcceptanceTests".
 
 ## Code So Simple It Has To Work
 
@@ -117,6 +117,6 @@ Before adding a test for a trivial function, ask: "Is this code so simple that i
 
 ## Related Skills
 
-- `contract-testing` — iron law: every abstract type requires a contract test fixture
-- `testing` — test taxonomy, AAA pattern, naming conventions
-- `systematic-debugging` — when tests surface bugs, trace to root cause before patching
+- `contract-testing` -- iron law: every abstract type requires a contract test fixture
+- `testing` -- test taxonomy, AAA pattern, naming conventions
+- `systematic-debugging` -- when tests surface bugs, trace to root cause before patching

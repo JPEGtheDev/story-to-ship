@@ -34,21 +34,21 @@ Every generated story must include this section:
 
 ## Premium Request Estimation Guidelines
 
-### Small (S) — 15–30 requests
+### Small (S) -- 15-30 requests
 - Single file/class creation
 - Simple utilities or helpers
 - Basic configuration files
 - Bug fixes with clear root cause
 - Examples: Image format converter, config parser
 
-### Medium (M) — 30–70 requests
+### Medium (M) -- 30-70 requests
 - Multi-file features
 - Moderate integration work
 - Test suite creation
 - CI/CD workflow setup
 - Examples: Pixel comparator, GitHub Actions workflow, unit test suite
 
-### Large (L) — 70–120+ requests
+### Large (L) -- 70-120+ requests
 - Major architectural changes
 - Cross-cutting refactoring
 - Complex integration across multiple subsystems
@@ -78,10 +78,10 @@ Every generated story must include this section:
 
 | Component | % of Total |
 |-----------|-----------|
-| Base implementation | 40–60% |
-| Testing and validation | 20–30% |
-| Iteration and fixes | 15–25% |
-| Documentation | 5–10% |
+| Base implementation | 40-60% |
+| Testing and validation | 20-30% |
+| Iteration and fixes | 15-25% |
+| Documentation | 5-10% |
 
 ---
 
@@ -91,12 +91,12 @@ For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elim
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 - Generating a story without an effort estimate section
-- "I'll add the estimate later" — add it now
+- "I'll add the estimate later" -- add it now
 - Recommending Advanced model for a clearly mechanical task
-- Estimate range exceeds 50 requests for an S-sized story — recategorize as M
+- Estimate range exceeds 50 requests for an S-sized story -- recategorize as M
 - Dispatching a premium agent for a task clearly scoped as XS or S
 
 ---
@@ -109,8 +109,8 @@ For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elim
 4. All skill dispatches needed have been identified
 5. If the story requires >3 agents, the Wave structure has been accounted for
 
-✓ All met → commit to the estimate
-✗ Any unmet → resolve unknowns and recheck INVEST compliance before estimating
+[+] All met -> commit to the estimate
+[-] Any unmet -> resolve unknowns and recheck INVEST compliance before estimating
 
 ---
 

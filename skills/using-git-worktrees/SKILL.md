@@ -48,7 +48,7 @@ git -C .worktrees/agent-<name> branch --show-current
 # Must NOT equal the active development branch
 ```
 
-Use `.worktrees/agent-<name>` as the path — inside the repo, gitignored, named descriptively.
+Use `.worktrees/agent-<name>` as the path -- inside the repo, gitignored, named descriptively.
 
 ### List active worktrees
 
@@ -73,8 +73,8 @@ BEFORE creating a worktree, verify:
 2. A descriptive name for the branch exists: agent/<purpose>
 3. The subagent prompt includes the worktree path explicitly
 
-✓ All met → create the worktree and dispatch
-✗ Any unmet → work in the main context instead
+[+] All met -> create the worktree and dispatch
+[-] Any unmet -> work in the main context instead
 ```
 
 ---
@@ -88,7 +88,7 @@ When dispatching a subagent to a worktree:
 3. Subagent commits to its branch inside the worktree
 4. Main context reviews the diff: `git diff main..agent/<name>`
 5. If approved: merge or cherry-pick into main
-6. If rejected: `git worktree remove` — no cleanup needed in main
+6. If rejected: `git worktree remove` -- no cleanup needed in main
 
 **The subagent MUST NOT push to `main`, `master`, or the active development branch.**
 
@@ -100,16 +100,16 @@ When "I think" is not enough: dispatch two agents -- one per worktree -- with an
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
-- Subagent working directly in the main repo directory — **STOP. Create a worktree in `.worktrees/` first.**
+- Subagent working directly in the main repo directory -- **STOP. Create a worktree in `.worktrees/` first.**
 - Subagent output committed to `main` or the active feature branch without review
 - Worktree left alive after the work is merged or discarded (leaks branch clutter)
 - Dispatch to a worktree without passing the worktree path in the agent prompt
 - Merging a worktree branch before reviewing the full diff: `git diff main..agent/<name>`
-- Using `git worktree list | wc -l` to check if you are in a worktree — **STOP. This does NOT tell you which worktree you are in. Use `git rev-parse --show-toplevel` and compare against the expected path.**
-- "I reviewed the diff mentally — running `git diff main..agent/<name>` explicitly is redundant" — **STOP. Run the diff command. Mental review is not a structural check.**
-- Using `git worktree add ../name` (relative `../` path) — **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
+- Using `git worktree list | wc -l` to check if you are in a worktree -- **STOP. This does NOT tell you which worktree you are in. Use `git rev-parse --show-toplevel` and compare against the expected path.**
+- "I reviewed the diff mentally -- running `git diff main..agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**
+- Using `git worktree add ../name` (relative `../` path) -- **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
 
 ---
 
@@ -117,17 +117,17 @@ When "I think" is not enough: dispatch two agents -- one per worktree -- with an
 
 | Excuse | Reality |
 |--------|---------|
-| "The task is simple enough to do in main" | Simple tasks don't need a worktree — this rule applies when you WOULD use a subagent |
+| "The task is simple enough to do in main" | Simple tasks don't need a worktree -- this rule applies when you WOULD use a subagent |
 | "I'll review the subagent output before merging" | Review happens in the main context; the subagent STILL needs its own worktree to work safely |
 | "Worktrees add overhead" | One git command. The cleanup time saved from a subagent polluting main more than compensates |
 | "I think this approach is right, no need for A/B" | "I think" is not evidence. Dispatch two agents and let the output decide. |
 | "The subagent promised not to touch main" | Subagent discipline is not a structural guarantee. Worktrees are. Create the worktree. |
-| "I'll clean up the worktree later — it's not hurting anything active" | Reality: YOU MUST remove worktrees immediately after merging or discarding. Stale worktrees accumulate into branch clutter that obscures active work. |
+| "I'll clean up the worktree later -- it's not hurting anything active" | Reality: YOU MUST remove worktrees immediately after merging or discarding. Stale worktrees accumulate into branch clutter that obscures active work. |
 
 ---
 
 ## Related Skills
 
-- `subagent-driven-development` — governs how to dispatch subagents and review their work; worktrees are the isolation mechanism for every subagent dispatch
-- `dispatching-parallel-agents` — governs parallel agent dispatch patterns; every parallel agent MUST have its own dedicated worktree
-- `execution` — governs the overall work loop; worktrees support the commit rhythm and behavior preservation required by the execution skill
+- `subagent-driven-development` -- governs how to dispatch subagents and review their work; worktrees are the isolation mechanism for every subagent dispatch
+- `dispatching-parallel-agents` -- governs parallel agent dispatch patterns; every parallel agent MUST have its own dedicated worktree
+- `execution` -- governs the overall work loop; worktrees support the commit rhythm and behavior preservation required by the execution skill

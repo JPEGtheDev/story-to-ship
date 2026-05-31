@@ -24,8 +24,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 2. Does a contract test fixture exist for it?
 3. Does every concrete implementation pass all contract tests?
 
-✓ All met → proceed
-✗ Any unmet → write the contract test fixture before adding any new implementation
+[+] All met -> proceed
+[-] Any unmet -> write the contract test fixture before adding any new implementation
 
 ---
 
@@ -33,9 +33,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 A contract test describes the behavioral invariants all implementations must satisfy. Violating a contract test violates the Liskov Substitution Principle.
 
-Use `TYPED_TEST_P` — not `TEST_F` — because `TEST_F` instantiates the fixture class directly and will not compile against a pure-virtual base. See `references/CONTRACT_TESTING.md` for the full `TYPED_TEST_P` / `INSTANTIATE_TYPED_TEST_SUITE_P` pattern.
+Use `TYPED_TEST_P` -- not `TEST_F` -- because `TEST_F` instantiates the fixture class directly and will not compile against a pure-virtual base. See `references/CONTRACT_TESTING.md` for the full `TYPED_TEST_P` / `INSTANTIATE_TYPED_TEST_SUITE_P` pattern.
 
-A failing contract test means the hierarchy is wrong — fix the hierarchy, not the test.
+A failing contract test means the hierarchy is wrong -- fix the hierarchy, not the test.
 
 ---
 

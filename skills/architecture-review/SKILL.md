@@ -8,7 +8,7 @@ description: Use when adding new classes, refactoring code, or reviewing PRs for
 ## Iron Law
 
 ```
-DEPENDENCIES FLOW INWARD — INNER LAYERS NEVER DEPEND ON OUTER LAYERS
+DEPENDENCIES FLOW INWARD -- INNER LAYERS NEVER DEPEND ON OUTER LAYERS
 YOU MUST verify dependency direction for every new class and every refactor. A layer violation in a PR means the PR is NOT mergeable until it is fixed. No exceptions.
 ```
 
@@ -28,7 +28,7 @@ For the Particle-Viewer 4-layer inward-dependency model, file-to-layer mapping, 
 
 > "With a sufficient number of users of an API, it does not matter what you promise in the contract: all observable behaviors of your system will be depended upon by somebody."
 
-Before modifying **any observable behavior** of an existing component — including undocumented behaviors, error messages, return value nuances, timing, side effects — ask:
+Before modifying **any observable behavior** of an existing component -- including undocumented behaviors, error messages, return value nuances, timing, side effects -- ask:
 
 **"What else could currently be depending on this?"**
 
@@ -54,9 +54,9 @@ The codebase has a **dirty zone** (data that has not been validated) and a **cle
 
 | Zone | Contains | May assume |
 |------|----------|-----------|
-| Dirty | File bytes, user input strings, socket data | Nothing — validate everything |
-| Barricade | Parser, validator, loader functions | Converts dirty → clean |
-| Clean | ViewerApp state, Camera, Shader, Particle | Data is valid — no defensive checks needed |
+| Dirty | File bytes, user input strings, socket data | Nothing -- validate everything |
+| Barricade | Parser, validator, loader functions | Converts dirty -> clean |
+| Clean | ViewerApp state, Camera, Shader, Particle | Data is valid -- no defensive checks needed |
 
 **Violation signal:** A class in Layer 2 (Camera, Shader, Particle) checking for null or empty data it received from ViewerApp. That check belongs at the barricade, not in the clean zone.
 
@@ -68,15 +68,15 @@ Run every item for each file under review:
 
 1. Does the new or modified class belong to a defined layer?
 2. Does it import or call code from an outer layer? (VIOLATION if yes)
-3. Does `ViewerApp` orchestrate or implement? (must orchestrate only — rendering logic belongs in Shader/Particle classes)
+3. Does `ViewerApp` orchestrate or implement? (must orchestrate only -- rendering logic belongs in Shader/Particle classes)
 4. Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
-5. Do any `src/` files import from `tests/`? (VIOLATION — production code must never depend on test code)
+5. Do any `src/` files import from `tests/`? (VIOLATION -- production code must never depend on test code)
 6. Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
 7. Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
 8. Are there circular `#include` dependencies between any two files in the same layer?
 
-✓ All pass → verdict: CLEAN
-✗ Any fail → verdict: VIOLATIONS FOUND — document every failure in the Review Report
+[+] All pass -> verdict: CLEAN
+[-] Any fail -> verdict: VIOLATIONS FOUND -- document every failure in the Review Report
 
 ---
 
@@ -94,15 +94,15 @@ A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in t
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of the following, STOP before writing your verdict:
 
-- "It only calls one GL function directly, that's fine" → Stop. One raw GL call outside `IOpenGLContext` is a violation. Flag it.
-- "ViewerApp is the orchestrator so it's fine to put logic there" → Stop. Orchestration means delegation. Logic belongs in domain classes.
-- "The test utility is small, it won't hurt in src/" → Stop. Test code in production is a maintenance trap. Flag it.
-- "It's in the same layer, so the dependency is acceptable" → Stop. Same layer, different files — check for circular dependencies. Design smell if found.
-- "The violation is minor, I'll note it but give CLEAN" → Stop. There is no CLEAN with open violations. Verdict is VIOLATIONS FOUND.
+- "It only calls one GL function directly, that's fine" -> Stop. One raw GL call outside `IOpenGLContext` is a violation. Flag it.
+- "ViewerApp is the orchestrator so it's fine to put logic there" -> Stop. Orchestration means delegation. Logic belongs in domain classes.
+- "The test utility is small, it won't hurt in src/" -> Stop. Test code in production is a maintenance trap. Flag it.
+- "It's in the same layer, so the dependency is acceptable" -> Stop. Same layer, different files -- check for circular dependencies. Design smell if found.
+- "The violation is minor, I'll note it but give CLEAN" -> Stop. There is no CLEAN with open violations. Verdict is VIOLATIONS FOUND.
 
 ---
 
@@ -121,9 +121,9 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 
 ## Related Skills
 
-- `code-quality` — naming conventions and C++ patterns; architecture-review checks structure, code-quality checks form
-- `testing` — governs what lives in `tests/` vs `src/testing/`; architecture-review enforces the boundary
-- `infrastructure-review` — CMake build structure; architecture-review checks source structure
-- `oop-principles` — sub-domain skill; run Is-A / Has-A and SOLID gate for every class hierarchy change reviewed here
+- `code-quality` -- naming conventions and C++ patterns; architecture-review checks structure, code-quality checks form
+- `testing` -- governs what lives in `tests/` vs `src/testing/`; architecture-review enforces the boundary
+- `infrastructure-review` -- CMake build structure; architecture-review checks source structure
+- `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID gate for every class hierarchy change reviewed here
 
 **Design patterns and architectural principles:** `references/DESIGN_PATTERNS.md` and `references/ANTIPATTERNS.md`

@@ -29,7 +29,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED | `claude-sonnet-4.6` |
 | 6 | Feature merged and closed | Retrospective | Process improvement items | `claude-haiku-4.5` |
 
-Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas + model selection rationale: `references/CEREMONIES.md`.
+Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas + model selection rationale: `references/CEREMONIES.md`.
 
 ---
 
@@ -37,8 +37,8 @@ Simple 1-todo, clear AC → skip; use Skeptic. 1+2 required for Discovery featur
 
 1. Which ceremony? (see When to Invoke)
 2. Did Discovery run? Check plan.md for `## Feature Specification`.
-   ✓ → Three Amigos for Ceremonies 2, 5, 6
-   ✗ → Skeptic for Ceremony 2
+   [+] -> Three Amigos for Ceremonies 2, 5, 6
+   [-] -> Skeptic for Ceremony 2
 3. 3 worktrees, one per amigo. Inject `{{PERSONA}}` + `{{READ_FIRST}}` + `{{CEREMONY}}` + `{{AGENDA}}` into amigo.md.
 4. Collect all three verdicts before acting on any.
 5. Any single REJECT blocks. Majority does NOT override.
@@ -73,7 +73,7 @@ A Feature Specification that does not address both questions is incomplete and M
 - 3 simultaneous worktrees, branches: `amigo/<ceremony>-<persona>`.
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
 - After all verdicts: delete worktrees and branches.
-- NEEDS_CONTEXT from any amigo → re-dispatch that amigo only.
+- NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
 
 ---
 
@@ -85,13 +85,13 @@ CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching an
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
-- "Two approved — proceed" → Any REJECT blocks. Collect all three verdicts first.
-- "Discovery ran, skip re-reading the spec" → Read plan.md now.
-- "Small feature, skip Three Amigos" → Check When to Invoke. If the signal fires, run the ceremony now.
-- "AC is obvious" → Informal AC is exactly what Discovery solves. Run Discovery now.
-- "REVISIONS NEEDED — fix and merge" → Requires new todos, completion, and re-Signoff.
+- "Two approved -- proceed" -> Any REJECT blocks. Collect all three verdicts first.
+- "Discovery ran, skip re-reading the spec" -> Read plan.md now.
+- "Small feature, skip Three Amigos" -> Check When to Invoke. If the signal fires, run the ceremony now.
+- "AC is obvious" -> Informal AC is exactly what Discovery solves. Run Discovery now.
+- "REVISIONS NEEDED -- fix and merge" -> Requires new todos, completion, and re-Signoff.
 
 ---
 
@@ -99,9 +99,9 @@ CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching an
 
 | Excuse | Reality |
 |--------|---------|
-| "We discussed it, Discovery is redundant" | Discussion ≠ Feature Specification. Run Discovery. |
+| "We discussed it, Discovery is redundant" | Discussion != Feature Specification. Run Discovery. |
 | "Developer knows the code, skip that amigo" | Amigo reads code first. Findings are evidence. |
-| "Two approved — majority rules" | Any REJECT blocks. Majority is irrelevant. |
+| "Two approved -- majority rules" | Any REJECT blocks. Majority is irrelevant. |
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |
 | "Retrospective is optional" | Process debt accumulates. Expected, not optional. |
 | "Not fully blocked, skip Pivot Assessment" | DONE_WITH_CONCERNS also triggers Pivot Assessment. |
@@ -110,4 +110,4 @@ CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching an
 
 ## References
 
-- `references/CEREMONIES.md` — per-amigo sources, agenda lists, output formats, and model selection rationale for all 6 ceremonies
+- `references/CEREMONIES.md` -- per-amigo sources, agenda lists, output formats, and model selection rationale for all 6 ceremonies

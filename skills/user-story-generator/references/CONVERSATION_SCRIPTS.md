@@ -27,7 +27,7 @@ Start by acknowledging what they've said and asking clarifying questions:
 > 
 > 1. **What problem does this solve?** (What's the user/business value?)
 > 2. **Is this a feature, refactor, spike, or bug fix?**
-> 3. **Rough scope estimate**—is this small (few hours), medium (1-2 days), or larger?"
+> 3. **Rough scope estimate**--is this small (few hours), medium (1-2 days), or larger?"
 
 ### If their request is vague:
 > "I can help with that! To create a good story, could you tell me more about:
@@ -62,7 +62,7 @@ Based on their answers, ask **one or two follow-up questions** to clarify:
 - "What's the impact? (crashes, incorrect behavior, performance)"
 - "Do we know the root cause, or is investigation needed?"
 
-**Keep questions natural and conversational.** Don't interrogate—ask what you genuinely need to know.
+**Keep questions natural and conversational.** Don't interrogate--ask what you genuinely need to know.
 
 ## Step 3: Confirm Understanding Before Generating
 
@@ -84,7 +84,7 @@ This gives them a chance to course-correct before you generate the full story.
 
 ---
 
-**Step 4 — Generate the Story:** See `references/STORY_TEMPLATE.md` for the full story template.
+**Step 4 -- Generate the Story:** See `references/STORY_TEMPLATE.md` for the full story template.
 
 ---
 
@@ -106,7 +106,7 @@ After generating the story, **invite feedback and refinement**:
 
 ### If they want changes:
 Make them immediately and conversationally:
-> "Got it—I've updated the [section] to [change]. Here's the revised version..."
+> "Got it--I've updated the [section] to [change]. Here's the revised version..."
 
 ### If they want breakdown:
 Ask how they want it split:

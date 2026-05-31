@@ -46,13 +46,13 @@ TEST(DataLoadingPipelineTest, LoadSettings_ValidFile_PopulatesParticles)
 
 ## Test File Organization
 
-- `tests/core/` — Unit tests for `src/*.hpp` classes
-- `tests/integration/` — Multi-component tests
-- `tests/testing/` — Tests for test utilities (PixelComparator, Image)
-- `tests/visual-regression/` — Visual regression tests
-- `tests/mocks/` — Mock implementations
+- `tests/core/` -- Unit tests for `src/*.hpp` classes
+- `tests/integration/` -- Multi-component tests
+- `tests/testing/` -- Tests for test utilities (PixelComparator, Image)
+- `tests/visual-regression/` -- Visual regression tests
+- `tests/mocks/` -- Mock implementations
 
-File naming: each test file matches its source — `CameraTests.cpp` tests `camera.hpp`.
+File naming: each test file matches its source -- `CameraTests.cpp` tests `camera.hpp`.
 
 ---
 
@@ -70,7 +70,7 @@ File naming: each test file matches its source — `CameraTests.cpp` tests `came
 
 6. **Visual test resolution.** Use the viewer's default resolution (1280x720) for visual regression tests unless specifically testing other resolutions. Non-default resolutions can cause warping and scaling artifacts.
 
-7. **Camera positioning for visual tests.** Don't blindly copy debug camera coordinates — debug shows interactive state, not ideal test framing. Extract the viewing **direction** from debug output, then calculate **distance** based on desired viewport coverage: `distance = subject_size / (coverage_% * tan(FOV/2))`. See `docs/visual-regression/camera-positioning-lessons-learned.md`.
+7. **Camera positioning for visual tests.** Don't blindly copy debug camera coordinates -- debug shows interactive state, not ideal test framing. Extract the viewing **direction** from debug output, then calculate **distance** based on desired viewport coverage: `distance = subject_size / (coverage_% * tan(FOV/2))`. See `docs/visual-regression/camera-positioning-lessons-learned.md`.
 
 8. **Every bug fix requires a regression test.** Write a test that reproduces the bug (fails before the fix). Fix the code. Confirm the test now passes. A bug fixed without a test is a bug scheduled for a return visit.
 
@@ -88,12 +88,12 @@ Use the **least sophisticated double** that answers your question. Reaching for 
 |--------|----------|-----------------|-------------|
 | **Stub** | No-op methods; returns null/zero/false | No | You need `IOpenGLContext` to not crash; you don't care what it called |
 | **Fake** | Returns programmable values via setters | No | You need to control what `glGetError()` returns without interaction verification |
-| **Mock** | Returns values AND verifies call expectations | Yes — test fails if expected calls are not made | You must assert `glDrawArrays` was called exactly once with specific arguments |
+| **Mock** | Returns values AND verifies call expectations | Yes -- test fails if expected calls are not made | You must assert `glDrawArrays` was called exactly once with specific arguments |
 | **Shunt / SelfShunt** | The test fixture itself implements the interface | Inspected in teardown | Lowest setup overhead when the fixture plays both collaborator and verifier |
 
-**Google Mock mapping:** Stub → subclass returning constants. Fake → subclass with setters. Mock → `MOCK_METHOD` + `EXPECT_CALL` + `Times()`. Shunt → `TEST_F` fixture inherits from the interface.
+**Google Mock mapping:** Stub -> subclass returning constants. Fake -> subclass with setters. Mock -> `MOCK_METHOD` + `EXPECT_CALL` + `Times()`. Shunt -> `TEST_F` fixture inherits from the interface.
 
-**Key principle:** Mock the *role* (interface), not the concrete object. `MockOpenGLContext` mocks `IOpenGLContext` — stable across implementation changes.
+**Key principle:** Mock the *role* (interface), not the concrete object. `MockOpenGLContext` mocks `IOpenGLContext` -- stable across implementation changes.
 
 **When NOT to use Google Mock:** If the question is "does this run without crashing?", a stub suffices. Only use `EXPECT_CALL` when the interaction itself is the behavior under test.
 
@@ -103,7 +103,7 @@ For directory layout and file naming conventions, see **Test File Organization**
 
 ### Test Ordering
 
-Within a file, order tests: basic → complex, common → edge cases.
+Within a file, order tests: basic -> complex, common -> edge cases.
 
 ---
 
@@ -131,7 +131,7 @@ These supplement the core rows kept in SKILL.md:
 | "Deleting X hours of work is wasteful" | Sunk cost. Keeping untested code is technical debt. |
 | "The bug was a one-off, no regression test needed" | One-off bugs recur after the next refactoring. A regression test takes 5 minutes; a re-investigation takes hours. |
 
-Additional Red Flags — STOP:
+Additional Red Flags -- STOP:
 
 - "Tests after achieve the same goals"
 - "Just this once" or "This is different because..."

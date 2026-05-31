@@ -24,10 +24,10 @@ Before declaring "the bug disappeared":
 
 - [ ] Compare debug vs release build behavior: `cmake -DCMAKE_BUILD_TYPE=Debug` vs `Release`
 - [ ] Audit every `assert` for `=` (assignment) vs `==` (comparison)
-- [ ] Compile with sanitizers: `-fsanitize=address,undefined` — does the bug surface?
+- [ ] Compile with sanitizers: `-fsanitize=address,undefined` -- does the bug surface?
 - [ ] If a threading issue: run with thread sanitizer (`-fsanitize=thread`)
-- [ ] Test without the debugger attached — run the binary directly
-- [ ] Compile with `-O2` and `-O0` — does behavior differ between the two?
+- [ ] Test without the debugger attached -- run the binary directly
+- [ ] Compile with `-O2` and `-O0` -- does behavior differ between the two?
 - [ ] Check for uninitialized variables: `-Wuninitialized -Wall -Wextra`
 
-A bug that only reproduces in one build mode is a real bug with a real root cause. The difference in behavior is evidence — use it.
+A bug that only reproduces in one build mode is a real bug with a real root cause. The difference in behavior is evidence -- use it.

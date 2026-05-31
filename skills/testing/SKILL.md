@@ -29,9 +29,9 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 ## TDD (Test-Driven Development) Cycle
 
-**RED → GREEN → REFACTOR. In that order. Every time.**
+**RED -> GREEN -> REFACTOR. In that order. Every time.**
 
-- **RED:** Write one failing test. Name: `UnitName_Condition_ExpectedResult`. YOU MUST SEE IT FAIL — confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
+- **RED:** Write one failing test. Name: `UnitName_Condition_ExpectedResult`. YOU MUST SEE IT FAIL -- confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
 - **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
 - **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
 
@@ -41,10 +41,10 @@ For PV test runner commands, see `references/PV_TEST_CONVENTIONS.md`.
 
 ## Step 1: Determine Test Type
 
-- **Unit test** — single class/function in isolation → `tests/core/`
-- **Integration test** — component interactions → `tests/integration/`
-- **Visual regression test** — pixel comparison → load `visual-regression-testing` skill
-- **Test review** — check existing tests against standards → apply the `## BEFORE PROCEEDING` checklist
+- **Unit test** -- single class/function in isolation -> `tests/core/`
+- **Integration test** -- component interactions -> `tests/integration/`
+- **Visual regression test** -- pixel comparison -> load `visual-regression-testing` skill
+- **Test review** -- check existing tests against standards -> apply the `## BEFORE PROCEEDING` checklist
 
 ---
 
@@ -61,7 +61,7 @@ Use format: `UnitName_StateUnderTest_ExpectedResult`
 Examples:
 - `MoveForward_IncreasesZPosition`
 
-**`_ExpectedResult` must describe the behavior or invariant proven — not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
+**`_ExpectedResult` must describe the behavior or invariant proven -- not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
 
 See `references/TESTING_EXAMPLES.md` for PV naming examples.
 
@@ -87,12 +87,12 @@ Before presenting tests, verify:
 12. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
 13. For visual regression tests: see visual-regression-testing skill checklist
 
-✓ All met → proceed
-✗ Any unmet → write the test first before touching implementation code
+[+] All met -> proceed
+[-] Any unmet -> write the test first before touching implementation code
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of these, STOP and start over with RED:
 
@@ -137,16 +137,16 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 
 ## Related Skills
 
-- `contract-testing` — sub-domain skill; every abstract type or interface requires a contract test fixture — load this skill when the type has 2+ implementations
-- `visual-regression-testing` — sub-domain skill; pixel-level output testing boundary; unit and contract tests do not replace visual regression
-- `code-quality` — clang-format and naming conventions apply to test code too
+- `contract-testing` -- sub-domain skill; every abstract type or interface requires a contract test fixture -- load this skill when the type has 2+ implementations
+- `visual-regression-testing` -- sub-domain skill; pixel-level output testing boundary; unit and contract tests do not replace visual regression
+- `code-quality` -- clang-format and naming conventions apply to test code too
 
-**Testing principles (T2–T4):** See the `contract-testing` skill — unit tests as constraints, acceptance vs unit boundary, simplicity check
+**Testing principles (T2-T4):** See the `contract-testing` skill -- unit tests as constraints, acceptance vs unit boundary, simplicity check
 
 ---
 
 ## Reference Files
 
-- `references/testing-anti-patterns.md` — common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green)
-- `references/TEST_SMELLS.md` — test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
+- `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green)
+- `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
 

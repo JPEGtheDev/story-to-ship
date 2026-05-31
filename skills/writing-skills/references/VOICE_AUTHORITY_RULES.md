@@ -38,7 +38,7 @@ Rules:
 
 ## Acronym Rule
 
-**Spell out all terms on first use.** Do not introduce acronyms unless they are universally known (TDD, CI, PR, API). Project-specific and skill-specific abbreviations are forbidden — they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
+**Spell out all terms on first use.** Do not introduce acronyms unless they are universally known (TDD, CI, PR, API). Project-specific and skill-specific abbreviations are forbidden -- they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
 
 Examples:
 - WRONG: "After the DDR is approved, hand off to writing-plans."

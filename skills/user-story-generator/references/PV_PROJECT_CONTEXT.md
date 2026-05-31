@@ -1,6 +1,6 @@
 # Particle-Viewer Project Scope Gate
 
-## Step 1: Understand the Request — Verify Project Scope First
+## Step 1: Understand the Request -- Verify Project Scope First
 
 **CRITICAL: Verify Project Scope First**
 
@@ -15,7 +15,7 @@ Before asking any other questions, **load and review** `references/PARTICLE_VIEW
 - Focus on rendering, file I/O, camera controls, visual testing
 
 **If the user mentions functionality that doesn't exist in the project**, ask:
-> "Just to clarify—are you planning to add [feature], or did I misunderstand the scope? I want to make sure we're working on something that fits the project's purpose as a [viewer/simulator/etc]."
+> "Just to clarify--are you planning to add [feature], or did I misunderstand the scope? I want to make sure we're working on something that fits the project's purpose as a [viewer/simulator/etc]."
 
 ## Using Project Context
 
@@ -46,4 +46,4 @@ Load `references/STORY_TEMPLATES.md` when:
 - Need to show format variations (BDD vs bullets)
 - Asked for examples of features, refactors, spikes, or bugs
 
-**Don't load all references upfront.** Use progressive disclosure—load only what you need when you need it.
+**Don't load all references upfront.** Use progressive disclosure--load only what you need when you need it.

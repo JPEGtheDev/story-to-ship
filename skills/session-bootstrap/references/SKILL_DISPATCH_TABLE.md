@@ -1,6 +1,6 @@
-# On Start — Skill Dispatch Table
+# On Start -- Skill Dispatch Table
 
-| If the task involves…                        | MUST read these skills BEFORE acting               |
+| If the task involves...                        | MUST read these skills BEFORE acting               |
 |----------------------------------------------|----------------------------------------------------|
 | Any implementation work                      | `execution`                                        |
 | Planning a multi-step task                   | `writing-plans`                                    |
@@ -25,7 +25,7 @@
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`                                   |
 | Resuming from a prior session with pending SQL todos | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch Skeptic, before first implementation step |
-| Schema design, new data structure, or plan with ≥5 implementation items | `brainstorming`, `writing-plans` |
+| Schema design, new data structure, or plan with >=5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
 | Summarizing external resources (articles, web pages, files) for knowledge extraction | `summarization` |

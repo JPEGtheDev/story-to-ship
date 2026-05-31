@@ -15,7 +15,7 @@ Auto-enforced via `.clang-format`. Key settings:
 | Line length | 120 characters |
 | Functions/classes braces | Allman (new line) |
 | Control structure braces | K&R (same line) |
-| Include order | C++ standard → system → external libs → project headers |
+| Include order | C++ standard -> system -> external libs -> project headers |
 | Pointer alignment | Left (`int* ptr`) |
 
 Full configuration: `.clang-format`
@@ -31,14 +31,14 @@ clang-tidy src/main.cpp -- -Isrc/glad/include
 # Analyze using compilation database
 clang-tidy src/particle.hpp -p build
 
-# Auto-fix (always review auto-fix output before committing — it can change behavior)
+# Auto-fix (always review auto-fix output before committing -- it can change behavior)
 clang-tidy -fix src/main.cpp -- -Isrc/glad/include
 ```
 
 Configuration in `.clang-tidy` enforces:
-- `modernize-*` — Modern C++ practices (smart pointers, nullptr, auto, range-based loops)
-- `readability-*` — Const correctness, function complexity (≤25 cognitive, ≤50 statements, <5 params)
-- `cppcoreguidelines-*` — Microsoft C++ Core Guidelines
+- `modernize-*` -- Modern C++ practices (smart pointers, nullptr, auto, range-based loops)
+- `readability-*` -- Const correctness, function complexity (<=25 cognitive, <=50 statements, <5 params)
+- `cppcoreguidelines-*` -- Microsoft C++ Core Guidelines
 - `performance-*`, `bugprone-*`, `portability-*`, `clang-analyzer-*`
 
 Header filter excludes embedded libs: `glad`, `stb_*`.
@@ -52,7 +52,7 @@ Header filter excludes embedded libs: `glad`, `stb_*`.
 ## Step 7: Adding a Feature / Fixing a Bug
 
 ### New Feature Workflow
-1. **Scan the class interface** — before writing integration code that calls methods on an existing class, verify which members are public/private. Classes like `Camera` have a mix; don't assume public.
+1. **Scan the class interface** -- before writing integration code that calls methods on an existing class, verify which members are public/private. Classes like `Camera` have a mix; don't assume public.
 2. Make code changes following naming conventions
 3. Add unit tests in `tests/core/` (see `testing` skill)
 4. Run `clang-format -i` on ALL changed files

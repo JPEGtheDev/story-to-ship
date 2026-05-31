@@ -23,11 +23,11 @@ Violating the letter of this rule is violating the spirit of this rule.
 1. Have I loaded the code-quality skill?
 2. Am I about to introduce a GL resource without RAII (Resource Acquisition Is Initialization)?
 3. Am I about to duplicate logic that already exists in the codebase?
-4. Has the class or function I am changing been read — not recalled from memory?
-5. Before declaring a new type: is this part of the public API, or an implementation detail used only in one Translation Unit (TU)? If implementation detail → declare in `.cpp`, not the header.
+4. Has the class or function I am changing been read -- not recalled from memory?
+5. Before declaring a new type: is this part of the public API, or an implementation detail used only in one Translation Unit (TU)? If implementation detail -> declare in `.cpp`, not the header.
 
-✓ All met → proceed
-✗ Any unmet → load the code-quality skill, apply RAII, search for existing implementations, read the target code, or move the implementation detail into the `.cpp` before writing any production code
+[+] All met -> proceed
+[-] Any unmet -> load the code-quality skill, apply RAII, search for existing implementations, read the target code, or move the implementation detail into the `.cpp` before writing any production code
 
 ---
 
@@ -53,9 +53,9 @@ When writing C++ code for this project, apply these patterns consistently.
 - Use assertions for preconditions and invariants
 - Open binary data files with `"rb"` mode for cross-platform correctness
 
-### FailFast — Surface Errors at Their Source
+### FailFast -- Surface Errors at Their Source
 
-A system that terminates on detecting bad state causes less damage than one that continues in an unknown state. **ExceptionHiding** — silently swallowing an error — transfers the symptom downstream where the root cause is invisible.
+A system that terminates on detecting bad state causes less damage than one that continues in an unknown state. **ExceptionHiding** -- silently swallowing an error -- transfers the symptom downstream where the root cause is invisible.
 
 | Error type | Mechanism | Example |
 |---|---|---|
@@ -64,10 +64,10 @@ A system that terminates on detecting bad state causes less damage than one that
 | User-recoverable error | Log + return `false`/error code | Missing particle data file |
 
 ```cpp
-// WRONG — ExceptionHiding: swallows compile error, propagates broken shader
+// WRONG -- ExceptionHiding: swallows compile error, propagates broken shader
 glCompileShader(shader);
 
-// CORRECT — FailFast: surface at source
+// CORRECT -- FailFast: surface at source
 GLint success = 0;
 glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 if (!success) {
@@ -105,16 +105,16 @@ if (!success) {
 
 ### SDL3 Gotchas
 
-- **Subsystem flags:** `SDL_Init` must include the flag for every SDL3 subsystem used. Missing a flag causes silent failure — no error, no events, no devices.
+- **Subsystem flags:** `SDL_Init` must include the flag for every SDL3 subsystem used. Missing a flag causes silent failure -- no error, no events, no devices.
 - **`*ForID` query functions:** Use `SDL_Get*ForID()` variants (e.g., `SDL_GetJoystickGUIDForID`) over opening a joystick just to read a value then close it. Unnecessary open consumes a file handle.
 - **Joystick type is distro-dependent:** `SDL_GetJoystickTypeForID()` returns `SDL_JOYSTICK_TYPE_GAMEPAD` on SteamOS but `SDL_JOYSTICK_TYPE_UNKNOWN` on generic Linux (OpenSuse, Ubuntu) because stock udev rules don't set the GAMEPAD property. Always pair type-based detection with a capability-based fallback: open the joystick, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, then close it.
-- **Gamepad hold-button state:** Don't route through `Camera::KeyReader()`. `KeyReader` has a single-press dispatch block — calling it every frame fires single-press handlers repeatedly. For hold-buttons that mirror keyboard held keys, add a dedicated method (e.g., `Camera::setSpeedBoost(bool)`).
+- **Gamepad hold-button state:** Don't route through `Camera::KeyReader()`. `KeyReader` has a single-press dispatch block -- calling it every frame fires single-press handlers repeatedly. For hold-buttons that mirror keyboard held keys, add a dedicated method (e.g., `Camera::setSpeedBoost(bool)`).
 
 ---
 
 ## Headers
 
-- Every header must include all headers it directly uses — no transitive include reliance
+- Every header must include all headers it directly uses -- no transitive include reliance
 - Mark functions defined in headers as `inline` to avoid multiple-definition linker errors
 
 ---
@@ -131,11 +131,11 @@ When removing a call site from `viewer_app.cpp`, **do not also delete the suppor
 
 ---
 
-## DRY — Knowledge, Not Text
+## DRY -- Knowledge, Not Text
 
 DRY means every piece of **knowledge** has a single authoritative representation. Not text.
 
-**Acid test:** If you change one copy and not the other, does the system break? If yes: DRY violation. If no: independent representations of different things — not a violation.
+**Acid test:** If you change one copy and not the other, does the system break? If yes: DRY violation. If no: independent representations of different things -- not a violation.
 
 - **DRY violation signal:** "If this constant changes, I need to update it in N places."
 - **False DRY signal:** "These two functions look the same." Looks are not knowledge. Check whether they represent the same concept before extracting.
@@ -151,7 +151,7 @@ When you encounter a code smell or quality violation while working on something 
 3. Apply the boarding protocol:
 
 ```
-[BROKEN WINDOW NOTED: src/viewer_app.cpp:142 — raw glDrawArrays outside IOpenGLContext]
+[BROKEN WINDOW NOTED: src/viewer_app.cpp:142 -- raw glDrawArrays outside IOpenGLContext]
 ```
 
 Place this in a `// TODO` at the point of observation. After your current task completes, create a follow-up todo to address it. One window = one todo.
@@ -193,14 +193,14 @@ These smells are not caught by clang-tidy. Catch them in code review.
 | **MagicNumber** | Raw GLenum inline: `glTexImage2D(..., 0x8051, ...)` | Named constant: `constexpr GLenum kInternalFormat = GL_RGB8` |
 | **DataClumps** | `(GLuint vao, GLuint vbo, GLuint ebo)` always passed together | Extract `struct GpuMesh { GLuint vao, vbo, ebo; }` |
 | **PrimitiveObsession** | `int textureUnit` for `GL_TEXTURE0` binding point | `enum class TextureUnit : GLint` or typed wrapper |
-| **ArrowAntiPattern** | `if (gladLoad()) { if (SDL_Init()) { if (createWindow()) { ... } } }` | RAII wrappers — each resource cleans itself up on scope exit |
+| **ArrowAntiPattern** | `if (gladLoad()) { if (SDL_Init()) { if (createWindow()) { ... } } }` | RAII wrappers -- each resource cleans itself up on scope exit |
 | **SpeculativeGenerality** | Abstract render interface with exactly one concrete implementation | Remove the abstraction until a second implementation exists |
 | **CopyAndPasteProgramming** | VAO setup duplicated per render pass; shader variants copied with minor edits | `setupVAO()` extracted function; OpenGL Shading Language (GLSL) `#define` or UBO for variants |
 | **ExceptionHiding** | `glCompileShader()` with no `glGetShaderiv(GL_COMPILE_STATUS)` check | Always check, log, and terminate on unrecoverable GL errors (see FailFast above) |
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 - Class owns GL resources but has no cleanup in destructor
 - Copy constructor not deleted for a class that owns GL objects
@@ -226,6 +226,6 @@ These smells are not caught by clang-tidy. Catch them in code review.
 
 ## Related Skills
 
-- `cpp-safety` — sub-domain skill; destructor must not throw and every resource must have a scope-bound owning guard — load this skill when the class owns any resource
-- `code-quality` — clang-format and naming conventions; cpp-patterns covers structural patterns, code-quality covers form
-- `oop-principles` — sub-domain skill; run Is-A / Has-A and SOLID gate before any new inheritance in C++ code
+- `cpp-safety` -- sub-domain skill; destructor must not throw and every resource must have a scope-bound owning guard -- load this skill when the class owns any resource
+- `code-quality` -- clang-format and naming conventions; cpp-patterns covers structural patterns, code-quality covers form
+- `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID gate before any new inheritance in C++ code

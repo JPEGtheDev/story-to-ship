@@ -8,20 +8,20 @@ Before proposing any fix in a multi-component failure:
 
 1. **Name the layers involved.** List every component the failing code path touches in execution order.
    ```
-   Example: File picker → ViewerApp → SDL3Context → OpenGL → Shader → Render
+   Example: File picker -> ViewerApp -> SDL3Context -> OpenGL -> Shader -> Render
    ```
 
 2. **Identify the boundary between "working" and "broken."**
    Ask: at which layer does the correct input produce incorrect output?
    ```
-   Layer check: does [Layer A] receive correct input? → YES/NO
-   Layer check: does [Layer B] produce correct output given correct input? → YES/NO
+   Layer check: does [Layer A] receive correct input? -> YES/NO
+   Layer check: does [Layer B] produce correct output given correct input? -> YES/NO
    ```
    The first "NO" is the boundary where the failure lives.
 
 3. **Add instrumentation at that boundary.**
    ```cpp
-   // Minimal boundary probe — remove after diagnosis
+   // Minimal boundary probe -- remove after diagnosis
    std::cerr << "[DEBUG boundary] input: " << input << " output: " << output << "\n";
    ```
 
@@ -39,4 +39,4 @@ Before proposing any fix in a multi-component failure:
 | SDL3 window creates but hangs | SDL3/OpenGL init sequence | Add `SDL_GetError()` and `glGetError()` probes at each init step |
 | Flatpak crash on startup | Library version mismatch | Run `ldd` on the binary; check manifest pinned versions |
 
-For the Particle-Viewer layer taxonomy (SDL3 events → ViewerApp → UI → Graphics → OpenGL → Shader → GPU), see `references/PV_DEBUG_REFERENCE.md`.
+For the Particle-Viewer layer taxonomy (SDL3 events -> ViewerApp -> UI -> Graphics -> OpenGL -> Shader -> GPU), see `references/PV_DEBUG_REFERENCE.md`.

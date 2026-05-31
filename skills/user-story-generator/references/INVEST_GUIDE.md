@@ -44,14 +44,14 @@ The INVEST checklist is maintained inline in `SKILL.md`. See the INVEST Checklis
 If a story violates INVEST, fix it or suggest breaking it down.
 
 ### Avoid Vague Language
-❌ "Code should be clean"  
-✅ "Cyclomatic complexity reduced from 15 to 8"
+[-] "Code should be clean"  
+[+] "Cyclomatic complexity reduced from 15 to 8"
 
-❌ "Performance should improve"  
-✅ "Frame capture completes in ≤16ms (60 FPS budget)"
+[-] "Performance should improve"  
+[+] "Frame capture completes in <=16ms (60 FPS budget)"
 
-❌ "UI should look good"  
-✅ "Dashboard displays last 10 activities with <200ms load time"
+[-] "UI should look good"  
+[+] "Dashboard displays last 10 activities with <200ms load time"
 
 ### Include Concrete Details for Your Project
 
@@ -64,7 +64,7 @@ Ask clarifying questions, but keep moving forward. Example:
 > "Create a story for testing"
 
 Response:
-> "Got it! Testing what specifically—visual regression, unit tests for a component, or integration tests? Also, is this for existing code or new functionality?"
+> "Got it! Testing what specifically--visual regression, unit tests for a component, or integration tests? Also, is this for existing code or new functionality?"
 
 **User wants to refactor globals**  
 This is a common Particle-Viewer task. Consult `references/PARTICLE_VIEWER_CONTEXT.md` for refactoring patterns.
@@ -75,4 +75,4 @@ Suggest breaking it down:
 
 **User overrides your suggestion**  
 Accept it gracefully:
-> "Got it—adjusted to [their preference]. Here's the updated version..."
+> "Got it--adjusted to [their preference]. Here's the updated version..."

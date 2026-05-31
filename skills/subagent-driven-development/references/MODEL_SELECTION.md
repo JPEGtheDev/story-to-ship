@@ -2,9 +2,9 @@
 
 Match model tier to task complexity. Instructions must be written for GPT-4.1 baseline regardless of selected tier.
 
-**Model preference priority — check in this order before every agent dispatch:**
+**Model preference priority -- check in this order before every agent dispatch:**
 
-1. **Stored memory override (highest):** Check stored memories for a user-specified model preference. If found, apply that tier to ALL agents in this batch — it overrides the table below.
+1. **Stored memory override (highest):** Check stored memories for a user-specified model preference. If found, apply that tier to ALL agents in this batch -- it overrides the table below.
 2. **Tier table (default):** If no stored preference, use the task-type table below.
 3. **Session default (fallback):** If neither applies, use the current session default.
 

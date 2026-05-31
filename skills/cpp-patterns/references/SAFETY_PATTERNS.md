@@ -1,6 +1,6 @@
 # C++ Safety Patterns Reference
 
-Source: Ward Cunningham's C2 wiki audit — C++-specific patterns for resource safety, object identity, and structural hazards.
+Source: Ward Cunningham's C2 wiki audit -- C++-specific patterns for resource safety, object identity, and structural hazards.
 
 ---
 
@@ -36,12 +36,12 @@ Benefits: transparent polymorphism, safe default state, no explicit null checks 
 
 ## Value Semantics
 
-Objects passed by value must be fully independent copies — no aliasing between source and destination. Requirements:
+Objects passed by value must be fully independent copies -- no aliasing between source and destination. Requirements:
 - Copy constructor produces an object equivalent to the original
 - Assignment operator produces an object equivalent to the original
 - Neither the copy nor the original affects the other after copying
 
-For OpenGL resource handles: value semantics implies cloning the resource or using reference counting — not sharing the raw integer handle.
+For OpenGL resource handles: value semantics implies cloning the resource or using reference counting -- not sharing the raw integer handle.
 
 ---
 
@@ -80,9 +80,9 @@ This restores testability and removes hidden coupling.
 
 ## Speculative Inheritance Hazard
 
-See the `oop-principles` skill — Speculative Hierarchy Anti-Pattern — for the hierarchy design rule.
+See the `oop-principles` skill -- Speculative Hierarchy Anti-Pattern -- for the hierarchy design rule.
 
-C++-specific note: CRTP-based template hierarchies compound the hazard — they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
+C++-specific note: CRTP-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
 
 ---
 
@@ -106,7 +106,7 @@ void executeAll(const std::vector<GLCommand*>& cmds) {
 
 ## Virtual Functions and Shared Memory Hazard
 
-Polymorphic objects cannot be safely passed across process boundaries via shared memory. A vtable pointer is a memory address in the originating process's address space — it does not exist in another process's memory space.
+Polymorphic objects cannot be safely passed across process boundaries via shared memory. A vtable pointer is a memory address in the originating process's address space -- it does not exist in another process's memory space.
 
 Workarounds: serialize state to a plain-data structure, reconstruct on the other side. Never pass `IOpenGLContext*` through IPC.
 
@@ -140,10 +140,10 @@ Destructors must not throw. Throwing from a destructor during stack unwinding (w
 
 If a destructor contains code that can fail:
 1. Wrap it in `try/catch`
-2. Log the error — do not re-throw
+2. Log the error -- do not re-throw
 3. Complete the cleanup regardless
 
-For RAII resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint — the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
+For RAII resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint -- the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
 
 ---
 
@@ -174,11 +174,11 @@ This prevents subclasses from bypassing the algorithm skeleton (pre/post hooks a
 
 ## Command-Query Separation in OpenGL Code
 
-A method either returns a value (Query) or changes state (Command) — not both.
+A method either returns a value (Query) or changes state (Command) -- not both.
 
 In OpenGL code:
-- **Commands** (state-changing): `glBindVertexArray`, `glUseProgram`, `glBufferData` — no return value expected
-- **Queries** (state-reading): `glGetIntegerv`, `glGetError`, shader uniform lookups — no side effects expected
+- **Commands** (state-changing): `glBindVertexArray`, `glUseProgram`, `glBufferData` -- no return value expected
+- **Queries** (state-reading): `glGetIntegerv`, `glGetError`, shader uniform lookups -- no side effects expected
 
 Mixing them in a single function (e.g., bind-and-return-previous-binding) requires extra caution and explicit documentation of the side effect. When a method must return a value AND change state, document the side effect at the declaration site, not just the implementation. Source: C2 Wiki "CommandQuerySeparation".
 
@@ -186,7 +186,7 @@ Mixing them in a single function (e.g., bind-and-return-previous-binding) requir
 
 ## Fail Fast
 
-Terminate immediately on encountering irrecoverable state corruption rather than allowing corrupt state to propagate. The purpose is to prevent damage and generation of incorrect output — not to maintain availability.
+Terminate immediately on encountering irrecoverable state corruption rather than allowing corrupt state to propagate. The purpose is to prevent damage and generation of incorrect output -- not to maintain availability.
 
 C++ implementation:
 - `assert(condition)` for invariants that must hold in debug builds
@@ -195,12 +195,12 @@ C++ implementation:
 
 Distinguish: fail-fast on process state corruption; graceful handling on recoverable input data errors. Do not use `std::terminate` as a catch-all for bad input.
 
-See also: `systematic-debugging/references/DEBUGGING_TACTICS.md — Fail Fast` for the general principle. Source: C2 Wiki "FailFast".
+See also: `systematic-debugging/references/DEBUGGING_TACTICS.md -- Fail Fast` for the general principle. Source: C2 Wiki "FailFast".
 
 ---
 
 ## Related Skills
 
-- `cpp-safety` — iron law: every resource is owned by a scope-bound guard; destructors never throw
-- `cpp-patterns` — broader C++ idiom reference
-- `oop-principles` — structural design before implementation choices
+- `cpp-safety` -- iron law: every resource is owned by a scope-bound guard; destructors never throw
+- `cpp-patterns` -- broader C++ idiom reference
+- `oop-principles` -- structural design before implementation choices

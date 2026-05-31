@@ -1,6 +1,6 @@
 # Human-Reviewable Formatting Patterns
 
-These require **manual inspection** after running clang-format — tools don't always catch them:
+These require **manual inspection** after running clang-format -- tools don't always catch them:
 
 | Issue | Fix | Example |
 |-------|-----|---------|

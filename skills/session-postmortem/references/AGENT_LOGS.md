@@ -1,4 +1,4 @@
-# Claude Code Session Logs — Reference
+# Claude Code Session Logs -- Reference
 
 ## Log File Locations
 
@@ -9,7 +9,7 @@ Claude Code session transcripts (full turn-by-turn JSONL) are stored at:
 ```
 
 The encoded path is the absolute project path with `/` replaced by `-`.
-Example: `/home/user/Projects/MyProject` → `-home-user-Projects-MyProject`
+Example: `/home/user/Projects/MyProject` -> `-home-user-Projects-MyProject`
 
 Project memories (persistent facts written by the agent) live at:
 

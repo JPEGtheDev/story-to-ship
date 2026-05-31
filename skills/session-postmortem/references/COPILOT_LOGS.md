@@ -1,4 +1,4 @@
-# Copilot Session Logs — Reference
+# Copilot Session Logs -- Reference
 
 ## Log File Locations
 
@@ -21,9 +21,9 @@ Session state (checkpoints, persistent files) lives at:
 ## Using Logs in a Postmortem
 
 When running `session-postmortem`, the agent can parse:
-- `checkpoints/index.md` → list of checkpoints with titles and timestamps
-- Individual checkpoint files → what was accomplished, what was committed, what was left unfinished
-- `files/` contents → research corpus, task breakdowns, prior analysis
+- `checkpoints/index.md` -> list of checkpoints with titles and timestamps
+- Individual checkpoint files -> what was accomplished, what was committed, what was left unfinished
+- `files/` contents -> research corpus, task breakdowns, prior analysis
 
 ## Future Work
 

@@ -10,15 +10,15 @@ You are reviewing code in Particle-Viewer for quality, correctness, and standard
 ## Files under review
 {{FILES}}
 
-## Worktree Self-Check — Run BEFORE starting
+## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
 git rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
-- If it matches → proceed.
-- If it does NOT match → return immediately:
+- If it matches -> proceed.
+- If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
   Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
@@ -27,17 +27,17 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 ## Review Protocol
 
-**Step 1 — Full file read:** Read every file listed above in full. Do not limit your review to changed lines.
+**Step 1 -- Full file read:** Read every file listed above in full. Do not limit your review to changed lines.
 
-**Step 2 — Run the full checklist** against the complete content of each file.
+**Step 2 -- Run the full checklist** against the complete content of each file.
 
-**Step 3 — Attribution:** Run `git diff $(git merge-base HEAD main) -- {{FILES}}` to get the diff. For each issue found, determine:
-- If the offending line appears in the diff → **INTRODUCED** (must fix before merge)
-- If it does not appear in the diff → **PRE-EXISTING** (note; do not block merge for this alone)
+**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD main) -- {{FILES}}` to get the diff. For each issue found, determine:
+- If the offending line appears in the diff -> **INTRODUCED** (must fix before merge)
+- If it does not appear in the diff -> **PRE-EXISTING** (note; do not block merge for this alone)
 
 Do not ask the caller to provide a diff. Derive it yourself.
 
-## Review checklist (required — check every item)
+## Review checklist (required -- check every item)
 
 ### Correctness
 - [ ] No GL resource leaks (every owner destructor cleans up VAO, VBO, FBO, RBO, textures)
@@ -46,7 +46,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] No undefined behavior: bounds checked, no signed overflow, no null deref paths
 
 ### Tests
-- [ ] New behavior has a test (Beyoncé Rule: if you liked it, you should have put a test on it)
+- [ ] New behavior has a test (Beyonce Rule: if you liked it, you should have put a test on it)
 - [ ] Test names follow `ClassName_Action_ExpectedResult` pattern
 - [ ] Tests use production classes, not duplicated test helpers
 - [ ] No test covers multiple unrelated behaviors in a single TEST_F
@@ -61,20 +61,20 @@ Do not ask the caller to provide a diff. Derive it yourself.
 ### Knowledge rules
 - [ ] DRY: every piece of knowledge has one authoritative representation
 - [ ] Deprecated symbols: all call sites removed or annotated
-- [ ] Public interface changed → documentation updated in same commit
+- [ ] Public interface changed -> documentation updated in same commit
 - [ ] Broken windows noted (not silently walked past)
-- [ ] No reference file contains a pointer that refers back to itself (self-referential pointer). A fix that changes a broken pointer to a self-reference is still a bug — flag as critical regardless of whether the reviewer can construct a justification for why it looks intentional.
+- [ ] No reference file contains a pointer that refers back to itself (self-referential pointer). A fix that changes a broken pointer to a self-reference is still a bug -- flag as critical regardless of whether the reviewer can construct a justification for why it looks intentional.
 
 ### Architecture
 - [ ] No direct OpenGL calls outside `IOpenGLContext` implementations
-- [ ] No layer boundary violations (UI → Core OK; Core → UI NOT OK)
+- [ ] No layer boundary violations (UI -> Core OK; Core -> UI NOT OK)
 - [ ] No tight coupling introduced between subsystems
 
 ## Return format
 ```
 VERDICT: [APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT]
 
-Critical issues (must fix before merge — INTRODUCED only): [list or NONE]
+Critical issues (must fix before merge -- INTRODUCED only): [list or NONE]
 Pre-existing issues (log for cleanup, do not block merge): [list or NONE]
 Nits (fix or explain): [list or NONE]
 Missing tests: [list or NONE]

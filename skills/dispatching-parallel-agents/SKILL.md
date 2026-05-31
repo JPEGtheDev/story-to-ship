@@ -9,7 +9,7 @@ description: Use when multiple independent read-only research tasks can run simu
 
 ```
 YOU MUST RESTRICT PARALLEL AGENTS TO READ-ONLY WORK ONLY.
-YOU MUST PROVIDE EACH WRITE AGENT WITH ITS OWN ISOLATED WORKTREE — ONE WORKTREE PER AGENT.
+YOU MUST PROVIDE EACH WRITE AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
 No exceptions.
 ```
 
@@ -33,7 +33,7 @@ When dispatching parallel agents, the main agent acts as a **team lead**:
 1. Collect all agent results before acting on any
 2. Cross-check conflicts against source files directly
 3. Aggregate findings into a coherent summary
-4. Remove noise — do not forward raw agent output upstream
+4. Remove noise -- do not forward raw agent output upstream
 5. Present conclusions to the user: "Agents found X. I verified Y at [file:line]. Conclusion: Z."
 
 **What the team lead never does:**
@@ -51,13 +51,13 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 
 | Task type | Correct agent | Wrong choice |
 |-----------|--------------|--------------|
-| Read-only research across 3+ files — patterns, symbols, hypotheses | `explore` | `general-purpose` |
+| Read-only research across 3+ files -- patterns, symbols, hypotheses | `explore` | `general-purpose` |
 | Code compliance, style, logic, or spec review | `code-review` | `general-purpose` |
 | Multi-step implementation with file modifications | `general-purpose` + worktree | `explore` |
-| Build, test, or lint execution — success/failure result only | `task` | `general-purpose` |
+| Build, test, or lint execution -- success/failure result only | `task` | `general-purpose` |
 | Any read-only + write combination | Separate explore and general-purpose agents | One general-purpose for everything |
 
-**Routing rule:** Use the most constrained agent type that can complete the job. `general-purpose` can do everything — which means it accumulates context, produces serial output, and contaminates findings with session assumptions for work that a constrained agent would complete faster and cleaner.
+**Routing rule:** Use the most constrained agent type that can complete the job. `general-purpose` can do everything -- which means it accumulates context, produces serial output, and contaminates findings with session assumptions for work that a constrained agent would complete faster and cleaner.
 
 ---
 
@@ -65,9 +65,9 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 
 Dispatch agents in parallel when ALL of the following are true:
 
-1. Tasks are **independent** — no agent needs the output of another to start
+1. Tasks are **independent** -- no agent needs the output of another to start
 2. Tasks are **read-only** OR each write agent has its own isolated worktree
-3. Each task has a **single clear objective** — multi-part briefs produce noise
+3. Each task has a **single clear objective** -- multi-part briefs produce noise
 
 **Good candidates for parallelization:**
 - Scanning multiple files for a pattern
@@ -81,25 +81,25 @@ Dispatch agents in parallel when ALL of the following are true:
 - Tasks requiring shared state or coordinated decisions
 
 BEFORE DISPATCHING PARALLEL AGENTS, verify:
-1. All tasks are truly independent — no agent needs another agent's output to start
+1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
 4. Read-only agents have no shared write targets; write agents each have an isolated worktree
 
-✓ All met → dispatch agents
-✗ Any unmet → resolve the dependency, define the return format, or serialize the dispatch before proceeding
+[+] All met -> dispatch agents
+[-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
 
 ---
 
 ## BEFORE PROCEEDING
 
-1. All tasks are truly independent — no agent needs another agent's output to start
+1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
 4. Read-only agents have no shared write targets; write agents each have an isolated worktree
 
-✓ All met → dispatch agents
-✗ Any unmet → resolve the dependency, define the return format, or serialize the dispatch before proceeding
+[+] All met -> dispatch agents
+[-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
 
 ---
 
@@ -107,7 +107,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 Verify your account's agent concurrency limit before dispatching. Default assumption: up to 4 concurrent unless you have confirmed a higher limit.
 
-State your concurrency assumption before dispatching: "Dispatching N agents in parallel — [confirmed N-agent limit / assuming default 4]."
+State your concurrency assumption before dispatching: "Dispatching N agents in parallel -- [confirmed N-agent limit / assuming default 4]."
 
 ---
 
@@ -115,10 +115,10 @@ State your concurrency assumption before dispatching: "Dispatching N agents in p
 
 Each parallel agent MUST receive:
 
-1. **Isolated context** — never share your session history. Provide only what that agent needs.
-2. **A single objective** — one question, one file set, one hypothesis.
-3. **An explicit return format** — tell it exactly what to give back.
-4. **No knowledge of other agents** — agents do not know about each other.
+1. **Isolated context** -- never share your session history. Provide only what that agent needs.
+2. **A single objective** -- one question, one file set, one hypothesis.
+3. **An explicit return format** -- tell it exactly what to give back.
+4. **No knowledge of other agents** -- agents do not know about each other.
 
 **Why isolation matters:** Agents that share context inherit your biases and assumptions. Isolated agents search without your anchoring.
 
@@ -129,12 +129,12 @@ Each parallel agent MUST receive:
 When parallel agents return:
 
 1. Read all results before acting on any
-2. Treat every finding as a **hypothesis** — not a fact
+2. Treat every finding as a **hypothesis** -- not a fact
 3. Cross-check conflicting findings against the source files yourself
 4. State what each agent found and what you verified:
    ```
-   Agent 1 found: [X] — verified by reading [file:line]
-   Agent 2 found: [Y] — conflicts with Agent 1 — investigating
+   Agent 1 found: [X] -- verified by reading [file:line]
+   Agent 2 found: [Y] -- conflicts with Agent 1 -- investigating
    ```
 5. Do NOT propagate a finding to the user until you have verified it
 
@@ -146,14 +146,14 @@ When any agent cites specific file names, page names, or resource paths as evide
 
 1. For each cited resource not directly confirmed by a read or listing tool in the agent's own work: verify the resource yourself by reading or listing it directly.
 2. Verification = the resource exists AND its content supports the claim.
-3. **If verification fails:** REJECT the finding. Record: `REJECTED: [resource] does not exist — citation unverified.` Do NOT re-dispatch the original agent for the same citation.
-4. **If verification passes:** accept the finding. Note: `VERIFIED: read [path] — content confirms [claim].`
+3. **If verification fails:** REJECT the finding. Record: `REJECTED: [resource] does not exist -- citation unverified.` Do NOT re-dispatch the original agent for the same citation.
+4. **If verification passes:** accept the finding. Note: `VERIFIED: read [path] -- content confirms [claim].`
 
-**Why:** Agents — especially when working with large archives or documentation sets — frequently cite plausible-but-nonexistent resources. Treating citations as hypotheses and verifying them before synthesis prevents hallucinated evidence from reaching conclusions.
+**Why:** Agents -- especially when working with large archives or documentation sets -- frequently cite plausible-but-nonexistent resources. Treating citations as hypotheses and verifying them before synthesis prevents hallucinated evidence from reaching conclusions.
 
 ---
 
-## Write Agents — Worktree Requirement
+## Write Agents -- Worktree Requirement
 
 When parallelizing write work (e.g., multiple implementers working on independent subsystems):
 
@@ -166,7 +166,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 | Pattern | Action |
 |---------|--------|
@@ -184,17 +184,17 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 |--------|---------|
 | "These tasks are mostly independent" | Mostly = risk. Confirm independence before dispatching. |
 | "I'll just have them both edit the file" | Race condition. One agent's changes will be overwritten. Use worktrees. |
-| "I'll share my session context — it's helpful" | It contaminates their search. They'll confirm your assumptions instead of testing them. |
+| "I'll share my session context -- it's helpful" | It contaminates their search. They'll confirm your assumptions instead of testing them. |
 | "One agent can do all this" | Sequential agents fill your context. Parallel agents preserve it. |
-| "I don't need to verify — the agent found it" | Findings are hypotheses. You verify before you propagate. |
-| "I'll use general-purpose — it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
-| "I'll run them sequentially — parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
-| "The agents can share the same branch — I'll merge their changes manually" | YOU MUST use worktrees for parallel agents with side effects. Shared branches produce conflicts. |
+| "I don't need to verify -- the agent found it" | Findings are hypotheses. You verify before you propagate. |
+| "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
+| "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
+| "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use worktrees for parallel agents with side effects. Shared branches produce conflicts. |
 
 ---
 
 ## Related Skills
 
-- `subagent-driven-development` — orchestration framework; parallel dispatch is a specialized case of subagent dispatch
-- `using-git-worktrees` — required for any parallel write agents; isolation guarantee
-- `execution` — work loop and commit rhythm that parallel dispatch operates within
+- `subagent-driven-development` -- orchestration framework; parallel dispatch is a specialized case of subagent dispatch
+- `using-git-worktrees` -- required for any parallel write agents; isolation guarantee
+- `execution` -- work loop and commit rhythm that parallel dispatch operates within

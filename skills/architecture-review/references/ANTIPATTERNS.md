@@ -1,6 +1,6 @@
 # Anti-Patterns Reference
 
-An anti-pattern is an attractive-but-harmful solution. It appears to solve a problem and may even deliver short-term gains, but it backfires over time. Documenting anti-patterns is as important as documenting patterns — recognizing them early prevents design debt.
+An anti-pattern is an attractive-but-harmful solution. It appears to solve a problem and may even deliver short-term gains, but it backfires over time. Documenting anti-patterns is as important as documenting patterns -- recognizing them early prevents design debt.
 
 ---
 
@@ -186,11 +186,11 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 
 ## Anti-Pattern Taxonomy
 
-Anti-patterns occur at all levels — development (code style), architecture (module structure), and management (process). The same root cause manifests differently at each level:
+Anti-patterns occur at all levels -- development (code style), architecture (module structure), and management (process). The same root cause manifests differently at each level:
 
-- **Root cause: unclear ownership** → God Class (architecture), Analysis Paralysis (process)
-- **Root cause: fear of change** → Big Design Up Front, Big Ball of Mud (architecture debt)
-- **Root cause: premature optimization** → Global State, Jumble Anti-Pattern (coupling)
+- **Root cause: unclear ownership** -> God Class (architecture), Analysis Paralysis (process)
+- **Root cause: fear of change** -> Big Design Up Front, Big Ball of Mud (architecture debt)
+- **Root cause: premature optimization** -> Global State, Jumble Anti-Pattern (coupling)
 
 Recognizing the root cause helps address the true problem, not just the symptom.
 
@@ -198,5 +198,5 @@ Recognizing the root cause helps address the true problem, not just the symptom.
 
 ## Related Skills
 
-- `oop-principles` — complementary; OOP provides patterns for sound design; anti-patterns document what to avoid
-- `code-quality` — works at the code level; anti-patterns operate at module and system level
+- `oop-principles` -- complementary; OOP provides patterns for sound design; anti-patterns document what to avoid
+- `code-quality` -- works at the code level; anti-patterns operate at module and system level

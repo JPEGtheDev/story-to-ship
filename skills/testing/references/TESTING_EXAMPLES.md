@@ -4,17 +4,17 @@ This reference provides concrete examples of correct and incorrect test patterns
 
 ---
 
-## AAA Pattern — Critical Rules
+## AAA Pattern -- Critical Rules
 
 1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
    - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.
-2. **If no Arrange is needed**, omit `// Arrange` entirely — start with `// Act`.
+2. **If no Arrange is needed**, omit `// Arrange` entirely -- start with `// Act`.
 3. **Move expected values to Arrange** as named variables, not inline in Assert.
-4. **One logical concept per test** — split if testing multiple behaviors.
+4. **One logical concept per test** -- split if testing multiple behaviors.
 
 ---
 
-## AAA Pattern — Correct Examples
+## AAA Pattern -- Correct Examples
 
 ### Unit Test: Camera Movement
 
@@ -156,9 +156,9 @@ TEST(VisualHelperTest, ImageLoad_PPM_RoundTrip_PreservesPixels)
 
 ---
 
-## AAA Pattern — INCORRECT Examples (Do NOT Follow)
+## AAA Pattern -- INCORRECT Examples (Do NOT Follow)
 
-### ❌ Combined Arrange & Act
+### [-] Combined Arrange & Act
 
 ```cpp
 // BAD: "Arrange & Act" combined
@@ -174,7 +174,7 @@ TEST(ImageTest, DefaultConstructor_CreatesEmptyImage)
 
 **Fix:** Omit `// Arrange` entirely, start with `// Act`.
 
-### ❌ Combined Act & Assert
+### [-] Combined Act & Assert
 
 ```cpp
 // BAD: "Act & Assert" combined
@@ -191,7 +191,7 @@ TEST_F(VisualRegressionTest, ExactMatch_IdenticalImages_Passes)
 
 **Fix:** Separate into `// Act` (run comparison) and `// Assert` (check result).
 
-### ❌ Inline Expected Values in Assert
+### [-] Inline Expected Values in Assert
 
 ```cpp
 // BAD: Magic numbers in assert
@@ -208,7 +208,7 @@ TEST(ImageTest, Constructor_SetsSize)
 
 **Fix:** Put expected values as named variables in Arrange.
 
-### ❌ Testing External Library Behavior
+### [-] Testing External Library Behavior
 
 ```cpp
 // BAD: Testing std::vector, not our code
@@ -225,9 +225,9 @@ TEST(ImageTest, PixelVector_Resizes)
 }
 ```
 
-**Fix:** Only test YOUR code — wrapper logic, integration, or behavior you own.
+**Fix:** Only test YOUR code -- wrapper logic, integration, or behavior you own.
 
-### ❌ EXPECT_LE When the Value Is Deterministic
+### [-] EXPECT_LE When the Value Is Deterministic
 
 ```cpp
 // BAD: LE masks regressions where the code under-enqueues
@@ -241,18 +241,18 @@ EXPECT_LE(callCount, window);  // passes even if callCount is 0 or window-1
 EXPECT_EQ(callCount, window);
 ```
 
-### ❌ Binary File Test Missing Required Record Count
+### [-] Binary File Test Missing Required Record Count
 
 When testing that a binary reader correctly handles a frame-N seek, a file with fewer than N+1 records causes `fseek` to go past EOF, so `fread` returns 0 (EOF/truncated), not a record with the wrong field. This means the test ends up exercising the truncation branch instead of the intended branch (e.g., field mismatch):
 
 ```cpp
-// BAD: single-record file; seeking to frame=1 goes past EOF → fread returns 0
+// BAD: single-record file; seeking to frame=1 goes past EOF -> fread returns 0
 // (tests truncation, not the intended field-mismatch path)
 FILE* f = fopen(path.c_str(), "wb");
 float r0[4] = {1.0f, 2.0f, 3.0f, 0.0f};  // frame 0 only
 fwrite(r0, sizeof(float), 4, f);
 fclose(f);
-getCOM(/*frame=*/1, out);  // seeks to byte 16 — past EOF
+getCOM(/*frame=*/1, out);  // seeks to byte 16 -- past EOF
 ```
 
 **Fix:** Write N+1 records so `fseek` lands within the file and `fread` succeeds:
@@ -265,10 +265,10 @@ float r1[4] = {1.0f, 2.0f, 3.0f, 99.0f};  // frame 1, w=99 (wrong type to trigge
 fwrite(r0, sizeof(float), 4, f);
 fwrite(r1, sizeof(float), 4, f);
 fclose(f);
-getCOM(/*frame=*/1, out);  // reads r1; w=99 ≠ frame=1 → mismatch branch
+getCOM(/*frame=*/1, out);  // reads r1; w=99 != frame=1 -> mismatch branch
 ```
 
-### ❌ Vague Test Name
+### [-] Vague Test Name
 
 ```cpp
 // BAD: No clear behavior being tested
@@ -279,7 +279,7 @@ TEST(CameraTest, Update)            // <-- WRONG
 
 **Fix:** Use `UnitName_StateUnderTest_ExpectedResult` format.
 
-### ❌ Duplicating Production Logic in Test Helpers
+### [-] Duplicating Production Logic in Test Helpers
 
 ```cpp
 // BAD: Test helper class recreates Particle's cube generation logic
@@ -293,7 +293,7 @@ class ParticleRenderer {
 };
 ```
 
-**Fix:** Use `Particle` directly — tests stay in sync with production code automatically.
+**Fix:** Use `Particle` directly -- tests stay in sync with production code automatically.
 
 ```cpp
 // GOOD: Use production class
@@ -318,7 +318,7 @@ class Particle
     std::vector<glm::vec4> translations; // positions (x, y, z, colorValue)
     std::vector<glm::vec4> velocities;   // velocity data
 
-    Particle();                                        // Default: 64,000 particles in 40×40×40 grid
+    Particle();                                        // Default: 64,000 particles in 40x40x40 grid
     Particle(long number_of_bodies, const glm::vec4* positions); // Custom data (copies)
 
     void changeTranslations(long count, const glm::vec4* new_positions);
@@ -400,20 +400,20 @@ Image createGradientImage(uint32_t w, uint32_t h,
 
 ```
 tests/
-├── core/               # Unit tests (CameraTests.cpp, ParticleTests.cpp, etc.)
-├── integration/        # Multi-component tests
-├── testing/            # Tests for PixelComparator, Image
-├── visual-regression/  # Visual comparison tests (uses production Particle class)
-│   ├── baselines/      # Baseline images (committed, never modified by tests)
-│   └── RenderingRegressionTests.cpp
-├── mocks/              # MockOpenGL.hpp/.cpp
-├── stb_image_write_impl.cpp
-└── CMakeLists.txt
++-- core/               # Unit tests (CameraTests.cpp, ParticleTests.cpp, etc.)
++-- integration/        # Multi-component tests
++-- testing/            # Tests for PixelComparator, Image
++-- visual-regression/  # Visual comparison tests (uses production Particle class)
+|   +-- baselines/      # Baseline images (committed, never modified by tests)
+|   +-- RenderingRegressionTests.cpp
++-- mocks/              # MockOpenGL.hpp/.cpp
++-- stb_image_write_impl.cpp
++-- CMakeLists.txt
 ```
 
 ---
 
-## AAA Pattern — Template (Three Phases)
+## AAA Pattern -- Template (Three Phases)
 
 ```cpp
 TEST(SuiteName, MethodName_Condition_ExpectedResult)
@@ -447,27 +447,27 @@ Any behavior that your code **relies upon** must have a test. This applies to:
 - Libraries you depend on (test the integration point, not the library internals)
 - Configuration assumptions (if the behavior would surprise you if it changed, test it)
 
-The inverse: if behavior changes and no test breaks, that behavior was untested. It is not safe to change — it is merely unverified to be safe. Add the test now.
+The inverse: if behavior changes and no test breaks, that behavior was untested. It is not safe to change -- it is merely unverified to be safe. Add the test now.
 
 ---
 
 ## Coincidence Articulation
 
-Tests that mirror the implementation's structure detect nothing — they fail together or pass together regardless of correctness.
+Tests that mirror the implementation's structure detect nothing -- they fail together or pass together regardless of correctness.
 
 **Rule:** The test must reason about the problem independently from the implementation.
 - Test input/output contracts, not internal data structures
 - Test what the function is supposed to do, not how it currently does it
-- If the test would pass for any implementation that uses the same algorithm, it is not testing a contract — it is testing an implementation coincidence
+- If the test would pass for any implementation that uses the same algorithm, it is not testing a contract -- it is testing an implementation coincidence
 
 Signal: if modifying the test file requires looking at the source file, the test is mirroring implementation structure. The test MUST be written from requirements, not from reading the implementation.
 
 - Use `EXPECT_*` (non-fatal) for most assertions; use `ASSERT_*` (fatal) only when a test cannot meaningfully continue after failure
 - If a test seems to test external library behavior, focus on the wrapper/integration instead
-- If Arrange and Act are identical, the test is a constructor test — put expected values in Arrange, constructor call in Act
+- If Arrange and Act are identical, the test is a constructor test -- put expected values in Arrange, constructor call in Act
 
 ---
 
 ## Agile Alarm Bell
 
-**Agile Alarm Bell:** "Let's refactor without writing tests first" is the most dangerous phrase pair in software. Refactoring without a test suite to hold behavior constant is not refactoring — it is reckless restructuring. Stop. Write characterization tests first. Then refactor.
+**Agile Alarm Bell:** "Let's refactor without writing tests first" is the most dangerous phrase pair in software. Refactoring without a test suite to hold behavior constant is not refactoring -- it is reckless restructuring. Stop. Write characterization tests first. Then refactor.

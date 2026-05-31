@@ -6,7 +6,7 @@ Load this reference when writing tests, adding mocks, or tempted to add test-onl
 
 ## Iron Laws
 
-1. NEVER test mock behavior — test what the real code does
+1. NEVER test mock behavior -- test what the real code does
 2. NEVER add test-only methods to production classes
 3. NEVER mock without understanding what you're mocking
 
@@ -14,7 +14,7 @@ Load this reference when writing tests, adding mocks, or tempted to add test-onl
 
 ## Anti-Pattern 1: Testing Mock Behavior
 
-**The trap:** You set up a `MockOpenGL`, call the code under test, then assert that the mock was called — instead of asserting what the code _produced_.
+**The trap:** You set up a `MockOpenGL`, call the code under test, then assert that the mock was called -- instead of asserting what the code _produced_.
 
 ```cpp
 // BAD: asserting mock was called proves nothing about real behavior
@@ -22,13 +22,13 @@ TEST(ShaderTest, Compile_ValidSource_Succeeds)
 {
     // Arrange
     MockOpenGL mockGL;
-    EXPECT_CALL(mockGL, glCreateShader(_)).Times(1);  // ← tests mock, not behavior
+    EXPECT_CALL(mockGL, glCreateShader(_)).Times(1);  // <- tests mock, not behavior
 
     // Act
     Shader shader(mockGL, vertSrc, fragSrc);
 
     // Assert
-    // Nothing — the EXPECT_CALL IS the assertion. This is wrong.
+    // Nothing -- the EXPECT_CALL IS the assertion. This is wrong.
 }
 ```
 
@@ -48,7 +48,7 @@ TEST(ShaderTest, Compile_ValidSource_ProgramIdIsNonZero)
 }
 ```
 
-**Gate function — BEFORE asserting on any mock:**
+**Gate function -- BEFORE asserting on any mock:**
 > "Am I testing real behavior or mock existence?"
 > If mock existence: delete the assertion and test the observable outcome instead.
 
@@ -61,7 +61,7 @@ TEST(ShaderTest, Compile_ValidSource_ProgramIdIsNonZero)
 **Why it is wrong:**
 - Production classes accumulate dead weight that confuses maintainers
 - `destroy()` called accidentally in production corrupts state with no safety net
-- The method is never tested itself — it becomes a landmine
+- The method is never tested itself -- it becomes a landmine
 
 **The fix:** put setup and teardown in test fixtures, not production classes.
 
@@ -70,7 +70,7 @@ TEST(ShaderTest, Compile_ValidSource_ProgramIdIsNonZero)
 class Renderer {
 public:
     void render(const Scene& scene);
-    void resetForTest();  // ← never called in production, dangerous
+    void resetForTest();  // <- never called in production, dangerous
 };
 ```
 
@@ -84,7 +84,7 @@ protected:
 };
 ```
 
-**Gate function — BEFORE adding any method to a production class:**
+**Gate function -- BEFORE adding any method to a production class:**
 > "Is this method called from non-test code?"
 > If no: don't add it. Move the logic to the test fixture.
 
@@ -92,12 +92,12 @@ protected:
 
 ## Anti-Pattern 3: Mocking Without Understanding
 
-**The trap:** `MockOpenGL` makes tests compile, so you mock every GL call and ship the test — without ever running the real path or knowing which calls actually matter.
+**The trap:** `MockOpenGL` makes tests compile, so you mock every GL call and ship the test -- without ever running the real path or knowing which calls actually matter.
 
 **Why it is wrong:** if you mock the very method that produces the state your test depends on, the test becomes circular. It passes because the mock returns what you told it to return, not because the code is correct.
 
 **The process:**
-1. Run the test against real code first — even if it crashes or fails due to missing GL context
+1. Run the test against real code first -- even if it crashes or fails due to missing GL context
 2. Read the failure. Understand what the code needs from the GL layer
 3. Mock ONLY the GL boundary calls. Let the logic above the mock run for real
 
@@ -115,26 +115,26 @@ ON_CALL(mockGL, glBindBuffer(_, _)).WillByDefault(Return());
 MockOpenGL mockGL;
 ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1));
 
-Camera camera(800, 600);  // no GL needed — camera is pure math
+Camera camera(800, 600);  // no GL needed -- camera is pure math
 camera.moveForward();
 EXPECT_LT(camera.cameraPos.z, 0.0f);
 ```
 
-**Gate function — BEFORE mocking any method:**
+**Gate function -- BEFORE mocking any method:**
 > "Run the test with real code first (even if it fails). Understand what the test actually needs. THEN mock at the correct level."
 
 ---
 
 ## Anti-Pattern 4: Incomplete Mock Data
 
-**The trap:** A test needs particle data, so you create a `std::vector<glm::vec4>` with one element and a made-up value — without matching the layout the production code actually expects.
+**The trap:** A test needs particle data, so you create a `std::vector<glm::vec4>` with one element and a made-up value -- without matching the layout the production code actually expects.
 
 **Why it is wrong:** the test passes because the mocked data never exercises structural assumptions. When real data arrives, the code fails.
 
 **The fix:** mirror the complete real data structure.
 
 ```cpp
-// BAD: partial mock — real code expects w component to encode particle type
+// BAD: partial mock -- real code expects w component to encode particle type
 std::vector<glm::vec4> particles = { {1.0f, 2.0f, 3.0f, 0.0f} };  // w=0 is uninitialized
 
 // GOOD: mirror the real layout (x,y,z = position, w = particle type id)
@@ -148,14 +148,14 @@ Use the production `Particle` class to generate test data wherever possible:
 
 ```cpp
 Particle particles;
-particles.loadDefaultCube();  // real production method — no duplication
+particles.loadDefaultCube();  // real production method -- no duplication
 ```
 
 ---
 
 ## Anti-Pattern 5: Visual Regression Tests Without Red-Green
 
-**The trap:** create the baseline image, write the test, run it — it passes immediately. Ship it.
+**The trap:** create the baseline image, write the test, run it -- it passes immediately. Ship it.
 
 **Why it is wrong:** a test that has never been red cannot be trusted. If the baseline was created from buggy output, the test permanently encodes that bug as "correct."
 
@@ -166,22 +166,22 @@ BAD sequence:
   1. Render scene
   2. Save as baseline.png
   3. Write test comparing against baseline.png
-  4. Test passes ✓
-  → You have tested nothing. You compared output to itself.
+  4. Test passes [+]
+  -> You have tested nothing. You compared output to itself.
 
 GOOD sequence:
   1. Write the test with no baseline (or a deliberately wrong one)
-  2. Run the test → it FAILS ✗  (this is RED — required)
+  2. Run the test -> it FAILS [-]  (this is RED -- required)
   3. Inspect the failure: is the rendered output visually correct?
   4. If yes: promote it to baseline.png
-  5. Run the test → it PASSES ✓  (GREEN)
+  5. Run the test -> it PASSES [+]  (GREEN)
 ```
 
 The visual test **MUST fail before the baseline is correct.** If it never failed, delete the baseline and start over.
 
 ---
 
-## Red Flags — Stop Before Proceeding
+## Red Flags -- Stop Before Proceeding
 
 - Mock setup is longer than the test logic
 - Test breaks when you change the mock, not the production code

@@ -1,12 +1,12 @@
 # Structured Ideation Reference
 
-Source: Ward Cunningham's C2 wiki audit — techniques for design exploration, collaborative critique, and avoiding premature convergence.
+Source: Ward Cunningham's C2 wiki audit -- techniques for design exploration, collaborative critique, and avoiding premature convergence.
 
 ---
 
 ## Work Backward from Ideal (Pseudo-Code First)
 
-Start every design session by writing the ideal interface in free-form domain notation — before any production language constraints apply:
+Start every design session by writing the ideal interface in free-form domain notation -- before any production language constraints apply:
 
 ```
 // Ideal API (unconstrained):
@@ -21,7 +21,7 @@ Then work backward to production code. The gap between the ideal and what the la
 
 Abstraction ignores irrelevant detail but can answer precise questions at the level of the abstraction. Vagueness cannot answer questions at any level.
 
-> "The purpose of abstraction is not to be vague, but to create a new semantic level in which one can be absolutely precise." — Dijkstra
+> "The purpose of abstraction is not to be vague, but to create a new semantic level in which one can be absolutely precise." -- Dijkstra
 
 Before finalizing an API or interface, test it: can every caller question be answered precisely from the abstraction? If not, the abstraction is vague, not abstract. Redesign.
 
@@ -29,7 +29,7 @@ Before finalizing an API or interface, test it: can every caller question be ans
 
 ## Visitor from Mars (Fresh-Eye Review)
 
-When a new contributor joins, formally designate them as a "Visitor from Mars" — an outside observer who has not yet become blind to friction points. Task them with documenting:
+When a new contributor joins, formally designate them as a "Visitor from Mars" -- an outside observer who has not yet become blind to friction points. Task them with documenting:
 
 - Places where the code surprised them
 - Conventions that were not written down
@@ -47,9 +47,9 @@ Adapt the literary writers' workshop format for design and code review:
 
 1. **Safe setting:** establish that critique targets the work, not the author
 2. **Author is silent:** the author observes while others discuss; does not defend
-3. **Summarize first:** one reviewer restates the work's intent in their own words — confirms understanding before critique
+3. **Summarize first:** one reviewer restates the work's intent in their own words -- confirms understanding before critique
 4. **Positive feedback first:** state what works well and why
-5. **Suggestions for improvement:** frame as conditional observations rather than judgments ("If the intent is X, this approach limits Y") — not directives, not unqualified verdicts. (Note: "I wondered if..." phrasing is for human collaborative workshops only — agent code review output must remain direct per the code-quality skill.)
+5. **Suggestions for improvement:** frame as conditional observations rather than judgments ("If the intent is X, this approach limits Y") -- not directives, not unqualified verdicts. (Note: "I wondered if..." phrasing is for human collaborative workshops only -- agent code review output must remain direct per the code-quality skill.)
 6. **Author responds last:** addresses clarifications only, not defenses
 
 The goal is learning, not verdict. This format reduces defensive responses and surfaces signal that direct critique suppresses.
@@ -58,7 +58,7 @@ The goal is learning, not verdict. This format reduces defensive responses and s
 
 ## Interaction Design: Minimize Undesirable Interactions
 
-Design is the process of finding a minimal concept set where desirable interactions are maximized and undesirable interactions are minimized. Every additional user choice or configuration option is a **cost**, not a benefit — it adds an interaction surface that must be tested and maintained.
+Design is the process of finding a minimal concept set where desirable interactions are maximized and undesirable interactions are minimized. Every additional user choice or configuration option is a **cost**, not a benefit -- it adds an interaction surface that must be tested and maintained.
 
 Before adding a feature or a parameter, ask: does this eliminate a worse interaction, or does it add a new one?
 
@@ -77,7 +77,7 @@ Forcing a pattern onto code that does not need it adds indirection with no payof
 
 ## Evolutionary Design (XP Model)
 
-XP does not eliminate design — it distributes design throughout development:
+XP does not eliminate design -- it distributes design throughout development:
 
 - **Day 1:** establish a system metaphor (4-5 key classes, a brief description)
 - **Per capability:** run a Class-Responsibility-Collaboration session (~4 new classes at a time)
@@ -112,19 +112,19 @@ The value is separating modes, not combining them. When everyone is in "caution 
 
 ## Brainstorm Protocol (Postpone Judgment)
 
-The generation phase and the evaluation phase must be strictly separated. During generation: no idea is evaluated — only recorded. Premature criticism kills generative thinking; the generator starts self-censoring and quantity drops. Dispatch a Skeptic Agent after generation, not during.
+The generation phase and the evaluation phase must be strictly separated. During generation: no idea is evaluated -- only recorded. Premature criticism kills generative thinking; the generator starts self-censoring and quantity drops. Dispatch a Skeptic Agent after generation, not during.
 
 Four rules for the generation phase:
-1. Postpone judgment — no evaluation, no "yes but", no "that won't work"
-2. Quantity breeds quality — the best idea is usually idea #17, not idea #3
-3. Hitchhike — build on others' ideas without owning them
-4. Register everything — no idea is too obvious or too silly to record
+1. Postpone judgment -- no evaluation, no "yes but", no "that won't work"
+2. Quantity breeds quality -- the best idea is usually idea #17, not idea #3
+3. Hitchhike -- build on others' ideas without owning them
+4. Register everything -- no idea is too obvious or too silly to record
 
 After generation is complete: switch modes. Apply the Six Thinking Hats or a Skeptic Agent to evaluate the recorded ideas against constraints. Source: C2 Wiki "BrainStorm".
 
 ---
 
-## Phase 1 Clarifying Questions — Good vs. Bad Examples
+## Phase 1 Clarifying Questions -- Good vs. Bad Examples
 
 **Good clarifying questions:**
 - "Should this work with existing data formats or a new format?"
@@ -140,6 +140,6 @@ After generation is complete: switch modes. Apply the Six Thinking Hats or a Ske
 
 ## Related Skills
 
-- `brainstorming` — hard gate: load before any design with unclear approach
-- `writing-plans` — Simplicity Principles reference; YAGNI; Skeptic Agent
-- `architecture-review` — OOP Principles reference; layer boundary gate
+- `brainstorming` -- hard gate: load before any design with unclear approach
+- `writing-plans` -- Simplicity Principles reference; YAGNI; Skeptic Agent
+- `architecture-review` -- OOP Principles reference; layer boundary gate

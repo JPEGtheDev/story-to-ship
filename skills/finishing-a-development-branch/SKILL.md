@@ -28,8 +28,8 @@ Before beginning the branch ceremony:
 4. Every commit on the branch uses conventional commit format
 5. No debug-only, Work In Progress (WIP), or dead code remains in the diff
 
-✓ All met → proceed through Steps 1-5
-✗ Any unmet → resolve the unmet item before starting the branch ceremony
+[+] All met -> proceed through Steps 1-5
+[-] Any unmet -> resolve the unmet item before starting the branch ceremony
 
 ---
 
@@ -44,8 +44,8 @@ find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
 git diff  # verify no unintended changes from formatting
 ```
 
-✓ All four pass → proceed to Step 2
-✗ Any fail → fix before proceeding; do not open a PR against a red branch
+[+] All four pass -> proceed to Step 2
+[-] Any fail -> fix before proceeding; do not open a PR against a red branch
 
 See `verification-before-completion` skill for the complete gate.
 
@@ -55,7 +55,7 @@ See `verification-before-completion` skill for the complete gate.
 
 Before writing the PR, answer:
 
-1. **Every acceptance criterion from the original task — is it delivered?**
+1. **Every acceptance criterion from the original task -- is it delivered?**
    List each criterion. Mark DONE or OPEN. Any OPEN item must be extracted to a new issue or be deliberately deferred (with the user's knowledge).
 
 2. **Are there any open TODOs in the code?**
@@ -73,14 +73,14 @@ Before writing the PR, answer:
 
 ## Step 3: Commit Cleanup
 
-Choose one of these four options — do not mix them:
+Choose one of these four options -- do not mix them:
 
 | Option | When to use |
 |--------|-------------|
-| **Squash into one commit** | Small feature/fix — all changes tell one story |
-| **Squash into logical groups** | Larger branch — separate "feat" from "test" from "refactor" commits |
+| **Squash into one commit** | Small feature/fix -- all changes tell one story |
+| **Squash into logical groups** | Larger branch -- separate "feat" from "test" from "refactor" commits |
 | **Keep all commits** | Each commit is already clean, atomic, and independently meaningful |
-| **Interactive rebase** | Mix of clean and messy commits — clean up before squashing |
+| **Interactive rebase** | Mix of clean and messy commits -- clean up before squashing |
 
 **Squash prescribed command:** Use `git reset --mixed HEAD~N`. Use `--mixed`, not `--soft`. `--soft` carries staged hunks forward and can silently include unintended changes. `--mixed` clears the index so the new commit starts from a clean slate.
 
@@ -100,7 +100,7 @@ See `versioning` skill for conventional commit rules.
 
 ## Step 4: PR Creation
 
-**Title:** Must be a valid conventional commit message — this becomes the squash commit on merge.
+**Title:** Must be a valid conventional commit message -- this becomes the squash commit on merge.
 
 **Description must include:**
 ```
@@ -130,9 +130,9 @@ See `versioning` skill for conventional commit rules.
 
 ## Step 5: After Merge
 
-1. **Delete the branch** — merged branches are dead weight
-2. **Update linked issues** — close any issues that were resolved
-3. **Verify the merge commit built green** on main — do not assume
+1. **Delete the branch** -- merged branches are dead weight
+2. **Update linked issues** -- close any issues that were resolved
+3. **Verify the merge commit built green** on main -- do not assume
 4. **Remove any worktrees** created for this branch: `git worktree list` and prune
 
 ---
@@ -143,18 +143,18 @@ See `versioning` skill for conventional commit rules.
 |--------|---------|
 | "I'll clean up the commits later" | Later never comes. Clean them now while context is fresh. |
 | "The tests pass locally, CI will be fine" | CI has a different environment. It fails independently. Verify the diff, not the confidence. |
-| "It's close enough — I'll fix it in follow-up" | Undefined follow-up is a polite word for "never." Open a tracking issue with a due date or do it now. |
+| "It's close enough -- I'll fix it in follow-up" | Undefined follow-up is a polite word for "never." Open a tracking issue with a due date or do it now. |
 | "The PR description can be filled in later" | PR descriptions written after the fact are summaries, not design records. Write them now. |
 | "CI passed on the branch, merge is safe" | CI on the branch does not verify the merge commit. Verify CI is green on main AFTER the merge. |
-| "Reviewers will just read the diff — the PR description is optional" | Reality: YOU MUST write the PR description before opening the PR. The diff shows what changed; the description explains why. |
+| "Reviewers will just read the diff -- the PR description is optional" | Reality: YOU MUST write the PR description before opening the PR. The diff shows what changed; the description explains why. |
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 - Opening a PR with failing tests
 - Squashing commits without reading the resulting diff
 - Merging without checking CI on main after merge
 - Closing a branch with OPEN acceptance criteria and no tracking issue
 - Pushing to open a PR without reading the full diff (`git diff main...HEAD`) line by line
-- "I'll skip the post-merge cleanup — branches and worktrees can wait" — **STOP. Delete the branch, close linked issues, and prune worktrees immediately after merging.**
+- "I'll skip the post-merge cleanup -- branches and worktrees can wait" -- **STOP. Delete the branch, close linked issues, and prune worktrees immediately after merging.**

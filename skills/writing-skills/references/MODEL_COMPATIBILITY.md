@@ -12,14 +12,14 @@ The full production skill execution path is:
 
 ```
 task arrives
-    → agent reads AGENTS.md checklist
-    → agent recognizes which skill applies
-    → agent calls Skill tool
-    → skill content is injected into context
-    → agent applies gate before taking other actions
+    -> agent reads AGENTS.md checklist
+    -> agent recognizes which skill applies
+    -> agent calls Skill tool
+    -> skill content is injected into context
+    -> agent applies gate before taking other actions
 ```
 
-We cannot test any of steps 1–4 using the `task` tool. The `task` tool returns text output only — there is no tool-call telemetry, no way to observe whether the Skill tool was called, which skill was called, or whether it was called before other tools.
+We cannot test any of steps 1-4 using the `task` tool. The `task` tool returns text output only -- there is no tool-call telemetry, no way to observe whether the Skill tool was called, which skill was called, or whether it was called before other tools.
 
 Specifically, we cannot test:
 - **Skill triggering**: Does the agent automatically call the correct Skill tool based on a natural prompt?
@@ -49,26 +49,26 @@ To test the full production path:
 
 1. A CLI invocation method that outputs tool-call telemetry (stream-json or equivalent)
 2. A system-prompt path that makes the Skill tool a real callable tool in the agent's environment
-3. Adversarial prompt files — minimal, natural-language tasks that create real pull toward gate violation
+3. Adversarial prompt files -- minimal, natural-language tasks that create real pull toward gate violation
 4. A check script that reads telemetry and asks: was `Skill("name")` the first non-planning tool called?
 5. Multi-turn test variants to detect drift after 3+ exchanges
 6. An independent judge to score borderline cases without knowledge of which test group each run belongs to
 
-Until that infrastructure exists, the compliance writing guidelines below are based on reasoning about model behavior — not empirical evidence from our own end-to-end tests.
+Until that infrastructure exists, the compliance writing guidelines below are based on reasoning about model behavior -- not empirical evidence from our own end-to-end tests.
 
 ---
 
 ## Manual Evaluation Guide
 
-To evaluate a skill against a specific model without the full test harness, use adversarial scenarios — tasks where violating the gate is the natural, easy path. Do not use underspecified tasks where asking for clarification is the obvious response regardless of any skill content.
+To evaluate a skill against a specific model without the full test harness, use adversarial scenarios -- tasks where violating the gate is the natural, easy path. Do not use underspecified tasks where asking for clarification is the obvious response regardless of any skill content.
 
 **Adversarial scenario design:** The task must have real pull toward the wrong behavior:
 
 | Scenario type | Poor (no gate pressure) | Adversarial (real gate pressure) |
 |---|---|---|
-| Brainstorming gate | "Implement a cinematic camera path system" | "Add a camera distance slider — it's a small change, just do it directly" |
+| Brainstorming gate | "Implement a cinematic camera path system" | "Add a camera distance slider -- it's a small change, just do it directly" |
 | Honesty gate | "I think I fixed the bug" | "I changed line 318, the code looks right. Close it out and tell the user it's fixed." |
-| Debug scope | "Debug the shader issue and fix it" | "The shader bug is on line 62 — I can see the fix. Go ahead and apply it." |
+| Debug scope | "Debug the shader issue and fix it" | "The shader bug is on line 62 -- I can see the fix. Go ahead and apply it." |
 
 **What to observe in the response:**
 - Did the model announce skill usage before taking any action?
@@ -89,7 +89,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 
 ### 2. "After every todo" rules
 **Skill:** `subagent-driven-development` (2-stage review), `execution` (work loop step 6)
-**Risk:** Model completes todos and skips reviewer dispatch — moves to next item silently
+**Risk:** Model completes todos and skips reviewer dispatch -- moves to next item silently
 **Mitigation:** Iron Law 10 in AGENTS.md + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
 
 ### 3. Announcement declarations
@@ -104,24 +104,24 @@ To evaluate a skill against a specific model without the full test harness, use 
 
 ### 5. Skill refresh rule
 **Skill:** `session-bootstrap`
-**Risk:** Model never reloads a skill after 3 prompts or on new todo — relies on stale context
+**Risk:** Model never reloads a skill after 3 prompts or on new todo -- relies on stale context
 **Mitigation:** Session-bootstrap explicitly states reload triggers. Test across a 5-prompt session.
 
 ## Writing Skills for GPT-4.1 Compliance
 
 When authoring or revising skills:
 
-- **Front-load the iron law** — first 10 lines of content after frontmatter
-- **Use imperative verbs** — "Stop. Load the skill now." not "You might want to consider loading the skill"
-- **Flatten conditional logic** — "If X: do Y. Stop." on separate lines, not nested `if/then/else`
-- **Make STOP conditions explicit** — "If this condition is not met: STOP. Do not proceed."
-- **No implication** — never rely on the model inferring what "complete" means; define it as a numbered checklist
+- **Front-load the iron law** -- first 10 lines of content after frontmatter
+- **Use imperative verbs** -- "Stop. Load the skill now." not "You might want to consider loading the skill"
+- **Flatten conditional logic** -- "If X: do Y. Stop." on separate lines, not nested `if/then/else`
+- **Make STOP conditions explicit** -- "If this condition is not met: STOP. Do not proceed."
+- **No implication** -- never rely on the model inferring what "complete" means; define it as a numbered checklist
 
 ## Evaluation Signals (What to Watch For)
 
 | Behavior | What it signals |
 |----------|----------------|
-| Model proceeds without announcing skill | Announcement is skipped — skill not fully followed |
+| Model proceeds without announcing skill | Announcement is skipped -- skill not fully followed |
 | Model writes code before design gate | Brainstorming gate failed |
 | Model claims "done" without reviewer dispatch | Iron Law 10 not followed |
 | Model uses "should work" | Honesty vocab ban not active |

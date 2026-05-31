@@ -1,6 +1,6 @@
 # Simplicity Principles Reference
 
-Source: Ward Cunningham's C2 wiki audit — principles for scoping plans, choosing simple designs, and avoiding speculative complexity.
+Source: Ward Cunningham's C2 wiki audit -- principles for scoping plans, choosing simple designs, and avoiding speculative complexity.
 
 ---
 
@@ -19,7 +19,7 @@ Cut any todo that cannot be traced to a passing test or a clear requirement.
 
 ## Work Backward from Pseudo-Code
 
-Before implementation, write the ideal call site in free-form domain language — unconstrained by the production language:
+Before implementation, write the ideal call site in free-form domain language -- unconstrained by the production language:
 
 ```
 // Ideal:
@@ -28,7 +28,7 @@ scene.render(particles, camera, lightingModel)
   .saveAs("frame.png")
 ```
 
-Then work backward to fit the production language (C++20). If the production language requires significant ceremony to express the ideal, the gap reveals a missing abstraction — add it.
+Then work backward to fit the production language (C++20). If the production language requires significant ceremony to express the ideal, the gap reveals a missing abstraction -- add it.
 
 Avoids letting language constraints limit design thinking.
 
@@ -36,7 +36,7 @@ Avoids letting language constraints limit design thinking.
 
 ## YAGNI Applied to Plans
 
-YAGNI governs feature additions — **not** code clarity, refactoring, or structural decisions.
+YAGNI governs feature additions -- **not** code clarity, refactoring, or structural decisions.
 
 Forbidden in plan todos:
 - "We'll probably need this later"
@@ -56,7 +56,7 @@ Ask before applying any design pattern:
 2. Does the pattern resolve those specific forces?
 3. Have three real instances of this problem appeared? (Rule of Three)
 
-If any answer is "no" or "not yet" → use the simpler solution.
+If any answer is "no" or "not yet" -> use the simpler solution.
 
 ---
 
@@ -85,7 +85,7 @@ Planning implication: one active implementation todo at a time. Completing todos
 
 ## Do Not Refactor Stable Code Speculatively
 
-Refactor only when fixing a bug or adding a feature. Working, stable code that does not block forward progress is not a refactoring target — maintenance cost is real, not theoretical.
+Refactor only when fixing a bug or adding a feature. Working, stable code that does not block forward progress is not a refactoring target -- maintenance cost is real, not theoretical.
 
 "Working code trumps everything" is a corollary of YAGNI. The moment a feature need drives a refactor, the refactor is justified. Until then, it is not.
 
@@ -107,15 +107,15 @@ Not every useful idea is a pattern. Forcing a pattern form onto advice dilutes p
 
 ## Simplest Thing That Could Possibly Work (STTCPW)
 
-Before finalizing any design or implementation, ask: "Is there a simpler solution that satisfies all acceptance criteria?" The burden of proof is on the complex option, not the simple one. STTCPW is not "simplest thing that is easy to type" — it is "simplest thing that could pass all the tests." Reject solutions that satisfy criteria not in scope. Source: C2 Wiki "DoTheSimplestThingThatCouldPossiblyWork".
+Before finalizing any design or implementation, ask: "Is there a simpler solution that satisfies all acceptance criteria?" The burden of proof is on the complex option, not the simple one. STTCPW is not "simplest thing that is easy to type" -- it is "simplest thing that could pass all the tests." Reject solutions that satisfy criteria not in scope. Source: C2 Wiki "DoTheSimplestThingThatCouldPossiblyWork".
 
 ## Dimensions of Simplicity
 
-Kent Beck's ordered checklist for assessing design quality: (1) Passes all tests. (2) Reveals intention — names, structure, and organization communicate what the code does without comment. (3) No duplication — each concept has exactly one home. (4) Fewest elements — no class, method, or variable that does not serve a purpose in criteria 1–3. Apply in order: criterion 1 gates criterion 2, which gates criterion 3, which gates criterion 4. Source: C2 Wiki "XpSimplicityRules".
+Kent Beck's ordered checklist for assessing design quality: (1) Passes all tests. (2) Reveals intention -- names, structure, and organization communicate what the code does without comment. (3) No duplication -- each concept has exactly one home. (4) Fewest elements -- no class, method, or variable that does not serve a purpose in criteria 1-3. Apply in order: criterion 1 gates criterion 2, which gates criterion 3, which gates criterion 4. Source: C2 Wiki "XpSimplicityRules".
 
 ## Assign Problems, Not Tasks
 
-Delegate outcomes, not procedures. State what success looks like — the verifiable end state — and let the assignee determine the path. A task delegation says "do these five steps." A problem delegation says "the system must do X when Y; verify it." Task delegation creates followers who cannot adapt when the steps do not fit; problem delegation creates owners who can. This is the canonical definition. See the `subagent-driven-development` and `execution` skills for project-level application. Source: C2 Wiki "AssignProblemsNotTasks".
+Delegate outcomes, not procedures. State what success looks like -- the verifiable end state -- and let the assignee determine the path. A task delegation says "do these five steps." A problem delegation says "the system must do X when Y; verify it." Task delegation creates followers who cannot adapt when the steps do not fit; problem delegation creates owners who can. This is the canonical definition. See the `subagent-driven-development` and `execution` skills for project-level application. Source: C2 Wiki "AssignProblemsNotTasks".
 
 ## Clear Requirements
 
@@ -123,20 +123,20 @@ A requirement is not clear until it has a verifiable acceptance criterion. "The 
 
 ## Big Reduction Up Front
 
-Before planning the work, identify the one simplification that removes the most future work. This is not premature optimization — it is asking "if we change the structure of the problem, how much of the solution disappears?" The question is: what is the highest-leverage simplification available before any code is written? Source: C2 Wiki "BigReductionUpFront".
+Before planning the work, identify the one simplification that removes the most future work. This is not premature optimization -- it is asking "if we change the structure of the problem, how much of the solution disappears?" The question is: what is the highest-leverage simplification available before any code is written? Source: C2 Wiki "BigReductionUpFront".
 
 ---
 
 ## Refactoring Is a Requirement, Not a Reward
 
-Refactoring is not something done after "real work" is finished. It is part of delivering working software. A codebase that accumulates structure debt requires more effort to change — which means all future requirements cost more to implement.
+Refactoring is not something done after "real work" is finished. It is part of delivering working software. A codebase that accumulates structure debt requires more effort to change -- which means all future requirements cost more to implement.
 
 Consequences of treating refactoring as optional:
 - Velocity slows as the codebase grows
 - New requirements become harder to fit into an increasingly rigid structure
 - Developers avoid changing code they don't understand, creating zones of accumulating risk
 
-Build refactoring into the development cycle. It is not a separate task to be scheduled separately — it happens continuously as part of normal work.
+Build refactoring into the development cycle. It is not a separate task to be scheduled separately -- it happens continuously as part of normal work.
 
 ---
 
@@ -147,7 +147,7 @@ Refactoring means changing the structure of code without changing its observable
 - Changing what the code does while cleaning it up
 - Adding new features while restructuring
 
-"Refactoring" that changes behavior is not refactoring — it is combined refactoring and feature work. These must be separated to preserve rollback safety and test validity.
+"Refactoring" that changes behavior is not refactoring -- it is combined refactoring and feature work. These must be separated to preserve rollback safety and test validity.
 
 **Rule:** During a refactoring session, the test suite must stay green at every step. If a step breaks a test, either the refactoring changed behavior (revert it) or the test was wrong (fix the test in a separate step, not the same commit).
 
@@ -157,11 +157,11 @@ Refactoring means changing the structure of code without changing its observable
 
 Three approaches match different contexts:
 
-**Refactor As You Go** — appropriate for active, well-tested code. Clean up as you touch code. Apply the Boy Scout Rule: leave the code slightly better than you found it. Keep changes small.
+**Refactor As You Go** -- appropriate for active, well-tested code. Clean up as you touch code. Apply the Boy Scout Rule: leave the code slightly better than you found it. Keep changes small.
 
-**Refactor Mercilessly** — appropriate for code under heavy active development. Continuously improve the design until it clearly expresses the intent. Do not defer cleanup.
+**Refactor Mercilessly** -- appropriate for code under heavy active development. Continuously improve the design until it clearly expresses the intent. Do not defer cleanup.
 
-**Refactor Daintily (legacy code)** — appropriate for untested or rarely-touched code. Make the smallest possible change that allows a test to be added. Add the test. Then improve incrementally. Never refactor legacy code without first adding tests that constrain behavior.
+**Refactor Daintily (legacy code)** -- appropriate for untested or rarely-touched code. Make the smallest possible change that allows a test to be added. Add the test. Then improve incrementally. Never refactor legacy code without first adding tests that constrain behavior.
 
 Choosing the wrong strategy for the context creates risk:
 - Refactoring mercilessly on untested legacy code risks introducing silent regressions
@@ -184,7 +184,7 @@ Do not begin with the hardest structural problem. That is the last refactoring, 
 
 ## Excessive Refactoring as Signal
 
-A system that requires continuous large-scale refactoring every iteration is signaling a design failure — not a refactoring success. Refactoring should reduce the cost of future change. If it never does, the design is not improving.
+A system that requires continuous large-scale refactoring every iteration is signaling a design failure -- not a refactoring success. Refactoring should reduce the cost of future change. If it never does, the design is not improving.
 
 Signs of excessive refactoring:
 - Every new feature requires restructuring multiple modules
@@ -197,9 +197,9 @@ The root cause is usually an incorrect domain model or missed abstraction. Stop 
 
 ## Related Skills
 
-- `writing-plans` — YAGNI, PPP, Skeptic Agent gate
-- `brainstorming` — Structured Ideation reference for design exploration
-- `execution` — Make It Work → Make It Right → Make It Fast gate
+- `writing-plans` -- YAGNI, PPP, Skeptic Agent gate
+- `brainstorming` -- Structured Ideation reference for design exploration
+- `execution` -- Make It Work -> Make It Right -> Make It Fast gate
 
 ---
 
@@ -207,20 +207,20 @@ The root cause is usually an incorrect domain model or missed abstraction. Stop 
 
 ```
 Task arrives
-    ↓
-Trivial (1 file, 1 step)? → Implement directly
-    ↓ (multi-step)
-Step 0: Clarify Expectations — restate requirements, label [UNCLEAR:]
-    ↓
-Smart Trust Gate — answer 5 questions; if 2+ todos: check for `## Feature Specification` → three-amigos Refinement OR Skeptic
-    ↓
+    v
+Trivial (1 file, 1 step)? -> Implement directly
+    v (multi-step)
+Step 0: Clarify Expectations -- restate requirements, label [UNCLEAR:]
+    v
+Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Specification` -> three-amigos Refinement OR Skeptic
+    v
 Build todo list: YAGNI + PPP per item + No Placeholders
-    ↓
+    v
 TDD task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
-    ↓
+    v
 Plan review: covers all criteria? downsides named?
-    ↓
-Present plan to user — WAIT for explicit approval
-    ↓
+    v
+Present plan to user -- WAIT for explicit approval
+    v
 Begin execution (invoke execution skill)
 ```

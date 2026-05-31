@@ -28,8 +28,8 @@ Before pushing any change:
 4. No new dependency duplicates an existing transitive dependency at a different version
 5. If shader files were changed: build was re-run so `Viewer-Assets/shaders/` is current
 
-✓ All met → proceed to push
-✗ Any unmet → fix before pushing
+[+] All met -> proceed to push
+[-] Any unmet -> fix before pushing
 
 ---
 
@@ -64,7 +64,7 @@ cmake --install build
 | Requirement | Minimum Version |
 |-------------|----------------|
 | CMake | 3.24 |
-| C++ compiler | C++20 (GCC ≥ 10, Clang ≥ 11, MSVC 2019+) |
+| C++ compiler | C++20 (GCC >= 10, Clang >= 11, MSVC 2019+) |
 | OpenGL | Development libraries (`OpenGL::GL` target) |
 | GLM | System-installed |
 | SDL3 | Auto-downloaded via FetchContent (local) or Flatpak module |
@@ -83,12 +83,12 @@ cmake --install build
 - Always downloaded via `FetchContent`.
 
 ### Embedded Libraries (no management needed)
-- `src/glad/` — GLAD OpenGL loader
-- `src/stb_*.h` — stb single-header libraries
+- `src/glad/` -- GLAD OpenGL loader
+- `src/stb_*.h` -- stb single-header libraries
 
 ### Dependency Upgrades
 - Allowed as long as all tests pass and build succeeds
-- Visual regression tests are a hard requirement — must pass without modification unless the approver is explicitly shown the new output
+- Visual regression tests are a hard requirement -- must pass without modification unless the approver is explicitly shown the new output
 - Test updates for API changes (e.g., GoogleTest) are acceptable
 
 ### One Version Rule
@@ -97,20 +97,20 @@ cmake --install build
 
 **Rule:** Before adding or upgrading any dependency:
 1. Check if that library is already a transitive dependency of another component
-2. If it is: use the existing version — upgrade if needed, never add a parallel version
+2. If it is: use the existing version -- upgrade if needed, never add a parallel version
 3. If a diamond dependency arises (A needs lib@v1, B needs lib@v2): resolve by upgrading to the higher version and confirming both A and B still work
-4. Document the version pin (tag or commit SHA) in `CMakeLists.txt` — never use `HEAD` or `main` as a `FetchContent` ref in production builds
+4. Document the version pin (tag or commit SHA) in `CMakeLists.txt` -- never use `HEAD` or `main` as a `FetchContent` ref in production builds
 
-**Gate:** `grep -r "FetchContent_Declare" CMakeLists.txt` — every `FetchContent_Declare` must have a `GIT_TAG` pinned to a specific version, not a branch name.
+**Gate:** `grep -r "FetchContent_Declare" CMakeLists.txt` -- every `FetchContent_Declare` must have a `GIT_TAG` pinned to a specific version, not a branch name.
 
-✓ All tags pinned to a version tag or commit SHA → proceed to add or upgrade the dependency
-✗ Any tag references a branch name → fix the ref before proceeding
+[+] All tags pinned to a version tag or commit SHA -> proceed to add or upgrade the dependency
+[-] Any tag references a branch name -> fix the ref before proceeding
 
 ```cmake
-# CORRECT — pinned to tag
+# CORRECT -- pinned to tag
 FetchContent_Declare(some_lib GIT_REPOSITORY ... GIT_TAG v1.2.3)
 
-# WRONG — pinned to branch (non-reproducible)
+# WRONG -- pinned to branch (non-reproducible)
 FetchContent_Declare(some_lib GIT_REPOSITORY ... GIT_TAG main)
 ```
 
@@ -129,7 +129,7 @@ FetchContent_Declare(some_lib GIT_REPOSITORY ... GIT_TAG main)
 ## Step 5: Troubleshooting
 
 **Missing SDL3:**
-Run `cmake -B build -S .` — SDL3 downloads automatically via FetchContent.
+Run `cmake -B build -S .` -- SDL3 downloads automatically via FetchContent.
 
 **OpenGL headers not found:**
 Install OpenGL development packages. Ensure `OpenGL::GL` CMake target is available.
@@ -149,13 +149,13 @@ See the `flatpak` skill for MSAA fallback, SDL3 module setup, NVIDIA GL workarou
 | "Small change, can't break the build" | Even single-line changes break builds. Run `cmake --build build` first. |
 | "CI will catch it if the build fails" | CI is a safety net. Don't push broken builds intentionally. |
 | "It built fine yesterday" | Dependencies change. State changes. Build locally before every push. |
-| "The CMake error is too confusing to parse" | Read the first 10 lines of error output — that's always where the root cause is. |
+| "The CMake error is too confusing to parse" | Read the first 10 lines of error output -- that's always where the root cause is. |
 | "I'll fix the FetchContent pin later" | Unpinned dependencies produce non-reproducible builds. Pin to tag/commit now. |
 | "The tests don't need to be in the build target" | All test targets must build cleanly. No orphaned test binaries. |
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
 - "I'll push and see if CI builds it"

@@ -43,9 +43,9 @@ Before dispatching any agent, verify:
 2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (ask user for directory after summary completes -- not before).
 3. `scratch/summaries/` exists for the temp file.
 
-✓ All met -> dispatch agents 1-3 in parallel
-✗ Source missing -> fetch or read the source. Do not dispatch.
-✗ Output path unknown -> note it; ask user after summary completes.
+[+] All met -> dispatch agents 1-3 in parallel
+[-] Source missing -> fetch or read the source. Do not dispatch.
+[-] Output path unknown -> note it; ask user after summary completes.
 
 ---
 

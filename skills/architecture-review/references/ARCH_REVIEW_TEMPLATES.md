@@ -7,7 +7,7 @@
 
 ### Layer Assignment
 Component belongs to: Layer [N] ([name])
-Expected dependencies: Layers ≤[N]
+Expected dependencies: Layers <=[N]
 Actual dependencies found: [list includes/calls]
 
 ### Violations Found

@@ -8,7 +8,7 @@ description: Use when packaging, running, or debugging a Flatpak application wit
 ## Iron Law
 
 ```
-GATE ALL FLATPAK WORKAROUNDS ON /.flatpak-info — NEVER APPLY SANDBOX WORKAROUNDS
+GATE ALL FLATPAK WORKAROUNDS ON /.flatpak-info -- NEVER APPLY SANDBOX WORKAROUNDS
 ON NATIVE SYSTEMS
 YOU MUST gate every sandbox workaround on `/.flatpak-info`. No exceptions.
 ```
@@ -25,14 +25,14 @@ A workaround that fires outside the Flatpak sandbox forces software rendering on
 
 Before modifying the Flatpak manifest, SDL3 window creation code, or GL context initialization:
 
-1. Is this code running inside Flatpak? Check `/.flatpak-info` — gate every workaround on this.
+1. Is this code running inside Flatpak? Check `/.flatpak-info` -- gate every workaround on this.
 2. Is SDL3 built as a **separate** manifest module (not via FetchContent inside the app module)?
 3. Are all `setenv()` calls using `overwrite=1`?
 4. Is the NVIDIA fallback check gated on both `/dev/nvidia0` AND absence of the mounted GL extension?
 5. Is the MSAA fallback retry present if requesting multisample?
 
-✓ All pass → proceed
-✗ Any fail → fix the gate condition first, then proceed
+[+] All pass -> proceed
+[-] Any fail -> fix the gate condition first, then proceed
 
 ---
 
@@ -48,7 +48,7 @@ Before modifying the Flatpak manifest, SDL3 window creation code, or GL context 
 
 ### 2. SDL3 as a Separate Flatpak Module
 
-When SDL3 is built via CMake `FetchContent` inside a `flatpak-builder` module, the Freedesktop SDK `pkg-config` paths are **not** inherited by the sub-build. This causes `sdl3_config.cmake` to report `SDL_X11: OFF` and `SDL_WAYLAND: OFF` — no video driver available at runtime.
+When SDL3 is built via CMake `FetchContent` inside a `flatpak-builder` module, the Freedesktop SDK `pkg-config` paths are **not** inherited by the sub-build. This causes `sdl3_config.cmake` to report `SDL_X11: OFF` and `SDL_WAYLAND: OFF` -- no video driver available at runtime.
 
 **Fix:** Build SDL3 as a separate module in the Flatpak manifest, before the app module:
 
@@ -65,7 +65,7 @@ Then in `CMakeLists.txt`, try `find_package(SDL3 QUIET)` first so the Flatpak-bu
 
 ---
 
-### 3. NVIDIA GL Extension Mismatch — Three Env Vars Required
+### 3. NVIDIA GL Extension Mismatch -- Three Env Vars Required
 
 **Symptom:** `SDL_CreateWindow failed: Invalid window driver data` inside Flatpak on NVIDIA hardware.
 
@@ -80,7 +80,7 @@ setenv("__GLX_VENDOR_LIBRARY_NAME","mesa",     1);
 ```
 
 Why all three:
-- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient — GLVND still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
+- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient -- GLVND still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
 - `__GLX_VENDOR_LIBRARY_NAME=mesa` bypasses X server vendor negotiation entirely.
 - `GALLIUM_DRIVER=llvmpipe` selects Mesa's software rasterizer explicitly.
 
@@ -98,7 +98,7 @@ const bool ext_mounted = isNvidiaGlExtensionMounted();
 if (isRunningInFlatpak() && nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
 
-Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" — Flatpak mounts the GL extension into a versioned, architecture-specific GL extension directory. GLVND resolves the vendor library by scanning that directory structure, not via `LD_LIBRARY_PATH`.
+Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" -- Flatpak mounts the GL extension into a versioned, architecture-specific GL extension directory. GLVND resolves the vendor library by scanning that directory structure, not via `LD_LIBRARY_PATH`.
 
 This must run **before** the first `SDL_Init` call. Setting env vars after SDL_Init has no effect.
 
@@ -109,7 +109,7 @@ This must run **before** the first `SDL_Init` call. Setting env vars after SDL_I
 Flatpak pre-initializes env vars it manages to `""` (empty string, not unset). An `overwrite=0` call to `setenv()` sees a non-NULL existing value and silently does nothing.
 
 ```cpp
-// WRONG — silently does nothing inside Flatpak when the var is pre-set to ""
+// WRONG -- silently does nothing inside Flatpak when the var is pre-set to ""
 setenv("LIBGL_ALWAYS_SOFTWARE", "1", 0);
 
 // CORRECT
@@ -150,7 +150,7 @@ cat /proc/driver/nvidia/version     # host driver version
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If any of the following apply, stop and re-read the relevant core rule:
 
@@ -159,7 +159,7 @@ If any of the following apply, stop and re-read the relevant core rule:
 - NVIDIA detection logic runs on native systems (missing `/.flatpak-info` gate)
 - MSAA is requested without a no-MSAA fallback retry
 - Three NVIDIA env vars are not set together (partial set = partial fix = still broken)
-- Env vars are set after `SDL_Init` (too late — GL vendor already loaded)
+- Env vars are set after `SDL_Init` (too late -- GL vendor already loaded)
 
 ---
 

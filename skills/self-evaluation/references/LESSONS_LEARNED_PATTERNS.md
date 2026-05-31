@@ -12,7 +12,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Always open binary data files with `"rb"` mode for cross-platform correctness.
 
-**Added to:** `AGENTS.md` → Error Handling section, `testing` skill → Key Design Principles
+**Added to:** `AGENTS.md` -> Error Handling section, `testing` skill -> Key Design Principles
 
 ### Return By Const Reference (PR #73)
 
@@ -20,15 +20,15 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Return large objects (matrices, vectors, structs) by `const&` from getters when the member is stored in the class.
 
-**Added to:** `AGENTS.md` → Common Pitfalls
+**Added to:** `AGENTS.md` -> Common Pitfalls
 
 ### GLFW Key Bounds Check (PR #73)
 
 **Problem:** `keys_[key]` indexed without validation. GLFW can pass `GLFW_KEY_UNKNOWN` (-1), causing out-of-bounds access.
 
-**Lesson:** Bounds-check GLFW key callbacks — `GLFW_KEY_UNKNOWN` is -1.
+**Lesson:** Bounds-check GLFW key callbacks -- `GLFW_KEY_UNKNOWN` is -1.
 
-**Added to:** `AGENTS.md` → OpenGL Usage section
+**Added to:** `AGENTS.md` -> OpenGL Usage section
 
 ---
 
@@ -40,15 +40,15 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Always keep Act and Assert as separate phases, even when they seem naturally combined.
 
-**Added to:** `testing` skill → Critical Rules, `TESTING_EXAMPLES.md` → Incorrect Examples
+**Added to:** `testing` skill -> Critical Rules, `TESTING_EXAMPLES.md` -> Incorrect Examples
 
 ### Production Classes in Tests (PR #73)
 
 **Problem:** Visual regression test helper duplicated Particle's cube generation logic, creating a maintenance burden and false confidence.
 
-**Lesson:** Use production classes (e.g., `Particle`) directly in tests — never duplicate production logic in test helpers.
+**Lesson:** Use production classes (e.g., `Particle`) directly in tests -- never duplicate production logic in test helpers.
 
-**Added to:** `testing` skill → Key Design Principles, `TESTING_EXAMPLES.md` → correct/incorrect patterns
+**Added to:** `testing` skill -> Key Design Principles, `TESTING_EXAMPLES.md` -> correct/incorrect patterns
 
 ### Ensure Output Directories Exist (PR #72)
 
@@ -56,7 +56,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Ensure all output directories exist in test `SetUp()`, and check `save()` return values.
 
-**Added to:** `testing` skill → Self-Review Checklist
+**Added to:** `testing` skill -> Self-Review Checklist
 
 ### Camera Positioning for Visual Tests (PR #71)
 
@@ -64,7 +64,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Extract viewing direction from debug output, but calculate distance based on desired viewport coverage. Formula: `distance = subject_size / (coverage_% * tan(FOV/2))`.
 
-**Added to:** `AGENTS.md` → Visual Regression Tests section, `docs/visual-regression/camera-positioning-lessons-learned.md`
+**Added to:** `AGENTS.md` -> Visual Regression Tests section, `docs/visual-regression/camera-positioning-lessons-learned.md`
 
 ---
 
@@ -76,7 +76,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Group related member variables into Plain Old C++ Objects (POCOs)/structs (e.g., `WindowConfig`, `RenderResources`). Structs must provide their own defaults.
 
-**Added to:** `AGENTS.md` → Data Organization, `testing` skill → Key Design Principles
+**Added to:** `AGENTS.md` -> Data Organization, `testing` skill -> Key Design Principles
 
 ### Headers Must Be Self-Contained (PR #70)
 
@@ -84,23 +84,23 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Headers must include all their own dependencies. Don't rely on transitive includes from other headers.
 
-**Added to:** `AGENTS.md` → Common Pitfalls
+**Added to:** `AGENTS.md` -> Common Pitfalls
 
 ### GL Resource Cleanup (PR #73)
 
 **Problem:** `cleanup()` only deleted FBO, leaking other GL objects (textures, renderbuffers, VAOs, VBOs).
 
-**Lesson:** Clean up ALL GL resources in destructors — VAOs, VBOs, FBOs, RBOs, textures. Check for non-zero before deleting.
+**Lesson:** Clean up ALL GL resources in destructors -- VAOs, VBOs, FBOs, RBOs, textures. Check for non-zero before deleting.
 
-**Added to:** `AGENTS.md` → Memory Management
+**Added to:** `AGENTS.md` -> Memory Management
 
 ### GL_POINT_SIZE_RANGE Clamping (PR #81)
 
 **Problem:** Resolution independence test at 4K computed `gl_PointSize` of 366px, but hardware max was 256px. OpenGL silently clamped it, making the particle appear ~50% smaller. A loose test tolerance (0.01) masked the defect.
 
-**Lesson:** `gl_PointSize` is silently clamped by `GL_POINT_SIZE_RANGE` (256px on Mesa/llvmpipe). When testing resolution-independent scaling, choose camera distances that keep computed point sizes under this limit at all target resolutions. Use tolerances proportional to the values being compared — an absolute tolerance larger than the expected value itself will mask real failures.
+**Lesson:** `gl_PointSize` is silently clamped by `GL_POINT_SIZE_RANGE` (256px on Mesa/llvmpipe). When testing resolution-independent scaling, choose camera distances that keep computed point sizes under this limit at all target resolutions. Use tolerances proportional to the values being compared -- an absolute tolerance larger than the expected value itself will mask real failures.
 
-**Added to:** `AGENTS.md` → OpenGL Usage
+**Added to:** `AGENTS.md` -> OpenGL Usage
 
 ### Cross-Mesa Baseline Stability (PR #81)
 
@@ -108,7 +108,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Different Mesa/llvmpipe versions may compile the same shader differently, causing sprite-boundary rounding differences. Visual regression baselines should allow a small `MAX_DIFF_RATIO` (e.g., 0.01%) instead of requiring 100% pixel match. Always `ASSERT_TRUE(image.save(...))` artifact writes so debug images are not silently lost.
 
-**Added to:** `AGENTS.md` → Test Issues
+**Added to:** `AGENTS.md` -> Test Issues
 
 ---
 
@@ -123,7 +123,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 2. Visually spot-check modified files for common patterns (trailing semicolons after `}`, exception handling, multi-declarations, bracing)
 3. Only then run the dry-run verification
 
-**Added to:** `code-quality` skill → Step 1 (Pre-Commit Checklist) + new Step 3 (Human-Reviewable Formatting Patterns table)
+**Added to:** `code-quality` skill -> Step 1 (Pre-Commit Checklist) + new Step 3 (Human-Reviewable Formatting Patterns table)
 
 ---
 
@@ -134,7 +134,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Use `FetchContent_Declare()` with `SOURCE_SUBDIR` set to a non-existent path, then call `FetchContent_MakeAvailable()`. This downloads the source without attempting `add_subdirectory()`, and avoids the `FetchContent_Populate()` deprecation warning. Then add the source files manually to your target.
 
-**Added to:** `AGENTS.md` → ImGui Integration
+**Added to:** `AGENTS.md` -> ImGui Integration
 
 ### GLFW Callback Chaining Order (PR #79)
 
@@ -142,23 +142,23 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Set application GLFW callbacks (e.g., `glfwSetKeyCallback`) **before** calling `ImGui_ImplGlfw_InitForOpenGL(window, true)`. ImGui saves the current callbacks and chains to them, ensuring both ImGui and the application receive input events.
 
-**Added to:** `AGENTS.md` → ImGui Integration
+**Added to:** `AGENTS.md` -> ImGui Integration
 
 ### ImGui Renders to Default Framebuffer (PR #79)
 
 **Problem:** Needed to ensure ImGui menus don't appear in FBO-based screenshots and frame recordings.
 
-**Lesson:** ImGui renders to the default framebuffer after the FBO blit pass. Since recording reads pixels from the offscreen FBO (before the blit), ImGui content is naturally excluded. This is an architectural advantage of the FBO pipeline — no special handling needed.
+**Lesson:** ImGui renders to the default framebuffer after the FBO blit pass. Since recording reads pixels from the offscreen FBO (before the blit), ImGui content is naturally excluded. This is an architectural advantage of the FBO pipeline -- no special handling needed.
 
-**Added to:** `AGENTS.md` → ImGui Integration
+**Added to:** `AGENTS.md` -> ImGui Integration
 
 ### Debug Overlay Must Offset for Menu Bar (PR #79)
 
 **Problem:** Debug overlay positioned at y=5 was hidden behind the ImGui menu bar (~25px high). The first line (including FPS counter) was not visible.
 
-**Lesson:** Use ImGui windows instead of raw GL overlays — `ImGui::GetFrameHeight()` gives the actual menu bar height for dynamic positioning. This avoids hard-coded offsets that break with DPI/font scaling changes.
+**Lesson:** Use ImGui windows instead of raw GL overlays -- `ImGui::GetFrameHeight()` gives the actual menu bar height for dynamic positioning. This avoids hard-coded offsets that break with DPI/font scaling changes.
 
-**Added to:** `AGENTS.md` → ImGui Integration
+**Added to:** `AGENTS.md` -> ImGui Integration
 
 ---
 
@@ -168,7 +168,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Problem:** Visual regression test artifacts used names like `single_particle_720p.png` that didn't match the CI workflow regex `_baseline|_current|_diff`. The quick fix was to expand the regex; the correct fix was to rename artifacts at the source.
 
-**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code — not the CI regex. CI patterns should enforce conventions, not accommodate deviations.
+**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code -- not the CI regex. CI patterns should enforce conventions, not accommodate deviations.
 
 **Added to:** Self-evaluation skill (this file)
 
@@ -184,7 +184,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Minimize duplication across skills. Each skill owns one domain. Skills reference other skills instead of repeating content.
 
-**Added to:** `AGENTS.md` → Skill Architecture section
+**Added to:** `AGENTS.md` -> Skill Architecture section
 
 ### Always Upload Current Images (PR #64)
 
@@ -192,7 +192,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Always save and upload current rendered images, even when tests pass. Use `if: always()` on upload steps.
 
-**Added to:** `workflow` skill → Artifact Upload Pattern
+**Added to:** `workflow` skill -> Artifact Upload Pattern
 
 ---
 
@@ -204,7 +204,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Always add a fallback retry for MSAA: attempt creation with 4x MSAA first; if that returns NULL, reset the attribute to 0 and retry. This ensures headless/CI tests can run on software renderers.
 
-**Added to:** `AGENTS.md` → OpenGL Usage section
+**Added to:** `AGENTS.md` -> OpenGL Usage section
 
 ---
 
@@ -214,27 +214,27 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** When mixing FetchContent dependencies, make all lightweight/header-only deps (ImGui) and all non-subdirectory deps (GoogleTest) available **before** a full-CMakeLists dep (SDL3). Declare all deps at the top, then call `FetchContent_MakeAvailable` in a safe order.
 
-**Added to:** `AGENTS.md` → ImGui Integration / Architecture section
+**Added to:** `AGENTS.md` -> ImGui Integration / Architecture section
 
 ---
 
 ### Search All Files During Backend Migration (SDL3 migration PR)
 
-**Problem:** During GLFW→SDL3 migration, `src/ui/imgui_menu.cpp` still included `<GLFW/glfw3.h>` and called `glfwGetPrimaryMonitor()`. Initial grep missed it because the search targeted `viewer_app*`, `camera*`, and `main.cpp` but not the UI layer.
+**Problem:** During GLFW->SDL3 migration, `src/ui/imgui_menu.cpp` still included `<GLFW/glfw3.h>` and called `glfwGetPrimaryMonitor()`. Initial grep missed it because the search targeted `viewer_app*`, `camera*`, and `main.cpp` but not the UI layer.
 
 **Lesson:** When migrating a windowing/graphics backend, search ALL source files (`find src -name "*.cpp" -o -name "*.hpp" | xargs grep OLDLIBNAME`) rather than targeting specific files by name. The old API may appear in unexpected locations (monitor queries in menu code, etc.).
 
-**Added to:** `AGENTS.md` → Common Pitfalls (as a Build Issues entry)
+**Added to:** `AGENTS.md` -> Common Pitfalls (as a Build Issues entry)
 
 ---
 
 ### SDL3 Subsystem Flag Missing Causes Silent Failure (gamepad PR)
 
-**Problem:** Gamepad input was implemented and merged but never worked on any device (Steam Deck, Bluetooth, USB). `SDL_Init(SDL_INIT_VIDEO)` was never updated when the gamepad subsystem was added. Without `SDL_INIT_GAMEPAD`, `SDL_GetGamepads()` returns empty, `SDL_EVENT_GAMEPAD_ADDED` is never fired, and all controllers are invisible — no error, no warning.
+**Problem:** Gamepad input was implemented and merged but never worked on any device (Steam Deck, Bluetooth, USB). `SDL_Init(SDL_INIT_VIDEO)` was never updated when the gamepad subsystem was added. Without `SDL_INIT_GAMEPAD`, `SDL_GetGamepads()` returns empty, `SDL_EVENT_GAMEPAD_ADDED` is never fired, and all controllers are invisible -- no error, no warning.
 
-**Lesson:** Every SDL3 subsystem needs its `SDL_INIT_*` flag in the `SDL_Init` call in `SDL3Context.cpp`. Adding a new SDL3 feature (gamepad, audio, haptic) **always** requires updating this call. Missing a flag is a silent failure — SDL3 does not warn that the subsystem was never started.
+**Lesson:** Every SDL3 subsystem needs its `SDL_INIT_*` flag in the `SDL_Init` call in `SDL3Context.cpp`. Adding a new SDL3 feature (gamepad, audio, haptic) **always** requires updating this call. Missing a flag is a silent failure -- SDL3 does not warn that the subsystem was never started.
 
-**Added to:** `code-quality` skill → OpenGL Usage section
+**Added to:** `code-quality` skill -> OpenGL Usage section
 
 ---
 
@@ -244,7 +244,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** When querying joystick properties by instance ID, always check for a `SDL_Get*ForID()` variant first: `SDL_GetJoystickGUIDForID`, `SDL_GetJoystickTypeForID`, `SDL_GetJoystickVendorForID`, `SDL_GetJoystickProductForID`, etc. Opening a device to read a property and immediately closing it wastes a file handle and SDL3 reference counts unnecessarily.
 
-**Added to:** `code-quality` skill → OpenGL Usage section
+**Added to:** `code-quality` skill -> OpenGL Usage section
 
 ---
 
@@ -254,35 +254,35 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** Never rely on `SDL_GetJoystickTypeForID() == SDL_JOYSTICK_TYPE_GAMEPAD` alone for cross-distro gamepad detection. Always pair it with a capability-based fallback for `SDL_JOYSTICK_TYPE_UNKNOWN` devices: open the joystick briefly, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, close it, and treat as a gamepad candidate if the heuristic passes.
 
-**Added to:** `code-quality` skill → OpenGL Usage section
+**Added to:** `code-quality` skill -> OpenGL Usage section
 
 ---
 
-### Gamepad Hold-Button → KeyReader Routing Causes Repeated Single-Press Events (gamepad PR)
+### Gamepad Hold-Button -> KeyReader Routing Causes Repeated Single-Press Events (gamepad PR)
 
-**Problem:** To mirror Shift-key speed boost on the B gamepad button, initial implementation called `cam_->KeyReader(SDL_SCANCODE_LSHIFT, held)` every frame. `KeyReader` has a `if (is_pressed)` single-press dispatch block — calling it every frame with `is_pressed=true` would fire any single-press handlers for that scancode on every frame, not just on the initial press.
+**Problem:** To mirror Shift-key speed boost on the B gamepad button, initial implementation called `cam_->KeyReader(SDL_SCANCODE_LSHIFT, held)` every frame. `KeyReader` has a `if (is_pressed)` single-press dispatch block -- calling it every frame with `is_pressed=true` would fire any single-press handlers for that scancode on every frame, not just on the initial press.
 
-**Lesson:** For gamepad hold-buttons that mirror keyboard *held* keys (e.g. B → Shift for speed boost), **never** route through `Camera::KeyReader()`. Instead, add a dedicated thin method that sets only the key state directly (e.g. `Camera::setSpeedBoost(bool active) { keys[SDL_SCANCODE_LSHIFT] = active; }`). Call it every frame with the current hold state — it's safe because it bypasses the single-press dispatch entirely.
+**Lesson:** For gamepad hold-buttons that mirror keyboard *held* keys (e.g. B -> Shift for speed boost), **never** route through `Camera::KeyReader()`. Instead, add a dedicated thin method that sets only the key state directly (e.g. `Camera::setSpeedBoost(bool active) { keys[SDL_SCANCODE_LSHIFT] = active; }`). Call it every frame with the current hold state -- it's safe because it bypasses the single-press dispatch entirely.
 
-**Added to:** `code-quality` skill → OpenGL Usage section
+**Added to:** `code-quality` skill -> OpenGL Usage section
 
 ---
 
 ### Don't Remove Camera API Methods When Only the Call Site Changes (gamepad PR)
 
-**Problem:** When L3/R3 sphere distance controls were removed at user request, `isRenderingSphere()` was also deleted from `Camera` because `viewer_app.cpp` was the only caller. One session later, the user re-requested L3/R3, requiring `isRenderingSphere()` to be restored — unnecessary rework.
+**Problem:** When L3/R3 sphere distance controls were removed at user request, `isRenderingSphere()` was also deleted from `Camera` because `viewer_app.cpp` was the only caller. One session later, the user re-requested L3/R3, requiring `isRenderingSphere()` to be restored -- unnecessary rework.
 
 **Lesson:** When removing a call site in `viewer_app.cpp` (e.g. a gamepad feature), **do not also delete the supporting `Camera` public method**. The Camera API is stable; call sites in `viewer_app` are volatile (controlled by user preference). Only remove a Camera method if it is architecturally incorrect or duplicates something, not merely because it has no callers at the moment.
 
-**Added to:** `code-quality` skill → Step 7: Adding a Feature / Fixing a Bug
+**Added to:** `code-quality` skill -> Step 7: Adding a Feature / Fixing a Bug
 
 ### EXPECT_EQ Over EXPECT_LE for Deterministic Counts (PR #112)
 
-**Problem:** `FrameCache` pending-cap test used `EXPECT_LE(callCount, window)`. The count is deterministically equal to `window` — using LE hid the fact that a regression (under-enqueue) would still pass.
+**Problem:** `FrameCache` pending-cap test used `EXPECT_LE(callCount, window)`. The count is deterministically equal to `window` -- using LE hid the fact that a regression (under-enqueue) would still pass.
 
 **Lesson:** Use `EXPECT_EQ` when the value is deterministic. `EXPECT_LE`/`EXPECT_GE` are for inherently non-deterministic values (timing, OS scheduling). An overly lenient bound masks regressions.
 
-**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+**Added to:** `testing` skill -> `TESTING_EXAMPLES.md` -> Incorrect Examples
 
 ---
 
@@ -292,15 +292,15 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** When writing a binary file test that seeks to frame N, write at least N+1 records so `fseek` lands within the file and `fread` actually reads the target record. A single-record file will always produce a truncation result for any frame > 0.
 
-**Added to:** `testing` skill → `TESTING_EXAMPLES.md` → Incorrect Examples
+**Added to:** `testing` skill -> `TESTING_EXAMPLES.md` -> Incorrect Examples
 
 ---
 
-### Full Docstring Rewrite Required When void→bool (PR #112)
+### Full Docstring Rewrite Required When void->bool (PR #112)
 
 **Problem:** After changing `getCOM()` from void to bool, the docstring was patched to mention the return value, but the first sentence still said "caller must call checkCOM() first" while a later sentence said "no extra checkCOM round-trip". The two sentences contradicted each other.
 
-**Lesson:** When changing a function's calling contract (especially void→bool), rewrite the *entire* docstring — don't patch it. The new contract (all false-return cases, what the caller need not do) renders the old docstring structurally incorrect and patching a structurally wrong docstring still leaves it wrong.
+**Lesson:** When changing a function's calling contract (especially void->bool), rewrite the *entire* docstring -- don't patch it. The new contract (all false-return cases, what the caller need not do) renders the old docstring structurally incorrect and patching a structurally wrong docstring still leaves it wrong.
 
 **Added to:** Self-evaluation skill (this file)
 
@@ -308,11 +308,11 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 ### Test Names Must Describe Behavior Proven, Not Return Value (PR #112, round 2)
 
-**Problem:** `GetCOM_ValidFile_Frame1_ReturnsTrue` described the return value, not what property was being verified. Code review renamed it to `GetCOM_ValidFile_Frame1_SeekIsAbsolute` — the test was specifically checking that `SEEK_SET` (absolute seek) was used.
+**Problem:** `GetCOM_ValidFile_Frame1_ReturnsTrue` described the return value, not what property was being verified. Code review renamed it to `GetCOM_ValidFile_Frame1_SeekIsAbsolute` -- the test was specifically checking that `SEEK_SET` (absolute seek) was used.
 
-**Lesson:** The `_ExpectedResult` segment of `UnitName_StateUnderTest_ExpectedResult` must encode the *invariant or property proven*, not just the return value. `_SeekIsAbsolute` answers "what holds?"; `_ReturnsTrue` answers "what came back?" — the latter masks what the test is actually verifying.
+**Lesson:** The `_ExpectedResult` segment of `UnitName_StateUnderTest_ExpectedResult` must encode the *invariant or property proven*, not just the return value. `_SeekIsAbsolute` answers "what holds?"; `_ReturnsTrue` answers "what came back?" -- the latter masks what the test is actually verifying.
 
-**Added to:** `testing` skill → Naming Convention section
+**Added to:** `testing` skill -> Naming Convention section
 
 ---
 
@@ -322,7 +322,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** For any function returning bool/error-code: in failure-path tests, always assert output parameters remain at their initial value (`EXPECT_EQ(outValue, glm::vec3(0.f))` after `EXPECT_FALSE(...)`). Initialize output params to a known value in Arrange so the Assert is meaningful.
 
-**Added to:** `testing` skill → Self-Review Checklist
+**Added to:** `testing` skill -> Self-Review Checklist
 
 ---
 
@@ -332,31 +332,31 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Lesson:** When a factory method (not a constructor) sequentially allocates two raw pointers, wrap the second `new` in try-catch: delete and null the first pointer before rethrowing. This is the raw-pointer equivalent of scope-bound guards when `unique_ptr` is impractical.
 
-**Added to:** `cpp-safety` skill → Constructor Rule section
+**Added to:** `cpp-safety` skill -> Constructor Rule section
 
 ---
 
 ### Expose Derived Quantities on the Interface to Prevent DRY Violations (PR #112, round 2)
 
-**Problem:** `viewer_app.cpp` computed `bytes_used = frame_cache_->capacity() * particles_per_frame * sizeof(glm::vec4)` — duplicating `FrameCache`'s internal `frame_size_bytes` formula. If per-particle data layout changed, the call site would silently produce wrong values.
+**Problem:** `viewer_app.cpp` computed `bytes_used = frame_cache_->capacity() * particles_per_frame * sizeof(glm::vec4)` -- duplicating `FrameCache`'s internal `frame_size_bytes` formula. If per-particle data layout changed, the call site would silently produce wrong values.
 
 **Lesson:** When a call site derives a value from an interface (counts, sizes, compound formulas), add the derived quantity as a virtual method on the interface. The concrete class is the single source of truth; callers receive the value without re-deriving it. Signal: "if the formula changes, I need to update it in N places."
 
-**Added to:** `cpp-patterns` skill → DRY section
+**Added to:** `cpp-patterns` skill -> DRY section
 
 ### Worktree `../` Relative Path Creates Sibling Outside Repo (Metaballs session)
 
-**Problem:** Three amigo worktrees were created with `git worktree add ../amigo-refinement-*`. From `/home/JPEG/Projects/Particle-Viewer`, `../` resolves to `/home/JPEG/Projects/`, placing the worktrees at `/home/JPEG/Projects/amigo-refinement-*`. Agent prompts were given `/home/JPEG/amigo-refinement-*` (one level up from the actual location). All three amigos returned BLOCKED — the path didn't exist at the specified location.
+**Problem:** Three amigo worktrees were created with `git worktree add ../amigo-refinement-*`. From `/home/JPEG/Projects/Particle-Viewer`, `../` resolves to `/home/JPEG/Projects/`, placing the worktrees at `/home/JPEG/Projects/amigo-refinement-*`. Agent prompts were given `/home/JPEG/amigo-refinement-*` (one level up from the actual location). All three amigos returned BLOCKED -- the path didn't exist at the specified location.
 
 **Lesson:** Never use `../` relative paths with `git worktree add`. Always use `.worktrees/agent-<name>` (inside the repo, gitignored). The `.worktrees/` convention makes absolute paths predictable: `<repo_root>/.worktrees/<name>`. `../` paths land at a depth dependent on the current working directory, which is easy to get wrong when constructing agent prompt absolute paths.
 
-**Added to:** `using-git-worktrees` skill → Red Flags section
+**Added to:** `using-git-worktrees` skill -> Red Flags section
 
 ---
 
 ## Quick Reference: Where to Add Lessons
 
-Use this for fast question-based lookup — "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.
+Use this for fast question-based lookup -- "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.
 
 | If the lesson is about... | Add to... |
 |---|---|
@@ -385,7 +385,7 @@ Use this when classifying a captured lesson into a skill update. The Examples co
 
 ---
 
-## Objectivity Block — Why Structural Mechanisms Beat "Try Harder"
+## Objectivity Block -- Why Structural Mechanisms Beat "Try Harder"
 
 Humans are structurally poor at evaluating their own work. This is not a character flaw -- it is an architectural constraint of cognition. The response is not "try harder to be objective" but "use structural mechanisms that bypass the block":
 

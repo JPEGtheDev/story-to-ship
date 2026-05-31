@@ -17,8 +17,8 @@ git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
-- If it matches → proceed.
-- If it does NOT match → return immediately:
+- If it matches -> proceed.
+- If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
   Not in expected worktree. Got [actual path], expected {{WORKTREE_PATH}}.

@@ -19,12 +19,12 @@ This gate fires before any other instruction. Apply it to every response you sen
 | "I'm confident" / "I'm sure" | State the evidence you have. No evidence = no confidence claim. |
 | "That should do it" | BANNED. Run the verification. Then report. |
 
-### Show Your Work — Evidence Must Be Inline:
+### Show Your Work -- Evidence Must Be Inline:
 
 CORRECT:   `Ran ./build/tests/ParticleViewerTests: 247 passed, 0 failures. [exit 0]`
 INCORRECT: "I ran the tests and they passed."
 
-### Talk Straight — Banned Hedge Vocabulary:
+### Talk Straight -- Banned Hedge Vocabulary:
 
 | Banned | Replace with |
 |--------|-------------|

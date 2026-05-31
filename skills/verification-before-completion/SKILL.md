@@ -28,11 +28,11 @@ Violating the letter of this rule is violating the spirit of this rule.
 | Unit tests pass locally | "Verified locally, ready for pipeline" | ~~Done~~ |
 | CI green on branch | "CI green, ready for acceptance review" | ~~Done~~ |
 | Staging deployed and tested | "Staging verified, pending production" | ~~Done~~ |
-| Production deployed, monitored, working | **"Done"** (the only correct use) | — |
+| Production deployed, monitored, working | **"Done"** (the only correct use) | -- |
 
 **Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains.
 
-For Particle-Viewer–specific Done stages, see `references/PV_DONE_DEFINITION.md`.
+For Particle-Viewer-specific Done stages, see `references/PV_DONE_DEFINITION.md`.
 
 ---
 
@@ -44,14 +44,14 @@ Apply this BEFORE any completion claim or expression of satisfaction:
 BEFORE claiming any status or expressing satisfaction:
 1. IDENTIFY: What command proves this claim?
 2. RUN: Execute the FULL command (fresh, in this session, after the latest change)
-3. READ: Full output — check exit code, count failures, read warnings
+3. READ: Full output -- check exit code, count failures, read warnings
 4. VERIFY: Does output confirm the claim?
    - If NO: State actual status with evidence
    - If YES: State claim WITH evidence inline
 5. ONLY THEN: Make the claim
 
-✓ All met → proceed
-✗ Any unmet → return to step 1; do not make the claim
+[+] All met -> proceed
+[-] Any unmet -> return to step 1; do not make the claim
 ```
 
 Skipping any step = lying, not verifying.
@@ -64,7 +64,7 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 ## Pre-PR Checklist (PRR)
 
-Before creating any PR — answer all 6 questions:
+Before creating any PR -- answer all 6 questions:
 
 | # | Question | Why it matters |
 |---|----------|----------------|
@@ -94,8 +94,8 @@ These words and phrases **cannot appear in any response** unless fresh verificat
 
 Evidence must be **inline**, not referenced:
 
-❌ `"I ran the tests and they passed."`  
-✅ `"Ran <project-test-runner>: **247 passed, 0 failures.** [exit 0]"`
+[-] `"I ran the tests and they passed."`  
+[+] `"Ran <project-test-runner>: **247 passed, 0 failures.** [exit 0]"`
 
 See `references/HONESTY_PATTERNS.md` for why "should work" is banned, process language alternatives, and the 4-Cores final integrity check.
 
@@ -105,20 +105,20 @@ For Particle-Viewer build and test commands, see `references/PV_VERIFICATION_COM
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you find yourself thinking any of the following, you are about to make an unverified claim. **STOP. Run the verification commands. Then state your claim.**
 
 - "Should work now"
 - "Probably passes"
 - "I'm confident it's right"
-- "I ran it earlier this session" — earlier ≠ after the current change
+- "I ran it earlier this session" -- earlier != after the current change
 - "The build was clean before my change"
-- "CI will catch anything I missed" — CI is a safety net, not your verification
+- "CI will catch anything I missed" -- CI is a safety net, not your verification
 - "Just a small change, can't have broken anything"
 - Expressing satisfaction ("Great!", "Done!", "That should do it!") before running commands
 - About to write a commit message without having run the gate commands
-- Verified 1 of N parallel edits (N ≥ 3) — **STOP. View at least 3 of the N edited files. "They all look the same" is an assumption, not evidence. A malformed edit still counts as a changed file.**
+- Verified 1 of N parallel edits (N >= 3) -- **STOP. View at least 3 of the N edited files. "They all look the same" is an assumption, not evidence. A malformed edit still counts as a changed file.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
 
@@ -129,14 +129,14 @@ If you find yourself thinking any of the following, you are about to make an unv
 | Excuse | Reality |
 |--------|---------|
 | "Should work now" | RUN the verification. |
-| "I'm confident" | Confidence ≠ evidence. |
+| "I'm confident" | Confidence != evidence. |
 | "Small change, can't break things" | Small changes cause subtle failures. |
 | "I ran it earlier" | Earlier run does not cover current changes. |
 | "CI will catch it" | CI is a safety net, not your job. |
 | "Just this once" | No exceptions. |
-| "I already manually verified" | Manual ≠ automated. Results can't be reproduced or cited. |
+| "I already manually verified" | Manual != automated. Results can't be reproduced or cited. |
 | "Build passed, tests must be fine" | Build and tests are separate gates. |
-| "They all follow the same pattern" | If the pattern was wrong once, it was wrong for all N. For N ≥ 3 parallel edits of the same structure: view at least 3 of the edited files before committing — not 1. |
+| "They all follow the same pattern" | If the pattern was wrong once, it was wrong for all N. For N >= 3 parallel edits of the same structure: view at least 3 of the edited files before committing -- not 1. |
 
 ---
 

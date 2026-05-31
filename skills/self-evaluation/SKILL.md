@@ -20,12 +20,12 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## BEFORE PROCEEDING
 
-1. The session's primary task is complete — no further implementation work is planned for this session.
+1. The session's primary task is complete -- no further implementation work is planned for this session.
 2. All commits from this session have been pushed or are staged and ready.
 3. You have NOT yet sent the final message to the user.
 
-✓ All met → proceed through all 7 steps in order
-✗ Any unmet → complete remaining session work first; once no further work is planned, return here and execute all 7 steps
+[+] All met -> proceed through all 7 steps in order
+[-] Any unmet -> complete remaining session work first; once no further work is planned, return here and execute all 7 steps
 
 ---
 
@@ -33,7 +33,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## How This Skill is Invoked
 
-This skill is **mandatory** — `AGENTS.md` § Session Lifecycle requires it before every final message. You will also be invoked:
+This skill is **mandatory** -- `AGENTS.md` sec. Session Lifecycle requires it before every final message. You will also be invoked:
 - When explicitly asked: "Run self-evaluation", "What did you learn?", "Improve skills"
 - After addressing code review feedback that reveals a recurring pattern
 
@@ -43,7 +43,7 @@ This skill is **mandatory** — `AGENTS.md` § Session Lifecycle requires it bef
 
 Every session produces insights that can improve future agent effectiveness. Capture these systematically.
 
-**Objectivity block:** Agents and humans are structurally poor at evaluating their own work. This is not a character flaw — it is a known bias. The explicit steps below exist to override it. Skipping steps because "it went well" is the bias asserting itself.
+**Objectivity block:** Agents and humans are structurally poor at evaluating their own work. This is not a character flaw -- it is a known bias. The explicit steps below exist to override it. Skipping steps because "it went well" is the bias asserting itself.
 
 ---
 
@@ -51,10 +51,10 @@ Every session produces insights that can improve future agent effectiveness. Cap
 
 Examine what happened during this session:
 
-1. **Code review feedback received** — What patterns did reviewers catch?
-2. **Mistakes made and corrected** — What errors occurred during implementation?
-3. **Owner/user feedback** — What preferences or corrections did the user provide?
-4. **Patterns discovered** — What reusable patterns emerged from the work?
+1. **Code review feedback received** -- What patterns did reviewers catch?
+2. **Mistakes made and corrected** -- What errors occurred during implementation?
+3. **Owner/user feedback** -- What preferences or corrections did the user provide?
+4. **Patterns discovered** -- What reusable patterns emerged from the work?
 
 ---
 
@@ -77,9 +77,9 @@ Classify each lesson into one of these categories. For the full routing table wi
 
 Before proposing updates, verify the lesson is not already documented:
 
-1. Check `AGENTS.md` — Is this pattern already listed?
-2. Check the relevant skill's `SKILL.md` — Is this rule already stated?
-3. Check skill `references/` — Is there already an example?
+1. Check `AGENTS.md` -- Is this pattern already listed?
+2. Check the relevant skill's `SKILL.md` -- Is this rule already stated?
+3. Check skill `references/` -- Is there already an example?
 
 **Only propose additions for genuinely new or underemphasized patterns.**
 
@@ -141,7 +141,7 @@ Before generating the session summary, complete this audit:
    - Did I apply the same gates in low-visibility moments (single-line changes, quick responses, perceived-trivial tasks) as in high-visibility ones?
    - If I skipped any gate because the task "seemed small," name it. Consistency under low scrutiny is the definition of integrity.
 
-**Report honestly.** If you made false confidence claims, name them. This is not a punishment — it is the calibration mechanism. A model that accurately reports its own false confidence claims is more trustworthy than one that doesn't.
+**Report honestly.** If you made false confidence claims, name them. This is not a punishment -- it is the calibration mechanism. A model that accurately reports its own false confidence claims is more trustworthy than one that doesn't.
 
 ---
 
@@ -149,10 +149,10 @@ Before generating the session summary, complete this audit:
 
 If changes are warranted and the session scope allows:
 
-1. **Update the relevant skill** — Add the lesson to the appropriate section
-2. **Increment the skill version** — Bump the version in YAML frontmatter
-3. **Keep changes minimal** — Add only what's necessary, don't restructure
-4. **Maintain skill boundaries** — Don't duplicate content across skills
+1. **Update the relevant skill** -- Add the lesson to the appropriate section
+2. **Increment the skill version** -- Bump the version in YAML frontmatter
+3. **Keep changes minimal** -- Add only what's necessary, don't restructure
+4. **Maintain skill boundaries** -- Don't duplicate content across skills
 
 ---
 
@@ -182,11 +182,11 @@ Produce a brief summary of lessons captured:
 
 ## Anti-Patterns to Avoid
 
-1. **Don't update skills for one-off situations** — Only add patterns that are likely to recur
-2. **Don't duplicate across skills** — Each lesson goes in exactly one place
-3. **Don't restructure existing skills** — Add to existing sections, don't reorganize
-4. **Don't add lessons that are standard programming practice** — Focus on project-specific patterns
-5. **Don't forget to check existing docs first** — Avoid adding what's already there
+1. **Don't update skills for one-off situations** -- Only add patterns that are likely to recur
+2. **Don't duplicate across skills** -- Each lesson goes in exactly one place
+3. **Don't restructure existing skills** -- Add to existing sections, don't reorganize
+4. **Don't add lessons that are standard programming practice** -- Focus on project-specific patterns
+5. **Don't forget to check existing docs first** -- Avoid adding what's already there
 
 ---
 
@@ -196,21 +196,21 @@ Produce a brief summary of lessons captured:
 |--------|---------|
 | "I didn't make any mistakes, no need to evaluate" | Every session has lessons. No lessons found = evaluation wasn't thorough enough. |
 | "I'll do the self-evaluation next session" | Lessons evaporate overnight. Capture them now while the context is live. |
-| "The user seemed satisfied, so the session went well" | User satisfaction ≠ no lessons. Look for near-misses, slow spots, and subtle errors. |
+| "The user seemed satisfied, so the session went well" | User satisfaction != no lessons. Look for near-misses, slow spots, and subtle errors. |
 | "Self-evaluation is for big failures only" | Small improvements compound. Consistent small lessons beat occasional big ones. |
-| "I already updated one skill — that's enough" | Evaluate all active domains. One skill update is rarely complete coverage. |
-| "There's no time — the session is over" | 5 minutes of self-evaluation saves hours in future sessions. Make time. |
+| "I already updated one skill -- that's enough" | Evaluate all active domains. One skill update is rarely complete coverage. |
+| "There's no time -- the session is over" | 5 minutes of self-evaluation saves hours in future sessions. Make time. |
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
 - About to send a final message without having read the self-evaluation skill
 - "No lessons learned this session"
 - "The user is waiting, I'll skip self-eval"
 - Updated code but haven't checked if any skills are now stale
-- "I already know what I'd write — no need to actually write it"
+- "I already know what I'd write -- no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
 
 **All of these mean: Load the `self-evaluation` skill and complete every step. Then include the `### Session Self-Evaluation` block before your final message.**

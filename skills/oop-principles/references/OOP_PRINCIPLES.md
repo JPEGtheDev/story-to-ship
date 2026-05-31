@@ -1,12 +1,12 @@
 # OOP Principles Reference
 
-Source: Ward Cunningham's C2 wiki audit — patterns applicable to class hierarchy and interface design.
+Source: Ward Cunningham's C2 wiki audit -- patterns applicable to class hierarchy and interface design.
 
 ---
 
 ## Good Object-Oriented Code
 
-Good OO code provides meaningful abstractions — methods do domain work (`ship product`, `point in polygon`), not property access (`getX`, `setY`). Cohesion is high within classes; coupling is low between them. Substituting one implementation for another requires no client changes.
+Good OO code provides meaningful abstractions -- methods do domain work (`ship product`, `point in polygon`), not property access (`getX`, `setY`). Cohesion is high within classes; coupling is low between them. Substituting one implementation for another requires no client changes.
 
 **Anti-signals:** a class whose public API is entirely getters and setters is a data bag, not an object.
 
@@ -19,8 +19,8 @@ Before approving any class hierarchy, answer these two questions:
 1. **Is-A:** Is every derived type substitutable everywhere the base is used (Liskov Substitution)?
 2. **Has-A:** Would a composition relationship be clearer and less brittle?
 
-If the answer to (1) is "not always" → redesign to composition.
-If the answer to (2) is "yes, actually" → redesign to composition.
+If the answer to (1) is "not always" -> redesign to composition.
+If the answer to (2) is "yes, actually" -> redesign to composition.
 
 ---
 
@@ -48,7 +48,7 @@ Clients should not know or care whether accessing a value requires a field read 
 
 ## Value Interface Over Reference Exposure
 
-When internal implementation uses reference semantics (pointers, handles), expose a value-like interface to callers. Handle-based OpenGL resource wrappers should present stable value semantics — callers never hold raw GL integer handles.
+When internal implementation uses reference semantics (pointers, handles), expose a value-like interface to callers. Handle-based OpenGL resource wrappers should present stable value semantics -- callers never hold raw GL integer handles.
 
 ---
 
@@ -90,12 +90,12 @@ Source: C2 Wiki "CouplingAndCohesion".
 
 Two primary techniques for providing dependencies to an object:
 
-**Constructor Injection** — pass all required dependencies at object creation time:
+**Constructor Injection** -- pass all required dependencies at object creation time:
 - Dependencies are always present; object is fully initialized on construction
 - Makes required dependencies explicit and visible
 - Preferred for dependencies that the object cannot function without
 
-**Setter Injection** — provide optional or late-bound dependencies after construction:
+**Setter Injection** -- provide optional or late-bound dependencies after construction:
 - Allows partial initialization; dependencies can be changed after creation
 - Useful for optional features or when circular dependencies exist
 - Risk: object may be in an incomplete state between construction and injection
@@ -107,7 +107,7 @@ Two primary techniques for providing dependencies to an object:
 
 **Service Locator** (alternative pattern):
 - Centralizes service lookup; can cache or encapsulate vendor-specific details
-- Drawback: obscures dependencies — callers don't declare what they need
+- Drawback: obscures dependencies -- callers don't declare what they need
 - Prefer explicit DI over Service Locator for testability
 
 Source: C2 Wiki "DependencyInjection", "ServiceLocator".
@@ -123,9 +123,9 @@ In a system, developers and domain experts should share a single vocabulary for 
 **Mechanics:**
 - Use the same term in code, tests, documentation, and conversations
 - When a term becomes ambiguous or contested, refactor toward deeper insight: rename in code, update tests, update documentation
-- If the language must evolve (the business changes its terminology), update the code to match — do not maintain two vocabularies
+- If the language must evolve (the business changes its terminology), update the code to match -- do not maintain two vocabularies
 
-**Signal of violation:** a glossary document that maps "what we call it in code" to "what the business calls it" — this document is evidence of a language gap, not a solution to one.
+**Signal of violation:** a glossary document that maps "what we call it in code" to "what the business calls it" -- this document is evidence of a language gap, not a solution to one.
 
 Source: C2 Wiki "UbiquitousLanguage", "DomainDrivenDesign".
 
@@ -133,6 +133,6 @@ Source: C2 Wiki "UbiquitousLanguage", "DomainDrivenDesign".
 
 ## Related Skills
 
-- `oop-principles` — iron law, Is-A/Has-A gate, SOLID check (load before any hierarchy decision)
-- `contract-testing` — testing abstract types via typed test fixtures
-- `cpp-safety` — scope-bound resource ownership applies to all object lifetimes
+- `oop-principles` -- iron law, Is-A/Has-A gate, SOLID check (load before any hierarchy decision)
+- `contract-testing` -- testing abstract types via typed test fixtures
+- `cpp-safety` -- scope-bound resource ownership applies to all object lifetimes

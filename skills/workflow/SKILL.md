@@ -8,8 +8,8 @@ description: Use when creating GitHub Actions workflows, adding CI jobs, configu
 ## Iron Law
 
 ```
-PIPELINES ARE READ-ONLY — NEVER COMMIT FROM CI
-YOU MUST ensure every workflow step is read-only — no commits, no pushes, no write-backs.
+PIPELINES ARE READ-ONLY -- NEVER COMMIT FROM CI
+YOU MUST ensure every workflow step is read-only -- no commits, no pushes, no write-backs.
 No exceptions.
 ```
 
@@ -20,7 +20,7 @@ CI workflows read code, run tests, and publish artifacts. They never write code.
 **Second Iron Law:**
 
 ```
-BROKEN PIPELINE = HIGHEST PRIORITY — STOP ALL MERGES UNTIL GREEN
+BROKEN PIPELINE = HIGHEST PRIORITY -- STOP ALL MERGES UNTIL GREEN
 YOU MUST stop all merges and fix a broken main pipeline before any other work.
 No exceptions.
 ```
@@ -37,7 +37,7 @@ A broken main branch pipeline is not a background task. It is the highest-priori
 
 ## Core Principle: Pipelines Are Read-Only Consumers
 
-CI pipelines observe and report — they never modify the repository. Every rule below follows from this principle.
+CI pipelines observe and report -- they never modify the repository. Every rule below follows from this principle.
 
 ---
 
@@ -53,8 +53,8 @@ CI pipelines observe and report — they never modify the repository. Every rule
 3. **Upload generated files** (images, reports) as workflow artifacts via `actions/upload-artifact`.
 4. **Link to artifact downloads** in PR comments for visibility.
 5. **Use `$GITHUB_STEP_SUMMARY`** for rich text reports on the Actions tab.
-6. **Keep permissions minimal** — use `contents: read` unless the job needs to write checks or comments.
-7. **Use idempotent PR comments** — find and update existing comments instead of creating duplicates.
+6. **Keep permissions minimal** -- use `contents: read` unless the job needs to write checks or comments.
+7. **Use idempotent PR comments** -- find and update existing comments instead of creating duplicates.
 
 ---
 
@@ -79,8 +79,8 @@ Before presenting workflow changes, verify:
 7. `if: always()` on artifact upload and PR comment steps where needed
 8. Artifact retention set appropriately (default: 30 days)
 
-✓ All met → proceed with presenting workflow changes
-✗ Any unmet → fix before presenting
+[+] All met -> proceed with presenting workflow changes
+[-] Any unmet -> fix before presenting
 
 ---
 
@@ -89,7 +89,7 @@ Before presenting workflow changes, verify:
 | Excuse | Reality |
 |--------|---------|
 | "I need to commit from CI to fix this issue" | NEVER. Fix the code locally, push, let CI re-run. Committing from CI creates loops. |
-| "Broad permissions are easier than figuring out minimal ones" | Broad permissions are a security risk. Use minimal permissions — write only what's needed. |
+| "Broad permissions are easier than figuring out minimal ones" | Broad permissions are a security risk. Use minimal permissions -- write only what's needed. |
 | "I'll test this workflow change in CI" | Test locally with `act` or trace the logic manually. Don't waste CI minutes on avoidable failures. |
 | "Artifact retention doesn't matter much" | Excessive retention wastes storage. PRs: short retention. Releases: longer. |
 | "The trigger seems right, I'll push and check" | Incorrect triggers cause runaway pipelines or missing runs. Verify the trigger logic before pushing. |
@@ -97,7 +97,7 @@ Before presenting workflow changes, verify:
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
 - Typing `git commit` or `git push` inside a workflow `run:` step

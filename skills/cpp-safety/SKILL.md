@@ -8,7 +8,7 @@ description: Use when writing or reviewing any C++ class that owns resources, ha
 ## Iron Law
 
 ```
-DESTRUCTORS NEVER THROW — EVERY RESOURCE IS OWNED BY A SCOPE-BOUND GUARD
+DESTRUCTORS NEVER THROW -- EVERY RESOURCE IS OWNED BY A SCOPE-BOUND GUARD
 YOU MUST wrap every destructor body in try/catch and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
 ```
 
@@ -24,19 +24,19 @@ Violating the letter of this rule is violating the spirit of this rule.
 2. Can its destructor fail or throw?
 3. Does its constructor acquire multiple resources?
 
-✓ No owned resources → skip this skill  ✗ Any owned resource → apply the rules below
+[+] No owned resources -> skip this skill  [-] Any owned resource -> apply the rules below
 
 ---
 
 ## Destructor Rule
 
-Throwing from a destructor during stack unwinding calls `std::terminate` — no other destructors run. Wrap every destructor body in try/catch; never rethrow.
+Throwing from a destructor during stack unwinding calls `std::terminate` -- no other destructors run. Wrap every destructor body in try/catch; never rethrow.
 
 ## Constructor Rule
 
-If the constructor acquires resource A then throws while acquiring resource B, A leaks — the destructor is never called on a partially-constructed object. Each acquisition must be handed to its own scope-bound guard before the next acquisition begins.
+If the constructor acquires resource A then throws while acquiring resource B, A leaks -- the destructor is never called on a partially-constructed object. Each acquisition must be handed to its own scope-bound guard before the next acquisition begins.
 
-**When acquisition happens in a factory method (not a constructor) using raw pointers:** if `unique_ptr` cannot be used (e.g., the pointer is a member reset by a helper method), wrap the second `new` in try-catch — delete and null the first pointer before rethrowing:
+**When acquisition happens in a factory method (not a constructor) using raw pointers:** if `unique_ptr` cannot be used (e.g., the pointer is a member reset by a helper method), wrap the second `new` in try-catch -- delete and null the first pointer before rethrowing:
 
 ```cpp
 void createResources() {
@@ -59,8 +59,8 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 | Excuse | Reality |
 |---|---|
-| "The cleanup is simple, it won't throw" | Wrap now — that property must hold for all future edits. |
-| "`std::terminate` is acceptable here" | Not during stack unwinding — it prevents all remaining destructors from running. |
+| "The cleanup is simple, it won't throw" | Wrap now -- that property must hold for all future edits. |
+| "`std::terminate` is acceptable here" | Not during stack unwinding -- it prevents all remaining destructors from running. |
 | "The second allocation almost never fails" | "Almost never" is not a safety guarantee. Wrap in a scope-bound guard. |
 | "Owning guards add boilerplate" | The boilerplate is the guarantee. Inline cleanup is a future leak. |
 | "The partial construction case never happens in practice" | "Never in practice" is not a structural guarantee. Scope-bound guards prevent the case unconditionally -- no statistical argument required. |

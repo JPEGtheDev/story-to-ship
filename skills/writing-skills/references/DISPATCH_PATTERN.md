@@ -8,10 +8,10 @@ One agent per skill directory -- the agent reviews `SKILL.md` and every file in 
 ## Steps
 
 1. Read these four files from `writing-skills/references/`:
-   - `SKILL_ANATOMY_ELEMENTS.md` → `{{SKILL_ANATOMY_ELEMENTS}}`
-   - `VOICE_AUTHORITY_RULES.md` → `{{VOICE_AUTHORITY_RULES}}`
-   - `SIZE_AND_COMPRESSION.md` → `{{SIZE_AND_COMPRESSION}}`
-   - `REVIEW_INSTRUCTIONS.md` → `{{REVIEW_INSTRUCTIONS}}`
+   - `SKILL_ANATOMY_ELEMENTS.md` -> `{{SKILL_ANATOMY_ELEMENTS}}`
+   - `VOICE_AUTHORITY_RULES.md` -> `{{VOICE_AUTHORITY_RULES}}`
+   - `SIZE_AND_COMPRESSION.md` -> `{{SIZE_AND_COMPRESSION}}`
+   - `REVIEW_INSTRUCTIONS.md` -> `{{REVIEW_INSTRUCTIONS}}`
 2. For each skill: substitute all four placeholders in `agents/skill-reviewer.md`, set `{{SKILL_PATH}}` (absolute path to the skill's `SKILL.md` inside the worktree), `{{RECENT_CHANGES}}`, and `{{WORKTREE_PATH}}` (the pre-created worktree path, e.g. `<repo_root>/.worktrees/<agent-name>`), dispatch. The agent derives `references/` from `dirname({{SKILL_PATH}})` at runtime.
 3. Collect all reports before acting on any result.
 4. For each NEEDS WORK verdict: update the skill and re-dispatch a review of that file.

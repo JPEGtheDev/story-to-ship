@@ -6,7 +6,7 @@ Path conventions for reviewing Particle-Viewer postmortem sessions.
 
 ```
 REPO:             [git root of Particle-Viewer]
-SESSION_ID:       [UUID — shown in JSONL filename]
+SESSION_ID:       [UUID -- shown in JSONL filename]
 EVENTS_LOG:       ~/.claude/projects/<encoded-path>/<SESSION_ID>.jsonl
 MEMORY:           ~/.claude/projects/<encoded-path>/memory/
 SCRATCH:          [REPO]/scratch/
@@ -16,7 +16,7 @@ SCRATCH:          [REPO]/scratch/
 
 ```
 REPO:             [git root of Particle-Viewer]
-SESSION_ID:       [session ID — shown in workspace.yaml or .copilot/session-state/ directory name]
+SESSION_ID:       [session ID -- shown in workspace.yaml or .copilot/session-state/ directory name]
 EVENTS_LOG:       [SESSION_ID]/events.jsonl
 WORKSPACE:        [SESSION_ID]/
 SCRATCH:          [REPO]/scratch/

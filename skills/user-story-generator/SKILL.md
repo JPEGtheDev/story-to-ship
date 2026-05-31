@@ -28,8 +28,8 @@ After you've had the conversation and before generating, mentally verify you hav
 8. Format preference (if they expressed one)
 9. Any specific constraints or requirements
 
-✓ All 9 met → proceed to generate the story
-✗ Any unclear → ask one clarifying question before generating
+[+] All 9 met -> proceed to generate the story
+[-] Any unclear -> ask one clarifying question before generating
 
 **RED FLAGS - Stop and ask for clarification:**
 - Story mentions functionality not in project context
@@ -40,12 +40,12 @@ After you've had the conversation and before generating, mentally verify you hav
 ## INVEST Checklist
 
 Every generated story MUST be:
-- **Independent** – no hard dependencies on unstarted work
-- **Negotiable** – focus on "what" not "how"
-- **Valuable** – clear benefit stated in "So that" clause
-- **Estimable** – team can size it (provide S/M/L estimate)
-- **Small** – doable in one sprint
-- **Testable** – acceptance criteria are verifiable
+- **Independent** - no hard dependencies on unstarted work
+- **Negotiable** - focus on "what" not "how"
+- **Valuable** - clear benefit stated in "So that" clause
+- **Estimable** - team can size it (provide S/M/L estimate)
+- **Small** - doable in one sprint
+- **Testable** - acceptance criteria are verifiable
 
 If a story violates INVEST, fix it or suggest breaking it down.
 
@@ -69,9 +69,9 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 | "This story is too big but we'll split it in sprint" | Split it now. Big stories hide risk and block delivery. |
 | "The story depends on another, but we'll handle it" | Dependent stories can't be independently delivered. Redesign the split. |
 | "We can estimate it after starting" | Inestimable stories signal unclear scope. Clarify before committing. |
-| "Good enough — the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
+| "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 - Story has no acceptance criteria
 - Story requires another story to be done first ("depends on #X")

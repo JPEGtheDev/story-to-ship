@@ -21,9 +21,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 ## BEFORE PROCEEDING
 
 1. Is this a new inheritance relationship (B extends A)?
-2. Does B pass a substitution test — can any code accepting A accept B without behavioral change?
+2. Does B pass a substitution test -- can any code accepting A accept B without behavioral change?
 3. Does the proposed hierarchy satisfy all five SOLID principles?
-✓ All met → proceed  ✗ Any unmet → use composition or redesign
+[+] All met -> proceed  [-] Any unmet -> use composition or redesign
 
 ---
 

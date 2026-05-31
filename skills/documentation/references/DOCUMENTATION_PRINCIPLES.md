@@ -4,7 +4,7 @@ Derived from Ward Cunningham's C2 Wiki synthesis.
 
 ## Document Your Intentions
 
-Code shows what is done; it cannot show why. Documentation that restates what the code already shows is redundant and will drift. Documentation that records the intent — the reason for a decision, the alternatives considered, the constraint that drove the design — is irreplaceable. Write intention documentation at the decision point, not the implementation point. Source: C2 Wiki "DocumentYourAssumptions" / "IntentionRevealingNames".
+Code shows what is done; it cannot show why. Documentation that restates what the code already shows is redundant and will drift. Documentation that records the intent -- the reason for a decision, the alternatives considered, the constraint that drove the design -- is irreplaceable. Write intention documentation at the decision point, not the implementation point. Source: C2 Wiki "DocumentYourAssumptions" / "IntentionRevealingNames".
 
 ## Document Mode vs Thread Mode
 
@@ -20,7 +20,7 @@ Living documentation is automatically derived from or co-located with the code i
 
 ## Self-Documenting Code
 
-Self-documenting code does not require comments to explain what it does — the names, structure, and decomposition communicate it directly. Names are the primary documentation vehicle: a well-named function communicates its contract; a well-named variable communicates its role. The target: a reader can understand a function's purpose from its name and signature without reading its body. Comments that describe what the code does are a sign the code should be refactored. Source: C2 Wiki "SelfDocumentingCode".
+Self-documenting code does not require comments to explain what it does -- the names, structure, and decomposition communicate it directly. Names are the primary documentation vehicle: a well-named function communicates its contract; a well-named variable communicates its role. The target: a reader can understand a function's purpose from its name and signature without reading its body. Comments that describe what the code does are a sign the code should be refactored. Source: C2 Wiki "SelfDocumentingCode".
 
 ## Literate Programming
 
@@ -28,6 +28,6 @@ Literate programming interleaves prose and code at the decision level: the prose
 
 ## See Also
 
-- `documentation/references/WIKI_PRINCIPLES.md` — Ward Cunningham's principles for designing a knowledge base
-- `documentation/SKILL.md` — project documentation conventions
-- `writing-skills/SKILL.md` — skill file authoring (Doc4 Alexandrian Form is defined here)
+- `documentation/references/WIKI_PRINCIPLES.md` -- Ward Cunningham's principles for designing a knowledge base
+- `documentation/SKILL.md` -- project documentation conventions
+- `writing-skills/SKILL.md` -- skill file authoring (Doc4 Alexandrian Form is defined here)

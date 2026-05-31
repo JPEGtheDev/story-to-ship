@@ -30,8 +30,8 @@ Each new round of PR review comments requires a fresh skill invocation. A load f
 4. I am not about to defend rather than understand
 5. If new comments arrived since the last round, I have invoked this skill again before triaging them
 
-✓ All met → proceed to address comments
-✗ Any unmet → complete the triage and reload the skill for the current review round before taking action
+[+] All met -> proceed to address comments
+[-] Any unmet -> complete the triage and reload the skill for the current review round before taking action
 
 ---
 
@@ -39,8 +39,8 @@ Each new round of PR review comments requires a fresh skill invocation. A load f
 
 Code review feedback is often treated as a bureaucratic step rather than a signal. The two failure modes are:
 
-1. **Performative agreement** — saying "good point, fixed!" without engaging with the substance
-2. **Defensive rejection** — dismissing feedback without genuinely considering whether it is correct
+1. **Performative agreement** -- saying "good point, fixed!" without engaging with the substance
+2. **Defensive rejection** -- dismissing feedback without genuinely considering whether it is correct
 
 Both erode trust. The first produces code that hasn't actually improved. The second produces friction that makes reviewers stop giving honest feedback.
 
@@ -50,16 +50,16 @@ Both erode trust. The first produces code that hasn't actually improved. The sec
 
 For every comment, before responding:
 
-1. **Read the comment fully** — do not draft a response until you understand what the reviewer is pointing at
-2. **Reproduce the concern** — can you see what they see? If not, ask a clarifying question before defending
+1. **Read the comment fully** -- do not draft a response until you understand what the reviewer is pointing at
+2. **Reproduce the concern** -- can you see what they see? If not, ask a clarifying question before defending
 3. **Categorize it honestly:**
 
 | Category | Action |
 |----------|--------|
-| Correct — I missed this | Acknowledge, fix, thank them specifically for the catch |
+| Correct -- I missed this | Acknowledge, fix, thank them specifically for the catch |
 | Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
-| I disagree — have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
-| I don't understand | Ask a specific clarifying question. Not "can you elaborate?" — name what specifically is unclear. |
+| I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
+| I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
 ---
@@ -109,14 +109,14 @@ For **low signal / noise**: ask for specifics. If no specifics come, treat as re
 
 ## The Disagreement Protocol
 
-**Attack ideas, not people.** Disagreement is about the code or the approach — never about the reviewer. Phrase every counter-argument as "this approach has [consequence]", not "you are wrong."
+**Attack ideas, not people.** Disagreement is about the code or the approach -- never about the reviewer. Phrase every counter-argument as "this approach has [consequence]", not "you are wrong."
 
 When you genuinely believe a reviewer is wrong:
 
 1. **State your counter-argument directly.** "I disagree because [specific reason]."
 2. **Do not soften it into ambiguity.** "I see your point, but..." followed by a counter-argument is not direct. "I disagree because X. Here is my reasoning: Y" is direct.
 3. **Ask the reviewer to respond.** A unilateral decision to close a contested comment is not resolution.
-4. **Escalate if unresolved.** If two rounds of discussion do not resolve it, flag for a third opinion — do not let it block indefinitely.
+4. **Escalate if unresolved.** If two rounds of discussion do not resolve it, flag for a third opinion -- do not let it block indefinitely.
 
 ---
 
@@ -125,16 +125,16 @@ When you genuinely believe a reviewer is wrong:
 If a reviewer finds something you missed that you should have caught:
 
 ```
-1. ACKNOWLEDGE: "This is correct — I missed it."
+1. ACKNOWLEDGE: "This is correct -- I missed it."
 2. FIX: Make the change.
 3. DO NOT MINIMIZE: Do not frame the reviewer's finding as a preference if it is a defect.
 ```
 
-The Right Wrongs protocol from the `execution` skill applies here directly. A reviewer finding a real bug is the same as discovering a mistake yourself — it must be acknowledged cleanly, not glossed over.
+The Right Wrongs protocol from the `execution` skill applies here directly. A reviewer finding a real bug is the same as discovering a mistake yourself -- it must be acknowledged cleanly, not glossed over.
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 - If you have read any PR comment and have not yet invoked this skill: **STOP. Load the skill NOW. Work done before loading the skill is unverified by the skill's gates.**
 - Dismissing feedback without investigation
@@ -152,6 +152,6 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "The reviewer is just being pedantic" | Pedantic reviewers still find real bugs. Engage with the substance. |
 | "I'll fix this in a follow-up" | Follow-up without a tracking issue means never. Create the issue. |
 | "They misunderstood what I was doing" | Maybe. But if a reviewer misunderstands, the code is unclear. Clarify the code or the comment. |
-| "This is a style preference" | If it violates `code-quality` standards, it is not a preference — it is a defect. |
-| "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context — do not dismiss the feedback. |
+| "This is a style preference" | If it violates `code-quality` standards, it is not a preference -- it is a defect. |
+| "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context -- do not dismiss the feedback. |
 **Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

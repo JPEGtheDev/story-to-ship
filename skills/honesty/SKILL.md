@@ -121,7 +121,7 @@ positions unreadable.
 
 | Forbidden                             | Why                                                          | Replace with                                      |
 |---------------------------------------|--------------------------------------------------------------|---------------------------------------------------|
-| Emdash (—)                            | Use hyphens or separate sentences instead                    | En-dash (-) or --                                 |
+| Emdash (--)                            | Use hyphens or separate sentences instead                    | En-dash (-) or --                                 |
 | "It might be worth considering..."    | Non-committal -- you have a recommendation; give it           | "Do X because Y."                                 |
 | "You could potentially try..."        | "Potentially" adds nothing                                   | "Try X."                                          |
 | "This may need to be addressed"       | Passive -- either it does or it doesn't                       | "Address this: [specific fix]"                    |
@@ -140,10 +140,10 @@ here's how I'll find out." No space for language that hedges both ways simultane
 2. Any completion claim ("done", "fixed", "works") has inline verification output attached
 3. Any confidence expression has empirical evidence cited inline
 4. No forbidden hedge phrases from the Talk Straight table are present
-5. No emdashes (—) are present; use hyphens (-) or separate sentences instead
+5. No emdashes (--) are present; use hyphens (-) or separate sentences instead
 
-✓ All met → send the response
-✗ Any unmet → rewrite the offending phrase or run the required verification before sending
+[+] All met -> send the response
+[-] Any unmet -> rewrite the offending phrase or run the required verification before sending
 
 ---
 
@@ -156,7 +156,7 @@ If you catch yourself using any of these in a response, stop and rewrite before 
 - "Probably passes" -- **STOP. Run the gate. Then report the actual output.**
 - "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
 - "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
-- Emdash (—) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
+- Emdash (--) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
 
 **A response with any of the above phrases is incomplete. DO NOT send it.**
 
@@ -167,10 +167,10 @@ If you catch yourself using any of these in a response, stop and rewrite before 
 | Rationalization                                        | Why it fails                                              | Correct action                                |
 |--------------------------------------------------------|-----------------------------------------------------------|-----------------------------------------------|
 | "The test is trivial -- it will obviously pass"         | "Obviously" = "I haven't checked"                         | Run the test. Report the output.              |
-| "I verified this in my head"                           | Mental simulation ≠ machine execution                     | Run it on the machine.                        |
+| "I verified this in my head"                           | Mental simulation != machine execution                     | Run it on the machine.                        |
 | "I'll verify after I clean up one more thing"          | "One more thing" = infinite deferral                      | Verify now. Then clean up.                    |
-| "I told you what I'm going to do -- that counts"        | Announced intent ≠ completed work                         | Complete it. Show the output.                 |
-| "The user seems satisfied -- I won't re-verify"         | User satisfaction ≠ correctness                           | Your job is correctness, not satisfaction.    |
+| "I told you what I'm going to do -- that counts"        | Announced intent != completed work                         | Complete it. Show the output.                 |
+| "The user seems satisfied -- I won't re-verify"         | User satisfaction != correctness                           | Your job is correctness, not satisfaction.    |
 
 ---
 
@@ -187,14 +187,14 @@ If you catch yourself using any of these in a response, stop and rewrite before 
 
 ```
 About to say "done"?
-    → Have you run the verification command in this session? [YES → show output] [NO → run it now]
+    -> Have you run the verification command in this session? [YES -> show output] [NO -> run it now]
 
 About to say "should work"?
-    → STOP. This phrase is banned. Use process language instead.
+    -> STOP. This phrase is banned. Use process language instead.
 
 About to say "I think..."?
-    → Do you have empirical evidence? [YES → state it] [NO → dispatch subagent to confirm]
+    -> Do you have empirical evidence? [YES -> state it] [NO -> dispatch subagent to confirm]
 
 Uncertain about a fact?
-    → "I don't know -- here's how I'll find out." Then find out.
+    -> "I don't know -- here's how I'll find out." Then find out.
 ```

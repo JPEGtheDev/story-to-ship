@@ -41,9 +41,9 @@ This project uses **zero-manual releases**. Every push to main triggers an autom
 
 | Type | Version Bump | Example |
 |------|-------------|---------|
-| `feat:` | MINOR (0.1.0 → 0.2.0) | `feat: add particle color picker` |
-| `fix:` | PATCH (0.1.0 → 0.1.1) | `fix: resolve crash on startup` |
-| `feat!:` / `fix!:` / `BREAKING CHANGE:` | MAJOR (0.1.0 → 1.0.0) | `feat!: redesign shader API` |
+| `feat:` | MINOR (0.1.0 -> 0.2.0) | `feat: add particle color picker` |
+| `fix:` | PATCH (0.1.0 -> 0.1.1) | `fix: resolve crash on startup` |
+| `feat!:` / `fix!:` / `BREAKING CHANGE:` | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign shader API` |
 | `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `perf:` | PATCH (default) | `docs: update README` |
 
 Every commit type triggers at least a PATCH bump. The release workflow specifically detects `feat:` and `fix:` plus any `!` breaking marker.
@@ -65,8 +65,8 @@ The PR title **MUST** use conventional commits format:
 - `feat!: redesign configuration API`
 
 **Invalid:**
-- ❌ "Add particle color customization" (missing type)
-- ❌ "Update camera rotation" (missing type)
+- [-] "Add particle color customization" (missing type)
+- [-] "Update camera rotation" (missing type)
 
 ### Working on an Existing PR
 
@@ -89,8 +89,8 @@ Before opening or merging a PR:
 5. Unit tests pass
 6. CI formatting checks pass
 
-✓ All met → PR is ready to merge
-✗ Any unmet → resolve before opening or merging the PR
+[+] All met -> PR is ready to merge
+[-] Any unmet -> resolve before opening or merging the PR
 
 ---
 
@@ -98,7 +98,7 @@ Before opening or merging a PR:
 
 At build time, version is resolved in this order:
 1. `PROJECT_VERSION` CMake variable (e.g., `-DPROJECT_VERSION=1.2.3`)
-2. Git tags (format: `v0.1.0`) — used by CI release workflow
+2. Git tags (format: `v0.1.0`) -- used by CI release workflow
 3. Fallback: `0.0.0`
 
 **DO NOT** manually create git tags, edit versions in CMakeLists.txt, or create manual releases.
@@ -111,7 +111,7 @@ At build time, version is resolved in this order:
 Verify the commit message/PR title uses the correct type. Manual override via `workflow_dispatch` if needed.
 
 **Need a release:**
-Just push conventional commits to main — it's automatic.
+Just push conventional commits to main -- it's automatic.
 
 ---
 
@@ -119,16 +119,16 @@ Just push conventional commits to main — it's automatic.
 
 | Excuse | Reality |
 |--------|---------|
-| "The commit type doesn't matter much" | Wrong type = wrong version bump. `fix` → patch, `feat` → minor, `feat!` → major. Automation parses this. |
+| "The commit type doesn't matter much" | Wrong type = wrong version bump. `fix` -> patch, `feat` -> minor, `feat!` -> major. Automation parses this. |
 | "I'll fix the commit message after the PR is merged" | Merged commit messages are permanent. The PR title IS the squash commit message. |
-| "This feels like a feat but it's technically a fix" | Ask: does it add a new user-visible behavior? Yes → `feat`. No → `fix`. |
+| "This feels like a feat but it's technically a fix" | Ask: does it add a new user-visible behavior? Yes -> `feat`. No -> `fix`. |
 | "The PR title is close enough to conventional format" | Close enough = broken parsing. The format must be exact. |
-| "I'll write a proper commit message once the work is done" | Write the commit type first — it clarifies scope and prevents scope creep. |
+| "I'll write a proper commit message once the work is done" | Write the commit type first -- it clarifies scope and prevents scope creep. |
 | "scope is optional so I'll skip it" | Scope makes large PRs navigable. Use it whenever the change is domain-specific. |
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
 - About to write a commit message without checking the type first

@@ -41,12 +41,12 @@ CANARY: systematic-debugging loaded. Issue: [name it]. No fix before root cause.
 
 ## BEFORE PROCEEDING
 
-1. The full error output has been read completely — not just the last line
+1. The full error output has been read completely -- not just the last line
 2. The failure reproduces consistently with identified reproduction steps
 3. I can state: "The root cause is X because Y" with evidence
 
-✓ All met → proceed
-✗ Any unmet → continue Phase 1 investigation; do not proceed
+[+] All met -> proceed
+[-] Any unmet -> continue Phase 1 investigation; do not proceed
 
 ---
 
@@ -62,19 +62,19 @@ Use this skill for every one of these situations:
 - Performance problems
 - Anything the user describes as "broken"
 
-**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue. These are exactly when the iron law is most needed — and most likely to be skipped.
+**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue. These are exactly when the iron law is most needed -- and most likely to be skipped.
 
 ---
 
 ## The Four Phases
 
-**Important scope boundary:** A request to "debug" or "investigate" is a request for root cause analysis and a findings report — NOT a request to fix. Present your findings and wait for explicit instruction before applying any fix. This applies even when the fix seems obvious.
+**Important scope boundary:** A request to "debug" or "investigate" is a request for root cause analysis and a findings report -- NOT a request to fix. Present your findings and wait for explicit instruction before applying any fix. This applies even when the fix seems obvious.
 
 Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-**First: verify your test runner CWD.** Run `pwd` and confirm it matches the required execution directory (e.g., `…/build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures — a failing test caused by wrong CWD is not a regression and requires no fix.
+**First: verify your test runner CWD.** Run `pwd` and confirm it matches the required execution directory (e.g., `.../build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
@@ -82,9 +82,9 @@ See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structu
 
 ### Phase 1: Root Cause Investigation
 
-- Read the error message **completely** — do not skim the last line and assume you understand it
-- Reproduce consistently — what exact steps trigger the failure?
-- Check recent changes — `git diff`, recent commits — what changed?
+- Read the error message **completely** -- do not skim the last line and assume you understand it
+- Reproduce consistently -- what exact steps trigger the failure?
+- Check recent changes -- `git diff`, recent commits -- what changed?
 - For **build errors**: read the FULL compiler output, not just the first error
 - For **test failures**: read the FULL test output; run the specific failing test in isolation
 - For **visual regression failures**: examine the diff image, compare pixels
@@ -95,13 +95,13 @@ BEFORE proceeding to Phase 2, verify:
 2. The failure reproduces consistently with identified reproduction steps.
 3. You can state: "The root cause is X because Y."
 
-✓ All 3 met → proceed to Phase 2
-✗ Any unmet → continue Phase 1 investigation; do not proceed
+[+] All 3 met -> proceed to Phase 2
+[-] Any unmet -> continue Phase 1 investigation; do not proceed
 
 ### Phase 2: Pattern Analysis
 
 - Find working examples of similar code in the codebase
-- Compare working vs broken — list every difference, however small
+- Compare working vs broken -- list every difference, however small
 - Read reference implementations COMPLETELY (don't skim)
 - Understand ALL dependencies before proposing changes
 
@@ -109,7 +109,7 @@ BEFORE proceeding to Phase 2, verify:
 
 - Form ONE hypothesis: "I think X is the root cause because Y"
 - Make the SMALLEST possible change to test that hypothesis
-- One variable at a time — do not bundle multiple changes
+- One variable at a time -- do not bundle multiple changes
 - If it didn't work: form a NEW hypothesis; do not pile more fixes on top of the failed attempt
 
 ### Phase 4: Implementation
@@ -135,7 +135,7 @@ Examine whether the approach is architecturally wrong before continuing. Common 
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
 If you find yourself thinking any of the following, **STOP and return to Phase 1**:
 
@@ -145,7 +145,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - "Add multiple changes, run tests, see what sticks"
 - "I don't fully understand but this might work"
 - "I've already tried 2 things, one more fix won't hurt"
-- "Let me just rerun the test" (for a failing test — rerunning without understanding = ignoring root cause)
+- "Let me just rerun the test" (for a failing test -- rerunning without understanding = ignoring root cause)
 - "It works on my machine" (still needs root cause)
 - "CI must have a glitch" (still needs root cause)
 - "The Flatpak environment must be doing something weird" (still needs systematic investigation)
@@ -163,11 +163,11 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "Just try this first, then investigate" | First fix sets the pattern. Do it right from the start. |
 | "I'll write the test after confirming the fix works" | Untested fixes don't stick. A test first proves the fix actually resolves the issue. |
 | "Multiple fixes at once saves time" | Can't isolate what worked. Creates new bugs. |
-| "I've already looked at it, I know the problem" | Looking at symptoms ≠ understanding root cause. |
+| "I've already looked at it, I know the problem" | Looking at symptoms != understanding root cause. |
 | "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. |
 | "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question the approach. |
-| "I found it — patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
-| "I already started debugging before loading this skill — I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
+| "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
+| "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
 | "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
 
 ---
@@ -180,8 +180,8 @@ For Particle-Viewer debug commands (build, test filter, visual regression diffs,
 
 ## Integration
 
-- `testing` skill — for writing the failing test that reproduces the issue (Phase 4)
-- `verification-before-completion` skill — for verifying the fix actually resolved the issue before claiming done
+- `testing` skill -- for writing the failing test that reproduces the issue (Phase 4)
+- `verification-before-completion` skill -- for verifying the fix actually resolved the issue before claiming done
 
 ---
 

@@ -34,7 +34,7 @@ This skill is required before writing code when ANY of the following are true:
 
 ---
 
-## Phase 1: Clarification (REQUIRED — do not skip)
+## Phase 1: Clarification (REQUIRED -- do not skip)
 
 ### Discovery Gate (run first)
 
@@ -43,8 +43,8 @@ This skill is required before writing code when ANY of the following are true:
 **Forces:** Brainstorming explores *how* to build. Discovery defines *what* to build. Designing how before defining what produces rework.
 
 **Solution:** Before asking clarifying questions, check plan.md for `## Feature Specification`.
-- Present → Discovery ran. AC is defined. Proceed to clarifying questions.
-- Absent → AC is unclear. Invoke `three-amigos` Discovery ceremony NOW. Return here after Discovery closes.
+- Present -> Discovery ran. AC is defined. Proceed to clarifying questions.
+- Absent -> AC is unclear. Invoke `three-amigos` Discovery ceremony NOW. Return here after Discovery closes.
 
 **Consequences:** Brainstorming Phase 1 operates on confirmed AC. No design work begins before behavioral scope is settled.
 
@@ -66,12 +66,12 @@ After all `[UNCLEAR:]` items are resolved: state "All ambiguities resolved. Proc
 
 Before proposing approaches, read the relevant area of the codebase:
 
-1. Identify which files will be affected — grep if needed, dispatch researcher agent if large
+1. Identify which files will be affected -- grep if needed, dispatch researcher agent if large
 2. Find existing patterns you must follow or are free to diverge from
 3. Identify any existing interfaces the change must comply with
 4. State what you found: "Existing pattern is X, found in Y. New code must follow this because Z."
 
-If you cannot answer a design question from reading the code, dispatch a researcher subagent — do not guess.
+If you cannot answer a design question from reading the code, dispatch a researcher subagent -- do not guess.
 
 ---
 
@@ -95,7 +95,7 @@ Answer all applicable questions before writing a single line of production code.
    ```
 
 4. **Where does this code live?**
-   Name exact file paths. "Somewhere in src/" is not an answer — it is a gap.
+   Name exact file paths. "Somewhere in src/" is not an answer -- it is a gap.
 
 5. **What does this NOT do?**
    State explicit scope boundary: what is out of scope, deferred, or assumed away.
@@ -103,7 +103,7 @@ Answer all applicable questions before writing a single line of production code.
 ### Additional Questions (architecture-impacting tasks)
 
 6. **Does this cross a layer boundary?**
-   Dependency direction must be outer → inner. Never inner → outer.
+   Dependency direction must be outer -> inner. Never inner -> outer.
 
 7. **What existing code does this interact with?**
    Name the interfaces and concrete classes.
@@ -117,16 +117,16 @@ Answer all applicable questions before writing a single line of production code.
 
 Every item MUST be checked before handing off to `writing-plans`.
 
-1. All `[UNCLEAR:]` ambiguities resolved — none remain
+1. All `[UNCLEAR:]` ambiguities resolved -- none remain
 2. Simplest approach identified and chosen or explicitly rejected with reason
-3. All trade-offs named — none left implicit
-4. Exact file paths named — no "somewhere in src/"
+3. All trade-offs named -- none left implicit
+4. Exact file paths named -- no "somewhere in src/"
 5. Out-of-scope items explicitly listed
 6. Architecture impact assessed (layer boundaries, dependency direction)
 7. Test strategy stated
 
-✓ All checked → output Design Decision Record → hand off to `writing-plans`
-✗ Any unchecked → STOP. Return to the relevant phase. Do not proceed.
+[+] All checked -> output Design Decision Record -> hand off to `writing-plans`
+[-] Any unchecked -> STOP. Return to the relevant phase. Do not proceed.
 
 ---
 
@@ -140,7 +140,7 @@ When the gate is fully passed, output this record. It becomes part of the PR des
 **Problem:** [one sentence]
 
 **Ambiguities resolved:**
-- [UNCLEAR: X] → resolved as: [answer]
+- [UNCLEAR: X] -> resolved as: [answer]
 
 **Chosen approach:** [one sentence]
 
@@ -156,9 +156,9 @@ When the gate is fully passed, output this record. It becomes part of the PR des
 
 **Test strategy:** [how correctness will be verified]
 
-**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong — required for any test design, research methodology, or evaluation framework]
+**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong -- required for any test design, research methodology, or evaluation framework]
 
-**Gate passed:** YES — awaiting user approval
+**Gate passed:** YES -- awaiting user approval
 ```
 
 After presenting this record: **STOP. Ask the user:**
@@ -173,7 +173,7 @@ After presenting this record: **STOP. Ask the user:**
 | Has questions or concerns | Return to the relevant phase; resolve before presenting again |
 | Changes requirements | Restart from Phase 1 with the updated requirements |
 
-Do NOT load `writing-plans` without user acknowledgment. The Design Decision Record is the contract — the user must accept it before planning begins.
+Do NOT load `writing-plans` without user acknowledgment. The Design Decision Record is the contract -- the user must accept it before planning begins.
 
 ---
 
@@ -182,9 +182,9 @@ Do NOT load `writing-plans` without user acknowledgment. The Design Decision Rec
 If the task spans **2+ independent subsystems** (different architectural layers, different files with no shared interface, or clearly separate responsibilities):
 
 1. Name each subsystem explicitly and state why each is independent
-2. Run Phases 1–5 for **each subsystem separately** — one Design Decision Record per subsystem
+2. Run Phases 1-5 for **each subsystem separately** -- one Design Decision Record per subsystem
 3. Present all records to the user together; get approval for all before proceeding
-4. Hand off to `writing-plans` with all approved records as context — one plan per subsystem
+4. Hand off to `writing-plans` with all approved records as context -- one plan per subsystem
 5. Each subsystem plan runs its own Skeptic Agent review independently
 
 **Do NOT create a single Design Decision Record for a task with independent subsystems.** A merged record hides coupling between subsystems. Identify the boundary first, then design each side separately.
@@ -196,7 +196,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 | Excuse | Reality |
 |--------|---------|
 | "I know what to do, I'll just start" | If you knew, the design questions take 2 minutes. Answer them first. |
-| "The requirement is clear enough" | Unresolved ambiguity is the most expensive bug — it shows up after code is written. |
+| "The requirement is clear enough" | Unresolved ambiguity is the most expensive bug -- it shows up after code is written. |
 | "I'll clarify as I go" | Mid-implementation clarification means rework. Clarify first. |
 | "We can refactor later" | Design debt compounds. 2 minutes now saves 2 hours later. |
 | "The approach is obvious" | Obvious approaches still need trade-offs named to be defensible. |
@@ -205,16 +205,16 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 
 ---
 
-## Red Flags — STOP
+## Red Flags -- STOP
 
-- Writing code before the gate checklist is fully checked → STOP. Complete the gate.
-- Any `[UNCLEAR:]` item not yet answered → STOP. Ask the clarifying question.
-- Handing off to `writing-plans` with any gap in the Design Decision Record → STOP. Fill the gap.
-- "TBD" appearing anywhere in the Design Decision Record → STOP. Resolve it.
-- Proceeding to implementation because the scope "feels clear enough" → STOP. Run the gate. Feelings are not evidence.
+- Writing code before the gate checklist is fully checked -> STOP. Complete the gate.
+- Any `[UNCLEAR:]` item not yet answered -> STOP. Ask the clarifying question.
+- Handing off to `writing-plans` with any gap in the Design Decision Record -> STOP. Fill the gap.
+- "TBD" appearing anywhere in the Design Decision Record -> STOP. Resolve it.
+- Proceeding to implementation because the scope "feels clear enough" -> STOP. Run the gate. Feelings are not evidence.
 
 ---
 
 ## References
 
-- Structured ideation protocols: `references/STRUCTURED_IDEATION.md` — Six Thinking Hats table, BrainStorm two-phase protocol (generation separate from evaluation)
+- Structured ideation protocols: `references/STRUCTURED_IDEATION.md` -- Six Thinking Hats table, BrainStorm two-phase protocol (generation separate from evaluation)

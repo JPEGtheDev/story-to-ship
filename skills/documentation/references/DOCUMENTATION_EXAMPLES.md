@@ -35,9 +35,9 @@ related:
 ```
 
 **Field rules:**
-- `description` — the primary field for semantic (vector) search; make it specific and concrete
-- `tags` — MUST include the domain and subdomain as the first two entries
-- `related` — relative paths from the file's own directory; verified to exist before adding
+- `description` -- the primary field for semantic (vector) search; make it specific and concrete
+- `tags` -- MUST include the domain and subdomain as the first two entries
+- `related` -- relative paths from the file's own directory; verified to exist before adding
 
 **Cross-cutting standard files** (`docs/UPPERCASE.md`):
 ```yaml
@@ -70,7 +70,7 @@ related:
 
 # Concept Name
 
-Brief one-paragraph description. ≤600 words total for the full file.
+Brief one-paragraph description. <=600 words total for the full file.
 
 ## Overview
 
@@ -93,8 +93,8 @@ Numbered list of rules. Specific, concrete, no soft language.
 
 ## Related
 
-- [Testing Standards](../TESTING_STANDARDS.md) — AAA pattern and naming conventions
-- [Integration Tests](integration-tests.md) — multi-component test patterns
+- [Testing Standards](../TESTING_STANDARDS.md) -- AAA pattern and naming conventions
+- [Integration Tests](integration-tests.md) -- multi-component test patterns
 ```
 
 ---
@@ -106,15 +106,15 @@ Every doc file MUST end with a `## Related` section:
 ```markdown
 ## Related
 
-- [Link Text](relative/path.md) — one-line description of why it's related
-- [Another Doc](../other.md) — one-line description
+- [Link Text](relative/path.md) -- one-line description of why it's related
+- [Another Doc](../other.md) -- one-line description
 ```
 
 Rules:
 - Use relative paths from the file's own directory
 - Verify all paths exist before adding
 - At least one link is required
-- One-line descriptions are mandatory — naked links are not acceptable
+- One-line descriptions are mandatory -- naked links are not acceptable
 
 ---
 
@@ -123,20 +123,20 @@ Rules:
 ### From `docs/testing/visual-regression.md`:
 
 ```markdown
-<!-- ✅ Correct: relative path from docs/testing/ to docs/ -->
+<!-- [+] Correct: relative path from docs/testing/ to docs/ -->
 See [Testing Standards](../TESTING_STANDARDS.md) for AAA pattern details.
 
-<!-- ❌ Incorrect: wrong relative path -->
+<!-- [-] Incorrect: wrong relative path -->
 See [Testing Standards](TESTING_STANDARDS.md) for AAA pattern details.
 ```
 
 ### From `docs/CODING_STANDARDS.md`:
 
 ```markdown
-<!-- ✅ Correct: same directory -->
+<!-- [+] Correct: same directory -->
 See [Testing Standards](TESTING_STANDARDS.md) for test-specific conventions.
 
-<!-- ✅ Correct: subdirectory -->
+<!-- [+] Correct: subdirectory -->
 See [Visual Regression Guide](testing/visual-regression.md) for image comparison.
 ```
 
@@ -156,9 +156,9 @@ description: Use when [triggering conditions only].
 
 ## Iron Law
 
-​```
-ALL CAPS RULE — NO EXCEPTIONS
-​```
+```
+ALL CAPS RULE -- NO EXCEPTIONS
+```
 
 Violating the letter of this rule is violating the spirit of this rule.
 
@@ -173,8 +173,8 @@ YOU MUST [action]. No exceptions.
 1. [Condition]
 2. [Condition]
 
-✓ All met → proceed
-✗ Any unmet → [specific required action]
+[+] All met -> proceed
+[-] Any unmet -> [specific required action]
 
 ---
 
@@ -186,7 +186,7 @@ YOU MUST [action]. No exceptions.
 ```
 
 Key rules:
-- Minimize duplication — if another skill covers a topic, reference it with a one-line pointer
+- Minimize duplication -- if another skill covers a topic, reference it with a one-line pointer
 - `SKILL.md` contains workflow and rules only
 - Heavy content, examples, and templates go in `references/`
 
@@ -197,16 +197,16 @@ Key rules:
 When adding a new skill, update these 4 locations in `AGENTS.md`:
 
 ```markdown
-<!-- 1. Skills Directory table — add a row -->
+<!-- 1. Skills Directory table -- add a row -->
 | `skill-name` | `.github/skills/skill-name/` | Domain description |
 
-<!-- 2. Before Every Response checklist — add if HARD-GATE trigger -->
-8. **Unclear approach or design impact?** → HARD-GATE: load `brainstorming`...
+<!-- 2. Before Every Response checklist -- add if HARD-GATE trigger -->
+8. **Unclear approach or design impact?** -> HARD-GATE: load `brainstorming`...
 
-<!-- 3. Minimum skill loads table — add the row -->
+<!-- 3. Minimum skill loads table -- add the row -->
 | Writing or editing a skill file | `writing-skills` |
 
-<!-- 4. Instruction Priority Hierarchy — only if new priority tier -->
+<!-- 4. Instruction Priority Hierarchy -- only if new priority tier -->
 (usually no change needed)
 ```
 

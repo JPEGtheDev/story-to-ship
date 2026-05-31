@@ -1,4 +1,4 @@
-# SDD Loop — Full Decision Tree
+# SDD Loop -- Full Decision Tree
 
 ## The SDD Loop
 
@@ -50,28 +50,28 @@ After each push: check for new automated review threads before picking up the ne
 Pick up next todo.
     |
     v
-(After all todos) → Check plan.md for `## Feature Specification`.
+(After all todos) -> Check plan.md for `## Feature Specification`.
     If present (Discovery ran): Invoke `three-amigos` Signoff (Ceremony 5) BEFORE finishing-a-development-branch.
-    If absent: Dispatch final code reviewer → finishing-a-development-branch
+    If absent: Dispatch final code reviewer -> finishing-a-development-branch
 ```
 
 ## Why These Three Gates Exist
 
-- **BLOCKED → Ceremony 4:** A blocker is a fork in the feature, not a delay. Assessing without Business and Tester perspectives risks silent scope changes.
-- **DONE_WITH_CONCERNS → Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. Independent review before rework compounds cost.
-- **After all todos → Ceremony 5 (Discovery ran) / final code reviewer (Discovery absent):** Merging without Signoff means Business and Tester have not confirmed delivered behavior matches the Feature Specification.
+- **BLOCKED -> Ceremony 4:** A blocker is a fork in the feature, not a delay. Assessing without Business and Tester perspectives risks silent scope changes.
+- **DONE_WITH_CONCERNS -> Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. Independent review before rework compounds cost.
+- **After all todos -> Ceremony 5 (Discovery ran) / final code reviewer (Discovery absent):** Merging without Signoff means Business and Tester have not confirmed delivered behavior matches the Feature Specification.
 
 ## Quick Reference Flowchart
 
 ```
 Task to delegate
     |
-    +-- Read-only research? → dispatching-parallel-agents skill
+    +-- Read-only research? -> dispatching-parallel-agents skill
     |
     +-- Needs file changes?
          |
          v
-    Create worktree (ALWAYS — never dispatch to main working tree)
+    Create worktree (ALWAYS -- never dispatch to main working tree)
          |
          v
     Dispatch implementer (implementer.md)
@@ -79,20 +79,20 @@ Task to delegate
          v
     Status code: DONE / DONE_WITH_CONCERNS / PARTIAL / NEEDS_CONTEXT / BLOCKED
          |
-         +-- NEEDS_CONTEXT → provide info, re-dispatch
-         +-- BLOCKED → Pivot Assessment (Ceremony 4). If unavailable: assess, escalate
-         +-- PARTIAL → verify completed, create todos for remaining, proceed to canary + Stage 1
-         +-- DONE_WITH_CONCERNS → read concerns; correctness/scope risk? → Pivot Assessment (Ceremony 4); else proceed to canary + Stage 1
+         +-- NEEDS_CONTEXT -> provide info, re-dispatch
+         +-- BLOCKED -> Pivot Assessment (Ceremony 4). If unavailable: assess, escalate
+         +-- PARTIAL -> verify completed, create todos for remaining, proceed to canary + Stage 1
+         +-- DONE_WITH_CONCERNS -> read concerns; correctness/scope risk? -> Pivot Assessment (Ceremony 4); else proceed to canary + Stage 1
          +-- DONE
               |
               v
     Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"
               |
               v
-    Stage 1: spec-compliance-reviewer.md → GAPS? → implementer fixes → re-run Stage 1
+    Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
               |
               v
-    Stage 2: code-quality-reviewer.md (1 per file) → REQUEST CHANGES? → implementer fixes → re-run Stage 2
+    Stage 2: code-quality-reviewer.md (1 per file) -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
               |
               v
     Mark todo done. Reload skills (session-bootstrap refresh rule).
@@ -100,7 +100,7 @@ Task to delegate
     Pick up next todo.
               |
               v
-    (After all todos) → check plan.md for `## Feature Specification`
-        If present: Signoff (Ceremony 5) → finishing-a-development-branch
-        If absent: final code review → finishing-a-development-branch
+    (After all todos) -> check plan.md for `## Feature Specification`
+        If present: Signoff (Ceremony 5) -> finishing-a-development-branch
+        If absent: final code review -> finishing-a-development-branch
 ```

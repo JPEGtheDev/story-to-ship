@@ -5,7 +5,7 @@ description: Use when reviewing a completed agent session retrospective.
 
 # Postmortem Reviewer
 
-You are an external reviewer analyzing a completed agent session. You have NO memory of this session. You are reading the raw event log cold. Your job is to find where the agent rationalized, bypassed gates, or got lucky — regardless of whether the outcome was correct.
+You are an external reviewer analyzing a completed agent session. You have NO memory of this session. You are reading the raw event log cold. Your job is to find where the agent rationalized, bypassed gates, or got lucky -- regardless of whether the outcome was correct.
 
 ## Session to review
 
@@ -17,15 +17,15 @@ You are an external reviewer analyzing a completed agent session. You have NO me
 **Self-assessment (if any):** {{SELF_ASSESSMENT_PATH}}
 **Output path:** {{OUTPUT_PATH}}
 
-## Worktree Self-Check — Run BEFORE starting
+## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
 git -C {{REPO_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
-- If it matches → proceed.
-- If it does NOT match → return immediately:
+- If it matches -> proceed.
+- If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
   Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
@@ -38,22 +38,22 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 Read these files in order:
 
-1. `{{EVENTS_JSONL_PATH}}` — the raw event stream. Extract:
-   - All `user.message` events → what the user actually asked for
-   - All `skill.invoked` events → which skills were loaded, and when
-   - All `tool.execution_start` events for `edit`, `create`, `bash` → when was code or files written
-   - All `subagent.started` and `subagent.completed` events → what was delegated and what was the reported result
-   - All `assistant.message` events → what the agent claimed, committed to, or announced as done
+1. `{{EVENTS_JSONL_PATH}}` -- the raw event stream. Extract:
+   - All `user.message` events -> what the user actually asked for
+   - All `skill.invoked` events -> which skills were loaded, and when
+   - All `tool.execution_start` events for `edit`, `create`, `bash` -> when was code or files written
+   - All `subagent.started` and `subagent.completed` events -> what was delegated and what was the reported result
+   - All `assistant.message` events -> what the agent claimed, committed to, or announced as done
 
-2. `{{SESSION_WORKSPACE_PATH}}/checkpoints/index.md` — checkpoint titles and order
+2. `{{SESSION_WORKSPACE_PATH}}/checkpoints/index.md` -- checkpoint titles and order
 
-3. Each checkpoint file listed in the index — for milestone context, not as authoritative fact
+3. Each checkpoint file listed in the index -- for milestone context, not as authoritative fact
 
-4. `{{REPO_PATH}}/scratch/` — list and read any files present. Scratch files are session artifacts: research dumps, intermediate analysis, theory-testing files. They may reveal exploratory work that was not committed and is not visible in the event log. A scratch file that contradicts a committed conclusion is a finding.
+4. `{{REPO_PATH}}/scratch/` -- list and read any files present. Scratch files are session artifacts: research dumps, intermediate analysis, theory-testing files. They may reveal exploratory work that was not committed and is not visible in the event log. A scratch file that contradicts a committed conclusion is a finding.
 
-5. `{{SELF_ASSESSMENT_PATH}}` — if it exists, read it LAST. Compare its claims against what the log actually shows. Every discrepancy is a finding.
+5. `{{SELF_ASSESSMENT_PATH}}` -- if it exists, read it LAST. Compare its claims against what the log actually shows. Every discrepancy is a finding.
 
-5. Read `.github/skills/session-postmortem/SKILL.md` — this is the framework you will apply.
+5. Read `.github/skills/session-postmortem/SKILL.md` -- this is the framework you will apply.
 
 ---
 
@@ -62,7 +62,7 @@ Read these files in order:
 Build a timeline of decision points using event timestamps:
 
 ```
-HH:MM - [event type] — [what happened] — [agent stated reason if visible] — [what the log shows]
+HH:MM - [event type] -- [what happened] -- [agent stated reason if visible] -- [what the log shows]
 ```
 
 Answer these questions directly from the log before moving to the analysis:
@@ -104,17 +104,17 @@ Begin with this block:
 
 ```
 ## External Reviewer Note
-Reviewer: external subagent — cold read of events.jsonl, no session memory
+Reviewer: external subagent -- cold read of events.jsonl, no session memory
 Session: {{SESSION_ID}}
 Log events analyzed: [count from events.jsonl]
-Self-assessment reviewed: [YES/NO — path if yes]
+Self-assessment reviewed: [YES/NO -- path if yes]
 Conflicts with self-assessment: [count]
 ```
 
 Then produce the full postmortem report using the format from the skill. For every finding, cite the specific log event as evidence:
 
 ```
-[EVIDENCE: 2026-04-19T04:21:37Z — tool.execution_start edit src/foo.cpp — no preceding skill.invoked for code-quality]
+[EVIDENCE: 2026-04-19T04:21:37Z -- tool.execution_start edit src/foo.cpp -- no preceding skill.invoked for code-quality]
 ```
 
 A finding without a log citation is an opinion. Only log-cited findings belong in the report.

@@ -21,7 +21,7 @@ without MSAA: try 4x first; if creation fails, retry with
 When SDL3 is built via CMake `FetchContent` inside a `flatpak-builder` module,
 the Freedesktop SDK `pkg-config` paths are **not** inherited by the sub-build.
 This causes `sdl3_config.cmake` to report `SDL_X11: OFF` and
-`SDL_WAYLAND: OFF`, leaving no video driver available at runtime — the app
+`SDL_WAYLAND: OFF`, leaving no video driver available at runtime -- the app
 silently fails to create a window with no useful error.
 
 **Fix:** Build SDL3 as a **separate** module in the Flatpak manifest, before
@@ -41,7 +41,7 @@ Flatpak-built SDL3 is picked up; fall back to FetchContent for local builds.
 
 ---
 
-## NVIDIA GL extension version mismatch — three env vars required
+## NVIDIA GL extension version mismatch -- three env vars required
 
 **Symptom:** `SDL_CreateWindow failed: Invalid window driver data` inside
 Flatpak on NVIDIA hardware.
@@ -50,10 +50,10 @@ Flatpak on NVIDIA hardware.
 (e.g. `nvidia-580-126-16`). If the installed extension doesn't match the
 running driver (e.g. driver `580.126.18`), only Mesa's `GL.default` extension
 mounts in the sandbox. Mesa's `libGLX_mesa.so` tries to negotiate with
-NVIDIA's X server GLX extension, which rejects the connection → window
+NVIDIA's X server GLX extension, which rejects the connection -> window
 creation fails.
 
-**Fix — set all three env vars before the first `SDL_Init`:**
+**Fix -- set all three env vars before the first `SDL_Init`:**
 
 ```cpp
 setenv("LIBGL_ALWAYS_SOFTWARE",    "1",    1);
@@ -62,7 +62,7 @@ setenv("__GLX_VENDOR_LIBRARY_NAME","mesa", 1);
 ```
 
 Why all three are needed:
-- `LIBGL_ALWAYS_SOFTWARE=1` alone is **insufficient** — GLVND still queries
+- `LIBGL_ALWAYS_SOFTWARE=1` alone is **insufficient** -- GLVND still queries
   the X server GLX extension (which advertises NVIDIA) and tries to
   `dlopen libGLX_nvidia.so`, which is absent.
 - `__GLX_VENDOR_LIBRARY_NAME=mesa` bypasses the X server's vendor
@@ -72,7 +72,7 @@ Why all three are needed:
 **Detection heuristic** (requires `--device=all` finish-arg in manifest):
 
 ```cpp
-// Gate on Flatpak — native systems have drivers installed normally.
+// Gate on Flatpak -- native systems have drivers installed normally.
 if (access("/.flatpak-info", F_OK) != 0) return false;
 
 const bool nvidia_dev = access("/dev/nvidia0", F_OK) == 0;
@@ -81,7 +81,7 @@ const bool ext_mounted = isNvidiaGlExtensionMounted();
 if (nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
 
-**Important:** Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" — Flatpak
+**Important:** Do NOT rely on `LD_LIBRARY_PATH` containing "nvidia" -- Flatpak
 mounts the GL extension into `/usr/lib/<triplet>/GL/nvidia-<ver>` and GLVND
 resolves it via the directory structure, not via `LD_LIBRARY_PATH`.
 
@@ -102,7 +102,7 @@ static bool isRunningInFlatpak() {
 }
 ```
 
-Without this gate, the workaround will misfire on native systems — e.g.
+Without this gate, the workaround will misfire on native systems -- e.g.
 scanning `/usr/lib/*/GL/nvidia-*` on a native NVIDIA system finds nothing
 (those directories only exist inside the Flatpak sandbox) and incorrectly
 forces software rendering.
@@ -116,7 +116,7 @@ An `overwrite=0` call to `setenv()` sees a non-NULL existing value and
 silently does nothing.
 
 ```cpp
-// WRONG — silently does nothing inside Flatpak when the var is pre-set to ""
+// WRONG -- silently does nothing inside Flatpak when the var is pre-set to ""
 setenv("LIBGL_ALWAYS_SOFTWARE", "1", 0);
 
 // CORRECT

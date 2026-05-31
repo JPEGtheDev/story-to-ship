@@ -7,7 +7,7 @@ Template examples for different story types. Customize based on your domain and 
 ## Feature Story Template
 
 ```markdown
-**Title:** [Feature name – user-centric outcome]
+**Title:** [Feature name - user-centric outcome]
 
 **Type:** Feature  
 **Size:** S | M | L  
@@ -75,7 +75,7 @@ Template examples for different story types. Customize based on your domain and 
 ## Refactoring Story Template
 
 ```markdown
-**Title:** [Refactoring target – specific outcome]
+**Title:** [Refactoring target - specific outcome]
 
 **Type:** Refactor  
 **Size:** S | M  
@@ -97,7 +97,7 @@ Template examples for different story types. Customize based on your domain and 
 - [ ] Extracted code is in a new class/module with clear responsibilities
 - [ ] All existing tests pass without modification
 - [ ] Cyclomatic complexity reduced from N to M
-- [ ] No behavioral changes – refactoring only
+- [ ] No behavioral changes - refactoring only
 - [ ] Code coverage maintained or improved
 
 ---
@@ -134,7 +134,7 @@ Template examples for different story types. Customize based on your domain and 
 ## Spike Story Template
 
 ```markdown
-**Title:** [Investigation goal – specific question to answer]
+**Title:** [Investigation goal - specific question to answer]
 
 **Type:** Spike  
 **Size:** S  
@@ -157,7 +157,7 @@ Template examples for different story types. Customize based on your domain and 
 - [ ] Proof-of-concept code (if applicable) demonstrates [key concern]
 - [ ] Recommendation provided: [Option A / Option B / Make more data available]
 - [ ] Known limitations and open questions documented
-- [ ] Timebox respected – no runaway research
+- [ ] Timebox respected - no runaway research
 
 ---
 
@@ -188,7 +188,7 @@ Template examples for different story types. Customize based on your domain and 
 ## Bug Story Template
 
 ```markdown
-**Title:** [Bug symptom – user-visible issue]
+**Title:** [Bug symptom - user-visible issue]
 
 **Type:** Bug  
 **Size:** S  
@@ -257,7 +257,7 @@ When a larger story is broken into subtasks, use this format:
 - [ ] Document memory ownership (who deletes buffers?)
 - [ ] Sketch architecture: OpenGL initialization, capture, conversion
 
-**Estimate:** S (2–3 hours)
+**Estimate:** S (2-3 hours)
 
 ---
 
@@ -266,7 +266,7 @@ When a larger story is broken into subtasks, use this format:
 - [ ] Test with manual OpenGL context in isolated test
 - [ ] Handle edge cases (no framebuffer bound, resolution mismatch)
 
-**Estimate:** M (4–6 hours)  
+**Estimate:** M (4-6 hours)  
 **Depends on:** Subtask 1
 
 ---
@@ -276,7 +276,7 @@ When a larger story is broken into subtasks, use this format:
 - [ ] Ensure vertical flip is correct
 - [ ] Test with ImageMagick `display` to verify output
 
-**Estimate:** S (2–3 hours)  
+**Estimate:** S (2-3 hours)  
 **Depends on:** Subtask 2
 
 ---
@@ -286,8 +286,8 @@ When a larger story is broken into subtasks, use this format:
 - [ ] Mock OpenGL calls
 - [ ] Test in headless mode with Xvfb
 
-**Estimate:** M (4–6 hours)  
-**Depends on:** Subtasks 2–3
+**Estimate:** M (4-6 hours)  
+**Depends on:** Subtasks 2-3
 ```
 
 ---
@@ -301,8 +301,8 @@ When a larger story is broken into subtasks, use this format:
 
 ### Metric-Based
 ```markdown
-- [ ] Frame capture latency ≤16ms (60 FPS budget)
-- [ ] Memory overhead ≤50MB per capture
+- [ ] Frame capture latency <=16ms (60 FPS budget)
+- [ ] Memory overhead <=50MB per capture
 - [ ] Zero memory leaks (Valgrind report)
 ```
 
@@ -316,9 +316,9 @@ When a larger story is broken into subtasks, use this format:
 
 ## Tips for Good Story Templates
 
-1. **Keep titles short and user-centric** – action-oriented, not technical jargon
-2. **Use "As a / I want to / So that"** – grounds the story in user perspective
-3. **Break large acceptance criteria into bullets** – easier to track progress
-4. **Include Definition of Done** – prevents "almost done" stories
-5. **Reference files and components** – clarifies scope and touchpoints
-6. **Estimate subtasks, not epics** – individual subtasks should be S/M
+1. **Keep titles short and user-centric** - action-oriented, not technical jargon
+2. **Use "As a / I want to / So that"** - grounds the story in user perspective
+3. **Break large acceptance criteria into bullets** - easier to track progress
+4. **Include Definition of Done** - prevents "almost done" stories
+5. **Reference files and components** - clarifies scope and touchpoints
+6. **Estimate subtasks, not epics** - individual subtasks should be S/M

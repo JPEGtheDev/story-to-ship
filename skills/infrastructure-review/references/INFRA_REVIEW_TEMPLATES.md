@@ -8,33 +8,33 @@
 ### Pipeline Safety
 | Check | Result | Notes |
 |-------|--------|-------|
-| No git commit/push in steps | ✅/❌ | ... |
-| Minimal permissions | ✅/❌ | ... |
-| Correct artifact retention | ✅/❌ | ... |
-| No hardcoded secrets | ✅/❌ | ... |
-| Correct triggers | ✅/❌ | ... |
-| Pinned third-party actions | ✅/❌ | ... |
+| No git commit/push in steps | [+]/[-] | ... |
+| Minimal permissions | [+]/[-] | ... |
+| Correct artifact retention | [+]/[-] | ... |
+| No hardcoded secrets | [+]/[-] | ... |
+| Correct triggers | [+]/[-] | ... |
+| Pinned third-party actions | [+]/[-] | ... |
 
 ### Build Reproducibility
 | Check | Result | Notes |
 |-------|--------|-------|
-| All dependencies declared | ✅/❌ | ... |
-| FetchContent pinned | ✅/❌ | ... |
-| Test/production targets separated | ✅/❌ | ... |
-| Install rules present | ✅/❌ | ... |
-| No hardcoded paths | ✅/❌ | ... |
+| All dependencies declared | [+]/[-] | ... |
+| FetchContent pinned | [+]/[-] | ... |
+| Test/production targets separated | [+]/[-] | ... |
+| Install rules present | [+]/[-] | ... |
+| No hardcoded paths | [+]/[-] | ... |
 
 ### Flatpak Compliance
 | Check | Result | Notes |
 |-------|--------|-------|
-| OpenGL permissions declared | ✅/❌ | ... |
-| SDL3 permissions correct | ✅/❌ | ... |
-| App ID correct | ✅/❌ | ... |
-| Runtime pinned | ✅/❌ | ... |
-| No unnecessary --share=network | ✅/❌ | ... |
+| OpenGL permissions declared | [+]/[-] | ... |
+| SDL3 permissions correct | [+]/[-] | ... |
+| App ID correct | [+]/[-] | ... |
+| Runtime pinned | [+]/[-] | ... |
+| No unnecessary --share=network | [+]/[-] | ... |
 
 ### Critical Issues
-[Any ❌ that must be resolved before merge, with file:line reference]
+[Any [-] that must be resolved before merge, with file:line reference]
 
 ### Verdict: SAFE / ISSUES FOUND
 ```

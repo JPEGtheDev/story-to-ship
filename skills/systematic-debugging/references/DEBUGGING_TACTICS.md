@@ -1,6 +1,6 @@
 # Debugging Tactics Reference
 
-Source: Ward Cunningham's C2 wiki audit — tactics for investigating failures, working with legacy code, and designing for testability.
+Source: Ward Cunningham's C2 wiki audit -- tactics for investigating failures, working with legacy code, and designing for testability.
 
 ---
 
@@ -25,7 +25,7 @@ public:
 };
 ```
 
-Configurable delays expose race conditions. Extracting timing-sensitive operations into small methods makes them individually testable. The `#ifdef TEST_MODE` trade-off is accepted — correctness outweighs purity.
+Configurable delays expose race conditions. Extracting timing-sensitive operations into small methods makes them individually testable. The `#ifdef TEST_MODE` trade-off is accepted -- correctness outweighs purity.
 
 Diagnostic pattern: reproduce the bug with a failing test **first**, then fix. The test becomes the regression guard.
 
@@ -49,7 +49,7 @@ To add tests to legacy code: identify a seam, inject a test double through it, S
 Before refactoring untested code, record its current output as "golden" values:
 
 1. Run the code and capture its current output (pixel values, log lines, state transitions)
-2. Write tests that assert the golden output — these are characterization tests
+2. Write tests that assert the golden output -- these are characterization tests
 3. Refactor until the characterization tests pass
 4. Discard the characterization tests once the feature under development is covered by intent-driven tests
 
@@ -61,10 +61,10 @@ This verifies behavioral identity through the refactor without requiring deep un
 
 Distinguish small smell-driven refactors (do them inline) from large structural refactors (require a spike):
 
-1. **Small refactor:** code smell visible, fix is local, tests still pass → do it now
-2. **Large refactor:** requires touching 5+ files, unclear whether approach works → spike on a branch first
+1. **Small refactor:** code smell visible, fix is local, tests still pass -> do it now
+2. **Large refactor:** requires touching 5+ files, unclear whether approach works -> spike on a branch first
 
-Spike: minimal proof-of-concept that answers the structural question. If it works, roll out via simple refactorings. If it fails, discard the branch — no harm done.
+Spike: minimal proof-of-concept that answers the structural question. If it works, roll out via simple refactorings. If it fails, discard the branch -- no harm done.
 
 ---
 
@@ -109,7 +109,7 @@ Write one paragraph containing:
 3. Where the divergence was first observed
 4. What you have already ruled out
 
-If you cannot write this paragraph, you do not understand the problem yet. Return to observation. The act of writing forces the precision that silent thought avoids. "Writing exposes what you don't know" — Feynman.
+If you cannot write this paragraph, you do not understand the problem yet. Return to observation. The act of writing forces the precision that silent thought avoids. "Writing exposes what you don't know" -- Feynman.
 
 Corollary: if a subagent cannot restate the problem in its own words at the start of its output, its diagnosis is likely to be wrong. Source: C2 Wiki "FeynmanAlgorithm".
 
@@ -122,7 +122,7 @@ Before committing any fix, run the BandAid check:
 A **BandAid** addresses the symptom without removing the cause. Signals:
 - The fix works but requires a qualifier: "this shouldn't happen anyway"
 - The fix changes caller behavior: "callers should not pass null here"
-- The fix is not testable in isolation — it only works with specific surrounding state
+- The fix is not testable in isolation -- it only works with specific surrounding state
 - A new symptom appears after the fix
 
 A **real fix** can be explained in terms of the root cause: "This failed because X; removing X prevents the failure."
@@ -133,7 +133,7 @@ If you cannot explain the fix in terms of the root cause, stop. Find the root ca
 
 ## RubberDucking (Explain the Problem Aloud)
 
-Explaining a problem to an external listener — a rubber duck, a colleague, or an agent — forces sufficient precision that the solution often becomes apparent without further investigation.
+Explaining a problem to an external listener -- a rubber duck, a colleague, or an agent -- forces sufficient precision that the solution often becomes apparent without further investigation.
 
 Why it works: speaking (or writing for an imaginary listener) engages different cognitive processes than silent thought. The friction slows down racing assumptions. You must sequence the facts in a communicable order, which surfaces gaps you didn't notice.
 
@@ -153,6 +153,6 @@ Terminate immediately on encountering irrecoverable state corruption rather than
 
 ## Related Skills
 
-- `systematic-debugging` — four-phase root cause protocol; HeisenBug patterns
-- `testing` — test taxonomy; saw-test-fail gate
-- `cpp-safety` — resource ownership patterns; exception-safe destructors
+- `systematic-debugging` -- four-phase root cause protocol; HeisenBug patterns
+- `testing` -- test taxonomy; saw-test-fail gate
+- `cpp-safety` -- resource ownership patterns; exception-safe destructors

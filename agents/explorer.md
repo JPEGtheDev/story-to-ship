@@ -16,15 +16,15 @@ You are doing read-only research across multiple files to answer a specific ques
 ## Questions to answer
 {{QUESTIONS}}
 
-## Worktree Self-Check — Run BEFORE starting
+## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
 git rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
-- If it matches → proceed.
-- If it does NOT match → return immediately:
+- If it matches -> proceed.
+- If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
   Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
@@ -37,7 +37,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 - **Read-only.** Do not modify, create, or delete any file.
 - **Evidence only.** Every finding must cite a file path and line number, or a command and its output.
-- **No assumptions.** If you cannot find evidence for a claim, state "NOT FOUND" — do not infer.
+- **No assumptions.** If you cannot find evidence for a claim, state "NOT FOUND" -- do not infer.
 - **No recommendations.** Your job is to report findings, not propose solutions.
 - **Stay scoped.** Do not follow leads outside the files/directories listed above unless they are directly referenced by those files.
 
@@ -45,12 +45,12 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 Use at least two of the following:
 
-1. **grep / glob** — pattern search across files for symbols, strings, or structures
-2. **Read relevant files** — read the specific files listed above directly
-3. **Cross-reference** — trace a symbol from definition to all call sites (or vice versa)
-4. **Count / enumerate** — if the question is "how many" or "which files", enumerate exhaustively
+1. **grep / glob** -- pattern search across files for symbols, strings, or structures
+2. **Read relevant files** -- read the specific files listed above directly
+3. **Cross-reference** -- trace a symbol from definition to all call sites (or vice versa)
+4. **Count / enumerate** -- if the question is "how many" or "which files", enumerate exhaustively
 
-## Evidence requirement — MANDATORY
+## Evidence requirement -- MANDATORY
 
 Every finding must cite evidence. This is especially strict for **negative findings**:
 
@@ -60,10 +60,10 @@ Every finding must cite evidence. This is especially strict for **negative findi
 ```
 # Example of acceptable negative evidence:
 Evidence: grep -rn "glDrawArrays" src/ --include="*.cpp"
-Output: (no output — zero matches)
+Output: (no output -- zero matches)
 ```
 
-A table of "all ✓" with no supporting grep output is not a finding — it is an unverifiable assertion.
+A table of "all [+]" with no supporting grep output is not a finding -- it is an unverifiable assertion.
 
 ## Return format
 
@@ -84,5 +84,5 @@ NOT FOUND items:
 - [anything searched for but not found, with what was searched]
 
 Confidence: [HIGH | MEDIUM | LOW]
-Confidence reason: [what would change this — what was not searched]
+Confidence reason: [what would change this -- what was not searched]
 ```

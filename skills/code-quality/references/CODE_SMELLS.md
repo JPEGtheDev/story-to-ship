@@ -1,6 +1,6 @@
 # Code Smells Catalog
 
-Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deeper design problems and indicate where refactoring is needed.
+Source: Martin Fowler's _Refactoring_ -- canonical code smells that signal deeper design problems and indicate where refactoring is needed.
 
 ---
 
@@ -8,7 +8,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 1. Long Method
 
-**What it looks like:** A method that exceeds 10–20 lines, or mixes multiple levels of abstraction, or has nested control structures three or more levels deep.
+**What it looks like:** A method that exceeds 10-20 lines, or mixes multiple levels of abstraction, or has nested control structures three or more levels deep.
 
 **Why it hurts:**
 - Hard to understand, test, and reuse
@@ -47,7 +47,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 4. Data Clumps
 
-**What it looks like:** The same group of variables (e.g., `startX`, `startY`, `endX`, `endY`) appears together in multiple places — method signatures, class fields, function calls.
+**What it looks like:** The same group of variables (e.g., `startX`, `startY`, `endX`, `endY`) appears together in multiple places -- method signatures, class fields, function calls.
 
 **Why it hurts:**
 - Reveals missing abstraction; domain concept is unnamed
@@ -60,7 +60,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 5. Primitive Obsession
 
-**What it looks like:** Domain concepts are represented as primitives instead of objects — e.g., a phone number as a string, a currency amount as a double, a date range as two separate integers.
+**What it looks like:** Domain concepts are represented as primitives instead of objects -- e.g., a phone number as a string, a currency amount as a double, a date range as two separate integers.
 
 **Why it hurts:**
 - Validation scattered throughout the codebase
@@ -88,7 +88,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 7. Duplicated Code
 
-**What it looks like:** The same code structure appears in two or more places — identical or nearly identical blocks, loops, conditionals, or methods.
+**What it looks like:** The same code structure appears in two or more places -- identical or nearly identical blocks, loops, conditionals, or methods.
 
 **Why it hurts:**
 - Violates DRY (Don't Repeat Yourself)
@@ -102,7 +102,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 8. Lazy Class
 
-**What it looks like:** A class that does very little — minimal methods, minimal responsibility, or acts as a simple pass-through to another class.
+**What it looks like:** A class that does very little -- minimal methods, minimal responsibility, or acts as a simple pass-through to another class.
 
 **Why it hurts:**
 - Adds complexity without proportional benefit
@@ -115,7 +115,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 9. Speculative Generality
 
-**What it looks like:** Abstractions, parameters, or methods added "just in case" — for scenarios that may never occur, or for frameworks that are not yet needed.
+**What it looks like:** Abstractions, parameters, or methods added "just in case" -- for scenarios that may never occur, or for frameworks that are not yet needed.
 
 **Why it hurts:**
 - Dead code accumulates; harder to understand what is actually used
@@ -123,7 +123,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 - The imagined scenario may never materialize or may materialize differently
 - Increased surface area for bugs and maintenance
 
-**Primary Refactorings:** Remove unused code and layers (embrace YAGNI — You Aren't Gonna Need It), Simplify design
+**Primary Refactorings:** Remove unused code and layers (embrace YAGNI -- You Aren't Gonna Need It), Simplify design
 
 ---
 
@@ -143,7 +143,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 11. Message Chains
 
-**What it looks like:** Long chains of method calls — `a.getB().getC().getD().doSomething()` — where the caller must navigate the entire chain and depend on intermediate structure.
+**What it looks like:** Long chains of method calls -- `a.getB().getC().getD().doSomething()` -- where the caller must navigate the entire chain and depend on intermediate structure.
 
 **Why it hurts:**
 - Tight coupling to navigation structure; changes propagate
@@ -157,7 +157,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 12. Middle Man
 
-**What it looks like:** A class that delegates most or all of its work to another class, adding little value — mostly forwarding calls without transformation.
+**What it looks like:** A class that delegates most or all of its work to another class, adding little value -- mostly forwarding calls without transformation.
 
 **Why it hurts:**
 - Adds a layer of indirection without benefit
@@ -171,7 +171,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 13. Inappropriate Intimacy
 
-**What it looks like:** One class reaches into another class's private or protected data or methods; the boundary is blurred — they know too much about each other's internals.
+**What it looks like:** One class reaches into another class's private or protected data or methods; the boundary is blurred -- they know too much about each other's internals.
 
 **Why it hurts:**
 - Tight coupling between classes; changes break both
@@ -185,7 +185,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 14. Data Class
 
-**What it looks like:** A class that has only fields and getter/setter methods, with little to no behavior — a container for data.
+**What it looks like:** A class that has only fields and getter/setter methods, with little to no behavior -- a container for data.
 
 **Why it hurts:**
 - Violates object-oriented design; data is separated from the behavior that operates on it
@@ -212,7 +212,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 16. Divergent Change
 
-**What it looks like:** A single class must be modified for different reasons — e.g., one change is for database schema updates, another for UI changes. The class has multiple reasons to change.
+**What it looks like:** A single class must be modified for different reasons -- e.g., one change is for database schema updates, another for UI changes. The class has multiple reasons to change.
 
 **Why it hurts:**
 - Violates Single Responsibility Principle
@@ -226,7 +226,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 17. Shotgun Surgery
 
-**What it looks like:** One small, logical change requires editing many small pieces in many different places — the change "spreads" across the codebase.
+**What it looks like:** One small, logical change requires editing many small pieces in many different places -- the change "spreads" across the codebase.
 
 **Why it hurts:**
 - Opposite of Divergent Change but same root cause: related responsibilities are scattered
@@ -240,7 +240,7 @@ Source: Martin Fowler's _Refactoring_ — canonical code smells that signal deep
 
 ### 18. Parallel Inheritance Hierarchies
 
-**What it looks like:** For every subclass of class A, you must create a corresponding subclass of class B — the hierarchies mirror each other.
+**What it looks like:** For every subclass of class A, you must create a corresponding subclass of class B -- the hierarchies mirror each other.
 
 **Why it hurts:**
 - Maintenance burden doubles; creating a new type requires parallel changes
@@ -264,7 +264,7 @@ These thresholds are **triggers to investigate**, not absolute violations. Use t
 | Public methods per class | > 10 | Class may have too many responsibilities (Divergent Change) |
 | Data field access from other class | Frequent cross-class gets | Feature Envy; consider moving method |
 | Duplication ratio | Same code in 2+ locations | Duplicated Code; extract common logic |
-| Cyclic dependencies | Module A → B → A | Architectural problem; split responsibilities |
+| Cyclic dependencies | Module A -> B -> A | Architectural problem; split responsibilities |
 | Null checks for a field | 3+ null checks in class | Temporary Field; extract or refactor |
 | Method call chains | 4+ in sequence | Message Chains; introduce intermediary method |
 | Unused code paths | Code only executed in rare scenarios | Speculative Generality; consider removal |
@@ -274,14 +274,14 @@ These thresholds are **triggers to investigate**, not absolute violations. Use t
 ## Key Principles
 
 **All code smells trace back to three root violations:**
-1. **DRY (Don't Repeat Yourself)** — Duplication of logic, structure, or intent
-2. **OAOO (Once and Only Once)** — A concept or responsibility appears in multiple places
-3. **Single Responsibility** — A class or method has more than one reason to change
+1. **DRY (Don't Repeat Yourself)** -- Duplication of logic, structure, or intent
+2. **OAOO (Once and Only Once)** -- A concept or responsibility appears in multiple places
+3. **Single Responsibility** -- A class or method has more than one reason to change
 
 When you detect a smell:
-- **Understand the root cause** — Which principle is violated?
-- **Assess the cost** — Is the code a temporary placeholder, core logic, or rarely touched? Fixing a core algorithm is more valuable than cosmetic refactoring.
-- **Choose the appropriate refactoring** — Different smells have different remedies; applying the wrong one can make things worse.
+- **Understand the root cause** -- Which principle is violated?
+- **Assess the cost** -- Is the code a temporary placeholder, core logic, or rarely touched? Fixing a core algorithm is more valuable than cosmetic refactoring.
+- **Choose the appropriate refactoring** -- Different smells have different remedies; applying the wrong one can make things worse.
 
 **Design smells** (higher-level: Parallel Inheritance Hierarchies, Divergent Change, Shotgun Surgery, Message Chains) often point to architectural problems that cannot be solved by simple refactoring. These may require architectural review and larger restructuring.
 

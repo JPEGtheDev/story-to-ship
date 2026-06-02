@@ -14,37 +14,7 @@
         "ref": "claude/plugin-marketplace-skills-2nnKn"
       },
       "description": "TDD, planning, debugging, code quality, and collaboration skills for any software project",
-      "license": "MIT",
-      "homepage": "https://github.com/jpegthedev/story-to-ship",
-      "repository": "https://github.com/jpegthedev/story-to-ship",
-      "keywords": ["tdd", "planning", "debugging", "code-quality", "agents", "skills"],
-      "category": "productivity",
-      "skills": "./skills",
-      "agents": "./agents",
-      "hooks": {
-        "SessionStart": [
-          {
-            "matcher": "startup|clear|compact",
-            "hooks": [
-              {
-                "type": "command",
-                "command": "${CLAUDE_PLUGIN_ROOT}/.claude/hooks/session-start.sh"
-              }
-            ]
-          }
-        ],
-        "UserPromptSubmit": [
-          {
-            "hooks": [
-              {
-                "type": "command",
-                "command": "${CLAUDE_PLUGIN_ROOT}/.claude/hooks/pre-message.sh"
-              }
-            ]
-          }
-        ]
-      },
-      "strict": false
+      "license": "MIT"
     }
   ]
 }

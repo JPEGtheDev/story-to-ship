@@ -69,7 +69,7 @@ A Claude Code plugin marketplace providing professional software development ski
 | `workflow` | GitHub Actions workflows and CI configuration |
 | `versioning` | Commits, PRs, version bumps |
 
-### C++ Skills (cpp plugin -- coming soon)
+### C++ Skills (cpp plugin)
 `build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`
 
 ---
@@ -101,9 +101,9 @@ Installing this plugin adds:
 
 Skills are loaded on demand, not injected at startup. The hooks enforce consistent communication standards across all sessions without loading all skill content at once.
 
-## C++ Plugin (coming soon)
+## C++ Plugin
 
-C++ and OpenGL-specific skills will be published as a separate `story-to-ship-cpp` plugin. Install both for full C++ project coverage.
+C++ and OpenGL-specific skills are published as a separate `story-to-ship-cpp` plugin. Install both for full C++ project coverage.
 
 ## License
 

@@ -1,7 +1,7 @@
 ---
 name: documentation
 license: MIT
-description: Use when creating docs, updating guides, writing API references, or reviewing documentation for Particle-Viewer.
+description: Use when creating docs, updating guides, writing API references, or reviewing documentation.
 ---
 
 

@@ -1,7 +1,7 @@
 ---
 name: testing
 license: MIT
-description: Use when writing or reviewing any test for Particle-Viewer.
+description: Use when writing or reviewing any test.
 ---
 
 

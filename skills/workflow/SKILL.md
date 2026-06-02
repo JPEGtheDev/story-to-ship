@@ -1,7 +1,7 @@
 ---
 name: workflow
 license: MIT
-description: Use when creating GitHub Actions workflows, adding CI jobs, configuring artifact uploads, or reviewing pipeline configuration for Particle-Viewer.
+description: Use when creating GitHub Actions workflows, adding CI jobs, configuring artifact uploads, or reviewing pipeline configuration.
 ---
 
 

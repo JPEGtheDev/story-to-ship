@@ -1,6 +1,10 @@
 # story-to-ship
 
-Skills and agents for the developer-side SDLC -- from story through merged branch. Covers requirements, planning, implementation, testing, review, CI/CD, and retrospective. Does not cover deployment, monitoring, or security review.
+SDLC governance for Claude Code -- behavioral constraints, evidence gates, Iron Laws, and ceremony systems covering the developer loop from story through merged branch.
+
+Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipelines, write PR descriptions. This governs behavior: blocks forward progress without inline evidence, enforces ceremony gates before implementation, requires root-cause analysis before any fix. No published plugin does this.
+
+**Scope:** Requirements, planning, implementation, testing, code review, CI/CD, documentation, retrospective. Does not cover deployment, monitoring, or security review.
 
 ## Install
 
@@ -9,76 +13,80 @@ Skills and agents for the developer-side SDLC -- from story through merged branc
 /plugin install story-to-ship@story-to-ship
 ```
 
-## SDLC Coverage
+## Skills by Phase
 
-### Discovery and Requirements
+### Behavior (Always Active)
 | Skill | Purpose |
 |-------|---------|
-| `brainstorming` | Unclear approach or design decisions |
-| `three-amigos` | Acceptance criteria ceremony |
-| `user-story-generator` | Creating INVEST-aligned user stories |
-| `user-story-estimation` | Estimating effort and token budgets |
+| `honesty` | Evidence gate -- bans unverified completion claims, enforces inline verification |
+| `verification-before-completion` | Hard stop before any "done" claim |
+
+### Requirements and Discovery
+| Skill | Purpose |
+|-------|---------|
+| `brainstorming` | Design gate -- required before committing to any approach |
+| `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
+| `user-story-generator` | INVEST-aligned story authoring |
+| `user-story-estimation` | Effort and token budget estimation |
 
 ### Planning
 | Skill | Purpose |
 |-------|---------|
-| `writing-plans` | Multi-step tasks and feature work |
-| `brainstorming` | Design decisions before committing to an approach |
+| `writing-plans` | Scope gate -- builds todo list before any code is written |
 
 ### Implementation
 | Skill | Purpose |
 |-------|---------|
-| `execution` | Any non-trivial implementation work |
-| `honesty` | Communication quality and trust enforcement -- always active |
-| `code-quality` | Writing or reviewing code |
-| `session-bootstrap` | Starting any new session |
-| `subagent-driven-development` | Delegating tasks, parallel research, reviewing work |
+| `execution` | Commitment and right-wrongs protocol for any non-trivial implementation |
+| `code-quality` | Formatting, naming, and static analysis gates |
+| `session-bootstrap` | Session initialization -- loads context and routing table |
+| `subagent-driven-development` | Delegation protocol with mandatory post-todo review |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
-| `using-git-worktrees` | Parallel agent work in isolation |
+| `using-git-worktrees` | Parallel agent isolation via git worktrees |
 
 ### Testing and Verification
 | Skill | Purpose |
 |-------|---------|
-| `testing` | Writing or reviewing any test |
-| `contract-testing` | Testing interfaces or abstract base classes |
-| `systematic-debugging` | Any bug, failure, or unexpected behavior |
-| `verification-before-completion` | Before claiming work is done |
+| `testing` | TDD gate -- no production code without a failing test first |
+| `contract-testing` | Interface and abstract base class test coverage |
+| `systematic-debugging` | Root-cause protocol -- no patches without tracing to root |
 
 ### Code Review
 | Skill | Purpose |
 |-------|---------|
-| `requesting-code-review` | Preparing a PR for review |
-| `receiving-code-review` | Acting on review feedback |
+| `requesting-code-review` | PR preparation and review request protocol |
+| `receiving-code-review` | Acting on feedback without rationalization |
 
 ### CI/CD and Release
 | Skill | Purpose |
 |-------|---------|
-| `workflow` | GitHub Actions workflows and CI configuration |
-| `versioning` | Commits, PRs, version bumps |
-| `finishing-a-development-branch` | Branch ready to merge |
+| `workflow` | GitHub Actions and CI configuration standards |
+| `versioning` | Conventional commit enforcement, version bumps, PR protocol |
+| `finishing-a-development-branch` | Branch-ready-to-merge checklist |
 
 ### Documentation and Knowledge
 | Skill | Purpose |
 |-------|---------|
-| `documentation` | Creating or reviewing docs |
-| `summarization` | Summarizing external resources |
-| `writing-skills` | Authoring or editing skill files |
+| `documentation` | Creating and reviewing project documentation |
+| `summarization` | Structured summarization of external resources |
+| `writing-skills` | Skill file authoring standards |
 
 ### Retrospective
 | Skill | Purpose |
 |-------|---------|
-| `session-postmortem` | Behavioral retrospective on completed sessions |
-| `self-evaluation` | Completing a session |
+| `session-postmortem` | Behavioral retrospective -- audits agent behavior for rationalization patterns |
+| `self-evaluation` | Session close checklist |
 
 ---
 
-### Agents
+## Agents
+
 | Agent | Role |
 |-------|------|
 | `implementer` | Feature implementation in a git worktree |
-| `skeptic` | Plan gap analysis before implementation |
-| `spec-compliance-reviewer` | Stage 1 post-todo review |
-| `code-quality-reviewer` | Stage 2 post-todo review |
+| `skeptic` | Plan gap analysis before implementation begins |
+| `spec-compliance-reviewer` | Stage 1 post-todo review: spec compliance |
+| `code-quality-reviewer` | Stage 2 post-todo review: code quality |
 | `explorer` | Read-only multi-file research |
 | `researcher` | Hypothesis confirmation or denial |
 | `architecture-reviewer` | Layer boundary and interface compliance |
@@ -95,9 +103,9 @@ Skills and agents for the developer-side SDLC -- from story through merged branc
 Installing this plugin adds:
 - 26 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 14 agents to `.claude/agents/` -- dispatched via the `Agent` tool
-- Two hooks: `SessionStart` (injects honesty and Iron Laws) and `UserPromptSubmit` (active per-turn enforcement)
+- Two hooks: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (active per-turn enforcement)
 
-Skills are loaded on demand, not injected at startup. The hooks enforce consistent communication standards across all sessions without loading all skill content at once.
+Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active.
 
 ## C++ Plugin
 

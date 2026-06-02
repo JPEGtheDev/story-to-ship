@@ -12,7 +12,7 @@
         "source": "github",
         "repo": "jpegthedev/story-to-ship"
       },
-      "description": "TDD, planning, debugging, code quality, and collaboration skills for any software project",
+      "description": "SDLC governance: behavioral constraints, evidence gates, Iron Laws, and ceremony systems from story through merged branch",
       "license": "MIT"
     }
   ]

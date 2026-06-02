@@ -114,5 +114,3 @@ If you catch yourself thinking any of these, stop and follow the rule:
 ## Reference
 
 For concrete workflow examples and patterns, see [references/WORKFLOW_EXAMPLES.md](references/WORKFLOW_EXAMPLES.md).
-
-For Flatpak packaging, SDL3 display backend configuration, NVIDIA GL extension issues, and `setenv` behavior inside the Flatpak sandbox, see the `flatpak` skill or [references/FLATPAK_GL_GOTCHAS.md](references/FLATPAK_GL_GOTCHAS.md) for the detailed reference.

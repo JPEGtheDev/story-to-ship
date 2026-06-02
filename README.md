@@ -1,6 +1,6 @@
 # story-to-ship
 
-A Claude Code plugin marketplace providing professional software development skills and agents. Drop the entire system into any project with two commands.
+Skills and agents for the developer-side SDLC -- from story through merged branch. Covers requirements, planning, implementation, testing, review, CI/CD, and retrospective. Does not cover deployment, monitoring, or security review.
 
 ## Install
 
@@ -9,68 +9,66 @@ A Claude Code plugin marketplace providing professional software development ski
 /plugin install story-to-ship@story-to-ship
 ```
 
-## What's Included
+## SDLC Coverage
 
-### Core Process Skills
-| Skill | When to use |
-|-------|-------------|
-| `honesty` | Communication quality and trust enforcement -- always active |
-| `execution` | Any non-trivial implementation work |
-| `verification-before-completion` | Before claiming work is done |
-| `systematic-debugging` | Any bug, failure, or unexpected behavior |
-
-### Planning Skills
-| Skill | When to use |
-|-------|-------------|
-| `writing-plans` | Multi-step tasks and feature work |
+### Discovery and Requirements
+| Skill | Purpose |
+|-------|---------|
 | `brainstorming` | Unclear approach or design decisions |
-| `three-amigos` | Unclear acceptance criteria, ceremony facilitation |
+| `three-amigos` | Acceptance criteria ceremony |
 | `user-story-generator` | Creating INVEST-aligned user stories |
 | `user-story-estimation` | Estimating effort and token budgets |
 
-### Development Workflow Skills
-| Skill | When to use |
-|-------|-------------|
-| `session-bootstrap` | Starting any new session |
-| `self-evaluation` | Completing a session |
-| `session-postmortem` | Behavioral retrospective on completed sessions |
-| `finishing-a-development-branch` | Branch ready to merge |
+### Planning
+| Skill | Purpose |
+|-------|---------|
+| `writing-plans` | Multi-step tasks and feature work |
+| `brainstorming` | Design decisions before committing to an approach |
 
-### Code Quality Skills
-| Skill | When to use |
-|-------|-------------|
+### Implementation
+| Skill | Purpose |
+|-------|---------|
+| `execution` | Any non-trivial implementation work |
+| `honesty` | Communication quality and trust enforcement -- always active |
 | `code-quality` | Writing or reviewing code |
-| `testing` | Writing or reviewing any test |
-| `contract-testing` | Testing interfaces or abstract base classes |
-
-### Collaboration Skills
-| Skill | When to use |
-|-------|-------------|
+| `session-bootstrap` | Starting any new session |
 | `subagent-driven-development` | Delegating tasks, parallel research, reviewing work |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
 | `using-git-worktrees` | Parallel agent work in isolation |
 
-### Review Skills
-| Skill | When to use |
-|-------|-------------|
+### Testing and Verification
+| Skill | Purpose |
+|-------|---------|
+| `testing` | Writing or reviewing any test |
+| `contract-testing` | Testing interfaces or abstract base classes |
+| `systematic-debugging` | Any bug, failure, or unexpected behavior |
+| `verification-before-completion` | Before claiming work is done |
+
+### Code Review
+| Skill | Purpose |
+|-------|---------|
 | `requesting-code-review` | Preparing a PR for review |
 | `receiving-code-review` | Acting on review feedback |
 
-### Documentation and Knowledge Skills
-| Skill | When to use |
-|-------|-------------|
-| `documentation` | Creating or reviewing docs |
-| `writing-skills` | Authoring or editing skill files |
-| `summarization` | Summarizing external resources |
-
-### CI/CD and Release Skills
-| Skill | When to use |
-|-------|-------------|
+### CI/CD and Release
+| Skill | Purpose |
+|-------|---------|
 | `workflow` | GitHub Actions workflows and CI configuration |
 | `versioning` | Commits, PRs, version bumps |
+| `finishing-a-development-branch` | Branch ready to merge |
 
-### C++ Skills (cpp plugin)
-`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`
+### Documentation and Knowledge
+| Skill | Purpose |
+|-------|---------|
+| `documentation` | Creating or reviewing docs |
+| `summarization` | Summarizing external resources |
+| `writing-skills` | Authoring or editing skill files |
+
+### Retrospective
+| Skill | Purpose |
+|-------|---------|
+| `session-postmortem` | Behavioral retrospective on completed sessions |
+| `self-evaluation` | Completing a session |
 
 ---
 
@@ -95,7 +93,7 @@ A Claude Code plugin marketplace providing professional software development ski
 ## How It Works
 
 Installing this plugin adds:
-- 34 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 26 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 14 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Two hooks: `SessionStart` (injects honesty and Iron Laws) and `UserPromptSubmit` (active per-turn enforcement)
 
@@ -103,7 +101,7 @@ Skills are loaded on demand, not injected at startup. The hooks enforce consiste
 
 ## C++ Plugin
 
-C++ and OpenGL-specific skills are published as a separate `story-to-ship-cpp` plugin. Install both for full C++ project coverage.
+C++ and OpenGL-specific skills (`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`) are published as a separate `story-to-ship-cpp` plugin. Install both for full C++ project coverage.
 
 ## License
 

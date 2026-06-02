@@ -10,7 +10,8 @@
       "name": "story-to-ship",
       "source": {
         "source": "github",
-        "repo": "jpegthedev/story-to-ship"
+        "repo": "jpegthedev/story-to-ship",
+        "ref": "claude/plugin-marketplace-skills-2nnKn"
       },
       "description": "TDD, planning, debugging, code quality, and collaboration skills for any software project",
       "license": "MIT",

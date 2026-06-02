@@ -20,7 +20,7 @@ Token estimate: `chars / 4` is a reliable approximation for technical Markdown.
 
 **Check before shipping:**
 ```bash
-wc -c .github/skills/<skill-name>/SKILL.md | awk '{print int($1/4) " tokens"}'
+wc -c .claude/skills/<skill-name>/SKILL.md | awk '{print int($1/4) " tokens"}'
 ```
 
 ---

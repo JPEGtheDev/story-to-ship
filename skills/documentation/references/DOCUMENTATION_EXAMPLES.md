@@ -198,7 +198,7 @@ When adding a new skill, update these 4 locations in `AGENTS.md`:
 
 ```markdown
 <!-- 1. Skills Directory table -- add a row -->
-| `skill-name` | `.github/skills/skill-name/` | Domain description |
+| `skill-name` | `.claude/skills/skill-name/` | Domain description |
 
 <!-- 2. Before Every Response checklist -- add if HARD-GATE trigger -->
 8. **Unclear approach or design impact?** -> HARD-GATE: load `brainstorming`...

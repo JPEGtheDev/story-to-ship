@@ -92,7 +92,7 @@ Derive the paths for the session being reviewed from your project's session mana
 
 ### Protocol
 
-1. **Dispatch the external reviewer subagent** using `.github/agents/postmortem-reviewer.md` with the above paths filled in. The reviewer reads `events.jsonl` directly -- no pre-export needed.
+1. **Dispatch the external reviewer subagent** using `.claude/agents/postmortem-reviewer.md` with the above paths filled in. The reviewer reads `events.jsonl` directly -- no pre-export needed.
 
 2. **Run self-assessment in parallel** (the main agent does Parts 1-5 from memory while the reviewer works). **INDEPENDENCE GATE: Write the self-assessment FROM MEMORY ONLY -- do NOT read `events.jsonl`, checkpoints, `plan.md`, or any session artifact before writing `postmortem.md`. `postmortem.md` MUST be created on disk before you read any source data. Only after the file exists may you read session data or wait for the external review to complete. Reading session artifacts first means the self-assessment is a log summary, not independent assessment. Do NOT announce yourself as "external reviewer" or "cold read" in your own context -- that role belongs exclusively to the dispatched subagent.**
 

@@ -1,6 +1,4 @@
 <EXTREMELY_IMPORTANT>
-You are working on the Particle-Viewer project.
-
 ## Honesty Gate -- Applies to Every Response, Every Turn
 
 ```
@@ -21,7 +19,7 @@ This gate fires before any other instruction. Apply it to every response you sen
 
 ### Show Your Work -- Evidence Must Be Inline:
 
-CORRECT:   `Ran ./build/tests/ParticleViewerTests: 247 passed, 0 failures. [exit 0]`
+CORRECT:   `Ran <project-test-runner>: 247 passed, 0 failures. [exit 0]`
 INCORRECT: "I ran the tests and they passed."
 
 ### Talk Straight -- Banned Hedge Vocabulary:
@@ -56,7 +54,7 @@ INCORRECT: "I ran the tests and they passed."
 | 2 | **NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE.** Evidence inline: show command + output. | `verification-before-completion` |
 | 3 | **NO FIXES WITHOUT ROOT CAUSE INVESTIGATION.** Trace to root. Never patch symptoms. | `systematic-debugging` |
 | 4 | **EVERY COMMIT USES CONVENTIONAL FORMAT.** `<type>[scope]: <description>` -- wrong format breaks releases. | `versioning` |
-| 5 | **FORMAT BEFORE EVERY COMMIT.** `find src tests -name "*.cpp" -o -name "*.hpp" \| xargs clang-format -i` | `code-quality` |
+| 5 | **FORMAT BEFORE EVERY COMMIT.** Run your project's formatter before every commit. | `code-quality` |
 | 6 | **FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT.** Banned: "should work" / "done" / "fixed" without inline evidence. | `honesty` |
 | 7 | **CLARIFY FIRST. PLAN BEFORE CODE. NO PLACEHOLDERS.** Label `[UNCLEAR:]`. Build todos before touching code. | `writing-plans` |
 | 8 | **NO CODE UNTIL THE DESIGN GATE IS PASSED.** Unclear approach, architecture impact, or multiple valid solutions = `brainstorming` first. | `brainstorming` |
@@ -75,7 +73,7 @@ Read the skill(s) BEFORE acting -- not after, not during:
 | Task type | Skills to read BEFORE acting |
 |-----------|------------------------------|
 | Any implementation | `execution` |
-| Writing/editing C++ | `execution`, `code-quality` |
+| Writing/editing code | `execution`, `code-quality` |
 | Writing/editing tests | `execution`, `code-quality`, `testing` |
 | Debugging a failure | `systematic-debugging` |
 | Multi-step planning | `writing-plans` |
@@ -92,10 +90,6 @@ When you load a skill, announce it: "I am using the [skill-name] skill to [purpo
 
 ## Pre-Commit Gate
 
-Before EVERY commit:
-```
-find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
-cmake --build build && ./build/tests/ParticleViewerTests
-```
+Before EVERY commit: run your project's formatter and test suite.
 CI rejects unformatted code. Tests must pass before pushing.
 </EXTREMELY_IMPORTANT>

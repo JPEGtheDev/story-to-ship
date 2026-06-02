@@ -206,10 +206,10 @@ Uncertain about a fact?
 | # | Law |
 |---|-----|
 | 1 | NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST. |
-| 2 | NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION. Run `cmake --build build && ./build/tests/ParticleViewerTests` in THIS session. Show output inline. |
+| 2 | NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION. Run your project's test suite in THIS session. Show output inline. |
 | 3 | NO FIXES WITHOUT ROOT CAUSE INVESTIGATION. |
 | 4 | EVERY COMMIT USES CONVENTIONAL FORMAT. `<type>[scope]: <description>` |
-| 5 | FORMAT BEFORE EVERY COMMIT. `find src tests -name "*.cpp" -o -name "*.hpp" \| xargs clang-format -i` |
+| 5 | FORMAT BEFORE EVERY COMMIT. Run your project's formatter before every commit. |
 | 6 | FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT. "Should work" is banned. |
 | 7 | CLARIFY FIRST. PLAN BEFORE CODE. NO PLACEHOLDERS. |
 | 8 | NO CODE UNTIL THE DESIGN GATE IS PASSED. |

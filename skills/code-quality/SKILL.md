@@ -33,7 +33,7 @@ Before every commit, verify:
 2. Formatting passes CI check: `find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run -Werror`
 3. `git diff` of every modified C++ file visually inspected -- do not trust silent tool output
 4. Build passes: `cmake --build build`
-5. All tests pass: `./build/tests/ParticleViewerTests`
+5. All tests pass: run your project's test suite
 
 [+] All 5 met -> proceed to commit
 [-] Any unmet -> fix the failing step; do not commit
@@ -53,7 +53,7 @@ See `references/NAMING_TABLES.md` for full naming examples.
 
 ## Naming Pre-Flight
 
-Before naming a new `enum`, struct field, or constant: open `docs/CODING_STANDARDS.md` and verify the naming convention. Enumerators: `UPPER_CASE`.
+Before naming a new `enum`, struct field, or constant: consult your project's naming conventions. Enumerators: `UPPER_CASE`.
 
 ---
 
@@ -75,7 +75,7 @@ Before naming a new `enum`, struct field, or constant: open `docs/CODING_STANDAR
 
 ## Adding a Feature / Fixing a Bug
 
-See `references/CPP_TOOLCHAIN.md` for PV-specific toolchain commands.
+See `references/CPP_TOOLCHAIN.md` for toolchain commands.
 
 ---
 
@@ -137,7 +137,7 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - Full coding standards: [`docs/CODING_STANDARDS.md`](../../../docs/CODING_STANDARDS.md)
 - Commit format: `versioning` skill
 - Testing patterns: `testing` skill
-- `references/CPP_TOOLCHAIN.md` -- formatting settings, clang-tidy, PV workflow patterns
+- `references/CPP_TOOLCHAIN.md` -- formatting settings, clang-tidy, workflow patterns
 - `references/FORMATTING_RULES.md` -- human-reviewable formatting patterns
 - `cpp-patterns` skill -- C++ runtime patterns
 - `references/DESIGN_PRINCIPLES.md` -- design heuristics

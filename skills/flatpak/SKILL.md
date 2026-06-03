@@ -61,7 +61,7 @@ When SDL3 is built via CMake `FetchContent` inside a `flatpak-builder` module, t
     - -DSDL_SHARED=ON
 ```
 
-Then in `CMakeLists.txt`, try `find_package(SDL3 QUIET)` first so the Flatpak-built SDL3 is picked up; fall back to FetchContent for local builds.
+In `CMakeLists.txt`, call `find_package(SDL3 QUIET)` first so the Flatpak-built SDL3 is picked up; fall back to FetchContent for local builds.
 
 ---
 

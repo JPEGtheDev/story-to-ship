@@ -10,14 +10,14 @@ description: Use when creating PRs, writing commit messages, understanding versi
 ```
 EVERY COMMIT AND PR TITLE MUST USE CONVENTIONAL FORMAT
 YOU MUST use conventional format for every commit message and PR title.
-No exceptions. Wrong format breaks release automation.
+No exceptions.
 ```
 
-Violating the letter of this rule is violating the spirit of this rule.
+Violating the letter of this rule is violating the spirit of this rule. Wrong format breaks release automation.
 
 `<type>[scope]: <description>`
 
-**Announce at start:** "I am using the versioning skill to [create commit/PR for] [description]."
+**Announce at start:** "I am using the versioning skill to [create/review] [commit or PR title]."
 
 ---
 
@@ -97,7 +97,7 @@ Before opening or merging a PR:
 ## Step 3: Version Resolution
 
 Tag format: `v1.2.3`. Apply the bump rules using your project's release automation, or
-create semver tags manually when no automation exists:
+create Semantic Versioning (semver) tags manually when no automation exists:
 
 ```shell
 git tag v1.2.3 -m "Release v1.2.3" && git push origin v1.2.3

@@ -192,7 +192,7 @@ Stories involving visual regression testing should:
    - Mesa on Linux [+]
    - (Windows support TBD)
 
-6. **CI Integration**  
+7. **CI Integration**  
    - Artifacts (diff images) uploaded to GitHub Actions
    - Comment on PR with visual diff summary
    - See `.github/workflows/unit-tests.yml (visual-regression job)`

@@ -47,7 +47,7 @@ Every generated story MUST be:
 - **Small** - doable in one sprint
 - **Testable** - acceptance criteria are verifiable
 
-If a story violates INVEST, fix it or suggest breaking it down.
+If a story violates INVEST, fix it or break it down.
 
 See `references/INVEST_GUIDE.md` for conversation principles and common edge cases.
 See `references/INVEST_FRAMEWORK.md` for per-criterion elaboration and examples.

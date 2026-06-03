@@ -114,3 +114,11 @@ If you catch yourself thinking any of these, stop and follow the rule:
 ## Reference
 
 For concrete workflow examples and patterns, see [references/WORKFLOW_EXAMPLES.md](references/WORKFLOW_EXAMPLES.md).
+
+---
+
+## Related Skills
+
+- `finishing-a-development-branch` -- merge-gate coordination; workflow rules apply at merge
+- `infrastructure-review` -- reviews changed CI/CD files for compliance with these pipeline rules
+- `visual-regression-testing` -- owns the visual regression workflow job configuration

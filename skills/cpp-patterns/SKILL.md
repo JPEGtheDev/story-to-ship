@@ -1,7 +1,7 @@
 ---
 name: cpp-patterns
 license: MIT
-description: Use when implementing C++ code for Particle-Viewer, handling GL resources, working with SDL3, or applying DRY/deprecation/docs-commit patterns.
+description: Use when implementing C++ code for Particle-Viewer, handling GL resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
 ---
 
 
@@ -95,7 +95,7 @@ if (!success) {
 ## OpenGL Usage
 
 - Check OpenGL errors after major operations
-- GLAD loader call: `gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)`
+- GL/OpenGL Loader Generator (GLAD) loader call: `gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)`
 - Shaders loaded from `Viewer-Assets/shaders/`
 - Modern VBO/VAO patterns for vertex data
 - Bounds-check SDL3 scancode values before indexing key state arrays
@@ -195,7 +195,7 @@ These smells are not caught by clang-tidy. Catch them in code review.
 | **PrimitiveObsession** | `int textureUnit` for `GL_TEXTURE0` binding point | `enum class TextureUnit : GLint` or typed wrapper |
 | **ArrowAntiPattern** | `if (gladLoad()) { if (SDL_Init()) { if (createWindow()) { ... } } }` | RAII wrappers -- each resource cleans itself up on scope exit |
 | **SpeculativeGenerality** | Abstract render interface with exactly one concrete implementation | Remove the abstraction until a second implementation exists |
-| **CopyAndPasteProgramming** | VAO setup duplicated per render pass; shader variants copied with minor edits | `setupVAO()` extracted function; OpenGL Shading Language (GLSL) `#define` or UBO for variants |
+| **CopyAndPasteProgramming** | VAO setup duplicated per render pass; shader variants copied with minor edits | `setupVAO()` extracted function; OpenGL Shading Language (GLSL) `#define` or Uniform Buffer Object (UBO) for variants |
 | **ExceptionHiding** | `glCompileShader()` with no `glGetShaderiv(GL_COMPILE_STATUS)` check | Always check, log, and terminate on unrecoverable GL errors (see FailFast above) |
 
 ---

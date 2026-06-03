@@ -1,6 +1,6 @@
 # Workflow Examples and Patterns
 
-This reference provides concrete examples of correct and incorrect CI/CD workflow patterns.
+This reference provides concrete examples of correct and incorrect CI/CD (Continuous Delivery) workflow patterns.
 
 ---
 
@@ -82,7 +82,7 @@ This reference provides concrete examples of correct and incorrect CI/CD workflo
 ```yaml
 const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 const artifactsUrl = `${runUrl}#artifacts`;
-body += `**[in] [Download images from workflow artifacts](${artifactsUrl})**\n\n`;
+body += `**[Download images from workflow artifacts](${artifactsUrl})**\n\n`;
 ```
 
 ### [+] Minimal Permissions
@@ -181,7 +181,7 @@ jobs:
     # Visual tests run after unit tests pass
 ```
 
-### Gtest Output Parsing (Final Summary Lines)
+### Gtest (Google Test) Output Parsing (Final Summary Lines)
 
 ```bash
 TOTAL=$(grep -E '^\[==========\] [0-9]+ tests? from [0-9]+ test suites? ran\.' output.txt \
@@ -201,4 +201,4 @@ FAILED=$(grep -E '^\[  FAILED  \] [0-9]+ tests?, listed below:' output.txt \
 The project uses `unit-tests.yml` with two jobs:
 
 1. **`test`** -- Build, run unit tests, generate coverage, comment on PR
-2. **`visual-regression`** -- Build, run `VisualRegressionTest.*` under Xvfb, upload artifact images, comment on PR
+2. **`visual-regression`** -- Build, run `VisualRegressionTest.*` under Xvfb (X Virtual Framebuffer), upload artifact images, comment on PR

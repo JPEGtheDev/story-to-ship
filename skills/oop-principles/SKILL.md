@@ -9,7 +9,7 @@ description: Use when adding inheritance, designing interfaces, or reviewing any
 
 ```
 CHECK IS-A / HAS-A AND SOLID BEFORE APPROVING ANY CLASS HIERARCHY
-YOU MUST run the Is-A / Has-A gate and verify all five SOLID principles before adding or approving any inheritance relationship. No exceptions.
+YOU MUST run the Is-A / Has-A gate and verify all five SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) principles before adding or approving any inheritance relationship. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.

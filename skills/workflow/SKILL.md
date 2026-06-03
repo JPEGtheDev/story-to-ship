@@ -17,15 +17,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 CI workflows read code, run tests, and publish artifacts. They never write code.
 
-**Second Iron Law:**
+## Rule: Broken Pipeline Is Highest Priority
 
-```
-BROKEN PIPELINE = HIGHEST PRIORITY -- STOP ALL MERGES UNTIL GREEN
-YOU MUST stop all merges and fix a broken main pipeline before any other work.
-No exceptions.
-```
-
-Violating the letter of this rule is violating the spirit of this rule.
+YOU MUST stop all merges and fix a broken main pipeline before any other work. No exceptions.
 
 A broken main branch pipeline is not a background task. It is the highest-priority item for anyone working on the project. No PR merges while the pipeline is red. The broken build is the only work that matters until it is fixed.
 

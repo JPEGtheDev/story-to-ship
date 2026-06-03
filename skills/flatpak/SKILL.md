@@ -93,7 +93,7 @@ static bool isRunningInFlatpak() {
 
 // Gate: only apply when inside Flatpak AND nvidia device present AND GL extension NOT mounted
 const bool nvidia_dev = access("/dev/nvidia0", F_OK) == 0;
-// Scan /usr/lib/*/GL/ for nvidia-* directories (architecture-agnostic)
+// Scan GL extension directories for nvidia-* directories (architecture-agnostic)
 const bool ext_mounted = isNvidiaGlExtensionMounted();
 if (isRunningInFlatpak() && nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
@@ -143,7 +143,6 @@ flatpak run --command=bash <app-id>
 # Inside the shell:
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 ls /run/flatpak/ld.so.conf.d/       # which GL extensions are mounted
-ls /usr/lib/x86_64-linux-gnu/GL/    # what GL dirs are present
 ldconfig -p | grep -i "libGLX"      # which vendor libraries are found
 cat /proc/driver/nvidia/version     # host driver version
 ```

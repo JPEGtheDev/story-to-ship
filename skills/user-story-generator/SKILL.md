@@ -8,7 +8,8 @@ description: Use when creating or refining Independent, Negotiable, Valuable, Es
 ## Iron Law
 
 ```
-YOU MUST VALIDATE EVERY STORY AGAINST INVEST AND INCLUDE ACCEPTANCE CRITERIA BEFORE SHIPPING.
+VALIDATE EVERY STORY AGAINST INVEST CRITERIA AND INCLUDE ACCEPTANCE CRITERIA BEFORE SHIPPING
+YOU MUST validate every story against INVEST criteria and include acceptance criteria before shipping.
 No exceptions.
 ```
 Violating the letter of this rule is violating the spirit of this rule.

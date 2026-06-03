@@ -121,7 +121,6 @@ positions unreadable.
 
 | Forbidden                             | Why                                                          | Replace with                                      |
 |---------------------------------------|--------------------------------------------------------------|---------------------------------------------------|
-| Non-ASCII characters                  | ASCII-only text in all output -- no Unicode arrows, dashes, math symbols | ASCII equivalents: -> -- - <= >= != [+] [-]   |
 | "It might be worth considering..."    | Non-committal -- you have a recommendation; give it           | "Do X because Y."                                 |
 | "You could potentially try..."        | "Potentially" adds nothing                                   | "Try X."                                          |
 | "This may need to be addressed"       | Passive -- either it does or it doesn't                       | "Address this: [specific fix]"                    |

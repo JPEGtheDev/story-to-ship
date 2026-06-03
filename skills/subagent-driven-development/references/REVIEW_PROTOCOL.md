@@ -4,7 +4,7 @@
 
 **Question:** Does the implementation do what the spec/requirements asked?
 
-Use `.claude/agents/spec-compliance-reviewer.md`. Provide:
+Use the `spec-compliance-reviewer` agent. Provide:
 - Full requirements / acceptance criteria for the todo
 - Full diff or file contents of the implementation
 
@@ -14,6 +14,6 @@ If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceedin
 
 **Question:** Is the implementation clean, maintainable, and correct?
 
-Use `.claude/agents/code-quality-reviewer.md` -- 1 agent per file changed.
+Use the `code-quality-reviewer` agent -- 1 agent per file changed.
 
 If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding.

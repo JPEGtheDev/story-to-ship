@@ -1,8 +1,8 @@
 # story-to-ship
 
-SDLC governance for Claude Code -- behavioral constraints, evidence gates, Iron Laws, and ceremony systems covering the developer loop from story through merged branch.
+SDLC governance for Claude Code -- behavioral constraints, evidence gates, and ceremony systems covering the developer loop from story through merged branch.
 
-Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipelines, write PR descriptions. This governs behavior: blocks forward progress without inline evidence, enforces ceremony gates before implementation, requires root-cause analysis before any fix. No published plugin does this.
+Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipelines, write PR descriptions. This governs behavior: blocks forward progress without inline evidence, enforces ceremony gates before implementation, requires root-cause analysis before any fix.
 
 **Scope:** Requirements, planning, implementation, testing, code review, CI/CD, documentation, retrospective. Does not cover deployment, monitoring, or security review.
 
@@ -27,7 +27,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `brainstorming` | Design gate -- required before committing to any approach |
 | `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
 | `user-story-generator` | INVEST-aligned story authoring |
-| `user-story-estimation` | Effort and token budget estimation |
+| `user-story-estimation` | T-shirt sizing and effort estimation |
 
 ### Planning
 | Skill | Purpose |

@@ -96,26 +96,21 @@ Before opening or merging a PR:
 
 ## Step 4: Version Resolution
 
-Versions are driven by git tags. The CI release workflow reads the squash-merge commit
-message, determines the bump type, and pushes the next tag. No manual steps needed.
+Tag format: `v1.2.3`. Apply the bump rules using your project's release automation, or
+create semver tags manually when no automation exists:
 
-Tag format: `v0.1.0`
+```shell
+git tag v1.2.3 -m "Release v1.2.3" && git push origin v1.2.3
+```
 
-| Commit type | Bump |
-|-------------|------|
-| `feat!:` / `BREAKING CHANGE` | MAJOR (1.0.0 -> 2.0.0) |
-| `feat:` | MINOR (0.1.0 -> 0.2.0) |
-| `fix:`, `docs:`, `chore:`, etc. | PATCH (0.1.0 -> 0.1.1) |
-
-**DO NOT** manually create git tags or set a `version` field in `plugin.json`. Both break
-automated version resolution -- the CI workflow is the single source of truth.
+The mapping: `feat!` / `BREAKING CHANGE` -> MAJOR, `feat:` -> MINOR, all else -> PATCH.
 
 ---
 
 ## Troubleshooting
 
 **Wrong version bump occurred:**
-Verify the commit message/PR title uses the correct type. Manual override via `workflow_dispatch` if needed.
+Verify the commit message/PR title uses the correct type. Check your project's release automation for manual override options.
 
 **Need a release:**
 Just push conventional commits to main -- it's automatic.

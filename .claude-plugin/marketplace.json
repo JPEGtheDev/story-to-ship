@@ -2,8 +2,7 @@
   "name": "story-to-ship",
   "description": "Professional software development skills and agents for Claude Code",
   "owner": {
-    "name": "JPEGtheDev",
-    "email": "jonathan.petz@pm.me"
+    "name": "JPEGtheDev"
   },
   "plugins": [
     {
@@ -12,7 +11,7 @@
         "source": "github",
         "repo": "jpegthedev/story-to-ship"
       },
-      "description": "SDLC governance: behavioral constraints, evidence gates, Iron Laws, and ceremony systems from story through merged branch",
+      "description": "SDLC governance: behavioral constraints, evidence gates, and ceremony systems from story through merged branch",
       "license": "MIT"
     }
   ]

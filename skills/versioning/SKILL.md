@@ -59,10 +59,11 @@ Every commit type triggers at least a PATCH bump. The release workflow specifica
 The PR title **MUST** use conventional commits format:
 
 **Valid:**
-- `feat: add particle color customization`
-- `fix(camera): correct rotation calculation in moveAround method`
-- `docs: update build instructions for Flatpak`
-- `feat!: redesign configuration API`
+- `feat: add user authentication`
+- `fix(auth): correct token expiry calculation`
+- `docs: update installation instructions`
+- `chore: upgrade dependency versions`
+- `feat!: redesign public API`
 
 **Invalid:**
 - [-] "Add particle color customization" (missing type)
@@ -150,5 +151,6 @@ If you catch yourself thinking any of these, stop and follow the rule:
 
 ## Reference
 
+- [Conventional Commits specification](https://www.conventionalcommits.org)
 - Release pipeline: [`.github/workflows/release.yml`](../../../.github/workflows/release.yml)
 - CI workflow rules: `workflow` skill

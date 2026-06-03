@@ -84,10 +84,9 @@ Before opening or merging a PR:
 
 1. PR title uses conventional commits format
 2. All commits use conventional commits format
-3. Code formatted with `clang-format` (see `code-quality` skill)
-4. Build succeeds on all platforms
-5. Unit tests pass
-6. CI formatting checks pass
+3. Code formatted (run your project's formatter)
+4. Tests pass
+5. CI checks pass
 
 [+] All met -> PR is ready to merge
 [-] Any unmet -> resolve before opening or merging the PR
@@ -96,12 +95,19 @@ Before opening or merging a PR:
 
 ## Step 4: Version Resolution
 
-At build time, version is resolved in this order:
-1. `PROJECT_VERSION` CMake variable (e.g., `-DPROJECT_VERSION=1.2.3`)
-2. Git tags (format: `v0.1.0`) -- used by CI release workflow
-3. Fallback: `0.0.0`
+Versions are driven by git tags. The CI release workflow reads the squash-merge commit
+message, determines the bump type, and pushes the next tag. No manual steps needed.
 
-**DO NOT** manually create git tags, edit versions in CMakeLists.txt, or create manual releases.
+Tag format: `v0.1.0`
+
+| Commit type | Bump |
+|-------------|------|
+| `feat!:` / `BREAKING CHANGE` | MAJOR (1.0.0 -> 2.0.0) |
+| `feat:` | MINOR (0.1.0 -> 0.2.0) |
+| `fix:`, `docs:`, `chore:`, etc. | PATCH (0.1.0 -> 0.1.1) |
+
+**DO NOT** manually create git tags or set a `version` field in `plugin.json`. Both break
+automated version resolution -- the CI workflow is the single source of truth.
 
 ---
 
@@ -144,6 +150,5 @@ If you catch yourself thinking any of these, stop and follow the rule:
 
 ## Reference
 
-- Full commit format examples: [`docs/CONVENTIONAL_COMMITS.md`](../../../docs/CONVENTIONAL_COMMITS.md)
-- Release pipeline details: [`docs/RELEASE_PROCESS.md`](../../../docs/RELEASE_PROCESS.md)
+- Release pipeline: [`.github/workflows/release.yml`](../../../.github/workflows/release.yml)
 - CI workflow rules: `workflow` skill

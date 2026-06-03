@@ -27,9 +27,9 @@ jobs:
             MINOR=$(echo "$CURRENT" | cut -d. -f2)
             PATCH=$(echo "$CURRENT" | cut -d. -f3)
 
-            COMMIT_MSG=$(git log -1 --format='%s')
+            COMMIT_MSG=$(git log -1 --format='%B')
 
-            if echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\([^)]*\))?!:|^[A-Z ]*BREAKING[_ ]CHANGE'; then
+            if echo "$COMMIT_MSG" | grep -qE '^[a-z]+(\([^)]*\))?!:|^BREAKING[ _]CHANGE'; then
               NEXT="v$((MAJOR + 1)).0.0"
             elif echo "$COMMIT_MSG" | grep -qE '^feat(\([^)]*\))?:'; then
               NEXT="v${MAJOR}.$((MINOR + 1)).0"

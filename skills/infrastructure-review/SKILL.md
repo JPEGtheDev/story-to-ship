@@ -92,7 +92,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 
 - "The pipeline worked before, this change is minor" -> Stop. Minor CI changes cause hard-to-debug failures. Review the full checklist anyway.
 - "FetchContent branch is fine for now, I'll pin it later" -> Stop. Branches move. Unpinned dependencies are not reproducible. Pin it now.
-- "GL permissions probably aren't needed for this build" -> Stop. GL access in Flatpak requires explicit permissions. See GOTCHAS doc. Assume it is needed until verified otherwise.
+- "GL permissions probably aren't needed for this build" -> Stop. GL access in Flatpak requires explicit permissions. See the `flatpak` skill. Assume it is needed until verified otherwise.
 - "The permissions block is broad but I need it for this one step" -> Stop. Identify the minimum permissions that step requires and use those only.
 - "The secrets are only test keys, not production" -> Stop. All secrets go in `${{ secrets.X }}`. Hardcoded keys are a violation regardless of their scope.
 
@@ -104,7 +104,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 |--------|---------|
 | "The pipeline worked before, this change is minor" | Minor CI changes cause hard-to-debug, intermittent failures. Review every change against the checklist. |
 | "FetchContent branch is fine for now" | Branches can move at any commit. Pin to a tag or commit SHA for reproducible builds. |
-| "Flatpak will work -- it worked on other machines" | GL access in Flatpak requires explicit sandbox permissions. Missing permissions = silent runtime failure. See GOTCHAS doc. |
+| "Flatpak will work -- it worked on other machines" | GL access in Flatpak requires explicit sandbox permissions. Missing permissions = silent runtime failure. See the `flatpak` skill. |
 | "The permissions block is broad but I need it for X" | Identify the minimal permissions for X and use those. Broad permissions are a security risk even in CI. |
 | "Secrets are only test keys, not production" | All secrets go in `${{ secrets.X }}`. No hardcoded values. No exceptions. |
 | "Third-party action tags are stable enough" | Tags can be force-pushed. Pin to a commit SHA for supply chain security. |

@@ -14,7 +14,7 @@ Subagents can:
 ```
 Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
     v
-1. Check VCS diff -- do the changes exist?
+1. Check Version Control System (VCS) diff -- do the changes exist?
    git diff HEAD  OR  git -C [worktree-path] diff HEAD
     v
 2. Verify changes match the stated intent

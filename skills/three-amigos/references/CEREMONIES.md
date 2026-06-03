@@ -11,7 +11,7 @@ Full ceremony definitions for all 6 ceremonies. Orchestrator reads this file to 
 
 **Trigger:** New feature with new or unclear acceptance criteria.  
 **Output:** Feature Specification written into `## Feature Specification` in plan.md.  
-**Required:** YES for any feature with 2+ todos and unclear AC.
+**Required:** YES for any feature with 2+ todos and unclear Acceptance Criteria (AC).
 
 ### Feature Specification grain -- MANDATORY
 

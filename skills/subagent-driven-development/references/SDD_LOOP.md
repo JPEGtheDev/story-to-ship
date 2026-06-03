@@ -13,7 +13,7 @@ Implementer returns status code
     |
     +-- NEEDS_CONTEXT --> Provide the missing information. Re-dispatch.
     |
-    +-- BLOCKED --> Invoke `three-amigos` Pivot Assessment (Ceremony 4). CONTINUE/REVISE AC/REVISE PLAN/ABANDON.
+    +-- BLOCKED --> Invoke `three-amigos` Pivot Assessment (Ceremony 4). CONTINUE/REVISE Acceptance Criteria (AC)/REVISE PLAN/ABANDON.
                     If no Three Amigos available: Assess. Provide context if possible. Otherwise escalate to user.
     |
     +-- PARTIAL --> Read completed/remaining split.

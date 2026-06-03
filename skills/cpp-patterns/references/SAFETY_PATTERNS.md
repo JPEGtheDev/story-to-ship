@@ -67,7 +67,7 @@ The static wrapper holds the this-pointer in `userdata`; the virtual method prov
 
 ## Singleton Avoidance (Simpleton Pattern)
 
-Singletons are globals with extra syntax. They break dependency injection, make mocking impossible, and cause test interference when tests share state. Any class that "only needs one instance" should instead receive that instance through its constructor or a factory parameter.
+Singletons are globals with extra syntax. They break dependency injection, make mocking impossible, and cause test interference when tests share state. Any class that "only needs one instance" MUST instead receive that instance through its constructor or a factory parameter.
 
 Replacing a singleton:
 1. Extract an interface for the singleton's behavior
@@ -130,7 +130,7 @@ std::weak_ptr<ParticleSystem> weakSystem = system;
 if (auto s = weakSystem.lock()) { s->update(); }
 ```
 
-Prefer `std::weak_ptr` over raw pointers for non-owning references to managed objects.
+Use `std::weak_ptr` instead of raw pointers for non-owning references to managed objects.
 
 ---
 
@@ -168,7 +168,7 @@ protected:
 };
 ```
 
-This prevents subclasses from bypassing the algorithm skeleton (pre/post hooks always fire) while still allowing step customization. Prefer NVI over making public methods virtual. Source: C2 Wiki "TemplateMethodPattern".
+This prevents subclasses from bypassing the algorithm skeleton (pre/post hooks always fire) while still allowing step customization. Use NVI (Non-Virtual Interface). Do not make public methods virtual. Source: C2 Wiki "TemplateMethodPattern".
 
 ---
 

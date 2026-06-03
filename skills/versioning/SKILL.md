@@ -94,7 +94,7 @@ Before opening or merging a PR:
 
 ---
 
-## Step 4: Version Resolution
+## Step 3: Version Resolution
 
 Tag format: `v1.2.3`. Apply the bump rules using your project's release automation, or
 create semver tags manually when no automation exists:

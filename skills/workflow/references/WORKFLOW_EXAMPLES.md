@@ -1,6 +1,6 @@
 # Workflow Examples and Patterns
 
-This reference provides concrete examples of correct and incorrect CI/CD workflow patterns for Particle-Viewer.
+This reference provides concrete examples of correct and incorrect CI/CD workflow patterns.
 
 ---
 

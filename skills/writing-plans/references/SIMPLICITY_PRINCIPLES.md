@@ -184,7 +184,7 @@ Do not begin with the hardest structural problem. That is the last refactoring, 
 
 ## Excessive Refactoring as Signal
 
-A system that requires continuous large-scale refactoring every iteration is signaling a design failure -- not a refactoring success. Refactoring should reduce the cost of future change. If it never does, the design is not improving.
+A system that requires continuous large-scale refactoring every iteration is signaling a design failure -- not a refactoring success. Refactoring reduces the cost of future change. If it never does, the design is not improving.
 
 Signs of excessive refactoring:
 - Every new feature requires restructuring multiple modules

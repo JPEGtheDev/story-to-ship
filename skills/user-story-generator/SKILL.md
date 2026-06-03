@@ -1,7 +1,7 @@
 ---
 name: user-story-generator
 license: MIT
-description: Use when creating or refining INVEST-aligned user stories.
+description: Use when creating or refining Independent, Negotiable, Valuable, Estimable, Small, Testable (INVEST)-aligned user stories.
 ---
 
 

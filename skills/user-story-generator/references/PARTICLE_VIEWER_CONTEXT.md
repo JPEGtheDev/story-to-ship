@@ -180,15 +180,15 @@ Stories involving visual regression testing should:
 
 3. **Follow CI pipeline rules** -- use the `workflow` skill for guidelines
 
-3. **Support Headless Mode**  
+4. **Support Headless Mode**  
    - No display required (works with Xvfb on CI)
    - Must not assume real GPU
 
-4. **Baseline Image Management**  
+5. **Baseline Image Management**  
    - Include logic for updating baselines when rendering intentionally changes
    - Store baseline images in `tests/visual-regression/baselines/`
 
-5. **Cross-Platform Compatibility**  
+6. **Cross-Platform Compatibility**  
    - Mesa on Linux [+]
    - (Windows support TBD)
 

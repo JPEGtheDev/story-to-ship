@@ -54,7 +54,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ## Building the Plan
 
-1. Create a todo list (`sql` tool) with concrete, verifiable items
+1. Create a todo list (`TodoWrite` tool) with concrete, verifiable items
 2. Specify expected file changes up front -- files, functions, test additions
 3. Bake in proof steps -- plan how to verify each change
 4. Sanity-check: does the plan address every acceptance criterion?

@@ -52,7 +52,7 @@ See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patt
 | "Inheritance is the natural model here" | Natural is not correct. Run the Is-A test. |
 | "The base class is just for code reuse" | Reuse is composition's job. Inheritance is for substitutability. |
 | "The substitution test passes today" | Does it pass under all invariants, including error semantics? |
-| "The derived class only adds methods; it doesn't change base behavior" | Adding methods can still tighten preconditions or weaken postconditions. Run the LSP check for every added method. |
+| "The derived class only adds methods; it doesn't change base behavior" | Adding methods can still tighten preconditions or weaken postconditions. Run the Liskov Substitution Principle (LSP) check for every added method. |
 | "Interface Segregation doesn't apply -- all clients need all methods" | Verify by inspection: find every caller of every interface method. If any caller never calls a method, the interface is too fat. |
 
 ---

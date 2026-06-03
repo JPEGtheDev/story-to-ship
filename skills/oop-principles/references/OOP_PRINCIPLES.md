@@ -6,7 +6,7 @@ Source: Ward Cunningham's C2 wiki audit -- patterns applicable to class hierarch
 
 ## Good Object-Oriented Code
 
-Good OO code provides meaningful abstractions -- methods do domain work (`ship product`, `point in polygon`), not property access (`getX`, `setY`). Cohesion is high within classes; coupling is low between them. Substituting one implementation for another requires no client changes.
+Good object-oriented (OO) code provides meaningful abstractions -- methods do domain work (`ship product`, `point in polygon`), not property access (`getX`, `setY`). Cohesion is high within classes; coupling is low between them. Substituting one implementation for another requires no client changes.
 
 **Anti-signals:** a class whose public API is entirely getters and setters is a data bag, not an object.
 
@@ -34,21 +34,21 @@ Benefits: adding a new alternative requires changing exactly one place. Directly
 
 ## Speculative Hierarchy Anti-Pattern
 
-Creating abstract subclasses for scenarios not yet needed ("WhatIfNonSharableComponent?") violates YAGNI and adds indirection with no payoff. Resist introducing a base class until three or more real, concrete variants exist and are actively in use.
+Creating abstract subclasses for scenarios not yet needed ("WhatIfNonSharableComponent?") violates YAGNI (You Ain't Gonna Need It) and adds indirection with no payoff. Resist introducing a base class until three or more real, concrete variants exist and are actively in use.
 
-Applies to template meta-hierarchies: CRTP-style base classes are only justified when proven necessary by real polymorphism needs.
+Applies to template meta-hierarchies: CRTP (Curiously Recurring Template Pattern)-style base classes are only justified when proven necessary by real polymorphism needs.
 
 ---
 
 ## Uniform Access Principle
 
-Clients should not know or care whether accessing a value requires a field read or a computed operation. Expose a uniform accessor; hide the implementation detail.
+Clients MUST NOT know or care whether accessing a value requires a field read or a computed operation. Expose a uniform accessor; hide the implementation detail.
 
 ---
 
 ## Value Interface Over Reference Exposure
 
-When internal implementation uses reference semantics (pointers, handles), expose a value-like interface to callers. Handle-based OpenGL resource wrappers should present stable value semantics -- callers never hold raw GL integer handles.
+When internal implementation uses reference semantics (pointers, handles), expose a value-like interface to callers. Handle-based OpenGL resource wrappers MUST present stable value semantics -- callers never hold raw GL integer handles.
 
 ---
 
@@ -93,7 +93,7 @@ Two primary techniques for providing dependencies to an object:
 **Constructor Injection** -- pass all required dependencies at object creation time:
 - Dependencies are always present; object is fully initialized on construction
 - Makes required dependencies explicit and visible
-- Preferred for dependencies that the object cannot function without
+- Use for dependencies that the object cannot function without
 
 **Setter Injection** -- provide optional or late-bound dependencies after construction:
 - Allows partial initialization; dependencies can be changed after creation
@@ -108,7 +108,7 @@ Two primary techniques for providing dependencies to an object:
 **Service Locator** (alternative pattern):
 - Centralizes service lookup; can cache or encapsulate vendor-specific details
 - Drawback: obscures dependencies -- callers don't declare what they need
-- Prefer explicit DI over Service Locator for testability
+- Use explicit DI (Dependency Injection) over Service Locator for testability
 
 Source: C2 Wiki "DependencyInjection", "ServiceLocator".
 
@@ -116,7 +116,7 @@ Source: C2 Wiki "DependencyInjection", "ServiceLocator".
 
 ## Ubiquitous Language
 
-In a system, developers and domain experts should share a single vocabulary for the same concepts. This shared language is the Ubiquitous Language.
+In a system, developers and domain experts MUST share a single vocabulary for the same concepts. This shared language is the Ubiquitous Language.
 
 **Why it matters:** When developers use different names than domain experts (renaming "Customer" to "User", calling an "Invoice" an "Order"), the translation cost compounds at every conversation, code review, and handoff. Bugs hide in translation gaps.
 

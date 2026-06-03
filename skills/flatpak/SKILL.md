@@ -29,7 +29,7 @@ Before modifying the Flatpak manifest, SDL3 window creation code, or GL context 
 2. Is SDL3 built as a **separate** manifest module (not via FetchContent inside the app module)?
 3. Are all `setenv()` calls using `overwrite=1`?
 4. Is the NVIDIA fallback check gated on both `/dev/nvidia0` AND absence of the mounted GL extension?
-5. Is the MSAA fallback retry present if requesting multisample?
+5. Is the Multisample Anti-Aliasing (MSAA) fallback retry present if requesting multisample?
 
 [+] All pass -> proceed
 [-] Any fail -> fix the gate condition first, then proceed
@@ -80,7 +80,7 @@ setenv("__GLX_VENDOR_LIBRARY_NAME","mesa",     1);
 ```
 
 Why all three:
-- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient -- GLVND still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
+- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient -- GLVND (GL Vendor-Neutral Dispatch) still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
 - `__GLX_VENDOR_LIBRARY_NAME=mesa` bypasses X server vendor negotiation entirely.
 - `GALLIUM_DRIVER=llvmpipe` selects Mesa's software rasterizer explicitly.
 

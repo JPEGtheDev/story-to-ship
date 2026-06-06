@@ -77,6 +77,18 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `session-postmortem` | Behavioral retrospective -- audits agent behavior for rationalization patterns |
 | `self-evaluation` | Session close checklist |
 
+### C++ and OpenGL
+| Skill | Purpose |
+|-------|---------|
+| `build` | CMake build, dependency, and Flatpak packaging gates |
+| `architecture-review` | Layer boundary compliance and class hierarchy review |
+| `infrastructure-review` | CI/CMake/Flatpak manifest compliance review |
+| `oop-principles` | Is-A/Has-A and SOLID gate before any class hierarchy change |
+| `cpp-patterns` | GL resource management and public interface documentation patterns |
+| `cpp-safety` | RAII and destructor safety for resource-owning classes |
+| `flatpak` | Sandbox-aware Flatpak packaging and debugging |
+| `visual-regression-testing` | Visual baseline management and render regression testing |
+
 ---
 
 ## Agents
@@ -101,15 +113,15 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 26 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 34 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 14 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Two hooks: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (active per-turn enforcement)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active.
 
-## C++ Plugin
+## C++ and OpenGL
 
-C++ and OpenGL-specific skills (`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`) are published as a separate `story-to-ship-cpp` plugin. Install both for full C++ project coverage.
+C++ and OpenGL-specific skills (`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`) are bundled in this plugin. No separate install required.
 
 ## License
 

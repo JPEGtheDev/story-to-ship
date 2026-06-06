@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 ## BEFORE PROCEEDING
 
 After you've had the conversation and before generating, mentally verify you have:
-1. **Loaded `references/PV_PROJECT_CONTEXT.md`** and verified this aligns with actual project purpose
+1. **Loaded `references/PV_PROJECT_CONTEXT.md`** if this is a Particle-Viewer session. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific. Use the actual project context from the repo README or the user's description instead.
 2. **Confirmed the functionality/component actually exists** (didn't assume based on naming)
 3. Clear understanding of what they want to accomplish
    [-] Ask: "What specifically do you want this story to enable?"
@@ -37,6 +37,7 @@ After you've had the conversation and before generating, mentally verify you hav
    [-] Assume no constraints; state the assumption
 
 [+] All 9 met -> proceed to generate the story
+[-] Any unmet -> ask the missing questions or gather the missing information. Do not generate until all 9 conditions are met.
 
 **RED FLAGS - Stop and ask for clarification:**
 - Story mentions functionality not in project context
@@ -77,6 +78,11 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 | "The story depends on another, but we'll handle it" | Dependent stories can't be independently delivered. Redesign the split. |
 | "We can estimate it after starting" | Inestimable stories signal unclear scope. Clarify before committing. |
 | "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
+| "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery produces a Feature Specification that validates field optionality, invocation paths, and behavioral Acceptance Criteria under three personas. They are not equivalent. |
+
+## Output Destination
+
+See `references/OUTPUT_ROUTING.md` for the full routing rule with context and forces.
 
 ## Red Flags -- STOP
 
@@ -86,13 +92,14 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
 - Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.
+- Generating 2+ stories with new Acceptance Criteria without running Three Amigos Discovery first -> STOP. Acceptance Criteria written before Discovery are unvalidated. Run `three-amigos` Ceremony 1 before finalizing any acceptance criterion.
 
 ---
 
 # Instructions for Agent
 
 See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scripts.
-See `references/PV_PROJECT_CONTEXT.md` for project scope verification and reference loading guide.
+See `references/PV_PROJECT_CONTEXT.md` for project scope verification and reference loading guide (Particle-Viewer sessions only).
 
 **Always include the Effort Estimate section** with:
 - Total premium requests (range)

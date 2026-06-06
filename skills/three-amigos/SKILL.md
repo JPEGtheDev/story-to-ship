@@ -80,6 +80,8 @@ A Feature Specification that does not address both questions is incomplete and M
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
 - After all verdicts: delete worktrees and branches.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
+- Agent prompts MUST include an explicit `cd {{WORKTREE_PATH}} &&` before the worktree self-check. Agents start in the session's main repo directory, not the worktree -- without the explicit `cd`, the self-check will always return BLOCKED.
+- If a stop hook fires during an active amigo wait: respond to the hook only if the hook action does not modify any file that running amigos are currently reading. Committing a previously untracked file that amigos have not opened is safe. Staging or modifying plan.md, SKILL.md, or any reference file an amigo may be reading is not safe. Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
 
 ---
 
@@ -101,6 +103,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 - "Discovery ran, skip re-reading the spec" -> Read plan.md now.
 - "Small feature, skip Three Amigos" -> Check When to Invoke. If the signal fires, run the ceremony now.
 - "AC is obvious" -> Informal AC is exactly what Discovery solves. Run Discovery now.
+- "AskUserQuestion was used for clarification, skipping Discovery" -> STOP. AskUserQuestion output is not a Feature Specification. Run Discovery now.
 - "REVISIONS NEEDED -- fix and merge" -> Requires new todos, completion, and re-Signoff.
 
 ---
@@ -110,6 +113,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 | Excuse | Reality |
 |--------|---------|
 | "We discussed it, Discovery is redundant" | Discussion != Feature Specification. Run Discovery. |
+| "AskUserQuestion answered the same questions" | AskUserQuestion produces informal clarification. Discovery produces a Feature Specification with behavioral ACs, field optionality, and invocation path coverage. They are not equivalent. Run Discovery. |
 | "Developer knows the code, skip that amigo" | Amigo reads code first. Findings are evidence. |
 | "Two approved -- majority rules" | Any REJECT blocks. Majority is irrelevant. |
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |

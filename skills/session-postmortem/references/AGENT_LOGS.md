@@ -9,7 +9,7 @@ Claude Code session transcripts (full turn-by-turn JSONL) are stored at:
 ```
 
 The encoded path is the absolute project path with `/` replaced by `-`.
-Example: `/home/user/Projects/MyProject` -> `-home-user-Projects-MyProject`
+Example: `/path/to/MyProject` -> `-path-to-MyProject`
 
 Project memories (persistent facts written by the agent) live at:
 

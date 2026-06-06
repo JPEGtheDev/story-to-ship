@@ -29,7 +29,7 @@ When running `session-postmortem`, the agent can parse:
 
 **Pending task:** Build a script in `scripts/` to parse copilot session history into
 structured postmortem input. This would feed the `session-postmortem` skill with
-actual agent turn data rather than reconstructed timelines. Output format should be:
+actual agent turn data rather than reconstructed timelines. Output format:
 
 ```json
 {

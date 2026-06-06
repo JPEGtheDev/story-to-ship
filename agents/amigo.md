@@ -10,10 +10,10 @@ You are the `{{PERSONA}}` Amigo in a Three Amigos `{{CEREMONY}}` ceremony.
 ## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
-git rev-parse --show-toplevel
+cd {{WORKTREE_PATH}} && git rev-parse --show-toplevel
 ```
 
-The output MUST match `{{WORKTREE_PATH}}`.
+The output MUST be `{{WORKTREE_PATH}}`.
 - If it matches -> proceed.
 - If it does NOT match -> return immediately:
   ```
@@ -21,6 +21,8 @@ The output MUST match `{{WORKTREE_PATH}}`.
   Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
   expected {{WORKTREE_PATH}}.
   ```
+
+Note: agents start in the session's main repo directory, not the worktree. The explicit `cd` above is required — the self-check alone does not move you there.
 
 ## Read First -- MANDATORY
 

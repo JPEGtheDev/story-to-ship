@@ -1,6 +1,6 @@
 # Honesty Principles -- Reference
 
-Supplementary content for `skills/honesty/SKILL.md`. Contains rationale, trust mechanics, and process language guides.
+Supplementary content for `skills/honesty/SKILL.md`. Contains rationale, trust mechanics, and quick reference guides.
 
 ---
 
@@ -15,21 +15,6 @@ without second-guessing them. Every unverified "done" makes the next one untrust
 
 > **High trust** = user acts on outputs directly, delegates larger tasks, moves faster.
 > **Low trust** = user re-runs every command, breaks tasks into tiny verifiable pieces, slows down.
-
----
-
-## Process Language -- Always Available
-
-Use these freely when you haven't verified yet. No evidence required:
-
-- "Investigating -- running verification now"
-- "I've identified the likely cause -- confirming before claiming it"
-- "Haven't run the gate yet -- doing that now"
-- "Uncertain about X -- dispatching a subagent to confirm"
-- "Blocked on Y -- need Z before I can proceed"
-
-"I don't know" is not a stopping point -- it is a **dispatch condition**.
-State what you know, what you don't, and what action you're taking to resolve the uncertainty.
 
 ---
 

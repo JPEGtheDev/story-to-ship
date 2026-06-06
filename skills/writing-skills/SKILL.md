@@ -36,10 +36,14 @@ Before creating, editing, or shipping any skill or agent template:
 3. **Alexandrian form check** -- every rule with more than one application context, or any rule that could be misapplied in an edge case, MUST answer Context + Forces. See `references/SKILL_ANATOMY_ELEMENTS.md`.
    - Not met -> identify which rules lack Context/Forces; add them before proceeding.
 
-4. **Modifying anatomy elements?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before any edits. Frontmatter-only changes: reference files optional.
+4. **Compressing a skill?** For every ban or prohibited phrase in SKILL.md, verify its safe substitute is also in SKILL.md -- not only in a references/ file.
+   - [+] Ban and substitute co-located in SKILL.md -> proceed
+   - [-] Substitute is only in references/ -> move the substitute into SKILL.md before shipping.
+
+5. **Modifying anatomy elements?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before any edits. Frontmatter-only changes: reference files optional.
    - Not met -> stop. Read `references/SKILL_ANATOMY_ELEMENTS.md` now. Do not make edits until loaded.
 
-5. **Auditing existing skills?** Load `skill-reviewer` agent template; inject 4 reference files; one agent per skill directory (reviews `SKILL.md` + all `references/` files).
+6. **Auditing existing skills?** Load `skill-reviewer` agent template; inject 4 reference files; one agent per skill directory (reviews `SKILL.md` + all `references/` files).
    - Not following -> read `references/DISPATCH_PATTERN.md` before dispatching any review agents.
 
 [+] All met -> proceed
@@ -83,9 +87,9 @@ Before creating, editing, or shipping any skill or agent template:
 
 ## References
 
-- `references/SKILL_ANATOMY_ELEMENTS.md` -- full element schemas, bad/good examples, rationale, Alexandrian Pattern Form guide
-- `references/SIZE_AND_COMPRESSION.md` -- token count targets, compression rules, line limits
+- `references/SKILL_ANATOMY_ELEMENTS.md` -- element schemas, bad/good examples, Alexandrian Pattern Form guide
+- `references/SIZE_AND_COMPRESSION.md` -- token targets, compression rules including enforcement co-location gate, line limits
 - `references/VOICE_AUTHORITY_RULES.md` -- authority table, Absolute Path Rule, Acronym Rule
-- `references/MODEL_COMPATIBILITY.md` -- patterns most likely to be skipped by lower-end models
-- `references/REVIEW_INSTRUCTIONS.md` -- review process, checklist, qualitative questions, return format; injected into `skill-reviewer` agent at dispatch time
-- `references/DISPATCH_PATTERN.md` -- step-by-step dispatch instructions; read before auditing any skill
+- `references/MODEL_COMPATIBILITY.md` -- patterns most likely skipped by lower-end models
+- `references/REVIEW_INSTRUCTIONS.md` -- review checklist and return format; injected into `skill-reviewer` at dispatch time
+- `references/DISPATCH_PATTERN.md` -- dispatch instructions; read before auditing any skill

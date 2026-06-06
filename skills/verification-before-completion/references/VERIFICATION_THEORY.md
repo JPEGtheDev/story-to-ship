@@ -10,7 +10,7 @@
 | Code inspection/review | 45-70% |
 | **Both combined** | **>90%** |
 
-The IBM Cleanroom result: formal inspections achieved <0.1 defects/KLOC vs. industry average 15-50.
+The IBM Cleanroom result: formal inspections achieved <0.1 defects/KLOC (thousands of lines of code) vs. industry average 15-50.
 
 **The implication:** "Tests pass" with no additional review still has a statistically likely defect rate of 30-70%. Tests catch execution-time defects. Code review catches logical, requirements, and interface defects that tests cannot surface.
 

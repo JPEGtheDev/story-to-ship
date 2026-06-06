@@ -40,8 +40,14 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
    [+] -> Three Amigos for Ceremonies 2, 5, 6
    [-] -> Skeptic for Ceremony 2
 3. 3 worktrees, one per amigo. Inject `{{PERSONA}}` + `{{READ_FIRST}}` + `{{CEREMONY}}` + `{{AGENDA}}` into amigo.md.
+   [+] All three worktrees created -> dispatch amigos
+   [-] Any worktree missing -> create it before dispatching
 4. Collect all three verdicts before acting on any.
+   [+] All three verdicts received -> proceed to synthesis
+   [-] Any verdict missing -> wait; do not act on partial results
 5. Any single REJECT blocks. Majority does NOT override.
+   [+] No REJECT -> proceed
+   [-] Any REJECT -> address blocking issue before proceeding
 
 ---
 
@@ -77,11 +83,15 @@ A Feature Specification that does not address both questions is incomplete and M
 
 ---
 
-## CANARY
+## Canary
+
+Before dispatching any amigos, state the ceremony and feature:
 
 ```
-CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching any amigos.
+CANARY: Three Amigos loaded. Ceremony: [ceremony name]. Feature: [feature description].
 ```
+
+This output proves the ceremony was identified before dispatch. It does not prove the correct ceremony was selected or that plan.md was read.
 
 ---
 
@@ -107,6 +117,11 @@ CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching an
 | "Not fully blocked, skip Pivot Assessment" | DONE_WITH_CONCERNS also triggers Pivot Assessment. |
 
 ---
+
+## Related Skills
+
+- `skeptic` -- plan validation without Three Amigos ceremony; use when Discovery did not run and a single-todo feature needs review
+- `brainstorming` -- design exploration; referenced by the Discovery Tracking Mechanism as a reader of the Feature Specification
 
 ## References
 

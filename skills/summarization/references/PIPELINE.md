@@ -25,7 +25,7 @@ Dispatch three `general-purpose` agents simultaneously via the `task` tool.
 
 ## Agent 4: Synthesizer
 
-Dispatch using `.github/agents/synthesizer.md` after all three method agents return.
+Dispatch using the `synthesizer` agent after all three method agents return.
 
 Fill every `{{VARIABLE}}` slot:
 
@@ -45,7 +45,7 @@ The synthesizer writes the article to `{{TEMP_PATH}}` first. Dispatch the claim 
 
 ## Agent 5: Claim Enrichment
 
-Dispatch using `.github/agents/claim-enrichment.md` after the synthesizer returns.
+Dispatch using the `claim-enrichment` agent after the synthesizer returns.
 
 Fill every `{{VARIABLE}}` slot:
 
@@ -63,7 +63,7 @@ After the enrichment agent reports, report the temp path to the user. They can r
 
 ## Agent 6: Quality Evaluator
 
-Dispatch using `.github/agents/summarization-quality.md`. Can be dispatched in parallel with notifying the user of the temp path -- they do not need to be sequential.
+Dispatch using the `summarization-quality` agent. Can be dispatched in parallel with notifying the user of the temp path -- they do not need to be sequential.
 
 Fill every `{{VARIABLE}}` slot:
 

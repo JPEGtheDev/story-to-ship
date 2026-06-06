@@ -67,7 +67,7 @@ The static wrapper holds the this-pointer in `userdata`; the virtual method prov
 
 ## Singleton Avoidance (Simpleton Pattern)
 
-Singletons are globals with extra syntax. They break dependency injection, make mocking impossible, and cause test interference when tests share state. Any class that "only needs one instance" should instead receive that instance through its constructor or a factory parameter.
+Singletons are globals with extra syntax. They break dependency injection, make mocking impossible, and cause test interference when tests share state. Any class that "only needs one instance" MUST instead receive that instance through its constructor or a factory parameter.
 
 Replacing a singleton:
 1. Extract an interface for the singleton's behavior
@@ -82,7 +82,7 @@ This restores testability and removes hidden coupling.
 
 See the `oop-principles` skill -- Speculative Hierarchy Anti-Pattern -- for the hierarchy design rule.
 
-C++-specific note: CRTP-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
+C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
 
 ---
 
@@ -130,7 +130,7 @@ std::weak_ptr<ParticleSystem> weakSystem = system;
 if (auto s = weakSystem.lock()) { s->update(); }
 ```
 
-Prefer `std::weak_ptr` over raw pointers for non-owning references to managed objects.
+Use `std::weak_ptr` instead of raw pointers for non-owning references to managed objects.
 
 ---
 
@@ -168,7 +168,7 @@ protected:
 };
 ```
 
-This prevents subclasses from bypassing the algorithm skeleton (pre/post hooks always fire) while still allowing step customization. Prefer NVI over making public methods virtual. Source: C2 Wiki "TemplateMethodPattern".
+This prevents subclasses from bypassing the algorithm skeleton (pre/post hooks always fire) while still allowing step customization. Use NVI (Non-Virtual Interface). Do not make public methods virtual. Source: C2 Wiki "TemplateMethodPattern".
 
 ---
 
@@ -195,7 +195,7 @@ C++ implementation:
 
 Distinguish: fail-fast on process state corruption; graceful handling on recoverable input data errors. Do not use `std::terminate` as a catch-all for bad input.
 
-See also: `systematic-debugging/references/DEBUGGING_TACTICS.md -- Fail Fast` for the general principle. Source: C2 Wiki "FailFast".
+See also: the `systematic-debugging` skill (Fail Fast section) for the general principle. Source: C2 Wiki "FailFast".
 
 ---
 

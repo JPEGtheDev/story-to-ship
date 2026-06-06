@@ -14,7 +14,7 @@ Subagents can:
 ```
 Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
     v
-1. Check VCS diff -- do the changes exist?
+1. Check Version Control System (VCS) diff -- do the changes exist?
    git diff HEAD  OR  git -C [worktree-path] diff HEAD
     v
 2. Verify changes match the stated intent
@@ -36,6 +36,6 @@ Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
 | "I committed [X]" | `git log --oneline -5` -- does the commit exist? |
 | "I updated the file" | `git diff HEAD [file]` -- are the changes present? |
 | "All tests pass" | Run `./build/tests/ParticleViewerTests` yourself |
-| "I created the skill" | `ls .github/skills/[skill-name]/SKILL.md` -- does it exist? |
+| "I created the skill" | `ls .claude/skills/[skill-name]/SKILL.md` -- does it exist? |
 
 **Never relay a subagent's completion claim to the user without first running this gate.**

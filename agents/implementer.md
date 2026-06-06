@@ -5,7 +5,7 @@ description: Use when implementing a feature task in a git worktree.
 
 # Implementer Agent
 
-You are implementing a feature for Particle-Viewer (C++20, OpenGL, CMake, Google Test).
+You are implementing a feature in a software project.
 
 ## Worktree Self-Check -- Run BEFORE reading the task
 

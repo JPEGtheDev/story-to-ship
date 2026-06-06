@@ -5,7 +5,7 @@ description: Use for Stage 2 post-todo review after Stage 1 passes to check code
 
 # Code Quality Reviewer Agent
 
-You are reviewing code in Particle-Viewer for quality, correctness, and standards compliance.
+You are reviewing code for quality, correctness, and standards compliance.
 
 ## Files under review
 {{FILES}}

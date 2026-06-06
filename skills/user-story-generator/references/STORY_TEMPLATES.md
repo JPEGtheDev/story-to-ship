@@ -321,4 +321,4 @@ When a larger story is broken into subtasks, use this format:
 3. **Break large acceptance criteria into bullets** - easier to track progress
 4. **Include Definition of Done** - prevents "almost done" stories
 5. **Reference files and components** - clarifies scope and touchpoints
-6. **Estimate subtasks, not epics** - individual subtasks should be S/M
+6. **Estimate subtasks, not epics** - individual subtasks MUST be S/M (Small or Medium)

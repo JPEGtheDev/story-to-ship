@@ -1,7 +1,7 @@
 ---
 name: testing
 license: MIT
-description: Use when writing or reviewing any test for Particle-Viewer.
+description: Use when writing or reviewing any test.
 ---
 
 
@@ -35,8 +35,6 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 - **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
 - **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
 
-For PV test runner commands, see `references/PV_TEST_CONVENTIONS.md`.
-
 ---
 
 ## Step 1: Determine Test Type
@@ -59,13 +57,13 @@ For the complete AAA rule set, code examples, and advanced patterns, see `refere
 Use format: `UnitName_StateUnderTest_ExpectedResult`
 
 Examples:
-- `MoveForward_IncreasesZPosition`
+- `UserLogin_WithValidCredentials_GrantsAccess`
 
 **`_ExpectedResult` must describe the behavior or invariant proven -- not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
 
-See `references/TESTING_EXAMPLES.md` for PV naming examples.
+See `references/TESTING_EXAMPLES.md` for naming examples.
 
-For PV-specific test patterns (Camera, SettingsIO examples), test double taxonomy, file organization, and test size taxonomy, see `references/PV_TEST_CONVENTIONS.md`. For visual regression, see the `visual-regression-testing` skill.
+For visual regression, see the `visual-regression-testing` skill.
 
 ---
 

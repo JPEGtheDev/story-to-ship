@@ -23,13 +23,13 @@ A workaround that fires outside the Flatpak sandbox forces software rendering on
 
 ## BEFORE PROCEEDING
 
-Before modifying the Flatpak manifest, SDL3 window creation code, or GL context initialization:
+Before modifying the Flatpak manifest, SDL3 window creation code, or OpenGL (GL) context initialization:
 
 1. Is this code running inside Flatpak? Check `/.flatpak-info` -- gate every workaround on this.
 2. Is SDL3 built as a **separate** manifest module (not via FetchContent inside the app module)?
 3. Are all `setenv()` calls using `overwrite=1`?
 4. Is the NVIDIA fallback check gated on both `/dev/nvidia0` AND absence of the mounted GL extension?
-5. Is the MSAA fallback retry present if requesting multisample?
+5. Is the Multisample Anti-Aliasing (MSAA) fallback retry present if requesting multisample?
 
 [+] All pass -> proceed
 [-] Any fail -> fix the gate condition first, then proceed
@@ -40,7 +40,7 @@ Before modifying the Flatpak manifest, SDL3 window creation code, or GL context 
 
 ### 1. SDL3 MSAA Fallback
 
-`SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` causes `SDL_CreateWindow` to return NULL on Mesa/llvmpipe (Xvfb) because the software renderer doesn't support MSAA.
+`SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` causes `SDL_CreateWindow` to return NULL on Mesa/llvmpipe (X Virtual Framebuffer, Xvfb) because the software renderer doesn't support MSAA.
 
 **Fix:** Try 4x first; if creation fails, retry with `SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0)`.
 
@@ -61,7 +61,7 @@ When SDL3 is built via CMake `FetchContent` inside a `flatpak-builder` module, t
     - -DSDL_SHARED=ON
 ```
 
-Then in `CMakeLists.txt`, try `find_package(SDL3 QUIET)` first so the Flatpak-built SDL3 is picked up; fall back to FetchContent for local builds.
+In `CMakeLists.txt`, call `find_package(SDL3 QUIET)` first so the Flatpak-built SDL3 is picked up; fall back to FetchContent for local builds.
 
 ---
 
@@ -80,7 +80,7 @@ setenv("__GLX_VENDOR_LIBRARY_NAME","mesa",     1);
 ```
 
 Why all three:
-- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient -- GLVND still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
+- `LIBGL_ALWAYS_SOFTWARE=1` alone is insufficient -- GLVND (GL Vendor-Neutral Dispatch) still queries the X server's GLX extension and tries to `dlopen libGLX_nvidia.so`, which is absent.
 - `__GLX_VENDOR_LIBRARY_NAME=mesa` bypasses X server vendor negotiation entirely.
 - `GALLIUM_DRIVER=llvmpipe` selects Mesa's software rasterizer explicitly.
 
@@ -93,7 +93,7 @@ static bool isRunningInFlatpak() {
 
 // Gate: only apply when inside Flatpak AND nvidia device present AND GL extension NOT mounted
 const bool nvidia_dev = access("/dev/nvidia0", F_OK) == 0;
-// Scan /usr/lib/*/GL/ for nvidia-* directories (architecture-agnostic)
+// Scan GL extension directories for nvidia-* directories (architecture-agnostic)
 const bool ext_mounted = isNvidiaGlExtensionMounted();
 if (isRunningInFlatpak() && nvidia_dev && !ext_mounted) { /* set the three vars */ }
 ```
@@ -143,7 +143,6 @@ flatpak run --command=bash <app-id>
 # Inside the shell:
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 ls /run/flatpak/ld.so.conf.d/       # which GL extensions are mounted
-ls /usr/lib/x86_64-linux-gnu/GL/    # what GL dirs are present
 ldconfig -p | grep -i "libGLX"      # which vendor libraries are found
 cat /proc/driver/nvidia/version     # host driver version
 ```

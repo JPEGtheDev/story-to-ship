@@ -54,12 +54,12 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ## Building the Plan
 
-1. Create a todo list (`sql` tool) with concrete, verifiable items
+1. Create a todo list (`TodoWrite` tool) with concrete, verifiable items
 2. Specify expected file changes up front -- files, functions, test additions
 3. Bake in proof steps -- plan how to verify each change
 4. Sanity-check: does the plan address every acceptance criterion?
 5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
-6. Disclose decision rationale -- name alternatives considered and why chosen approach was preferred
+6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
 7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
 
 ### No-Placeholder Rule
@@ -154,7 +154,7 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 ---
 
-## Heuristics: YAGNI - Simplest Thing - PPP
+## Heuristics: You Ain't Gonna Need It (YAGNI) - Simplest Thing - Plain Programmer's Purpose (PPP)
 
 **YAGNI (You Ain't Gonna Need It):** If a todo cannot be traced to a specific acceptance criterion, cut it.
 > Forbidden: "We'll probably need it later."
@@ -179,10 +179,10 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 | "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
-| "I listed all the main files -- the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find .github/skills -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
+| "I listed all the main files -- the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find .claude/skills -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
 | "I found the bug -- fixing it now" | A request to debug or research is not a request to fix. Present findings first. Wait for instruction. |
 | "Plan states a numerical estimate (word count, file size, line count) without measuring" | Measure before writing. Run `wc -w` or `wc -l`. Unverified numerical claims in plans cause failed acceptance criteria. |
-| "It's just a quick test, I don't need todos" | Any multi-step task without SQL todos has no review gate. The Skeptic and Three Amigos dispatch rules cannot fire if todos were never created. Create todos first, then execute. |
+| "It's just a quick test, I don't need todos" | Any multi-step task without todos has no review gate. The Skeptic and Three Amigos dispatch rules cannot fire if todos were never created. Create todos first, then execute. |
 | "Implementation revealed a dependency on a second file -- I'll modify it" | Scope expansion requires user authorization. STOP. State the dependency and ask before touching any file not in the original plan. |
 | "Skeptic or Refinement approved with conditions, I addressed them -- I can proceed" | NO. Review findings change the plan -- user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
 

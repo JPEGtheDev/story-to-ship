@@ -35,7 +35,7 @@ Before reviewing any infrastructure change:
 
 ## Review Areas
 
-### 1. CI/CD Pipeline Checks
+### 1. CI/CD (Continuous Delivery) Pipeline Checks
 
 Run every item for each changed `.github/workflows/*.yml` file:
 
@@ -45,7 +45,7 @@ Run every item for each changed `.github/workflows/*.yml` file:
 4. No secrets hardcoded -- all sensitive values via `${{ secrets.X }}` only
 5. Workflow triggers are intentional -- `push` and `pull_request` events correct; no unintended `workflow_run` chains
 6. Matrix builds cover required platforms (Linux at minimum; Windows/macOS if the project targets them)
-7. `actions/checkout` and other third-party actions pinned to a specific SHA, not a floating tag
+7. `actions/checkout` and other third-party actions pinned to a specific Secure Hash Algorithm (SHA), not a floating tag
 
 [+] All pass -> pipeline is safe to merge
 [-] Any unmet -> verdict: ISSUES FOUND -- document in review report
@@ -67,7 +67,7 @@ Run every item for each changed `CMakeLists.txt`:
 
 Run every item for any changed file under `flatpak/`:
 
-1. OpenGL extension permissions declared -- required for GPU access in Flatpak sandbox (see `flatpak` skill)
+1. OpenGL extension permissions declared -- required for Graphics Processing Unit (GPU) access in Flatpak sandbox (see `flatpak` skill)
 2. SDL3 permissions correct for display and input device access
 3. App ID matches `com.jpegthedev.ParticleViewer` naming convention
 4. Runtime version pinned to a specific release (not a floating `latest`)
@@ -92,7 +92,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 
 - "The pipeline worked before, this change is minor" -> Stop. Minor CI changes cause hard-to-debug failures. Review the full checklist anyway.
 - "FetchContent branch is fine for now, I'll pin it later" -> Stop. Branches move. Unpinned dependencies are not reproducible. Pin it now.
-- "GL permissions probably aren't needed for this build" -> Stop. GL access in Flatpak requires explicit permissions. See GOTCHAS doc. Assume it is needed until verified otherwise.
+- "GL permissions probably aren't needed for this build" -> Stop. GL access in Flatpak requires explicit permissions. See the `flatpak` skill. Assume it is needed until verified otherwise.
 - "The permissions block is broad but I need it for this one step" -> Stop. Identify the minimum permissions that step requires and use those only.
 - "The secrets are only test keys, not production" -> Stop. All secrets go in `${{ secrets.X }}`. Hardcoded keys are a violation regardless of their scope.
 
@@ -104,7 +104,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 |--------|---------|
 | "The pipeline worked before, this change is minor" | Minor CI changes cause hard-to-debug, intermittent failures. Review every change against the checklist. |
 | "FetchContent branch is fine for now" | Branches can move at any commit. Pin to a tag or commit SHA for reproducible builds. |
-| "Flatpak will work -- it worked on other machines" | GL access in Flatpak requires explicit sandbox permissions. Missing permissions = silent runtime failure. See GOTCHAS doc. |
+| "Flatpak will work -- it worked on other machines" | GL access in Flatpak requires explicit sandbox permissions. Missing permissions = silent runtime failure. See the `flatpak` skill. |
 | "The permissions block is broad but I need it for X" | Identify the minimal permissions for X and use those. Broad permissions are a security risk even in CI. |
 | "Secrets are only test keys, not production" | All secrets go in `${{ secrets.X }}`. No hardcoded values. No exceptions. |
 | "Third-party action tags are stable enough" | Tags can be force-pushed. Pin to a commit SHA for supply chain security. |
@@ -116,4 +116,4 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 - `workflow` -- owns CI/CD pipeline patterns; infrastructure-review enforces compliance with those patterns
 - `build` -- owns CMake and Flatpak authoring; infrastructure-review checks the output for correctness
 - `architecture-review` -- checks source-level structure; infrastructure-review checks build and pipeline structure
-- `flatpak` skill -- required reading for any Flatpak manifest change; owns MSAA, SDL3 module, NVIDIA GL, and setenv rules
+- `flatpak` skill -- required reading for any Flatpak manifest change; owns Multisample Anti-Aliasing (MSAA), SDL3 module, NVIDIA GL, and setenv rules

@@ -4,7 +4,7 @@
 
 ## I - Independent
 
-**What it means:** Stories should have minimal dependencies on other stories.
+**What it means:** Stories have minimal dependencies on other stories.
 
 **Why it matters:** Independent stories can be:
 - Picked up by any team member without waiting
@@ -88,7 +88,7 @@
 
 ## S - Small
 
-**What it means:** Stories should be completable within one sprint (typically 1-2 weeks).
+**What it means:** Stories are completable within one sprint (typically 1-2 weeks).
 
 **Why it matters:**
 - Fast feedback loops

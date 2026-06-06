@@ -1,14 +1,14 @@
 ---
 name: user-story-estimation
 license: MIT
-description: Use when estimating effort, premium request counts, or model tier selection for user stories or agent dispatches.
+description: Use when estimating effort for user stories or implementation tasks.
 ---
 
 
 ## Iron Law
 
 ```
-YOU MUST INCLUDE AN EFFORT ESTIMATE AND MODEL RECOMMENDATION IN EVERY STORY.
+YOU MUST INCLUDE AN EFFORT ESTIMATE IN EVERY STORY.
 No exceptions.
 ```
 
@@ -25,59 +25,59 @@ Every generated story must include this section:
 ```markdown
 ## Effort Estimate
 
-**Total Premium Requests:** [Range, e.g., 30-40]
-**Recommended Model Tier:** [Small | Standard | Advanced]
+**Size:** [XS | S | M | L | XL]
 **Reasoning:** [One sentence explaining complexity level]
 ```
 
 ---
 
-## Premium Request Estimation Guidelines
+## T-Shirt Size Guide
 
-### Small (S) -- 15-30 requests
-- Single file/class creation
-- Simple utilities or helpers
-- Basic configuration files
-- Bug fixes with clear root cause
-- Examples: Image format converter, config parser
+### XS -- Trivial
+- Single-line or single-function change
+- No ambiguity; outcome is certain before starting
+- No new tests required beyond existing coverage
+- Examples: Rename a variable, update a config value, fix a typo in a message
 
-### Medium (M) -- 30-70 requests
-- Multi-file features
-- Moderate integration work
-- Test suite creation
-- CI/CD workflow setup
-- Examples: Pixel comparator, GitHub Actions workflow, unit test suite
+### S -- Small
+- Change contained in one or two files
+- Simple utility, helper, or bug fix with clear root cause
+- Minimal new test surface
+- Examples: Add a helper method, fix a null check, update a schema field
 
-### Large (L) -- 70-120+ requests
-- Major architectural changes
-- Cross-cutting refactoring
-- Complex integration across multiple subsystems
-- Deep dependency changes
-- Examples: Global state elimination, layer separation, dependency injection
+### M -- Medium
+- Multi-file feature or change
+- Moderate integration work; requires new tests
+- Reviewable in a single PR without scope concerns
+- Examples: Add an API endpoint, implement a UI component, write a CI/CD workflow
 
-### Factors that increase estimates
-- Complex algorithms or math
-- Need for mocking/abstraction layers
-- Tight integration with external APIs
-- Performance optimization requirements
-- Legacy code refactoring with unclear dependencies
+### L -- Large
+- Architectural impact or cross-cutting change
+- Multiple subsystems involved; deep dependency changes
+- Requires phased implementation or multiple PRs
+- Examples: Introduce a new abstraction layer, migrate a data model, refactor for testability
+
+### XL -- Too Large to Estimate
+- Scope is too wide to estimate safely as written
+- Must be decomposed into L or smaller stories before any work begins
+- Examples: "Rewrite the auth system", "Migrate to a new framework"
 
 ---
 
-## Model Selection Guidelines
+## Factors That Increase Size
 
-| Tier | Tasks | When |
-|------|-------|------|
-| **Small (Lightweight)** | Simple, well-defined tasks; clear examples; basic file operations | Speed and minimal context needed |
-| **Standard (Mid-level)** | Standard implementation; moderate complexity; tests, CI/CD, features | Balanced complexity and context understanding |
-| **Advanced (Deep-reasoning)** | Architectural decisions; deep refactoring; cross-subsystem integration; novel design | Deep reasoning and architecture-level decisions needed |
+- Complex algorithms or unfamiliar domain
+- Need for mocking or abstraction layers
+- Tight integration with external APIs
+- Performance requirements with unclear targets
+- Legacy code with unclear dependencies
 
 ---
 
 ## Estimation Formula
 
-| Component | % of Total |
-|-----------|-----------|
+| Component | % of Total Effort |
+|-----------|------------------|
 | Base implementation | 40-60% |
 | Testing and validation | 20-30% |
 | Iteration and fixes | 15-25% |
@@ -85,19 +85,13 @@ Every generated story must include this section:
 
 ---
 
-## Validated Example Estimates
-
-For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elimination, Coding Standards), see `references/PV_ESTIMATION_EXAMPLES.md`.
-
----
-
 ## Red Flags -- STOP
 
 - Generating a story without an effort estimate section
 - "I'll add the estimate later" -- add it now
-- Recommending Advanced model for a clearly mechanical task
-- Estimate range exceeds 50 requests for an S-sized story -- recategorize as M
-- Dispatching a premium agent for a task clearly scoped as XS or S
+- Accepting an XL story without decomposing it first
+- Sizing M as S because "it's probably quick"
+- Estimating without accounting for testing and iteration overhead
 
 ---
 
@@ -105,9 +99,8 @@ For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elim
 
 1. The story has been validated against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)
 2. All unknowns are identified and noted in the estimate
-3. The task breakdown reflects the actual work, not a best-case scenario
-4. All skill dispatches needed have been identified
-5. If the story requires >3 agents, the Wave structure has been accounted for
+3. The task breakdown reflects actual work, not a best-case scenario
+4. XL stories have been decomposed before any estimate is committed
 
 [+] All met -> commit to the estimate
 [-] Any unmet -> resolve unknowns and recheck INVEST compliance before estimating
@@ -118,8 +111,8 @@ For real-world Particle-Viewer estimates (Framebuffer Capture, Global State Elim
 
 | Excuse | Reality |
 |--------|---------|
-| "Estimates are just guesses anyway" | Calibrated estimates improve sprint planning; validated examples improve calibration |
-| "The model tier doesn't matter that much" | Wrong tier wastes budget or loses quality on critical tasks |
+| "Estimates are just guesses anyway" | Calibrated estimates drive planning; T-shirt sizing forces early scope conversation |
 | "I'll estimate after implementation" | Pre-estimation exposes scope uncertainty before it causes overruns |
-| "The story is straightforward, premium model isn't needed" | Story complexity is not always visible at estimation time. Use the model tier the standard prescribes for the story size. |
-| "I'll update the estimate after starting" | Estimates set expectations. Changing them mid-task without communication breaks trust. Revise estimates before beginning, not during. |
+| "The story is probably S" | Use the complexity indicators above. When uncertain, size up. |
+| "I'll update the estimate after starting" | Estimates set expectations. Revise before beginning, not during. |
+| "XL is fine, we can figure it out as we go" | XL means the estimate is undefined. Decompose first. |

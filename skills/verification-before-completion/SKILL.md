@@ -62,7 +62,7 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 ---
 
-## Pre-PR Checklist (PRR)
+## Pre-PR Checklist
 
 Before creating any PR -- answer all 6 questions:
 
@@ -73,7 +73,7 @@ Before creating any PR -- answer all 6 questions:
 | 3 | **Failure mode:** Does this fail loudly (error/exception) or silently? | Silent failures require active monitoring to catch |
 | 4 | **Rollback path:** Can this be reverted with `git revert`? | Irreversible changes need extra review |
 | 5 | **Dependency appropriateness:** Are you connecting to the right components? | Architectural violations that pass tests |
-| 6 | **Open issues:** Are there P0/P1 open action items in this area? | Shipping over an unresolved incident |
+| 6 | **Open issues:** Are there P0 (Priority 0) / P1 (Priority 1) open action items in this area? | Shipping over an unresolved incident |
 
 A "no" or "unknown" on any item = resolve it or document it explicitly in the PR description before opening.
 

@@ -46,7 +46,7 @@ Before dispatching any subagent:
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.**
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value.
-4. If a pre-built template exists in `.github/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `architecture-reviewer.md`, `infrastructure-reviewer.md`.
+4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `architecture-reviewer.md`, `infrastructure-reviewer.md`.
 5. Agent type is correct for the task: explore for read-only research, code-review for analysis, general-purpose+worktree for file modifications, task for build/test/lint.
 
 [+] All 5 met -> dispatch the agent
@@ -81,7 +81,7 @@ These thoughts mean stop immediately:
 | "Based on how it usually works..." | Dispatch to confirm the actual behavior |
 | "Dispatching a file-modifying agent without creating a worktree first" | STOP. Create the worktree and load `using-git-worktrees` before dispatch. |
 | "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first -- every time, without exception. The session-bootstrap On Start table maps "Parallel agent work / A/B testing" to this skill. Creating worktrees without it is a retroactive-load violation. |
-| "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.github/agents/`. Do not reinvent it. |
+| "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 
 ---
@@ -171,11 +171,11 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "I'll do a quick scan instead of dispatching a code-review agent" | A quick scan inherits your assumptions. A dispatched code-review agent does not. Dispatch the agent. |
 | "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step verification above first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
-| "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.github/agents/` are the single source of truth. Use them. |
+| "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
 | "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one dispatch, always. |
 | "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
 | "The two stages of review are redundant -- I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then code-quality-reviewer.md. Writing carefully is not a substitute for independent review. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
 | "The concerns are nits -- not a correctness or scope risk, so I'll skip Ceremony 4" | "Correctness or scope risk" is objective: does it affect behavior, API surface, or stated requirements? If yes, dispatch Ceremony 4. "Feels minor" is not a valid exemption. |
-| "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear AC), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
+| "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |

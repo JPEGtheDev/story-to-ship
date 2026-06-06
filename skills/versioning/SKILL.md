@@ -1,7 +1,7 @@
 ---
 name: versioning
 license: MIT
-description: Use when creating PRs, writing commit messages, understanding version bumps, or troubleshooting release issues for Particle-Viewer.
+description: Use when creating PRs, writing commit messages, understanding version bumps, or troubleshooting release issues.
 ---
 
 
@@ -10,14 +10,14 @@ description: Use when creating PRs, writing commit messages, understanding versi
 ```
 EVERY COMMIT AND PR TITLE MUST USE CONVENTIONAL FORMAT
 YOU MUST use conventional format for every commit message and PR title.
-No exceptions. Wrong format breaks release automation.
+No exceptions.
 ```
 
-Violating the letter of this rule is violating the spirit of this rule.
+Violating the letter of this rule is violating the spirit of this rule. Wrong format breaks release automation.
 
 `<type>[scope]: <description>`
 
-**Announce at start:** "I am using the versioning skill to [create commit/PR for] [description]."
+**Announce at start:** "I am using the versioning skill to [create/review] [commit or PR title]."
 
 ---
 
@@ -59,10 +59,11 @@ Every commit type triggers at least a PATCH bump. The release workflow specifica
 The PR title **MUST** use conventional commits format:
 
 **Valid:**
-- `feat: add particle color customization`
-- `fix(camera): correct rotation calculation in moveAround method`
-- `docs: update build instructions for Flatpak`
-- `feat!: redesign configuration API`
+- `feat: add user authentication`
+- `fix(auth): correct token expiry calculation`
+- `docs: update installation instructions`
+- `chore: upgrade dependency versions`
+- `feat!: redesign public API`
 
 **Invalid:**
 - [-] "Add particle color customization" (missing type)
@@ -84,31 +85,32 @@ Before opening or merging a PR:
 
 1. PR title uses conventional commits format
 2. All commits use conventional commits format
-3. Code formatted with `clang-format` (see `code-quality` skill)
-4. Build succeeds on all platforms
-5. Unit tests pass
-6. CI formatting checks pass
+3. Code formatted (run your project's formatter)
+4. Tests pass
+5. CI checks pass
 
 [+] All met -> PR is ready to merge
 [-] Any unmet -> resolve before opening or merging the PR
 
 ---
 
-## Step 4: Version Resolution
+## Step 3: Version Resolution
 
-At build time, version is resolved in this order:
-1. `PROJECT_VERSION` CMake variable (e.g., `-DPROJECT_VERSION=1.2.3`)
-2. Git tags (format: `v0.1.0`) -- used by CI release workflow
-3. Fallback: `0.0.0`
+Tag format: `v1.2.3`. Apply the bump rules using your project's release automation, or
+create Semantic Versioning (semver) tags manually when no automation exists:
 
-**DO NOT** manually create git tags, edit versions in CMakeLists.txt, or create manual releases.
+```shell
+git tag v1.2.3 -m "Release v1.2.3" && git push origin v1.2.3
+```
+
+The mapping: `feat!` / `BREAKING CHANGE` -> MAJOR, `feat:` -> MINOR, all else -> PATCH.
 
 ---
 
 ## Troubleshooting
 
 **Wrong version bump occurred:**
-Verify the commit message/PR title uses the correct type. Manual override via `workflow_dispatch` if needed.
+Verify the commit message/PR title uses the correct type. Check your project's release automation for manual override options.
 
 **Need a release:**
 Just push conventional commits to main -- it's automatic.
@@ -131,19 +133,17 @@ Just push conventional commits to main -- it's automatic.
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
-- About to write a commit message without checking the type first
-- "feat or fix, doesn't really matter"
-- Commit message starts with a capital letter or ends with a period
-- PR title doesn't start with `<type>[scope]:` format
-- "I'll change the PR title later if needed"
-- Working on a hotfix and tempted to use `feat` to "be safe"
-
-**All of these mean: Check the type first. `feat` = new user-visible behavior, `fix` = corrects existing behavior, `docs` = documentation only. When in doubt, read the `versioning` skill.**
+- About to write a commit message without checking the type first -> STOP. Determine the type (`feat`/`fix`/`docs`/`chore`) before writing.
+- "feat or fix, doesn't really matter" -> STOP. Ask: does it add new user-visible behavior? Yes = `feat`. No = `fix`.
+- Commit message starts with a capital letter or ends with a period -> STOP. Rewrite: `type: lowercase description, no period`.
+- PR title doesn't start with `<type>[scope]:` format -> STOP. Fix the title now. It becomes the squash commit message.
+- "I'll change the PR title later if needed" -> STOP. Fix it before requesting review. Merged titles are permanent.
+- Working on a hotfix and tempted to use `feat` to "be safe" -> STOP. Hotfixes are `fix`. Use `feat` only for new behavior.
 
 ---
 
 ## Reference
 
-- Full commit format examples: [`docs/CONVENTIONAL_COMMITS.md`](../../../docs/CONVENTIONAL_COMMITS.md)
-- Release pipeline details: [`docs/RELEASE_PROCESS.md`](../../../docs/RELEASE_PROCESS.md)
+- [Conventional Commits specification](https://www.conventionalcommits.org)
+- Release pipeline: `.github/workflows/release.yml`
 - CI workflow rules: `workflow` skill

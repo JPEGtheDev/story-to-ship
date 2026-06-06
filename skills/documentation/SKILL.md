@@ -1,7 +1,7 @@
 ---
 name: documentation
 license: MIT
-description: Use when creating docs, updating guides, writing API references, or reviewing documentation for Particle-Viewer.
+description: Use when creating docs, updating guides, writing API references, or reviewing documentation.
 ---
 
 
@@ -38,8 +38,8 @@ Before writing any documentation:
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
 | Domain guides | `docs/<domain>/<subdomain>/` -- one concept per file, <=600 words |
 | Cross-cutting standards | `docs/UPPERCASE.md` |
-| Agent skills | `.github/skills/<name>/SKILL.md` |
-| Skill reference content | `.github/skills/<name>/references/*.md` |
+| Agent skills | `.claude/skills/<name>/SKILL.md` |
+| Skill reference content | `.claude/skills/<name>/references/*.md` |
 | Agent onboarding | `AGENTS.md` -- summarize only |
 
 ---

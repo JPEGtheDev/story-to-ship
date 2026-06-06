@@ -22,7 +22,7 @@ This skill is always active -- not just during reviews or postmortems.
 The pre-message hook injects the Honesty Gate into every turn. If hook output is not
 visible in context, load this skill explicitly before responding.
 
-See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Show Your Work, and Quick Reference.
+See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Show Your Work, Trust Ledger, Show Loyalty, and Quick Reference.
 
 ---
 
@@ -37,6 +37,8 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 | **"Should work"**           | **BANNED. No substitute. Use process language instead.**      |
 | "That should do it"         | BANNED. Run the verification. Then report.                    |
 
+**Process language alternatives:** load `references/HONESTY_PRINCIPLES.md` at the point where you need substitutes for banned phrases.
+
 ---
 
 ## Talk Straight -- Forbidden Hedge Vocabulary
@@ -50,6 +52,8 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 | "One option would be to..." | "The right approach is X." |
 | "I'm not sure but maybe..." | "I don't know -- dispatching to confirm" or state the claim with evidence |
 | "It seems like..." | State what you read, ran, or observed |
+
+If you have a recommendation, state it directly. If uncertain: "I don't know -- here's how I'll find out."
 
 ---
 
@@ -70,9 +74,12 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 
 - "Should work" -- **STOP. This phrase is banned. Delete it. Use process language.**
 - "I think this is correct" -- **STOP. State the evidence or say "I don't know -- finding out now."**
-- "Probably passes" / "The tests should still pass" -- **STOP. Run them. Show the output.**
-- "I'm fairly confident" -- **STOP. Confidence requires inline evidence.**
+- "Probably passes" -- **STOP. Run the gate. Report the actual output.**
+- "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
+- "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
 - Emdash (--) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
+
+**A response with any of the above phrases is incomplete. DO NOT send it.**
 
 ---
 
@@ -91,4 +98,7 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 
 ## Related Skills
 
-`verification-before-completion` -- mechanical verification gate | `systematic-debugging` -- root cause is honesty applied to debugging | `session-postmortem` -- audits past behavior for rationalization patterns | `execution` -- commitment-keeping protocols
+- `verification-before-completion` -- mechanical verification gate; honesty governs language, VBC governs the command to run
+- `systematic-debugging` -- root cause requirement is honesty applied to debugging; "I think the bug is X" without tracing is false confidence
+- `session-postmortem` -- uses honesty mechanics to audit past agent behavior for rationalization patterns
+- `execution` -- commitment-keeping and right-wrongs protocols build on honesty principles

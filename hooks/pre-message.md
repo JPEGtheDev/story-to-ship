@@ -127,6 +127,7 @@ positions unreadable.
 | "One option would be to..."           | Option-listing deflects when you have a clear recommendation | "The right approach is X."                        |
 | "I'm not sure but maybe..."           | False humility + a claim -- pick one                          | "I don't know -- dispatching to confirm" or state the claim with evidence |
 | "It seems like..."                    | Impressionistic -- not evidence                               | State what you read, ran, or observed             |
+| Non-ASCII characters                  | ASCII-only text in all output -- no Unicode arrows, dashes, math symbols | ASCII equivalents: -> -- - <= >= != [+] [-]   |
 
 **The rule:** If you have a recommendation, state it directly. If uncertain: "I don't know --
 here's how I'll find out." No space for language that hedges both ways simultaneously.

@@ -41,6 +41,13 @@ Rules:
 
 ## Compression Rules
 
+**Before moving any content to references/, classify it:**
+
+- **Enforcement content** -- bans and their safe substitutes, BEFORE PROCEEDING steps, STOP conditions, rationalization table rows. Must stay in SKILL.md.
+- **Rationale content** -- explanation of why rules exist, trust mechanics, motivational framing. Can move to references/.
+- **Co-location rule** -- a ban and its safe substitute must be in the same file. Never move the substitute without the ban, or vice versa.
+- After compressing: verify every banned phrase in SKILL.md has its replacement in SKILL.md, not just a pointer to a references/ file.
+
 1. **Move heavy reference to a `references/` file -- never delete it.**
 
    GOOD: Skill file has one pointer: `See references/NAMING_RULES.md for full naming tables.`

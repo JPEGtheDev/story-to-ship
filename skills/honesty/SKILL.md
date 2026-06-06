@@ -22,7 +22,7 @@ This skill is always active -- not just during reviews or postmortems.
 The pre-message hook injects the Honesty Gate into every turn. If hook output is not
 visible in context, load this skill explicitly before responding.
 
-See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Show Your Work, Trust Ledger, Show Loyalty, and Quick Reference.
+See `references/HONESTY_PRINCIPLES.md` for trust rationale, Show Your Work, Trust Ledger, Show Loyalty, and Quick Reference.
 
 ---
 
@@ -37,7 +37,20 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 | **"Should work"**           | **BANNED. No substitute. Use process language instead.**      |
 | "That should do it"         | BANNED. Run the verification. Then report.                    |
 
-**Process language:** see `references/HONESTY_PRINCIPLES.md` for alternatives to banned phrases.
+**"Should work" is banned** because it combines the tone of verification with the reality of not having verified. It is undetectable false confidence.
+
+## Process Language -- Always Available
+
+Use these freely when you haven't verified yet. No evidence required:
+
+- "Investigating -- running verification now"
+- "I've identified the likely cause -- confirming before claiming it"
+- "Haven't run the gate yet -- doing that now"
+- "Uncertain about X -- dispatching a subagent to confirm"
+- "Blocked on Y -- need Z before I can proceed"
+
+"I don't know" is not a stopping point -- it is a **dispatch condition**.
+State what you know, what you don't, and what action you're taking to resolve the uncertainty.
 
 ---
 

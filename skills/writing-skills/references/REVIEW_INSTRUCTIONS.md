@@ -42,6 +42,7 @@ item are in the reference sections above.
 - [ ] **Skill-specific content** -- no generic placeholder-only examples?
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
+- [ ] **Enforcement co-location** -- every banned phrase or prohibited action has its safe substitute in SKILL.md, not behind a references/ pointer?
 
 [+] All pass -> proceed to Step 3
 [-] Any unmet -> record every failing item; continue through all steps before filing verdict
@@ -124,6 +125,7 @@ the verdict if needed before returning.
 - "The description explains what the skill does" -- must start "Use when...".
 - "`should` is just writing style" -- soft language in rule bodies is a FAIL.
 - "The acronym is obvious" -- spell it out. No exceptions.
+- "The safe substitute is in references/ but the ban is inline" -- enforcement separation. Ban and safe alternative must be in the same file. If a vocabulary gate says 'use process language' and the process language list is only in references/, that is a FAIL on Enforcement co-location.
 
 ---
 

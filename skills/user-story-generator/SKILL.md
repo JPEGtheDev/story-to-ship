@@ -77,6 +77,13 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 | "The story depends on another, but we'll handle it" | Dependent stories can't be independently delivered. Redesign the split. |
 | "We can estimate it after starting" | Inestimable stories signal unclear scope. Clarify before committing. |
 | "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
+| "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery produces a Feature Specification that validates field optionality, invocation paths, and behavioral ACs under three personas. They are not equivalent. |
+
+## Output Destination
+
+Approved stories go to **GitHub issues**, not `plan.md`. Create one issue per story after Three Amigos Refinement approves the plan. Use `mcp__github__issue_write` with the full user story, ACs, effort estimate, and Definition of Done.
+
+`plan.md` holds the `## Feature Specification` (Discovery output) and `## Implementation Notes` (Developer amigo findings) only. Individual stories in plan.md are a scratch surface — not a substitute for GitHub issues.
 
 ## Red Flags -- STOP
 
@@ -86,6 +93,7 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
 - Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.
+- Generating 2+ stories with new ACs without running Three Amigos Discovery first -> STOP. ACs written before Discovery are unvalidated. Run `three-amigos` Ceremony 1 before finalizing any AC.
 
 ---
 

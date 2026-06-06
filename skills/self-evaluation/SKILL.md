@@ -203,6 +203,21 @@ Produce a brief summary of lessons captured:
 
 ---
 
+## Write Gate
+
+Before announcing self-evaluation complete, write the full findings summary to `self-assessment.md` in the repo root.
+
+A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
+
+**Write Gate steps:**
+1. Complete Steps 1-6 above (review, categorize, check, propose, audit, apply)
+2. Write the `### Session Self-Evaluation` block to `self-assessment.md` (create or append)
+3. THEN include the same block in the final message
+
+**Format for self-assessment.md:** Use the Session Summary template from Step 7, prefixed with the session date and branch.
+
+---
+
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
@@ -212,8 +227,9 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - Updated code but haven't checked if any skills are now stale
 - "I already know what I'd write -- no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
+- Closing self-evaluation without writing findings to `self-assessment.md` on disk
 
-**All of these mean: Load the `self-evaluation` skill and complete every step. Then include the `### Session Self-Evaluation` block before your final message.**
+**All of these mean: Load the `self-evaluation` skill and complete every step. Write to `self-assessment.md`. Then include the `### Session Self-Evaluation` block before your final message.**
 
 ---
 

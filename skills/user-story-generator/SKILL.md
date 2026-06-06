@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 ## BEFORE PROCEEDING
 
 After you've had the conversation and before generating, mentally verify you have:
-1. **Loaded `references/PV_PROJECT_CONTEXT.md`** and verified this aligns with actual project purpose
+1. **Loaded `references/PV_PROJECT_CONTEXT.md`** if this is a Particle-Viewer session. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific. Use the actual project context from the repo README or the user's description instead.
 2. **Confirmed the functionality/component actually exists** (didn't assume based on naming)
 3. Clear understanding of what they want to accomplish
    [-] Ask: "What specifically do you want this story to enable?"

@@ -171,6 +171,7 @@ If you catch yourself using any of these in a response, stop and rewrite before 
 | "I'll verify after I clean up one more thing"          | "One more thing" = infinite deferral                      | Verify now. Then clean up.                    |
 | "I told you what I'm going to do -- that counts"        | Announced intent != completed work                         | Complete it. Show the output.                 |
 | "The user seems satisfied -- I won't re-verify"         | User satisfaction != correctness                           | Your job is correctness, not satisfaction.    |
+| "I'm calling multiple MCP tools in one turn -- that's parallel" | MCP tool calls in a single assistant turn execute sequentially. 17-second gaps between calls are not parallel. Parallel execution requires separate Agent dispatch. | Verify the execution model before announcing it. Do not say "in parallel" for same-turn tool call sequences. |
 
 ---
 

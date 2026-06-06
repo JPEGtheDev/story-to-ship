@@ -81,6 +81,7 @@ A Feature Specification that does not address both questions is incomplete and M
 - After all verdicts: delete worktrees and branches.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
 - **Agent prompts MUST include an explicit `cd {{WORKTREE_PATH}} &&` before the worktree self-check.** Agents start in the session's main repo directory, not the worktree — without the explicit cd, the self-check will always return BLOCKED.
+- **Stop hook during active amigo wait:** If a stop hook fires while waiting for amigo verdicts: respond to the hook only if the action is non-destructive to worktree state (e.g., committing a previously untracked file that amigos are not reading). Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
 
 ---
 

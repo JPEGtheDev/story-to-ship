@@ -1,4 +1,4 @@
-# SDD Rationale -- Why, Evidence Mandate, Delegation, Anti-Patterns, Red Flags
+# Subagent-Driven Development (SDD) Rationale -- Why, Evidence Mandate, Delegation, Anti-Patterns, Red Flags
 
 ## Why Subagents Are Mandatory
 

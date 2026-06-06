@@ -15,17 +15,17 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
+**Announce at start:** "I am using the workflow skill to [create/update/debug] [workflow description]."
+
 CI workflows read code, run tests, and publish artifacts. They never write code.
 
 ## Rule: Broken Pipeline Is Highest Priority
 
-YOU MUST stop all merges and fix a broken main pipeline before any other work. No exceptions.
+Stop all merges immediately. Fix the broken main pipeline before any other work. No other task takes priority.
 
 A broken main branch pipeline is not a background task. It is the highest-priority item for anyone working on the project. No PR merges while the pipeline is red. The broken build is the only work that matters until it is fixed.
 
 **Why:** A broken pipeline on main means the deploy safety net is gone. Every merge while it is broken is unverified. The longer it stays broken, the harder the root cause is to identify (multiple changes compound). Fix it immediately, not in the next sprint.
-
-**Announce at start:** "I am using the workflow skill to [create/update/debug] [workflow description]."
 
 ---
 
@@ -94,14 +94,12 @@ Before presenting workflow changes, verify:
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
-- Typing `git commit` or `git push` inside a workflow `run:` step
-- "I'll just set `permissions: write-all` for now"
-- "Let me push this workflow change and see if it works"
-- Adding a `workflow_run` trigger without verifying it won't cause infinite loops
-- `secrets.GITHUB_TOKEN` used with `write` permission for something that only needs `read`
-- Artifact upload without a `retention-days:` value
-
-**All of these mean: Pipelines are read-only. Verify trigger logic and permissions before every push. Never commit from CI.**
+- Typing `git commit` or `git push` inside a workflow `run:` step -> STOP. Remove the write command. Pipelines MUST NOT commit or push.
+- "I'll just set `permissions: write-all` for now" -> STOP. List only what the job writes. Use `contents: read` as the base.
+- "Let me push this workflow change and see if it works" -> STOP. Trace the trigger logic locally first. Don't waste CI minutes on avoidable failures.
+- Adding a `workflow_run` trigger without verifying it won't cause infinite loops -> STOP. Map every trigger path and confirm no cycle exists before pushing.
+- `secrets.GITHUB_TOKEN` used with `write` permission for something that only needs `read` -> STOP. Set `contents: read` and add write only where the step explicitly requires it.
+- Artifact upload without a `retention-days:` value -> STOP. Add `retention-days: 30` (PRs) or `retention-days: 90` (releases).
 
 ---
 

@@ -94,26 +94,6 @@ permissions:
   pull-requests: write  # Comment on PRs
 ```
 
-### [+] Idempotent PR Comment (Find & Update)
-
-```javascript
-const { data: comments } = await github.rest.issues.listComments({
-  owner: context.repo.owner,
-  repo: context.repo.repo,
-  issue_number: context.issue.number,
-});
-
-const existing = comments.find(c =>
-  c.user.type === 'Bot' && c.body.includes('Report Title')
-);
-
-if (existing) {
-  await github.rest.issues.updateComment({ /* ... */ });
-} else {
-  await github.rest.issues.createComment({ /* ... */ });
-}
-```
-
 ---
 
 ## Pipeline Safety -- INCORRECT Examples (Do NOT Follow)

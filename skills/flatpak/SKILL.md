@@ -23,7 +23,7 @@ A workaround that fires outside the Flatpak sandbox forces software rendering on
 
 ## BEFORE PROCEEDING
 
-Before modifying the Flatpak manifest, SDL3 window creation code, or GL context initialization:
+Before modifying the Flatpak manifest, SDL3 window creation code, or OpenGL (GL) context initialization:
 
 1. Is this code running inside Flatpak? Check `/.flatpak-info` -- gate every workaround on this.
 2. Is SDL3 built as a **separate** manifest module (not via FetchContent inside the app module)?
@@ -40,7 +40,7 @@ Before modifying the Flatpak manifest, SDL3 window creation code, or GL context 
 
 ### 1. SDL3 MSAA Fallback
 
-`SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` causes `SDL_CreateWindow` to return NULL on Mesa/llvmpipe (Xvfb) because the software renderer doesn't support MSAA.
+`SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` causes `SDL_CreateWindow` to return NULL on Mesa/llvmpipe (X Virtual Framebuffer, Xvfb) because the software renderer doesn't support MSAA.
 
 **Fix:** Try 4x first; if creation fails, retry with `SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0)`.
 

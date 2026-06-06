@@ -121,7 +121,7 @@ if (!success) {
 
 ## ImGui Integration
 
-See [`docs/IMGUI_INTEGRATION.md`](../../../docs/IMGUI_INTEGRATION.md) for architecture, FetchContent setup, menu system, and overlay positioning.
+See `docs/IMGUI_INTEGRATION.md` for architecture, FetchContent setup, menu system, and overlay positioning.
 
 ---
 
@@ -202,12 +202,12 @@ These smells are not caught by clang-tidy. Catch them in code review.
 
 ## Red Flags -- STOP
 
-- Class owns GL resources but has no cleanup in destructor
-- Copy constructor not deleted for a class that owns GL objects
-- Deprecated symbol with active call sites and no migration annotation
-- Public interface changed but documentation not updated in this commit
-- `SDL_Init` called without the subsystem flag for a subsystem being used
-- Transitive include reliance without explicit `#include`
+- Class owns GL resources but has no cleanup in destructor -> STOP. Add destructor with `glDelete*` calls for every owned handle before proceeding.
+- Copy constructor not deleted for a class that owns GL objects -> STOP. Add `= delete` for copy constructor and copy assignment operator.
+- Deprecated symbol with active call sites and no migration annotation -> STOP. Annotate every call site or remove them all in this commit.
+- Public interface changed but documentation not updated in this commit -> STOP. Update the documentation in this same commit before merging.
+- `SDL_Init` called without the subsystem flag for a subsystem being used -> STOP. Add the missing subsystem flag to the `SDL_Init` call.
+- Transitive include reliance without explicit `#include` -> STOP. Add the explicit `#include` to every file that uses the dependency directly.
 
 ---
 

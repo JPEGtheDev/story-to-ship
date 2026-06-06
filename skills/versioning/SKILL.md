@@ -133,19 +133,17 @@ Just push conventional commits to main -- it's automatic.
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
-- About to write a commit message without checking the type first
-- "feat or fix, doesn't really matter"
-- Commit message starts with a capital letter or ends with a period
-- PR title doesn't start with `<type>[scope]:` format
-- "I'll change the PR title later if needed"
-- Working on a hotfix and tempted to use `feat` to "be safe"
-
-**All of these mean: Check the type first. `feat` = new user-visible behavior, `fix` = corrects existing behavior, `docs` = documentation only. When in doubt, read the `versioning` skill.**
+- About to write a commit message without checking the type first -> STOP. Determine the type (`feat`/`fix`/`docs`/`chore`) before writing.
+- "feat or fix, doesn't really matter" -> STOP. Ask: does it add new user-visible behavior? Yes = `feat`. No = `fix`.
+- Commit message starts with a capital letter or ends with a period -> STOP. Rewrite: `type: lowercase description, no period`.
+- PR title doesn't start with `<type>[scope]:` format -> STOP. Fix the title now. It becomes the squash commit message.
+- "I'll change the PR title later if needed" -> STOP. Fix it before requesting review. Merged titles are permanent.
+- Working on a hotfix and tempted to use `feat` to "be safe" -> STOP. Hotfixes are `fix`. Use `feat` only for new behavior.
 
 ---
 
 ## Reference
 
 - [Conventional Commits specification](https://www.conventionalcommits.org)
-- Release pipeline: [`.github/workflows/release.yml`](../../../.github/workflows/release.yml)
+- Release pipeline: `.github/workflows/release.yml`
 - CI workflow rules: `workflow` skill

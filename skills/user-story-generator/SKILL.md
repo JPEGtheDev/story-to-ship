@@ -22,15 +22,21 @@ After you've had the conversation and before generating, mentally verify you hav
 1. **Loaded `references/PV_PROJECT_CONTEXT.md`** and verified this aligns with actual project purpose
 2. **Confirmed the functionality/component actually exists** (didn't assume based on naming)
 3. Clear understanding of what they want to accomplish
+   [-] Ask: "What specifically do you want this story to enable?"
 4. Context about why it matters (the value)
+   [-] Ask: "What outcome or value does this deliver?"
 5. Rough scope and size estimate (S/M/L)
+   [-] Ask: "Is this small (hours), medium (days), or large (sprint)?"
 6. Premium request estimate based on complexity
+   [-] Estimate from scope; state the assumption
 7. Model recommendation with reasoning
+   [-] Default to Standard tier; state the assumption
 8. Format preference (if they expressed one)
+   [-] Default to Story Template format; state the assumption
 9. Any specific constraints or requirements
+   [-] Assume no constraints; state the assumption
 
 [+] All 9 met -> proceed to generate the story
-[-] Any unclear -> ask one clarifying question before generating
 
 **RED FLAGS - Stop and ask for clarification:**
 - Story mentions functionality not in project context
@@ -74,14 +80,12 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 
 ## Red Flags -- STOP
 
-- Story has no acceptance criteria
-- Story requires another story to be done first ("depends on #X")
-- Story spans multiple unrelated components or layers
-- "We'll know it's done when it feels right"
-- Story takes more than one sprint to deliver
-- Can't write a failing test for the acceptance criteria
-
-**All of these mean: split the story, clarify the criteria, or restructure the work.**
+- Story has no acceptance criteria -> STOP. Write at least one testable acceptance criterion before generating.
+- Story requires another story to be done first ("depends on #X") -> STOP. Redesign the split so this story can be delivered independently.
+- Story spans multiple unrelated components or layers -> STOP. Split into separate stories, one per component or layer.
+- "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
+- Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
+- Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.
 
 ---
 

@@ -85,9 +85,13 @@ A Feature Specification that does not address both questions is incomplete and M
 
 ## Canary
 
+Before dispatching any amigos, state the ceremony and feature:
+
 ```
-CANARY: Three Amigos loaded. Name the ceremony and feature before dispatching any amigos.
+CANARY: Three Amigos loaded. Ceremony: [ceremony name]. Feature: [feature description].
 ```
+
+This output proves the ceremony was identified before dispatch. It does not prove the correct ceremony was selected or that plan.md was read.
 
 ---
 

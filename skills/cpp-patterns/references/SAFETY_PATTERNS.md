@@ -82,7 +82,7 @@ This restores testability and removes hidden coupling.
 
 See the `oop-principles` skill -- Speculative Hierarchy Anti-Pattern -- for the hierarchy design rule.
 
-C++-specific note: CRTP-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
+C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
 
 ---
 
@@ -195,7 +195,7 @@ C++ implementation:
 
 Distinguish: fail-fast on process state corruption; graceful handling on recoverable input data errors. Do not use `std::terminate` as a catch-all for bad input.
 
-See also: `systematic-debugging/references/DEBUGGING_TACTICS.md -- Fail Fast` for the general principle. Source: C2 Wiki "FailFast".
+See also: the `systematic-debugging` skill (Fail Fast section) for the general principle. Source: C2 Wiki "FailFast".
 
 ---
 

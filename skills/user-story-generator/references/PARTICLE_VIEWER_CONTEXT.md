@@ -120,7 +120,7 @@ Stories involving rendering **must** be compatible with:
 
 ### Code Quality Standards
 
-Stories should reference:
+Stories MUST reference:
 - **Linting:** Project uses clang-tidy (if configured)
 - **Formatting:** clang-format with project style
 - **Static Analysis:** Address any new warnings
@@ -128,7 +128,7 @@ Stories should reference:
 
 ### Dependencies & Layering
 
-The project should follow a layering approach (target state):
+New code MUST move toward this layering approach (target state):
 
 ```
 +------------------------+
@@ -150,7 +150,7 @@ The project should follow a layering approach (target state):
 - Frame advancement is playback (like a video player), not simulation stepping
 - Particle positions/velocities come from external simulation tools
 
-**Story Rule:** New stories should move code **toward** this architecture, not introduce cross-layer dependencies.
+**Story Rule:** New stories MUST move code **toward** this architecture. Do not introduce cross-layer dependencies.
 
 ---
 
@@ -169,7 +169,7 @@ The `Image` class is the base type for all image operations. Use it for creating
 
 ### Particle-Viewer-Specific Requirements
 
-Stories involving visual regression testing should:
+Stories involving visual regression testing MUST:
 
 1. **Use the Image class** as the base type for all image data (defined in `src/Image.hpp`)
 
@@ -227,7 +227,7 @@ Current refactoring priorities:
 
 2. **Main Loop Simplification** (Priority: Medium)
    - Separate concerns: input handling, data loading, rendering
-   - Main loop should orchestrate: poll input -> load frame data -> render -> swap
+   - Main loop MUST orchestrate: poll input -> load frame data -> render -> swap
    - No `GameEngine` - this is a viewer, not a game
 
 3. **SettingsIO Decomposition** (Priority: Medium)
@@ -284,7 +284,7 @@ Current refactoring priorities:
 
 ## Epic & Large Story Breakdown Guidelines
 
-If a story is too large (M or L), it should be broken into subtasks following this pattern:
+If a story is too large (M or L), break it into subtasks following this pattern:
 
 ```
 [Epic]: Visual Regression Testing Infrastructure
@@ -296,13 +296,13 @@ If a story is too large (M or L), it should be broken into subtasks following th
 +-- Subtask 6: Auto-comment Visual Diffs on PRs (M)
 ```
 
-Each subtask should be independently completable and mergeable.
+Each subtask MUST be independently completable and mergeable.
 
 ---
 
 ## Definition of Done Checklist
 
-All Particle-Viewer stories should confirm:
+All Particle-Viewer stories MUST confirm:
 
 ### Code Quality
 - [ ] Code compiles with no warnings

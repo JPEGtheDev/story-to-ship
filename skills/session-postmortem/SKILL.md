@@ -80,7 +80,7 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 - Agent dropped an announced commitment without acknowledging it
 - Prompt Feedback section was omitted or left as a placeholder
 - **External reviewer was not dispatched -- postmortem is self-assessment only**
-- **Postmortem report written to message stream but not to the SELF_ASSESSMENT path (docs/postmortem/YYYY-MM-DD-[SESSION_ID].md) -- STOP. Create the file before this is complete.**
+- **Postmortem report written to message stream but not to the SELF_ASSESSMENT path (docs/postmortem/YYYY-MM-DD-[SESSION_SHORT_ID].md) -- STOP. Create the file before this is complete.**
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 

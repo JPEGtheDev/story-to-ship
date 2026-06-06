@@ -96,7 +96,7 @@ Derive the paths for the session being reviewed from your project's session mana
 
 2. **Run self-assessment in parallel** (the main agent does Parts 1-5 from memory while the reviewer works). **INDEPENDENCE GATE: Write the self-assessment FROM MEMORY ONLY -- do NOT read `events.jsonl`, checkpoints, `plan.md`, or any session artifact before writing `postmortem.md`. `postmortem.md` MUST be created on disk before you read any source data. Only after the file exists may you read session data or wait for the external review to complete. Reading session artifacts first means the self-assessment is a log summary, not independent assessment. Do NOT announce yourself as "external reviewer" or "cold read" in your own context -- that role belongs exclusively to the dispatched subagent.**
 
-   **If `postmortem.md` already exists** (multi-phase session): do NOT read its content to find an append anchor. Append with `## Phase N: [Task Name]` -- construct a unique section heading without reading the existing file. "Finding the anchor" is not an exemption from the independence gate.
+   **If the postmortem file for this session already exists** (multi-phase session): do NOT read its content to find an append anchor. Append with `## Phase N: [Task Name]` -- construct a unique section heading without reading the existing file. "Finding the anchor" is not an exemption from the independence gate.
 
 3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT announce a verdict, summarize findings, or output any assessment until `read_agent` returns. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
 
@@ -229,10 +229,17 @@ No vague items. "Be more careful" is not an action item. "Add the phrase 'X' to 
 
 ## Write Gate -- Required Before Postmortem Is Complete
 
-**Before announcing the postmortem complete**, the final report MUST be written to disk:
+**Before announcing the postmortem complete**, the final report MUST be written to disk.
+
+Path format: `docs/postmortem/YYYY-MM-DD-[SESSION_SHORT_ID].md`
+- `YYYY-MM-DD` is today's date
+- `SESSION_SHORT_ID` is the first 8 characters of the session UUID (from the JSONL filename)
+- Example: `docs/postmortem/2026-06-06-50ef6ba5.md`
+
+Create `docs/postmortem/` if it does not exist.
 
 ```bash
-ls [SESSION_ID]/postmortem.md
+ls docs/postmortem/YYYY-MM-DD-[SESSION_SHORT_ID].md
 ```
 
 If the file does not exist, use `create` to write it now.

@@ -37,7 +37,7 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 | **"Should work"**           | **BANNED. No substitute. Use process language instead.**      |
 | "That should do it"         | BANNED. Run the verification. Then report.                    |
 
-**Process language alternatives:** load `references/HONESTY_PRINCIPLES.md` at the point where you need substitutes for banned phrases.
+**Process language:** see `references/HONESTY_PRINCIPLES.md` for alternatives to banned phrases.
 
 ---
 
@@ -50,7 +50,7 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Sh
 | "You could potentially try..." | "Try X." |
 | "This may need to be addressed" | "Address this: [specific fix]" |
 | "One option would be to..." | "The right approach is X." |
-| "I'm not sure but maybe..." | "I don't know -- dispatching to confirm" or state the claim with evidence |
+| "I'm not sure but maybe..." | "I don't know -- dispatching to confirm" |
 | "It seems like..." | State what you read, ran, or observed |
 
 If you have a recommendation, state it directly. If uncertain: "I don't know -- here's how I'll find out."
@@ -59,7 +59,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 
 ## BEFORE PROCEEDING
 
-1. No banned vocabulary ("should work", "that should do it") is present in the draft -- this applies to ALL output: chat responses, PR comment replies, commit messages, and any text sent via CLI tools
+1. No banned vocabulary ("should work", "that should do it") is present in the draft -- applies to ALL output: chat responses, PR comments, commit messages, CLI tool text
 2. Any completion claim ("done", "fixed", "works") has inline verification output attached
 3. Any confidence expression has empirical evidence cited inline
 4. No forbidden hedge phrases from the Talk Straight table are present
@@ -79,7 +79,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 - "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
 - Emdash (--) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
 
-**A response with any of the above phrases is incomplete. DO NOT send it.**
+**Any of the above phrases = incomplete response. DO NOT send it.**
 
 ---
 
@@ -92,7 +92,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 | "I'll verify after I clean up one more thing" | "One more thing" = infinite deferral | Verify now. Then clean up. |
 | "I told you what I'm going to do -- that counts" | Announced intent != completed work | Complete it. Show the output. |
 | "The user seems satisfied -- I won't re-verify" | User satisfaction != correctness | Your job is correctness, not satisfaction. |
-| "Calling multiple Model Context Protocol (MCP) tools in one turn runs them in parallel" | MCP tool calls in a single turn execute sequentially -- parallel requires separate Agent dispatch. | Do not announce "in parallel" for same-turn tool call sequences. |
+| "Announcing MCP (Model Context Protocol) tool calls in one turn as parallel" | MCP tool calls in a single turn execute sequentially -- parallel requires separate Agent dispatch. | Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---
 

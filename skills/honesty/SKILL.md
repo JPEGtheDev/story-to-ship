@@ -22,13 +22,11 @@ This skill is always active -- not just during reviews or postmortems.
 The pre-message hook injects the Honesty Gate into every turn. If hook output is not
 visible in context, load this skill explicitly before responding.
 
-See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language examples, Show Your Work, Trust Ledger, and Show Loyalty.
+See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language, Show Your Work, and Quick Reference.
 
 ---
 
 ## The Confidence Vocabulary Gate
-
-**These words/phrases require prior verification + inline evidence. They cannot appear without it:**
 
 | Forbidden without evidence  | Required replacement                                          |
 |-----------------------------|---------------------------------------------------------------|
@@ -38,9 +36,6 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, process language exa
 | "I'm confident" / "I'm sure" | State what evidence you have. No evidence = no confidence claim. |
 | **"Should work"**           | **BANNED. No substitute. Use process language instead.**      |
 | "That should do it"         | BANNED. Run the verification. Then report.                    |
-
-**"Should work" is banned** because it combines the tone of verification with the reality of
-not having verified. It is undetectable false confidence.
 
 ---
 
@@ -55,8 +50,6 @@ not having verified. It is undetectable false confidence.
 | "One option would be to..." | "The right approach is X." |
 | "I'm not sure but maybe..." | "I don't know -- dispatching to confirm" or state the claim with evidence |
 | "It seems like..." | State what you read, ran, or observed |
-
-If you have a recommendation, state it directly. If uncertain: "I don't know -- here's how I'll find out."
 
 ---
 
@@ -75,35 +68,27 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 
 ## Red Flags -- STOP
 
-If you catch yourself using any of these in a response, stop and rewrite before sending:
-
 - "Should work" -- **STOP. This phrase is banned. Delete it. Use process language.**
 - "I think this is correct" -- **STOP. State the evidence or say "I don't know -- finding out now."**
-- "Probably passes" -- **STOP. Run the gate. Then report the actual output.**
-- "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
-- "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
+- "Probably passes" / "The tests should still pass" -- **STOP. Run them. Show the output.**
+- "I'm fairly confident" -- **STOP. Confidence requires inline evidence.**
 - Emdash (--) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
-
-**A response with any of the above phrases is incomplete. DO NOT send it.**
 
 ---
 
 ## Rationalization Prevention
 
-| Rationalization                                        | Why it fails                                              | Correct action                                |
-|--------------------------------------------------------|-----------------------------------------------------------|-----------------------------------------------|
-| "The test is trivial -- it will obviously pass"         | "Obviously" = "I haven't checked"                         | Run the test. Report the output.              |
-| "I verified this in my head"                           | Mental simulation != machine execution                     | Run it on the machine.                        |
-| "I'll verify after I clean up one more thing"          | "One more thing" = infinite deferral                      | Verify now. Then clean up.                    |
-| "I told you what I'm going to do -- that counts"        | Announced intent != completed work                         | Complete it. Show the output.                 |
-| "The user seems satisfied -- I won't re-verify"         | User satisfaction != correctness                           | Your job is correctness, not satisfaction.    |
-| "I'm calling multiple Model Context Protocol (MCP) tools in one turn -- that's parallel" | MCP tool calls in a single assistant turn execute sequentially. 17-second gaps between calls are not parallel. Parallel execution requires separate Agent dispatch. | Verify the execution model before announcing it. Do not say "in parallel" for same-turn tool call sequences. |
+| Rationalization | Why it fails | Correct action |
+|----------------|-------------|----------------|
+| "The test is trivial -- it will obviously pass" | "Obviously" = "I haven't checked" | Run the test. Report the output. |
+| "I verified this in my head" | Mental simulation != machine execution | Run it on the machine. |
+| "I'll verify after I clean up one more thing" | "One more thing" = infinite deferral | Verify now. Then clean up. |
+| "I told you what I'm going to do -- that counts" | Announced intent != completed work | Complete it. Show the output. |
+| "The user seems satisfied -- I won't re-verify" | User satisfaction != correctness | Your job is correctness, not satisfaction. |
+| "Calling multiple Model Context Protocol (MCP) tools in one turn runs them in parallel" | MCP tool calls in a single turn execute sequentially -- parallel requires separate Agent dispatch. | Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---
 
 ## Related Skills
 
-- `verification-before-completion` -- the mechanical verification gate; honesty governs language, VBC governs the command to run
-- `systematic-debugging` -- root cause requirement is honesty applied to debugging; "I think the bug is X" without tracing is false confidence
-- `session-postmortem` -- uses honesty mechanics to audit past agent behavior for rationalization patterns
-- `execution` -- commitment-keeping and right-wrongs protocols build on honesty principles
+`verification-before-completion` -- mechanical verification gate | `systematic-debugging` -- root cause is honesty applied to debugging | `session-postmortem` -- audits past behavior for rationalization patterns | `execution` -- commitment-keeping protocols

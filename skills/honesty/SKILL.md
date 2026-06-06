@@ -56,7 +56,7 @@ State what you know, what you don't, and what action you're taking to resolve th
 
 | Forbidden phrase | Replace with |
 |------------------|--------------|
-| Emdash (--)      | Hyphen (-) or separate sentence |
+| Double hyphen used as em-dash | Hyphen (-) or separate sentence |
 | "It might be worth considering..." | "Do X because Y." |
 | "You could potentially try..." | "Try X." |
 | "This may need to be addressed" | "Address this: [specific fix]" |

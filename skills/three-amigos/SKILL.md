@@ -80,8 +80,8 @@ A Feature Specification that does not address both questions is incomplete and M
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
 - After all verdicts: delete worktrees and branches.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
-- **Agent prompts MUST include an explicit `cd {{WORKTREE_PATH}} &&` before the worktree self-check.** Agents start in the session's main repo directory, not the worktree — without the explicit cd, the self-check will always return BLOCKED.
-- **Stop hook during active amigo wait:** If a stop hook fires while waiting for amigo verdicts: respond to the hook only if the action is non-destructive to worktree state (e.g., committing a previously untracked file that amigos are not reading). Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
+- Agent prompts MUST include an explicit `cd {{WORKTREE_PATH}} &&` before the worktree self-check. Agents start in the session's main repo directory, not the worktree -- without the explicit `cd`, the self-check will always return BLOCKED.
+- If a stop hook fires during an active amigo wait: respond to the hook only if the hook action does not modify any file that running amigos are currently reading. Committing a previously untracked file that amigos have not opened is safe. Staging or modifying plan.md, SKILL.md, or any reference file an amigo may be reading is not safe. Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
 
 ---
 

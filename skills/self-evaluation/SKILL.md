@@ -24,8 +24,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 2. All commits from this session have been pushed or are staged and ready.
 3. You have NOT yet sent the final message to the user.
 
-[+] All met -> proceed through all 7 steps in order
-[-] Any unmet -> complete remaining session work first; once no further work is planned, return here and execute all 7 steps
+[+] All met -> proceed through all 8 steps in order
+[-] Any unmet -> complete remaining session work first; once no further work is planned, return here and execute all 8 steps
 
 ---
 
@@ -156,9 +156,25 @@ If changes are warranted and the session scope allows:
 
 ---
 
-## Step 7: Generate Session Summary
+## Step 7: Write Findings to Disk
 
-Produce a brief summary of lessons captured:
+Before generating the session summary block, write the full findings to `self-assessment.md` in the repo root.
+
+A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
+
+**Write Gate:**
+1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
+2. Write it to `self-assessment.md` in the repo root (append with session date + branch header if file already exists)
+3. [+] File written -> proceed to Step 8
+4. [-] File not written -> STOP. Write the file before sending any final message.
+
+**Lifecycle:** `self-assessment.md` is listed in `.gitignore`. It is a local session artifact -- never committed.
+
+---
+
+## Step 8: Generate Session Summary
+
+Include the `### Session Self-Evaluation` block in the final message to the user (this is the same content written to disk in Step 7):
 
 ```markdown
 ### Session Self-Evaluation
@@ -203,21 +219,6 @@ Produce a brief summary of lessons captured:
 
 ---
 
-## Write Gate
-
-Before announcing self-evaluation complete, write the full findings summary to `self-assessment.md` in the repo root.
-
-A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
-
-**Write Gate steps:**
-1. Complete Steps 1-6 above (review, categorize, check, propose, audit, apply)
-2. Write the `### Session Self-Evaluation` block to `self-assessment.md` (create or append)
-3. THEN include the same block in the final message
-
-**Format for self-assessment.md:** Use the Session Summary template from Step 7, prefixed with the session date and branch.
-
----
-
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
@@ -227,9 +228,9 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - Updated code but haven't checked if any skills are now stale
 - "I already know what I'd write -- no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
-- Closing self-evaluation without writing findings to `self-assessment.md` on disk
+- Closing self-evaluation without writing findings to `self-assessment.md` on disk (Step 7 gate)
 
-**All of these mean: Load the `self-evaluation` skill and complete every step. Write to `self-assessment.md`. Then include the `### Session Self-Evaluation` block before your final message.**
+**All of these mean: Load the `self-evaluation` skill and complete all 8 steps. Write to `self-assessment.md` (Step 7). Then include the `### Session Self-Evaluation` block in the final message (Step 8).**
 
 ---
 

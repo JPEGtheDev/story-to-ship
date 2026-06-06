@@ -100,7 +100,7 @@ Approved stories go to **GitHub issues**, not `plan.md`. Create one issue per st
 # Instructions for Agent
 
 See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scripts.
-See `references/PV_PROJECT_CONTEXT.md` for project scope verification and reference loading guide.
+See `references/PV_PROJECT_CONTEXT.md` for project scope verification and reference loading guide (Particle-Viewer sessions only).
 
 **Always include the Effort Estimate section** with:
 - Total premium requests (range)

@@ -120,7 +120,10 @@ Phase 3: Post-loop termination
     |
     +-- APPROVE
     |       Termination condition met.
-    |       Proceed to finishing-a-development-branch skill.
+    |       Check plan.md for `## Feature Specification`:
+    |         - Present (Discovery ran): Invoke `three-amigos` Signoff (Ceremony 5)
+    |           BEFORE `finishing-a-development-branch`
+    |         - Absent: Dispatch final code reviewer → `finishing-a-development-branch`
     |
     +-- APPROVE WITH CONDITIONS
     |       Create new todos for each CONDITION.
@@ -145,6 +148,8 @@ The loop terminates when ALL of the following are true:
 
 1. All todos are marked done.
 2. Post-loop Skeptic returns **APPROVE** — not APPROVE WITH CONDITIONS, not REJECT.
+
+After post-loop Skeptic APPROVE, the `## Feature Specification` check in plan.md governs the final step: if the section is present, Ceremony 5 (`three-amigos` Signoff) runs before `finishing-a-development-branch`; if absent, dispatch a final code reviewer and proceed directly to `finishing-a-development-branch`.
 
 ## Document-Edit Exemption
 

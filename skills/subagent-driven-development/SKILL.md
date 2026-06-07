@@ -140,7 +140,7 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (code-quality-r
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
-**Stage 2:** Use `code-quality-reviewer.md` -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
+**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
 
 See `references/REVIEW_PROTOCOL.md` for full protocol details.
 

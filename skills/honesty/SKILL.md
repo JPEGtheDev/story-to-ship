@@ -89,6 +89,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 - "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
 - "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
 - Emdash (--) in technical writing -- **STOP. Replace with hyphen (-) or rewrite as separate sentences.**
+- You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 
@@ -104,6 +105,8 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 | "I told you what I'm going to do -- that counts" | Announced intent != completed work | Complete it. Show the output. |
 | "The user seems satisfied -- I won't re-verify" | User satisfaction != correctness | Your job is correctness, not satisfaction. Re-run the verification gate regardless of the user's reaction. |
 | "Announcing MCP (Model Context Protocol) tool calls in one turn as parallel" | MCP tool calls in a single turn execute sequentially -- parallel requires separate Agent dispatch. | Do not announce "in parallel" for same-turn tool call sequences. |
+| "I audited my own changes, so my findings are valid" | Authorship disqualifies the finding as a verdict -- you will rationalize away the gaps you created. | Dispatch an independent reviewer BEFORE reporting any findings. |
+| "I am using skill X" (announced in response text, no Skill tool call in same turn) | Announcing a skill from memory is not equivalent to invoking it. Gate functions fire on the Skill tool call, not on the announcement text. | Invoke the skill via the Skill tool in the same turn as the announcement. |
 
 ---
 

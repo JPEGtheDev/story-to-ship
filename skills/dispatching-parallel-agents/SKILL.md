@@ -85,6 +85,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
 4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
 [-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
@@ -97,6 +98,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
 4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
 [-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
@@ -175,6 +177,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | Acting on one agent's result before all agents have returned | STOP. Collect ALL results first, then aggregate and verify. |
 | More than 4 concurrent agents on a Standard account without confirming the limit | STOP. Verify your account's concurrency limit before dispatching. |
 | Forwarding agent output to the user without verifying it against source files | STOP. Cross-check every finding against source files before presenting conclusions. |
+| Dispatching batch hypothesis-testing agents (A/B test, multi-agent experiment) without a prior Skeptic design review | STOP. Dispatch the design-review Skeptic first. Unreviewed experiment designs produce uninterpretable results. |
 
 ---
 
@@ -190,7 +193,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
 | "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
 | "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use worktrees for parallel agents with side effects. Shared branches produce conflicts. |
-| "I announced the tool calls in one turn, so they run in parallel" | MCP tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
+| "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---
 

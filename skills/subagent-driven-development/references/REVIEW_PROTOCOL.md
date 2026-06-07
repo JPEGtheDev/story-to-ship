@@ -4,7 +4,7 @@
 
 **Question:** Does the implementation do what the spec/requirements asked?
 
-Use the `spec-compliance-reviewer` agent. Provide:
+Use the `spec-compliance-reviewer.md` agent. Provide:
 - Full requirements / acceptance criteria for the todo
 - Full diff or file contents of the implementation
 
@@ -14,6 +14,7 @@ If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceedin
 
 **Question:** Is the implementation clean, maintainable, and correct?
 
-Use the `code-quality-reviewer` agent -- 1 agent per file changed.
+For skill `.md` files (in `skills/`): use the `skill-reviewer.md` agent -- 1 agent per file.
+For all other code and config files: use the `code-quality-reviewer.md` agent -- 1 agent per file.
 
 If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding.

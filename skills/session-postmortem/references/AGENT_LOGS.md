@@ -2,7 +2,7 @@
 
 ## Log File Locations
 
-Claude Code session transcripts (full turn-by-turn JSONL) are stored at:
+Claude Code session transcripts (full turn-by-turn JSON Lines (JSONL)) are stored at:
 
 ```
 ~/.claude/projects/<encoded-project-path>/<session-id>.jsonl

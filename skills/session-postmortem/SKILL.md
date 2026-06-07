@@ -24,12 +24,13 @@ Before starting the postmortem analysis:
 
 1. The session being analyzed has completed -- no further work is planned for that session.
 2. The session's `events.jsonl` log is accessible at the path provided by the user or session context.
-3. **DISPATCHING agent:** Dispatch a `postmortem-reviewer` subagent as external reviewer. For self-assessment authorship rules, follow the Independence Gate in `references/POSTMORTEM_STRUCTURE.md`.
+3. Self-evaluation skill run and output written to `self-assessment.md` in the repo root from memory, before reading any session artifacts. The Independence Gate in `references/POSTMORTEM_STRUCTURE.md` requires self-assessment to be written from memory first. The external reviewer reads `self-assessment.md` to find discrepancies between what the agent claimed and what the log shows. A postmortem without a self-assessment is missing the agent's own perspective.
+4. Read `checkpoints/index.md` to determine the full session scope (only after self-assessment.md is written). Context compaction does not shorten the session. A self-assessment that covers only the final task of a 9-hour session is incomplete. If `checkpoints/` does not exist, note the absence and determine scope from the compacted context summary and `events.jsonl` instead.
+5. **DISPATCHING agent:** Dispatch a `postmortem-reviewer` subagent as external reviewer. For self-assessment authorship rules, follow the Independence Gate in `references/POSTMORTEM_STRUCTURE.md`.
    **EXTERNAL reviewer subagent:** No session memory. Read `events.jsonl` cold.
-4. Before writing the self-assessment, read `checkpoints/index.md` to determine the full session scope. Context compaction does not shorten the session. A self-assessment that covers only the final task of a 9-hour session is incomplete.
 
-[+] All 4 met -> proceed through all postmortem parts in order
-[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, dispatch a separate external reviewer, or read `checkpoints/index.md` before proceeding.
+[+] All 5 met -> proceed through all postmortem parts in order
+[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, run self-evaluation and write self-assessment.md from memory first (Independence Gate), then read checkpoints/index.md (or note its absence) to determine scope, then dispatch the external reviewer.
 
 ---
 

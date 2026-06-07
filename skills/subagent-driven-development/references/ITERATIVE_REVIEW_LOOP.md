@@ -1,0 +1,154 @@
+# Iterative Review Loop -- Full Decision Tree
+
+## When This Applies
+
+Activate the outer loop when BOTH conditions are true:
+
+1. The task has 2 or more todos (evaluate at PLAN TIME; re-evaluate at every todo transition — todo proliferation from PARTIAL returns can push a task over the threshold mid-execution)
+2. At least one pending todo modifies: skill files (`*.md` inside `skills/`), code files (`.ts`, `.py`, `.rs`, or similar), or configuration that affects runtime behavior
+
+Re-evaluate after each todo completes. If new todos are created (e.g., from a PARTIAL return or APPROVE WITH CONDITIONS), recount and re-check condition 2 before picking up the next todo.
+
+## When It Does NOT Apply
+
+- Single-todo tasks (inner SDD loop from SDD_LOOP.md is sufficient)
+- Read-only research tasks (no file modifications)
+- Plan-only changes (modifying plan.md only, no skill or code files touched)
+- Edits to ITERATIVE_REVIEW_LOOP.md itself (see Document-Edit Exemption section)
+
+## Apply Filtered Changes
+
+Run this procedure AFTER Stage 1 (spec-compliance-reviewer) AND Stage 2 (skill-reviewer or code-quality-reviewer) both return their findings for a todo:
+
+```
+Step 1: Compile the full findings list
+    Collect every finding from Stage 1 and Stage 2 into a single ordered list.
+    |
+    v
+Step 2: Dispatch filtering agent
+    Use a CUSTOM PROMPT — do NOT use skeptic.md verbatim.
+    (skeptic.md is for plan review; filtering agent categorizes implementation findings.)
+    Provide: the full compiled findings list.
+    The filtering agent labels each finding as one of:
+        MANDATORY — correctness violation, spec gap, Iron Law breach, or factual error
+                     Include one-sentence rationale per label.
+        DEFERRED  — size alert below ideal max, style preference, low-priority improvement,
+                     preference without Iron Law backing
+                     Include one-sentence rationale per label.
+    |
+    v
+Step 3: Apply ONLY the MANDATORY findings
+    |
+    v
+Step 4: Log DEFERRED items
+    Record each DEFERRED item with its rationale in self-assessment.md or plan.md.
+    |
+    v
+Step 5: Dispatch confirm Skeptic
+    Use skeptic.md (appropriate here — reviewing whether applied changes match MANDATORY list).
+    |
+    +-- APPROVE
+    |       Proceed to next todo.
+    |
+    +-- APPROVE WITH CONDITIONS
+    |       Address each CONDITION before proceeding.
+    |       Re-dispatch confirm Skeptic after addressing.
+    |       Do not proceed until APPROVE is returned.
+    |
+    +-- REJECT
+            Re-apply all missing MANDATORY findings.
+            Re-dispatch confirm Skeptic.
+            Do not proceed until APPROVE is returned.
+```
+
+## The Outer Loop
+
+```
+Phase 0: Plan
+    |
+    Load writing-plans skill.
+    Draft todos: each must be single-objective (one clear deliverable per todo).
+    Identify all files that will be modified.
+    |
+    v
+Phase 1: Pre-implementation Skeptic
+    |
+    Dispatch Skeptic (skeptic.md) with full plan.
+    |
+    +-- REJECT
+    |       Revise plan to address rejection reasons.
+    |       Re-dispatch Skeptic.
+    |       Do not proceed until APPROVE is returned.
+    |
+    +-- APPROVE WITH CONDITIONS
+    |       Address each CONDITION in the plan.
+    |       Re-dispatch Skeptic.
+    |       Do not proceed until APPROVE is returned.
+    |
+    +-- APPROVE
+            Proceed to Phase 2.
+    |
+    v
+Phase 2: Per-todo execution (repeat for each todo)
+    |
+    Pick up next todo.
+    |
+    Count currently-pending (not-yet-started) todos.
+    If count >= 1 AND any pending todo modifies skill or code files:
+        Run Apply Filtered Changes (this document) after Stage 2 completes
+        before proceeding to the next todo.
+    |
+    v
+    Run inner SDD loop (SDD_LOOP.md) for this todo.
+    |
+    v
+    After Stage 2 APPROVE:
+    Run Apply Filtered Changes (see section above).
+    |
+    v
+    No todos remain? --> Proceed to Phase 3.
+    Todos remain?   --> Return to top of Phase 2 with next todo.
+    |
+    v
+Phase 3: Post-loop termination
+    |
+    All todos done.
+    Dispatch post-loop Skeptic (skeptic.md).
+    |
+    +-- APPROVE
+    |       Termination condition met.
+    |       Proceed to finishing-a-development-branch skill.
+    |
+    +-- APPROVE WITH CONDITIONS
+    |       Create new todos for each CONDITION.
+    |       Re-dispatch post-loop Skeptic after addressing all new todos.
+    |       Loop does not terminate until APPROVE is returned.
+    |
+    +-- REJECT
+            Evaluate rejection scope:
+            |
+            +-- Spec or scope issues (work does not match what was required)
+            |       Revise plan.
+            |       Re-enter at Phase 1 (new pre-implementation Skeptic).
+            |
+            +-- Implementation gaps only (MANDATORY findings not applied, items missed)
+                    Create new todos for each gap.
+                    Re-enter at Phase 2 directly.
+```
+
+## Termination Condition
+
+The loop terminates when ALL of the following are true:
+
+1. All todos are marked done.
+2. Post-loop Skeptic returns **APPROVE** — not APPROVE WITH CONDITIONS, not REJECT.
+
+## Document-Edit Exemption
+
+Edits to ITERATIVE_REVIEW_LOOP.md itself follow the normal 2-stage SDD review:
+- Stage 1: spec-compliance-reviewer
+- Stage 2: code-quality-reviewer
+
+Do NOT apply the outer loop to edits of this file. This prevents self-referential recursion.
+
+The trade-off: structural errors in this document receive 2-stage review only, not Skeptic review. The post-loop Skeptic on the task that created or edited this file provides Skeptic coverage for those edits.

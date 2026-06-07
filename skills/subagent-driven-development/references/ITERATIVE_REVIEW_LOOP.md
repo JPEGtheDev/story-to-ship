@@ -179,10 +179,16 @@ Include this exact output in the reviewer prompt. The reviewer checks the provid
 ### Recovery (run BEFORE dispatching any fix agent for a "no other changes" GAPS finding)
 
 1. Run `git diff <base-branch>..<worktree-branch> -- <file>` directly in the main context.
-2. Compare the actual base diff against the reviewer's claimed extra changes.
-3. If the claimed changes do NOT appear in the base diff: baseline confusion. Do not dispatch a fix agent. Treat the "no other changes" check as PASS.
+2. For each GAPS finding claiming an unrequested change, check whether the specific claimed transition (old text A → new text B at line N) appears in the diff. String presence is not sufficient — a word can appear in context lines without being the claimed change.
+3. If the claimed transition does NOT appear in the diff: phantom claim. Do not dispatch a fix agent. Treat the "no other changes" check as PASS.
 
 **Max iteration gate:** If the same file receives 2+ GAPS verdicts about unrequested changes with no confirming evidence in `git diff base..branch` — stop. Verify the diff directly. Do not dispatch further fix agents until the base diff confirms the claimed changes exist.
+
+### Known Limitation
+
+**RC1 prevention is not deterministically testable in a single run.** Providing the diff to the reviewer reduces false-positive probability but does not eliminate it. A reviewer can hallucinate claims about a file even when a correct diff is provided — particularly when the file is long or the diff is small relative to its full content.
+
+This is documented as a caveat, not a blocker. The Recovery procedure above (verify claims against the actual diff before dispatching a fix agent) is the stronger guarantee: even if a reviewer hallucinates, the main context catches it before acting on it. Prevention reduces incidents; Recovery stops the loop when prevention fails.
 
 ## Document-Edit Exemption
 

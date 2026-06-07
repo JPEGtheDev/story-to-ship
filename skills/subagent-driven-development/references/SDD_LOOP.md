@@ -31,10 +31,7 @@ Implementer returns status code
 Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"
          |
          v
-Stage 1: Before dispatching, run `git diff <worktree-base>..<worktree-branch> -- <file>`
-    in the main context and include the exact output in the reviewer prompt.
-    The reviewer checks the provided diff — it does not compute its own.
-    Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
+Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
     |
     +-- GAPS --> Implementer fixes gaps. Re-dispatch Stage 1.
     |
@@ -93,8 +90,7 @@ Task to delegate
     Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"
               |
               v
-    Stage 1: compute `git diff worktree-base..worktree-branch -- file`, include in prompt
-             -> spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
+    Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
               |
               v
     Stage 2: code-quality-reviewer (code/config) or skill-reviewer (skill .md files) -- 1 per file -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2

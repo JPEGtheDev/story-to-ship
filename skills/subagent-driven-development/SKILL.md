@@ -87,6 +87,8 @@ These thoughts mean stop immediately:
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
 | "Stage 2 returned APPROVE and I'm about to pick up the next todo" | STOP. Check: does the current task have any remaining todos that modify skill, code, or config files? If yes: run Apply Filtered Changes from `references/ITERATIVE_REVIEW_LOOP.md` first. |
+| "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer`, not `code-review` or `code-quality-reviewer`. Invoking `code-review` for skill `.md` files is always wrong. |
+| "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
 
 ---
 
@@ -141,6 +143,7 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (code-quality-r
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
 **Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
+BEFORE invoking any reviewer skill: identify the file types in scope. Skill `.md` files (in `skills/`) -> `skill-reviewer`. Code/config files -> `code-quality-reviewer`. Never invoke `/code-review` (the slash command) for skill `.md` files.
 
 See `references/REVIEW_PROTOCOL.md` for full protocol details.
 

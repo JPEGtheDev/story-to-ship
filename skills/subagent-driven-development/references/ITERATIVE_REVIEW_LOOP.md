@@ -52,11 +52,15 @@ Step 4: Log DEFERRED items
 Step 5: Dispatch confirm Skeptic
     Dispatch confirm-Skeptic with this custom prompt:
     "You are a confirm-Skeptic. You receive: (1) the MANDATORY findings list, (2) the
-    actual changes made. For each MANDATORY finding, verify whether it was applied
-    correctly. Return one of:
+    actual changes made as a git diff. For each MANDATORY finding, verify whether it
+    was applied correctly using the provided diff as the authoritative record — do NOT
+    read the main-repo copy of the file to verify; if a worktree path is specified,
+    use that path. A REJECT verdict requires citing the specific diff line(s) showing
+    the gap; a REJECT unsupported by the diff is unsupported by evidence and must not be issued.
+    Return one of:
       APPROVE — all MANDATORY findings correctly applied
       APPROVE WITH CONDITIONS — findings partially applied; list each unresolved condition
-      REJECT — one or more MANDATORY findings not applied; list which and why"
+      REJECT — one or more MANDATORY findings not applied; cite the diff evidence"
     |
     +-- APPROVE
     |       Proceed to next todo.

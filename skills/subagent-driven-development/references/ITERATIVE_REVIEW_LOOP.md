@@ -14,11 +14,12 @@ Re-evaluate after each todo completes. If new todos are created (e.g., from a PA
 - Single-todo tasks (inner SDD loop from SDD_LOOP.md is sufficient)
 - Read-only research tasks (no file modifications)
 - Plan-only changes (modifying plan.md only, no skill or code files touched)
+- Tasks with 2+ todos where no todo modifies skill, code, or config files (the inner SDD loop per todo is sufficient; the outer loop's condition 2 is not met)
 - Edits to ITERATIVE_REVIEW_LOOP.md itself (see Document-Edit Exemption section)
 
 ## Apply Filtered Changes
 
-Run this procedure AFTER Stage 1 (spec-compliance-reviewer) AND Stage 2 (skill-reviewer or code-quality-reviewer) both return their findings for a todo:
+Run this procedure AFTER Stage 1 (spec-compliance-reviewer) AND Stage 2 (code-quality-reviewer for code and config files; skill-reviewer for skill `.md` files) both return their findings for a todo:
 
 ```
 Step 1: Compile the full findings list
@@ -26,15 +27,16 @@ Step 1: Compile the full findings list
     |
     v
 Step 2: Dispatch filtering agent
-    Use a CUSTOM PROMPT — do NOT use skeptic.md verbatim.
-    (skeptic.md is for plan review; filtering agent categorizes implementation findings.)
-    Provide: the full compiled findings list.
-    The filtering agent labels each finding as one of:
-        MANDATORY — correctness violation, spec gap, Iron Law breach, or factual error
-                     Include one-sentence rationale per label.
-        DEFERRED  — size alert below ideal max, style preference, low-priority improvement,
-                     preference without Iron Law backing
-                     Include one-sentence rationale per label.
+    Dispatch filtering-agent with this custom prompt:
+    "You are a finding-categorization agent. You receive a numbered list of findings from
+    Stage 1 (spec-compliance) and Stage 2 (code-quality) reviewers. For each finding,
+    categorize it as:
+      MANDATORY — correctness violation, spec gap, Iron Law breach, or factual error that
+                  makes the output incorrect or unexecutable
+      DEFERRED  — size alert below ideal max, style preference, low-priority improvement,
+                  or preference without Iron Law backing
+    Return: numbered list matching input order. Each item: [MANDATORY] or [DEFERRED] +
+    one-sentence rationale."
     |
     v
 Step 3: Apply ONLY the MANDATORY findings
@@ -45,19 +47,25 @@ Step 4: Log DEFERRED items
     |
     v
 Step 5: Dispatch confirm Skeptic
-    Use skeptic.md (appropriate here — reviewing whether applied changes match MANDATORY list).
+    Dispatch confirm-Skeptic with this custom prompt:
+    "You are a confirm-Skeptic. You receive: (1) the MANDATORY findings list, (2) the
+    actual changes made. For each MANDATORY finding, verify whether it was applied
+    correctly. Return one of:
+      APPROVE — all MANDATORY findings correctly applied
+      APPROVE WITH CONDITIONS — findings partially applied; list each unresolved condition
+      REJECT — one or more MANDATORY findings not applied; list which and why"
     |
     +-- APPROVE
     |       Proceed to next todo.
     |
     +-- APPROVE WITH CONDITIONS
-    |       Address each CONDITION before proceeding.
-    |       Re-dispatch confirm Skeptic after addressing.
+    |       Address each listed condition.
+    |       Re-dispatch confirm-Skeptic.
     |       Do not proceed until APPROVE is returned.
     |
     +-- REJECT
-            Re-apply all missing MANDATORY findings.
-            Re-dispatch confirm Skeptic.
+            Re-apply missing MANDATORY findings.
+            Re-dispatch confirm-Skeptic.
             Do not proceed until APPROVE is returned.
 ```
 
@@ -92,11 +100,6 @@ Phase 1: Pre-implementation Skeptic
 Phase 2: Per-todo execution (repeat for each todo)
     |
     Pick up next todo.
-    |
-    Count currently-pending (not-yet-started) todos.
-    If count >= 1 AND any pending todo modifies skill or code files:
-        Run Apply Filtered Changes (this document) after Stage 2 completes
-        before proceeding to the next todo.
     |
     v
     Run inner SDD loop (SDD_LOOP.md) for this todo.

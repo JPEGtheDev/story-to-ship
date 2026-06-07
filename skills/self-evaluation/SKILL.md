@@ -166,7 +166,7 @@ A self-evaluation that exists only in the message stream is not a self-evaluatio
 1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
 2. Write it to `self-assessment.md` in the repo root:
    - If file does not exist: write directly (Write tool).
-   - If file already exists from a prior session: do NOT read the file before appending. Construct the new section heading from memory using today's date and session ID (first 8 characters of session UUID). Use shell append (`>>`) to add content without reading existing content. Reading prior session content before writing violates the independence gate.
+   - If file already exists from a prior session: do NOT read the file before appending. Construct the new section heading from memory using today's date and session ID (first 8 characters of session UUID). Use shell append (`>>`) to add content without reading existing content. Reading prior session content before writing allows prior-session framing to contaminate this session's evaluation.
 3. [+] File written -> proceed to Step 8
 4. [-] File not written -> STOP. Write the file before sending any final message.
 

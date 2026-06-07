@@ -84,7 +84,7 @@ These thoughts mean stop immediately:
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
-| "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer`, not `code-review` or `code-quality-reviewer`. Invoking `code-review` for skill `.md` files is always wrong. |
+| "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
 | "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
 
 ---
@@ -98,7 +98,7 @@ These thoughts mean stop immediately:
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic Agent (see writing-plans skill) |
 | Code review (per-file) | Yes | code-review agent, 1 per file |
-| Skill review | Yes | `writing-skills` + `skill-reviewer` agent template |
+| Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |
@@ -139,10 +139,10 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (code-quality-r
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
-**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
+**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
 
 BEFORE invoking any reviewer skill:
-1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer`; code/config files -> `code-quality-reviewer`.
+1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`.
 2. Never invoke `/code-review` (the slash command) for skill `.md` files.
 
 [+] File type identified and correct reviewer selected -> dispatch

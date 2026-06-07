@@ -38,7 +38,7 @@ Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
     +-- PASS
          |
          v
-Stage 2: Dispatch code-quality-reviewer (code/config files) or skill-reviewer (skill `.md` files) -- one per file
+Stage 2: Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one per file
     |
     +-- REQUEST CHANGES --> Implementer fixes. Re-dispatch Stage 2.
     |
@@ -92,7 +92,7 @@ Task to delegate
     Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
               |
               v
-    Stage 2: code-quality-reviewer (code/config) or skill-reviewer (skill .md files) -- 1 per file -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
+    Stage 2: `code-quality-reviewer.md` (code/config) or `skill-reviewer.md` (skill .md files) -- 1 per file -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
               |
               v
     Mark todo done. Reload skills (session-bootstrap refresh rule).

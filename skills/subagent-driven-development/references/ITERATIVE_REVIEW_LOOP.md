@@ -151,6 +151,18 @@ The loop terminates when ALL of the following are true:
 
 After post-loop Skeptic APPROVE, the `## Feature Specification` check in plan.md governs the final step: if the section is present, Ceremony 5 (`three-amigos` Signoff) runs before `finishing-a-development-branch`; if absent, dispatch a final code reviewer and proceed directly to `finishing-a-development-branch`.
 
+## Breakout Gate -- False Reviewer Claims
+
+Before dispatching any fix agent in response to a "No other changes" GAPS finding or "extra changes found" claim from a spec-compliance reviewer:
+
+1. Run `git diff <base-branch>..<worktree-branch> -- <file>` directly in the main context.
+2. Compare the actual base diff against the reviewer's claimed extra changes.
+3. If the claimed changes do NOT appear in the base diff: the reviewer used the wrong baseline (e.g., compared per-commit diffs within the worktree instead of base-to-HEAD). Do not dispatch a fix agent. Treat the "no other changes" check as PASS.
+
+A reviewer finding extra changes that are absent from the base diff is a baseline confusion error. Dispatching a fix agent in response to a false claim creates a correction loop with no exit. Verify the diff directly before acting.
+
+**Max iteration gate:** If the same file has received 2+ GAPS verdicts about "unrequested changes" with no confirming evidence in `git diff base..branch`, stop the loop. Verify the diff directly. Do not dispatch further fix agents until the base diff confirms the claimed changes exist.
+
 ## Document-Edit Exemption
 
 Edits to ITERATIVE_REVIEW_LOOP.md itself follow the normal 2-stage SDD review:

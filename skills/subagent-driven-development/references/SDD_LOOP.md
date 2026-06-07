@@ -47,6 +47,7 @@ Stage 2: Dispatch code-quality-reviewer (code-quality-reviewer.md)
          v
 Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
 After each push: check for new automated review threads before picking up the next todo. Do not wait for the user to surface review feedback.
+If current pending-todo count >= 1 AND at least one pending todo modifies skill or code files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
 Pick up next todo.
     |
     v
@@ -97,6 +98,7 @@ Task to delegate
               v
     Mark todo done. Reload skills (session-bootstrap refresh rule).
     After each push: check for new automated review threads before picking up the next todo.
+    If current pending-todo count >= 1 AND at least one pending todo modifies skill or code files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
     Pick up next todo.
               |
               v

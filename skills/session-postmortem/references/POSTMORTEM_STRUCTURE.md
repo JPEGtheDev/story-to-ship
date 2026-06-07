@@ -126,7 +126,7 @@ Do not editorialize in the timeline. Record events.
 
 ### Part 2: Root Cause
 
-For each failure or near-miss in the timeline, identify the **underlying cause**. Not the proximate cause ("the agent wrote code without a test") but the root cause ("no gate in the session-start checklist enforced TDD before the first `edit` call in this task type").
+For each failure or near-miss in the timeline, identify the **underlying cause**. Not the proximate cause ("the agent wrote code without a test") but the root cause ("no gate in the session-start checklist enforced Test-Driven Development (TDD) before the first `edit` call in this task type").
 
 Use "5 Whys" for each failure:
 ```

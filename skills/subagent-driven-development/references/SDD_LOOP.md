@@ -38,7 +38,7 @@ Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
     +-- PASS
          |
          v
-Stage 2: Dispatch code-quality-reviewer (code-quality-reviewer.md)
+Stage 2: Dispatch code-quality-reviewer (code/config files) or skill-reviewer (skill `.md` files) -- one per file
     |
     +-- REQUEST CHANGES --> Implementer fixes. Re-dispatch Stage 2.
     |
@@ -47,7 +47,7 @@ Stage 2: Dispatch code-quality-reviewer (code-quality-reviewer.md)
          v
 Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
 After each push: check for new automated review threads before picking up the next todo. Do not wait for the user to surface review feedback.
-If current pending-todo count >= 1 AND at least one pending todo modifies skill or code files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
+If current pending-todo count >= 1 AND at least one pending todo modifies skill, code, or config files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
 Pick up next todo.
     |
     v
@@ -93,12 +93,12 @@ Task to delegate
     Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
               |
               v
-    Stage 2: code-quality-reviewer.md (1 per file) -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
+    Stage 2: code-quality-reviewer (code/config) or skill-reviewer (skill .md files) -- 1 per file -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
               |
               v
     Mark todo done. Reload skills (session-bootstrap refresh rule).
     After each push: check for new automated review threads before picking up the next todo.
-    If current pending-todo count >= 1 AND at least one pending todo modifies skill or code files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
+    If current pending-todo count >= 1 AND at least one pending todo modifies skill, code, or config files: run Apply Filtered Changes from ITERATIVE_REVIEW_LOOP.md before picking up the next todo.
     Pick up next todo.
               |
               v

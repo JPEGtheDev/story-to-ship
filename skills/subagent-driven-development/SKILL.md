@@ -36,7 +36,7 @@ Pick up todo -> Dispatch implementer -> Handle status code -> Stage 1 spec revie
 
 See `references/SDD_LOOP.md` for the full decision tree with complete ASCII flow.
 
-For tasks with 2+ todos involving skill or code changes: load `references/ITERATIVE_REVIEW_LOOP.md` before dispatch.
+For tasks with 2+ todos involving skill, code, or config changes: load `references/ITERATIVE_REVIEW_LOOP.md` before dispatch.
 
 ---
 
@@ -86,7 +86,7 @@ These thoughts mean stop immediately:
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
-| "Stage 2 returned APPROVE and I'm about to pick up the next todo" | STOP. Check: does the current task have any remaining todos that modify skill or code files? If yes: run Apply Filtered Changes from `references/ITERATIVE_REVIEW_LOOP.md` first. |
+| "Stage 2 returned APPROVE and I'm about to pick up the next todo" | STOP. Check: does the current task have any remaining todos that modify skill, code, or config files? If yes: run Apply Filtered Changes from `references/ITERATIVE_REVIEW_LOOP.md` first. |
 
 ---
 

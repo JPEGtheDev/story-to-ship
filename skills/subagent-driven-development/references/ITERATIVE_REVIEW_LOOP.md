@@ -37,6 +37,9 @@ Step 2: Dispatch filtering agent
                   or preference without Iron Law backing
     Return: numbered list matching input order. Each item: [MANDATORY] or [DEFERRED] +
     one-sentence rationale."
+    Example output:
+    1. [MANDATORY] Line 42 uses "should" in a rule body — weak language violates Iron Law.
+    2. [DEFERRED] File is 820 lines; target is 650 — above target but below 1000 ideal max.
     |
     v
 Step 3: Apply ONLY the MANDATORY findings

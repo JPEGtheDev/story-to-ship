@@ -128,7 +128,7 @@ Every completed implementation task requires two reviews in this order. This is 
 
 ```
 Stage 1: Spec Compliance Review     <- ALWAYS FIRST (spec-compliance-reviewer.md)
-Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (code-quality-reviewer.md)
+Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer.md or code-quality-reviewer.md -- see Stage 2 below)
 ```
 
 **Canary confirmation (before Stage 1):** Before proceeding to Stage 1 from any implementer result (DONE, DONE_WITH_CONCERNS, or PARTIAL), state: `Canary confirmed: [paste the Worktree: line from implementer output]`. If the canary line is absent from the implementer's output, the implementer did not follow BEFORE PROCEEDING -- require skill reload and resubmit before dispatching Stage 1.

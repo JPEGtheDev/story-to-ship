@@ -140,7 +140,13 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (code-quality-r
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
 **Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
-BEFORE invoking any reviewer skill: identify the file types in scope. Skill `.md` files (in `skills/`) -> `skill-reviewer`. Code/config files -> `code-quality-reviewer`. Never invoke `/code-review` (the slash command) for skill `.md` files.
+
+BEFORE invoking any reviewer skill:
+1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer`; code/config files -> `code-quality-reviewer`.
+2. Never invoke `/code-review` (the slash command) for skill `.md` files.
+
+[+] File type identified and correct reviewer selected -> dispatch
+[-] File type unclear -> read the file path before dispatching
 
 See `references/REVIEW_PROTOCOL.md` for full protocol details.
 

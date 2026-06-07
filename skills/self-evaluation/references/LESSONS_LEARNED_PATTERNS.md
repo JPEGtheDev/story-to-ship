@@ -346,7 +346,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 ### Worktree `../` Relative Path Creates Sibling Outside Repo (Metaballs session)
 
-**Problem:** Three amigo worktrees were created with `git worktree add ../amigo-refinement-*`. From `/home/JPEG/Projects/Particle-Viewer`, `../` resolves to `/home/JPEG/Projects/`, placing the worktrees at `/home/JPEG/Projects/amigo-refinement-*`. Agent prompts were given `/home/JPEG/amigo-refinement-*` (one level up from the actual location). All three amigos returned BLOCKED -- the path didn't exist at the specified location.
+**Problem:** Three amigo worktrees were created with `git worktree add ../amigo-refinement-*`. From `[repo-root]`, `../` resolves to the parent directory, placing the worktrees at `[repo-root]/../amigo-refinement-*`. Agent prompts were given a path one level up from the actual location. All three amigos returned BLOCKED -- the path didn't exist at the specified location.
 
 **Lesson:** Never use `../` relative paths with `git worktree add`. Always use `.worktrees/agent-<name>` (inside the repo, gitignored). The `.worktrees/` convention makes absolute paths predictable: `<repo_root>/.worktrees/<name>`. `../` paths land at a depth dependent on the current working directory, which is easy to get wrong when constructing agent prompt absolute paths.
 

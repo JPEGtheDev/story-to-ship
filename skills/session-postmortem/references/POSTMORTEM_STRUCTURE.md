@@ -98,7 +98,7 @@ Derive the paths for the session being reviewed from your project's session mana
 
    **If the postmortem file for this session already exists** (multi-phase session): do NOT read its content to find an append anchor. Append with `## Phase N: [Task Name]` -- construct a unique section heading without reading the existing file. "Finding the anchor" is not an exemption from the independence gate.
 
-   **`self-assessment.md` follows the same rule:** do NOT read its existing content before appending. Governing instruction: `self-evaluation/SKILL.md` Step 7.
+   **`self-assessment.md` follows the same rule:** do NOT read its existing content before appending. Governing instruction: Step 7 of the `self-evaluation` skill.
 
 3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT announce a verdict, summarize findings, or output any assessment until `read_agent` returns. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
 
@@ -255,7 +255,7 @@ Run every item before generating the report:
 
 | Law | Followed | Evidence | Notes |
 |-----|----------|----------|-------|
-| TDD (no prod code without test) | [+]/[-]/N/A | [what proves this] | |
+| Test-Driven Development (TDD) (no prod code without test) | [+]/[-]/N/A | [what proves this] | |
 | Verification before completion | [+]/[-]/N/A | [what proves this] | |
 | Root cause before fixes | [+]/[-]/N/A | [what proves this] | |
 | Conventional commits | [+]/[-]/N/A | [what proves this] | |

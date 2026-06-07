@@ -5,7 +5,7 @@
 Activate the outer loop when BOTH conditions are true:
 
 1. The task has 2 or more todos (evaluate at PLAN TIME; re-evaluate at every todo transition — todo proliferation from PARTIAL returns can push a task over the threshold mid-execution)
-2. At least one pending todo modifies: skill files (`*.md` inside `skills/`), code files (`.ts`, `.py`, `.rs`, or similar), or configuration that affects runtime behavior
+2. At least one pending todo modifies: skill files (`*.md` inside `skills/`), code files (`.ts`, `.py`, `.rs`, test files, or similar), or configuration that affects runtime behavior
 
 Re-evaluate after each todo completes. If new todos are created (e.g., from a PARTIAL return or APPROVE WITH CONDITIONS), recount and re-check condition 2 before picking up the next todo.
 

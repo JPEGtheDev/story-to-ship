@@ -1,10 +1,4 @@
 <IMPORTANT>
-## Bootstrap Check
-
-If you have no memory of bootstrapping this session, load `session-bootstrap` now before responding.
-
----
-
 ## Honesty Skill -- Active on Every Turn
 
 ## Iron Law
@@ -134,19 +128,6 @@ here's how I'll find out." No space for language that hedges both ways simultane
 
 ---
 
-## BEFORE PROCEEDING
-
-1. No banned vocabulary ("should work", "that should do it") is present in the draft -- this applies to ALL output: chat responses, PR comment replies, commit messages, and any text sent via CLI tools
-2. Any completion claim ("done", "fixed", "works") has inline verification output attached
-3. Any confidence expression has empirical evidence cited inline
-4. No forbidden hedge phrases from the Talk Straight table are present
-5. No non-ASCII characters are present in the draft; use ASCII-only text
-
-[+] All met -> send the response
-[-] Any unmet -> rewrite the offending phrase or run the required verification before sending
-
----
-
 ## Red Flags -- STOP
 
 If you catch yourself using any of these in a response, stop and rewrite before sending:
@@ -174,33 +155,6 @@ If you catch yourself using any of these in a response, stop and rewrite before 
 
 ---
 
-## Related Skills
-
-- `verification-before-completion` -- the mechanical verification gate; honesty governs language, VBC governs the command to run
-- `systematic-debugging` -- root cause requirement is honesty applied to debugging; "I think the bug is X" without tracing is false confidence
-- `session-postmortem` -- uses honesty mechanics to audit past agent behavior for rationalization patterns
-- `execution` -- commitment-keeping and right-wrongs protocols build on honesty principles
-
----
-
-## Quick Reference
-
-```
-About to say "done"?
-    -> Have you run the verification command in this session? [YES -> show output] [NO -> run it now]
-
-About to say "should work"?
-    -> STOP. This phrase is banned. Use process language instead.
-
-About to say "I think..."?
-    -> Do you have empirical evidence? [YES -> state it] [NO -> dispatch subagent to confirm]
-
-Uncertain about a fact?
-    -> "I don't know -- here's how I'll find out." Then find out.
-```
-
----
-
 ## Iron Laws -- Active on Every Response
 
 | # | Law |
@@ -219,14 +173,4 @@ Uncertain about a fact?
 
 If you are tempted to rationalize past any of these: that thought is the rationalization. Stop. Follow the rule.
 
----
-
-## Skill Reload Triggers -- STOP and Reload When:
-
-1. Picking up a new todo -- reload the skill(s) for that todo's domain
-2. After 3 user prompts without a skill reload -- reload the skill for whatever you are doing
-3. After a user correction or redirect -- reload the misapplied skill immediately
-4. After context compaction -- any compaction requires full skill reload for the active domain
-
-Do NOT say "I remember the skill content." Load fresh. Skill routing table is in `session-bootstrap`.
 </IMPORTANT>

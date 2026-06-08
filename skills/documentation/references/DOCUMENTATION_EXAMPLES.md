@@ -1,19 +1,27 @@
 # Documentation Examples and Templates
 
-This reference provides templates and examples for writing documentation in Particle-Viewer.
+This reference provides templates and examples for writing documentation in projects using the story-to-ship plugin.
 
 ---
 
 ## Domain Taxonomy
 
-| Domain | Subdomains | Location |
-|--------|-----------|----------|
-| `testing` | `unit-testing`, `integration-testing`, `visual-regression` | `docs/testing/` |
-| `coding` | `naming`, `formatting`, `memory-management`, `patterns` | `docs/coding/` |
-| `build` | `cmake`, `flatpak`, `dependencies` | `docs/build/` |
-| `workflow` | `ci-cd`, `releases`, `branching` | `docs/workflow/` |
-| `architecture` | `opengl`, `sdl3`, `imgui`, `camera` | `docs/architecture/` |
-| `cross-cutting` | standards, process | `docs/` (flat, UPPERCASE filename) |
+Define your domains using DDD Bounded Contexts: one directory per team concern, one vocabulary per directory.
+
+**How to define your taxonomy:**
+1. Identify your top-level bounded contexts (e.g., `payments`, `catalog`, `delivery`). Each becomes a `docs/<domain>/` directory.
+2. Within each context, identify subdomains -- cohesive sub-concerns that share terminology. Each becomes `docs/<domain>/<subdomain>/`.
+3. When a subdomain needs further splitting, add a third level: `docs/<domain>/<subdomain>/<subdomain2>/`. Use sparingly -- three levels is the maximum.
+4. Cross-cutting concerns (standards that apply across domains) go at `docs/UPPERCASE.md` as flat files.
+
+**Example structure (replace with your actual bounded contexts):**
+
+| Level | Example Path | Purpose |
+|-------|-------------|---------|
+| Domain | `docs/payments/` | Payments bounded context |
+| Subdomain | `docs/payments/invoicing/` | Invoicing sub-concern |
+| Sub-subdomain | `docs/payments/invoicing/disputes/` | Dispute resolution patterns (use only when a subdomain is too broad) |
+| Cross-cutting | `docs/PAYMENTS_STANDARDS.md` | Standards that apply across all payments docs |
 
 ---
 
@@ -25,12 +33,12 @@ Every `docs/` file MUST begin with this block:
 ---
 title: "Short Descriptive Title"
 description: "One sentence describing exactly what this doc covers."
-domain: testing
-subdomain: unit-testing
-tags: [testing, unit-testing, gtest, c++]
+domain: <domain>
+subdomain: <subdomain>
+subdomain2: ""  # optional -- omit or leave empty when not using a third level
+tags: [<domain>, <subdomain>, <additional-tags>]
 related:
-  - "../TESTING_STANDARDS.md"
-  - "integration-tests.md"
+  - "../RELATED_DOC.md"
 ---
 ```
 
@@ -42,14 +50,13 @@ related:
 **Cross-cutting standard files** (`docs/UPPERCASE.md`):
 ```yaml
 ---
-title: "Testing Standards"
-description: "AAA pattern, naming conventions, and coverage expectations for all Particle-Viewer tests."
+title: "Standards Title"
+description: "One sentence describing the standards this file defines and what domains it covers."
 domain: cross-cutting
 subdomain: ""
-tags: [testing, standards, gtest, aaa]
+tags: [<domain>, standards, <additional-tags>]
 related:
-  - "testing/unit-testing/naming.md"
-  - "testing/visual-regression.md"
+  - "<domain>/<subdomain>.md"
 ---
 ```
 
@@ -61,11 +68,12 @@ related:
 ---
 title: "Concept Name"
 description: "One concrete sentence about exactly what this covers."
-domain: testing
-subdomain: unit-testing
-tags: [testing, unit-testing, gtest]
+domain: <domain>
+subdomain: <subdomain>
+subdomain2: ""  # optional -- omit or leave empty when not using a third level
+tags: [<domain>, <subdomain>]
 related:
-  - "../TESTING_STANDARDS.md"
+  - "../RELATED_STANDARDS.md"
 ---
 
 # Concept Name
@@ -120,24 +128,24 @@ Rules:
 
 ## Relative Link Examples
 
-### From `docs/testing/visual-regression.md`:
+### From `docs/<domain>/<subdomain>.md` (subdomain file linking up to root):
 
 ```markdown
-<!-- [+] Correct: relative path from docs/testing/ to docs/ -->
-See [Testing Standards](../TESTING_STANDARDS.md) for AAA pattern details.
+<!-- [+] Correct: relative path from docs/<domain>/ to docs/ -->
+See [Standards Doc](../STANDARDS_DOC.md) for details.
 
 <!-- [-] Incorrect: wrong relative path -->
-See [Testing Standards](TESTING_STANDARDS.md) for AAA pattern details.
+See [Standards Doc](STANDARDS_DOC.md) for details.
 ```
 
-### From `docs/CODING_STANDARDS.md`:
+### From `docs/CROSS_CUTTING_STANDARDS.md` (root cross-cutting file):
 
 ```markdown
 <!-- [+] Correct: same directory -->
-See [Testing Standards](TESTING_STANDARDS.md) for test-specific conventions.
+See [Other Standards](OTHER_STANDARDS.md) for additional conventions.
 
 <!-- [+] Correct: subdirectory -->
-See [Visual Regression Guide](testing/visual-regression.md) for image comparison.
+See [Subdomain Guide](<domain>/<subdomain>.md) for domain-specific patterns.
 ```
 
 ---
@@ -187,28 +195,8 @@ YOU MUST [action]. No exceptions.
 
 Key rules:
 - Minimize duplication -- if another skill covers a topic, reference it with a one-line pointer
-- `SKILL.md` contains workflow and rules only
+- `SKILL.md` contains process steps and rules only
 - Heavy content, examples, and templates go in `references/`
-
----
-
-## AGENTS.md Update Pattern
-
-When adding a new skill, update these 4 locations in `AGENTS.md`:
-
-```markdown
-<!-- 1. Skills Directory table -- add a row -->
-| `skill-name` | `.claude/skills/skill-name/` | Domain description |
-
-<!-- 2. Before Every Response checklist -- add if HARD-GATE trigger -->
-8. **Unclear approach or design impact?** -> HARD-GATE: load `brainstorming`...
-
-<!-- 3. Minimum skill loads table -- add the row -->
-| Writing or editing a skill file | `writing-skills` |
-
-<!-- 4. Instruction Priority Hierarchy -- only if new priority tier -->
-(usually no change needed)
-```
 
 ---
 

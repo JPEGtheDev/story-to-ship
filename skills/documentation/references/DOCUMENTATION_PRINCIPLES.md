@@ -26,8 +26,20 @@ Self-documenting code does not require comments to explain what it does -- the n
 
 Literate programming interleaves prose and code at the decision level: the prose describes the reasoning and the code implements it. Applied selectively, it is appropriate for non-obvious design decisions where the reasoning matters as much as the implementation. Applied globally, it produces verbosity. Limit it to: architectural boundary decisions, non-obvious algorithm choices, and contract definitions. Source: C2 Wiki "LiterateProgramming".
 
+## Bounded Contexts as Taxonomy Organizer
+
+Each `docs/<domain>/` directory is a Bounded Context in the DDD sense: one team concern owns it, uses a consistent vocabulary within it, and documents that vocabulary there. Do not let terms cross context boundaries without translation. If a concept from one domain appears in another domain's docs, write a brief mapping note rather than importing raw terminology from a different context. Source: C2 Wiki "BoundedContexts" / "DomainDrivenDesign".
+
+## DocumentationPatterns: Write Once, Link Everywhere
+
+Document each concept exactly once. When a second location needs the same content, link to the authoritative source instead of duplicating it. Duplicate documentation diverges. Core principles from C2 Wiki's DocumentationPatterns:
+
+- Single Source of Truth: one file per concept; all other locations link back to it
+- Document inheritance: a subdomain guide implicitly inherits the rules of its domain guide; state deviations explicitly, not the full rule set again
+- For documenting intent vs. implementation (WHY not WHAT), see "Document Your Intentions" above
+Source: C2 Wiki "DocumentationPatterns" / "LightweightDocumentation".
+
 ## See Also
 
 - `documentation/references/WIKI_PRINCIPLES.md` -- Ward Cunningham's principles for designing a knowledge base
-- `documentation/SKILL.md` -- project documentation conventions
 - `writing-skills/SKILL.md` -- skill file authoring (Doc4 Alexandrian Form is defined here)

@@ -24,7 +24,7 @@ Before writing any documentation:
 
 1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
 2. Confirm the file belongs in `docs/<domain>/<subdomain>/` (not a flat root file unless it's a cross-cutting standard)
-3. Confirm no existing file already covers this concept -- link to it instead of duplicating
+3. Confirm no existing file already covers this concept: run `grep -r "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
 [-] Any unmet -> resolve before writing a single line
@@ -36,7 +36,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides | `docs/<domain>/<subdomain>/` -- one concept per file, <=600 words |
+| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=600 words |
 | Cross-cutting standards | `docs/UPPERCASE.md` |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
@@ -71,19 +71,11 @@ All files in `docs/` MUST be **Document Mode** -- readable independently, with n
 
 ---
 
-## Step 3: Update AGENTS.md When Adding a New Skill
-
-Update all 4 locations:
-1. **Skills Directory table** -- add row with name, path, domain
-2. **Before Every Response checklist** -- add item if the skill has a HARD-GATE
-3. **Minimum skill loads table** -- add the row(s) for when this skill MUST be read
-4. **Instruction Priority Hierarchy** -- only if the skill introduces a new priority tier
-
-Skipping any location makes the skill effectively invisible. For templates and code examples for each update location, see `references/DOCUMENTATION_EXAMPLES.md`.
+**New skills:** When adding a new skill, see the `writing-skills` skill for the AGENTS.md update pattern.
 
 ---
 
-## Step 4: Review Checklist
+## Step 3: Review Checklist
 
 Before presenting documentation, verify:
 
@@ -133,4 +125,4 @@ Before presenting documentation, verify:
 
 For the domain taxonomy, frontmatter schema, and guide template, see [references/DOCUMENTATION_EXAMPLES.md](references/DOCUMENTATION_EXAMPLES.md).
 
-**Documentation principles (Doc1-Doc5, SelfDocumentingCode, LiterateProgramming):** `references/DOCUMENTATION_PRINCIPLES.md`
+**Documentation principles:** `references/DOCUMENTATION_PRINCIPLES.md`

@@ -20,7 +20,7 @@ For any collaborative knowledge base -- skills, documentation, project wikis:
 
 **More words than content** -- every sentence must carry information not already present in adjacent sentences. Prune ruthlessly.
 
-## Application to Particle-Viewer Skill Files
+## Application to Project Skill Files
 
 - Each skill file title must exactly match the domain it governs
 - Reference files link outward, not inward -- avoid circular pointer chains

@@ -28,7 +28,7 @@ Run every item. Mark [+] (pass) or [-] (fail) with file:line evidence. Criteria 
 item are in the reference sections above.
 
 - [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters?
-- [ ] **Size** -- apply three levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max = NEEDS WORK (compression required before shipping)?
+- [ ] **Size** -- apply three levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale, redundant rules, unvalidated bans) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user.
 - [ ] **Iron Law block** -- backtick-wrapped; ALL CAPS rule; `YOU MUST`; `No exceptions.`; all INSIDE the backtick block?
 - [ ] **Iron Law letter/spirit line** -- "Violating the letter of this rule is violating the spirit of this rule." present?
 - [ ] **Announcement** -- explicit exact wording present, not implied?
@@ -121,7 +121,7 @@ the verdict if needed before returning.
 - "The path is just an example" -- any machine-specific absolute path is a FAIL.
 - "The gate function exists under a different heading" -- must be `## BEFORE PROCEEDING`.
 - "`YOU MUST` and `No exceptions.` are in prose, not the block" -- prose-only is a FAIL.
-- "The skill is long but comprehensive" -- SIZE ALERT if above Target; NEEDS WORK if above Ideal max. Content quality does not override size limits.
+- "The skill is long but comprehensive" -- SIZE ALERT if above Target. Above Ideal max: run Content Value Test. Enforcement content validated by real incidents overrides ideal max -- PASS (size advisory) is correct when no cuttable content exists. What does NOT override ideal max: rationale that can move to references/, redundant rules, unvalidated bans.
 - "The description explains what the skill does" -- must start "Use when...".
 - "`should` is just writing style" -- soft language in rule bodies is a FAIL.
 - "The acronym is obvious" -- spell it out. No exceptions.
@@ -137,7 +137,7 @@ Return findings in EXACTLY this structure:
 ## Skill Review: [skill-name]
 
 ### Size and Frontmatter
-- Lines: [N] | Bytes: [N] | Size status: OK / SIZE ALERT (above target, within ideal max) / OVER IDEAL MAX (compression required)
+- Lines: [N] | Bytes: [N] | Size status: OK / SIZE ALERT (above target, within ideal max) / OVER IDEAL MAX -- Content Value Test result: [cuttable content found -> NEEDS WORK / no cuttable content -> PASS (size advisory)]
 - Frontmatter: [+]/[-] -- [note any missing or malformed fields]
 
 ### Gate Elements
@@ -198,7 +198,9 @@ Return findings in EXACTLY this structure:
 1. [file:line -- problem -- example fix]
 2. ...
 
-### Verdict: PASS / NEEDS WORK
+### Verdict: PASS / PASS (size advisory) / NEEDS WORK
 ```
 
-NEEDS WORK means the skill MUST be updated before production dispatch.
+**PASS** -- all criteria met, size within ideal max.
+**PASS (size advisory)** -- all structural, voice, acronym, and enforcement criteria pass. SKILL.md exceeds ideal max but Content Value Test found no cuttable content. Report: minimum functional size, specific enforcement content driving it, and user options (accept / split by domain / remove [specific candidate]).
+**NEEDS WORK** -- structural issue or cuttable content above ideal max. Skill MUST be updated before production dispatch.

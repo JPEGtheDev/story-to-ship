@@ -24,9 +24,9 @@ When SKILL.md exceeds its ideal max:
    - **Rationale** (explanation of why rules exist, motivational framing, history) -> move to `references/`. Never delete it.
    - **Enforcement** (STOP conditions, bans, gates, rationalization rows, BEFORE PROCEEDING items) -> do NOT cut to hit a token target. Proceed to step 2.
 
-2. For each enforcement block, ask: has this rule been validated by a confirmed failure pattern -- a real incident, a recurring agent mistake, a bug caught by this specific rule?
-   - Yes -> it stays. Do not cut it.
-   - No -> flag it as a candidate. Do not cut without user confirmation.
+2. For each enforcement block, check: is this rule redundant with another rule already in this file?
+   - Not redundant -> it stays. Do not cut it.
+   - Redundant -> flag it as a candidate. Do not cut without user confirmation.
 
 3. After steps 1 and 2:
    - Cuttable content found -> cut rationale, move to `references/`, re-check size.

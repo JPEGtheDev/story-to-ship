@@ -23,8 +23,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 Before writing any documentation:
 
 1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
-2. Confirm the file belongs in `docs/<domain>/<subdomain>/` (not a flat root file unless it's a cross-cutting standard)
-3. Confirm no existing file already covers this concept: run `grep -r "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
+2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat root file unless it's a cross-cutting standard)
+3. Confirm no existing file already covers this concept: run `grep -rF "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
 [-] Any unmet -> resolve before writing a single line

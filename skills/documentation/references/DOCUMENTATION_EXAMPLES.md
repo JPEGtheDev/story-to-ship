@@ -128,14 +128,14 @@ Rules:
 
 ## Relative Link Examples
 
-### From `docs/<domain>/<subdomain>.md` (subdomain file linking up to root):
+### From `docs/<domain>/<subdomain>/concept.md` (guide inside a subdomain directory):
 
 ```markdown
-<!-- [+] Correct: relative path from docs/<domain>/ to docs/ -->
-See [Standards Doc](../STANDARDS_DOC.md) for details.
+<!-- [+] Correct: relative path from docs/<domain>/<subdomain>/ to docs/ -->
+See [Standards Doc](../../STANDARDS_DOC.md) for details.
 
-<!-- [-] Incorrect: wrong relative path -->
-See [Standards Doc](STANDARDS_DOC.md) for details.
+<!-- [-] Incorrect: one level short -->
+See [Standards Doc](../STANDARDS_DOC.md) for details.
 ```
 
 ### From `docs/CROSS_CUTTING_STANDARDS.md` (root cross-cutting file):
@@ -145,7 +145,7 @@ See [Standards Doc](STANDARDS_DOC.md) for details.
 See [Other Standards](OTHER_STANDARDS.md) for additional conventions.
 
 <!-- [+] Correct: subdirectory -->
-See [Subdomain Guide](<domain>/<subdomain>.md) for domain-specific patterns.
+See [Subdomain Guide](<domain>/<subdomain>/concept.md) for domain-specific patterns.
 ```
 
 ---
@@ -156,7 +156,7 @@ Skills follow a strict 5-element anatomy. See the `writing-skills` skill for the
 
 Minimal structure:
 
-```markdown
+````markdown
 ---
 name: skill-name
 description: Use when [triggering conditions only].
@@ -191,7 +191,7 @@ YOU MUST [action]. No exceptions.
 | Excuse | Reality |
 |--------|---------|
 | "[rationalization]" | [counter] |
-```
+````
 
 Key rules:
 - Minimize duplication -- if another skill covers a topic, reference it with a one-line pointer

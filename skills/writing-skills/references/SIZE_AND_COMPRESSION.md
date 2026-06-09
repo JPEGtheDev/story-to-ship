@@ -26,7 +26,7 @@ When SKILL.md exceeds its ideal max:
 
 2. For each enforcement block, check: is this rule redundant with another rule already in this file?
    - Not redundant -> it stays. Do not cut it.
-   - Redundant -> flag it as a candidate. Do not cut without user confirmation.
+   - Redundant -> flag it as a candidate in the review report. Do not cut without user confirmation.
 
 3. After steps 1 and 2:
    - Cuttable content found -> cut rationale, move to `references/`, re-check size.

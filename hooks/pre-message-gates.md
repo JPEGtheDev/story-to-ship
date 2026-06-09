@@ -1,7 +1,7 @@
 <IMPORTANT>
 ## Bootstrap Check
 
-If you have no memory of bootstrapping this session, load `session-bootstrap` now before responding.
+If you have no memory of bootstrapping this session, OR if this session opened with "This session is being continued from a previous conversation that ran out of context" -- load `session-bootstrap` and all active domain skills now before responding. A compaction summary creates pseudo-memory of prior skill loads; pseudo-memory is NOT equivalent to live skill context.
 
 ---
 

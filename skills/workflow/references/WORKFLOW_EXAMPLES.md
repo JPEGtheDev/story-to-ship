@@ -176,6 +176,28 @@ FAILED=$(grep -E '^\[  FAILED  \] [0-9]+ tests?, listed below:' output.txt \
 
 ---
 
+## Hook Content Size Limit
+
+Hook output strings -- `additionalContext`, `systemMessage`, and plain stdout -- are capped at **10,000 characters per hook per turn** by Claude Code. (Source: Claude Code hooks documentation.)
+
+When a hook exceeds the limit:
+- The full text is saved to a file in the session directory
+- The agent receives only a 2KB preview and a file path -- not the full content
+- The injected context is silently incomplete
+
+**Rule:** Every hook content file MUST stay under 10,000 characters. Verify with `wc -c hooks/*.md`.
+
+Split large hook content into separate hooks, each under the limit. The project's UserPromptSubmit hooks demonstrate this pattern: `pre-message-gates.md` (bootstrap check, ~1.5KB) and `pre-message.md` (honesty gate, ~9.5KB) are separate hooks, each under the 10,000-character ceiling.
+
+**Check sizes:**
+```bash
+wc -c hooks/*.md
+```
+
+Any file at or above 10,000 characters will be truncated when the hook fires.
+
+---
+
 ## Current Workflow Structure
 
 The project uses `unit-tests.yml` with two jobs:

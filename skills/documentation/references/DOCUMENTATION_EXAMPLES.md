@@ -6,7 +6,7 @@ This reference provides templates and examples for writing documentation in proj
 
 ## Domain Taxonomy
 
-Define your domains using DDD Bounded Contexts: one directory per team concern, one vocabulary per directory.
+Define your domains using Domain-Driven Design (DDD) Bounded Contexts: one directory per team concern, one vocabulary per directory.
 
 **How to define your taxonomy:**
 1. Identify your top-level bounded contexts (e.g., `payments`, `catalog`, `delivery`). Each becomes a `docs/<domain>/` directory.

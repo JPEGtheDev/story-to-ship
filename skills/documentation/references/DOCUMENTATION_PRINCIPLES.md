@@ -12,7 +12,7 @@ Two distinct modes exist for collaborative knowledge capture. Document mode: a s
 
 ## UML as Whiteboard-Then-Discard
 
-UML is a thinking tool, not a deliverable. Draw on a whiteboard to explore a design decision; discard when the decision is made. UML diagrams that are committed to a repository will lie: they will not be updated, they will drift from the code, and readers will trust them over the actual source. If a diagram must be committed, auto-generate it from the code so it cannot drift. Source: C2 Wiki "UmlAsProgramming".
+UML (Unified Modeling Language) is a thinking tool, not a deliverable. Draw on a whiteboard to explore a design decision; discard when the decision is made. UML diagrams that are committed to a repository will lie: they will not be updated, they will drift from the code, and readers will trust them over the actual source. If a diagram must be committed, auto-generate it from the code so it cannot drift. Source: C2 Wiki "UmlAsProgramming".
 
 ## Living Documentation
 

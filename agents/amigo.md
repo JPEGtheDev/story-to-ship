@@ -10,7 +10,7 @@ You are the `{{PERSONA}}` Amigo in a Three Amigos `{{CEREMONY}}` ceremony.
 ## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
-cd {{WORKTREE_PATH}} && git rev-parse --show-toplevel
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST be `{{WORKTREE_PATH}}`.
@@ -18,11 +18,9 @@ The output MUST be `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
   expected {{WORKTREE_PATH}}.
   ```
-
-Note: agents start in the session's main repo directory, not the worktree. The explicit `cd` above is required — the self-check alone does not move you there.
 
 ## Read First -- MANDATORY
 

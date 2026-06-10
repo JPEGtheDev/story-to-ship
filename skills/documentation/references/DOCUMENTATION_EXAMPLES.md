@@ -165,11 +165,10 @@ description: Use when [triggering conditions only].
 
 ```
 ALL CAPS RULE -- NO EXCEPTIONS
+YOU MUST [action]. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-YOU MUST [action]. No exceptions.
 
 **Announce at start:** "I am using the [skill-name] skill to [purpose]."
 

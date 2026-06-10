@@ -20,7 +20,7 @@ Living documentation is automatically derived from or co-located with the code i
 
 ## Self-Documenting Code
 
-Self-documenting code does not require comments to explain what it does -- the names, structure, and decomposition communicate it directly. Names are the primary documentation vehicle: a well-named function communicates its contract; a well-named variable communicates its role. The target: a reader can understand a function's purpose from its name and signature without reading its body. Comments that describe what the code does are a sign the code should be refactored. Source: C2 Wiki "SelfDocumentingCode".
+Self-documenting code does not require comments to explain what it does -- the names, structure, and decomposition communicate it directly. Names are the primary documentation vehicle: a well-named function communicates its contract; a well-named variable communicates its role. The target: a reader can understand a function's purpose from its name and signature without reading its body. Comments that describe what the code does are a signal to refactor the code, not add a comment. Source: C2 Wiki "SelfDocumentingCode".
 
 ## Literate Programming
 
@@ -81,4 +81,4 @@ Source: C2 Wiki "DocumentationPatterns" / "LightweightDocumentation".
 ## See Also
 
 - `documentation/references/WIKI_PRINCIPLES.md` -- Ward Cunningham's principles for designing a knowledge base
-- `writing-skills/SKILL.md` -- skill file authoring (Doc4 Alexandrian Form is defined here)
+- `writing-skills` skill -- skill file authoring (Alexandrian Form is defined there)

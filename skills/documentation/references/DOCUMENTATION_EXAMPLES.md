@@ -56,7 +56,7 @@ domain: cross-cutting
 subdomain: ""
 tags: [<domain>, standards, <additional-tags>]
 related:
-  - "<domain>/<subdomain>.md"
+  - "<domain>/<subdomain>/concept.md"
 ---
 ```
 

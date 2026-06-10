@@ -28,7 +28,7 @@ Run every item. Mark [+] (pass) or [-] (fail) with file:line evidence. Criteria 
 item are in the reference sections above.
 
 - [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters?
-- [ ] **Size** -- apply three levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale, redundant rules, unvalidated bans) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user.
+- [ ] **Size** -- apply four levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max but at or under 5,000 tokens = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale, redundant enforcement rules) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user; (4) above 5,000 tokens (hard limit) = NEEDS WORK regardless of content value -- skill will not load correctly in all agent implementations.
 - [ ] **Iron Law block** -- backtick-wrapped; ALL CAPS rule; `YOU MUST`; `No exceptions.`; all INSIDE the backtick block?
 - [ ] **Iron Law letter/spirit line** -- "Violating the letter of this rule is violating the spirit of this rule." present?
 - [ ] **Announcement** -- explicit exact wording present, not implied?
@@ -121,7 +121,7 @@ the verdict if needed before returning.
 - "The path is just an example" -- any machine-specific absolute path is a FAIL.
 - "The gate function exists under a different heading" -- must be `## BEFORE PROCEEDING`.
 - "`YOU MUST` and `No exceptions.` are in prose, not the block" -- prose-only is a FAIL.
-- "The skill is long but comprehensive" -- SIZE ALERT if above Target. Above Ideal max: run Content Value Test. Enforcement content validated by real incidents overrides ideal max -- PASS (size advisory) is correct when no cuttable content exists. What does NOT override ideal max: rationale that can move to references/, redundant rules, unvalidated bans.
+- "The skill is long but comprehensive" -- SIZE ALERT if above Target. Above Ideal max: run Content Value Test. Enforcement content with no cuttable equivalent overrides ideal max -- PASS (size advisory) is correct when no cuttable content exists. What does NOT override ideal max: rationale that can move to references/, redundant enforcement rules. Above 5,000 tokens: NEEDS WORK with no exceptions -- the hard limit is not subject to Content Value Test.
 - "The description explains what the skill does" -- must start "Use when...".
 - "`should` is just writing style" -- soft language in rule bodies is a FAIL.
 - "The acronym is obvious" -- spell it out. No exceptions.

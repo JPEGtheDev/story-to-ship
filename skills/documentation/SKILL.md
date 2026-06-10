@@ -24,7 +24,7 @@ Before writing any documentation:
 
 1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
 2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat root file unless it's a cross-cutting standard)
-3. Confirm no existing file already covers this concept: run `grep -rF "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
+3. Confirm no existing file already covers this concept: run `grep -rF -- "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
 [-] Any unmet -> resolve before writing a single line
@@ -87,6 +87,7 @@ Before presenting documentation, verify:
 6. No content duplicated from another file -- linked instead
 7. `## Related` section is present at the bottom
 8. Documentation matches current code state
+9. All acronyms spelled out on first use -- no unexpanded project-specific abbreviations (Acronym Rule from `writing-skills` skill)
 
 [+] All pass -> documentation is ready to present
 [-] Any unmet -> resolve all failing items before presenting

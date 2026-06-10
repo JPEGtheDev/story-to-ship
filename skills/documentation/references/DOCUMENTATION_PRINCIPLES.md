@@ -46,20 +46,28 @@ A parent API or platform repo may own upper-level domain documentation. A micros
 
 ## Documentation Index
 
-Every repo with a `docs/` directory MUST maintain a `docs/INDEX.md` that lists every doc file the repo owns:
+Every `docs/` directory at each level MUST maintain an `INDEX.md` for what it owns:
+- `docs/INDEX.md` -- cross-cutting standards and links to domain-level indexes
+- `docs/<domain>/INDEX.md` -- domain-wide docs and links to subdomain indexes
+- `docs/<domain>/<subdomain>/INDEX.md` -- subdomain-specific docs
+
+Each index uses this format:
 
 ```
-| File | Domain | Subdomain | Token limit | Description |
-|------|--------|-----------|-------------|-------------|
-| payments/invoicing/disputes.md | payments | invoicing | 600 | Dispute resolution patterns |
+| File | Domain | Subdomain | Word limit | Description |
+|------|--------|-----------|------------|-------------|
+| invoicing/disputes.md | payments | invoicing | 600 | Dispute resolution patterns |
+| https://example.com/paper.pdf | payments | -- | -- | Research: invoice fraud patterns |
 ```
 
-Token limits per article type:
-- Domain guide (`docs/<domain>/<subdomain>/`): <=600 tokens
-- Cross-cutting standard (`docs/UPPERCASE.md`): <=800 tokens
+Word limits per article type:
+- Domain guide (`docs/<domain>/<subdomain>/`): <=600 words
+- Cross-cutting standard (`docs/UPPERCASE.md`): <=600 words
 - External reference (linked, not stored): no local limit
 
-The index is the fast-path for discovering what documentation exists. Without it, agents scan the filesystem; with it, agents read one file. The index also enforces per-article token budgets by making them visible. For external sources, the index entry links out rather than storing content. Source: DDD "Context Map" pattern.
+Include in each index: owned doc files at that level, architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. Do not duplicate entries already in a child index -- link to the child index instead.
+
+The index is the fast-path for discovering what documentation exists. Without it, agents scan the filesystem; with it, agents read one file. For external sources, the index entry links out rather than storing content. Source: DDD "Context Map" pattern.
 
 ## DocumentationPatterns: Write Once, Link Everywhere
 

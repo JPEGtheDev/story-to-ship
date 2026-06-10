@@ -104,7 +104,7 @@ If unsure, read `code-quality` -- it applies to every code task.
 9. If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched -- NOT done inline
 10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available
 11. If a hook config fix was committed during this session: that fix is NOT active until the NEXT session. Do NOT claim hooks are working. The CLI reads hooks.json once at session start -- in-session commits to hook files do not take effect until the session is restarted.
-12. If this session involves documentation work: scan `docs/INDEX.md` (and any applicable `docs/<domain>/INDEX.md`) for existing coverage before writing any new doc file.
+12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
 [+] All met -> proceed with session work
 [-] Any unmet -> complete the unmet step now before writing code or sending a plan

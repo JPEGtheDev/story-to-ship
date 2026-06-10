@@ -77,19 +77,4 @@ Before creating, editing, or shipping any skill or agent template:
 
 ---
 
-## Related Skills
-
-- `skill-reviewer` agent template -- dispatches review agents using this skill's reference files as injected criteria
-- `documentation` -- governs how skill reference docs are structured, formatted, and linked
-- `self-evaluation` -- reviews skills updated during a session using this checklist
-
----
-
-## References
-
-- `references/SKILL_ANATOMY_ELEMENTS.md` -- element schemas, bad/good examples, Alexandrian Pattern Form guide
-- `references/SIZE_AND_COMPRESSION.md` -- token targets, compression rules including enforcement co-location gate, line limits
-- `references/VOICE_AUTHORITY_RULES.md` -- authority table, Absolute Path Rule, Acronym Rule
-- `references/MODEL_COMPATIBILITY.md` -- patterns most likely skipped by lower-end models
-- `references/REVIEW_INSTRUCTIONS.md` -- review checklist and return format; injected into `skill-reviewer` at dispatch time
-- `references/DISPATCH_PATTERN.md` -- dispatch instructions; read before auditing any skill
+For reference file descriptions and related skills, see `references/DISPATCH_PATTERN.md`.

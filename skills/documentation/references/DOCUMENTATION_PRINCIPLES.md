@@ -28,7 +28,7 @@ Literate programming interleaves prose and code at the decision level: the prose
 
 ## Bounded Contexts as Taxonomy Organizer
 
-Each `docs/<domain>/` directory is a Bounded Context in the DDD sense: one team concern owns it, uses a consistent vocabulary within it, and documents that vocabulary there. Do not let terms cross context boundaries without translation. If a concept from one domain appears in another domain's docs, write a brief mapping note rather than importing raw terminology from a different context. Source: C2 Wiki "BoundedContexts" / "DomainDrivenDesign".
+Each `docs/<domain>/` directory is a Bounded Context in the Domain-Driven Design (DDD) sense: one team concern owns it, uses a consistent vocabulary within it, and documents that vocabulary there. Do not let terms cross context boundaries without translation. If a concept from one domain appears in another domain's docs, write a brief mapping note rather than importing raw terminology from a different context. Source: C2 Wiki "BoundedContexts" / "DomainDrivenDesign".
 
 ## Repo Scope and Documentation Ownership
 

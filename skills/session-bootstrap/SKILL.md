@@ -76,12 +76,13 @@ domains, read multiple skills in parallel (they are independent reads).
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`                                   |
-| Resuming from a prior session with pending SQL todos | `writing-plans`; dispatch Skeptic before first implementation step |
+| Resuming from a prior session with pending SQL todos | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic Agent (see `writing-plans`), before first implementation step |
 | Schema design, new data structure, or plan with >=5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |
-| Any new plan with 2+ todos | `writing-plans`; dispatch Skeptic before first implementation step |
+| Any new plan with 2+ todos or an architectural decision | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic Agent, before first implementation step |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
 | Task references a GitHub issue number (#NNN), OR task description contains "AC:", "acceptance criteria", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
+| Summarizing external resources (articles, web pages, files) for knowledge extraction | `summarization` |
 
 If unsure, read `code-quality` -- it applies to every code task.
 
@@ -98,7 +99,7 @@ If unsure, read `code-quality` -- it applies to every code task.
 3. All required skills for this task type loaded (in parallel if multiple domains)
 4. Skill load announcement made for each loaded skill
 5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work. Ghost commits from prior agents are a recurring risk.
-6. If resuming a prior session: SQL pending todos checked; Skeptic dispatched before first implementation step
+6. If resuming a prior session: SQL pending todos checked; Skeptic Agent dispatched before first implementation step
 7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched -- NOT done inline
@@ -139,7 +140,7 @@ behavior is habitual, not conditional.
 ## Red Flags -- STOP
 
 - A task just completed and no new user message has arrived -- **STOP. Is this the session's last task? If so, treat it as session end. Load self-evaluation NOW before responding.**
-- Starting implementation when SQL has pending todos from a prior session without dispatching Skeptic -- **STOP. Dispatch Skeptic before the first implementation step.**
+- Starting implementation when SQL has pending todos from a prior session without dispatching the Skeptic Agent -- **STOP. Dispatch the Skeptic Agent before the first implementation step.**
 - Picking up plan todos without `subagent-driven-development` loaded -- **STOP. Load `subagent-driven-development` before dispatching the first implementer. The skill contains the review protocol that every todo requires.**
 - Starting to code before reading the required skill -- **STOP. Load the skill now. Do not write one line first.**
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**

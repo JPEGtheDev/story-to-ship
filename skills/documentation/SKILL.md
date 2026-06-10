@@ -71,10 +71,6 @@ All files in `docs/` MUST be **Document Mode** -- readable independently, with n
 
 ---
 
-**New skills:** When adding a new skill, see the `writing-skills` skill for the AGENTS.md update pattern.
-
----
-
 ## Step 3: Review Checklist
 
 Before presenting documentation, verify:

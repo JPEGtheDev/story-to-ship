@@ -77,4 +77,4 @@ Before creating, editing, or shipping any skill or agent template:
 
 ---
 
-For reference file descriptions and related skills, see `references/DISPATCH_PATTERN.md`.
+Related skills: `skill-reviewer`, `documentation`, `self-evaluation` -- see `references/DISPATCH_PATTERN.md` for details.

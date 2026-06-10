@@ -83,7 +83,7 @@ Before presenting documentation, verify:
 6. No content duplicated from another file -- linked instead
 7. `## Related` section is present at the bottom
 8. Documentation matches current code state
-9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in `writing-skills/references/VOICE_AUTHORITY_RULES.md`)
+9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
 10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
 
 [+] All pass -> documentation is ready to present

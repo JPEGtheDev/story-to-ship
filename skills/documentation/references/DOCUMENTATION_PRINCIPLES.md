@@ -30,6 +30,37 @@ Literate programming interleaves prose and code at the decision level: the prose
 
 Each `docs/<domain>/` directory is a Bounded Context in the DDD sense: one team concern owns it, uses a consistent vocabulary within it, and documents that vocabulary there. Do not let terms cross context boundaries without translation. If a concept from one domain appears in another domain's docs, write a brief mapping note rather than importing raw terminology from a different context. Source: C2 Wiki "BoundedContexts" / "DomainDrivenDesign".
 
+## Repo Scope and Documentation Ownership
+
+A repo's documentation scope maps directly to its DDD scope:
+
+| Repo type | Docs it owns | References externally |
+|-----------|-------------|----------------------|
+| Single domain | All docs for that domain | Shared kernel, enterprise standards |
+| Multi-domain | All `docs/<domain>/` directories | External shared docs, if any |
+| Subdomain microservice | `docs/<subdomain>/` only | Parent domain docs, shared kernel |
+
+Cross-repo concerns -- shared kernel definitions, context maps, enterprise-level standards -- live in an external repo or wiki. The local repo references them by link. Duplication is acceptable only when the external dependency would break agent context loading, or when the content is foundational enough that developers need it without navigating away. When duplicating: note the authoritative source.
+
+A parent API or platform repo may own upper-level domain documentation. A microservice that implements a subdomain links upward to the parent domain docs rather than duplicating them. Source: DDD "Context Map" / "Shared Kernel".
+
+## Documentation Index
+
+Every repo with a `docs/` directory MUST maintain a `docs/INDEX.md` that lists every doc file the repo owns:
+
+```
+| File | Domain | Subdomain | Token limit | Description |
+|------|--------|-----------|-------------|-------------|
+| payments/invoicing/disputes.md | payments | invoicing | 600 | Dispute resolution patterns |
+```
+
+Token limits per article type:
+- Domain guide (`docs/<domain>/<subdomain>/`): <=600 tokens
+- Cross-cutting standard (`docs/UPPERCASE.md`): <=800 tokens
+- External reference (linked, not stored): no local limit
+
+The index is the fast-path for discovering what documentation exists. Without it, agents scan the filesystem; with it, agents read one file. The index also enforces per-article token budgets by making them visible. For external sources, the index entry links out rather than storing content. Source: DDD "Context Map" pattern.
+
 ## DocumentationPatterns: Write Once, Link Everywhere
 
 Document each concept exactly once. When a second location needs the same content, link to the authoritative source instead of duplicating it. Duplicate documentation diverges. Core principles from C2 Wiki's DocumentationPatterns:

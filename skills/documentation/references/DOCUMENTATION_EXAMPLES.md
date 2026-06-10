@@ -35,7 +35,6 @@ title: "Short Descriptive Title"
 description: "One sentence describing exactly what this doc covers."
 domain: <domain>
 subdomain: <subdomain>
-subdomain2: ""  # optional -- omit or leave empty when not using a third level
 tags: [<domain>, <subdomain>, <additional-tags>]
 related:
   - "../RELATED_DOC.md"
@@ -46,6 +45,7 @@ related:
 - `description` -- the primary field for semantic (vector) search; make it specific and concrete
 - `tags` -- MUST include the domain and subdomain as the first two entries
 - `related` -- relative paths from the file's own directory; verified to exist before adding
+- `subdomain2` -- omit this field entirely when not using a third level. Do NOT write `subdomain2: ""`. Only add it when a value exists: `subdomain2: <value>`
 
 **Cross-cutting standard files** (`docs/UPPERCASE.md`):
 ```yaml
@@ -70,7 +70,6 @@ title: "Concept Name"
 description: "One concrete sentence about exactly what this covers."
 domain: <domain>
 subdomain: <subdomain>
-subdomain2: ""  # optional -- omit or leave empty when not using a third level
 tags: [<domain>, <subdomain>]
 related:
   - "../RELATED_STANDARDS.md"

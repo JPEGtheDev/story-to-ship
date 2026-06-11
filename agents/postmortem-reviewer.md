@@ -23,13 +23,13 @@ You are an external reviewer analyzing a completed agent session. You have NO me
 git -C {{REPO_PATH}} rev-parse --show-toplevel
 ```
 
-The output MUST match `{{REPO_PATH}}`.
+The output MUST match `{{WORKTREE_PATH}}`.
 - If it matches -> proceed.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not running in the expected repo. `git -C {{REPO_PATH}} rev-parse --show-toplevel` returned [actual path],
-  expected {{REPO_PATH}}.
+  Not running in the expected worktree. `git -C {{REPO_PATH}} rev-parse --show-toplevel` returned [actual path],
+  expected {{WORKTREE_PATH}}.
   ```
 
 ---

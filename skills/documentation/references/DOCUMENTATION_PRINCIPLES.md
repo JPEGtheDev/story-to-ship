@@ -54,16 +54,13 @@ Every `docs/` directory at each level MUST maintain an `INDEX.md` for what it ow
 Each index uses this format:
 
 ```
-| File | Domain | Subdomain | Word limit | Description |
+| File | Domain | Subdomain | Max tokens | Description |
 |------|--------|-----------|------------|-------------|
-| invoicing/disputes.md | payments | invoicing | 600 | Dispute resolution patterns |
+| invoicing/disputes.md | payments | invoicing | 800 | Dispute resolution patterns |
 | https://example.com/paper.pdf | payments | -- | -- | Research: invoice fraud patterns |
 ```
 
-Word limits per article type:
-- Domain guide (`docs/<domain>/<subdomain>/`): <=600 words
-- Cross-cutting standard (`docs/UPPERCASE.md`): <=600 words
-- External reference (linked, not stored): no local limit
+Universal token maximum: 800 tokens per article (all types). External references linked in the index have no local limit -- the limit applies only to files stored in the repo.
 
 Include in each index: owned doc files at that level, architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. Do not duplicate entries already in a child index -- link to the child index instead.
 

@@ -9,7 +9,7 @@ description: Use when creating docs, updating guides, writing API references, or
 
 ```
 EVERY DOC IS SMALL, TAGGED, AND LINKED -- ONE CONCEPT PER FILE
-YOU MUST keep every doc file under 600 words, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
+YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -36,7 +36,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=600 words |
+| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
 | Cross-cutting standards | `docs/UPPERCASE.md` |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
@@ -66,7 +66,7 @@ All files in `docs/` MUST be **Document Mode** -- readable independently, with n
 2. Include a Table of Contents for documents with 3+ sections
 3. Use code blocks with language tags for all code examples
 4. Use relative links -- verify they resolve from the file's directory
-5. Keep file <=600 words; split at concept boundaries if longer
+5. Keep file <=800 tokens; split at concept boundaries if longer
 6. Use ASCII-only text (no Unicode characters) -- replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +)
 
 ---
@@ -77,7 +77,7 @@ Before presenting documentation, verify:
 
 1. YAML frontmatter is present with all required fields
 2. File is in the correct domain/subdomain directory
-3. File is <=600 words
+3. File is <=800 tokens
 4. All relative links resolve correctly from the file's directory
 5. Code examples have language tags
 6. No content duplicated from another file -- linked instead
@@ -107,7 +107,7 @@ Before presenting documentation, verify:
 
 ## Red Flags -- STOP
 
-- Doc file over 600 words -- **STOP. Split at the second concept.**
+- Doc file over 800 tokens -- **STOP. Split at the second concept.**
 - Missing YAML frontmatter -- **STOP. Add the full block before continuing.**
 - Missing `## Related` section -- **STOP. Add at least one annotated link.**
 - Two files covering the same concept -- **STOP. Delete one; link from the other.**

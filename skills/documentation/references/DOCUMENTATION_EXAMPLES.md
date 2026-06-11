@@ -77,7 +77,7 @@ related:
 
 # Concept Name
 
-Brief one-paragraph description. <=600 words total for the full file.
+Brief one-paragraph description. <=800 tokens total for the full file.
 
 ## Overview
 

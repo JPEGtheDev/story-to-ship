@@ -77,5 +77,5 @@ Source: C2 Wiki "DocumentationPatterns" / "LightweightDocumentation".
 
 ## See Also
 
-- `documentation/references/WIKI_PRINCIPLES.md` -- Ward Cunningham's principles for designing a knowledge base
+- `WIKI_PRINCIPLES.md` in this skill's `references/` directory -- Ward Cunningham's principles for designing a knowledge base
 - `writing-skills` skill -- skill file authoring (Alexandrian Form is defined there)

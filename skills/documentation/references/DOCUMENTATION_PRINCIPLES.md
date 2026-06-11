@@ -54,10 +54,10 @@ Every `docs/` directory at each level MUST maintain an `INDEX.md` for what it ow
 Each index uses this format:
 
 ```
-| File | Domain | Subdomain | Max tokens | Description |
-|------|--------|-----------|------------|-------------|
-| invoicing/disputes.md | payments | invoicing | 800 | Dispute resolution patterns |
-| https://example.com/paper.pdf | payments | -- | -- | Research: invoice fraud patterns |
+| File | Domain | Subdomain | Description |
+|------|--------|-----------|-------------|
+| invoicing/disputes.md | payments | invoicing | Dispute resolution patterns |
+| https://example.com/paper.pdf | payments | -- | Research: invoice fraud patterns |
 ```
 
 Universal token maximum: 800 tokens per article (all types). External references linked in the index have no local limit -- the limit applies only to files stored in the repo.

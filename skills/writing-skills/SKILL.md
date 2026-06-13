@@ -55,6 +55,7 @@ Before creating, editing, or shipping any skill or agent template:
 
 - Creating a skill for a pattern in fewer than 1% of sessions -- **STOP. Write a reference doc instead.**
 - Description field contains "covers", "enforces", "provides", "includes" -- **STOP. Rewrite to "Use when [conditions]."**
+- Description starts with "Use when [trigger]" but continues with workflow clauses ("to conduct", "to produce", "to generate", "to create", "to interview") -- **STOP. End the description at the triggering condition. Drop all "to [verb]" workflow suffixes.**
 - Iron Law lacks "letter/spirit" line -- **STOP. Add "Violating the letter of this rule is violating the spirit of this rule." now.**
 - Iron Law lacks "YOU MUST" and "No exceptions." -- **STOP. Both phrases are required. Add them.**
 - No BEFORE PROCEEDING gate -- **STOP. Add a gate with explicit [+]/[-] branches before shipping.**

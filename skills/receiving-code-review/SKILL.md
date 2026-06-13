@@ -58,10 +58,11 @@ For every comment, before responding:
 |----------|--------|
 | Correct -- I missed this | Acknowledge, fix, thank them specifically for the catch |
 | Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
-| Scope challenge ("why is X in a Y file?") | Identify the out-of-scope content. Remove it from this file and put it in the correct location. Do NOT expand the file's scope to justify keeping the content here. |
 | I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
+
+**When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content might genuinely belong here, first determine whether the file's scope is correctly stated before deciding to relocate.
 
 ---
 
@@ -155,5 +156,5 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "They misunderstood what I was doing" | Maybe. But if a reviewer misunderstands, the code is unclear. Clarify the code or the comment. |
 | "This is a style preference" | If it violates `code-quality` standards, it is not a preference -- it is a defect. |
 | "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context -- do not dismiss the feedback. |
-| "I'll expand the scope to cover it" | Expanding scope to justify misplaced content creates ambiguity. Remove the content and put it where it belongs. |
+| "I'll expand the scope to cover it" | Maybe the scope genuinely needs expanding. But if the content is out of scope, expanding the scope statement to justify keeping it creates ambiguity. Determine whether the content is truly in scope first. If it is not: remove it and relocate it. |
 **Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

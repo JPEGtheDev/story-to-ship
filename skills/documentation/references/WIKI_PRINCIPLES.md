@@ -27,4 +27,4 @@ These principles govern all project files: documentation in `docs/` and skill fi
 - Each file title must exactly match the concept or domain it governs
 - Reference files link outward, not inward -- avoid circular pointer chains
 - When two sections say the same thing in different files, apply the Once And Only Once principle: choose one authoritative location, add a pointer from the other
-- Files that grow past their token budget have diverged from the Simplicity property -- trim or extract to a reference file (see the `documentation` skill for docs; `writing-skills` for skill files)
+- Documentation files in `docs/` that grow past 800 tokens have diverged from the Simplicity property -- trim or extract to a reference file

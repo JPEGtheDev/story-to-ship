@@ -20,9 +20,11 @@ For any collaborative knowledge base -- skills, documentation, project wikis:
 
 **More words than content** -- every sentence must carry information not already present in adjacent sentences. Prune ruthlessly.
 
-## Application to Project Skill Files
+## Application to All Project Files
 
-- Each skill file title must exactly match the domain it governs
+These principles govern all project files: documentation in `docs/` and skill files in `.claude/skills/`.
+
+- Each file title must exactly match the concept or domain it governs
 - Reference files link outward, not inward -- avoid circular pointer chains
 - When two sections say the same thing in different files, apply the Once And Only Once principle: choose one authoritative location, add a pointer from the other
-- Skill files (SKILL.md) that grow past 800 tokens have diverged from the Simplicity property -- trim or extract to a reference file
+- Files that grow past their token budget have diverged from the Simplicity property -- trim or extract to a reference file (see the `documentation` skill for docs; `writing-skills` for skill files)

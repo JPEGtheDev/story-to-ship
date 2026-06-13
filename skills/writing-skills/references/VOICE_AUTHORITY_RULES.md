@@ -41,12 +41,12 @@ Rules:
 **Spell out all terms on first use.** Do not introduce acronyms unless they fall into an exempt category. Project-specific and skill-specific abbreviations are forbidden -- they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
 
 Exempt categories (no expansion required):
-- Universally known: TDD, CI, PR, API
+- Universally known: CI, PR, API
 - File formats: YAML, JSON, CSV, XML -- these are the format name, not an acronym; expanding them adds no clarity
 - Encoding/character standards: ASCII -- explain the constraint in context (e.g., "ASCII-only text (no Unicode characters)") rather than expanding the initialism
 
 Non-exempt -- MUST expand on first use:
-- Technical concepts: UML (Unified Modeling Language), DDD (Domain-Driven Design)
+- Technical concepts: TDD (Test-Driven Development), UML (Unified Modeling Language), DDD (Domain-Driven Design)
 - Project-specific or skill-specific abbreviations (DDR, VBC, SDD, etc.)
 
 Examples:
@@ -54,6 +54,8 @@ Examples:
 - RIGHT: "After the Design Decision Record (DDR) is approved, hand off to writing-plans."
 - WRONG: "See the VBC skill for the verification gate."
 - RIGHT: "See the `verification-before-completion` skill for the verification gate."
+- WRONG: "Use TDD to drive the implementation."
+- RIGHT: "Use Test-Driven Development (TDD) to drive the implementation."
 - WRONG: "Use ASCII-only text."
 - RIGHT: "Use ASCII-only text (no Unicode characters)."
 - OK: "Use YAML frontmatter." (file format -- no expansion needed)

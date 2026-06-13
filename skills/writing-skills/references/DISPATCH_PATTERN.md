@@ -28,3 +28,20 @@ One agent per skill directory -- the agent reviews `SKILL.md` and every file in 
 | `{{REVIEW_INSTRUCTIONS}}` | `REVIEW_INSTRUCTIONS.md` | Review process, checklist, return format |
 
 Injecting at dispatch time means the reviewer has current criteria without any runtime file reads. It also means the same agent template works for external skills that do not share a file system with this repo -- no cross-skill file path dependencies.
+
+---
+
+## Reference Files
+
+- `SKILL_ANATOMY_ELEMENTS.md` -- element schemas, bad/good examples, Alexandrian Pattern Form guide
+- `SIZE_AND_COMPRESSION.md` -- token targets, compression rules including enforcement co-location gate, line limits
+- `VOICE_AUTHORITY_RULES.md` -- authority table, Absolute Path Rule, Acronym Rule
+- `MODEL_COMPATIBILITY.md` -- patterns most likely skipped by lower-end models
+- `REVIEW_INSTRUCTIONS.md` -- review checklist and return format; injected into `skill-reviewer` at dispatch time
+- `DISPATCH_PATTERN.md` -- this file; dispatch instructions for auditing skills
+
+## Related Skills
+
+- `skill-reviewer` agent template -- dispatches review agents using this skill's reference files as injected criteria
+- `documentation` -- governs how skill reference docs are structured, formatted, and linked
+- `self-evaluation` -- reviews skills updated during a session using this checklist

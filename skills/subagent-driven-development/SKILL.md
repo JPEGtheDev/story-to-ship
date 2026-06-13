@@ -42,7 +42,7 @@ See `references/SDD_LOOP.md` for the full decision tree with complete ASCII flow
 
 Before dispatching any subagent:
 
-1. The todo has a single, clear objective -- no compound tasks bundled together.
+1. The todo has a single, clear objective -- no compound tasks bundled together. Any specific limits, counts, or numbers in the task description are verified from source files, not from memory.
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.**
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value.
@@ -86,6 +86,7 @@ These thoughts mean stop immediately:
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
 | "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
 | "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
+| "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
 
 ---
 

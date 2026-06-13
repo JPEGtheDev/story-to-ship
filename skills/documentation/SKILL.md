@@ -9,7 +9,7 @@ description: Use when creating docs, updating guides, writing API references, or
 
 ```
 EVERY DOC IS SMALL, TAGGED, AND LINKED -- ONE CONCEPT PER FILE
-YOU MUST keep every doc file under 600 words, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
+YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -23,8 +23,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 Before writing any documentation:
 
 1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
-2. Confirm the file belongs in `docs/<domain>/<subdomain>/` (not a flat root file unless it's a cross-cutting standard)
-3. Confirm no existing file already covers this concept -- link to it instead of duplicating
+2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat root file unless it's a cross-cutting standard)
+3. Confirm no existing file already covers this concept: run `grep -rF -- "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
 [-] Any unmet -> resolve before writing a single line
@@ -36,7 +36,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides | `docs/<domain>/<subdomain>/` -- one concept per file, <=600 words |
+| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
 | Cross-cutting standards | `docs/UPPERCASE.md` |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
@@ -66,35 +66,25 @@ All files in `docs/` MUST be **Document Mode** -- readable independently, with n
 2. Include a Table of Contents for documents with 3+ sections
 3. Use code blocks with language tags for all code examples
 4. Use relative links -- verify they resolve from the file's directory
-5. Keep file <=600 words; split at concept boundaries if longer
-6. Use ASCII-only text -- replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +)
+5. Keep file <=800 tokens; split at concept boundaries if longer
+6. Use ASCII-only text (no Unicode characters) -- replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +)
 
 ---
 
-## Step 3: Update AGENTS.md When Adding a New Skill
-
-Update all 4 locations:
-1. **Skills Directory table** -- add row with name, path, domain
-2. **Before Every Response checklist** -- add item if the skill has a HARD-GATE
-3. **Minimum skill loads table** -- add the row(s) for when this skill MUST be read
-4. **Instruction Priority Hierarchy** -- only if the skill introduces a new priority tier
-
-Skipping any location makes the skill effectively invisible. For templates and code examples for each update location, see `references/DOCUMENTATION_EXAMPLES.md`.
-
----
-
-## Step 4: Review Checklist
+## Step 3: Review Checklist
 
 Before presenting documentation, verify:
 
 1. YAML frontmatter is present with all required fields
 2. File is in the correct domain/subdomain directory
-3. File is <=600 words
+3. File is <=800 tokens
 4. All relative links resolve correctly from the file's directory
 5. Code examples have language tags
 6. No content duplicated from another file -- linked instead
 7. `## Related` section is present at the bottom
 8. Documentation matches current code state
+9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
+10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
 
 [+] All pass -> documentation is ready to present
 [-] Any unmet -> resolve all failing items before presenting
@@ -117,7 +107,7 @@ Before presenting documentation, verify:
 
 ## Red Flags -- STOP
 
-- Doc file over 600 words -- **STOP. Split at the second concept.**
+- Doc file over 800 tokens -- **STOP. Split at the second concept.**
 - Missing YAML frontmatter -- **STOP. Add the full block before continuing.**
 - Missing `## Related` section -- **STOP. Add at least one annotated link.**
 - Two files covering the same concept -- **STOP. Delete one; link from the other.**
@@ -133,4 +123,4 @@ Before presenting documentation, verify:
 
 For the domain taxonomy, frontmatter schema, and guide template, see [references/DOCUMENTATION_EXAMPLES.md](references/DOCUMENTATION_EXAMPLES.md).
 
-**Documentation principles (Doc1-Doc5, SelfDocumentingCode, LiterateProgramming):** `references/DOCUMENTATION_PRINCIPLES.md`
+**Documentation principles:** `references/DOCUMENTATION_PRINCIPLES.md`

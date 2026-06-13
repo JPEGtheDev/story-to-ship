@@ -10,6 +10,8 @@ Use the `spec-compliance-reviewer.md` agent. Provide:
 
 If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceeding.
 
+**False positive check for "no other lines should change" requirements:** Stage 1 reviewers reading `git diff base..HEAD` see ALL prior commits as context, and may misattribute pre-existing branch content as implementer changes. When Stage 1 returns GAPS on this class of requirement, verify with `git show <commit> -- <file>` (single commit view). If the single-commit diff shows only the intended change, the GAPS verdict is a false positive -- proceed to Stage 2.
+
 ## Stage 2: Code Quality Review
 
 **Question:** Is the implementation clean, maintainable, and correct?

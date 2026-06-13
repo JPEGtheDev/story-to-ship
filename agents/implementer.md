@@ -11,7 +11,7 @@ You are implementing a feature in a software project.
 
 ```bash
 # Step 1: Verify you are in the correct worktree
-git rev-parse --show-toplevel
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
@@ -20,7 +20,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Blockers: Not running in the expected worktree. `git rev-parse --show-toplevel` returned
+  Blockers: Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned
   [actual path], expected {{WORKTREE_PATH}}. The orchestrator must create the worktree and
   re-dispatch with the correct WORKTREE_PATH.
   ```

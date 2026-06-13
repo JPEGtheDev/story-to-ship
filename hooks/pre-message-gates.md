@@ -1,7 +1,7 @@
 <IMPORTANT>
 ## Bootstrap Check
 
-If you have no memory of bootstrapping this session, load `session-bootstrap` now before responding.
+If you have no memory of bootstrapping this session, OR if this session opened with "This session is being continued from a previous conversation that ran out of context" -- load `session-bootstrap` and all relevant skills now before responding. A compaction summary creates pseudo-memory of prior skill loads; pseudo-memory is NOT equivalent to live skill context.
 
 ---
 
@@ -10,7 +10,7 @@ If you have no memory of bootstrapping this session, load `session-bootstrap` no
 1. Picking up a new todo -- reload the skill(s) for that todo's domain
 2. After 3 user prompts without a skill reload -- reload the skill for whatever you are doing
 3. After a user correction or redirect -- reload the misapplied skill immediately
-4. After context compaction -- any compaction requires full skill reload for the active domain
+4. After context compaction -- any compaction requires full skill reload for all relevant domains
 
 Do NOT say "I remember the skill content." Load fresh. Skill routing table is in `session-bootstrap`.
 

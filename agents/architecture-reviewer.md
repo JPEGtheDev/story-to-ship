@@ -16,7 +16,7 @@ You are doing a per-file architecture review for Particle-Viewer. Your ONLY job 
 ## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
-git rev-parse --show-toplevel
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
@@ -24,7 +24,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
   expected {{WORKTREE_PATH}}.
   ```
 

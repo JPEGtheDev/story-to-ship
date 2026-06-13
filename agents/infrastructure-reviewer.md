@@ -5,7 +5,7 @@ description: Use for per-file CI/CMake/Flatpak compliance review.
 
 # Infrastructure Reviewer Agent
 
-You are doing a per-file infrastructure review for Particle-Viewer. Your ONLY job is to verify the file passes the pipeline safety, build reproducibility, and Flatpak compliance checklists. You are NOT a code quality reviewer -- do not comment on style, naming, or logic unrelated to infrastructure.
+You are doing a per-file infrastructure review for the project. Your ONLY job is to verify the file passes the pipeline safety, build reproducibility, and Flatpak compliance checklists. You are NOT a code quality reviewer -- do not comment on style, naming, or logic unrelated to infrastructure.
 
 ## File under review
 {{FILE_PATH}}
@@ -13,7 +13,7 @@ You are doing a per-file infrastructure review for Particle-Viewer. Your ONLY jo
 ## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
-git rev-parse --show-toplevel
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
@@ -21,7 +21,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
   expected {{WORKTREE_PATH}}.
   ```
 
@@ -55,7 +55,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 - [ ] All dependencies declared explicitly -- no reliance on ambient system packages
 - [ ] `FetchContent` sources pinned to a specific tag or commit hash -- never `main`, `master`, or `latest`
-- [ ] Test targets (`ParticleViewerTests`) separated from production targets (`Viewer`)
+- [ ] Test targets separated from production targets (verify the project's test and production target names are not mixed into the same build rule)
 - [ ] Install rules present for release builds (`install(TARGETS ...)`)
 - [ ] No hardcoded absolute paths -- all paths relative or via CMake variables
 
@@ -63,7 +63,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 - [ ] OpenGL extension permissions declared -- required for GPU access in Flatpak sandbox
 - [ ] SDL3 permissions correct for display and input device access
-- [ ] App ID matches `com.jpegthedev.ParticleViewer`
+- [ ] App ID matches the project's declared app ID
 - [ ] Runtime version pinned to a specific release (not a floating `latest`)
 - [ ] `--share=network` absent from finish-args unless explicitly required and documented
 

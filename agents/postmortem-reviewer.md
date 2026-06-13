@@ -28,7 +28,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not running in the expected worktree. `git rev-parse --show-toplevel` returned [actual path],
+  Not running in the expected worktree. `git -C {{REPO_PATH}} rev-parse --show-toplevel` returned [actual path],
   expected {{WORKTREE_PATH}}.
   ```
 

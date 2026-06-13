@@ -13,8 +13,24 @@
 | Sub-domain skills | <= 300 tokens | 600 tokens |
 | Reference files (not SKILL.md) | No limit -- loaded on demand | -- |
 
-**Ideal max** = the ceiling within which no refactor is required. Above it, compression is mandatory.
+**Ideal max** = the ceiling within which no refactor is required. Above it, apply the Content Value Test before making any cuts.
 **Hard limit** = 5,000 tokens -- the agentskills.io spec recommendation for marketplace compatibility. Skills over 5,000 tokens may not load correctly in all agent implementations. Do not cross it.
+
+### Content Value Test -- Run Before Any Compression
+
+When SKILL.md exceeds its ideal max:
+
+1. For every section or block beyond the 5-element anatomy minimum, classify it:
+   - **Rationale** (explanation of why rules exist, motivational framing, history) -> move to `references/`. Never delete it.
+   - **Enforcement** (STOP conditions, bans, gates, rationalization rows, BEFORE PROCEEDING items) -> do NOT cut to hit a token target. Proceed to step 2.
+
+2. For each enforcement block, check: is this rule redundant with another rule already in this file?
+   - Not redundant -> it stays. Do not cut it.
+   - Redundant -> flag it as a candidate in the review report. Do not cut without user confirmation.
+
+3. After steps 1 and 2:
+   - Cuttable content found -> cut rationale, move to `references/`, re-check size.
+   - No cuttable content found -> the skill is at minimum functional size. Report: "All criteria pass. Size exceeds ideal max because [specific enforcement content]. Options: accept current size, split by domain, or remove [specific candidate] with confirmation. Decision required." Do NOT continue compression attempts.
 
 Token estimate: `chars / 4` is a reliable approximation for technical Markdown.
 

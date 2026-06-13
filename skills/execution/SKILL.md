@@ -28,7 +28,7 @@ For completion claims -> invoke **verification-before-completion** skill.
 Before writing any code or claiming any task done:
 
 1. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
-2. For multi-step tasks (3+ steps): a written plan with SQL todos exists
+2. For multi-step tasks (3+ steps): tasks for this work exist in the task tool (TaskList)
 3. Required skills for this domain are loaded (check session-bootstrap On Start table)
 4. No placeholders in any todo -- every item is concrete and executable
 5. Verification method is identified -- know what command proves success before starting
@@ -102,7 +102,7 @@ If you catch yourself thinking any of these:
 - "This is done enough to move on"
 - "Evidence contradicts the plan but I'll finish this step first" -- **Stop. Confront reality immediately.** State what the plan assumed, what evidence shows, and what that means for remaining todos. Revise the plan before proceeding, even if it voids completed work. Continuing on a plan you know is wrong is not progress.
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
-- "I see a DRY violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
+- "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -160,7 +160,7 @@ For trade-off discipline structure and the Approach A/B/Choice template, see `re
 - Refactoring while tests are red (behavior is unknown)
 - Profiling before a clean design exists (profiling a mess optimizes the wrong thing)
 
-For the relationship between MIWMIRMIF and the TDD cycle, see `references/EXECUTION_PATTERNS.md`.
+For the relationship between Make It Work, Make It Right, Make It Fast (MIWMIRMIF) and the TDD cycle, see `references/EXECUTION_PATTERNS.md`.
 
 ---
 
@@ -224,7 +224,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
 | "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. If the fix is a structural change (heading level, path format, sentence replacement), dispatch a re-review or apply only to content you can verify in the same view call. |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
-| "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a SQL todo or session note. "I'll remember" is not a commitment mechanism. |
+| "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
 
 ---

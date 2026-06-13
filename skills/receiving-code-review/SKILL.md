@@ -62,6 +62,8 @@ For every comment, before responding:
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
+**When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content genuinely belongs here, first determine whether the file's scope is correctly stated before deciding to relocate.
+
 ---
 
 ## Responding to Comments
@@ -85,7 +87,7 @@ For every comment, before responding:
 1. The code change is committed.
 2. The PR thread has a reply explaining what was done.
 
-Declaring a comment "addressed" before both are complete is an IL-6 violation.
+Declaring a comment "addressed" before both are complete is an Iron Law violation.
 
 ---
 
@@ -122,7 +124,7 @@ When you genuinely believe a reviewer is wrong:
 
 ## Right Wrongs in Review
 
-If a reviewer finds something you missed that you should have caught:
+If a reviewer finds something you missed that you were responsible for catching:
 
 ```
 1. ACKNOWLEDGE: "This is correct -- I missed it."
@@ -154,4 +156,5 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "They misunderstood what I was doing" | Maybe. But if a reviewer misunderstands, the code is unclear. Clarify the code or the comment. |
 | "This is a style preference" | If it violates `code-quality` standards, it is not a preference -- it is a defect. |
 | "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context -- do not dismiss the feedback. |
+| "I'll expand the scope to cover it" | Maybe the scope genuinely needs expanding. But if the content is out of scope, expanding the scope statement to justify keeping it creates ambiguity. Determine whether the content is truly in scope first. If it is not: remove it and relocate it. |
 **Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

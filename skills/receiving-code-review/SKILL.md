@@ -87,7 +87,7 @@ For every comment, before responding:
 1. The code change is committed.
 2. The PR thread has a reply explaining what was done.
 
-Declaring a comment "addressed" before both are complete is an IL-6 violation.
+Declaring a comment "addressed" before both are complete is an Iron Law violation.
 
 ---
 
@@ -124,7 +124,7 @@ When you genuinely believe a reviewer is wrong:
 
 ## Right Wrongs in Review
 
-If a reviewer finds something you missed that you should have caught:
+If a reviewer finds something you missed that you were responsible for catching:
 
 ```
 1. ACKNOWLEDGE: "This is correct -- I missed it."

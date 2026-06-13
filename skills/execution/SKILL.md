@@ -102,7 +102,7 @@ If you catch yourself thinking any of these:
 - "This is done enough to move on"
 - "Evidence contradicts the plan but I'll finish this step first" -- **Stop. Confront reality immediately.** State what the plan assumed, what evidence shows, and what that means for remaining todos. Revise the plan before proceeding, even if it voids completed work. Continuing on a plan you know is wrong is not progress.
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
-- "I see a DRY violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
+- "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -160,7 +160,7 @@ For trade-off discipline structure and the Approach A/B/Choice template, see `re
 - Refactoring while tests are red (behavior is unknown)
 - Profiling before a clean design exists (profiling a mess optimizes the wrong thing)
 
-For the relationship between MIWMIRMIF and the TDD cycle, see `references/EXECUTION_PATTERNS.md`.
+For the relationship between Make It Work, Make It Right, Make It Fast (MIWMIRMIF) and the TDD cycle, see `references/EXECUTION_PATTERNS.md`.
 
 ---
 

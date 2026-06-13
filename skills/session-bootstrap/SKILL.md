@@ -31,7 +31,7 @@ Reload the relevant skill(s) immediately when ANY of these occur:
 1. **Picking up a new todo** -- reload the skill(s) for that todo's domain before starting work
 2. **After 3 user prompts** without a skill reload -- reload the skill for whatever you are currently doing
 3. **After a user correction or redirect** -- the correction is evidence the skill was misapplied or is stale; reload it
-4. **After context compaction** -- any compaction event requires full skill reload for all relevant domains
+4. **After context compaction** -- any compaction event requires full skill reload for all skills required by the current task
 
 **Announce the reload:** "Reloading `[skill-name]` -- [reason: new todo / 3 prompts / correction]."
 

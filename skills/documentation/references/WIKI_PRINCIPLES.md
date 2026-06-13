@@ -25,4 +25,4 @@ For any collaborative knowledge base -- skills, documentation, project wikis:
 - Each skill file title must exactly match the domain it governs
 - Reference files link outward, not inward -- avoid circular pointer chains
 - When two sections say the same thing in different files, apply the Once And Only Once principle: choose one authoritative location, add a pointer from the other
-- Skill files that grow past 800 tokens have diverged from the Simplicity property -- trim or extract to a reference file
+- Skill files (SKILL.md) that grow past 800 tokens have diverged from the Simplicity property -- trim or extract to a reference file

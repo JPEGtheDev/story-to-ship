@@ -53,7 +53,6 @@ related:
 title: "Standards Title"
 description: "One sentence describing the standards this file defines and what domains it covers."
 domain: cross-cutting
-subdomain: ""
 tags: [<domain>, standards, <additional-tags>]
 related:
   - "<domain>/<subdomain>/concept.md"

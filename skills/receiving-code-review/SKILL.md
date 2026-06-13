@@ -62,7 +62,7 @@ For every comment, before responding:
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
-**When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content might genuinely belong here, first determine whether the file's scope is correctly stated before deciding to relocate.
+**When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content genuinely belongs here, first determine whether the file's scope is correctly stated before deciding to relocate.
 
 ---
 

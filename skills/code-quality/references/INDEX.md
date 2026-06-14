@@ -19,7 +19,7 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 | File | Covers |
 |------|--------|
 | `code-smells.md` | 6 universal smells from Fowler's _Refactoring_ -- Long Method, Duplicated Code, Long Parameter List, Speculative Generality, Divergent Change, Shotgun Surgery |
-| `design-principles.md` | Design heuristics from Ward Cunningham's C2 wiki -- DRY, YAGNI, Composed Method, Beck's Rules; all paradigms |
+| `design-principles.md` | Design heuristics from Ward Cunningham's C2 wiki -- Don't Repeat Yourself (DRY), You Aren't Gonna Need It (YAGNI), Composed Method, Beck's Rules; all paradigms |
 
 ---
 

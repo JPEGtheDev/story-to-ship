@@ -13,8 +13,9 @@ One agent per skill directory -- the agent reviews `SKILL.md` and every file in 
    - `SIZE_AND_COMPRESSION.md` -> `{{SIZE_AND_COMPRESSION}}`
    - `REVIEW_INSTRUCTIONS.md` -> `{{REVIEW_INSTRUCTIONS}}`
 2. For each skill: substitute all four placeholders for the `skill-reviewer` agent, set `{{SKILL_PATH}}` (absolute path to the skill's `SKILL.md` inside the worktree), `{{RECENT_CHANGES}}`, and `{{WORKTREE_PATH}}` (the pre-created worktree path, e.g. `<repo_root>/.worktrees/<agent-name>`), dispatch. The agent derives `references/` from `dirname({{SKILL_PATH}})` at runtime.
-3. Collect all reports before acting on any result.
-4. For each NEEDS WORK verdict: update the skill and re-dispatch a review of that file.
+3. For each modified reference file listed in `{{RECENT_CHANGES}}`: dispatch a SEPARATE skill-reviewer agent with that file as the primary focus. Include the file path explicitly in the prompt. The agent applies the full Step 2 quality checklist (weak language, acronym rule, absolute paths, cross-skill refs, enforcement co-location) adapted for a reference file -- skip anatomy element checks (Iron Law, Announcement, Gate Function, Rationalization Table) since those only apply to SKILL.md.
+4. Collect all reports before acting on any result.
+5. For each NEEDS WORK verdict: update the skill and re-dispatch a review of that file.
 
 ---
 

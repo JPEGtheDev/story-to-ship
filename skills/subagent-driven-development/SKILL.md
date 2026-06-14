@@ -105,8 +105,6 @@ These thoughts mean stop immediately:
 | Reading one known file | No | do inline |
 | Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos require subagent dispatch regardless of size) |
 
-**Max 4 concurrent agents.** Beyond that, results compete for context and quality drops.
-
 ---
 
 ## Implementer Status Codes

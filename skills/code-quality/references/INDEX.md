@@ -28,7 +28,7 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 | File | Covers |
 |------|--------|
 | `oop/index.md` | Dispatch table: trigger conditions + ordered 5-check list + pass/fail gate |
-| `oop/review-checklist.md` | Full pre-commit checklist -- format, build, tests, RAII, headers |
+| `oop/review-checklist.md` | Full pre-commit checklist -- format, build, tests, Resource Acquisition Is Initialization (RAII), headers |
 | `oop/oop-smells.md` | 12 OOP-specific smells from Fowler's _Refactoring_ -- Feature Envy, Data Clumps, Primitive Obsession, etc. |
 | `oop/cpp-toolchain.md` | clang-format and clang-tidy configuration |
 | `oop/formatting-rules.md` | Human-reviewable formatting patterns clang-format does not catch |

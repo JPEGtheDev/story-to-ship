@@ -5,7 +5,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 3. Feature Envy
+### 1. Feature Envy
 
 **What it looks like:** A method calls getters or accesses data on a different object more often than it uses its own data.
 
@@ -15,7 +15,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 4. Data Clumps
+### 2. Data Clumps
 
 **What it looks like:** The same group of variables appears together in multiple places -- method signatures, class fields, function calls.
 
@@ -25,7 +25,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 5. Primitive Obsession
+### 3. Primitive Obsession
 
 **What it looks like:** Domain concepts represented as primitives -- phone number as a string, currency as a double, date range as two integers.
 
@@ -35,7 +35,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 6. Switch Statement Smell
+### 4. Switch Statement Smell
 
 **What it looks like:** Switch statements or if-chains recurring in multiple places, each branch handling a type or state.
 
@@ -45,7 +45,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 8. Lazy Class
+### 5. Lazy Class
 
 **What it looks like:** A class that does very little -- minimal methods, or acts as a pass-through to another class.
 
@@ -55,7 +55,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 10. Temporary Field
+### 6. Temporary Field
 
 **What it looks like:** An instance variable only populated in certain code paths; sometimes null, lifecycle unclear.
 
@@ -65,7 +65,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 11. Message Chains
+### 7. Message Chains
 
 **What it looks like:** Long chains of method calls -- `a.getB().getC().getD().doSomething()`.
 
@@ -75,7 +75,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 12. Middle Man
+### 8. Middle Man
 
 **What it looks like:** A class that delegates most of its work to another class, adding little value.
 
@@ -85,7 +85,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 13. Inappropriate Intimacy
+### 9. Inappropriate Intimacy
 
 **What it looks like:** One class reaches into another class's private data or methods; the boundary is blurred.
 
@@ -95,7 +95,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 14. Data Class
+### 10. Data Class
 
 **What it looks like:** A class with only fields and getters/setters; little to no behavior.
 
@@ -105,7 +105,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 15. Refused Bequest
+### 11. Refused Bequest
 
 **What it looks like:** A subclass doesn't use or need many of the methods from its parent.
 
@@ -115,7 +115,7 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 ---
 
-### 18. Parallel Inheritance Hierarchies
+### 12. Parallel Inheritance Hierarchies
 
 **What it looks like:** For every subclass of A, you must create a corresponding subclass of B.
 

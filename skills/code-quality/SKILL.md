@@ -1,7 +1,7 @@
 ---
 name: code-quality
 license: MIT
-description: Use when writing or reviewing code in any paradigm to apply universal and paradigm-specific quality standards before committing.
+description: Use when writing or reviewing code in any paradigm.
 ---
 
 
@@ -36,9 +36,8 @@ Before every commit:
 
 Run in order; stop at first match:
 1. `.cpp` or `.hpp` files modified -> OOP tier
-2. `grep -rn "^class " <modified .py files>` returns results -> OOP tier
-3. `.sh`, `.ps1`, or `.bash` files modified -> scripting tier
-4. No match -> universal only (skip Step 3)
+2. `grep -rn "^class " $(git diff --cached --name-only | grep '\.py$')` returns results -> OOP tier
+3. No match -> universal only (skip Step 3)
 
 ### Step 3: Paradigm Tier
 
@@ -88,8 +87,8 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 
 ## Reference
 
-- `references/code-smells.md` -- universal smells (smells 1, 2, 7, 9, 16, 17)
-- `references/oop/oop-smells.md` -- OOP-specific smells (smells 3-6, 8, 10-15, 18)
+- `references/code-smells.md` -- universal smells (Long Method, Long Parameter List, Duplicated Code, Speculative Generality, Divergent Change, Shotgun Surgery)
+- `references/oop/oop-smells.md` -- OOP-specific smells (Feature Envy, Data Clumps, Primitive Obsession, etc.)
 - `references/design-principles.md` -- design heuristics (all paradigms)
 - `references/oop/index.md` -- OOP tier dispatch table
 - `references/oop/cpp-toolchain.md` -- clang-format, clang-tidy, cmake

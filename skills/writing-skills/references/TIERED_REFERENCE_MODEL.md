@@ -2,23 +2,36 @@
 
 Use this model when a skill applies universally but has paradigm-specific or domain-specific checks that fire conditionally.
 
+This model is the skill-reference equivalent of the `documentation` skill's domain/subdomain directory structure. The structural pattern is the same: universal root + conditional subfolders with an index. The difference is purpose -- documentation domains organize for retrieval; reference tiers organize for conditional execution.
+
 ---
 
-## Model Definition
+## Structural Parallel
+
+| Documentation skill | Tiered reference model |
+|---------------------|------------------------|
+| `docs/<domain>/` | `references/<paradigm>/` |
+| `docs/<domain>/INDEX.md` | `references/<paradigm>/index.md` |
+| Cross-cutting standards (`docs/UPPERCASE.md`) | Universal references (`references/*.md`) |
+| Domain guides (conditional by topic) | Paradigm references (conditional by file type) |
+
+**Root `references/` = universal tier.** Loaded unconditionally for every task -- same as cross-cutting standards in docs.
+
+**Paradigm subfolder = conditional tier.** Fires only when the triggering condition is true -- same as domain guides in docs.
+
+---
+
+## Directory Layout
 
 ```
 references/
-├── <universal-ref-a>.md      <- fires unconditionally for every task
-├── <universal-ref-b>.md      <- fires unconditionally for every task
-└── <paradigm>/
-    ├── index.md              <- dispatch table: conditions + ordered check list
-    ├── <ref-a>.md
-    └── <ref-b>.md
++-  <universal-ref-a>.md      <- fires unconditionally for every task
++-  <universal-ref-b>.md      <- fires unconditionally for every task
++-- <paradigm>/
+    +-- index.md              <- dispatch table: conditions + ordered check list
+    +-- <ref-a>.md
+    +-- <ref-b>.md
 ```
-
-**Root `references/` = universal tier.** Every file here is loaded for every task, no conditions.
-
-**Paradigm subfolder = conditional tier.** Fires only when the triggering condition is true. The subfolder's `index.md` is the mechanically-executable entry point.
 
 ---
 
@@ -34,7 +47,7 @@ Each entry must be mechanically executable: a reader (human or agent) can follow
 ```markdown
 Apply this tier when any of the following are true:
 - Modified files include `.cpp` or `.hpp` extensions
-- `grep -rn "^class " <modified .py files>` returns results
+- `grep -rn "^class " $(git diff --cached --name-only | grep '\.py$')` returns results
 ```
 
 **Ordered check list** -- numbered, action-first, reference-linked:
@@ -104,3 +117,10 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 | Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` |
 
 Shared paradigm tiers (OOP/C++ and OOP/Python both use `oop/`) are the norm, not the exception. The dispatch table in `oop/index.md` notes which checks apply to which languages where they differ.
+
+---
+
+## Related
+
+- `documentation` skill -- domain/subdomain model this structure mirrors; read for retrieval-oriented hierarchy
+- `code-quality` skill -- the primary consumer of this model; `references/oop/` is the reference implementation

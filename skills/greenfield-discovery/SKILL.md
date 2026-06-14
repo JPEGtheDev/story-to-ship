@@ -23,7 +23,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Load this skill when the user describes a project they want to build from scratch, before any architecture or implementation discussion begins.
 
-If a `## Domain Model` block already exists in the conversation: DO NOT re-run the interview. Read the existing block and proceed to `greenfield-architecture` or the next appropriate skill. Asking the user to re-describe information already in a `## Domain Model` block is a protocol violation.
+If a `## Domain Model` block already exists in the conversation: DO NOT re-run the interview. Read the existing block and proceed to the next step in the greenfield workflow (architecture or implementation planning). Asking the user to re-describe information already in a `## Domain Model` block is a protocol violation.
 
 ---
 

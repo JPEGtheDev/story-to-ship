@@ -24,15 +24,17 @@ These rows are present in the session-bootstrap "On Start" table:
 | Task type | Skill |
 |-----------|-------|
 | Starting a new project from scratch | `greenfield-discovery` |
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` |
 
 ## Dispatch Rows (deferred)
 
-The following row is NOT yet in the session-bootstrap table because the referenced skill
-does not exist. Add it when the `exception-philosophy` skill ships (Story 4):
+The following rows are NOT yet in the session-bootstrap table because the referenced skills
+do not exist. Add each row only when its skill ships:
 
-| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` |
+| Task type | Skill | Ships with |
+|-----------|-------|------------|
+| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 |
+| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 |
+| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 |
 
 ## Greenfield Invocation Chain
 

@@ -88,7 +88,8 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 
 ## Reference
 
-- `references/code-smells.md` -- universal + OOP smells (Universal: smells 1, 2, 7, 9, 16, 17)
+- `references/code-smells.md` -- universal smells (smells 1, 2, 7, 9, 16, 17)
+- `references/oop/oop-smells.md` -- OOP-specific smells (smells 3-6, 8, 10-15, 18)
 - `references/design-principles.md` -- design heuristics (all paradigms)
 - `references/oop/index.md` -- OOP tier dispatch table
 - `references/oop/cpp-toolchain.md` -- clang-format, clang-tidy, cmake

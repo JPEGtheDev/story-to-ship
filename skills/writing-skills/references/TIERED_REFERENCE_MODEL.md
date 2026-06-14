@@ -112,11 +112,9 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 | Paradigm | Trigger | Subfolder |
 |----------|---------|-----------|
 | Object-Oriented Programming (OOP) / C++ | `.cpp` or `.hpp` extensions | `oop/` |
-| OOP / Python | `grep -rn "^class "` returns results | `oop/` (shared tier) |
-| Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` |
-| Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` |
-
-Shared paradigm tiers (OOP/C++ and OOP/Python both use `oop/`) are the norm, not the exception. The dispatch table in `oop/index.md` notes which checks apply to which languages where they differ.
+| OOP / Python | deferred -- `references/python-oop/` does not exist yet | -- |
+| Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` (deferred) |
+| Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` (deferred) |
 
 ---
 

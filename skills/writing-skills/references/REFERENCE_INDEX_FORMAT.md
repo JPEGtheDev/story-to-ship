@@ -11,7 +11,7 @@ related:
 
 # Skill Reference Index Format
 
-Every skill that has a `references/` directory MUST have a `references/INDEX.md` file.
+Any skill whose `references/` directory has files added, removed, or renamed MUST have a `references/INDEX.md` updated to reflect the change.
 Every `references/INDEX.md` file MUST follow this format exactly.
 
 ---

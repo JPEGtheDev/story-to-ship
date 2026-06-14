@@ -13,7 +13,7 @@ Does NOT apply when: An existing project is being extended or refactored. Use ex
 
 ## Forces
 
-Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. The `greenfield-discovery` skill is the gate that ensures domain understanding precedes every downstream decision.
+Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. The `greenfield-discovery` skill is the gate that ensures domain understanding precedes every downstream decision.
 
 Adding dispatch rows before their referenced skills exist causes broken sessions -- the model invokes a skill file that does not exist. Rows are added only when the referenced skill ships.
 

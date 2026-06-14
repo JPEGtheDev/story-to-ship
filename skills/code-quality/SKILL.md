@@ -33,10 +33,10 @@ Before every commit:
 ### Step 2: Identify Paradigm
 
 Run in order; stop at first match:
-1. `.cpp` or `.hpp` files modified -> Object-Oriented Programming (OOP) tier
-2. `grep -rn "^class " $(git diff HEAD --name-only | grep '\.py$')` returns results -> OOP tier
-3. No match -> universal only (skip Step 3)
+1. `.cpp` or `.hpp` files modified -> C++ Object-Oriented Programming (OOP) tier (`references/oop/index.md`)
+2. No match -> universal only (skip Step 3)
 
+**Python OOP tier** (Python files with `class` definitions): deferred -- `references/python-oop/` does not exist yet. Apply universal tier only.
 **Scripting tier** (`.sh`, `.ps1`, `.bash`): deferred -- `references/scripting/` does not exist yet. Apply universal tier only.
 
 ### Step 3: Paradigm Tier

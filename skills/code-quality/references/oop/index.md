@@ -1,8 +1,6 @@
-# OOP Tier -- Dispatch Table
+# C++ OOP Tier -- Dispatch Table
 
-Apply this tier when any of the following are true:
-- Modified files include `.cpp` or `.hpp` extensions
-- `grep -rn "^class " $(git diff HEAD --name-only | grep '\.py$')` returns results
+Apply this tier when modified files include `.cpp` or `.hpp` extensions.
 
 ## Checks to Apply (in order)
 

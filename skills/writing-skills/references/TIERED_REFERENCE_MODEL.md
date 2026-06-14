@@ -47,7 +47,7 @@ Each entry must be mechanically executable: a reader (human or agent) can follow
 ```markdown
 Apply this tier when any of the following are true:
 - Modified files include `.cpp` or `.hpp` extensions
-- `grep -rn "^class " $(git diff --cached --name-only | grep '\.py$')` returns results
+- `git diff --cached --name-only | grep '\.py$' | xargs grep -l "^class "` returns results
 ```
 
 **Ordered check list** -- numbered, action-first, reference-linked:

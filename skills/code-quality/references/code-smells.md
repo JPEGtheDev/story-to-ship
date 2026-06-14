@@ -4,7 +4,9 @@ Source: Martin Fowler's _Refactoring_ -- canonical code smells that signal deepe
 
 ---
 
-## The 18 Canonical Code Smells
+## Universal Smells (apply to all paradigms)
+
+Smells 1, 2, 7, 9, 16, 17 apply regardless of language or paradigm. Check these for every code review.
 
 ### 1. Long Method
 
@@ -31,6 +33,10 @@ Source: Martin Fowler's _Refactoring_ -- canonical code smells that signal deepe
 **Primary Refactorings:** Introduce Parameter Object, Replace Parameter with Method, introduce a lightweight context object
 
 ---
+
+## OOP Smells (class-based code only)
+
+Smells 3-6, 8, 10-15, 18 require class or inheritance concepts. Apply these only when working on OOP code. Load references/oop/index.md for OOP-specific refactoring guidance.
 
 ### 3. Feature Envy
 

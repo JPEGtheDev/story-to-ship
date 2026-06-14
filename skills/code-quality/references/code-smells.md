@@ -25,7 +25,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/oop-smells.md
 
 ---
 
-### 7. Duplicated Code
+### 3. Duplicated Code
 
 **What it looks like:** The same code structure appears in two or more places.
 
@@ -35,7 +35,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/oop-smells.md
 
 ---
 
-### 9. Speculative Generality
+### 4. Speculative Generality
 
 **What it looks like:** Abstractions, parameters, or functions added "just in case" for scenarios that may never occur.
 
@@ -45,7 +45,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/oop-smells.md
 
 ---
 
-### 16. Divergent Change
+### 5. Divergent Change
 
 **What it looks like:** A single module must be modified for different unrelated reasons.
 
@@ -55,7 +55,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/oop-smells.md
 
 ---
 
-### 17. Shotgun Surgery
+### 6. Shotgun Surgery
 
 **What it looks like:** One logical change requires editing many small pieces in many different places.
 

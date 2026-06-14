@@ -23,7 +23,7 @@ Before every commit:
 
 ### Step 1: Universal Tier (all code, no exceptions)
 
-1. `references/code-smells.md` Universal Smells section -- none of smells 1, 2, 7, 9, 16, 17 present in changed code
+1. `references/code-smells.md` Universal Smells section -- none of smells 1-6 present in changed code
 2. `references/design-principles.md` -- no principle violations (Don't Repeat Yourself (DRY), You Aren't Gonna Need It (YAGNI), Composed Method, Beck's Rules)
 3. Self-documenting check: no comment substitutes for a poor name; no magic numbers; no clever code
 

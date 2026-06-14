@@ -25,15 +25,21 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 
 ## OOP Tier (`oop/`)
 
+### C++ (`oop/cpp/`)
+
 | File | Covers |
 |------|--------|
-| `oop/index.md` | Dispatch table: trigger conditions + ordered 5-check list + pass/fail gate |
-| `oop/review-checklist.md` | Full pre-commit checklist -- format, build, tests, Resource Acquisition Is Initialization (RAII), headers |
-| `oop/oop-smells.md` | 12 OOP-specific smells from Fowler's _Refactoring_ -- Feature Envy, Data Clumps, Primitive Obsession, etc. |
-| `oop/cpp-toolchain.md` | clang-format and clang-tidy configuration |
-| `oop/formatting-rules.md` | Human-reviewable formatting patterns clang-format does not catch |
-| `oop/naming-tables.md` | Naming convention tables by category for OOP identifiers |
-| `oop/invocation.md` | How the OOP tier is invoked; maps to the tier check sequence |
+| `oop/cpp/index.md` | Dispatch table: trigger conditions + ordered 5-check list + pass/fail gate |
+| `oop/cpp/review-checklist.md` | Full pre-commit checklist -- format, build, tests, Resource Acquisition Is Initialization (RAII), headers |
+| `oop/cpp/oop-smells.md` | 12 OOP-specific smells from Fowler's _Refactoring_ -- Feature Envy, Data Clumps, Primitive Obsession, etc. |
+| `oop/cpp/cpp-toolchain.md` | clang-format and clang-tidy configuration |
+| `oop/cpp/formatting-rules.md` | Human-reviewable formatting patterns clang-format does not catch |
+| `oop/cpp/naming-tables.md` | Naming convention tables by category for OOP identifiers |
+| `oop/cpp/invocation.md` | How the OOP tier is invoked; maps to the tier check sequence |
+
+### Python (`oop/python/`) -- deferred
+
+`oop/python/` does not exist yet. Apply universal tier only for Python OOP files.
 
 ---
 

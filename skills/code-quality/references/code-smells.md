@@ -1,7 +1,7 @@
 # Code Smells -- Universal
 
 Source: Martin Fowler's _Refactoring_. These smells apply to all paradigms and languages.
-For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/oop-smells.md`.
+For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smells.md`.
 
 ---
 

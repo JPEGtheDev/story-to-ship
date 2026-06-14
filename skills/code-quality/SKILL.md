@@ -33,10 +33,10 @@ Before every commit:
 ### Step 2: Identify Paradigm
 
 Run in order; stop at first match:
-1. `.cpp` or `.hpp` files modified -> C++ Object-Oriented Programming (OOP) tier (`references/oop/index.md`)
+1. `.cpp` or `.hpp` files modified -> C++ Object-Oriented Programming (OOP) tier (`references/oop/cpp/index.md`)
 2. No match -> universal only (skip Step 3)
 
-**Python OOP tier** (Python files with `class` definitions): deferred -- `references/python-oop/` does not exist yet. Apply universal tier only.
+**Python OOP tier** (Python files with `class` definitions): deferred -- `references/oop/python/` does not exist yet. Apply universal tier only.
 **Scripting tier** (`.sh`, `.ps1`, `.bash`): deferred -- `references/scripting/` does not exist yet. Apply universal tier only.
 
 ### Step 3: Paradigm Tier
@@ -89,14 +89,14 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 ## Reference
 
 - `references/code-smells.md` -- universal smells (Long Method, Long Parameter List, Duplicated Code, Speculative Generality, Divergent Change, Shotgun Surgery)
-- `references/oop/oop-smells.md` -- OOP-specific smells (Feature Envy, Data Clumps, Primitive Obsession, etc.)
+- `references/oop/cpp/oop-smells.md` -- OOP-specific smells (Feature Envy, Data Clumps, Primitive Obsession, etc.)
 - `references/design-principles.md` -- design heuristics (all paradigms)
-- `references/oop/index.md` -- OOP tier dispatch table
-- `references/oop/cpp-toolchain.md` -- clang-format, clang-tidy, cmake
-- `references/oop/formatting-rules.md` -- human-reviewable C++ formatting patterns
-- `references/oop/naming-tables.md` -- OOP naming conventions
-- `references/oop/review-checklist.md` -- full OOP pre-commit checklist
-- `references/oop/invocation.md` -- OOP tier invocation instructions
+- `references/oop/cpp/index.md` -- OOP tier dispatch table
+- `references/oop/cpp/cpp-toolchain.md` -- clang-format, clang-tidy, cmake
+- `references/oop/cpp/formatting-rules.md` -- human-reviewable C++ formatting patterns
+- `references/oop/cpp/naming-tables.md` -- OOP naming conventions
+- `references/oop/cpp/review-checklist.md` -- full OOP pre-commit checklist
+- `references/oop/cpp/invocation.md` -- OOP tier invocation instructions
 - Commit format: `versioning` skill
 - Testing patterns: `testing` skill
 - C++ runtime patterns: `cpp-patterns` skill

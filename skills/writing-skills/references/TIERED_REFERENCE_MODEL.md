@@ -111,8 +111,8 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 
 | Paradigm | Trigger | Subfolder |
 |----------|---------|-----------|
-| Object-Oriented Programming (OOP) / C++ | `.cpp` or `.hpp` extensions | `oop/` |
-| OOP / Python | deferred -- `references/python-oop/` does not exist yet | -- |
+| Object-Oriented Programming (OOP) / C++ | `.cpp` or `.hpp` extensions | `oop/cpp/` |
+| OOP / Python | deferred -- `references/oop/python/` does not exist yet | `oop/python/` (deferred) |
 | Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` (deferred) |
 | Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` (deferred) |
 
@@ -121,4 +121,4 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 ## Related
 
 - `documentation` skill -- domain/subdomain model this structure mirrors; read for retrieval-oriented hierarchy
-- `code-quality` skill -- the primary consumer of this model; `references/oop/` is the reference implementation
+- `code-quality` skill -- the primary consumer of this model; `references/oop/cpp/` is the reference implementation

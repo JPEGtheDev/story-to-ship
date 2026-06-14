@@ -2,7 +2,7 @@
 
 Apply this tier when any of the following are true:
 - Modified files include `.cpp` or `.hpp` extensions
-- `grep -rn "^class " $(git diff --cached --name-only | grep '\.py$')` returns results
+- `grep -rn "^class " $(git diff HEAD --name-only | grep '\.py$')` returns results
 
 ## Checks to Apply (in order)
 

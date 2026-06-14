@@ -1,6 +1,6 @@
 # Skill Dispatch Table -- Greenfield Workflow
 
-Context, forces, and row definitions for the three greenfield dispatch rows added to the
+Context, forces, and row definitions for the one active greenfield dispatch row added to the
 session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 ---

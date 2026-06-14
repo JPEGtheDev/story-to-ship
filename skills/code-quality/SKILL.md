@@ -10,7 +10,7 @@ description: Use when writing or reviewing code in any paradigm.
 ```
 NO CODE SHIPS WITHOUT PASSING UNIVERSAL CHECKS AND PARADIGM CHECKS.
 YOU MUST: (1) verify all universal tier checks pass; (2) verify your paradigm's checks pass
-(see references/oop/index.md for OOP/C++). No exceptions.
+(see references/oop/index.md for Object-Oriented Programming (OOP)/C++). No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -26,7 +26,7 @@ Before every commit:
 ### Step 1: Universal Tier (all code, no exceptions)
 
 1. `references/code-smells.md` Universal Smells section -- none of smells 1, 2, 7, 9, 16, 17 present in changed code
-2. `references/design-principles.md` -- no principle violations (DRY, YAGNI, Composed Method, Beck's Rules)
+2. `references/design-principles.md` -- no principle violations (Don't Repeat Yourself (DRY), You Aren't Gonna Need It (YAGNI), Composed Method, Beck's Rules)
 3. Self-documenting check: no comment substitutes for a poor name; no magic numbers; no clever code
 
 [+] All 3 pass -> continue to Step 2
@@ -36,8 +36,10 @@ Before every commit:
 
 Run in order; stop at first match:
 1. `.cpp` or `.hpp` files modified -> OOP tier
-2. `grep -rn "^class " $(git diff --cached --name-only | grep '\.py$')` returns results -> OOP tier
+2. `grep -rn "^class " $(git diff HEAD --name-only | grep '\.py$')` returns results -> OOP tier
 3. No match -> universal only (skip Step 3)
+
+**Scripting tier** (`.sh`, `.ps1`, `.bash`): deferred -- `references/scripting/` does not exist yet. Apply universal tier only.
 
 ### Step 3: Paradigm Tier
 
@@ -82,6 +84,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - Skipping paradigm tier because it is a small change -- **STOP. File extension determines the tier.**
 - Comment explaining what a value is -- **STOP. Rename or refactor. Do not improve the comment.**
 - Writing code and planning to format "later in this session" -- **STOP. Run your project's formatter now.**
+- Running Step 2 paradigm detection before Step 1 passes -- **STOP. Universal tier is mandatory first. Paradigm tier does not substitute for it.**
 
 ---
 

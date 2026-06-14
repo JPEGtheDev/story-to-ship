@@ -111,7 +111,7 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 
 | Paradigm | Trigger | Subfolder |
 |----------|---------|-----------|
-| OOP / C++ | `.cpp` or `.hpp` extensions | `oop/` |
+| Object-Oriented Programming (OOP) / C++ | `.cpp` or `.hpp` extensions | `oop/` |
 | OOP / Python | `grep -rn "^class "` returns results | `oop/` (shared tier) |
 | Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` |
 | Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` |

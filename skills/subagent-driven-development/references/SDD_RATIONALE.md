@@ -1,4 +1,4 @@
-# Subagent-Driven Development (SDD) Rationale -- Why, Evidence Mandate, Delegation, Anti-Patterns, Red Flags
+# Subagent-Driven Development (SDD) Rationale -- Why, Evidence Mandate, Delegation, Anti-Patterns
 
 ## Why Subagents Are Mandatory
 
@@ -30,24 +30,7 @@ If you cannot point to a specific file, line, or test run -- dispatch a subagent
 
 ## Red Flags -- STOP
 
-These thoughts mean stop immediately:
-
-| Thought | Required action |
-|---------|----------------|
-| "I think the issue is..." | Dispatch explore agent -> read the actual code |
-| "I dispatched a subagent -- I'll also work on this while waiting" | STOP. The only permissible next call is read_agent. "I'll wait" is a binding constraint, not a statement of intent. |
-| "This should work because..." | Run it. Read the output. |
-| "I'm confident that..." | State the evidence, or dispatch to get it |
-| "It probably passes..." | Run the test suite |
-| "I remember that..." | Memory is always unverified -- dispatch |
-| "Based on how it usually works..." | Dispatch to confirm the actual behavior |
-| "Dispatching a file-modifying agent without creating a worktree first" | STOP. Create the worktree and load `using-git-worktrees` before dispatch. |
-| "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first -- every time, without exception. |
-| "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
-| "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Split unconditionally before dispatch. |
-| "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
-| "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
-| "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
+See the canonical Red Flags table in `../SKILL.md`.
 
 ## Delegation Quality Rules
 

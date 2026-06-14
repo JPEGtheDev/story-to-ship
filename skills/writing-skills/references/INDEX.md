@@ -6,7 +6,6 @@ subdomain: writing-skills
 tags: [skills, writing-skills, references, index]
 related:
   - "../SKILL.md"
-  - "../../code-quality/references/INDEX.md"
 ---
 
 # writing-skills References Index
@@ -32,5 +31,4 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- enforcement gate; drives skill creation and editing workflow
-- [code-quality references INDEX.md](../../code-quality/references/INDEX.md) -- reference implementation of the tiered model
+- [SKILL.md](../SKILL.md) -- enforcement gate; drives skill creation and editing workflow; the `code-quality` skill's `references/oop/` directory is the reference implementation of the tiered model

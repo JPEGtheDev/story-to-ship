@@ -48,7 +48,7 @@ related:
 - `domain` -- always `skills` for skill reference directories.
 - `subdomain` -- the skill directory name (e.g., `code-quality`, `writing-skills`).
 - `tags` -- MUST include `skills`, the skill name, `references`, and `index` as the first four entries.
-- `related` -- relative paths from the `references/` directory. Always include `"../SKILL.md"`. Add other cross-skill links when the index describes a tiered structure.
+- `related` -- relative paths from the `references/` directory. Always include `"../SKILL.md"`. DO NOT add paths to other skills' directories -- cross-skill references belong in prose inside the Related section, not as YAML paths.
 
 ---
 

@@ -34,7 +34,7 @@ Pick up todo -> Dispatch implementer -> Handle status code -> Stage 1 spec revie
 
 **Do not advance past any todo until both Stage 1 and Stage 2 are PASS/APPROVE.**
 
-See `references/SDD_LOOP.md` for the full decision tree with complete ASCII flow.
+See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow.
 
 ---
 

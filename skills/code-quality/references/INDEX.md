@@ -6,7 +6,6 @@ subdomain: code-quality
 tags: [skills, code-quality, references, index]
 related:
   - "../SKILL.md"
-  - "../../writing-skills/references/TIERED_REFERENCE_MODEL.md"
 ---
 
 # code-quality References Index
@@ -40,5 +39,4 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- enforcement gate that drives both tiers
-- [TIERED_REFERENCE_MODEL.md](../../writing-skills/references/TIERED_REFERENCE_MODEL.md) -- model this structure follows; read when adding a new paradigm tier
+- [SKILL.md](../SKILL.md) -- enforcement gate that drives both tiers; see the `writing-skills` skill's `TIERED_REFERENCE_MODEL` reference for the model this structure follows

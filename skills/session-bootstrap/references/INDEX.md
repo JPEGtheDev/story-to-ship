@@ -6,7 +6,6 @@ subdomain: session-bootstrap
 tags: [skills, session-bootstrap, references, index]
 related:
   - "../SKILL.md"
-  - "../../greenfield-discovery/SKILL.md"
 ---
 
 # session-bootstrap References Index
@@ -23,5 +22,4 @@ related:
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- "On Start" dispatch table that SKILL_DISPATCH_TABLE.md annotates
-- [greenfield-discovery/SKILL.md](../../greenfield-discovery/SKILL.md) -- the one active greenfield skill dispatched from the On Start table
+- [SKILL.md](../SKILL.md) -- "On Start" dispatch table that SKILL_DISPATCH_TABLE.md annotates; see the `greenfield-discovery` skill for the one active greenfield dispatch row

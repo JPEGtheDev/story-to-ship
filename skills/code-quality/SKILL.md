@@ -8,9 +8,7 @@ description: Use when writing or reviewing code in any paradigm.
 ## Iron Law
 
 ```
-NO CODE SHIPS WITHOUT PASSING UNIVERSAL CHECKS AND PARADIGM CHECKS.
-YOU MUST: (1) verify all universal tier checks pass; (2) verify your paradigm's checks pass
-(see references/oop/index.md for Object-Oriented Programming (OOP)/C++). No exceptions.
+YOU MUST RUN ALL UNIVERSAL CHECKS AND PARADIGM CHECKS BEFORE COMMITTING. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -35,7 +33,7 @@ Before every commit:
 ### Step 2: Identify Paradigm
 
 Run in order; stop at first match:
-1. `.cpp` or `.hpp` files modified -> OOP tier
+1. `.cpp` or `.hpp` files modified -> Object-Oriented Programming (OOP) tier
 2. `grep -rn "^class " $(git diff HEAD --name-only | grep '\.py$')` returns results -> OOP tier
 3. No match -> universal only (skip Step 3)
 

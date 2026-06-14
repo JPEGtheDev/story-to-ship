@@ -1,7 +1,7 @@
 # Example Run: Mathematical Model Simulator
 
 Fixture session demonstrating the `greenfield-discovery` skill on the prompt
-"I want to build a mathematical model simulator." Verifies AC: domain-specific vocabulary
+"I want to build a mathematical model simulator." Verifies Acceptance Criteria (AC): domain-specific vocabulary
 appears in the `## Domain Model` output (simulator, model, equations, trajectory).
 
 ---

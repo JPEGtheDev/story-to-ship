@@ -88,3 +88,4 @@ Related skills: `skill-reviewer`, `documentation`, `self-evaluation` -- see `ref
 - `references/MODEL_COMPATIBILITY.md` -- patterns most likely to be skipped by lower-end models
 - `references/REVIEW_INSTRUCTIONS.md` -- review process, checklist, qualitative questions, return format; injected into `skill-reviewer` agent at dispatch time
 - `references/DISPATCH_PATTERN.md` -- step-by-step dispatch instructions; read before auditing any skill
+- `references/TIERED_REFERENCE_MODEL.md` -- how to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading

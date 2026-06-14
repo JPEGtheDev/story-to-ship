@@ -1,16 +1,16 @@
 ---
 name: code-quality
 license: MIT
-description: Use when writing or reviewing C++ code, running pre-commit checks, or addressing formatting, naming, or static analysis violations.
+description: Use when writing or reviewing code in any paradigm to apply universal and paradigm-specific quality standards before committing.
 ---
 
 
 ## Iron Law
 
 ```
-NO UNFORMATTED OR UNTIDY CODE SHIPS
-YOU MUST run clang-format AND clang-tidy BEFORE every commit. CI will reject violations.
-No exceptions.
+NO CODE SHIPS WITHOUT PASSING UNIVERSAL CHECKS AND PARADIGM CHECKS.
+YOU MUST: (1) verify all universal tier checks pass; (2) verify your paradigm's checks pass
+(see references/oop/index.md for OOP/C++). No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -19,89 +19,49 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ---
 
-## Core Principle: Tools Enforce Style, Humans Write Logic
-
-Formatting and naming are automated via `.clang-format` and `.clang-tidy`. Never manually format code -- run the tools.
-
----
-
 ## BEFORE PROCEEDING
 
-Before every commit, verify:
+Before every commit:
 
-1. All C++ files formatted: `find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i`
-2. Formatting passes CI check: `find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run -Werror`
-3. `git diff` of every modified C++ file visually inspected -- do not trust silent tool output
-4. Build passes: `cmake --build build`
-5. All tests pass: run your project's test suite
+### Step 1: Universal Tier (all code, no exceptions)
 
-[+] All 5 met -> proceed to commit
-[-] Any unmet -> fix the failing step; do not commit
+1. `references/code-smells.md` Universal Smells section -- none of smells 1, 2, 7, 9, 16, 17 present in changed code
+2. `references/design-principles.md` -- no principle violations (DRY, YAGNI, Composed Method, Beck's Rules)
+3. Self-documenting check: no comment substitutes for a poor name; no magic numbers; no clever code
 
-**Note:** clang-format is C++ only. Never run it on Markdown, YAML, or documentation files -- it will corrupt them.
+[+] All 3 pass -> continue to Step 2
+[-] Any failing -> fix before proceeding
 
-See `references/CPP_TOOLCHAIN.md` for full command reference and optional clang-tidy invocation.
-See `references/FORMATTING_RULES.md` for formatting rule details.
+### Step 2: Identify Paradigm
 
----
+Run in order; stop at first match:
+1. `.cpp` or `.hpp` files modified -> OOP tier
+2. `grep -rn "^class " <modified .py files>` returns results -> OOP tier
+3. `.sh`, `.ps1`, or `.bash` files modified -> scripting tier
+4. No match -> universal only (skip Step 3)
 
-## Naming Conventions (clang-tidy enforced)
+### Step 3: Paradigm Tier
 
-`PascalCase` classes/enums - `camelCase` methods - `snake_case` vars/params - `snake_case_` private members - `UPPER_CASE` constants - `snake_case` files/namespaces - `<PROJECT>_<PATH>_<FILE>_H` guards
+Load `references/[paradigm]/index.md` and apply all checks listed there.
 
-See `references/NAMING_TABLES.md` for full naming examples.
-
-## Naming Pre-Flight
-
-Before naming a new `enum`, struct field, or constant: consult your project's naming conventions. Enumerators: `UPPER_CASE`.
+[+] All paradigm checks pass -> proceed to commit
+[-] Any failing -> fix before committing
 
 ---
 
 ## Self-Documenting Code
 
-**Readability is more important than development speed or execution speed.** Time spent on clarity is recovered many times over in maintenance, review, and debugging.
+**Readability is more important than development speed or execution speed.**
 
-**Comments are not intent.** Comments can go stale; code cannot. When a comment exists to explain what a value means, that is a signal the code must be rewritten -- not the comment improved.
+**Comments are not intent.** When a comment exists to explain what a value means, rewrite the code -- not the comment.
 
 | Signal | Wrong fix | Right fix |
 |--------|-----------|-----------|
-| `// 0=Fullscreen, 1=AutoCOM...` comment above a switch | Add a better comment | Replace magic numbers with a named enum |
+| `// 0=Fullscreen, 1=AutoCOM...` above a switch | Add a better comment | Replace magic numbers with a named enum |
 | `magic_value = 42; // timeout in ms` | Document the constant | `constexpr int kTimeoutMs = 42;` |
 | Function with a `bool` parameter | Comment at the call site | Replace with an enum or named overloads |
 
-**Rule:** If a comment is explaining what a value *is*, the comment is a code smell. Make the code say it directly.
-
----
-
-## Adding a Feature / Fixing a Bug
-
-See `references/CPP_TOOLCHAIN.md` for toolchain commands.
-
----
-
-## Code Smell Review Checklist
-
-Static analysis catches syntax violations. These structural smells require human review on every PR:
-
-- **DuplicatedCode** -- Same logic block in 2+ places? Extract it.
-- **LongMethod** -- Method longer than ~30 lines? Apply ExtractMethod.
-- **GodClass** -- One class controlling too many subsystems? Split responsibilities.
-- **DataClumps** -- Same 2+ variables always travelling together? Introduce a struct.
-- **PrimitiveObsession** -- Domain concepts as raw `int`, `float`, or `GLenum`? Introduce typed wrappers.
-
-See `references/CODE_SMELLS.md` for the full code smells catalog.
-
-[+] All checked -> no structural smells found
-[-] Any flagged -> log `[BROKEN WINDOW NOTED]` or fix before commit (see `cpp-patterns` skill)
-
----
-
-## Review Checklist
-
-See `references/REVIEW_CHECKLIST.md` for the full numbered pre-commit checklist.
-
-[+] All 10 met -> proceed to commit
-[-] Any unmet -> complete the failing step before committing
+**Rule:** If a comment explains what a value *is*, the comment is a code smell. Make the code say it.
 
 ---
 
@@ -109,39 +69,34 @@ See `references/REVIEW_CHECKLIST.md` for the full numbered pre-commit checklist.
 
 | Excuse | Reality |
 |--------|---------|
-| "I'll run clang-format once at the end before the PR" | Format after every meaningful change. Catch issues early, not in bulk. |
-| "clang-tidy has too many false positives, I'll skip it" | Fix or suppress with justification in code. Suppression without reason is tech debt. |
-| "The naming is close enough to the convention" | Exact naming prevents confusion across sessions and contributors. |
-| "Formatting is cosmetic, doesn't affect behavior" | Unformatted code gets rejected by CI. It's a hard gate, not a preference. |
-| "I'll clean up the style in a follow-up PR" | Style debt compounds. Clean it now while context is fresh. |
-| "The auto-formatter will handle it" | Run the auto-formatter explicitly -- it doesn't run itself. |
+| "I'll check quality at the end before the PR" | Run universal checks after every meaningful change. Catch issues early. |
+| "The paradigm tier does not apply to this small change" | Paradigm tier fires on file extension. No exceptions for small changes. |
+| "This code is too simple to need smell checks" | Universal smells (Long Method, Duplicated Code) appear in simple code. Run the check. |
+| "The auto-formatter will handle it" | Run your project's formatter explicitly -- it does not run itself. |
+| "I'll clean up style in a follow-up PR" | Style debt compounds. Clean now while context is fresh. |
 
 ---
 
 ## Red Flags -- STOP
 
-If you catch yourself thinking any of these, stop and follow the rule:
-- About to commit without running `clang-format -i`
-- "clang-tidy warning but it seems like a false positive"
-- "The naming is slightly different but close enough"
-- "I'll clean up formatting in the next commit"
-- "The CI will format it automatically"
-- Writing code and planning to format "later in this session"
-
-**All of these mean: Run `find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i` and `clang-tidy` before every commit. No exceptions.**
+- About to commit without running Step 1 -- **STOP. Run universal tier checks first.**
+- Skipping paradigm tier because it is a small change -- **STOP. File extension determines the tier.**
+- Comment explaining what a value is -- **STOP. Rename or refactor. Do not improve the comment.**
+- Writing code and planning to format "later in this session" -- **STOP. Run your project's formatter now.**
 
 ---
 
 ## Reference
 
-- Full coding standards: [`docs/CODING_STANDARDS.md`](../../../docs/CODING_STANDARDS.md)
+- `references/code-smells.md` -- universal smells (smells 1, 2, 7, 9, 16, 17)
+- `references/oop/oop-smells.md` -- OOP-specific smells (smells 3-6, 8, 10-15, 18)
+- `references/design-principles.md` -- design heuristics (all paradigms)
+- `references/oop/index.md` -- OOP tier dispatch table
+- `references/oop/cpp-toolchain.md` -- clang-format, clang-tidy, cmake
+- `references/oop/formatting-rules.md` -- human-reviewable C++ formatting patterns
+- `references/oop/naming-tables.md` -- OOP naming conventions
+- `references/oop/review-checklist.md` -- full OOP pre-commit checklist
+- `references/oop/invocation.md` -- OOP tier invocation instructions
 - Commit format: `versioning` skill
 - Testing patterns: `testing` skill
-- `references/CPP_TOOLCHAIN.md` -- formatting settings, clang-tidy, workflow patterns
-- `references/FORMATTING_RULES.md` -- human-reviewable formatting patterns
-- `cpp-patterns` skill -- C++ runtime patterns
-- `references/DESIGN_PRINCIPLES.md` -- design heuristics
-- `references/CODE_SMELLS.md` -- smells, refactoring map
-- `references/NAMING_TABLES.md` -- naming examples
-- `references/REVIEW_CHECKLIST.md` -- pre-review checklist
-- `references/INVOCATION.md` -- agent invocation instructions
+- C++ runtime patterns: `cpp-patterns` skill

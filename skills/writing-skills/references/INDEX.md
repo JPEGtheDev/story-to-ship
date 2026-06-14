@@ -1,6 +1,6 @@
 ---
 title: "writing-skills References Index"
-description: "Index of all reference files for the writing-skills skill -- skill anatomy schemas, voice and authority rules, size constraints, model compatibility notes, review instructions, dispatch pattern, and the tiered reference model."
+description: "Index of all reference files for the writing-skills skill -- skill anatomy schemas, voice and authority rules, size constraints, model compatibility notes, review instructions, dispatch pattern, tiered reference model, and reference index format."
 domain: skills
 subdomain: writing-skills
 tags: [skills, writing-skills, references, index]
@@ -26,6 +26,7 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 | `REVIEW_INSTRUCTIONS.md` | Review checklist, qualitative questions, and return format; injected into `skill-reviewer` agent at dispatch time |
 | `DISPATCH_PATTERN.md` | Step-by-step dispatch instructions for auditing skills; read before dispatching any skill-reviewer agent |
 | `TIERED_REFERENCE_MODEL.md` | How to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading |
+| `REFERENCE_INDEX_FORMAT.md` | Required format for `references/INDEX.md` files -- YAML frontmatter template, file table rules, Related section rules, and complete template; read before creating or updating any INDEX.md |
 
 ---
 

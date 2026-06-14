@@ -46,6 +46,10 @@ Before creating, editing, or shipping any skill or agent template:
 6. **Auditing existing skills?** Load `skill-reviewer` agent template; inject 4 reference files; one agent per skill directory (reviews `SKILL.md` + all `references/` files).
    - Not following -> read `references/DISPATCH_PATTERN.md` before dispatching any review agents.
 
+7. **Adding, removing, or renaming a reference file?** Ensure `references/INDEX.md` exists and is updated to reflect the change. Follow `references/REFERENCE_INDEX_FORMAT.md` for the required YAML frontmatter, file table, and Related section.
+   - [+] INDEX.md exists and lists this file -> proceed
+   - [-] INDEX.md missing or stale -> create or update it before committing
+
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above
 
@@ -89,3 +93,4 @@ Related skills: `skill-reviewer`, `documentation`, `self-evaluation` -- see `ref
 - `references/REVIEW_INSTRUCTIONS.md` -- review process, checklist, qualitative questions, return format; injected into `skill-reviewer` agent at dispatch time
 - `references/DISPATCH_PATTERN.md` -- step-by-step dispatch instructions; read before auditing any skill
 - `references/TIERED_REFERENCE_MODEL.md` -- how to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading
+- `references/REFERENCE_INDEX_FORMAT.md` -- required format for references/INDEX.md files (YAML frontmatter, file table, Related section); read before creating or updating any INDEX.md

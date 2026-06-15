@@ -165,7 +165,7 @@ behavior is habitual, not conditional.
 | "'Always active' means I don't need to invoke honesty" | The declaration activates the rule reference, not the rule body. Without invocation, the confidence vocabulary and process language rules are absent. | Invoke `honesty` explicitly. Every session. |
 | "I ran the hook script and it exited 0 -- hooks are working" | Script execution != CLI mechanism. The CLI reads hooks.json once at session start. An in-session fix to hooks.json is NOT active until the next session. Do not claim hooks are working until a new session confirms hook.end success=true. | Restart the session. Verify hook.end success=true fires before claiming hooks are active. |
 | "I'm just gathering context, not reviewing"        | Research reading to inform a plan is still review. Inline review is biased by your assumptions. | Dispatch an explore or code-review agent for any 3+ file research task. |
-| "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. Run `git checkout main && git pull && git checkout -b <new-branch>`. |
+| "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. | Run `git checkout main && git pull && git checkout -b <new-branch>`. |
 
 ## Related Skills
 

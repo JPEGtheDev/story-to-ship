@@ -10,9 +10,8 @@ description: Use when completing any session.
 ```
 YOU MUST END EVERY SESSION WITH SELF-EVALUATION.
 No exceptions.
-```
-
 Violating the letter of this rule is violating the spirit of this rule.
+```
 
 **Announce at start:** "I am using the self-evaluation skill for this session."
 

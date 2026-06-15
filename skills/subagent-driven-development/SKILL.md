@@ -11,9 +11,8 @@ description: Use when delegating implementation tasks, confirming theories, runn
 YOU MUST DISPATCH BEFORE GUESSING -- SUBAGENTS ARE CHEAP, WRONG ASSUMPTIONS ARE EXPENSIVE.
 YOU MUST DISPATCH REVIEWERS AFTER EVERY TODO -- SPEC COMPLIANCE FIRST, THEN CODE QUALITY.
 No exceptions.
-```
-
 Violating the letter of these rules is violating the spirit of these rules.
+```
 
 **Announce at start:** "I am using the subagent-driven-development skill to [dispatch/review/confirm] [brief description]."
 

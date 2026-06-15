@@ -48,8 +48,6 @@ git -C .worktrees/agent-<name> branch --show-current
 # Must NOT equal the active development branch
 ```
 
-Use `.worktrees/agent-<name>` as the path -- inside the repo, gitignored, named descriptively.
-
 ### List active worktrees
 
 ```bash
@@ -67,36 +65,29 @@ git branch -d agent/<name>   # only after merging or discarding
 
 ## BEFORE PROCEEDING
 
-```
-BEFORE creating a worktree, verify:
+Before creating a worktree, verify:
 1. The task is independent enough for a subagent (not tightly coupled to in-progress main work)
 2. A descriptive name for the branch exists: agent/<purpose>
 3. The subagent prompt includes the worktree path explicitly
 
 [+] All met -> create the worktree and dispatch
 [-] Any unmet -> work in the main context instead
-```
 
 ---
 
 ## Subagent Dispatch Pattern
 
-When dispatching a subagent to a worktree:
-
-1. Create the worktree first (main context)
-2. Pass the worktree path to the subagent as its working directory
-3. Subagent commits to its branch inside the worktree
-4. Main context reviews the diff: `git diff main..agent/<name>`
-5. If approved: merge or cherry-pick into main
-6. If rejected: `git worktree remove` -- no cleanup needed in main
+Create worktree -> pass path to subagent -> subagent commits to its branch -> main context reviews diff (`git diff main..agent/<name>`) -> merge or cherry-pick if approved, `git worktree remove` if rejected.
 
 **The subagent MUST NOT push to `main`, `master`, or the active development branch.**
+
+See `subagent-driven-development` for the full dispatch protocol.
 
 ---
 
 ## A/B Testing with Worktrees
 
-When "I think" is not enough: dispatch two agents -- one per worktree -- with an identical test harness. Compare results (test pass/fail, line count, coupling, readability). Adopt the winner; discard the loser's worktree. For setup commands, see `references/WORKTREE_PATTERNS.md`.
+Dispatch two agents, one per worktree, with an identical test harness. Compare results. Adopt the winner; discard the loser's worktree. See `references/WORKTREE_PATTERNS.md` for setup commands.
 
 ---
 

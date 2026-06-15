@@ -61,6 +61,7 @@ Before creating, editing, or shipping any skill or agent template:
 - Description field contains "covers", "enforces", "provides", "includes" -- **STOP. Rewrite to "Use when [conditions]."**
 - Description starts with "Use when [trigger]" but continues with workflow clauses ("to conduct", "to produce", "to generate", "to create", "to interview") -- **STOP. End the description at the triggering condition. Drop all "to [verb]" workflow suffixes.**
 - Iron Law lacks "letter/spirit" line -- **STOP. Add "Violating the letter of this rule is violating the spirit of this rule." now.**
+- Iron Law letter/spirit line is outside the backtick block -- **STOP. The "Violating the letter..." line MUST be the last line INSIDE the backtick block, before the closing backtick fence. Placing it after the closing backtick is the most common Iron Law anatomy error.**
 - Iron Law lacks "YOU MUST" and "No exceptions." -- **STOP. Both phrases are required. Add them.**
 - No BEFORE PROCEEDING gate -- **STOP. Add a gate with explicit [+]/[-] branches before shipping.**
 - No rationalization table -- **STOP. Add >=5 rows now. A skill without one is a suggestion.**

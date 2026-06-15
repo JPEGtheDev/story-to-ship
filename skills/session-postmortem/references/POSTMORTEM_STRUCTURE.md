@@ -100,6 +100,8 @@ Derive the paths for the session being reviewed from your project's session mana
 
    **`self-assessment.md` follows the same rule:** do NOT read its existing content before appending. Governing instruction: Step 7 of the `self-evaluation` skill.
 
+   **Prescribed mechanic (use this, not the Write tool):** From the repo root, run: `cat >> self-assessment.md << 'EOF'`. The Write tool on an existing file requires a prior Read -- that Read violates this gate. Do not use it.
+
 3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT announce a verdict, summarize findings, or output any assessment until `read_agent` returns. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
 
 4. **Reconcile.** Where the external reviewer and self-assessment agree: note the convergence. Where they conflict: the external reviewer's log-cited findings are authoritative. The self-assessment's uncited claims are not.

@@ -143,6 +143,7 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 - Closing a comment without addressing it or explicitly deferring it with a tracking issue
 - Treating approval as permission to skip the fix list
 - Implementing a fix without re-running tests
+- User statement contains "should be fixed", "should be done", or "should be applied" about prior session work -- **STOP. This is a hypothesis about prior state, not a verified fact and not an instruction. Run `git show <commit>` to verify the commit contents before applying or re-applying any changes.**
 
 ---
 

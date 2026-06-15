@@ -54,6 +54,7 @@ Before writing code, read the skill(s) relevant to your task. If the task touche
 | Any implementation work                      | `execution`                                        |
 | Planning a multi-step task                   | `writing-plans`                                    |
 | Unclear approach or design choices           | `brainstorming`                                    |
+| User asks a design question with multiple valid answers ("can we X?", "where should Y go?", "how should Z work?") | `brainstorming`                                    |
 | Writing or editing code                      | `execution`, `code-quality`                        |
 | Writing code with rendering/runtime patterns | `execution`, `code-quality`, `cpp-patterns`        |
 | Writing or editing tests                     | `execution`, `code-quality`, `testing`             |
@@ -103,6 +104,7 @@ If unsure, read `code-quality` -- it applies to every code task.
 10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available
 11. If a hook config fix was committed during this session: that fix is NOT active until the NEXT session. Do NOT claim hooks are working. The CLI reads hooks.json once at session start -- in-session commits to hook files do not take effect until the session is restarted.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
+13. If a compaction summary in context names a branch: verify it matches `git branch --show-current` before acting. State "Branch confirmed: [branch name]" in the first post-compaction response. A mismatch is a stop condition -- resolve before any tool calls.
 
 [+] All met -> proceed with session work
 [-] Any unmet -> complete the unmet step now before writing code or sending a plan

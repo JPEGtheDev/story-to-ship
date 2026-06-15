@@ -226,6 +226,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
+| "User asked 'can we X' -- that's an instruction to implement X" | A question phrased as 'can we X' is a design probe, not an implementation approval. Present options and wait for explicit confirmation ("yes, do it") before touching any files. |
 
 ---
 

@@ -61,6 +61,7 @@ Before creating, editing, or shipping any skill or agent template:
 - No rationalization table -- **STOP. Add >=5 rows now. A skill without one is a suggestion.**
 - Skill contains "should", "prefer", "consider" -- **STOP. Replace every instance with MUST, DO NOT, or an explicit imperative.**
 - Skill or reference file contains non-ASCII characters -- **STOP. Replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +) before committing.**
+- Any file in a skill's `references/` directory has no inbound pointer from SKILL.md (not listed in the References section or mentioned inline) -- **STOP. An orphaned reference file is invisible to agents loading the skill. Add the pointer or delete the file before shipping.**
 
 ---
 

@@ -23,6 +23,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 1. The session's primary task is complete -- no further implementation work is planned for this session.
 2. All commits from this session have been pushed or are staged and ready.
 3. You have NOT yet sent the final message to the user.
+4. If the session has had more than 2 context compactions (visible as compaction summary injections in the message stream): declare scope explicitly in the self-assessment opening: "Self-assessment scope: limited to post-compaction memory. Earlier session phases are not assessable from memory. Scope declared: [last sub-session task]." Do NOT claim full-session coverage.
 
 [+] All met -> proceed through all 8 steps in order
 [-] Any unmet -> complete remaining session work first; once no further work is planned, return here and execute all 8 steps
@@ -166,7 +167,7 @@ A self-evaluation that exists only in the message stream is not a self-evaluatio
 1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
 2. Write it to `self-assessment.md` in the repo root:
    - If file does not exist: write directly (Write tool).
-   - If file already exists from a prior session: do NOT read the file before appending. Construct the new section heading from memory using today's date and session ID (first 8 characters of session UUID) in the format: `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])`. Use shell append (`>>`) to add content without reading existing content. Reading prior session content before writing allows prior-session framing to contaminate this session's evaluation.
+   - If file already exists from a prior session: do NOT read the file before appending. Construct the new section heading from memory using today's date and session ID (first 8 characters of session UUID) in the format: `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])`. Use bash append: `cat >> self-assessment.md << 'EOF'` from the repo root. Do NOT use the Write tool on an existing file -- it requires a prior Read, which violates this gate. Reading prior session content before writing allows prior-session framing to contaminate this session's evaluation.
 3. [+] File written -> proceed to Step 8
 4. [-] File not written -> STOP. Write the file before sending any final message.
 

@@ -234,9 +234,7 @@ No vague items. "Be more careful" is not an action item. "Add the phrase 'X' to 
 **Before announcing the postmortem complete**, the final report MUST be written to disk.
 
 Path format: `[SESSION_DIR]/postmortem.md`
-- `YYYY-MM-DD` is today's date
-- `SESSION_SHORT_ID` is the first 8 characters of the session UUID (from the JSONL filename)
-- Example: `[SESSION_DIR]/postmortem.md (e.g. ~/.claude/projects/.../ca61de74-.../postmortem.md)`
+- Example: `~/.claude/projects/.../ca61de74-.../postmortem.md`
 
 Create `[SESSION_DIR]` -- the directory containing the session's `events.jsonl`.
 

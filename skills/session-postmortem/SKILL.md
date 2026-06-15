@@ -58,7 +58,7 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 - Agent dropped an announced commitment -- STOP. Document the commitment and the drop in Timeline and Root Cause.
 - Prompt Feedback section omitted or left as placeholder -- STOP. Complete Part 4c before marking the postmortem done.
 - **External reviewer not dispatched -- STOP. Dispatch `postmortem-reviewer` subagent now.**
-- **Postmortem report not written to `sessions/YYYY-MM-DD-[SESSION_SHORT_ID].md` -- STOP. Create the file now.**
+- **Postmortem report not written to `[SESSION_DIR]/postmortem.md` -- STOP. Create the file now.**
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 

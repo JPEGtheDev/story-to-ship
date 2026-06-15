@@ -20,7 +20,7 @@ SESSION_ID:       [session ID -- shown in workspace.yaml or .copilot/session-sta
 EVENTS_LOG:       [SESSION_ID]/events.jsonl
 WORKSPACE:        [SESSION_ID]/
 SCRATCH:          [REPO]/scratch/
-SELF_ASSESSMENT:  sessions/YYYY-MM-DD-[SESSION_SHORT_ID].md  (if self-eval already ran)
+SELF_ASSESSMENT:  [SESSION_DIR]/postmortem.md  (if self-eval already ran)
 OUTPUT:           [SESSION_ID]/postmortem-external.md
 ```
 

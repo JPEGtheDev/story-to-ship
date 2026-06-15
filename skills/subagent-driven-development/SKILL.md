@@ -34,7 +34,7 @@ Pick up todo -> Dispatch implementer -> Handle status code -> Stage 1 spec revie
 
 **Do not advance past any todo until both Stage 1 and Stage 2 are PASS/APPROVE.**
 
-See `references/SDD_LOOP.md` for the full decision tree with complete ASCII flow.
+See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow.
 
 ---
 
@@ -104,8 +104,6 @@ These thoughts mean stop immediately:
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |
 | Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos require subagent dispatch regardless of size) |
-
-**Max 4 concurrent agents.** Beyond that, results compete for context and quality drops.
 
 ---
 

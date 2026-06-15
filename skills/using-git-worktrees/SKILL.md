@@ -102,7 +102,7 @@ Dispatch two agents, one per worktree, with an identical test harness. Compare r
 - "I reviewed the diff mentally -- running `git diff main..agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**
 - Using `git worktree add ../name` (relative `../` path) -- **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
 - Running any git command without `-C <repo-root>` after a `cd` appeared in any prior Bash call this session -- **STOP. The Bash tool's working directory persists across calls. A prior `cd` into a worktree will cause the next bare `git` command to run inside that worktree's branch, not the main branch. Always use `git -C /absolute/repo/path` or verify with `pwd` before any git operation that touches the main branch.**
-- About to create a worktree when the current branch is not `main` -- **STOP. Run `git log main..HEAD --oneline` first. If any commits appear, the branch is not main-current. A branch with a semantically relevant name is NOT a valid base unless the user explicitly named it. Run `git checkout main` before creating any worktree.**
+- About to create a worktree when the current branch is not `main` -- **STOP. Run `git log origin/main..HEAD --oneline` first. If any commits appear, the branch is not main-current. A branch with a semantically relevant name is NOT a valid base unless the user explicitly named it. Run `git checkout main && git pull` before creating any worktree.**
 
 ---
 
@@ -116,7 +116,7 @@ Dispatch two agents, one per worktree, with an identical test harness. Compare r
 | "I think this approach is right, no need for A/B" | "I think" is not evidence. Dispatch two agents and let the output decide. |
 | "The subagent promised not to touch main" | Subagent discipline is not a structural guarantee. Worktrees are. Create the worktree. |
 | "I'll clean up the worktree later -- it's not hurting anything active" | Reality: YOU MUST remove worktrees immediately after merging or discarding. Stale worktrees accumulate into branch clutter that obscures active work. |
-| "The existing branch name matches the feature domain, so it is the right base" | Branch names are semantic labels, not currency guarantees. Run `git log main..HEAD --oneline` -- if any commits appear, the branch is behind or diverged from main. A branch named for the active feature domain that predates a recent merged PR is stale regardless of name. |
+| "The existing branch name matches the feature domain, so it is the right base" | Branch names are semantic labels, not currency guarantees. Run `git log origin/main..HEAD --oneline` -- if any commits appear, the branch is behind or diverged from main. A branch named for the active feature domain that predates a recent merged PR is stale regardless of name. |
 
 ---
 

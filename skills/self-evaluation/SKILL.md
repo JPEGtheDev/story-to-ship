@@ -59,7 +59,7 @@ Examine what happened during this session:
 
 ## Step 2: Categorize Lessons
 
-Classify each lesson into one of these categories. For the full routing table with examples, see `references/LESSONS_LEARNED_PATTERNS.md`.
+Classify each lesson into one of these categories:
 
 | Category | Update Target |
 |----------|---------------|
@@ -238,7 +238,3 @@ If you catch yourself thinking any of these, stop and follow the rule:
 
 ---
 
-## References
-
-- Lesson examples and routing table: `references/LESSONS_LEARNED_PATTERNS.md`
-- Why structural mechanisms beat "try harder" (Objectivity Block rationale): `references/LESSONS_LEARNED_PATTERNS.md`

@@ -40,8 +40,8 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] Ban and substitute co-located in SKILL.md -> proceed
    - [-] Substitute is only in references/ -> move the substitute into SKILL.md before shipping.
 
-5. **Modifying anatomy elements?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before any edits. Frontmatter-only changes: reference files optional.
-   - Not met -> stop. Read `references/SKILL_ANATOMY_ELEMENTS.md` now. Do not make edits until loaded.
+5. **Modifying anatomy elements OR adding a Red Flag about anatomy format?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before writing or editing. When the Red Flag makes a format assertion ("MUST be inside/outside X", "MUST appear in Y position"), cite the specific line from `SKILL_ANATOMY_ELEMENTS.md`. A wrong format claim in `writing-skills` becomes the schema that ALL skill reviewers validate against -- propagating the error to every future review.
+   - Not met -> stop. Read `references/SKILL_ANATOMY_ELEMENTS.md` now. Do not write the Red Flag until the canonical position is verified and cited.
 
 6. **Auditing existing skills?** Load `skill-reviewer` agent template; inject 4 reference files; one agent per skill directory (reviews `SKILL.md` + all `references/` files).
    - Not following -> read `references/DISPATCH_PATTERN.md` before dispatching any review agents.

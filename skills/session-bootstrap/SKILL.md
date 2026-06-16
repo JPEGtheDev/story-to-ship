@@ -10,9 +10,8 @@ description: Use when opening a new conversation to load required skills, identi
 ```
 READ THE SKILL. THEN ACT. NEVER ACT THEN READ.
 YOU MUST read all required skills before writing any code or sending any plan. No exceptions.
-```
-
 Violating the letter of this rule is violating the spirit of this rule.
+```
 
 Skills contain rules that change what you do. Reading a skill AFTER acting defeats the purpose.
 

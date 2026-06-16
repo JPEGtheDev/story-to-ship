@@ -222,6 +222,13 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 
 ---
 
+## Related Skills
+
+- `session-postmortem` -- external reviewer that reads self-assessment.md written by this skill; complements but does not replace self-evaluation
+- `session-bootstrap` -- On Finish section calls this skill directly at session end
+
+---
+
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:

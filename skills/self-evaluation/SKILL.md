@@ -78,7 +78,7 @@ Before proposing updates, verify the lesson is not already documented:
 
 1. Check `AGENTS.md` -- Is this pattern already listed?
 2. Check the relevant skill's `SKILL.md` -- Is this rule already stated?
-3. Check skill `references/` -- Is there already an example?
+3. Check `references/LESSONS_LEARNED_PATTERNS.md` -- Is this category or pattern already documented?
 
 **Only propose additions for genuinely new or underemphasized patterns.**
 

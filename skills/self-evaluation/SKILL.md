@@ -60,7 +60,7 @@ Examine what happened during this session:
 
 ## Step 2: Categorize Lessons
 
-Classify each lesson into one of these categories. For the full routing table with examples, see `references/LESSONS_LEARNED_PATTERNS.md`.
+Classify each lesson into one of these categories:
 
 | Category | Update Target |
 |----------|---------------|
@@ -79,7 +79,7 @@ Before proposing updates, verify the lesson is not already documented:
 
 1. Check `AGENTS.md` -- Is this pattern already listed?
 2. Check the relevant skill's `SKILL.md` -- Is this rule already stated?
-3. Check skill `references/` -- Is there already an example?
+3. Check `references/LESSONS_LEARNED_PATTERNS.md` -- Is this category or pattern already documented?
 
 **Only propose additions for genuinely new or underemphasized patterns.**
 
@@ -158,19 +158,21 @@ If changes are warranted and the session scope allows:
 
 ## Step 7: Write Findings to Disk
 
-Before generating the session summary block, write the full findings to `self-assessment.md` in the repo root.
+Before generating the session summary block, write the full findings to `[SESSION_DIR]/self-assessment.md`.
+
+`[SESSION_DIR]` is the directory containing this session's `events.jsonl` (the same directory as `postmortem.md`). Writing here keeps all session artifacts co-located and out of the repo.
 
 A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
 
 **Write Gate:**
 1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
-2. Write it to `self-assessment.md` in the repo root:
-   - If file does not exist: write directly (Write tool).
-   - If file already exists from a prior session: do NOT read the file before appending. Construct the new section heading from memory using today's date and session ID (first 8 characters of session UUID) in the format: `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])`. Use shell append (`>>`) to add content without reading existing content. Reading prior session content before writing allows prior-session framing to contaminate this session's evaluation.
+2. Write it to `[SESSION_DIR]/self-assessment.md`:
+   - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.
+   - Each session has its own directory -- write directly (Write tool). Do NOT read any prior session's self-assessment before writing.
 3. [+] File written -> proceed to Step 8
 4. [-] File not written -> STOP. Write the file before sending any final message.
 
-**Lifecycle:** `self-assessment.md` is listed in `.gitignore`. It is a local session artifact -- never committed.
+**Lifecycle:** `self-assessment.md` lives in the session directory, outside the repo. It is never committed.
 
 ---
 
@@ -221,6 +223,13 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 
 ---
 
+## Related Skills
+
+- `session-postmortem` -- external reviewer that reads self-assessment.md written by this skill; complements but does not replace self-evaluation
+- `session-bootstrap` -- On Finish section calls this skill directly at session end
+
+---
+
 ## Red Flags -- STOP
 
 If you catch yourself thinking any of these, stop and follow the rule:
@@ -230,13 +239,10 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - Updated code but haven't checked if any skills are now stale
 - "I already know what I'd write -- no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
-- Closing self-evaluation without writing findings to `self-assessment.md` on disk (Step 7 gate)
+- Closing self-evaluation without writing findings to `[SESSION_DIR]/self-assessment.md` on disk (Step 7 gate)
+- About to execute Step 6 (Apply Updates) before BEFORE PROCEEDING conditions 1-3 are met -- **STOP. DO NOT apply skill updates until (a) the session's primary work is complete, (b) all commits are staged or pushed, and (c) you are on the correct branch for skill updates. Seeing the fix does not authorize applying it early.**
 
-**All of these mean: Load the `self-evaluation` skill and complete all 8 steps. Write to `self-assessment.md` (Step 7). Then include the `### Session Self-Evaluation` block in the final message (Step 8).**
+**All of these mean: Load the `self-evaluation` skill and complete all 8 steps. Write to `[SESSION_DIR]/self-assessment.md` (Step 7). Then include the `### Session Self-Evaluation` block in the final message (Step 8).**
 
 ---
 
-## References
-
-- Lesson examples and routing table: `references/LESSONS_LEARNED_PATTERNS.md`
-- Why structural mechanisms beat "try harder" (Objectivity Block rationale): `references/LESSONS_LEARNED_PATTERNS.md`

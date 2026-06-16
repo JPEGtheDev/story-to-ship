@@ -48,8 +48,6 @@ git -C .worktrees/agent-<name> branch --show-current
 # Must NOT equal the active development branch
 ```
 
-Use `.worktrees/agent-<name>` as the path -- inside the repo, gitignored, named descriptively.
-
 ### List active worktrees
 
 ```bash
@@ -67,36 +65,29 @@ git branch -d agent/<name>   # only after merging or discarding
 
 ## BEFORE PROCEEDING
 
-```
-BEFORE creating a worktree, verify:
+Before creating a worktree, verify:
 1. The task is independent enough for a subagent (not tightly coupled to in-progress main work)
 2. A descriptive name for the branch exists: agent/<purpose>
 3. The subagent prompt includes the worktree path explicitly
 
 [+] All met -> create the worktree and dispatch
 [-] Any unmet -> work in the main context instead
-```
 
 ---
 
 ## Subagent Dispatch Pattern
 
-When dispatching a subagent to a worktree:
-
-1. Create the worktree first (main context)
-2. Pass the worktree path to the subagent as its working directory
-3. Subagent commits to its branch inside the worktree
-4. Main context reviews the diff: `git diff main..agent/<name>`
-5. If approved: merge or cherry-pick into main
-6. If rejected: `git worktree remove` -- no cleanup needed in main
+Create worktree -> pass path to subagent -> subagent commits to its branch -> main context reviews diff (`git diff main..agent/<name>`) -> merge or cherry-pick if approved, `git worktree remove` if rejected.
 
 **The subagent MUST NOT push to `main`, `master`, or the active development branch.**
+
+See `subagent-driven-development` for the full dispatch protocol.
 
 ---
 
 ## A/B Testing with Worktrees
 
-When "I think" is not enough: dispatch two agents -- one per worktree -- with an identical test harness. Compare results (test pass/fail, line count, coupling, readability). Adopt the winner; discard the loser's worktree. For setup commands, see `references/WORKTREE_PATTERNS.md`.
+Dispatch two agents, one per worktree, with an identical test harness. Compare results. Adopt the winner; discard the loser's worktree. See `references/WORKTREE_PATTERNS.md` for setup commands.
 
 ---
 
@@ -111,6 +102,7 @@ When "I think" is not enough: dispatch two agents -- one per worktree -- with an
 - "I reviewed the diff mentally -- running `git diff main..agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**
 - Using `git worktree add ../name` (relative `../` path) -- **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
 - Running any git command without `-C <repo-root>` after a `cd` appeared in any prior Bash call this session -- **STOP. The Bash tool's working directory persists across calls. A prior `cd` into a worktree will cause the next bare `git` command to run inside that worktree's branch, not the main branch. Always use `git -C /absolute/repo/path` or verify with `pwd` before any git operation that touches the main branch.**
+- About to create a worktree when the current branch is not `main` -- **STOP. Run `git rev-list --left-right --count origin/main...HEAD` first. Output is `L<tab>R` (L = commits on main not in HEAD; R = commits in HEAD not on main). If L > 0 and R = 0: branch is behind main -- run `git checkout main && git pull`. If R > 0: branch has local commits -- only valid base if the user explicitly named it. Only `0<tab>0` means current with main.**
 
 ---
 
@@ -124,6 +116,7 @@ When "I think" is not enough: dispatch two agents -- one per worktree -- with an
 | "I think this approach is right, no need for A/B" | "I think" is not evidence. Dispatch two agents and let the output decide. |
 | "The subagent promised not to touch main" | Subagent discipline is not a structural guarantee. Worktrees are. Create the worktree. |
 | "I'll clean up the worktree later -- it's not hurting anything active" | Reality: YOU MUST remove worktrees immediately after merging or discarding. Stale worktrees accumulate into branch clutter that obscures active work. |
+| "The existing branch name matches the feature domain, so it is the right base" | Branch names are semantic labels, not currency guarantees. Run `git rev-list --left-right --count origin/main...HEAD` -- `L<tab>R` output: L > 0 means behind main; R > 0 means ahead with local commits; only `0<tab>0` is main-current. A branch named for the active feature domain that predates a recent merged PR is stale regardless of name. |
 
 ---
 

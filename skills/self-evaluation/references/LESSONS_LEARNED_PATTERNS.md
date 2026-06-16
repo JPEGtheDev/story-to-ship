@@ -106,7 +106,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Problem:** Adding `* (viewportHeight / REFERENCE_HEIGHT)` to the shader (where both equal 720.0, so `* 1.0`) caused a 1-pixel sprite-boundary difference on CI's Mesa version but not locally. The baseline comparison required 100% pixel match, so 1 pixel out of 921,600 failed the entire test.
 
-**Lesson:** Different Mesa/llvmpipe versions may compile the same shader differently, causing sprite-boundary rounding differences. Visual regression baselines should allow a small `MAX_DIFF_RATIO` (e.g., 0.01%) instead of requiring 100% pixel match. Always `ASSERT_TRUE(image.save(...))` artifact writes so debug images are not silently lost.
+**Lesson:** Different Mesa/llvmpipe versions may compile the same shader differently, causing sprite-boundary rounding differences. Visual regression baselines MUST allow a small `MAX_DIFF_RATIO` (e.g., 0.01%) instead of requiring 100% pixel match. Always `ASSERT_TRUE(image.save(...))` artifact writes so debug images are not silently lost.
 
 **Added to:** `AGENTS.md` -> Test Issues
 
@@ -168,7 +168,7 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Problem:** Visual regression test artifacts used names like `single_particle_720p.png` that didn't match the CI workflow regex `_baseline|_current|_diff`. The quick fix was to expand the regex; the correct fix was to rename artifacts at the source.
 
-**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code -- not the CI regex. CI patterns should enforce conventions, not accommodate deviations.
+**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code -- not the CI regex. CI patterns MUST enforce conventions, not accommodate deviations.
 
 **Added to:** Self-evaluation skill (this file)
 
@@ -361,7 +361,7 @@ Use this for fast question-based lookup -- "my lesson is about X, where does it 
 | If the lesson is about... | Add to... |
 |---|---|
 | Code patterns, naming, error handling | `AGENTS.md` |
-| Test writing, AAA, mocking, visual regression | `testing` skill |
+| Test writing, Arrange-Act-Assert (AAA), mocking, visual regression | `testing` skill |
 | CI/CD workflows, artifacts, permissions | `workflow` skill |
 | Documentation format, linking, content | `documentation` skill |
 | User story creation, estimation | `user-story-generator` skill |
@@ -394,3 +394,15 @@ Humans are structurally poor at evaluating their own work. This is not a charact
 - Use a checklist created before the session, not reconstructed from memory after it
 
 The self-evaluation block itself is imperfect by construction. Use it to surface what you can, knowing that a separate postmortem reviewer will catch what you cannot. Source: C2 Wiki "HumansAreLousyAtSelfEvaluation".
+
+---
+
+## Skill Authoring Lessons
+
+### Wrong Anatomy Red Flag Propagates to All Reviews (PR #16)
+
+**Problem:** A new Red Flag added to `writing-skills/SKILL.md` claimed the Iron Law letter/spirit line MUST be INSIDE the backtick block. The canonical schema in `SKILL_ANATOMY_ELEMENTS.md` shows it OUTSIDE. Three internal skill reviewers all returned PASS because they were validating against the wrong Red Flag. The error was caught only by a Copilot review of the PR.
+
+**Lesson:** When a Red Flag in `writing-skills` makes a format assertion ("MUST be inside/outside X"), that Red Flag becomes the schema all future skill reviewers validate against. A wrong Red Flag propagates the error to every review until caught. Before writing any Red Flag about anatomy format: (1) read `SKILL_ANATOMY_ELEMENTS.md`, (2) cite the specific line, (3) verify the claim matches the canonical example.
+
+**Added to:** `writing-skills` BEFORE PROCEEDING item 5 -- extended to cover "adding a Red Flag about anatomy format" and require canonical citation for format assertions.

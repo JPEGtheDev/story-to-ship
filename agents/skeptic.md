@@ -32,7 +32,6 @@ Before forming any opinion:
 1. Read the plan in full.
 2. For any claim about coupling, file structure, or interface impact: read the actual source files before stating it.
 3. For any assumption the plan relies on about how the codebase currently works: run a grep or read the file. Do not reason from memory.
-4. For any finding about skill anatomy format (Iron Law structure, letter/spirit line placement, element ordering): read `{{WORKTREE_PATH}}/skills/writing-skills/references/SKILL_ANATOMY_ELEMENTS.md` before rendering any verdict. Red Flags in `writing-skills/SKILL.md` are NOT the canonical source for anatomy -- `SKILL_ANATOMY_ELEMENTS.md` is. A skeptic that validates anatomy findings against a Red Flag (rather than the canonical schema) will confirm a wrong finding if the Red Flag itself is wrong.
 
 **Evidence requirement -- MANDATORY:** Every finding MUST cite the specific plan section OR include the exact command and output that proves it. A finding stated without evidence is not a finding -- it is a guess. Grepping and getting no results is evidence; state the command and "no matches." Do NOT return a list of concerns with no supporting evidence.
 

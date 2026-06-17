@@ -41,8 +41,8 @@ When the skill under review is `skills/writing-skills/SKILL.md`:
 - A wrong Red Flag in writing-skills becomes the schema all future reviewers validate against -- it is higher-severity than a wrong fact in any other skill.
 
 When reviewing Iron Law anatomy in ANY skill:
-- The letter/spirit line ("Violating the letter of this rule...") MUST appear OUTSIDE the backtick fence, immediately after the closing ```.
-- Canonical evidence: SKILL_ANATOMY_ELEMENTS Element 2 -- the letter/spirit line appears outside the block (which closes before it). This takes precedence over any Red Flag that asserts the opposite.
+- The letter/spirit line ("Violating the letter of this rule...") MUST appear OUTSIDE the backtick fence (after the closing ```, not inside it).
+- Canonical evidence: SKILL_ANATOMY_ELEMENTS Element 2 -- the letter/spirit line appears after the closing ```, separated from it by a blank line. This takes precedence over any Red Flag that asserts the opposite.
 
 ---
 

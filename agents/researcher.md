@@ -40,6 +40,18 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 ## Required methods (use at least two)
 
+**Runtime behavior hypotheses** (see the `systematic-debugging` skill Phase 1 for definition): If the hypothesis is about runtime behavior -- the user reported what they see, hear, or experience in the running application -- "Build + observe" is REQUIRED as one of the two required methods. It cannot be the omitted method.
+
+A sufficient "Build + observe" result MUST include the observation artifact inline: the exact command run, plus either a screenshot of the relevant UI state or a log excerpt from the running process (stdout/stderr). A textual description of observed behavior written by the agent is NOT a sufficient artifact.
+
+If the application cannot be built or run in this environment, return immediately:
+```
+VERDICT: INCONCLUSIVE
+Build + observe is required for this hypothesis type but the application cannot be built or run in this environment.
+Reason: [specific reason]
+Next step: [what environment or access is needed]
+```
+
 1. **Code search** -- `grep -r`, `find`, read relevant files
 2. **Run tests** -- write a minimal test that proves or disproves the hypothesis
 3. **Documentation scan** -- check docs, comments, and skill files for prior knowledge

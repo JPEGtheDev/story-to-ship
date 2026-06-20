@@ -56,6 +56,8 @@ BEFORE claiming any status or expressing satisfaction:
 
 Skipping any step = lying, not verifying.
 
+**For runtime behavior fixes** (the original bug report described what the user sees, hears, or experiences in the running application): Step 2 (RUN) MUST produce an observation artifact (a screenshot of the relevant user interface (UI) state or a log excerpt from the running process) that shows the reported symptom is absent. A pass/fail test result does not satisfy this step -- it verifies code logic, not observed runtime behavior. Show the observation artifact inline before claiming the fix is complete.
+
 ---
 
 See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trust ledger, and common failure modes.
@@ -118,6 +120,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 - "Just a small change, can't have broken anything"
 - Expressing satisfaction ("Great!", "Done!", "That should do it!") before running commands
 - About to write a commit message without having run the gate commands
+- Claiming a runtime behavior fix is complete using only pass/fail test output -- **STOP. Produce an observation artifact (screenshot of the UI state or log excerpt from the running process) showing the reported symptom is absent.**
 - Verified 1 of N parallel edits (N >= 3) -- **STOP. View at least 3 of the N edited files. "They all look the same" is an assumption, not evidence. A malformed edit still counts as a changed file.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
@@ -136,6 +139,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "Just this once" | No exceptions. |
 | "I already manually verified" | Manual != automated. Results can't be reproduced or cited. |
 | "Build passed, tests must be fine" | Build and tests are separate gates. |
+| "The automated tests pass -- the runtime behavior fix is done" | Pass/fail tests verify code logic. They do not demonstrate what the user observes in the running application. Show an observation artifact demonstrating the reported symptom is absent. |
 | "They all follow the same pattern" | If the pattern was wrong once, it was wrong for all N. For N >= 3 parallel edits of the same structure: view at least 3 of the edited files before committing -- not 1. |
 
 ---

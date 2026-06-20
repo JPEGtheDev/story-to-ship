@@ -43,7 +43,7 @@ CANARY: systematic-debugging loaded. Issue: [name it]. No fix before root cause.
 
 1. The full error output has been read completely -- not just the last line
 2. The failure reproduces consistently with identified reproduction steps
-   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not a locally-triggered error message.
+   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not compiler output, static analysis output, or test runner output.
 3. I can state: "The root cause is X because Y" with evidence
 
 [+] All met -> proceed
@@ -104,7 +104,7 @@ The existing Phase 1 BEFORE PROCEEDING items 1-3 and the global BEFORE PROCEEDIN
 BEFORE proceeding to Phase 2, verify:
 1. The error message has been read completely.
 2. The failure reproduces consistently with identified reproduction steps.
-   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not a locally-triggered error message.
+   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not compiler output, static analysis output, or test runner output.
 3. You can state: "The root cause is X because Y."
 
 [+] All 3 met -> proceed to Phase 2

@@ -40,7 +40,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 ## Required methods (use at least two)
 
-**Runtime behavior hypotheses** (see systematic-debugging/SKILL.md Phase 1 for definition): If the hypothesis is about runtime behavior -- the user reported what they see, hear, or experience in the running application -- "Build + observe" is REQUIRED as one of the two required methods. It cannot be the omitted method.
+**Runtime behavior hypotheses** (see the `systematic-debugging` skill Phase 1 for definition): If the hypothesis is about runtime behavior -- the user reported what they see, hear, or experience in the running application -- "Build + observe" is REQUIRED as one of the two required methods. It cannot be the omitted method.
 
 A sufficient "Build + observe" result MUST include the observation artifact inline: the exact command run, plus either a screenshot of the relevant UI state or a log excerpt from the running process (stdout/stderr). A textual description of observed behavior written by the agent is NOT a sufficient artifact.
 

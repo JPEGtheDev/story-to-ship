@@ -83,6 +83,7 @@ These thoughts mean stop immediately:
 | "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first -- every time, without exception. The session-bootstrap On Start table maps "Parallel agent work / A/B testing" to this skill. Creating worktrees without it is a retroactive-load violation. |
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
 | "About to relay a skeptic or reviewer verdict to the user" | STOP. State the base branch of the worktree that agent ran in. If the base is not `main` (or the user-approved feature branch), flag it explicitly: any finding about absent files or missing features may be a stale-branch artifact, not an actual gap. |
+| "About to investigate a runtime behavior bug by reading source code inline" | STOP. Dispatch a researcher agent. "Build + observe" is a required method for runtime behavior bug hypotheses (symptom can only be observed by running the app -- see systematic-debugging/SKILL.md Phase 1). Inline code reading produces a theory, not an observation artifact. |
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
 | "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
@@ -102,6 +103,7 @@ These thoughts mean stop immediately:
 | Code review (per-file) | Yes | code-review agent, 1 per file |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
+| Investigating a runtime behavior bug (symptom can only be observed by running the app -- see systematic-debugging/SKILL.md Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |
 | Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos require subagent dispatch regardless of size) |

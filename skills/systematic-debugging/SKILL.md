@@ -43,6 +43,7 @@ CANARY: systematic-debugging loaded. Issue: [name it]. No fix before root cause.
 
 1. The full error output has been read completely -- not just the last line
 2. The failure reproduces consistently with identified reproduction steps
+   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not a locally-triggered error message.
 3. I can state: "The root cause is X because Y" with evidence
 
 [+] All met -> proceed
@@ -82,6 +83,16 @@ See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structu
 
 ### Phase 1: Root Cause Investigation
 
+**Runtime behavior bug:** any reported failure where the symptom can only be observed by running the application -- not by reading source code. If the user describes what they SEE, HEAR, or EXPERIENCE in the running application, it is a runtime behavior bug regardless of what the source code says.
+
+An **observation artifact** is output produced by the running application itself -- a screenshot of the rendered UI or a log excerpt from an active process -- NOT compiler output, static analysis output, code review findings, or textual descriptions written by an agent. An observation artifact must be shown inline (in the response or as an attached file), not described by text alone.
+
+For runtime behavior bugs: dispatch a researcher agent with "Build + observe" as a required method to produce an observation artifact that captures the reported symptom. Move to Phase 2 only after the observation artifact exists and the reported symptom is visible in it. Observation of the failure IS the reproduction step for this class of bug -- source code analysis is not.
+
+If the researcher returns INCONCLUSIVE, escalate to the user before continuing. Do not substitute code analysis for the missing observation artifact.
+
+The existing Phase 1 BEFORE PROCEEDING items 1-3 and the global BEFORE PROCEEDING items 1-3 still apply to runtime behavior bugs in addition to this gate -- they are cumulative, not alternative. For item 2 in both blocks, "reproduction steps" means the observation artifact from the researcher. Items 1 and 3 apply as stated.
+
 - Read the error message **completely** -- do not skim the last line and assume you understand it
 - Reproduce consistently -- what exact steps trigger the failure?
 - Check recent changes -- `git diff`, recent commits -- what changed?
@@ -93,6 +104,7 @@ See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structu
 BEFORE proceeding to Phase 2, verify:
 1. The error message has been read completely.
 2. The failure reproduces consistently with identified reproduction steps.
+   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not a locally-triggered error message.
 3. You can state: "The root cause is X because Y."
 
 [+] All 3 met -> proceed to Phase 2
@@ -118,6 +130,7 @@ BEFORE proceeding to Phase 2, verify:
 - Write a failing test that reproduces the issue first (see `testing` skill)
 - ONE change at a time
 - Verify the fix resolves the issue
+   **Note for runtime behavior bugs:** "Verify the fix resolves the issue" requires an observation artifact from the running application (as defined in Phase 1 above), not only a passing test. The observation artifact must show the reported symptom is absent.
 - Check if the same pattern exists elsewhere in the codebase
 
 ---
@@ -149,6 +162,9 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - "It works on my machine" (still needs root cause)
 - "CI must have a glitch" (still needs root cause)
 - "The Flatpak environment must be doing something weird" (still needs systematic investigation)
+- First response to a runtime behavior bug report is code reading -- **STOP. Dispatch a researcher agent with "Build + observe" required. Source code cannot substitute for the observation artifact.**
+- Declaring root cause for a runtime behavior bug without an observation artifact from the running application -- **STOP. "The code shows X" is a theory. The observation artifact from the running application is required before Phase 2.**
+- "What the user is seeing is correct behavior" / "this is expected behavior" as a response to a user-reported runtime behavior bug -- **STOP. The running application is the ground truth for what the user observes, not the source code. Return to Phase 1 and dispatch the researcher.**
 
 **All of these mean: STOP. Return to Phase 1.**
 
@@ -169,6 +185,8 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
 | "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
 | "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
+| "The code shows the behavior is correct -- the user must be misreading the output" | Source code describes programmer intent; the running application produces what the user observes. For runtime behavior bugs, the running application is the ground truth. Dispatch the researcher with "Build + observe" required. |
+| "Reading the relevant code is faster than running the app" | Speed does not matter if the investigation is wrong. Code reading for a runtime behavior bug is theorizing. The observation artifact determines Phase 2 scope. Dispatch the researcher. |
 
 ---
 

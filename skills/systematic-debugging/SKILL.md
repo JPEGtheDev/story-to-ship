@@ -75,7 +75,7 @@ Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-**First: verify your test runner CWD.** Run `pwd` and confirm it matches the required execution directory (e.g., `.../build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
+**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., `.../build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
@@ -85,7 +85,7 @@ See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structu
 
 **Runtime behavior bug:** any reported failure where the symptom can only be observed by running the application -- not by reading source code. If the user describes what they SEE, HEAR, or EXPERIENCE in the running application, it is a runtime behavior bug regardless of what the source code says.
 
-An **observation artifact** is output produced by the running application itself -- a screenshot of the rendered UI or a log excerpt from an active process -- NOT compiler output, static analysis output, code review findings, or textual descriptions written by an agent. An observation artifact must be shown inline (in the response or as an attached file), not described by text alone.
+An **observation artifact** is output produced by the running application itself -- a screenshot of the rendered user interface (UI) or a log excerpt from an active process -- NOT compiler output, static analysis output, code review findings, or textual descriptions written by an agent. An observation artifact must be shown inline (in the response or as an attached file), not described by text alone.
 
 For runtime behavior bugs: dispatch a researcher agent with "Build + observe" as a required method to produce an observation artifact that captures the reported symptom. Move to Phase 2 only after the observation artifact exists and the reported symptom is visible in it. Observation of the failure IS the reproduction step for this class of bug -- source code analysis is not.
 

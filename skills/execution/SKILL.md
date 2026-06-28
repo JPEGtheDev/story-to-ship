@@ -25,7 +25,7 @@ For completion claims -> invoke **verification-before-completion** skill.
 
 ## BEFORE PROCEEDING
 
-Before modifying any file in the repo or claiming any task done:
+Before modifying or creating any file in the repo or claiming any task done:
 
 1. Working branch confirmed: run `git branch --show-current`. Output must NOT be `main` or `master`. If it is: run `git checkout main && git pull && git checkout -b <new-branch>` now. Do not advance past this item until on a non-main branch.
 2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
@@ -35,7 +35,7 @@ Before modifying any file in the repo or claiming any task done:
 6. Verification method is identified -- know what command proves success before starting
 
 [+] All met -> begin execution
-[-] Any unmet -> resolve now; do not write a single line of code first
+[-] Any unmet -> resolve now; do not modify or create any file in the repo first
 
 ---
 

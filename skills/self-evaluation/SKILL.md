@@ -147,6 +147,14 @@ Before generating the session summary, complete this audit:
 
 ## Step 6: Apply Updates (If Appropriate)
 
+### Plugin Context Gate -- STOP before editing any skill file
+
+Before editing any skill file, check the `Base directory for this skill:` header from the most recently loaded skill invocation.
+
+- If the base directory contains `plugins/cache` -- **DO NOT edit the file.** The session is running against a frozen plugin snapshot. Plugin cache files are outside any git repo and are silently overwritten on the next plugin update. Document the intended change under `## Deferred Skill Updates` in `self-assessment.md` with the exact text to apply. Open a PR in the plugin source repo in a separate session.
+- If the base directory is the plugin source repo or a local project skills directory -- proceed with edits below.
+- If no `Base directory for this skill:` header is visible in context -- check whether the skill file path itself contains `plugins/cache`. If yes: apply the plugin context rule above. If no: proceed with edits below.
+
 If changes are warranted and the session scope allows:
 
 1. **Update the relevant skill** -- Add the lesson to the appropriate section
@@ -220,6 +228,7 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 | "Self-evaluation is for big failures only" | Small improvements compound. Consistent small lessons beat occasional big ones. |
 | "I already updated one skill -- that's enough" | Evaluate all active domains. One skill update is rarely complete coverage. |
 | "There's no time -- the session is over" | 5 minutes of self-evaluation saves hours in future sessions. Make time. |
+| "Editing the plugin cache is the same as editing the source" | It is not. Plugin cache files are outside any git repo and are silently overwritten on the next plugin update. The edit disappears. Write to `## Deferred Skill Updates` in self-assessment.md and open a PR in the source repo. |
 
 ---
 
@@ -241,6 +250,7 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - Closing a session without the Session Self-Evaluation block in the final message
 - Closing self-evaluation without writing findings to `[SESSION_DIR]/self-assessment.md` on disk (Step 7 gate)
 - About to execute Step 6 (Apply Updates) before BEFORE PROCEEDING conditions 1-3 are met -- **STOP. DO NOT apply skill updates until (a) the session's primary work is complete, (b) all commits are staged or pushed, and (c) you are on the correct branch for skill updates. Seeing the fix does not authorize applying it early.**
+- About to edit a skill file whose `Base directory` contains `plugins/cache` -- **STOP. This is a plugin snapshot. Edits here are untracked and will be lost. Document the change in self-assessment.md under `## Deferred Skill Updates` and open a PR in the source repo instead.**
 
 **All of these mean: Load the `self-evaluation` skill and complete all 8 steps. Write to `[SESSION_DIR]/self-assessment.md` (Step 7). Then include the `### Session Self-Evaluation` block in the final message (Step 8).**
 

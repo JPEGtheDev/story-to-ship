@@ -14,7 +14,7 @@ This skill is **mandatory before proposing any fix**. It applies whenever you en
 - Unexpected rendering or application behavior
 - Anything the user describes as "broken"
 
-When activated, announce: **"I am using the systematic-debugging skill to investigate [brief description of issue]."**
+When activated, announce: **"I am using the systematic-debugging skill to [brief description of issue]."**
 
 ---
 
@@ -126,6 +126,9 @@ BEFORE proceeding to Phase 2, verify:
 
 ### Phase 4: Implementation
 
+**GATE: Phase 4 is an implementation step. `systematic-debugging` alone does not authorize touching files.**
+Load `subagent-driven-development` before creating a worktree or editing any file. Do not proceed past this gate until that skill is active.
+
 - Fix the root cause, not the symptom
 - Write a failing test that reproduces the issue first (see `testing` skill)
 - ONE change at a time
@@ -165,6 +168,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - First response to a runtime behavior bug report is code reading -- **STOP. Dispatch a researcher agent with "Build + observe" required. Source code cannot substitute for the observation artifact.**
 - Declaring root cause for a runtime behavior bug without an observation artifact from the running application -- **STOP. "The code shows X" is a theory. The observation artifact from the running application is required before Phase 2.**
 - "What the user is seeing is correct behavior" / "this is expected behavior" as a response to a user-reported runtime behavior bug -- **STOP. The running application is the ground truth for what the user observes, not the source code. Return to Phase 1 and dispatch the researcher.**
+- About to apply a fix (Phase 4) without loading `subagent-driven-development` -- **STOP. Phase 4 is an implementation step. Load `subagent-driven-development` before creating a worktree or touching any file.**
 
 **All of these mean: STOP. Return to Phase 1.**
 
@@ -187,6 +191,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
 | "The code shows the behavior is correct -- the user must be misreading the output" | Source code describes programmer intent; the running application produces what the user observes. For runtime behavior bugs, the running application is the ground truth. Dispatch the researcher with "Build + observe" required. |
 | "Reading the relevant code is faster than running the app" | Speed does not matter if the investigation is wrong. Code reading for a runtime behavior bug is theorizing. The observation artifact determines Phase 2 scope. Dispatch the researcher. |
+| "The fix is small -- I don't need to load `subagent-driven-development`" | Fix size is irrelevant to the Phase 4 gate. Phase 4 is an implementation step regardless of scope. Load `subagent-driven-development` before creating a worktree or editing any file. No exceptions. |
 
 ---
 

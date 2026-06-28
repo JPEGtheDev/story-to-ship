@@ -25,16 +25,17 @@ For completion claims -> invoke **verification-before-completion** skill.
 
 ## BEFORE PROCEEDING
 
-Before writing any code or claiming any task done:
+Before modifying or creating any file in the repo or claiming any task done:
 
-1. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
-2. For multi-step tasks (3+ steps): tasks for this work exist in the task tool (TaskList)
-3. Required skills for this domain are loaded (check session-bootstrap On Start table)
-4. No placeholders in any todo -- every item is concrete and executable
-5. Verification method is identified -- know what command proves success before starting
+1. Working branch confirmed: run `git branch --show-current`. Output must NOT be `main` or `master`. If it is: run `git checkout main && git pull && git checkout -b <new-branch>` now. Do not advance past this item until on a non-main branch.
+2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
+3. For multi-step tasks (3+ steps): tasks for this work exist in the task tool (TaskList)
+4. Required skills for this domain are loaded (check session-bootstrap On Start table)
+5. No placeholders in any todo -- every item is concrete and executable
+6. Verification method is identified -- know what command proves success before starting
 
 [+] All met -> begin execution
-[-] Any unmet -> resolve now; do not write a single line of code first
+[-] Any unmet -> resolve now; do not modify or create any file in the repo first
 
 ---
 
@@ -103,6 +104,7 @@ If you catch yourself thinking any of these:
 - "Evidence contradicts the plan but I'll finish this step first" -- **Stop. Confront reality immediately.** State what the plan assumed, what evidence shows, and what that means for remaining todos. Revise the plan before proceeding, even if it voids completed work. Continuing on a plan you know is wrong is not progress.
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
 - "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
+- About to write a file while `git branch --show-current` returns `main` or `master` -- **STOP. Return to BEFORE PROCEEDING item 1. Create a new branch before writing any file.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -226,6 +228,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
+| "I'm just investigating -- I'll create the branch before I actually start coding" | Investigation shapes the fix before you notice it is shaping it. By the time you "start coding," the investigation has already informed the edit. Run BEFORE PROCEEDING item 1 at skill load, not at first edit. |
 
 ---
 

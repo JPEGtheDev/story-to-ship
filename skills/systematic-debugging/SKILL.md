@@ -14,7 +14,7 @@ This skill is **mandatory before proposing any fix**. It applies whenever you en
 - Unexpected rendering or application behavior
 - Anything the user describes as "broken"
 
-When activated, announce: **"I am using the systematic-debugging skill to investigate [brief description of issue]."**
+When activated, announce: **"I am using the systematic-debugging skill to [brief description of issue]."**
 
 ---
 

@@ -191,6 +191,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
 | "The code shows the behavior is correct -- the user must be misreading the output" | Source code describes programmer intent; the running application produces what the user observes. For runtime behavior bugs, the running application is the ground truth. Dispatch the researcher with "Build + observe" required. |
 | "Reading the relevant code is faster than running the app" | Speed does not matter if the investigation is wrong. Code reading for a runtime behavior bug is theorizing. The observation artifact determines Phase 2 scope. Dispatch the researcher. |
+| "The fix is small -- I don't need to load `subagent-driven-development`" | Fix size is irrelevant to the Phase 4 gate. Phase 4 is an implementation step regardless of scope. Load `subagent-driven-development` before creating a worktree or editing any file. No exceptions. |
 
 ---
 

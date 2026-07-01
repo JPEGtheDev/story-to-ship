@@ -143,6 +143,7 @@ behavior is habitual, not conditional.
 - Starting to code before reading the required skill -- **STOP. Load the skill now. Do not write one line first.**
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
+- User's request names a skill directly (e.g. `/session-postmortem`), or its wording matches a skill's description closely enough that you would cite that skill to justify an answer -- **STOP. Invoke the Skill tool for it before writing any prose response to that request. A narrative description of what the skill would find is not the skill running -- the skill's procedure (dispatch, disk writes, structured steps) is the deliverable, not a summary of it.**
 - Finishing a session without running `self-evaluation` -- **STOP. Load the `self-evaluation` skill now.**
 - Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional -- **STOP. They are mandatory. Execute every step.**

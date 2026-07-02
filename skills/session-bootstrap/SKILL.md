@@ -39,15 +39,15 @@ Do NOT say "I remember the skill content." A remembered skill is an unverified s
 
 ### `honesty` -- Co-Equal Peer Skill
 
-`honesty` is NOT managed by `session-bootstrap`. It is a co-equal peer skill with its own hook injection. The pre-message hook injects the Honesty Gate into every turn automatically. The session-start hook injects the full Honesty Gate at session start.
+`honesty` is NOT managed by `session-bootstrap`. It is a co-equal peer skill. The hooks inject reminders of the Honesty Gate on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
 
-If neither hook output is visible in context, load `honesty` explicitly before responding. Do NOT proceed with a task-specific skill while honesty content is absent from working context.
+Invoke the `Skill` tool with `skill: honesty` once per session, immediately after `session-bootstrap` returns and before any task-specific skill. Do NOT proceed with a task-specific skill until the completed `Skill` call for `honesty` is visible in this session's context.
 
 ---
 
 ## On Start -- Minimum Skill Loads by Task Type
 
-Before writing code, read the skill(s) relevant to your task. If the task touches multiple domains, read multiple skills in parallel (they are independent reads). `honesty` is injected by hook -- load it explicitly only if hook output is absent.
+Before writing code, invoke the `Skill` tool for the skill(s) relevant to your task. If the task touches multiple domains, invoke multiple skills in parallel (they are independent loads). Hook-injected gate text is a reminder, NOT a substitute for invoking `honesty` -- invoke `honesty` every session, immediately after this skill returns.
 
 | If the task involves...                        | MUST read these skills BEFORE acting               |
 |----------------------------------------------|----------------------------------------------------|
@@ -85,7 +85,7 @@ Before writing code, read the skill(s) relevant to your task. If the task touche
 If unsure, read `code-quality` -- it applies to every code task.
 
 **Loading protocol:**
-1. Invoke `honesty` first -- every session, regardless of task type
+1. Invoke `honesty` immediately after this skill returns -- every session, regardless of task type; hook-injected gate text does not substitute for the invocation
 2. Identify task type(s) from the table above
 3. Load all required skills before writing a single line of code or sending a plan
 4. Announce each skill load: "I am using the [skill-name] skill to [purpose]."

@@ -18,7 +18,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the honesty skill to [apply/audit/enforce]."
 
-This skill is always active -- if hook output is not visible in context, load it explicitly before responding.
+This skill is always active. Hook output reminds you of the gate; it does NOT load the skill. If no completed `Skill` tool call with `skill: honesty` exists in this session, invoke it before responding.
 
 See `references/HONESTY_PRINCIPLES.md` for trust rationale, Show Your Work, Trust Ledger, Show Loyalty, and Quick Reference.
 

@@ -1,13 +1,13 @@
 <EXTREMELY_IMPORTANT>
 ## First Tool Call -- Non-Negotiable
 
-This block is an index of the rules, NOT the skills themselves. Nothing in this block
-satisfies a skill-load requirement -- only a `Skill` tool call does.
+This entire injected document is an index of the rules, NOT the skills themselves.
+Nothing in it satisfies a skill-load requirement -- only a `Skill` tool call does.
 
 Your FIRST tool call this session MUST be the `Skill` tool with `skill: session-bootstrap`,
 sent alone -- not batched with any other tool call. Invoke it BEFORE any task-matched
-skill, even a skill whose trigger names words in the user's prompt. Task skills load AFTER
-`session-bootstrap` returns.
+skill, even a skill whose trigger names words in the user's prompt. Load task skills only
+AFTER `session-bootstrap` returns.
 
 ---
 
@@ -17,7 +17,7 @@ skill, even a skill whose trigger names words in the user's prompt. Task skills 
 FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT.
 ```
 
-This gate fires before any other instruction. Apply it to every response you send.
+This gate governs the language of every response you send; the First Tool Call rule above governs your first action. Both apply unconditionally.
 
 ### Banned Vocabulary -- STOP before using any of these:
 
@@ -80,8 +80,9 @@ INCORRECT: "I ran the tests and they passed."
 
 ## Skill Auto-Load Table
 
-Invoke the `Skill` tool for the required skill(s) BEFORE acting -- not after, not during.
-Reading this table is NOT loading a skill:
+Invoke the `Skill` tool for the required skill(s) BEFORE acting -- not after, not during,
+and only after `session-bootstrap` per the First Tool Call rule. Reading this table is NOT
+loading a skill:
 
 | Task type | Skills to invoke BEFORE acting |
 |-----------|------------------------------|

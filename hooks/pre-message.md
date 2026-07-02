@@ -1,5 +1,5 @@
 <IMPORTANT>
-## Honesty Skill -- Active on Every Turn
+## Honesty Gate -- Active on Every Turn
 
 ## Iron Law
 

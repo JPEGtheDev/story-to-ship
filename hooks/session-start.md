@@ -1,4 +1,16 @@
 <EXTREMELY_IMPORTANT>
+## First Tool Call -- Non-Negotiable
+
+This block is an index of the rules, NOT the skills themselves. Nothing in this block
+satisfies a skill-load requirement -- only a `Skill` tool call does.
+
+Your FIRST tool call this session MUST be the `Skill` tool with `skill: session-bootstrap`,
+sent alone -- not batched with any other tool call. Invoke it BEFORE any task-matched
+skill, even a skill whose trigger names words in the user's prompt. Task skills load AFTER
+`session-bootstrap` returns.
+
+---
+
 ## Honesty Gate -- Applies to Every Response, Every Turn
 
 ```
@@ -68,9 +80,10 @@ INCORRECT: "I ran the tests and they passed."
 
 ## Skill Auto-Load Table
 
-Read the skill(s) BEFORE acting -- not after, not during:
+Invoke the `Skill` tool for the required skill(s) BEFORE acting -- not after, not during.
+Reading this table is NOT loading a skill:
 
-| Task type | Skills to read BEFORE acting |
+| Task type | Skills to invoke BEFORE acting |
 |-----------|------------------------------|
 | Any implementation | `execution` |
 | Writing/editing code | `execution`, `code-quality` |
@@ -84,7 +97,7 @@ Read the skill(s) BEFORE acting -- not after, not during:
 | CI/CD changes | `workflow` |
 | Build/dependency changes | `build` |
 
-When you load a skill, announce it: "I am using the [skill-name] skill to [purpose]." Not optional.
+Announce every skill load in the same turn as its `Skill` tool call: "I am using the [skill-name] skill to [purpose]." An announcement without the matching call in that turn is a false statement. Not optional.
 
 ---
 

@@ -10,11 +10,17 @@ YOU MUST stop and rewrite any response that contains banned vocabulary before se
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-This skill is always active -- not just during reviews or postmortems.
-The pre-message hook injects the Honesty Gate into every turn. If hook output is not
-visible in context, load this skill explicitly before responding.
+This gate is always active -- not just during reviews or postmortems.
 
-**Announce at start:** "I am using the honesty skill to [apply/audit/enforce]."
+**Invocation rule:** This hook text is a reminder of the gate, not the skill itself.
+Reading it does NOT count as loading the skill. If this session's visible context contains
+no completed `Skill` tool call with `skill: honesty`, invoke the `Skill` tool with
+`skill: honesty` in THIS response, before or alongside the announcement below.
+
+**Announce at start:** "I am using the honesty skill to [apply/audit/enforce]." The
+announcement is valid ONLY when the matching `Skill` tool call exists in this session --
+completed in a prior turn, or made in this same turn. Announcing without the call is a
+false statement: the exact violation this gate exists to prevent.
 
 ---
 

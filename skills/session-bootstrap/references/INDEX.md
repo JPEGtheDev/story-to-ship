@@ -17,6 +17,7 @@ related:
 | File | Covers |
 |------|--------|
 | `SKILL_DISPATCH_TABLE.md` | Context, forces, and row definitions for the greenfield dispatch rows in the "On Start" table; tracks which rows are active vs. deferred and what story ships each deferred row |
+| `RATIONALE.md` | Why the SKILL.md rules exist -- invoke-before-acting, skill refresh, git status check, unconditional self-evaluation block |
 
 ---
 

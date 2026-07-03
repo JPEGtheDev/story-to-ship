@@ -2,8 +2,8 @@
 name: honesty
 license: MIT
 description: >
-  Use when communication quality or trust is in question. Always active -- applies
-  to every session, every turn, every task.
+  Use when composing any response, in every session and every turn. Invoke once per
+  session before the first response -- hook-injected gate text is not the skill.
 ---
 
 
@@ -34,8 +34,6 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, Show Your Work, Trus
 | "I'm confident" / "I'm sure" | State what evidence you have. No evidence = no confidence claim. |
 | **"Should work"**           | **BANNED. No substitute. Use process language instead.**      |
 | "That should do it"         | BANNED. Run the verification. Then report.                    |
-
-**"Should work" is banned** because it combines the tone of verification with the reality of not having verified. It is undetectable false confidence.
 
 ## Process Language -- Always Available
 
@@ -70,7 +68,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 
 ## BEFORE PROCEEDING
 
-1. No banned vocabulary ("should work", "that should do it") is present in the draft -- applies to ALL output: chat responses, PR comments, commit messages, CLI tool text
+1. No banned vocabulary ("should work", "that should do it") is present in the draft -- applies to ALL output: chat responses, PR comments, commit messages, command-line interface (CLI) tool text
 2. Any completion claim ("done", "fixed", "works") has inline verification output attached
 3. Any confidence expression has empirical evidence cited inline
 4. No forbidden hedge phrases from the Talk Straight table are present

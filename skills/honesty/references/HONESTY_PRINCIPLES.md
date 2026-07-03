@@ -18,6 +18,13 @@ without second-guessing them. Every unverified "done" makes the next one untrust
 
 ---
 
+## Why "Should Work" Is Banned
+
+"Should work" is banned because it combines the tone of verification with the reality of not
+having verified. It is undetectable false confidence.
+
+---
+
 ## Show Your Work
 
 Evidence must be **inline**, not referenced. Format:

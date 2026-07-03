@@ -8,13 +8,11 @@ description: Use when opening a new conversation to load required skills, identi
 ## Iron Law
 
 ```
-READ THE SKILL. THEN ACT. NEVER ACT THEN READ.
-YOU MUST read all required skills before writing any code or sending any plan. No exceptions.
+INVOKE THE SKILL. THEN ACT. NEVER ACT THEN INVOKE.
+YOU MUST invoke the Skill tool for every required skill before writing any code or sending any plan. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
-
-Skills contain rules that change what you do. Reading a skill AFTER acting defeats the purpose.
 
 **Announce at start:** "I am using the session-bootstrap skill to load required skills for this session."
 
@@ -22,16 +20,16 @@ Skills contain rules that change what you do. Reading a skill AFTER acting defea
 
 ## Skill Refresh -- Mandatory
 
-**Stale skill context is worse than no skill.** Skills evolve. Context windows truncate. Skills loaded early in a session may no longer be active when you need them.
-
 ### When to Reload a Skill
 
-Reload the relevant skill(s) immediately when ANY of these occur:
+"Reload" means a fresh `Skill` tool invocation in this session. A Read tool call on the skill file, remembered content, and hook-injected text do NOT qualify.
 
-1. **Picking up a new todo** -- reload the skill(s) for that todo's domain before starting work
-2. **After 3 user prompts** without a skill reload -- reload the skill for whatever you are currently doing
-3. **After a user correction or redirect** -- the correction is evidence the skill was misapplied or is stale; reload it
-4. **After context compaction** -- any compaction event requires full skill reload for all skills required by the current task
+Re-invoke the relevant skill(s) immediately when ANY of these occur:
+
+1. **Picking up a new todo** -- re-invoke the skill(s) for that todo's domain before starting work
+2. **After 3 user prompts** without a skill reload -- re-invoke the skill for whatever you are currently doing
+3. **After a user correction or redirect** -- the correction is evidence the skill was misapplied or is stale; re-invoke it
+4. **After context compaction** -- re-invoke every skill the current task requires, plus `honesty`: the completed-call evidence for `honesty` does not survive compaction
 
 **Announce the reload:** "Reloading `[skill-name]` -- [reason: new todo / 3 prompts / correction]."
 
@@ -49,7 +47,7 @@ Invoke the `Skill` tool with `skill: honesty` once per session, immediately afte
 
 Before writing code, invoke the `Skill` tool for the skill(s) relevant to your task. If the task touches multiple domains, invoke multiple skills in parallel (they are independent loads). Hook-injected gate text is a reminder, NOT a substitute for invoking `honesty` -- invoke `honesty` every session, immediately after this skill returns.
 
-| If the task involves...                        | MUST read these skills BEFORE acting               |
+| If the task involves...                        | MUST invoke these skills BEFORE acting             |
 |----------------------------------------------|----------------------------------------------------|
 | Any implementation work                      | `execution`                                        |
 | Planning a multi-step task                   | `writing-plans`                                    |
@@ -63,7 +61,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Requesting code review                       | `requesting-code-review`                           |
 | Receiving code review feedback               | `receiving-code-review`                            |
 | CI/CD or workflow changes                    | `workflow`                                         |
-| Flatpak packaging or GL runtime              | `flatpak`                                          |
+| Flatpak packaging or OpenGL runtime          | `flatpak`                                          |
 | Build system or dependency changes           | `build`                                            |
 | Writing or editing documentation             | `documentation`                                    |
 | Bug fixes or error resolution                | `execution`, `systematic-debugging`                |
@@ -82,7 +80,9 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Task references a GitHub issue number (#NNN), OR task description contains "acceptance criteria", "AC:", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
 | Summarizing external resources (articles, web pages, files) for knowledge extraction | `summarization` |
 
-If unsure, read `code-quality` -- it applies to every code task.
+If unsure, invoke `code-quality` -- it applies to every code task.
+
+Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.md`.
 
 **Loading protocol:**
 1. Invoke `honesty` immediately after this skill returns -- every session, regardless of task type; hook-injected gate text does not substitute for the invocation
@@ -92,16 +92,16 @@ If unsure, read `code-quality` -- it applies to every code task.
 
 ## BEFORE PROCEEDING
 
-1. `honesty` invoked first -- before any other skill
+1. `honesty` invoked immediately after `session-bootstrap` returned -- before any task-specific skill
 2. Task type(s) identified from the On Start table above
 3. All required skills for this task type loaded (in parallel if multiple domains)
 4. Skill load announcement made for each loaded skill
-5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work. Ghost commits from prior agents are a recurring risk.
+5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work.
 6. If resuming a prior session: pending tasks checked (via TaskList); Skeptic Agent dispatched before first implementation step
 7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched -- NOT done inline
-10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available
+10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty` and for every skill in the On Start table
 11. If a hook config fix was committed during this session: that fix is NOT active until the NEXT session. Do NOT claim hooks are working. The CLI reads hooks.json once at session start -- in-session commits to hook files do not take effect until the session is restarted.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
@@ -130,8 +130,7 @@ If unsure, read `code-quality` -- it applies to every code task.
    Lessons: [count] | Skills updated: [list or "None"] | Compacted: [files or "None"]
    ```
 
-If you have nothing to report, still include the block with zeroes. This ensures the
-behavior is habitual, not conditional.
+If you have nothing to report, still include the block with zeroes.
 
 ---
 
@@ -140,7 +139,7 @@ behavior is habitual, not conditional.
 - A task just completed and no new user message has arrived -- **STOP. Is this the session's last task? If so, treat it as session end. Load self-evaluation NOW before responding.**
 - Starting implementation when prior session tasks are pending without dispatching the Skeptic Agent -- **STOP. Dispatch the Skeptic Agent before the first implementation step.**
 - Picking up plan todos without `subagent-driven-development` loaded -- **STOP. Load `subagent-driven-development` before dispatching the first implementer. The skill contains the review protocol that every todo requires.**
-- Starting to code before reading the required skill -- **STOP. Load the skill now. Do not write one line first.**
+- Starting to code before invoking the required skill -- **STOP. Invoke the skill now. Do not write one line first.**
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` -- **STOP. Load the `self-evaluation` skill now.**

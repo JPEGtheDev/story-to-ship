@@ -170,4 +170,4 @@ After all three Discovery amigos return:
 | Ceremonies | Model | Reason |
 |------------|-------|--------|
 | 1 (Discovery), 3 (Progress Check), 6 (Retrospective) | `claude-haiku-4.5` | Question-generation or summary tasks (reading spec, identifying gaps, listing lessons) -- Haiku handles these adequately |
-| 2 (Refinement), 4 (Pivot Assessment), 5 (Signoff) | `claude-sonnet-4.6` | Multi-file analysis, nuanced tradeoff evaluation, condition resolution -- Sonnet is worth the cost |
+| 2 (Refinement), 4 (Pivot Assessment), 5 (Signoff) | `claude-sonnet-5` | Multi-file analysis, nuanced tradeoff evaluation, condition resolution -- Sonnet is worth the cost |

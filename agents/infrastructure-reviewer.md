@@ -1,5 +1,6 @@
 ---
 name: infrastructure-reviewer
+model: sonnet
 description: Use for per-file CI/CMake/Flatpak compliance review.
 ---
 

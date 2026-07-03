@@ -1,5 +1,6 @@
 ---
 name: claim-enrichment
+model: sonnet
 description: Use when evaluating and enriching analytical claims in a synthesized summary article before quality validation.
 ---
 

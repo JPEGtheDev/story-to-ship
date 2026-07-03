@@ -1,5 +1,6 @@
 ---
 name: architecture-reviewer
+model: opus
 description: Use for per-file layer boundary and IOpenGLContext compliance review.
 ---
 

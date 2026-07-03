@@ -1,5 +1,6 @@
 ---
 name: skill-reviewer
+model: sonnet
 description: Use when auditing a single skill file against writing-skills criteria.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: skeptic
+model: sonnet
 description: Use when reviewing a plan for gaps before implementation begins.
 ---
 

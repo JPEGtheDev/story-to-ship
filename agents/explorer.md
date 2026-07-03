@@ -1,5 +1,6 @@
 ---
 name: explorer
+model: haiku
 description: Use for read-only multi-file research to answer specific questions.
 ---
 

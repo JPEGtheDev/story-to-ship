@@ -1,5 +1,6 @@
 ---
 name: implementer
+model: sonnet
 description: Use when implementing a feature task in a git worktree.
 ---
 

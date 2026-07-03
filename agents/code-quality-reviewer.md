@@ -1,5 +1,6 @@
 ---
 name: code-quality-reviewer
+model: sonnet
 description: Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards.
 ---
 

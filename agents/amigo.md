@@ -1,5 +1,6 @@
 ---
 name: amigo
+model: sonnet
 description: Use when dispatching a Three Amigos ceremony participant.
 ---
 

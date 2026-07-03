@@ -1,5 +1,6 @@
 ---
 name: synthesizer
+model: sonnet
 description: Use when synthesizing three parallel method summaries (Abstractive, Extractive, SAAC) into a final Markdown article.
 ---
 

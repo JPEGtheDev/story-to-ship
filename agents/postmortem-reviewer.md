@@ -1,5 +1,6 @@
 ---
 name: postmortem-reviewer
+model: sonnet
 description: Use when reviewing a completed agent session retrospective.
 ---
 

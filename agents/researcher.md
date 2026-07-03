@@ -1,5 +1,6 @@
 ---
 name: researcher
+model: sonnet
 description: Use when empirically confirming or denying a hypothesis.
 ---
 

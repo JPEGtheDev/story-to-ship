@@ -84,7 +84,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Every agent has its own isolated worktree; read-only agents additionally have no shared write targets
+4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
@@ -97,7 +97,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Every agent has its own isolated worktree; read-only agents additionally have no shared write targets
+4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
@@ -192,7 +192,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | "I don't need to verify -- the agent found it" | Findings are hypotheses. You verify before you propagate. |
 | "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
 | "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
-| "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use worktrees for parallel agents with side effects. Shared branches produce conflicts. |
+| "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use an isolated worktree for every dispatched agent, read-only or write. Shared branches produce conflicts. |
 | "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---

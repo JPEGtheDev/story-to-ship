@@ -121,4 +121,4 @@ Every generated story must include this section:
 
 ## References
 
-- `references/PV_ESTIMATION_EXAMPLES.md` -- validated real-world estimates from completed Particle-Viewer stories, for calibrating request-count estimates. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+- `references/PV_ESTIMATION_EXAMPLES.md` -- validated real-world estimates from completed Particle-Viewer stories, for calibrating estimates against actual outcomes. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.

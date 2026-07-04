@@ -14,33 +14,16 @@ criteria. Read them in full, then follow the Review Process exactly.
 ## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
-# Step 1: Verify you are in the correct worktree
 git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
 The output MUST match `{{WORKTREE_PATH}}`.
-
-- If it matches -> you are in the correct worktree. Proceed.
+- If it matches -> proceed.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Blockers: Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned
-  [actual path], expected {{WORKTREE_PATH}}. The orchestrator must create the worktree and
-  re-dispatch with the correct WORKTREE_PATH.
-  ```
-
-```bash
-# Step 2: Verify branch isolation
-git branch --show-current
-```
-
-The output MUST NOT be `main` or the parent development branch name.
-
-- If it is -> return immediately:
-  ```
-  STATUS: BLOCKED
-  Blockers: Running on main or the parent development branch. Branch isolation is not
-  confirmed. The worktree must be on a dedicated branch before this agent can proceed.
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
+  expected {{WORKTREE_PATH}}.
   ```
 
 ---

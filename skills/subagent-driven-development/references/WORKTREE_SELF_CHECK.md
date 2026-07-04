@@ -1,8 +1,32 @@
 # Worktree Self-Check -- Canonical Block
 
 This file is the source of truth for the Worktree Self-Check block used by every agent
-template in agents/. When editing or adding a template, copy this block verbatim,
-substituting the template's own path placeholder (e.g. {{REPO_PATH}} for postmortem-reviewer, which runs against the main repo root). Do not shorten or reword it.
+template in agents/. Read-only templates carry the core block (Variant A). Templates that
+COMMIT to a branch (currently only implementer) additionally carry the branch-isolation
+step (Variant B). Copy the applicable variant verbatim, substituting the template's own
+path placeholder (e.g. {{REPO_PATH}} for postmortem-reviewer, {{WORKTREE_PATH}} elsewhere).
+Do not shorten or reword it.
+
+## Variant A -- read-only templates
+
+````
+## Worktree Self-Check -- Run BEFORE starting
+
+```bash
+git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
+```
+
+The output MUST match `{{WORKTREE_PATH}}`.
+- If it matches -> proceed.
+- If it does NOT match -> return immediately:
+  ```
+  STATUS: BLOCKED
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
+  expected {{WORKTREE_PATH}}.
+  ```
+````
+
+## Variant B -- write templates (commit to a branch)
 
 ````
 ## Worktree Self-Check -- Run BEFORE starting

@@ -162,7 +162,7 @@ When dispatching parallel agents -- read-only and write agents alike (e.g., mult
 1. Create one worktree per agent BEFORE dispatching
 2. Verify each worktree is gitignored: `git check-ignore -q .worktrees || echo "NOT IGNORED"`
 3. Pass worktree path as the agent's working directory
-4. After agents complete: review each diff independently before merging
+4. After agents complete: review each write agent's diff independently before merging; for read-only agents, verify reported findings against source files before accepting them
 
 See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees` skill for full lifecycle.
 

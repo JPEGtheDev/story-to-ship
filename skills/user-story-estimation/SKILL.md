@@ -116,3 +116,9 @@ Every generated story must include this section:
 | "The story is probably S" | Use the complexity indicators above. When uncertain, size up. |
 | "I'll update the estimate after starting" | Estimates set expectations. Revise before beginning, not during. |
 | "XL is fine, we can figure it out as we go" | XL means the estimate is undefined. Decompose first. |
+
+---
+
+## References
+
+- `references/PV_ESTIMATION_EXAMPLES.md` -- validated real-world estimates from completed Particle-Viewer stories, for calibrating request-count estimates. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.

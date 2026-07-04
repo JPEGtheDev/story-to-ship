@@ -29,7 +29,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
 | 6 | Feature merged and closed | Retrospective | Process improvement items |
 
-Ceremony model tiers are defined once in the subagent-driven-development skill: `../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Do not restate model IDs here.
+Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 
 Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
 

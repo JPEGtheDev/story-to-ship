@@ -167,4 +167,4 @@ After all three Discovery amigos return:
 
 ## Model Selection
 
-Ceremony model tiers and their rationale are defined once in the subagent-driven-development skill: `../../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). See that table for the current tier per ceremony; do not restate tier assignments or model IDs in this file.
+Ceremony model tiers and their rationale are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony; do not restate tier assignments or model IDs in this file.

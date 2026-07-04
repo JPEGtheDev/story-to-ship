@@ -165,9 +165,6 @@ After all three Discovery amigos return:
 
 ---
 
-## Model Selection Rationale
+## Model Selection
 
-| Ceremonies | Model | Reason |
-|------------|-------|--------|
-| 1 (Discovery), 3 (Progress Check), 6 (Retrospective) | `claude-haiku-4.5` | Question-generation or summary tasks (reading spec, identifying gaps, listing lessons) -- Haiku handles these adequately |
-| 2 (Refinement), 4 (Pivot Assessment), 5 (Signoff) | `claude-sonnet-5` | Multi-file analysis, nuanced tradeoff evaluation, condition resolution -- Sonnet is worth the cost |
+Ceremony model tiers and their rationale are defined once in the subagent-driven-development skill: `../../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Ceremonies 1, 3, and 6 run Economy; ceremonies 2, 4, and 5 run Standard. Do not restate model IDs in this file.

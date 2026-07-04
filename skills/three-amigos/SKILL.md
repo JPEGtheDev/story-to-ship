@@ -20,16 +20,18 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## When to Invoke
 
-| # | Signal | Ceremony | Output | Model |
-|---|--------|----------|--------|-------|
-| 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md | `claude-haiku-4.5` |
-| 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT | `claude-sonnet-5` |
-| 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED | `claude-haiku-4.5` |
-| 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON | `claude-sonnet-5` |
-| 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED | `claude-sonnet-5` |
-| 6 | Feature merged and closed | Retrospective | Process improvement items | `claude-haiku-4.5` |
+| # | Signal | Ceremony | Output |
+|---|--------|----------|--------|
+| 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md |
+| 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT |
+| 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED |
+| 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
+| 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
+| 6 | Feature merged and closed | Retrospective | Process improvement items |
 
-Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas + model selection rationale: `references/CEREMONIES.md`.
+Ceremony model tiers are defined once in the subagent-driven-development skill: `references/MODEL_SELECTION.md` (Tier Assignments section). Do not restate model IDs here.
+
+Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
 
 ---
 

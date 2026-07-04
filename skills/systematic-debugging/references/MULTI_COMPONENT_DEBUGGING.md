@@ -39,4 +39,4 @@ Before proposing any fix in a multi-component failure:
 | SDL3 window creates but hangs | SDL3/OpenGL init sequence | Add `SDL_GetError()` and `glGetError()` probes at each init step |
 | Flatpak crash on startup | Library version mismatch | Run `ldd` on the binary; check manifest pinned versions |
 
-For the Particle-Viewer layer taxonomy (SDL3 events -> ViewerApp -> UI -> Graphics -> OpenGL -> Shader -> GPU), see `references/PV_DEBUG_REFERENCE.md`.
+For the Particle-Viewer layer taxonomy (SDL3 events -> ViewerApp -> UI -> Graphics -> OpenGL -> Shader -> GPU), see `references/PV_DEBUG_REFERENCE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.

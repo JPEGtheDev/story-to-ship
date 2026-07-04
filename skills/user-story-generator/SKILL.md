@@ -103,9 +103,9 @@ See `references/PV_PROJECT_CONTEXT.md` for project scope verification and refere
 
 **Always include the Effort Estimate section** with:
 - Total premium requests (range)
-- Recommended model tier (Small/Standard/Advanced)
+- Recommended model tier (Economy/Standard/Premium)
 - One-sentence reasoning for the model choice
 
 ## Related Skills
 
-See the `user-story-estimation` skill for S/M/L size breakdown, premium request ranges, model tier selection, and validated examples. Always include the Effort Estimate section in every generated story.
+See the `user-story-estimation` skill for S/M/L size breakdown, premium request ranges, and validated examples. For model tier selection, see `../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Always include the Effort Estimate section in every generated story.

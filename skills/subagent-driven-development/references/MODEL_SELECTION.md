@@ -18,7 +18,7 @@ If the user states a model preference in the current session, store it as a memo
 | Review: spec compliance, code quality, architecture | Standard |
 | Architecture design, security, final review (NOT compliance review) | Premium |
 
-## Tier Exceptions
+## Tier Assignments
 
 Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default for everything in the table above. **Premium** = top class (e.g. Opus), reserved for the Premium row.
 

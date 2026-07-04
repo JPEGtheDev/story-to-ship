@@ -20,7 +20,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## The Layer Architecture
 
-For the Particle-Viewer 4-layer inward-dependency model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`.
+For the Particle-Viewer 4-layer inward-dependency model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 ---
 
@@ -82,7 +82,7 @@ Run every item for each file under review:
 
 ## Common Violations
 
-For Particle-Viewer specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`.
+For Particle-Viewer specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 ---
 

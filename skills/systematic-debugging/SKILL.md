@@ -197,7 +197,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 
 ## Project-Specific Commands
 
-For Particle-Viewer debug commands (build, test filter, visual regression diffs, CI reproduction), see `references/PV_DEBUG_REFERENCE.md`.
+For Particle-Viewer debug commands (build, test filter, visual regression diffs, CI reproduction), see `references/PV_DEBUG_REFERENCE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 ---
 

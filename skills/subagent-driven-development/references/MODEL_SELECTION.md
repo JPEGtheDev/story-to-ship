@@ -22,7 +22,7 @@ If the user states a model preference in the current session, store it as a memo
 
 Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default for everything in the table above. **Premium** = top class (e.g. Opus), reserved for the Premium row.
 
-Exceptions to the Standard default:
+Tier assignments for named agents and ceremonies. Economy rows override the Standard default; the Standard rows match the default and are listed so the full ceremony mapping lives in this one table:
 
 | Agent or ceremony | Tier | Why |
 |-------------------|------|-----|

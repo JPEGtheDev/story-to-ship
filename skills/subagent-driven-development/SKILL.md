@@ -44,7 +44,7 @@ Before dispatching any subagent:
 
 1. The todo has a single, clear objective -- no compound tasks bundled together. Any specific limits, counts, or numbers in the task description are verified from source files, not from memory.
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
-3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.**
+3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value.
 4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `architecture-reviewer.md`, `infrastructure-reviewer.md`.
 5. Agent type is correct for the task: explore for read-only research, code-review for analysis, general-purpose+worktree for file modifications, task for build/test/lint.

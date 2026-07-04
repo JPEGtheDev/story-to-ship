@@ -9,7 +9,7 @@ description: Use when multiple independent read-only research tasks can run simu
 
 ```
 YOU MUST RESTRICT PARALLEL AGENTS TO READ-ONLY WORK ONLY.
-YOU MUST PROVIDE EACH WRITE AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
+YOU MUST PROVIDE EACH DISPATCHED AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
 No exceptions.
 ```
 
@@ -66,7 +66,7 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 Dispatch agents in parallel when ALL of the following are true:
 
 1. Tasks are **independent** -- no agent needs the output of another to start
-2. Tasks are **read-only** OR each write agent has its own isolated worktree
+2. Every agent has its own isolated worktree -- read-only and write agents alike
 3. Each task has a **single clear objective** -- multi-part briefs produce noise
 
 **Good candidates for parallelization:**
@@ -84,7 +84,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+4. Every agent has its own isolated worktree; read-only agents additionally have no shared write targets
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
@@ -97,7 +97,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+4. Every agent has its own isolated worktree; read-only agents additionally have no shared write targets
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents

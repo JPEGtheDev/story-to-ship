@@ -155,9 +155,9 @@ When any agent cites specific file names, page names, or resource paths as evide
 
 ---
 
-## Write Agents -- Worktree Requirement
+## Worktree Requirement -- Every Dispatched Agent
 
-When parallelizing write work (e.g., multiple implementers working on independent subsystems):
+When dispatching parallel agents -- read-only and write agents alike (e.g., multiple reviewers or implementers working on independent subsystems):
 
 1. Create one worktree per agent BEFORE dispatching
 2. Verify each worktree is gitignored: `git check-ignore -q .worktrees || echo "NOT IGNORED"`
@@ -200,5 +200,5 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 ## Related Skills
 
 - `subagent-driven-development` -- orchestration framework; parallel dispatch is a specialized case of subagent dispatch
-- `using-git-worktrees` -- required for any parallel write agents; isolation guarantee
+- `using-git-worktrees` -- required for every dispatched agent, read-only and write alike; isolation guarantee
 - `execution` -- work loop and commit rhythm that parallel dispatch operates within

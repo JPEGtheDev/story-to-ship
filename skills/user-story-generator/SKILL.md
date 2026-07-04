@@ -108,4 +108,4 @@ See `references/PV_PROJECT_CONTEXT.md` for project scope verification and refere
 
 ## Related Skills
 
-See the `user-story-estimation` skill for S/M/L size breakdown, premium request ranges, and validated examples. For model tier selection, see `../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Always include the Effort Estimate section in every generated story.
+See the `user-story-estimation` skill for the T-shirt size scale (XS-XL) and validated examples. For model tier selection, see `../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Always include the Effort Estimate section in every generated story.

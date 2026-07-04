@@ -54,7 +54,7 @@ Read these files in order:
 
 5. `{{SELF_ASSESSMENT_PATH}}` -- if it exists, read it LAST. Compare its claims against what the log actually shows. Every discrepancy is a finding.
 
-5. Load the `session-postmortem` skill -- this is the framework you will apply.
+6. Load the `session-postmortem` skill -- this is the framework you will apply.
 
 ---
 

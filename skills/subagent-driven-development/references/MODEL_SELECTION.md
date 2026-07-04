@@ -20,7 +20,7 @@ If the user states a model preference in the current session, store it as a memo
 
 ## Tier Assignments
 
-Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default for everything in the table above. **Premium** = top class (e.g. Opus), reserved for the Premium row.
+Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for the Premium row.
 
 Tier assignments for named agents and ceremonies. Economy rows override the Standard default; the Standard rows match the default and are listed so the full ceremony mapping lives in this one table:
 
@@ -34,7 +34,7 @@ Tier assignments for named agents and ceremonies. Economy rows override the Stan
 | Three Amigos Ceremony 4 (Pivot Assessment) | Standard | Gate decision on scope and correctness risk |
 | Three Amigos Ceremony 5 (Signoff) | Standard | Pre-merge acceptance decision |
 
-This table is the single source of truth for ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs.
+This table is the single source of truth for agent and ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs in prose; agent template frontmatter model fields implement these assignments and MUST stay consistent with this table.
 
 **Using Premium for non-architecture tasks:** State the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
 

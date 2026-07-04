@@ -167,4 +167,4 @@ After all three Discovery amigos return:
 
 ## Model Selection
 
-Ceremony model tiers and their rationale are defined once in the subagent-driven-development skill: `../../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). Ceremonies 1, 3, and 6 run Economy; ceremonies 2, 4, and 5 run Standard. Do not restate model IDs in this file.
+Ceremony model tiers and their rationale are defined once in the subagent-driven-development skill: `../../subagent-driven-development/references/MODEL_SELECTION.md` (Tier Assignments section). See that table for the current tier per ceremony; do not restate tier assignments or model IDs in this file.

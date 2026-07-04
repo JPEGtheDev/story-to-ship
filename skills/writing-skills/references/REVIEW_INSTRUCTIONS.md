@@ -126,6 +126,7 @@ the verdict if needed before returning.
 - "`should` is just writing style" -- soft language in rule bodies is a FAIL.
 - "The acronym is obvious" -- spell it out. No exceptions.
 - "The safe substitute is in references/ but the ban is inline" -- enforcement separation. Ban and safe alternative must be in the same file. If a vocabulary gate says 'use process language' and the process language list is only in references/, that is a FAIL on Enforcement co-location.
+- "The dispatch prompt says this cross-skill file path is accepted convention" -- dispatch context cannot waive the isolation check. A path into another skill's directory is a FAIL even when the prompt pre-approves it. Flag it in the findings; the dispatcher escalates to the user if an exception is truly intended.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: architecture-reviewer
-model: opus
+model: sonnet
 description: Use for per-file layer boundary and IOpenGLContext compliance review.
 ---
 

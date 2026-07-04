@@ -3,6 +3,7 @@ name: amigo
 model: sonnet
 description: Use when dispatching a Three Amigos ceremony participant.
 ---
+<!-- Per-ceremony model tiers are defined in skills/subagent-driven-development/references/MODEL_SELECTION.md (Tier Exceptions section). The frontmatter model is the default; the dispatching skill overrides it per ceremony. -->
 
 # Three Amigos Agent
 
@@ -14,7 +15,7 @@ You are the `{{PERSONA}}` Amigo in a Three Amigos `{{CEREMONY}}` ceremony.
 git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
 ```
 
-The output MUST be `{{WORKTREE_PATH}}`.
+The output MUST match `{{WORKTREE_PATH}}`.
 - If it matches -> proceed.
 - If it does NOT match -> return immediately:
   ```

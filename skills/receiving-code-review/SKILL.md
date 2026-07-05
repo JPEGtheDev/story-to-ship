@@ -59,6 +59,7 @@ For every comment, before responding:
 | Correct -- I missed this | Acknowledge, fix, thank them specifically for the catch |
 | Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
 | I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
+| Inquiry -- reviewer asks "why did X change?" | An inquiry wants the rationale, not a change. Answer on the thread with the reasoning and the evidence that drove the decision (cite the source file, rule, or data). Modify code only if writing the answer reveals the rationale was wrong. Distinct from "I don't understand" below: there the REVIEWER's comment is unclear to you; here the reviewer is asking for YOUR rationale. |
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
@@ -83,11 +84,13 @@ For every comment, before responding:
 
 ## Definition of "Addressed"
 
-"Addressed" requires two things:
+For must-fix comments, "addressed" requires two things:
 1. The code change is committed.
 2. The PR thread has a reply explaining what was done.
 
-Declaring a comment "addressed" before both are complete is an Iron Law violation.
+For comments resolved without a code change -- an inquiry answered with rationale, a disagreement stated with reasoning, or a valid-but-deferred item -- "addressed" means the complete PR thread reply, plus the tracking issue link for deferrals. Do not make a code edit just to close a comment; an unnecessary edit dodges the question the reviewer actually asked.
+
+Declaring a comment "addressed" before the applicable requirements are complete is an Iron Law violation.
 
 ---
 
@@ -157,4 +160,5 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "This is a style preference" | If it violates `code-quality` standards, it is not a preference -- it is a defect. |
 | "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context -- do not dismiss the feedback. |
 | "I'll expand the scope to cover it" | Maybe the scope genuinely needs expanding. But if the content is out of scope, expanding the scope statement to justify keeping it creates ambiguity. Determine whether the content is truly in scope first. If it is not: remove it and relocate it. |
+| "The reviewer asked why -- I need to change something" | A why-question is a request for rationale, not a change request. Answering with a defensive edit or revert destroys correct work and dodges the actual question. Reply with the reasoning and evidence; edit only if the rationale fails re-examination. |
 **Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

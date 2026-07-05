@@ -89,6 +89,7 @@ These thoughts mean stop immediately:
 | "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
 | "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
 | "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
+| "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
 
 ---
 

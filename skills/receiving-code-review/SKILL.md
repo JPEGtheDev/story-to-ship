@@ -84,11 +84,13 @@ For every comment, before responding:
 
 ## Definition of "Addressed"
 
-"Addressed" requires two things:
+For must-fix comments, "addressed" requires two things:
 1. The code change is committed.
 2. The PR thread has a reply explaining what was done.
 
-Declaring a comment "addressed" before both are complete is an Iron Law violation.
+For comments resolved without a code change -- an inquiry answered with rationale, a disagreement stated with reasoning, or a valid-but-deferred item -- "addressed" means the complete PR thread reply, plus the tracking issue link for deferrals. Do not make a code edit just to close a comment; an unnecessary edit dodges the question the reviewer actually asked.
+
+Declaring a comment "addressed" before the applicable requirements are complete is an Iron Law violation.
 
 ---
 

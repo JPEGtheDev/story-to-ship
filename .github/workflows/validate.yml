@@ -1,0 +1,108 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate hooks.json
+        run: |
+          jq empty hooks/hooks.json
+          echo "[+] hooks.json is valid JSON"
+
+      - name: Validate .claude-plugin JSON files
+        run: |
+          jq empty .claude-plugin/plugin.json
+          jq empty .claude-plugin/marketplace.json
+          echo "[+] .claude-plugin/*.json are valid JSON"
+
+      - name: Shellcheck hook scripts
+        run: |
+          shellcheck hooks/session-start.sh
+          shellcheck hooks/pre-message-gates.sh
+          shellcheck hooks/pre-message.sh
+          echo "[+] All hook scripts pass shellcheck"
+
+      - name: Enforce pre-message hook word budget
+        run: |
+          gates=$(wc -w < hooks/pre-message-gates.md)
+          message=$(wc -w < hooks/pre-message.md)
+          total=$((gates + message))
+          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 400)"
+          if [ "$total" -gt 400 ]; then
+            echo "FAILED: combined pre-message hook word count $total exceeds 400"
+            exit 1
+          fi
+          echo "[+] Combined pre-message hook injection is within the 400-word budget"
+
+      - name: Check for broken references in skill files
+        run: |
+          set -e
+          broken=0
+          for f in skills/*/SKILL.md; do
+            dir=$(dirname "$f")
+            while IFS= read -r ref; do
+              [ -z "$ref" ] && continue
+              target="$dir/$ref"
+              if [ ! -f "$target" ]; then
+                echo "BROKEN: $f references $ref (not found at $target)"
+                broken=$((broken + 1))
+              fi
+            done < <(grep -o 'references/[A-Za-z_./-]*\.md' "$f" | sort -u)
+          done
+          if [ "$broken" -gt 0 ]; then
+            echo "Found $broken broken reference(s)"
+            exit 1
+          fi
+          echo "[+] All skill references resolve to existing files"
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          set -e
+          for f in skills/*/SKILL.md; do
+            name=$(sed -n 's/^name: \(.*\)$/\1/p' "$f" | head -1)
+            desc=$(sed -n 's/^description: \(.*\)$/\1/p' "$f" | head -1)
+            if [ -z "$name" ]; then
+              echo "MISSING: $f has no 'name' field in frontmatter"
+              exit 1
+            fi
+            if [ -z "$desc" ] && ! grep -q '^description: >' "$f"; then
+              echo "MISSING: $f has no 'description' field in frontmatter"
+              exit 1
+            fi
+          done
+          echo "[+] All SKILL.md files have required frontmatter (name, description)"
+
+      - name: Hook script smoke test
+        run: |
+          set -e
+          for sh in hooks/*.sh; do
+            md="${sh%.sh}.md"
+            if [ -f "$md" ]; then
+              echo "Smoke-testing $sh..."
+              output=$(bash "$sh" 2>&1) || {
+                echo "FAILED: $sh exited nonzero"
+                exit 1
+              }
+              printf '%s\n' "$output" | jq empty || {
+                echo "FAILED: $sh output is not valid JSON"
+                printf 'Output was: %s\n' "$output"
+                exit 1
+              }
+              case "$output" in
+                *"[ERROR"*)
+                  echo "FAILED: $sh emitted an error envelope"
+                  echo "Output was: $output"
+                  exit 1
+                  ;;
+              esac
+            fi
+          done
+          echo "[+] All hook scripts produce valid, error-free JSON"

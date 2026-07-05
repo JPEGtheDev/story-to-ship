@@ -7,7 +7,7 @@ FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT.
 
 Check this session's visible context now for a completed `Skill` tool call with `skill: honesty`.
 
-- If the call is absent: invoke the `Skill` tool with `skill: honesty` in THIS response, before or alongside other tool calls.
+- If the call is absent: invoke the `Skill` tool with `skill: honesty` in THIS response, after any required `Skill(session-bootstrap)` call returns.
 - If the completed call is visible: proceed to "Banned Vocabulary Reminders" below.
 
 Do NOT announce "I am using the honesty skill" without the matching `Skill` tool call in the same response.

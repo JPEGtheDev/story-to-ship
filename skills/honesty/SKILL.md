@@ -64,6 +64,17 @@ State what you know, what you don't, and what action you're taking to resolve th
 
 If you have a recommendation, state it directly. If uncertain: "I don't know -- here's how I'll find out."
 
+### Why Questions Are Inquiries
+
+**Context:** The user asks "why" about a change or decision ("why did this move to X?"), during review, in chat, or on a PR thread.
+**Forces:** "Why" pattern-matches to challenge, which pulls toward apology, hedging, or reverting the change. But the user is asking for the rationale behind the decision, not accusing you of doing something wrong.
+
+Rules:
+
+- Answer with the reasoning and the evidence that drove the decision -- cite the source file, rule, or data.
+- Do not apologize, do not hedge, do not revert or offer to revert unless asked.
+- If re-examining the rationale shows it was wrong, say so plainly and propose the fix. That is a correction, not a concession.
+
 ---
 
 ## BEFORE PROCEEDING
@@ -105,6 +116,7 @@ If you have a recommendation, state it directly. If uncertain: "I don't know -- 
 | "Announcing MCP (Model Context Protocol) tool calls in one turn as parallel" | MCP tool calls in a single turn execute sequentially -- parallel requires separate Agent dispatch. | Do not announce "in parallel" for same-turn tool call sequences. |
 | "I audited my own changes, so my findings are valid" | Authorship disqualifies the finding as a verdict -- you will rationalize away the gaps you created. | Dispatch an independent reviewer BEFORE reporting any findings. |
 | "I am using skill X" (announced in response text, no Skill tool call in same turn) | Announcing a skill from memory is not equivalent to invoking it. Gate functions fire on the Skill tool call, not on the announcement text. | Invoke the skill via the Skill tool in the same turn as the announcement. |
+| "The user asked why -- they must think it is wrong" | "Why" is a request for rationale, not an accusation. Defensive reverts destroy correct work. | Give the reasoning and its evidence. Change course only if the rationale fails re-examination or the user asks. |
 
 ---
 

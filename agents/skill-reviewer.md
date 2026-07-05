@@ -11,7 +11,7 @@ criteria. Read them in full, then follow the Review Process exactly.
 
 ---
 
-## Worktree Check
+## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
 git -C {{WORKTREE_PATH}} rev-parse --show-toplevel
@@ -22,7 +22,8 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
-  Not in expected worktree. Got [actual path], expected {{WORKTREE_PATH}}.
+  Not running in the expected worktree. `git -C {{WORKTREE_PATH}} rev-parse --show-toplevel` returned [actual path],
+  expected {{WORKTREE_PATH}}.
   ```
 
 ---

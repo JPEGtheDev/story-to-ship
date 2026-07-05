@@ -8,7 +8,7 @@ description: Use when implementing a feature task in a git worktree.
 
 You are implementing a feature in a software project.
 
-## Worktree Self-Check -- Run BEFORE reading the task
+## Worktree Self-Check -- Run BEFORE starting
 
 ```bash
 # Step 1: Verify you are in the correct worktree
@@ -143,6 +143,7 @@ When acting as a fix agent (correcting issues flagged by a Stage 1 or Stage 2 re
 ## Return format
 ```
 STATUS: [DONE | DONE_WITH_CONCERNS | PARTIAL | NEEDS_CONTEXT | BLOCKED]
+Worktree: [output of: git -C {{WORKTREE_PATH}} rev-parse --show-toplevel]
 Branch: agent/{{AGENT_NAME}}
 Tests: [X passed, 0 failures]
 Files changed: [list]

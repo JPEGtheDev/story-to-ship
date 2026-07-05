@@ -1,7 +1,7 @@
 ---
 name: using-git-worktrees
 license: MIT
-description: Use when running parallel agent work, testing an approach in isolation, or keeping the main branch clean while a subagent operates on a separate branch.
+description: Use when dispatching any subagent (every dispatched agent runs in its own worktree), testing an approach in isolation, or keeping the main branch clean while a subagent operates on a separate branch.
 ---
 
 

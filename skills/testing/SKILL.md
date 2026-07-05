@@ -147,4 +147,5 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 
 - `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green)
 - `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
+- `references/PV_TEST_CONVENTIONS.md` -- Particle-Viewer test conventions: project-specific testing patterns, examples, and design principles. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 

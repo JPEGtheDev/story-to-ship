@@ -103,9 +103,11 @@ See `references/PV_PROJECT_CONTEXT.md` for project scope verification and refere
 
 **Always include the Effort Estimate section** with:
 - Total premium requests (range)
-- Recommended model tier (Small/Standard/Advanced)
+- Recommended model tier (Economy/Standard/Premium)
 - One-sentence reasoning for the model choice
+
+**Tier planning for decomposed stories:** Reserve Premium for stories that make architectural or design decisions. When decomposition front-loads those decisions into a Premium story, recommend Standard for the implementation stories that execute them, and Economy for mechanical, fully-specified changes. A breakdown where every story recommends Premium is a signal the decomposition did not separate deciding from executing.
 
 ## Related Skills
 
-See the `user-story-estimation` skill for S/M/L size breakdown, premium request ranges, model tier selection, and validated examples. Always include the Effort Estimate section in every generated story.
+See the `user-story-estimation` skill for the T-shirt size scale (XS-XL) and validated examples. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story.

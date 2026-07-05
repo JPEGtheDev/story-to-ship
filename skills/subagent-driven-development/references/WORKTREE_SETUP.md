@@ -23,7 +23,7 @@ git -C .worktrees/agent-<name> branch --show-current
 # Read-only agents (explorer, researcher, reviewers, skeptic, postmortem) skip step 4.
 ```
 
-The worktree path confirmed in step 3 is the value to pass as `{{WORKTREE_PATH}}` in the agent prompt.
+The worktree path confirmed in step 3 is the value to pass as `{{WORKTREE_PATH}}` in the agent prompt. The dispatched agent verifies its own side of this contract at start via the Worktree Self-Check block -- `references/WORKTREE_SELF_CHECK.md` is the canonical source that agent templates copy verbatim.
 
 ## Why Read-Only Agents Also Need Worktrees
 

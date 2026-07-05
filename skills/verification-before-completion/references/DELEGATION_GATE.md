@@ -26,6 +26,8 @@ Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
 4. ONLY THEN claim the subagent's work is complete
 ```
 
+Step 3 cites `references/PV_VERIFICATION_COMMANDS.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+
 [+] All steps passed -> claim the subagent's work is complete
 [-] Any step failed -> do not relay the completion claim; investigate and fix before claiming done
 

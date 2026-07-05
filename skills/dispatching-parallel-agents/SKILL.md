@@ -9,7 +9,7 @@ description: Use when multiple independent read-only research tasks can run simu
 
 ```
 YOU MUST RESTRICT PARALLEL AGENTS TO READ-ONLY WORK ONLY.
-YOU MUST PROVIDE EACH WRITE AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
+YOU MUST PROVIDE EACH DISPATCHED AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
 No exceptions.
 ```
 
@@ -66,7 +66,7 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 Dispatch agents in parallel when ALL of the following are true:
 
 1. Tasks are **independent** -- no agent needs the output of another to start
-2. Tasks are **read-only** OR each write agent has its own isolated worktree
+2. Every agent has its own isolated worktree -- read-only and write agents alike
 3. Each task has a **single clear objective** -- multi-part briefs produce noise
 
 **Good candidates for parallelization:**
@@ -84,7 +84,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
@@ -97,7 +97,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
-4. Read-only agents have no shared write targets; write agents each have an isolated worktree
+4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
@@ -155,14 +155,14 @@ When any agent cites specific file names, page names, or resource paths as evide
 
 ---
 
-## Write Agents -- Worktree Requirement
+## Worktree Requirement -- Every Dispatched Agent
 
-When parallelizing write work (e.g., multiple implementers working on independent subsystems):
+When dispatching parallel agents -- read-only and write agents alike (e.g., multiple reviewers or implementers working on independent subsystems):
 
 1. Create one worktree per agent BEFORE dispatching
 2. Verify each worktree is gitignored: `git check-ignore -q .worktrees || echo "NOT IGNORED"`
 3. Pass worktree path as the agent's working directory
-4. After agents complete: review each diff independently before merging
+4. After agents complete: review each write agent's diff independently before merging; for read-only agents, verify reported findings against source files before accepting them
 
 See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees` skill for full lifecycle.
 
@@ -192,7 +192,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | "I don't need to verify -- the agent found it" | Findings are hypotheses. You verify before you propagate. |
 | "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
 | "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
-| "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use worktrees for parallel agents with side effects. Shared branches produce conflicts. |
+| "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use an isolated worktree for every dispatched agent, read-only or write. Shared branches produce conflicts. |
 | "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---
@@ -200,5 +200,5 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 ## Related Skills
 
 - `subagent-driven-development` -- orchestration framework; parallel dispatch is a specialized case of subagent dispatch
-- `using-git-worktrees` -- required for any parallel write agents; isolation guarantee
+- `using-git-worktrees` -- required for every dispatched agent, read-only and write alike; isolation guarantee
 - `execution` -- work loop and commit rhythm that parallel dispatch operates within

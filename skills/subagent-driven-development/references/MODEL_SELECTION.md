@@ -16,7 +16,25 @@ If the user states a model preference in the current session, store it as a memo
 | Research: read files, summarize patterns, compare approaches | Standard |
 | Implementation: multi-file, design judgment | Standard |
 | Review: spec compliance, code quality, architecture | Standard |
-| Architecture design, security, final review | Premium |
+| Architecture design, security, final review (NOT compliance review) | Premium |
+
+## Tier Assignments
+
+Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for the Premium row.
+
+Tier assignments for named agents and ceremonies. Economy rows override the Standard default; the Standard rows match the default and are listed so the full ceremony mapping lives in this one table:
+
+| Agent or ceremony | Tier | Why |
+|-------------------|------|-----|
+| explorer template (read-only multi-file lookup) | Economy | Answers narrow factual questions; no judgment calls |
+| Three Amigos Ceremony 1 (Discovery) | Economy | Structured interview following a fixed agenda |
+| Three Amigos Ceremony 3 (Progress Check) | Economy | Status roll-up against an existing plan |
+| Three Amigos Ceremony 6 (Retrospective) | Economy | Pattern collection, no gating decision |
+| Three Amigos Ceremony 2 (Refinement) | Standard | Gate decision: APPROVE / CONDITIONS / REJECT |
+| Three Amigos Ceremony 4 (Pivot Assessment) | Standard | Gate decision on scope and correctness risk |
+| Three Amigos Ceremony 5 (Signoff) | Standard | Pre-merge acceptance decision |
+
+This table is the single source of truth for agent and ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs in prose; agent template frontmatter model fields implement these assignments and MUST stay consistent with this table.
 
 **Using Premium for non-architecture tasks:** State the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
 

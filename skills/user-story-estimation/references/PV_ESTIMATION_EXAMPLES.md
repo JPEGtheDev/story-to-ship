@@ -13,7 +13,7 @@ Validated real-world estimates from completed Particle-Viewer stories. Use to ca
 
 ---
 
-## Global State Elimination (L, Advanced, 80-100 requests)
+## Global State Elimination (L, Premium, 80-100 requests)
 
 - Implementation: 40-50 (manager classes, RAII, dependency wiring)
 - Testing: 20-25 (unit tests for all managers, integration tests)

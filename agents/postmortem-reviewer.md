@@ -24,13 +24,13 @@ You are an external reviewer analyzing a completed agent session. You have NO me
 git -C {{REPO_PATH}} rev-parse --show-toplevel
 ```
 
-The output MUST match `{{WORKTREE_PATH}}`.
+The output MUST match `{{REPO_PATH}}`.
 - If it matches -> proceed.
 - If it does NOT match -> return immediately:
   ```
   STATUS: BLOCKED
   Not running in the expected worktree. `git -C {{REPO_PATH}} rev-parse --show-toplevel` returned [actual path],
-  expected {{WORKTREE_PATH}}.
+  expected {{REPO_PATH}}.
   ```
 
 ---
@@ -54,7 +54,7 @@ Read these files in order:
 
 5. `{{SELF_ASSESSMENT_PATH}}` -- if it exists, read it LAST. Compare its claims against what the log actually shows. Every discrepancy is a finding.
 
-5. Load the `session-postmortem` skill -- this is the framework you will apply.
+6. Load the `session-postmortem` skill -- this is the framework you will apply.
 
 ---
 

@@ -8,6 +8,8 @@ NO EXCEPTIONS.
 
 No completed `Skill` call with `skill: session-bootstrap` visible in context: your FIRST tool call this response MUST be `Skill(session-bootstrap)`, sent alone -- not batched. Otherwise proceed below.
 
+A "continued from a previous conversation" preamble means the call is absent; a compaction summary is not a completed call.
+
 ## Skill Reload Triggers
 
 Only a fresh `Skill` tool call counts -- not a Read call, memory, or hook text. Reload when:

@@ -39,6 +39,18 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 ---
 
+## Canary
+
+When applying this skill, before the first file modification in any work-loop iteration, state this line in your response:
+
+> `Intent: [what this change does in one sentence] -- proven by [the command or check that will verify it]`
+
+This is the observable signal that the PPP gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer reads the event log for this line: a work-loop iteration that modified a file with no preceding `Intent:` line is a skipped gate, reported as a finding.
+
+**Note:** The canary raises the cost of skipping for a compliant agent -- it is not cryptographically bound to execution.
+
+---
+
 ## Core Principles
 
 - **Keep It Simple:** Straightforward approach first. Introduce abstraction only when it pays for itself.

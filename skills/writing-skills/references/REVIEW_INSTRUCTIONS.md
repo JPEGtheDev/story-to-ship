@@ -130,6 +130,19 @@ the verdict if needed before returning.
 
 ---
 
+## Step 6 -- Evidence Spot-Check
+
+The Implementer Evidence section injected into the review prompt is the input to this step.
+
+If it contains at least one runnable verification command (a dispatched pre-merge skill-change review):
+- Re-run at least one command the implementer pasted, exactly as written, inside {{WORKTREE_PATH}} (the pre-merge review worktree -- this is the current state).
+- Compare your output to the implementer's pasted output.
+- A material mismatch -- a different result, a different count, or a command that now fails -- is a NEEDS WORK verdict regardless of any other findings. Report both outputs verbatim.
+
+If no implementer evidence was provided (a standalone skill audit with no dispatcher-injected evidence), write "No implementer evidence -- spot-check N/A" and continue. The spot-check is not applicable to standalone audits.
+
+---
+
 ## Return Format
 
 Return findings in EXACTLY this structure:
@@ -198,6 +211,9 @@ Return findings in EXACTLY this structure:
 **Improvement suggestions:**
 1. [file:line -- problem -- example fix]
 2. ...
+
+### Evidence Spot-Check
+[command re-run + MATCH/MISMATCH, or "No implementer evidence -- spot-check N/A"]
 
 ### Verdict: PASS / PASS (size advisory) / NEEDS WORK
 ```

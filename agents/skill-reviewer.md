@@ -35,6 +35,12 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 ---
 
+## Implementer Evidence (spot-check input)
+
+{{IMPLEMENTER_EVIDENCE}}
+
+---
+
 ## Skill Anatomy Reference
 
 {{SKILL_ANATOMY_ELEMENTS}}

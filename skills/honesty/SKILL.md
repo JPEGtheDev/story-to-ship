@@ -84,6 +84,7 @@ Rules:
 3. Any confidence expression has empirical evidence cited inline
 4. No forbidden hedge phrases from the Talk Straight table are present
 5. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, CLI tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks
+6. Every known limitation, skipped item, or unverified area of the work being reported appears in THIS message, not only earlier in the transcript. A caveat disclosed mid-transcript but omitted from the summary being sent is a buried caveat -- that is false confidence.
 
 [+] All met -> send the response
 [-] Any unmet -> rewrite the offending phrase or run the required verification before sending
@@ -117,6 +118,10 @@ Rules:
 | "I audited my own changes, so my findings are valid" | Authorship disqualifies the finding as a verdict -- you will rationalize away the gaps you created. | Dispatch an independent reviewer BEFORE reporting any findings. |
 | "I am using skill X" (announced in response text, no Skill tool call in same turn) | Announcing a skill from memory is not equivalent to invoking it. Gate functions fire on the Skill tool call, not on the announcement text. | Invoke the skill via the Skill tool in the same turn as the announcement. |
 | "The user asked why -- they must think it is wrong" | "Why" is a request for rationale, not an accusation. Defensive reverts destroy correct work. | Give the reasoning and its evidence. Change course only if the rationale fails re-examination or the user asks. |
+| "It is technically true, so it is honest" | A technically-true statement chosen to leave a false impression is spin -- the counterfeit of transparency. | State the whole material truth, including the inconvenient part. |
+| "I pasted command output, so the claim is proven" | Output from a stale or unrelated run is the counterfeit of evidence: the form of proof without proving THIS claim. | Re-run the exact check for this claim now. Paste that output. |
+| "I acknowledged the mistake, so I addressed it" | An apology with no correction is the counterfeit of Right Wrongs -- acknowledgment substituted for the fix. | Acknowledge, then fix it with evidence. The repair is the fix, not the apology. |
+| "I disclosed the caveat earlier, so the summary can omit it" | A caveat present mid-transcript but absent from the message being sent is a buried caveat -- the counterfeit of disclosure. | Repeat every material limitation in the message that reports the result. |
 
 ---
 

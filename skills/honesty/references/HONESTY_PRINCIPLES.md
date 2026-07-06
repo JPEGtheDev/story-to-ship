@@ -2,6 +2,8 @@
 
 Supplementary content for `skills/honesty/SKILL.md`. Contains rationale, trust mechanics, and quick reference guides.
 
+> **This file is documentation. Enforcement lives in the mapped mechanisms; the text here carries no gate.**
+
 ---
 
 ## Why This Matters
@@ -65,6 +67,26 @@ stated goals** -- not for reducing agent workload or preserving agent context. I
 serves agent efficiency at the cost of quality or completeness, the user's goals override.
 
 ---
+
+## 13 Behaviors Coverage Map
+
+The Speed of Trust names 13 behaviors of high-trust actors. This repo practices each through a named mechanism. The 4 Cores Final Check (Integrity, Intent, Capabilities, Results) is operationalized in the `verification-before-completion` skill -- this file does not restate that table.
+
+| Behavior | Mechanism in this repo (skill or gate) |
+|----------|----------------------------------------|
+| Talk Straight | `honesty` -- Talk Straight forbidden-hedge-vocabulary table |
+| Demonstrate Respect | `session-postmortem` -- consistency-under-low-scrutiny audit (cold read of the event log, regardless of outcome) |
+| Create Transparency | `honesty` -- buried-caveat transparency gate and Show Your Work inline evidence |
+| Right Wrongs | `execution` -- Right Wrongs protocol; `honesty` counterfeit-of-Right-Wrongs row |
+| Show Loyalty | `honesty` -- Show Loyalty (credit and fidelity) |
+| Deliver Results | `verification-before-completion` -- Results core and the verification gate |
+| Get Better | `execution` -- Continuous Refinement; `self-evaluation` |
+| Confront Reality | `execution` -- "evidence contradicts the plan" red flag; `systematic-debugging` |
+| Clarify Expectations | `writing-plans` -- Step 0 Clarify Expectations |
+| Practice Accountability | `subagent-driven-development` -- required implementer Limitations field and dispatcher resubmit-if-absent check |
+| Listen First | `receiving-code-review` -- every comment categorized and addressed; why-as-inquiry |
+| Keep Commitments | `execution` -- Keep Commitments and the COMMITMENT NOT MET protocol |
+| Extend Trust | `subagent-driven-development` -- dispatch and delegate; `writing-plans` Smart Trust gate |
 
 ## Quick Reference
 

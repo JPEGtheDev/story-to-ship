@@ -136,13 +136,15 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 
 **Canary confirmation (before Stage 1):** Before proceeding to Stage 1 from any implementer result (DONE, DONE_WITH_CONCERNS, or PARTIAL), state: `Canary confirmed: [paste the Worktree: line from implementer output]`. If the canary line is absent from the implementer's output, the implementer did not follow BEFORE PROCEEDING -- require skill reload and resubmit before dispatching Stage 1.
 
+**Limitations-field check (before Stage 1):** The implementer output contract requires a `Limitations:` field. If the implementer result contains no `Limitations:` line, the result is incomplete -- resubmit for it before dispatching Stage 1. DO NOT infer "no limitations" from its absence: absence means the contract was not followed, not that there were none.
+
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
-**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding.
+**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding. When dispatching Stage 2, pass the implementer's pasted verification output to the reviewer as the {{IMPLEMENTER_EVIDENCE}} value so the reviewer re-runs at least one command and reports MATCH or MISMATCH. A Stage 2 dispatch that omits {{IMPLEMENTER_EVIDENCE}} disables the spot-check and is incomplete.
 
 BEFORE invoking any reviewer skill:
 1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`.

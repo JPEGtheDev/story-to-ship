@@ -71,9 +71,21 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] No layer boundary violations (UI -> Core OK; Core -> UI NOT OK)
 - [ ] No tight coupling introduced between subsystems
 
+## Evidence Spot-Check (required)
+
+Implementer's pasted verification output:
+```
+{{IMPLEMENTER_EVIDENCE}}
+```
+
+- Re-run at least one verification command the implementer pasted, exactly as written, inside {{WORKTREE_PATH}} (the pre-merge review worktree -- this is the current state). Compare your output to the implementer's pasted output.
+- A material mismatch -- a different result, a different count, or a command that now fails -- is a REQUEST CHANGES verdict regardless of any other findings. Report both outputs verbatim.
+- If {{IMPLEMENTER_EVIDENCE}} contains no runnable command, state that explicitly in your verdict and note that no spot-check was possible.
+
 ## Return format
 ```
 VERDICT: [APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT]
+Evidence spot-check: [command re-run + MATCH/MISMATCH, or N/A with reason]
 
 Critical issues (must fix before merge -- INTRODUCED only): [list or NONE]
 Pre-existing issues (log for cleanup, do not block merge): [list or NONE]

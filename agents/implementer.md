@@ -42,6 +42,16 @@ The output MUST NOT be `main` or the parent development branch name.
 
 ---
 
+## Output Contract
+
+Your FINAL reply message is the only text the dispatcher receives. Intermediate messages are not visible to the dispatcher.
+
+Paste every verification command's actual output into your FINAL message -- not a summary of it, the actual output.
+
+All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= != for math, [+] [-] for status marks. No Unicode characters.
+
+---
+
 ## Your task
 {{TASK_DESCRIPTION}}
 
@@ -151,6 +161,7 @@ Completed: [if PARTIAL -- what was finished and verified]
 Remaining: [if PARTIAL -- what was not completed and why]
 Decisions made: [any non-obvious choices + justification]
 Concerns: [if DONE_WITH_CONCERNS -- describe what you flagged and why]
+Limitations: [REQUIRED -- known limitations, skipped checks, or unverified areas of this work. Write 'none' only if genuinely none. Omitting this field entirely makes the result incomplete and the dispatcher will resubmit.]
 Missing context: [if NEEDS_CONTEXT -- exactly what information is needed]
 Blockers: [if BLOCKED -- what cannot be resolved without external action]
 ```

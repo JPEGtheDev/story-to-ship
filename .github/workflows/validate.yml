@@ -80,6 +80,32 @@ jobs:
           done
           echo "[+] All SKILL.md files have required frontmatter (name, description)"
 
+      - name: Check agent template contracts
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/implementer.md "FINAL reply message" "Limitations:" "ASCII"
+          check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
+          check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
+          check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
+          check agents/postmortem-reviewer.md "Intent-canary audit" "Evidence-spot-check audit"
+          check skills/execution/SKILL.md "## Canary"
+          if [ "$missing" -gt 0 ]; then
+            printf 'Found %s missing contract string(s)\n' "$missing"
+            exit 1
+          fi
+          echo "[+] All agent template contracts present"
+
       - name: Hook script smoke test
         run: |
           set -e

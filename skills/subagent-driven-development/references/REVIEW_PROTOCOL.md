@@ -19,4 +19,8 @@ If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceedin
 For skill `.md` files (in `skills/`): use the `skill-reviewer.md` agent -- 1 agent per file.
 For all other code and config files: use the `code-quality-reviewer.md` agent -- 1 agent per file.
 
+Provide to the Stage 2 reviewer:
+- Full diff or file contents of the implementation
+- The implementer's pasted verification output as the {{IMPLEMENTER_EVIDENCE}} value. The reviewer re-runs at least one command from it and reports MATCH or MISMATCH. If the implementer pasted no runnable command, state that explicitly so the reviewer records the spot-check as not possible.
+
 If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding.

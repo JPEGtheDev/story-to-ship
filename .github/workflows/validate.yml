@@ -98,8 +98,9 @@ jobs:
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
-          check agents/postmortem-reviewer.md "Intent-canary audit" "Evidence-spot-check audit"
+          check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit"
           check skills/execution/SKILL.md "## Canary"
+          check skills/honesty/SKILL.md "buried caveat"
           if [ "$missing" -gt 0 ]; then
             printf 'Found %s missing contract string(s)\n' "$missing"
             exit 1

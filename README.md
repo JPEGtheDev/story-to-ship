@@ -26,6 +26,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 |-------|---------|
 | `brainstorming` | Design gate -- required before committing to any approach |
 | `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
+| `greenfield-discovery` | Domain model interview for new projects -- blocks code decisions until the domain is documented |
 | `user-story-generator` | INVEST-aligned story authoring |
 | `user-story-estimation` | T-shirt sizing and effort estimation |
 
@@ -113,11 +114,21 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 34 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 14 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Two hooks: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (active per-turn enforcement)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active.
+
+## Repository Layout
+
+- **Source of truth:** the root `skills/`, `agents/`, and `hooks/` directories are canonical. Edit these.
+- **Self-hosted dogfooding:** `.claude/` wires this repo to run on its own framework. `.claude/skills` is a symlink to `../skills` and `.claude/agents` is a symlink to `../agents`. `.claude/hooks/` contains per-file symlinks -- both the `.md` docs and the `.sh` scripts point to `../../hooks/*`. There are no real files inside `.claude/hooks/`.
+- **Plugin distribution:** `.claude-plugin/` packages the framework for the Claude Code plugin marketplace. Consumers who install the plugin get their own `.claude/` wiring and never see this repo's symlink internals.
+
+Dual-wiring hazard: editing a skill while this repo is itself installed as a plugin writes into `~/.claude/plugins/cache/...`, a frozen snapshot outside this git repo that is not reflected in the source files. Contributors must edit this repo's files directly, not the plugin cache.
+
+See CONTRIBUTING.md for how to add a skill and the CI gates.
 
 ## C++ and OpenGL
 

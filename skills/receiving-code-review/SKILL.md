@@ -60,6 +60,7 @@ For every comment, before responding:
 | Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
 | I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
 | Inquiry -- reviewer asks "why did X change?" | An inquiry wants the rationale, not a change. Answer on the thread with the reasoning and the evidence that drove the decision (cite the source file, rule, or data). Modify code only if writing the answer reveals the rationale was wrong. Distinct from "I don't understand" below: there the REVIEWER's comment is unclear to you; here the reviewer is asking for YOUR rationale. |
+| Bug report phrased as a question (e.g. "why is this not null-checked?") | Not an inquiry -- a change request wearing a question mark. The test is what the reviewer wants: rationale (inquiry) or a code change (bug report), not whether the comment contains the word "why". Categorize and fix like any other correctness finding. |
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
@@ -71,10 +72,11 @@ For every comment, before responding:
 
 **Required for every non-trivial comment:**
 - Acknowledge what the reviewer found (even if you disagree)
-- State your decision: fix, defer, or disagree with reasoning
+- State your decision: fix, defer, disagree, or answer with reasoning
 - If fixing: show the fix or link to the commit
 - If deferring: link to the tracking issue
 - If disagreeing: state the counter-argument directly; invite further discussion if unresolved
+- If answering an inquiry: state the rationale and evidence directly on the thread; do not apologize or revert the code unless the reviewer asks for a change
 
 **Banned phrases:**
 - "Good point, will fix!" (without stating what was wrong or how it was fixed)

@@ -136,3 +136,24 @@ jobs:
             fi
           done
           echo "[+] All hook scripts produce valid, error-free JSON"
+
+      - name: Verify .claude/hooks symlink integrity
+        run: |
+          set -e
+          broken=0
+          for e in .claude/hooks/*; do
+            if [ ! -L "$e" ]; then
+              echo "FAILED: $e is not a symlink"
+              broken=$((broken + 1))
+              continue
+            fi
+            if [ ! -e "$e" ]; then
+              echo "FAILED: $e is a dangling symlink"
+              broken=$((broken + 1))
+            fi
+          done
+          if [ "$broken" -gt 0 ]; then
+            echo "Found $broken broken .claude/hooks entr(y/ies)"
+            exit 1
+          fi
+          echo "[+] All .claude/hooks entries are intact symlinks"

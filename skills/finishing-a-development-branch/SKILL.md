@@ -135,6 +135,8 @@ See `versioning` skill for conventional commit rules.
 3. **Verify the merge commit built green** on main -- do not assume
 4. **Remove any worktrees** created for this branch: `git worktree list` and prune
 
+**Squash-merge note:** After a squash merge, `git branch --merged main` will NOT list the feature branch -- the squash creates a new commit that does not retain the branch tip as an ancestor, so the ancestry-based check reports a false negative. Do NOT conclude the branch is unmerged from that signal. Confirm merge by TREE-equality instead: `git diff <feature-branch> <squash-merge-commit>` returns empty when the branch content is fully on main. `git branch -d <feature-branch>` still succeeds in this case because the branch is merged to its own remote-tracking ref.
+
 ---
 
 ## Rationalization Prevention

@@ -9,6 +9,9 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +58,7 @@ jobs:
                 echo "BROKEN: $f references $ref (not found at $target)"
                 broken=$((broken + 1))
               fi
-            done < <(grep -o 'references/[A-Za-z_./-]*\.md' "$f" | sort -u)
+            done < <(grep -o 'references/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
           done
           if [ "$broken" -gt 0 ]; then
             echo "Found $broken broken reference(s)"
@@ -73,7 +76,7 @@ jobs:
               echo "MISSING: $f has no 'name' field in frontmatter"
               exit 1
             fi
-            if [ -z "$desc" ] && ! grep -q '^description: >' "$f"; then
+            if [ -z "$desc" ]; then
               echo "MISSING: $f has no 'description' field in frontmatter"
               exit 1
             fi
@@ -126,7 +129,7 @@ jobs:
               case "$output" in
                 *"[ERROR"*)
                   echo "FAILED: $sh emitted an error envelope"
-                  echo "Output was: $output"
+                  printf 'Output was: %s\n' "$output"
                   exit 1
                   ;;
               esac

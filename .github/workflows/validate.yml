@@ -157,3 +157,46 @@ jobs:
             exit 1
           fi
           echo "[+] All .claude/hooks entries are intact symlinks"
+
+      - name: Check hooks/README.md matches .claude/hooks
+        run: |
+          set -e
+          drift=0
+          bt='`'
+          for e in .claude/hooks/*; do
+            base=$(basename "$e")
+            if ! grep -qF -- "${bt}${base}${bt}" hooks/README.md; then
+              echo "DRIFT: $base exists in .claude/hooks but is not documented in hooks/README.md"
+              drift=$((drift + 1))
+            fi
+          done
+          n=$(find .claude/hooks -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')
+          case "$n" in
+            1) word=one ;;
+            2) word=two ;;
+            3) word=three ;;
+            4) word=four ;;
+            5) word=five ;;
+            6) word=six ;;
+            7) word=seven ;;
+            8) word=eight ;;
+            9) word=nine ;;
+            10) word=ten ;;
+            11) word=eleven ;;
+            12) word=twelve ;;
+            *) word="" ;;
+          esac
+          if [ -z "$word" ]; then
+            echo "DRIFT: .claude/hooks has $n entries, outside the 1-12 word map in this gate -- update the gate in .github/workflows/validate.yml"
+            drift=$((drift + 1))
+          else
+            if ! grep -qiwE "$word|$n" hooks/README.md; then
+              echo "DRIFT: hooks/README.md does not state the current hook count ($n = '$word')"
+              drift=$((drift + 1))
+            fi
+          fi
+          if [ "$drift" -gt 0 ]; then
+            echo "Found $drift hooks/README.md drift issue(s)"
+            exit 1
+          fi
+          echo "[+] hooks/README.md matches the current .claude/hooks set and count"

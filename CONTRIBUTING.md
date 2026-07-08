@@ -62,6 +62,8 @@ Every push to main triggers `.github/workflows/release.yml`, which tags a new ve
 7. Validate SKILL.md frontmatter
 8. Check agent template contracts
 9. Hook script smoke test
+10. Verify .claude/hooks symlink integrity
+11. Check hooks/README.md matches .claude/hooks
 
 All steps must pass before a PR can merge.
 

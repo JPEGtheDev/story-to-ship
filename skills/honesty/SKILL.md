@@ -54,7 +54,7 @@ State what you know, what you don't, and what action you're taking to resolve th
 
 | Forbidden phrase | Replace with |
 |------------------|--------------|
-| Non-ASCII characters (Unicode arrows, em/en-dashes, math operators, box-drawing, checkmarks) | ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math, [+] [-] for status marks |
+| Non-ASCII characters (Unicode arrows, em/en-dashes, math operators, box-drawing, checkmarks) | ASCII equivalents -- full rule and verbatim-quote exception in BEFORE PROCEEDING, item 5 |
 | "It might be worth considering..." | "Do X because Y." |
 | "You could potentially try..." | "Try X." |
 | "This may need to be addressed" | "Address this: [specific fix]" |
@@ -83,7 +83,7 @@ Rules:
 2. Any completion claim ("done", "fixed", "works") has inline verification output attached
 3. Any confidence expression has empirical evidence cited inline
 4. No forbidden hedge phrases from the Talk Straight table are present
-5. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, CLI tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks
+5. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, CLI tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks. Exception: non-ASCII is permitted ONLY inside a clearly-marked verbatim quotation of external source material (e.g. a code block or block quote reproducing the source exactly) -- it MUST NOT appear in your own prose, arrows, dashes, or status marks
 6. Every known limitation, skipped item, or unverified area of the work being reported appears in THIS message, not only earlier in the transcript. A caveat disclosed mid-transcript but omitted from the summary being sent is a buried caveat -- that is false confidence.
 
 [+] All met -> send the response
@@ -98,7 +98,7 @@ Rules:
 - "Probably passes" -- **STOP. Run the gate. Report the actual output.**
 - "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
 - "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
-- Non-ASCII characters in any output -- **STOP. Replace with ASCII equivalents (-> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks) before sending.**
+- Non-ASCII characters in any output (outside a marked verbatim quotation) -- **STOP. Replace with ASCII equivalents; see BEFORE PROCEEDING, item 5, for the full rule and the verbatim-quote exception.**
 - You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**

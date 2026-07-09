@@ -103,7 +103,7 @@ Before building or presenting any plan:
 1. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
 2. Every acceptance criterion is mapped to a verifiable checkpoint
 3. Todo list has no placeholders -- every item is concrete and executable
-4. Plan has been reviewed by Skeptic Agent (or Three Amigos Refinement if Discovery ran)
+4. Plan has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
 5. No todo touches 3+ files or exceeds 25 tool calls without being split
 
 [+] All met -> present the plan and wait for explicit user approval
@@ -131,10 +131,12 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. The routing depends on whether Discovery ran:
 
 **If plan.md contains `## Feature Specification` (Discovery ran):**
-Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features.
+Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features. Discovery's three-amigos Refinement runs three independent personas under a unanimous-non-REJECT gate -- coverage that already exceeds the Skeptic + plan-reviewer pairing, so no additional reviewer is dispatched on the Discovery path.
 
 **Otherwise (no Discovery):**
-Dispatch a **Skeptic Agent**:
+Dispatch BOTH agents in parallel: a **Skeptic Agent** and the **plan-reviewer agent**. Read both verdicts before presenting the plan as final.
+
+Skeptic Agent prompt:
 
 ```
 You are a Skeptic Agent. Find what this plan is missing.
@@ -151,6 +153,8 @@ Answer only these four questions:
 
 If you genuinely find no gaps after thorough analysis, state that explicitly.
 ```
+
+Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` template, passing it the plan path and a worktree. Its role is complementary to the Skeptic's: the Skeptic finds what is MISSING from the plan; the plan-reviewer judges whether what IS in the plan is sound, correctly sequenced, and enforceable. Both verdicts are mandatory reads before the plan is presented as final -- neither agent substitutes for the other.
 
 ---
 
@@ -185,6 +189,7 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 | "It's just a quick test, I don't need todos" | Any multi-step task without todos has no review gate. The Skeptic and Three Amigos dispatch rules cannot fire if todos were never created. Create todos first, then execute. |
 | "Implementation revealed a dependency on a second file -- I'll modify it" | Scope expansion requires user authorization. STOP. State the dependency and ask before touching any file not in the original plan. |
 | "Skeptic or Refinement approved with conditions, I addressed them -- I can proceed" | NO. Review findings change the plan -- user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
+| "The Skeptic is enough -- the plan-reviewer is redundant" | The two jobs do not overlap: the Skeptic finds what is MISSING; the plan-reviewer judges whether what IS present is sound, sequenced, and enforceable. Both fire by default on every non-Discovery plan with 2+ todos -- dispatch them together, not one or the other. |
 
 ---
 
@@ -200,8 +205,8 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 ## Red Flags -- STOP
 
 - Code or file edits before Step 0 (restate requirements) is complete -- **STOP. Do Step 0 now.**
-- **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. No first edit until review result is read.**
-- **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic. The review must be in-flight or complete before the plan is presented as finished.**
+- **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
+- **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
 - A single todo touches 3+ files or is estimated at 30+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**

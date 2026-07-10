@@ -197,7 +197,7 @@ The root cause is usually an incorrect domain model or missed abstraction. Stop 
 
 ## Related Skills
 
-- `writing-plans` -- YAGNI, PPP, Skeptic Agent gate
+- `writing-plans` -- YAGNI, PPP, Skeptic + plan-reviewer gate
 - `brainstorming` -- Structured Ideation reference for design exploration
 - `execution` -- Make It Work -> Make It Right -> Make It Fast gate
 
@@ -212,7 +212,7 @@ Trivial (1 file, 1 step)? -> Implement directly
     v (multi-step)
 Step 0: Clarify Expectations -- restate requirements, label [UNCLEAR:]
     v
-Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Specification` -> three-amigos Refinement OR Skeptic
+Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair
     v
 Build todo list: YAGNI + PPP per item + No Placeholders
     v

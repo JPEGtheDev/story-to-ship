@@ -71,10 +71,10 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`                                   |
-| Resuming from a prior session with pending tasks | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic Agent (see `writing-plans`), before first implementation step |
+| Resuming from a prior session with pending tasks | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Schema design, new data structure, or plan with >=5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |
-| Any new plan with 2+ todos or an architectural decision | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic Agent, before first implementation step |
+| Any new plan with 2+ todos or an architectural decision | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
 | Starting a new project from scratch | `greenfield-discovery` |
 | Task references a GitHub issue number (#NNN), OR task description contains "acceptance criteria", "AC:", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
@@ -97,7 +97,7 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 3. All required skills for this task type loaded (in parallel if multiple domains)
 4. Skill load announcement made for each loaded skill
 5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work.
-6. If resuming a prior session: pending tasks checked (via TaskList); Skeptic Agent dispatched before first implementation step
+6. If resuming a prior session: pending tasks checked (via TaskList); Skeptic + plan-reviewer pair dispatched (per `writing-plans`) before first implementation step
 7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or code-review agent is dispatched -- NOT done inline
@@ -137,7 +137,7 @@ If you have nothing to report, still include the block with zeroes.
 ## Red Flags -- STOP
 
 - A task just completed and no new user message has arrived -- **STOP. Is this the session's last task? If so, treat it as session end. Load self-evaluation NOW before responding.**
-- Starting implementation when prior session tasks are pending without dispatching the Skeptic Agent -- **STOP. Dispatch the Skeptic Agent before the first implementation step.**
+- Starting implementation when prior session tasks are pending without dispatching the Skeptic + plan-reviewer pair -- **STOP. Dispatch the Skeptic + plan-reviewer pair (per `writing-plans`) before the first implementation step.**
 - Picking up plan todos without `subagent-driven-development` loaded -- **STOP. Load `subagent-driven-development` before dispatching the first implementer. The skill contains the review protocol that every todo requires.**
 - Starting to code before invoking the required skill -- **STOP. Invoke the skill now. Do not write one line first.**
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
@@ -146,7 +146,7 @@ If you have nothing to report, still include the block with zeroes.
 - Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional -- **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" -- **STOP. Memory degrades. Skills update. Load fresh every session.**
-- Branch about to be created, but the plan the user approved was the pre-Skeptic version -- **STOP. Re-present the post-Skeptic revised plan. Wait for explicit user approval before creating the branch.**
+- Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**
 - About to make an irreversible change (branch creation, push) without the `execution` skill loaded -- **STOP. Load `execution` before the first irreversible action.**
 - User says "check out a working branch" or "work on a branch" without naming a specific branch -- **STOP. The default is always `git checkout main && git pull && git checkout -b <new-branch>`. Using an existing named branch requires the user to name it explicitly. "Working branch" without a specific name means new branch from main.**
 

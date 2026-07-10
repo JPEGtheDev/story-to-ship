@@ -98,6 +98,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 |-------|------|
 | `implementer` | Feature implementation in a git worktree |
 | `skeptic` | Plan gap analysis before implementation begins |
+| `plan-reviewer` | Plan soundness, sequencing, and enforceability review (paired with the Skeptic) |
 | `spec-compliance-reviewer` | Stage 1 post-todo review: spec compliance |
 | `code-quality-reviewer` | Stage 2 post-todo review: code quality |
 | `explorer` | Read-only multi-file research |
@@ -115,7 +116,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 
 Installing this plugin adds:
 - 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
-- 14 agents to `.claude/agents/` -- dispatched via the `Agent` tool
+- 15 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Two hooks: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (active per-turn enforcement)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active.

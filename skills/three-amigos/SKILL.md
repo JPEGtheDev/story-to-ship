@@ -40,7 +40,7 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
 1. Which ceremony? (see When to Invoke)
 2. Did Discovery run? Check plan.md for `## Feature Specification`.
    [+] -> Three Amigos for Ceremonies 2, 5, 6
-   [-] -> Skeptic for Ceremony 2
+   [-] -> Skeptic + plan-reviewer pair for Ceremony 2 (see `writing-plans`)
 3. 3 worktrees, one per amigo. Inject `{{PERSONA}}` + `{{READ_FIRST}}` + `{{CEREMONY}}` + `{{AGENDA}}` into amigo.md.
    [+] All three worktrees created -> dispatch amigos
    [-] Any worktree missing -> create it before dispatching
@@ -68,7 +68,7 @@ A Feature Specification that does not address both questions is incomplete and M
 
 **Context:** Ceremony 2 routing and Signoff only. Not for non-Discovery features.
 
-**Forces:** Without a persisted signal, Refinement vs. Skeptic routing is ambiguous across sessions.
+**Forces:** Without a persisted signal, Refinement vs. Skeptic + plan-reviewer routing is ambiguous across sessions.
 
 **Solution:** `## Feature Specification` in plan.md = "Discovery ran." Written at close. Read by brainstorming, writing-plans, and Signoff.
 

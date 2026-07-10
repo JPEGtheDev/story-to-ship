@@ -100,7 +100,7 @@ These thoughts mean stop immediately:
 | Exploring unfamiliar APIs or libraries | Yes | explore agent |
 | Scanning 5+ files for patterns | Yes | explore agent |
 | Confirming a theory or assumption | Yes | explore agent |
-| Validating a plan before implementation | Yes | Skeptic Agent (see writing-plans skill) |
+| Validating a plan before implementation | Yes | Skeptic + plan-reviewer pair (see writing-plans skill) |
 | Code review (per-file) | Yes | code-review agent, 1 per file |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |

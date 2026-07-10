@@ -177,7 +177,7 @@ Task arrives
     v
 Trivial (1 file, 1 step)? -> Implement directly
     v (multi-step)
-Invoke writing-plans -> clarify -> plan -> Skeptic Agent
+Invoke writing-plans -> clarify -> plan -> Skeptic + plan-reviewer pair
     v
 Per todo: in-progress -> PPP gate -> implement -> prove -> done -> commit
     v

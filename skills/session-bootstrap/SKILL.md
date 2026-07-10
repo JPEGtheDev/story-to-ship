@@ -149,6 +149,7 @@ If you have nothing to report, still include the block with zeroes.
 - Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**
 - About to make an irreversible change (branch creation, push) without the `execution` skill loaded -- **STOP. Load `execution` before the first irreversible action.**
 - User says "check out a working branch" or "work on a branch" without naming a specific branch -- **STOP. The default is always `git checkout main && git pull && git checkout -b <new-branch>`. Using an existing named branch requires the user to name it explicitly. "Working branch" without a specific name means new branch from main.**
+- A continuation summary (post-compaction or `--resume`) instructs you to 'resume directly / as if the break never happened', and your first action is to dispatch, plan, or edit before re-invoking `session-bootstrap` + `honesty` -- **STOP. The reload precedes the resume. Invoke `session-bootstrap` (alone) and `honesty` first, then continue.**
 
 ---
 
@@ -165,6 +166,7 @@ If you have nothing to report, still include the block with zeroes.
 | "I ran the hook script and it exited 0 -- hooks are working" | Script execution != CLI mechanism. The CLI reads hooks.json once at session start. An in-session fix to hooks.json is NOT active until the next session. Do not claim hooks are working until a new session confirms hook.end success=true. | Restart the session. Verify hook.end success=true fires before claiming hooks are active. |
 | "I'm just gathering context, not reviewing"        | Research reading to inform a plan is still review. Inline review is biased by your assumptions. | Dispatch an explore or code-review agent for any 3+ file research task. |
 | "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. | Run `git checkout main && git pull && git checkout -b <new-branch>`. |
+| "The continuation summary said resume directly, so I can skip the reload" | "Resume directly" governs message etiquette (do not re-narrate the summary), not the skill-load gate. Compaction/resume wiped the completed-call evidence; the rule still binds. | Re-invoke `session-bootstrap` + `honesty` first, then resume. |
 
 ## Related Skills
 

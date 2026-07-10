@@ -75,7 +75,7 @@ Answer these questions directly from the log before moving to the analysis:
 | Did the agent announce completion before running build/test verification? | |
 | Were all user messages acted on, or were any dropped without acknowledgment? | |
 | Did any subagent completion claim get relayed without a visible verification step? | |
-| Was a Skeptic dispatched before any plan with 3 or more todos? | |
+| Was the Skeptic + plan-reviewer pair dispatched before any non-Discovery plan with 2 or more todos (Discovery plans use three-amigos Refinement instead)? | |
 | Was `brainstorming` loaded before design decisions were made? | |
 | Limitation-disclosure audit: did every implementer subagent result include a `Limitations:` field, and did the dispatcher resubmit or reject any result that omitted it? | |
 | Evidence-spot-check audit: did each Stage 2 reviewer re-run at least one of the implementer's pasted verification commands and report MATCH or MISMATCH, or did it relay implementer claims without an independent spot-check? | |

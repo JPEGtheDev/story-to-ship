@@ -185,7 +185,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 2. Run Phases 1-5 for **each subsystem separately** -- one Design Decision Record per subsystem
 3. Present all records to the user together; get approval for all before proceeding
 4. Hand off to `writing-plans` with all approved records as context -- one plan per subsystem
-5. Each subsystem plan runs its own Skeptic Agent review independently
+5. Each subsystem plan runs its own Skeptic + plan-reviewer pair review independently (per `writing-plans`)
 
 **Do NOT create a single Design Decision Record for a task with independent subsystems.** A merged record hides coupling between subsystems. Identify the boundary first, then design each side separately.
 

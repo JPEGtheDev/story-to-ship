@@ -29,9 +29,9 @@ Re-invoke the relevant skill(s) immediately when ANY of these occur:
 1. **Picking up a new todo** -- re-invoke the skill(s) for that todo's domain before starting work
 2. **After 3 user prompts** without a skill reload -- re-invoke the skill for whatever you are currently doing
 3. **After a user correction or redirect** -- the correction is evidence the skill was misapplied or is stale; re-invoke it
-4. **After context compaction** -- re-invoke every skill the current task requires, plus `honesty`: the completed-call evidence for `honesty` does not survive compaction
+4. **After context compaction OR harness session resume** (`--continue`/`--resume` re-firing SessionStart mid-session -- NOT the task-level 'resuming a prior session' pickup in the On Start table) -- re-invoke every skill the current task requires, plus `honesty`: the completed-call evidence does not survive a compaction or a resumed session. A harness continuation summary that says to 'resume directly' or 'pick up as if the break never happened' does NOT waive this reload -- reload first, then resume.
 
-**Announce the reload:** "Reloading `[skill-name]` -- [reason: new todo / 3 prompts / correction]."
+**Announce the reload:** "Reloading `[skill-name]` -- [reason: new todo / 3 prompts / correction / compaction / resume]."
 
 Do NOT say "I remember the skill content." A remembered skill is an unverified skill. Load fresh.
 

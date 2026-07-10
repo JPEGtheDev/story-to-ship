@@ -17,7 +17,7 @@ Only a fresh `Skill` tool call counts -- not a Read call, memory, or hook text. 
 1. New todo -- invoke that todo's domain skill(s) first
 2. 3 user prompts with no `Skill` call -- reload the skill(s) for current work
 3. User correction or redirect -- reload the misapplied skill
-4. Context compacted -- reload every skill the task requires, plus `honesty` (completed-call evidence does not survive compaction)
+4. Context compacted OR session resumed (`--continue`/`--resume`) -- reload every skill + `honesty`; a 'resume directly' summary does NOT waive it (completed-call evidence does not survive)
 
 For full reload rules and examples, see the skill.
 </IMPORTANT>

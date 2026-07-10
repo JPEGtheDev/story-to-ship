@@ -45,6 +45,7 @@ Read these files in order:
    - All `tool.execution_start` events for `edit`, `create`, `bash` -> when was code or files written
    - All `subagent.started` and `subagent.completed` events -> what was delegated and what was the reported result
    - All `assistant.message` events -> what the agent claimed, committed to, or announced as done
+   - All SessionStart continuation events (`SessionStart:compact` / `SessionStart:resume`, i.e. `source` compact/resume) -> when context was compacted or the session resumed, so post-event reload ordering can be checked
 
 2. `{{SESSION_WORKSPACE_PATH}}/checkpoints/index.md` -- checkpoint titles and order
 
@@ -81,6 +82,7 @@ Answer these questions directly from the log before moving to the analysis:
 | Evidence-spot-check audit: did each Stage 2 reviewer re-run at least one of the implementer's pasted verification commands and report MATCH or MISMATCH, or did it relay implementer claims without an independent spot-check? | |
 | Intent-canary audit: did each execution work-loop iteration that modified a file emit an `Intent:` line before the first edit (per the execution skill Canary), or did file modifications occur with no preceding stated intent? | |
 | Buried-caveat audit: did any response state a limitation, caveat, or skipped item earlier in the transcript that was then omitted from a later summary or completion message reporting the same work? | |
+| Continuation-reload audit: after each SessionStart continuation event (`SessionStart:compact` / `SessionStart:resume`) in the log, was the agent's next `skill.invoked` a re-invocation of `session-bootstrap` (and `honesty`) BEFORE any `edit`/`create`/`bash`/`subagent.started` -- or did it act first and reload later (or not at all)? | |
 
 **Rule:** If the log does not show a gate firing, it did not fire. The agent's memory of "I followed the process" is not evidence. Only the log event is evidence.
 

@@ -117,7 +117,7 @@ jobs:
             md="${sh%.sh}.md"
             if [ -f "$md" ]; then
               echo "Smoke-testing $sh..."
-              output=$(bash "$sh" 2>&1) || {
+              output=$(bash "$sh" 2>&1 </dev/null) || {
                 echo "FAILED: $sh exited nonzero"
                 exit 1
               }
@@ -136,6 +136,21 @@ jobs:
             fi
           done
           echo "[+] All hook scripts produce valid, error-free JSON"
+
+      - name: SessionStart source-branch detector
+        run: |
+          set -e
+          cont=$(printf '{"source":"compact"}' | bash hooks/session-start.sh | jq -r '.hookSpecificOutput.additionalContext')
+          printf '%s' "$cont" | grep -q "CONTINUATION: source=compact" \
+            || { echo "FAILED: compact source did not produce continuation banner"; exit 1; }
+          printf '%s' "$cont" | grep -q "Skill(session-bootstrap)" \
+            || { echo "FAILED: continuation banner missing the reload instruction"; exit 1; }
+          fresh=$(printf '{"source":"startup"}' | bash hooks/session-start.sh | jq -r '.hookSpecificOutput.additionalContext')
+          if printf '%s' "$fresh" | grep -q "CONTINUATION:"; then
+            echo "FAILED: startup source leaked continuation banner"; exit 1; fi
+          printf '%s' "$fresh" | grep -q "First Tool Call" \
+            || { echo "FAILED: fresh injection missing Iron-Laws block"; exit 1; }
+          echo "[+] SessionStart source branching verified (compact->banner+reload, startup->no banner)"
 
       - name: Verify .claude/hooks symlink integrity
         run: |

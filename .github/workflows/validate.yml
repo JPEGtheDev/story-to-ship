@@ -145,6 +145,9 @@ jobs:
             || { echo "FAILED: compact source did not produce continuation banner"; exit 1; }
           printf '%s' "$cont" | grep -q "Skill(session-bootstrap)" \
             || { echo "FAILED: continuation banner missing the reload instruction"; exit 1; }
+          res=$(printf '{"source":"resume"}' | bash hooks/session-start.sh | jq -r '.hookSpecificOutput.additionalContext')
+          printf '%s' "$res" | grep -q "CONTINUATION: source=resume" \
+            || { echo "FAILED: resume source did not produce continuation banner"; exit 1; }
           fresh=$(printf '{"source":"startup"}' | bash hooks/session-start.sh | jq -r '.hookSpecificOutput.additionalContext')
           if printf '%s' "$fresh" | grep -q "CONTINUATION:"; then
             echo "FAILED: startup source leaked continuation banner"; exit 1; fi

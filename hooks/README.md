@@ -2,6 +2,8 @@
 
 Hook scripts and the text they inject into Claude Code sessions. This README documents the directory; it is never injected.
 
+`session-start.sh` inspects the SessionStart `source` on stdin and, on `compact`/`resume`, prepends a continuation re-grounding banner before its paired `session-start.md`.
+
 ## Files
 
 | File | Event | Injected |

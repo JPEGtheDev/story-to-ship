@@ -36,6 +36,17 @@ Layer 1 (innermost): Abstractions and utilities
 
 ---
 
+## Additional Gate Items (Particle-Viewer Specific)
+
+Run these in addition to the general BEFORE PROCEEDING gate in the architecture-review skill:
+
+1. Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
+2. Does `ViewerApp` orchestrate or implement? (must orchestrate only -- rendering logic belongs in Shader/Particle classes)
+3. Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
+4. Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
+
+---
+
 ## Common Violations (Particle-Viewer Specific)
 
 These are the violations most likely to appear in this codebase. Check for each explicitly.
@@ -47,3 +58,22 @@ These are the violations most likely to appear in this codebase. Check for each 
 | Production code importing test code | `#include "../../tests/mocks/MockOpenGL.hpp"` in `src/` | Remove; mocks are test-only |
 | PixelComparator acquiring GL state | `glReadPixels(...)` inside `PixelComparator` | Pass a pre-captured `Image` to `PixelComparator` |
 | UI reaching into graphics internals | `#include "graphics/SDL3Context.hpp"` in `ui/imgui_menu.hpp` | Depend on `IOpenGLContext` interface only |
+
+---
+
+## Red Flags -- STOP (Particle-Viewer Specific)
+
+Run these in addition to the general Red Flags in the architecture-review skill:
+
+- "It only calls one GL function directly, that's fine" -> Stop. One raw GL call outside `IOpenGLContext` is a violation. Flag it.
+- "ViewerApp is the orchestrator so it's fine to put logic there" -> Stop. Orchestration means delegation. Rendering logic belongs in domain classes.
+
+---
+
+## Rationalization Prevention (Particle-Viewer Specific)
+
+| Excuse | Reality |
+|--------|---------|
+| "ViewerApp needed to call GL directly for performance" | Use `IOpenGLContext`. That abstraction exists precisely for this case. |
+
+In the Barricade Model clean zone, the validated domain objects for this project are `ViewerApp` state, `Camera`, `Shader`, and `Particle`; a Layer 2 class checking data it received from `ViewerApp` is a barricade violation.

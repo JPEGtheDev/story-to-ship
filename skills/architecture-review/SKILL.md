@@ -22,7 +22,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Software layers are concentric: inner layers hold domain logic and policy; outer layers hold I/O, frameworks, UI, and external integrations. Dependencies point inward only -- an inner layer never imports, calls, or names a type from an outer layer. Every file belongs to exactly one layer. Judge each change by which layer its file occupies and which direction its dependencies run.
 
-For the Particle-Viewer 4-layer inward-dependency model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+For the Particle-Viewer layer model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about that project, skip the reference -- it is project-specific.
 
 ---
 
@@ -58,9 +58,9 @@ The codebase has a **dirty zone** (data that has not been validated) and a **cle
 |------|----------|-----------|
 | Dirty | File bytes, user input strings, socket data | Nothing -- validate everything |
 | Barricade | Parser, validator, loader functions | Converts dirty -> clean |
-| Clean | Validated domain objects (in Particle-Viewer: ViewerApp state, Camera, Shader, Particle) | Data is valid -- no defensive checks needed |
+| Clean | Validated domain objects past the barricade | Data is valid -- no defensive checks needed |
 
-**Violation signal:** An inner-layer class checking for null or empty data it received from an orchestrator that already validated it (in Particle-Viewer: Camera, Shader, or Particle checking data from ViewerApp). That check belongs at the barricade, not in the clean zone.
+**Violation signal:** An inner-layer domain class checking for null or empty data it received from an orchestrator that already validated it. That check belongs at the barricade, not in the clean zone.
 
 ---
 
@@ -77,13 +77,13 @@ Run every item for each file under review:
 [+] All pass -> verdict: CLEAN
 [-] Any fail -> verdict: VIOLATIONS FOUND -- document every failure in the Review Report
 
-For a Particle-Viewer session, also run the "For Particle-Viewer Sessions" additional checks below before writing the verdict.
+For a Particle-Viewer session, also run the project-specific checks, red flags, and rationalizations in `references/PV_LAYER_ARCHITECTURE.md` before writing the verdict.
 
 ---
 
 ## Common Violations
 
-For Particle-Viewer specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+For project-specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip that file -- it is project-specific.
 
 ---
 
@@ -116,30 +116,6 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 | "Circular dependency is fine since they're in the same layer" | Same layer does not mean circular is acceptable. It is still a design smell requiring resolution. |
 | "I'll refactor it properly later" | Later never comes. Fix the boundary violation before this code ships. |
 | "The PR is urgent, we can clean up the architecture next sprint" | Urgency is the most common rationalization for shipping violations. The law applies under urgency too. |
-
----
-
-## For Particle-Viewer Sessions (Additional Checks)
-
-If this session is NOT about the Particle-Viewer project, skip this section -- it is PV-specific. For a Particle-Viewer review, run these in addition to the general gate above.
-
-**Additional gate items:**
-
-1. Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
-2. Does `ViewerApp` orchestrate or implement? (must orchestrate only -- rendering logic belongs in Shader/Particle classes)
-3. Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
-4. Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
-
-**Additional Red Flags -- STOP:**
-
-- "It only calls one GL function directly, that's fine" -> Stop. One raw GL call outside `IOpenGLContext` is a violation. Flag it.
-- "ViewerApp is the orchestrator so it's fine to put logic there" -> Stop. Orchestration means delegation. Rendering logic belongs in domain classes.
-
-**Additional Rationalization:**
-
-| Excuse | Reality |
-|--------|---------|
-| "ViewerApp needed to call GL directly for performance" | Use `IOpenGLContext`. That abstraction exists precisely for this case. |
 
 ---
 

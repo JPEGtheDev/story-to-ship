@@ -42,6 +42,8 @@ Before any inheritance: "Does B truly **is-a** A in all contexts, or does B mere
 | Dependency Inversion | High-level module depends on an abstraction? |
 
 See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patterns.
+See `references/c2-language-paradigms-and-type-systems.md` for background on typing (static/dynamic, strong/weak), type inference, and the competing definitions of object orientation.
+See `references/c2-design-patterns-and-refactoring.md` for background on design patterns (Singleton, Observer, MVC, Visitor), refactoring mechanics, and related anti-patterns (Golden Hammer, Copy-Paste).
 
 ---
 

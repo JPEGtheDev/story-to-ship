@@ -1,7 +1,9 @@
-import os, sys, unittest
+import json, os, re, sys, unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import contracts
+
+PROMPT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "judge_prompt.md")
 
 
 class SchemaContractTest(unittest.TestCase):
@@ -34,6 +36,21 @@ class SchemaContractTest(unittest.TestCase):
             contracts.TURN_TYPES,
             ("completion_claim", "hand_off", "question", "other"),
         )
+
+    def test_judge_prompt_json_block_matches_verdict_fields(self):
+        """Guards against the prompt the real judge reads drifting from the
+        code contract: parses the single fenced json block out of
+        judge_prompt.md and asserts its key set equals contracts.VERDICT_FIELDS."""
+        with open(PROMPT_PATH, "r", encoding="ascii") as f:
+            text = f.read()
+        blocks = re.findall(r"```json\s*\n(.*?)```", text, re.DOTALL)
+        self.assertEqual(
+            len(blocks),
+            1,
+            f"expected exactly one fenced json block in judge_prompt.md, found {len(blocks)}",
+        )
+        parsed = json.loads(blocks[0])
+        self.assertEqual(set(parsed.keys()), set(contracts.VERDICT_FIELDS))
 
 
 if __name__ == "__main__":

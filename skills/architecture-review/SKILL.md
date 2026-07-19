@@ -1,7 +1,7 @@
 ---
 name: architecture-review
 license: MIT
-description: Use when adding new classes, refactoring code, or reviewing PRs for Particle-Viewer.
+description: Use when adding classes, refactoring, or reviewing layer or dependency structure.
 ---
 
 
@@ -20,7 +20,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## The Layer Architecture
 
-For the Particle-Viewer 4-layer inward-dependency model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+Software layers are concentric: inner layers hold domain logic and policy; outer layers hold I/O, frameworks, UI, and external integrations. Dependencies point inward only -- an inner layer never imports, calls, or names a type from an outer layer. Every file belongs to exactly one layer. Judge each change by which layer its file occupies and which direction its dependencies run.
+
+For the Particle-Viewer layer model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about that project, skip the reference -- it is project-specific.
 
 ---
 
@@ -50,15 +52,15 @@ The codebase has a **dirty zone** (data that has not been validated) and a **cle
 **Rules:**
 - Code in the clean zone never handles dirty data. If it receives data, that data is already validated.
 - Validation happens at the barricade, not scattered through clean-zone code
-- The barricade for this project: data enters dirty through file I/O, user input, and external APIs. It becomes clean after parsing and validation in the input handlers.
+- Data enters dirty through file I/O, user input, and external APIs. It becomes clean after parsing and validation in the input handlers.
 
 | Zone | Contains | May assume |
 |------|----------|-----------|
 | Dirty | File bytes, user input strings, socket data | Nothing -- validate everything |
 | Barricade | Parser, validator, loader functions | Converts dirty -> clean |
-| Clean | ViewerApp state, Camera, Shader, Particle | Data is valid -- no defensive checks needed |
+| Clean | Validated domain objects past the barricade | Data is valid -- no defensive checks needed |
 
-**Violation signal:** A class in Layer 2 (Camera, Shader, Particle) checking for null or empty data it received from ViewerApp. That check belongs at the barricade, not in the clean zone.
+**Violation signal:** An inner-layer domain class checking for null or empty data it received from an orchestrator that already validated it. That check belongs at the barricade, not in the clean zone.
 
 ---
 
@@ -68,21 +70,20 @@ Run every item for each file under review:
 
 1. Does the new or modified class belong to a defined layer?
 2. Does it import or call code from an outer layer? (VIOLATION if yes)
-3. Does `ViewerApp` orchestrate or implement? (must orchestrate only -- rendering logic belongs in Shader/Particle classes)
-4. Does raw OpenGL (`glXxx()`, `glXxx_ext()`) appear outside of `IOpenGLContext` implementations? (VIOLATION)
-5. Do any `src/` files import from `tests/`? (VIOLATION -- production code must never depend on test code)
-6. Does `src/testing/PixelComparator` acquire OpenGL state directly, rather than receiving an `Image`? (VIOLATION)
-7. Do any UI files (`ui/`) reach into `graphics/` internals beyond `IOpenGLContext`? (VIOLATION)
-8. Are there circular `#include` dependencies between any two files in the same layer?
+3. Does an orchestrator or coordinator class orchestrate rather than implement? (it must delegate -- business, rendering, or compute logic belongs in domain classes, not the orchestrator)
+4. Do any production (`src/`) files import from `tests/`? (VIOLATION -- production code must never depend on test code)
+5. Are there circular `#include` or import dependencies between any two files in the same layer?
 
 [+] All pass -> verdict: CLEAN
 [-] Any fail -> verdict: VIOLATIONS FOUND -- document every failure in the Review Report
+
+For a Particle-Viewer session, also run the project-specific checks, red flags, and rationalizations in `references/PV_LAYER_ARCHITECTURE.md` before writing the verdict.
 
 ---
 
 ## Common Violations
 
-For Particle-Viewer specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+For project-specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip that file -- it is project-specific.
 
 ---
 
@@ -98,8 +99,8 @@ A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in t
 
 If you catch yourself thinking any of the following, STOP before writing your verdict:
 
-- "It only calls one GL function directly, that's fine" -> Stop. One raw GL call outside `IOpenGLContext` is a violation. Flag it.
-- "ViewerApp is the orchestrator so it's fine to put logic there" -> Stop. Orchestration means delegation. Logic belongs in domain classes.
+- "It only imports one symbol from an outer layer, that is a tiny coupling" -> Stop. One outward-pointing import is still an inward-dependency violation. Flag it.
+- "The orchestrator has just this one piece of logic inline, that is fine" -> Stop. Orchestration means delegation. Business, rendering, or compute logic belongs in a domain class, not the orchestrator.
 - "The test utility is small, it won't hurt in src/" -> Stop. Test code in production is a maintenance trap. Flag it.
 - "It's in the same layer, so the dependency is acceptable" -> Stop. Same layer, different files -- check for circular dependencies. Design smell if found.
 - "The violation is minor, I'll note it but give CLEAN" -> Stop. There is no CLEAN with open violations. Verdict is VIOLATIONS FOUND.
@@ -111,7 +112,6 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 | Excuse | Reality |
 |--------|---------|
 | "Just a small dependency, doesn't affect architecture" | Architecture violations compound. Small ones become load-bearing. Fix them now. |
-| "ViewerApp needed to call GL directly for performance" | Use `IOpenGLContext`. That abstraction exists precisely for this case. |
 | "The test utility is tiny, no harm putting it in src/" | Test-only code in production is a maintenance trap and blurs the test boundary. |
 | "Circular dependency is fine since they're in the same layer" | Same layer does not mean circular is acceptable. It is still a design smell requiring resolution. |
 | "I'll refactor it properly later" | Later never comes. Fix the boundary violation before this code ships. |

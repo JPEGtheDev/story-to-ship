@@ -73,6 +73,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 | "This code is too simple to need smell checks" | Universal smells (Long Method, Duplicated Code) appear in simple code. Run the check. |
 | "The auto-formatter will handle it" | Run your project's formatter explicitly -- it does not run itself. |
 | "I'll clean up style in a follow-up PR" | Style debt compounds. Clean now while context is fresh. |
+| "I'll add this hook or parameter now so it is ready when we need it later" | YAGNI. Code with no current caller is Speculative Generality -- a smell, not foresight. Add it when a real requirement needs it. |
 
 ---
 
@@ -83,6 +84,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - Comment explaining what a value is -- **STOP. Rename or refactor. Do not improve the comment.**
 - Writing code and planning to format "later in this session" -- **STOP. Run your project's formatter now.**
 - Running Step 2 paradigm detection before Step 1 passes -- **STOP. Universal tier is mandatory first. Paradigm tier does not substitute for it.**
+- Adding an abstraction, interface, parameter, or config flag for a use case that does not exist yet -- **STOP. YAGNI: if no current requirement needs it, cut it. Speculative Generality is a code smell (`references/design-principles.md`), not foresight.**
 
 ---
 

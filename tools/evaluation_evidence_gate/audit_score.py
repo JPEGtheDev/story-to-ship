@@ -157,7 +157,7 @@ def format_report(scores):
 
 def _read_jsonl(path):
     items = []
-    with open(path, "r", encoding="ascii") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for raw_line in f:
             if not raw_line.strip():
                 continue

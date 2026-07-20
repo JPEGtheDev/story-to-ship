@@ -67,7 +67,7 @@ def main():
         sys.stderr.write("usage: audit_sample.py <path-to-turns.jsonl>\n")
         return 1
     turns = []
-    with open(sys.argv[1], "r", encoding="ascii") as f:
+    with open(sys.argv[1], "r", encoding="utf-8") as f:
         for raw_line in f:
             if not raw_line.strip():
                 continue

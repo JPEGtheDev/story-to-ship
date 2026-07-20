@@ -139,7 +139,7 @@ def _read_transcript_lines(path):
     transcript data (e.g. a truncated final line) must never crash the
     extractor."""
     lines = []
-    with open(path, "r", encoding="ascii") as f:
+    with open(path, "r", encoding="utf-8") as f:
         for raw_line in f:
             if not raw_line.strip():
                 continue

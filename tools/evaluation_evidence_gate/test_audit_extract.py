@@ -478,6 +478,55 @@ class MalformedTranscriptReadingTest(unittest.TestCase):
         self.assertEqual(turns[0]["final_text"], "final answer")
 
 
+class Utf8TranscriptReadingTest(unittest.TestCase):
+    """Real transcripts are UTF-8 (e.g. an em-dash U+2014 in assistant
+    prose). The reader must not crash on non-ASCII bytes, and the
+    non-ASCII character must round-trip faithfully into final_text."""
+
+    def test_non_ascii_assistant_text_round_trips_without_crashing(self):
+        raw_lines = [
+            json.dumps(
+                {
+                    "type": "user",
+                    "isSidechain": False,
+                    "message": {"role": "user", "content": "start"},
+                    "uuid": "d-1",
+                    "sessionId": "sess-utf8",
+                    "timestamp": "t0",
+                },
+                ensure_ascii=False,
+            ),
+            json.dumps(
+                {
+                    "type": "assistant",
+                    "isSidechain": False,
+                    "message": {
+                        "role": "assistant",
+                        "content": [{"type": "text", "text": "Fix applied — done"}],
+                    },
+                    "uuid": "a-1",
+                    "sessionId": "sess-utf8",
+                    "timestamp": "t1",
+                },
+                ensure_ascii=False,
+            ),
+        ]
+        # Unlike write_temp_transcript above, this fixture MUST be written as
+        # utf-8: it contains a raw (non-escaped) non-ASCII character, which
+        # cannot be encoded as ascii.
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".jsonl", delete=False, encoding="utf-8"
+        ) as f:
+            f.write("\n".join(raw_lines) + "\n")
+            path = f.name
+        try:
+            turns = list(audit_extract.extract_turns(path))
+        finally:
+            os.remove(path)
+        self.assertEqual(len(turns), 1)
+        self.assertIn("—", turns[0]["final_text"])
+
+
 class LastTextMessageTest(unittest.TestCase):
     """(B) the shared scan that final_text and extract_turns both rely on."""
 

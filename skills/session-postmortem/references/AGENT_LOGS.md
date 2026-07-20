@@ -19,6 +19,13 @@ Project memories (persistent facts written by the agent) live at:
   <slug>.md          # Individual memory files
 ```
 
+## Scratch Artifacts
+
+Sessions often write intermediate work (analysis, theory-testing files, research dumps) to a
+gitignored scratch or session directory. These artifacts are not part of the committed repo and
+may contain evidence of exploratory work not captured in the event log -- check them when
+reconstructing what the agent actually tried.
+
 ## Using Logs in a Postmortem
 
 When running `session-postmortem`, the agent can read the full JSONL transcript to reconstruct:

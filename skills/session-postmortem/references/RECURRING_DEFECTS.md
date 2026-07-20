@@ -46,10 +46,10 @@ Each entry has:
 ---
 
 ### RD-01: missing-visual-verification
-- signature: Claimed a UI, rendered, or visual output was correct without inspecting the actual result.
+- signature: Claimed a UI or visual result was correct from quantitative checks (comparison tests passing) without qualitatively observing the actual running output.
 - count: 18 (mined 2026-07-19)   domain: general
 - maps-to: GAP (inline remediation below)
-- remediation: For any UI, rendered, or visual output, inspect the actual result (screenshot, rendered page, generated file) before claiming correctness; automated tests do not substitute for the manual visual check.
+- remediation: A qualitative check -- actually observing the output of the running UI application (a screenshot or the live app) -- is required before claiming visual correctness; quantitative checks (comparison tests passing) do not substitute for it.
 
 ### RD-02: bootstrap-not-fired
 - signature: Did not invoke session-bootstrap first after start, resume, or compaction.

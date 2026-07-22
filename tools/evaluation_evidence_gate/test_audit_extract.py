@@ -39,6 +39,23 @@ class IterMainThreadTest(unittest.TestCase):
         # 12 lines in fixture, 1 is a sidechain line -> 11 remain.
         self.assertEqual(len(main_thread), 11)
 
+    def test_line_omitting_isSidechain_is_treated_as_main_thread(self):
+        line = {
+            "type": "user",
+            "message": {"role": "user", "content": "start"},
+            "uuid": "d-no-field",
+        }
+        self.assertIn(line, list(audit_extract.iter_main_thread([line])))
+
+    def test_explicit_sidechain_true_is_still_excluded(self):
+        line = {
+            "type": "user",
+            "isSidechain": True,
+            "message": {"role": "user", "content": "start"},
+            "uuid": "d-side",
+        }
+        self.assertNotIn(line, list(audit_extract.iter_main_thread([line])))
+
 
 class IsTurnDelimiterTest(unittest.TestCase):
     def test_string_content_is_delimiter(self):

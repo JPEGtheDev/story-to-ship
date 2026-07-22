@@ -218,3 +218,8 @@ jobs:
             exit 1
           fi
           echo "[+] hooks/README.md matches the current .claude/hooks set and count"
+
+      - name: Run evaluation-evidence gate unit tests
+        run: |
+          python3 -m unittest discover -s tools/evaluation_evidence_gate -p 'test_*.py'
+          echo "[+] evaluation-evidence gate unit tests pass"

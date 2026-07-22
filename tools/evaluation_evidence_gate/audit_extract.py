@@ -39,9 +39,11 @@ _COMPLETION_CLAIM_PHRASES = (
 
 
 def iter_main_thread(lines):
-    """Yield only lines whose isSidechain field is False."""
+    """Yield lines that are not sidechain lines. A line is a sidechain line
+    only if its isSidechain field is explicitly True; a line that omits the
+    field is treated as main-thread."""
     for line in lines:
-        if line.get("isSidechain") is False:
+        if line.get("isSidechain") is not True:
             yield line
 
 

@@ -1,4 +1,6 @@
 self-assessment.md
 .worktrees/
 scratch/
+__pycache__/
+*.pyc
 .claude/.b2-verdict-log.jsonl

@@ -10,18 +10,7 @@ To run postmortems on older sessions that were never reviewed:
 ls ~/.claude/projects/<encoded-project-path>/*.jsonl 2>/dev/null
 ```
 
-**GitHub Copilot sessions (legacy):**
-```bash
-for dir in ~/.copilot/session-state/*/; do
-  session_id=$(basename "$dir")
-  if [ ! -f "$dir/postmortem-external.md" ] && [ -f "$dir/events.jsonl" ]; then
-    echo "$session_id"
-  fi
-done
-```
-
 See `references/AGENT_LOGS.md` for Claude Code session log structure.
-See `references/COPILOT_LOGS.md` for Copilot session log structure.
 
 Dispatch up to 4 reviewer subagents in parallel, each pointed at a different session. Use `postmortem-reviewer.md` for each. Collect results as they complete.
 

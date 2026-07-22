@@ -88,7 +88,7 @@ A self-assessment cannot find what the agent rationalized away. **An external re
 
 ### Setup
 
-Derive the paths for the session being reviewed from your project's session management conventions. For Particle-Viewer path conventions, see `references/PV_SESSION_PATHS.md`.
+Derive the paths for the session being reviewed from your project's session management conventions.
 
 ### Protocol
 

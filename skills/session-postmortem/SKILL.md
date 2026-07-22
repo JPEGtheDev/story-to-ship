@@ -62,6 +62,8 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 
+To check whether a recurring defect is already a known pattern and find its remedy, see `references/RECURRING_DEFECTS.md`.
+
 ---
 
 ## Rationalization Prevention

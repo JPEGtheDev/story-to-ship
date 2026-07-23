@@ -11,7 +11,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `session-start.sh` + `session-start.md` | SessionStart | Once per session |
 | `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | Every turn |
 | `pre-message.sh` + `pre-message.md` | UserPromptSubmit | Every turn |
-| `stop-verdict-log.sh` | Stop | Never -- passive log, no injection |
+| `stop-turn-log.sh` | Stop | Never -- passive log, no injection |
 
 Each `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
@@ -30,8 +30,8 @@ The two per-turn files are injected on every user prompt, so their size is a rec
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the six shipped `.md` and `.sh` injector files, plus the repo-local `stop-verdict-log.sh`, for seven entries total. The six shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-verdict-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the six shipped `.md` and `.sh` injector files, plus the repo-local `stop-turn-log.sh`, for seven entries total. The six shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
 
-## stop-verdict-log.sh
+## stop-turn-log.sh
 
-A Stop hook for the B2 verdict-gate pilot. It is repo-local: registered in `.claude/settings.json` only, and is deliberately not shipped via `hooks/hooks.json`. It is a passive shadow logger -- it appends one JSONL line per turn when env `B2_GATE` is `shadow` or `enforce`, and is inert (prints `{}`, no logging) for every other value including unset/off. It never blocks.
+A Stop hook that appends one JSONL line per turn to a local log, unconditionally (no enable flag). It is repo-local: registered in `.claude/settings.json` only, and is deliberately not shipped via `hooks/hooks.json`. It never blocks and never judges the turn -- pure passive logging.

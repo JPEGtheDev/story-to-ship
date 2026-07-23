@@ -1,0 +1,1 @@
+../../hooks/stop-turn-log.sh

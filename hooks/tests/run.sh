@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hermetic test harness for hooks/stop-verdict-log.sh.
+# Hermetic test harness for hooks/stop-turn-log.sh.
 #
 # For each case directory under fixtures/, sets the case's env (always pointing
 # STOP_TURN_LOG at a fresh temp file so cases never interfere with each other),
@@ -8,7 +8,7 @@
 # nonzero if any case fails.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HOOK="$SCRIPT_DIR/../stop-verdict-log.sh"
+HOOK="$SCRIPT_DIR/../stop-turn-log.sh"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures"
 
 pass=0

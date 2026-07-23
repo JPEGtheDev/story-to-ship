@@ -1,1 +1,0 @@
-../../hooks/stop-verdict-log.sh

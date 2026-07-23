@@ -38,7 +38,7 @@ log_line() {
     >>"$log" 2>/dev/null || return 0
 }
 
-LOG="${B2_GATE_LOG:-${CLAUDE_PROJECT_DIR:-.}/.claude/.b2-verdict-log.jsonl}"
+LOG="${STOP_TURN_LOG:-${CLAUDE_PROJECT_DIR:-.}/.claude/.stop-turn-log.jsonl}"
 log_line "$RAW" "$LOG" || true
 
 printf '{}\n'

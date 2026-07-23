@@ -2,7 +2,7 @@
 # Hermetic test harness for hooks/stop-verdict-log.sh.
 #
 # For each case directory under fixtures/, sets the case's env (always pointing
-# B2_GATE_LOG at a fresh temp file so cases never interfere with each other),
+# STOP_TURN_LOG at a fresh temp file so cases never interfere with each other),
 # pipes the case's input into the hook, and asserts stdout plus log-file behavior
 # match the case's expectations. Prints PASS/FAIL per case and a total; exits
 # nonzero if any case fails.
@@ -30,13 +30,12 @@ run_case() {
   expect_log="$(cat "$expect_log_file")"
 
   local tmp_log
-  tmp_log="$(mktemp -u "${TMPDIR:-/tmp}/b2-verdict-log.XXXXXX.jsonl")"
+  tmp_log="$(mktemp -u "${TMPDIR:-/tmp}/stop-turn-log.XXXXXX.jsonl")"
   # Do not pre-create the log file: "off" cases must assert it was never created.
 
   local actual_stdout actual_exit
   actual_stdout="$(
-    unset B2_GATE
-    export B2_GATE_LOG="$tmp_log"
+    export STOP_TURN_LOG="$tmp_log"
     unset CLAUDE_PROJECT_DIR
     if [[ -f "$env_file" ]]; then
       # shellcheck disable=SC1090

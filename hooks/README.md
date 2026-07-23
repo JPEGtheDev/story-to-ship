@@ -11,6 +11,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `session-start.sh` + `session-start.md` | SessionStart | Once per session |
 | `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | Every turn |
 | `pre-message.sh` + `pre-message.md` | UserPromptSubmit | Every turn |
+| `stop-turn-log.sh` | Stop | Never -- passive log, no injection |
 
 Each `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
@@ -29,4 +30,8 @@ The two per-turn files are injected on every user prompt, so their size is a rec
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory (all six `.md` and `.sh` files), so this repo dogfoods the same hooks it ships as a plugin. Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the six shipped `.md` and `.sh` injector files, plus the repo-local `stop-turn-log.sh`, for seven entries total. The six shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+
+## stop-turn-log.sh
+
+A Stop hook that appends one JSONL line per turn to a local log, unconditionally (no enable flag). It is repo-local: registered in `.claude/settings.json` only, and is deliberately not shipped via `hooks/hooks.json`. It never blocks and never judges the turn -- pure passive logging.

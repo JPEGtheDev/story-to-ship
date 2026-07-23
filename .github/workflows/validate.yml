@@ -31,7 +31,18 @@ jobs:
           shellcheck hooks/session-start.sh
           shellcheck hooks/pre-message-gates.sh
           shellcheck hooks/pre-message.sh
+          shellcheck hooks/stop-turn-log.sh
+          shellcheck hooks/tests/run.sh
           echo "[+] All hook scripts pass shellcheck"
+
+      - name: Run Stop turn-log hook tests
+        run: |
+          set -e
+          bash hooks/tests/run.sh
+          out=$(printf '' | bash hooks/stop-turn-log.sh)
+          test "$out" = "{}" || { echo "FAILED: empty-stdin did not yield {}"; exit 1; }
+          printf '%s' "$out" | jq empty || { echo "FAILED: empty-stdin output not valid JSON"; exit 1; }
+          echo "[+] Stop turn-log hook: fixture suite passed and empty-stdin is wedge-safe"
 
       - name: Enforce pre-message hook word budget
         run: |

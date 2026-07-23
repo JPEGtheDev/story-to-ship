@@ -3,3 +3,4 @@ self-assessment.md
 scratch/
 __pycache__/
 *.pyc
+.claude/.stop-turn-log.jsonl

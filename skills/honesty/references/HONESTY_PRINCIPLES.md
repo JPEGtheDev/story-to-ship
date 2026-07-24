@@ -2,7 +2,7 @@
 
 Supplementary content for `skills/honesty/SKILL.md`. Contains rationale, trust mechanics, and quick reference guides.
 
-> **This file is documentation. Enforcement lives in the mapped mechanisms; the text here carries no gate.**
+> **This file is documentation. Enforcement lives in the mapped mechanisms; the text here carries no gate.** The live gates are in `SKILL.md` -- the Confidence Vocabulary Gate and the Empirical-Backing Tripwire.
 
 ---
 

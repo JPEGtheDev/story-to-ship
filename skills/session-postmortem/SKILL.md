@@ -59,6 +59,7 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 - Prompt Feedback section omitted or left as placeholder -- STOP. Complete Part 4c before marking the postmortem done.
 - **External reviewer not dispatched -- STOP. Dispatch `postmortem-reviewer` subagent now.**
 - **Postmortem report not written to `[SESSION_DIR]/postmortem.md` -- STOP. Create the file now.**
+- Declare-clean or causal verdict COUNTS reported as defect counts without a precision split -- STOP. A raw flag count is a triage input, not a defect count; classify each flagged claim as evidence-absent (defect) / evidence-gathered-not-shown (presentation gap) / epistemically-marked (OK) and report precision first. Use the empirical-backing precision-split dimension in `agents/postmortem-reviewer.md`.
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 
@@ -78,6 +79,7 @@ To check whether a recurring defect is already a known pattern and find its reme
 | "The session was short, not worth analyzing" | Short sessions have failure modes too. A short session gets a proportionate postmortem -- 10 minutes, not an hour. |
 | "I'll skip the external reviewer, it's just overhead" | The external reviewer reads events the agent rationalized away. Skipping it means the postmortem finds only what the agent was willing to find. |
 | "User asked a direct question while the external reviewer is still running -- I can answer while it finishes" | NO. The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT answer the question, summarize findings, or output any assessment. Tell the user you are waiting for the external reviewer to complete, then continue polling. |
+| "The detector flagged N declare-clean claims, so there are N defects" | A flag count is not a defect count until you split it: evidence-absent = defect, evidence-gathered-not-shown = presentation gap, epistemically-marked = OK. Run the 3-way precision split (`agents/postmortem-reviewer.md`) before calling any flagged claim a defect. |
 
 ---
 

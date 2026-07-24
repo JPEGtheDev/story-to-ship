@@ -1,8 +1,9 @@
 # Recurring Defect Registry
 
 A shared, cross-repo catalog of recurring agent-behavior defects, mined from real user
-corrections. Use it in a postmortem: when a defect recurs, look it up here to see whether it
-is a known pattern and where its remedy lives.
+corrections, plus a small number of entries contributed from external-reviewer session
+self-audits (marked inline). Use it in a postmortem: when a defect recurs, look it up here to
+see whether it is a known pattern and where its remedy lives.
 
 ## Provenance
 
@@ -13,6 +14,11 @@ is a known pattern and where its remedy lives.
 - Sources: story-to-ship 92, Particle-Viewer 46, other-project 2 (= 140).
 - Every correction is grounded in a real quoted user message. That grounding is the only
   thing claimed as "verified" -- see the maps-to note below.
+- The registry now holds 47 entries: 46 from the 2026-07-19 user-correction mining run (grouped
+  into 46 canonical failure modes, below) plus RD-47, contributed 2026-07-23 from an
+  external-reviewer session self-audit (the a0e656aa drift-postmortem). RD-47 is grounded in
+  that postmortem's event log, not a quoted user correction, so the "every correction is
+  grounded in a real quoted user message" claim above scopes to the 46 mined modes only.
 
 ## Schema
 
@@ -34,10 +40,11 @@ Each entry has:
 
 ## Scope and limits
 
-- This is a curated point-in-time snapshot (2026-07-19), not an auto-updated view. The mining
-  METHOD (scan transcripts -> filter injected turns -> classify corrections -> name mode ->
-  map to remedy) is reproducible, but the source transcripts are private and are not
-  committed, so there is no one-command regeneration from repo state.
+- This is a curated point-in-time snapshot (2026-07-19), not an auto-updated view, plus a small
+  number of post-2026-07-19 additions contributed from external-reviewer self-audits (see
+  Provenance). The mining METHOD (scan transcripts -> filter injected turns -> classify
+  corrections -> name mode -> map to remedy) is reproducible, but the source transcripts are
+  private and are not committed, so there is no one-command regeneration from repo state.
 - Singletons (count 1) are candidates, not confirmed patterns -- flagged as such in-line;
   a few carry an explicit remediation where the corrective is already known.
 - The schema (portable mode names, maps-to slugs, domain tags) is repo-agnostic so other
@@ -98,9 +105,11 @@ Each entry has:
 - maps-to: skill: writing-skills
 
 ### RD-11: bare-completion-claim
-- signature: Claimed done/complete/CI-pass without inline command output.
+- signature: Claimed done/complete/CI-pass -- or any declare-clean checkpoint verdict (batch complete, 0 residual, all covered, verified, root cause X) -- without inline command output or a citation to prior evidence.
 - count: 4 (mined 2026-07-19)   domain: general
 - maps-to: skill: honesty
+- note: signature BROADENED 2026-07-23 from the external-reviewer self-audit of session a0e656aa (the drift-postmortem), not the 2026-07-19 user-correction mining run; `count: 4` reflects the PRE-broadening signature and is not re-tallied under the broadened definition (source transcripts are private/uncommitted -- no regeneration).
+- see also: RD-47 (re-assertion decay) -- when the bare claim is a RESTATED prior verdict rather than a first-time unbacked claim.
 
 ### RD-12: skeptic-not-dispatched
 - signature: Presented a plan or design without the required Skeptic review.
@@ -290,3 +299,9 @@ Each entry has:
 - count: 1 (mined 2026-07-19)   domain: general
 - maps-to: GAP (inline remediation below)
 - remediation: candidate (1 instance -- not yet a confirmed pattern).
+
+### RD-47: bare-re-assertion-decay
+- signature: Re-asserted a prior verdict (a completion, a coverage claim, OR a causal/mechanism diagnosis) without a pointer to the original evidence (msg # / file:line) and without re-deriving it now.
+- count: n/a (added 2026-07-23 from the external-reviewer self-audit of session a0e656aa -- the drift-postmortem -- not the 2026-07-19 user-correction mining run)   domain: general
+- maps-to: skill: honesty (the Empirical-Backing Tripwire re-assertion rule)
+- see also: RD-11 (bare-completion-claim) -- the first-time-unbacked declare-clean sibling of this re-assertion-specific mode.

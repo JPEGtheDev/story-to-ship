@@ -17,7 +17,7 @@ Reference files supporting the `session-postmortem` skill; load the one relevant
 | `AGENT_LOGS.md` | Claude Code session transcript and memory file locations, and how to use the JSONL transcript to reconstruct tool calls and rationalization patterns during a postmortem. |
 | `BATCH_ANALYSIS.md` | Commands to list unreviewed Claude Code sessions, and the priority order and parallel-dispatch pattern for running postmortems across a batch. |
 | `POSTMORTEM_STRUCTURE.md` | The canonical report template, verdict definitions, blameless-language rules, external reviewer protocol, and the 5-part postmortem structure (Timeline through Action Items) with the Iron Law Compliance Check. |
-| `RECURRING_DEFECTS.md` | Catalog of 46 recurring agent-behavior defects mined from user corrections, each mapped to its remedy. |
+| `RECURRING_DEFECTS.md` | Catalog of 47 recurring agent-behavior defects (46 mined from user corrections plus RD-47 from an external-reviewer self-audit), each mapped to its remedy. |
 
 ## Related
 

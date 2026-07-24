@@ -63,6 +63,7 @@ declare itself clean. Keyed to these forms:
 Each firing raises ONE question -- it is a conditional check, NOT a ban:
 
 > Is the evidence for this verdict pasted in THIS message?
+> - YES, the evidence is inline in this message -> proceed; the verdict is backed, no action needed.
 > - A RESTATEMENT of an earlier result -> cite the original (msg # or file:line).
 > - An INFERENCE -> mark it as inference, not established fact.
 > - NEITHER (a bare verdict) -> run the check and paste the output now, before the verdict.

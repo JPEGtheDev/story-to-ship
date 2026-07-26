@@ -32,13 +32,17 @@ jobs:
           shellcheck hooks/pre-message-gates.sh
           shellcheck hooks/pre-message.sh
           shellcheck hooks/stop-turn-log.sh
+          shellcheck hooks/bootstrap-gate-pre.sh
+          shellcheck hooks/bootstrap-gate-post.sh
           shellcheck hooks/tests/run.sh
+          shellcheck hooks/tests/run-bootstrap-gate.sh
+          shellcheck hooks/tests/run-all.sh
           echo "[+] All hook scripts pass shellcheck"
 
-      - name: Run Stop turn-log hook tests
+      - name: Run all hook fixture suites
         run: |
           set -e
-          bash hooks/tests/run.sh
+          bash hooks/tests/run-all.sh
           out=$(printf '' | bash hooks/stop-turn-log.sh)
           test "$out" = "{}" || { echo "FAILED: empty-stdin did not yield {}"; exit 1; }
           printf '%s' "$out" | jq empty || { echo "FAILED: empty-stdin output not valid JSON"; exit 1; }

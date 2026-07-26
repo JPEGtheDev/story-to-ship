@@ -46,6 +46,11 @@ fi
 SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 [[ -z "$SESSION_ID" ]] && exit 0
 
+# A session_id outside this charset (e.g. containing "/" or "..") could
+# traverse FLAG_FILE outside STATE_DIR once concatenated below. State can't
+# be trusted for a hostile session_id, so fail open silently.
+[[ "$SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]] || exit 0
+
 TOOL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_name // empty' 2>/dev/null)"
 SKILL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_input.skill // empty' 2>/dev/null)"
 
@@ -66,6 +71,10 @@ LOG_FILE="$STATE_DIR/.bootstrap-gate-log.jsonl"
 TS="$(date -u +%FT%TZ)"
 
 mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
+# The >> append below relies on POSIX O_APPEND atomicity for writes under
+# PIPE_BUF (4096 bytes) to stay safe against concurrent sessions logging at
+# once; each JSON line here is far short of that, so a single write(2) per
+# invocation is guaranteed not to interleave.
 jq -cn \
   --arg ts "$TS" \
   --arg sid "$SESSION_ID" \

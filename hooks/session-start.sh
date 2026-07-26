@@ -18,9 +18,16 @@ fi
 # side effect only -- it never changes this script's stdout or exit code, and
 # it fails silently (fail-open) if jq is missing, stdin has no session_id, or
 # neither state-dir variable is resolvable.
+#
+# This block MUST run before the python3/MD_FILE early-exit checks below --
+# those `exit 0` paths would otherwise skip stamping entirely, so the guard
+# added here only skips the stamping itself, never the whole script.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
   BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
-  if [[ -n "$BOOTSTRAP_SESSION_ID" ]]; then
+  # A session_id outside this charset (e.g. containing "/" or "..") could
+  # traverse the flag path outside the state dir once concatenated below;
+  # skip stamping rather than trust it.
+  if [[ -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
     BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
     if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
       BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"

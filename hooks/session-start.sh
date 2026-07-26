@@ -11,6 +11,27 @@ else
   RAW="$(timeout 2 cat 2>/dev/null || true)"
 fi
 
+# Stamp a bootstrap-pending flag for this session so the bootstrap-gate hooks
+# (bootstrap-gate-pre.sh / bootstrap-gate-post.sh) know a fresh session or
+# continuation needs Skill(session-bootstrap) before other tool use. Every
+# SessionStart source (startup/resume/compact/fork/clear) stamps. This is a
+# side effect only -- it never changes this script's stdout or exit code, and
+# it fails silently (fail-open) if jq is missing, stdin has no session_id, or
+# neither state-dir variable is resolvable.
+if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
+  BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
+  if [[ -n "$BOOTSTRAP_SESSION_ID" ]]; then
+    BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
+    if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+      BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
+    fi
+    if [[ -n "$BOOTSTRAP_STATE_DIR" ]]; then
+      mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null &&
+        : >"$BOOTSTRAP_STATE_DIR/.bootstrap-pending-$BOOTSTRAP_SESSION_ID" 2>/dev/null
+    fi
+  fi
+fi
+
 if ! command -v python3 &>/dev/null; then
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[ERROR: python3 not found; hook content unavailable]"}}\n'
   exit 0

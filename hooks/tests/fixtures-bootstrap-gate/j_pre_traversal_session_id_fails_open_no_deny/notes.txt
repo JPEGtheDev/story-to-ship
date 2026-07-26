@@ -1,0 +1,5 @@
+This case pins fail-OPEN behavior on a malformed/hostile session_id (exit 0,
+no deny, no log line) -- that is INTENTIONAL and consistent with this hook
+family's documented fail-open philosophy (session_id is harness-supplied,
+not a trust boundary the gate is meant to enforce). It is NOT a fail-closed
+guarantee: the gate simply declines to act rather than blocking.

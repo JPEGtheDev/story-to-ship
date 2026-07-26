@@ -8,8 +8,9 @@
 # session-bootstrap Skill call completes.
 #
 # Fail-open philosophy: this hook NEVER exits nonzero. Missing jq, malformed
-# stdin, an unresolved state dir, or any other ambiguity all resolve to a
-# plain allow (exit 0, empty stdout, no log line) rather than blocking.
+# stdin, an unresolved state dir, an invalid session_id, or any other
+# ambiguity all resolve to a plain allow (exit 0, empty stdout, no log line)
+# rather than blocking.
 #
 # State dir resolution: ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}.
 # If neither variable is set, there is no safe place to look for a flag or

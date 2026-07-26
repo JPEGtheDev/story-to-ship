@@ -43,6 +43,10 @@ jobs:
         run: |
           set -e
           bash hooks/tests/run-all.sh
+
+      - name: Stop turn-log wedge safety (empty stdin)
+        run: |
+          set -e
           out=$(printf '' | bash hooks/stop-turn-log.sh)
           test "$out" = "{}" || { echo "FAILED: empty-stdin did not yield {}"; exit 1; }
           printf '%s' "$out" | jq empty || { echo "FAILED: empty-stdin output not valid JSON"; exit 1; }

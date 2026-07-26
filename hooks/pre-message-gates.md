@@ -25,11 +25,9 @@ For full reload rules and examples, see the skill.
 
 ## Core Skill Routing (per turn)
 
-Ordering: `session-bootstrap` is the first tool call this response, sent alone. Invoke `honesty` immediately after it returns, before any task skill.
+Invoke `honesty` immediately after `session-bootstrap` returns, before any task skill.
 
-Reload triggers (a fresh `Skill` call only): new todo -- reload that todo's skill(s) first; 3 user prompts with no reload -- reload current work's skill; user correction or redirect -- reload the misapplied skill; context compacted or session resumed -- reload every skill plus `honesty`.
-
-Process combos: before any completion claim, commit, or PR, load `verification-before-completion`. For any plan with 2+ todos, dispatch the Skeptic + plan-reviewer pair. For multi-step planning, load `writing-plans` first. Before dispatching any subagent, load `subagent-driven-development` and `using-git-worktrees` together.
+Process combos: before any completion claim, commit, or PR, load `verification-before-completion`. For any plan with 2+ todos, dispatch the Skeptic + plan-reviewer pair; if plan.md contains a `## Feature Specification`, dispatch `three-amigos` Refinement instead. For multi-step planning, load `writing-plans` first. Before dispatching any subagent, load `subagent-driven-development` and `using-git-worktrees` together.
 
 Domain skills keep their own dispatch rows -- not here.
 </IMPORTANT>

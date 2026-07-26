@@ -18,6 +18,17 @@
 #   input                   - stdin JSON fed to the hook (required)
 #   pre_flag_sessions       - newline list of session_ids; a flag file is
 #                             created for each BEFORE the hook runs
+#   pre_dirs                - newline list of directory path templates;
+#                             each is mkdir -p'd BEFORE the hook runs. Used
+#                             to stage adversarial fixtures (e.g. an
+#                             intermediate directory a hostile session_id's
+#                             ".." segments must traverse through). Templates
+#                             may use the tokens STATE_DIR and
+#                             STATE_DIR_PARENT (see token note below).
+#   pre_files               - newline list of file path templates; each is
+#                             touched (created empty) BEFORE the hook runs.
+#                             Same token support as pre_dirs -- used to plant
+#                             a traversal-target "canary" file.
 #   expect_exit             - exact exit code (default 0)
 #   expect_stdout           - exact-match stdout (used when deterministic,
 #                             e.g. empty string for a plain allow)
@@ -32,10 +43,26 @@
 #                             must exist AFTER the hook runs
 #   expect_flag_absent      - newline list of session_ids whose flag file
 #                             must NOT exist AFTER the hook runs
+#   expect_file_exists      - newline list of file path templates that must
+#                             exist AFTER the hook runs. Same token support
+#                             as pre_dirs/pre_files -- used to assert a
+#                             traversal-target "canary" file survived a hook
+#                             invocation that carried a hostile session_id.
 #
 # State dir layout matches the bootstrap-gate contract:
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-gate-log.jsonl
+#
+# Sandbox layout: each case gets a fresh outer sandbox dir, with
+# BOOTSTRAP_GATE_STATE_DIR pointed at a "state" subdirectory one level
+# inside it. This leaves room, ABOVE the state dir but still INSIDE the
+# per-case sandbox, to stage adversarial fixtures whose hostile session_id
+# is designed to traverse out of the state dir (e.g. "a/../../CANARY") --
+# the traversal target lands in the sandbox, never a shared path, and
+# `rm -rf "$sandbox"` cleans it up unconditionally at the end of the case.
+# pre_dirs/pre_files/expect_file_exists templates may reference:
+#   STATE_DIR         - the state subdirectory itself
+#   STATE_DIR_PARENT  - the sandbox root (one level above STATE_DIR)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PRE_HOOK="$SCRIPT_DIR/../bootstrap-gate-pre.sh"
@@ -57,6 +84,19 @@ log_path() {
   printf '%s/.bootstrap-gate-log.jsonl' "$state_dir"
 }
 
+# Expands the STATE_DIR / STATE_DIR_PARENT tokens in a pre_dirs/pre_files/
+# expect_file_exists template into a concrete path. STATE_DIR_PARENT must be
+# substituted before STATE_DIR since it contains STATE_DIR as a substring.
+resolve_token_path() {
+  local state_dir="$1"
+  local template="$2"
+  local parent
+  parent="$(dirname "$state_dir")"
+  template="${template//STATE_DIR_PARENT/$parent}"
+  template="${template//STATE_DIR/$state_dir}"
+  printf '%s' "$template"
+}
+
 run_case() {
   local case_dir="$1"
   local name
@@ -66,6 +106,8 @@ run_case() {
   local env_file="$case_dir/env"
   local input_file="$case_dir/input"
   local pre_flag_sessions_file="$case_dir/pre_flag_sessions"
+  local pre_dirs_file="$case_dir/pre_dirs"
+  local pre_files_file="$case_dir/pre_files"
   local expect_exit_file="$case_dir/expect_exit"
   local expect_stdout_file="$case_dir/expect_stdout"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
@@ -75,6 +117,7 @@ run_case() {
   local expect_log_grep_file="$case_dir/expect_log_grep"
   local expect_flag_exists_file="$case_dir/expect_flag_exists"
   local expect_flag_absent_file="$case_dir/expect_flag_absent"
+  local expect_file_exists_file="$case_dir/expect_file_exists"
 
   if [[ ! -f "$hook_file" ]]; then
     echo "FAIL: $name"
@@ -105,8 +148,10 @@ run_case() {
       ;;
   esac
 
-  local state_dir
-  state_dir="$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-gate-test.XXXXXX")"
+  local sandbox
+  sandbox="$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-gate-test.XXXXXX")"
+  local state_dir="$sandbox/state"
+  mkdir -p "$state_dir"
 
   # Pre-seed flag files, if requested, before the hook runs.
   if [[ -f "$pre_flag_sessions_file" ]]; then
@@ -114,6 +159,24 @@ run_case() {
       [[ -z "$sid" ]] && continue
       : >"$(flag_path "$state_dir" "$sid")"
     done <"$pre_flag_sessions_file"
+  fi
+
+  # Pre-create directories, if requested (see pre_dirs in the contract
+  # comment above).
+  if [[ -f "$pre_dirs_file" ]]; then
+    while IFS= read -r template; do
+      [[ -z "$template" ]] && continue
+      mkdir -p "$(resolve_token_path "$state_dir" "$template")"
+    done <"$pre_dirs_file"
+  fi
+
+  # Pre-create files, if requested (see pre_files in the contract comment
+  # above).
+  if [[ -f "$pre_files_file" ]]; then
+    while IFS= read -r template; do
+      [[ -z "$template" ]] && continue
+      : >"$(resolve_token_path "$state_dir" "$template")"
+    done <"$pre_files_file"
   fi
 
   local expect_exit=0
@@ -236,6 +299,18 @@ run_case() {
     done <"$expect_flag_absent_file"
   fi
 
+  if [[ -f "$expect_file_exists_file" ]]; then
+    while IFS= read -r template; do
+      [[ -z "$template" ]] && continue
+      local resolved
+      resolved="$(resolve_token_path "$state_dir" "$template")"
+      if [[ ! -f "$resolved" ]]; then
+        ok=0
+        reasons+=("expected file to exist: $resolved")
+      fi
+    done <"$expect_file_exists_file"
+  fi
+
   if [[ "$ok" -eq 1 ]]; then
     echo "PASS: $name"
     pass=$((pass + 1))
@@ -247,7 +322,7 @@ run_case() {
     fail=$((fail + 1))
   fi
 
-  rm -rf "$state_dir"
+  rm -rf "$sandbox"
 }
 
 for case_dir in "$FIXTURES_DIR"/*/; do

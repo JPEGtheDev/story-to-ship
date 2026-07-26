@@ -14,8 +14,9 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `stop-turn-log.sh` | Stop | Never -- passive log, no injection |
 | `bootstrap-gate-pre.sh` | PreToolUse | Only in warn mode, only when the session is un-bootstrapped |
 | `bootstrap-gate-post.sh` | PostToolUse | Never -- clears state, no injection |
+| `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 
-Each `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, whose warn/deny text is generated inline by the scripts themselves. Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
+Each `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair and `workflow-model-guard.sh`, whose deny/warn text is generated inline by the scripts themselves (none of these three has a paired `.md` file). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
 ## Provenance of the injected text
 
@@ -32,7 +33,7 @@ The two per-turn files are injected on every user prompt, so their size is a rec
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the eight shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for nine entries total. The eight shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the nine shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for ten entries total. The nine shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
 
 ## stop-turn-log.sh
 
@@ -54,3 +55,15 @@ State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: th
 Subagents identify themselves via an `agent_id` field on the hook payload; `bootstrap-gate-pre.sh` exempts any call carrying one, so the gate only ever applies to the main-thread session.
 
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
+
+## workflow-model-guard.sh
+
+A PreToolUse hook (matcher `Workflow`) that denies a Workflow tool invocation whose inline script (`tool_input.script`) dispatches an `agent(` call with no `model:` pin. Unlike bootstrap-gate, this guard is deny-only: there is no mode env var and no warn mode, because the escape hatch is the marker below, not a softer failure mode.
+
+Block-extraction rule: an `agent(` call block runs from the line containing `agent(` through the first subsequent line containing the literal two-character substring `})` (which may be the same line). The `model:` pin check is a plain substring search scoped to that block only, so a `model:` mention in a comment line above the `agent(` line does not count.
+
+Script-level opt-out: a script that carries the literal marker `WORKFLOW-MODEL-INHERIT-OK` anywhere in its text is allowed unconditionally, regardless of any unpinned calls -- this is a whole-script substring search, not scoped per-call, documenting a deliberate choice to inherit the dispatching session's model tier.
+
+Subagents identify themselves via an `agent_id` field on the hook payload; this guard exempts any call carrying one, checked before any script parsing, matching the same exemption contract as `bootstrap-gate-pre.sh`.
+
+This guard is fail-open: missing `jq`, malformed stdin, and a Workflow invocation with no inline `tool_input.script` (e.g. a `scriptPath`-only invocation -- out of scope for this hook by design) all resolve to a plain allow. It never exits nonzero; deny is communicated only via `permissionDecision: deny` on stdout.

@@ -44,9 +44,8 @@ A PreToolUse/PostToolUse pair that gates tool use in a session that has not yet 
 
 Mode contract, via `BOOTSTRAP_GATE_MODE`:
 
-- unset -- gate off. The pre-hook exits silently before touching state.
-- `warn` -- **the shipped default** (both `.claude/settings.json` and `hooks/hooks.json` set `BOOTSTRAP_GATE_MODE=warn` on the hook command). Allows the tool call, injects an `additionalContext` nudge to run `Skill(session-bootstrap)`, and appends a line to the JSONL log.
-- `deny` -- a user-flipped promotion, never the shipped default. Blocks the tool call with a `permissionDecision: deny` reason instead of injecting context.
+- `deny` (exact string) -- a user-flipped promotion, never the shipped default. Blocks the tool call with a `permissionDecision: deny` reason instead of injecting context.
+- anything else -- **warn**, including unset and any value that isn't exactly `deny`. Allows the tool call, injects an `additionalContext` nudge to run `Skill(session-bootstrap)`, and appends a line to the JSONL log. Unset already resolves to warn (`MODE="${BOOTSTRAP_GATE_MODE:-warn}"`); the explicit `BOOTSTRAP_GATE_MODE=warn` prefix in both configs documents the default, it doesn't activate it. There is no gate-off value -- disabling the gate means removing (or commenting out) its `PreToolUse`/`PostToolUse` entries in `.claude/settings.json` / `hooks/hooks.json`.
 
 State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the flag file `.bootstrap-pending-<session_id>` and, in warn mode, the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`).
 

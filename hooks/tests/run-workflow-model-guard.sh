@@ -8,6 +8,14 @@
 # deliberately distinct from a fixture/assertion failure so a reader can tell
 # "hook not built" apart from "hook built wrong" at a glance.
 #
+# CI WIRING NOTE (disclosed, not silent): the lint job in
+# .github/workflows/validate.yml enumerates an explicit file list (not a
+# glob) and does NOT list this runner yet. That wiring deliberately lands
+# with T5 (GREEN) alongside the hook implementation itself -- until then
+# this file's absence from the list means CI simply never lints it (CI
+# still passes; the file is just uncovered), not that CI is expected to
+# fail.
+#
 # Sibling to hooks/tests/run-bootstrap-gate.sh and hooks/tests/run.sh,
 # following the same fixture-dir pattern: per-case directories under
 # fixtures-workflow-model-guard/ carry input/expected files; this runner
@@ -35,18 +43,26 @@
 #                             on stdout while still exiting 0 (bootstrap-
 #                             gate-pre.sh precedent) -- expect_exit is left
 #                             at its default for every case in this suite.
-#   expect_stdout           - exact-match stdout (used for the byte-for-byte
-#                             empty-stdout cases: agent_id bypass, malformed
-#                             JSON).
+#   expect_stdout           - exact-match stdout. This hook has no warn mode,
+#                             so every ALLOW path in this suite (b, c, d, e,
+#                             f) is pinned to BYTE-EXACT EMPTY STDOUT + exit
+#                             0 -- not merely "no deny" -- via this field.
+#                             (Tightened in the Stage 1 fix round: an earlier
+#                             draft used expect_stdout_not_grep on deny/
+#                             permissionDecision for the allow cases, which
+#                             could not distinguish a correct silent allow
+#                             from an allow that emits some other, wrong-
+#                             reason non-deny text.)
 #   expect_stdout_grep      - newline list; every pattern must appear in
 #                             stdout (used for deny cases -- asserts both the
 #                             deny shape and a snippet naming the offending
 #                             call).
-#   expect_stdout_not_grep  - newline list; no pattern may appear in stdout
-#                             (used for allow cases where the spec allows
-#                             either empty or non-deny stdout -- this only
-#                             pins the non-deny half, deliberately, per the
-#                             per-case notes).
+#   expect_stdout_not_grep  - newline list; no pattern may appear in stdout.
+#                             Supported by this runner for completeness /
+#                             parity with run-bootstrap-gate.sh, but no
+#                             fixture in this suite currently uses it -- see
+#                             expect_stdout above for why the allow cases use
+#                             the stricter exact-match field instead.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOK="$SCRIPT_DIR/../workflow-model-guard.sh"

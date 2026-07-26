@@ -8,13 +8,11 @@
 # deliberately distinct from a fixture/assertion failure so a reader can tell
 # "hook not built" apart from "hook built wrong" at a glance.
 #
-# CI WIRING NOTE (disclosed, not silent): the lint job in
-# .github/workflows/validate.yml enumerates an explicit file list (not a
-# glob) and does NOT list this runner yet. That wiring deliberately lands
-# with T5 (GREEN) alongside the hook implementation itself -- until then
-# this file's absence from the list means CI simply never lints it (CI
-# still passes; the file is just uncovered), not that CI is expected to
-# fail.
+# CI WIRING NOTE: the lint job in .github/workflows/validate.yml enumerates
+# an explicit file list (not a glob). This runner and
+# hooks/workflow-model-guard.sh itself are both wired into that list as of
+# T5 (GREEN), alongside the hook implementation -- shellcheck now covers
+# both files on every CI run.
 #
 # Sibling to hooks/tests/run-bootstrap-gate.sh and hooks/tests/run.sh,
 # following the same fixture-dir pattern: per-case directories under

@@ -34,10 +34,12 @@ jobs:
           shellcheck hooks/stop-turn-log.sh
           shellcheck hooks/bootstrap-gate-pre.sh
           shellcheck hooks/bootstrap-gate-post.sh
+          shellcheck hooks/workflow-model-guard.sh
           shellcheck hooks/tests/run.sh
           shellcheck hooks/tests/run-bootstrap-gate.sh
           shellcheck hooks/tests/run-all.sh
           shellcheck hooks/tests/run-skill-map-drift.sh
+          shellcheck hooks/tests/run-workflow-model-guard.sh
           echo "[+] All hook scripts pass shellcheck"
 
       - name: Run all hook fixture suites

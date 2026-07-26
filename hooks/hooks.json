@@ -27,6 +27,27 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "BOOTSTRAP_GATE_MODE=warn ${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-pre.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "BOOTSTRAP_GATE_MODE=warn ${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-post.sh"
+          }
+        ]
+      }
     ]
   }
 }

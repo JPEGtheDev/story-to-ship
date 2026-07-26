@@ -21,20 +21,49 @@ Adding dispatch rows before their referenced skills exist causes broken sessions
 
 These rows are present in the session-bootstrap "On Start" table:
 
-| Task type | Skill |
-|-----------|-------|
-| Starting a new project from scratch | `greenfield-discovery` |
+| Task type | Skill | Tier |
+|-----------|-------|------|
+| Starting a new project from scratch | `greenfield-discovery` | domain |
 
 ## Dispatch Rows (deferred)
 
 The following rows are NOT yet in the session-bootstrap table because the referenced skills
 do not exist. Add each row only when its skill ships:
 
-| Task type | Skill | Ships with |
-|-----------|-------|------------|
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 |
-| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 |
+| Task type | Skill | Ships with | Tier |
+|-----------|-------|------------|------|
+| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 | domain |
+| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 | domain |
+| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 | domain |
+
+## Core Skill Tags (per-turn routing block source)
+
+Tag format: a trailing `Tier` column (`core` or `domain`) rather than an HTML comment
+marker, because both dispatch-rows tables above already use multi-column pipe tables
+(the deferred table has 3 columns) -- a Tier column is a lower-diff, mechanically
+greppable extension of the existing structure.
+
+`core` = routes on a structural trigger (every session, every plan, every dispatch)
+rather than task domain. These are the skills the compressed per-turn routing block in
+`hooks/pre-message-gates.md` must name; `hooks/tests/run-skill-map-drift.sh` asserts
+every skill tagged `core` here is present in that file. Domain skills (testing, cpp,
+flatpak, build, docs, etc.) are tagged `domain` in the tables above and MUST NOT be
+added here or to the per-turn block -- they keep their own dispatch rows.
+
+| Skill | Tier | Routing trigger (session-bootstrap "On Start" table) |
+|-------|------|-------------------------------------------------------|
+| `session-bootstrap` | core | First tool call this response, every session, sent alone |
+| `honesty` | core | Immediately after `session-bootstrap` returns, before any task skill |
+| `verification-before-completion` | core | Before any completion claim, commit, or PR |
+| `subagent-driven-development` | core | Before dispatching the first subagent for any plan/todo |
+| `using-git-worktrees` | core | Alongside `subagent-driven-development` for any subagent dispatch |
+| `writing-plans` | core | Any new plan with 2+ todos, or any multi-step task/feature work |
+
+DISCLOSED DEVIATION: `writing-plans` is tagged `core` here because plan T3b explicitly
+names it in the injected per-turn block. The plugin-split ruling's core manifest (see
+project history) omits `writing-plans` from its core set. This tagging follows the T3b
+task instruction as given; the discrepancy with the manifest ruling is not resolved by
+this change and is called out for reviewer attention.
 
 ## Greenfield Invocation Chain
 

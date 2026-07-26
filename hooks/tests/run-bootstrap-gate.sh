@@ -124,8 +124,10 @@ run_case() {
     export BOOTSTRAP_GATE_STATE_DIR="$state_dir"
     unset CLAUDE_PROJECT_DIR
     if [[ -f "$env_file" ]]; then
+      set -a
       # shellcheck disable=SC1090
       source "$env_file"
+      set +a
     fi
     bash "$hook_bin" <"$input_file"
   )"

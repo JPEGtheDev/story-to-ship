@@ -200,11 +200,6 @@ run_case() {
         ok=0
         reasons+=("log missing expected substring: $pattern")
       fi
-      if [[ -f "$log_file" ]]; then
-        if ! jq empty "$log_file" 2>/dev/null; then
-          : # jq per-line validation happens below per line, not on whole file
-        fi
-      fi
     done <"$expect_log_grep_file"
   fi
 

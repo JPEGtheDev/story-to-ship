@@ -36,6 +36,15 @@
             "command": "BOOTSTRAP_GATE_MODE=warn ${CLAUDE_PROJECT_DIR}/.claude/hooks/bootstrap-gate-pre.sh"
           }
         ]
+      },
+      {
+        "matcher": "Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/workflow-model-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

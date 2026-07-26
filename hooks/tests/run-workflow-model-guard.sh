@@ -25,8 +25,8 @@
 # state dir, no log file), and there is only ONE hook under test, so this
 # runner drops the multi-hook "hook" selector field and the log/flag
 # assertion vocabulary that hook family needed. Everything else (input,
-# expect_exit, expect_stdout, expect_stdout_grep, expect_stdout_not_grep)
-# is the same vocabulary and the same semantics as run-bootstrap-gate.sh.
+# expect_exit, expect_stdout, expect_stdout_grep) is the same vocabulary and
+# the same semantics as run-bootstrap-gate.sh.
 #
 # Case directory contract (all files optional except "input"):
 #   input                  - stdin JSON fed to the hook (required). Every
@@ -57,12 +57,13 @@
 #                             stdout (used for deny cases -- asserts both the
 #                             deny shape and a snippet naming the offending
 #                             call).
-#   expect_stdout_not_grep  - newline list; no pattern may appear in stdout.
-#                             Supported by this runner for completeness /
-#                             parity with run-bootstrap-gate.sh, but no
-#                             fixture in this suite currently uses it -- see
-#                             expect_stdout above for why the allow cases use
-#                             the stricter exact-match field instead.
+#
+# (Stage 2 fix round: this runner previously also supported an
+# expect_stdout_not_grep field, carried over from run-bootstrap-gate.sh for
+# vocabulary parity. No fixture in this suite ever exercised it -- every
+# allow case uses the stricter byte-exact expect_stdout field instead (see
+# above) -- so the reviewer ruled it out as an untested branch and it has
+# been dropped rather than carried unexercised.)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOK="$SCRIPT_DIR/../workflow-model-guard.sh"
@@ -80,7 +81,6 @@ run_case() {
   local expect_exit_file="$case_dir/expect_exit"
   local expect_stdout_file="$case_dir/expect_stdout"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
-  local expect_stdout_not_grep_file="$case_dir/expect_stdout_not_grep"
 
   if [[ ! -f "$input_file" ]]; then
     echo "FAIL: $name"
@@ -135,16 +135,6 @@ run_case() {
         reasons+=("stdout missing expected substring: $pattern (got [$actual_stdout])")
       fi
     done <"$expect_stdout_grep_file"
-  fi
-
-  if [[ -f "$expect_stdout_not_grep_file" ]]; then
-    while IFS= read -r pattern; do
-      [[ -z "$pattern" ]] && continue
-      if grep -qF "$pattern" <<<"$actual_stdout"; then
-        ok=0
-        reasons+=("stdout contains forbidden substring: $pattern (got [$actual_stdout])")
-      fi
-    done <"$expect_stdout_not_grep_file"
   fi
 
   if [[ "$ok" -eq 1 ]]; then

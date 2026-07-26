@@ -38,12 +38,21 @@ fi
 
 # Extract core-tagged skill names: a pipe-table row whose last cell is the
 # literal word "core", with the skill name as the first backtick-quoted
-# token on that line. Dedup preserves first-seen order.
+# token on that line. Dedup preserves first-seen order. A core-tagged row
+# whose skill name cannot be extracted is a loud FAIL, not a silent skip --
+# an unextractable name is exactly the kind of malformed row the drift
+# check exists to catch, so it must count against the summary.
 core_skills=()
+unextractable=0
 while IFS= read -r row; do
+  [[ -z "$row" ]] && continue
   # shellcheck disable=SC2016 # literal backtick chars in the regex, not expansion
   skill="$(grep -oE '`[A-Za-z0-9_-]+`' <<<"$row" | head -1 | tr -d '`')"
-  [[ -z "$skill" ]] && continue
+  if [[ -z "$skill" ]]; then
+    echo "FAIL: core-tagged row with unextractable skill name: $row"
+    unextractable=$((unextractable + 1))
+    continue
+  fi
   already=0
   for existing in "${core_skills[@]}"; do
     [[ "$existing" == "$skill" ]] && already=1 && break
@@ -51,12 +60,14 @@ while IFS= read -r row; do
   [[ "$already" -eq 0 ]] && core_skills+=("$skill")
 done < <(grep -E '^\|.*\|[[:space:]]*core[[:space:]]*\|' "$DISPATCH_TABLE")
 
-if [[ "${#core_skills[@]}" -eq 0 ]]; then
+if [[ "${#core_skills[@]}" -eq 0 && "$unextractable" -eq 0 ]]; then
   echo "FAIL: no core-tagged skills found in $DISPATCH_TABLE"
   echo ""
   echo "Total: 1  Pass: 0  Fail: 1"
   exit 1
 fi
+
+fail=$((fail + unextractable))
 
 for skill in "${core_skills[@]}"; do
   if grep -qF -- "$skill" "$GATES_FILE"; then

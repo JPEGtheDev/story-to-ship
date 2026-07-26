@@ -61,7 +61,7 @@ added here or to the per-turn block -- they keep their own dispatch rows.
 
 | Skill | Tier | Routing trigger (source) |
 |-------|------|---------------------------|
-| `session-bootstrap` | core | First tool call this response, every session, sent alone (session-bootstrap SKILL.md Iron Law) |
+| `session-bootstrap` | core | First tool call this response, every session, sent alone (hooks/pre-message-gates.md, Bootstrap Gate) |
 | `honesty` | core | Immediately after `session-bootstrap` returns, before any task skill (session-bootstrap SKILL.md, "On Start" table) |
 | `verification-before-completion` | core | Before any completion claim, commit, or PR (session-bootstrap "On Start" table) |
 | `subagent-driven-development` | core | Before dispatching the first subagent for any plan/todo (session-bootstrap "On Start" table) |

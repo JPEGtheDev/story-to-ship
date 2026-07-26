@@ -1,0 +1,1 @@
+{"session_id": "sess-e", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"scriptPath": "scripts/dispatch.js"}}

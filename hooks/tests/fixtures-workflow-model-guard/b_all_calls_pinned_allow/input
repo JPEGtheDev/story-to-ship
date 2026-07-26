@@ -1,0 +1,1 @@
+{"session_id": "sess-b", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "// Workflow: research then review.\nagent({ name: \"explorer\", model: \"sonnet\", prompt: \"look at recent commits\" });\n\nagent({\n  name: \"reviewer\",\n  model: \"opus\",\n  prompt: \"review the diff for regressions\"\n});\n"}}

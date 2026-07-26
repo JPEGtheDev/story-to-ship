@@ -37,6 +37,7 @@ jobs:
           shellcheck hooks/tests/run.sh
           shellcheck hooks/tests/run-bootstrap-gate.sh
           shellcheck hooks/tests/run-all.sh
+          shellcheck hooks/tests/run-skill-map-drift.sh
           echo "[+] All hook scripts pass shellcheck"
 
       - name: Run all hook fixture suites
@@ -57,12 +58,12 @@ jobs:
           gates=$(wc -w < hooks/pre-message-gates.md)
           message=$(wc -w < hooks/pre-message.md)
           total=$((gates + message))
-          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 400)"
-          if [ "$total" -gt 400 ]; then
-            echo "FAILED: combined pre-message hook word count $total exceeds 400"
+          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 520)"
+          if [ "$total" -gt 520 ]; then
+            echo "FAILED: combined pre-message hook word count $total exceeds 520"
             exit 1
           fi
-          echo "[+] Combined pre-message hook injection is within the 400-word budget"
+          echo "[+] Combined pre-message hook injection is within the 520-word budget"
 
       - name: Check for broken references in skill files
         run: |

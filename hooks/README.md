@@ -16,7 +16,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `bootstrap-gate-post.sh` | PostToolUse | Never -- clears state, no injection |
 | `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 
-Each `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair and `workflow-model-guard.sh`, whose deny/warn text is generated inline by the scripts themselves (none of these three has a paired `.md` file). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
+Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair and `workflow-model-guard.sh`, whose deny/warn text is generated inline by the scripts themselves. Four `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, and `workflow-model-guard.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
 ## Provenance of the injected text
 
@@ -60,7 +60,7 @@ Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state d
 
 A PreToolUse hook (matcher `Workflow`) that denies a Workflow tool invocation whose inline script (`tool_input.script`) dispatches an `agent(` call with no `model:` pin. Unlike bootstrap-gate, this guard is deny-only: there is no mode env var and no warn mode, because the escape hatch is the marker below, not a softer failure mode.
 
-Block-extraction rule: an `agent(` call block runs from the line containing `agent(` through the first subsequent line containing the literal two-character substring `})` (which may be the same line). The `model:` pin check is a plain substring search scoped to that block only, so a `model:` mention in a comment line above the `agent(` line does not count.
+Block-extraction rule: a call block starts at each occurrence of the literal substring `agent(` -- per occurrence, not per line, so two calls on one line are two separate blocks -- and ends when parenthesis depth (tracked character-by-character from that occurrence's opening `(`) returns to 0 at the call's own closing paren; a nested call argument's own parens no longer terminate the block early. An unterminated block at EOF is flushed and evaluated rather than discarded. The `model:` pin check is a plain substring search scoped to that block only, so a `model:` mention in a comment line above the `agent(` occurrence, or in a preceding call on the same line, does not count. Disclosed residual: the scanner is not string-literal-aware, so literal `agent(` text or unbalanced parentheses inside a string value can shift block boundaries and produce a wrong verdict in either direction -- the marker below is the sanctioned escape hatch for a script the scanner misjudges.
 
 Script-level opt-out: a script that carries the literal marker `WORKFLOW-MODEL-INHERIT-OK` anywhere in its text is allowed unconditionally, regardless of any unpinned calls -- this is a whole-script substring search, not scoped per-call, documenting a deliberate choice to inherit the dispatching session's model tier.
 

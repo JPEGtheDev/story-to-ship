@@ -116,6 +116,14 @@ A class-closed claim may only be made when the message citing it contains BOTH:
 Absent either citation, the only permitted verdict is "closed THIS ROUND" -- an explicitly
 round-scoped claim that carries no residual-zero implication beyond the round just completed.
 
+**Scope of this rule (stated so it does not overclaim).** Neither existing after-the-fact
+detector checks what this rule requires: the evaluation-evidence-gate judge scores whether a
+closure claim carries inline/quoted evidence, and the postmortem-reviewer precision-split
+classifies that evidence as absent, gathered-not-shown, or epistemically-marked -- neither
+checks sweep WIDTH or REVIEWER INDEPENDENCE. A narrow token-grep pasted inline would pass
+both. Enforcement of this rule is therefore self-check at generation time (the Red Flags scan
+below), not a downstream gate.
+
 ---
 
 ## Talk Straight -- Forbidden Hedge Vocabulary
@@ -169,7 +177,7 @@ Rules:
 - Non-ASCII characters in any output (outside a marked verbatim quotation) -- **STOP. Replace with ASCII equivalents; see BEFORE PROCEEDING, item 5, for the full rule and the verbatim-quote exception.**
 - You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 - Declare-clean verdict ("batch complete", "0 residual", "all covered", "root cause is X") with NO inline evidence and no citation to prior evidence -- **STOP. Paste the check output now, or cite the original msg # / file:line. A bare verdict is the exact overclaim this gate catches.**
-- Defect CLASS declared closed ("0 residual", "class eliminated", "all instances fixed") backed only by a token grep, with no structure/verb-anchored sweep and no independent review-all pass cited -- **STOP. A token grep proves the named examples are gone, not the class. Run the wider sweep plus an independent review, or downgrade the claim to "closed this round."**
+- Defect CLASS declared closed ("0 residual", "class eliminated", "all instances fixed") backed only by a token grep, with no structure- or verb-anchored sweep and no independent review-all pass cited -- **STOP. A token grep proves the named examples are gone, not the class. Run the wider sweep plus an independent review, or downgrade the claim to "closed this round."**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 

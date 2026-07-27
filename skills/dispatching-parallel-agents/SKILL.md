@@ -83,7 +83,7 @@ Dispatch agents in parallel when ALL of the following are true:
 BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
-3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
+3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (excess dispatches queue)
 4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
@@ -96,7 +96,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
-3. No more than 4 agents in flight on Standard accounts (or within your confirmed Enterprise limit)
+3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (excess dispatches queue)
 4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 

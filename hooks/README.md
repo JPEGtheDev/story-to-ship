@@ -29,7 +29,7 @@ The full rules live in `skills/session-bootstrap/SKILL.md` and `skills/honesty/S
 
 ## Word budget
 
-The two per-turn files are injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 400 words for `pre-message-gates.md` + `pre-message.md`. `session-start.md` fires once per session and is outside the budget.
+The two per-turn files are injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 470 words for `pre-message-gates.md` + `pre-message.md`. `session-start.md` fires once per session and is outside the budget.
 
 ## Mirror in .claude/hooks
 

@@ -15,12 +15,28 @@
 # marker above is the only sanctioned escape hatch (mechanical precision is
 # the point; see hooks/README.md).
 #
-# Block-extraction rule: an agent( call block runs from the line containing
-# the literal substring "agent(" through the first subsequent line
-# containing the literal two-character substring "})" (which may be the
-# same line). The model: pin check is a plain substring search scoped to
-# that block only -- text before the agent( line (e.g. a comment mentioning
-# model:) does not count and must not satisfy the pin requirement.
+# Block-extraction rule: a block STARTS at each occurrence of the literal
+# substring "agent(" -- per occurrence, not per line, so two calls on one
+# line are two separate blocks. From that occurrence's opening "(", the
+# scanner tracks parenthesis depth character-by-character (only "(" and
+# ")" count; "{" and "}" do not) and the block ENDS when depth returns to
+# 0 at the call's own closing paren. A nested call argument's parens
+# (including a "}" immediately followed by a ")") no longer terminate the
+# block early -- only the outermost agent( call's own closing paren does.
+# If EOF is reached with an open block (depth never returns to 0), the
+# collected text is flushed and evaluated as-is rather than discarded, so
+# a truncated/unterminated call is still checked for a pin. The model:
+# pin check is a plain substring search scoped to that block only -- text
+# before the agent( occurrence (e.g. a comment mentioning model:, or a
+# preceding call on the same line) does not count and must not satisfy the
+# pin requirement.
+#
+# Known residual (disclosed, not silent): this scanner is not string-
+# literal-aware. Literal text matching "agent(" inside a string value, or
+# unbalanced parentheses inside a string value, can shift block boundaries
+# and produce a wrong verdict in either direction. The
+# WORKFLOW-MODEL-INHERIT-OK marker is the sanctioned escape hatch for a
+# script the scanner misjudges, not a silent fallback.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook.
@@ -57,39 +73,52 @@ if [[ "$SCRIPT" == *"WORKFLOW-MODEL-INHERIT-OK"* ]]; then
   exit 0
 fi
 
+# No awk, no scan: fail open (mirrors the jq guard above).
+command -v awk &>/dev/null || exit 0
+
 # Scan the script for agent( call blocks lacking a model: pin. AWK performs
-# the line-oriented block extraction described in the header comment above;
-# it prints one line (the offending call's prompt fragment, or a fallback
-# note) per unpinned block it finds. Any output at all means at least one
-# unpinned call exists.
+# the per-occurrence, paren-depth block extraction described in the header
+# comment above; it prints one line (the offending call's prompt fragment,
+# or a fallback note) per unpinned block it finds. Any output at all means
+# at least one unpinned call exists.
 UNPINNED="$(awk '
-  BEGIN { in_block = 0; block = "" }
-  {
-    line = $0
-    if (!in_block) {
-      if (index(line, "agent(") > 0) {
-        in_block = 1
-        block = line
-      } else {
-        next
+  { text = text $0 "\n" }
+  END {
+    n = length(text)
+    i = 1
+    while (i <= n) {
+      rest = substr(text, i)
+      idx = index(rest, "agent(")
+      if (idx == 0) { break }
+      start = i + idx - 1
+      paren = start + 5
+      depth = 1
+      j = paren + 1
+      while (j <= n && depth > 0) {
+        c = substr(text, j, 1)
+        if (c == "(") { depth++ }
+        else if (c == ")") { depth-- }
+        j++
       }
-    } else {
-      block = block "\n" line
-    }
-    if (in_block && index(line, "})") > 0) {
+      block = substr(text, start, j - start)
       if (index(block, "model:") == 0) {
-        frag = block
-        if (match(frag, /prompt:[ \t]*"[^"]*"/)) {
-          seg = substr(frag, RSTART, RLENGTH)
+        frag = ""
+        if (match(block, /prompt:[ \t]*"[^"]*"/)) {
+          seg = substr(block, RSTART, RLENGTH)
           sub(/^prompt:[ \t]*"/, "", seg)
           sub(/"$/, "", seg)
-          print seg
+          frag = seg
+        } else if (match(block, /agent\([ \t]*"[^"]*"/)) {
+          seg = substr(block, RSTART, RLENGTH)
+          sub(/^agent\([ \t]*"/, "", seg)
+          sub(/"$/, "", seg)
+          frag = seg
         } else {
-          print "(unpinned agent( call, prompt text not found)"
+          frag = "(unpinned agent( call, prompt text not found)"
         }
+        print frag
       }
-      in_block = 0
-      block = ""
+      i = j
     }
   }
 ' <<<"$SCRIPT")"

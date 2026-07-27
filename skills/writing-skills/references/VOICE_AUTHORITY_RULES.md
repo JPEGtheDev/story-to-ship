@@ -1,6 +1,6 @@
 # Voice Authority Rules
 
-These rules apply to every line of a skill file or agent template. Apply all three sections.
+These rules apply to every line of a skill file or agent template. Apply all four sections.
 
 ---
 

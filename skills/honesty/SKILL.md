@@ -98,7 +98,10 @@ closed -- "0 residual", "class eliminated", "all instances fixed" -- answers the
 question above with a stronger population than a single-instance verdict: it asserts the
 absence of instances not yet seen, not just the ones already found. A defect class is named
 from example tokens, but the class is broader than the tokens that named it -- a token grep
-returning 0 is evidence the named examples are gone, not evidence the class is gone.
+returning 0 is evidence the named examples are gone, not evidence the class is gone. Example:
+fixing an em-dash (the instance) and grepping for em-dashes returns 0, but the class is
+"non-ASCII characters" -- curly quotes and Unicode arrows belong to the same class, and the
+em-dash grep structurally cannot find them.
 
 **Context:** this fires whenever a message declares a defect CLASS closed, as opposed to a
 single fixed instance.

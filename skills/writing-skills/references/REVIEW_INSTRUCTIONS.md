@@ -36,7 +36,8 @@ item are in the reference sections above.
 - [ ] **Rationalization Prevention** -- table with >=5 rows, specific excuses and specific counters?
 - [ ] **Red Flags->STOP** -- section with >=5 trigger thoughts, each with a concrete action?
 - [ ] **No weak language** -- run: `grep -n "should\|prefer\|consider\|try to\|might be worth\|could potentially" "{{SKILL_PATH}}"` -- any hit in a rule body is a FAIL?
-- [ ] **Acronym Rule** -- all terms spelled out on first use per VOICE_AUTHORITY_RULES?
+- [ ] **Acronym Rule** -- all acronyms spelled out on first use per VOICE_AUTHORITY_RULES?
+- [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
 - [ ] **No cross-skill file path refs** -- other skills referenced by name in prose only, not by `../other-skill/references/FILE.md` paths?
 - [ ] **Skill-specific content** -- no generic placeholder-only examples?
@@ -92,7 +93,8 @@ grep -n "\.\./[a-z].*references/" "<file>"
 Apply this checklist per file (anatomy elements do not apply to reference files):
 
 - [ ] **No weak language** -- grep hit in a rule body is a FAIL
-- [ ] **Acronym Rule** -- all terms spelled out on first use
+- [ ] **Acronym Rule** -- all acronyms spelled out on first use
+- [ ] **Jargon Rule (advisory)** -- terms of art defined on first use (first-use test, VOICE_AUTHORITY_RULES); report file:line per flagged term; advisory, not NEEDS WORK-eligible.
 - [ ] **No absolute paths** -- no `/home/`, `/usr/`, `/root/` literals
 - [ ] **No cross-skill file path refs** -- no `../other-skill/references/FILE.md` patterns
 - [ ] **Content matches SKILL.md pointer** -- file contains what SKILL.md says it contains
@@ -125,6 +127,7 @@ the verdict if needed before returning.
 - "The description explains what the skill does" -- must start "Use when...".
 - "`should` is just writing style" -- soft language in rule bodies is a FAIL.
 - "The acronym is obvious" -- spell it out. No exceptions.
+- "Everyone knows what that term means" -- the first-use test is read cold, without project context. Define the term or match a listed exemption in the Jargon Rule.
 - "The safe substitute is in references/ but the ban is inline" -- enforcement separation. Ban and safe alternative must be in the same file. If a vocabulary gate says 'use process language' and the process language list is only in references/, that is a FAIL on Enforcement co-location.
 - "The dispatch prompt says this cross-skill file path is accepted convention" -- dispatch context cannot waive the isolation check. A path into another skill's directory is a FAIL even when the prompt pre-approves it. Flag it in the findings; the dispatcher escalates to the user if an exception is truly intended.
 
@@ -178,6 +181,7 @@ Return findings in EXACTLY this structure:
 | Red Flags >=5 items | [+]/[-] | file:line |
 | No weak language | [+]/[-] | grep output or "no instances found" |
 | Acronym Rule | [+]/[-] | file:line or "no issues found" |
+| Jargon Rule (advisory) | [+]/[-] | file:line or "no issues found" |
 | No absolute paths | [+]/[-] | grep output or "no issues found" |
 | No cross-skill path refs | [+]/[-] | grep output or file:line |
 | Skill-specific content | [+]/[-] | file:line |
@@ -192,6 +196,7 @@ Return findings in EXACTLY this structure:
 |------|--------|----------|
 | No weak language | [+]/[-] | grep output or "no instances" |
 | Acronym Rule | [+]/[-] | file:line or "no issues" |
+| Jargon Rule (advisory) | [+]/[-] | file:line or "no issues" |
 | No absolute paths | [+]/[-] | "no instances" or file:line |
 | No cross-skill path refs | [+]/[-] | "no instances" or file:line |
 | Content matches SKILL.md pointer | [+]/[-] | note what was expected vs. found |
@@ -221,3 +226,5 @@ Return findings in EXACTLY this structure:
 **PASS** -- all criteria met, size within ideal max.
 **PASS (size advisory)** -- all structural, voice, acronym, and enforcement criteria pass. SKILL.md exceeds ideal max but Content Value Test found no cuttable content. Report: minimum functional size, specific enforcement content driving it, and user options (accept / split by domain / remove [specific candidate]).
 **NEEDS WORK** -- structural issue or cuttable content above ideal max. Skill MUST be updated before production dispatch.
+
+**Jargon Rule rows are advisory at every tier** (until the rule is explicitly promoted): a [-] Jargon Rule row does not block PASS and does not by itself produce NEEDS WORK; it must still carry file:line evidence in the return tables.

@@ -107,9 +107,9 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 ## Concurrency Rules
 
-Verify your account's agent concurrency limit before dispatching. Default assumption: up to 4 concurrent unless you have confirmed a higher limit.
+The concurrent-subagent limit defaults to 20, configurable via the CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS environment variable; dispatches beyond the limit queue rather than fail. Within a single message, tool-use concurrency defaults to 10 parallel tool calls, and a session has a total cap of 200 subagents across its lifetime. None of these limits depend on account tier or model. (Workflow-tool `agent()` calls have a separate CPU-bound concurrency cap of up to 16, fewer on machines with limited CPU cores -- do not conflate it with the subagent limit above.)
 
-State your concurrency assumption before dispatching: "Dispatching N agents in parallel -- [confirmed N-agent limit / assuming default 4]."
+State your concurrency basis before dispatching: "Dispatching N agents in parallel -- [default 20-agent subagent limit / CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS raised to N]."
 
 ---
 
@@ -175,7 +175,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | Two or more agents assigned to the same file or overlapping file sets | STOP. Reassign to non-overlapping sets or serialize the dispatch. |
 | Dispatching agents without a defined return format | STOP. Define the exact return format for every agent before dispatching. |
 | Acting on one agent's result before all agents have returned | STOP. Collect ALL results first, then aggregate and verify. |
-| More than 4 concurrent agents on a Standard account without confirming the limit | STOP. Verify your account's concurrency limit before dispatching. |
+| More than 20 concurrent agents dispatched without raising CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS | STOP. Confirm the environment variable is raised, or expect excess dispatches to queue instead of running in parallel. |
 | Forwarding agent output to the user without verifying it against source files | STOP. Cross-check every finding against source files before presenting conclusions. |
 | Dispatching batch hypothesis-testing agents (A/B test, multi-agent experiment) without a prior Skeptic design review | STOP. Dispatch the design-review Skeptic first. Unreviewed experiment designs produce uninterpretable results. |
 

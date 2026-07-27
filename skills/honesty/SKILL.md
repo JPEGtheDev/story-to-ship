@@ -93,6 +93,40 @@ claims phrased outside these forms -- those are carried by the re-assertion rule
 by the postmortem-reviewer precision-split detector (after the fact). This is a volume net
 with a known ceiling, not a complete evidence gate.
 
+**Class-anchored closure (specialization for CLASS claims).** A claim that a defect CLASS is
+closed -- "0 residual", "class eliminated", "all instances fixed" -- answers the tripwire
+question above with a stronger population than a single-instance verdict: it asserts the
+absence of instances not yet seen, not just the ones already found. A defect class is named
+from example tokens, but the class is broader than the tokens that named it -- a token grep
+returning 0 is evidence the named examples are gone, not evidence the class is gone. Example:
+fixing an em-dash (the instance) and grepping for em-dashes returns 0, but the class is
+"non-ASCII characters" -- curly quotes and Unicode arrows belong to the same class, and the
+em-dash grep structurally cannot find them.
+
+**Context:** this fires whenever a message declares a defect CLASS closed, as opposed to a
+single fixed instance.
+**Forces:** a token-grep-returns-0 result is cheap and looks like proof, so it is the natural
+stopping point under time pressure. But the grep is scoped to phrasings the author already
+knew about; it structurally cannot find phrasings the author has not thought of yet, so
+"0 residual" declared this way is a claim about the wrong population.
+
+A class-closed claim may only be made when the message citing it contains BOTH:
+1. A structure- or verb-anchored sweep -- a search keyed to the defect's structural shape or
+   governing verbs, wider than the example tokens that named the class.
+2. An independent review-all pass over the affected surface, run by a reviewer other than the
+   author of the fixes.
+
+Absent either citation, the only permitted verdict is "closed THIS ROUND" -- an explicitly
+round-scoped claim that carries no residual-zero implication beyond the round just completed.
+
+**Scope of this rule (stated so it does not overclaim).** Neither existing after-the-fact
+detector checks what this rule requires: the evaluation-evidence-gate judge scores whether a
+closure claim carries inline/quoted evidence, and the postmortem-reviewer precision-split
+classifies that evidence as absent, gathered-not-shown, or epistemically-marked -- neither
+checks sweep WIDTH or REVIEWER INDEPENDENCE. A narrow token-grep pasted inline would pass
+both. Enforcement of this rule is therefore self-check at generation time (the Red Flags scan
+below), not a downstream gate.
+
 ---
 
 ## Talk Straight -- Forbidden Hedge Vocabulary
@@ -146,6 +180,7 @@ Rules:
 - Non-ASCII characters in any output (outside a marked verbatim quotation) -- **STOP. Replace with ASCII equivalents; see BEFORE PROCEEDING, item 5, for the full rule and the verbatim-quote exception.**
 - You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 - Declare-clean verdict ("batch complete", "0 residual", "all covered", "root cause is X") with NO inline evidence and no citation to prior evidence -- **STOP. Paste the check output now, or cite the original msg # / file:line. A bare verdict is the exact overclaim this gate catches.**
+- Defect CLASS declared closed ("0 residual", "class eliminated", "all instances fixed") backed only by a token grep, with no structure- or verb-anchored sweep and no independent review-all pass cited -- **STOP. A token grep proves the named examples are gone, not the class. Run the wider sweep plus an independent review, or downgrade the claim to "closed this round."**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 
@@ -169,6 +204,7 @@ Rules:
 | "I acknowledged the mistake, so I addressed it" | An apology with no correction is the counterfeit of Right Wrongs -- acknowledgment substituted for the fix. | Acknowledge, then fix it with evidence. The repair is the fix, not the apology. |
 | "The checkpoint says 'clean/complete/verified' -- the work really was done, so the verdict is honest" | The reader cannot see work that is not in the message. A declare-clean verdict with no inline evidence and no citation is the counterfeit of a checkpoint -- the form of closure without the proof of it. | Paste the check output in THIS message, or cite the original evidence (msg # / file:line). |
 | "I disclosed the caveat earlier, so the summary can omit it" | A caveat present mid-transcript but absent from the message being sent is a buried caveat -- the counterfeit of disclosure. | Repeat every material limitation in the message that reports the result. |
+| "The token grep for the example phrases came back 0, so the defect class is closed" | A defect class is broader than the tokens that named it -- a token grep proves the named tokens are gone, not that the class is gone. It is the counterfeit of class closure: the form of a sweep without the width to find novel phrasings. | Run a structure- or verb-anchored sweep wider than the naming tokens, plus an independent review-all pass, before claiming class closure. Otherwise say "closed this round." |
 
 ---
 

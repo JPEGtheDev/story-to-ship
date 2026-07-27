@@ -156,6 +156,16 @@ If you genuinely find no gaps after thorough analysis, state that explicitly.
 
 Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` template, passing it the plan path and a worktree. Its role is complementary to the Skeptic's: the Skeptic finds what is MISSING from the plan; the plan-reviewer judges whether what IS in the plan is sound, correctly sequenced, and enforceable. Both verdicts are mandatory reads before the plan is presented as final -- neither agent substitutes for the other.
 
+### Review-Round Cap
+
+Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan length exceeds the length of the file(s) it edits, switch the review surface from plan prose to the actual diff: implement, then review the diff. Do not add more plan-review rounds.
+
+**Self-feeding detector:** a blocking finding located in text written in answer to the previous round -- not in the original plan -- is a manufactured defect. Treat it as the stop signal, not as something to fix with more prose. "Rounds keep finding real defects" and "the review must stop" can both be true at once; the fix is switching surfaces, not adding rounds.
+
+**Permissive-clause closure:** when a review finds an ambiguous or permissive clause, close it by deleting the clause, not rewording it -- rewording can make the bypass easier (e.g. "the user asks" -> "the user directs the change" turned a stretch into a bright-line match). If you must reword, test the new wording against the concrete evasion sentence that exploited the old wording.
+
+**Enforcement is procedural/self-check:** round count > 3 and plan-lines > target-file-lines are both countable from the transcript/plan file. No automated detector exists.
+
 ---
 
 ## Heuristics: You Ain't Gonna Need It (YAGNI) - Simplest Thing - Plain Programmer's Purpose (PPP)
@@ -190,6 +200,7 @@ Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` te
 | "Implementation revealed a dependency on a second file -- I'll modify it" | Scope expansion requires user authorization. STOP. State the dependency and ask before touching any file not in the original plan. |
 | "Skeptic or Refinement approved with conditions, I addressed them -- I can proceed" | NO. Review findings change the plan -- user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
 | "The Skeptic is enough -- the plan-reviewer is redundant" | The two jobs do not overlap: the Skeptic finds what is MISSING; the plan-reviewer judges whether what IS present is sound, sequenced, and enforceable. Both fire by default on every non-Discovery plan with 2+ todos -- dispatch them together, not one or the other. |
+| "Round 4 found a real defect, so the review is still productive" | Past round 3 the defects are manufactured by the review itself -- the round-3 cap and the plan-longer-than-file tripwire are the stop signals. Switch review surface to the diff instead of adding rounds. |
 
 ---
 
@@ -213,6 +224,7 @@ Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` te
 - Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
+- Adversarial plan review is in round 4+, or plan length now exceeds the target file's length -- **STOP. Switch the review surface to the diff (implement, then review the diff). A finding located in text written answering the previous round is a manufactured defect, not evidence to keep reviewing.**
 
 ---
 

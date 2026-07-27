@@ -23,14 +23,14 @@ Violating the letter of this rule is violating the spirit of this rule.
 Before starting the postmortem analysis:
 
 1. The session being analyzed has completed -- no further work is planned for that session.
-2. The session's `events.jsonl` log is accessible at the path provided by the user or session context.
+2. The session's `events.jsonl` log is accessible at the path provided by the user or session context. If `events.jsonl` does not exist, name the substitute source explicitly in the postmortem output (e.g. "source = raw session transcript at `<path>`, substituting for missing `events.jsonl`") and state what the substitute lacks relative to `events.jsonl` if known (tool-result pairing, sidechain markers). If `events.jsonl` and `checkpoints/` are both missing and no substitute source exists, STOP and report the missing preconditions -- do not proceed from memory alone.
 3. Self-evaluation skill run and output written to `[SESSION_DIR]/self-assessment.md` from memory, before reading any session artifacts. The Independence Gate in `references/POSTMORTEM_STRUCTURE.md` requires self-assessment to be written from memory first. The external reviewer reads `self-assessment.md` to find discrepancies between what the agent claimed and what the log shows. A postmortem without a self-assessment is missing the agent's own perspective.
-4. Read `checkpoints/index.md` to determine the full session scope (only after `[SESSION_DIR]/self-assessment.md` is written). Context compaction does not shorten the session. A self-assessment that covers only the final task of a 9-hour session is incomplete. If `checkpoints/` does not exist, note the absence and determine scope from the compacted context summary and `events.jsonl` instead.
+4. Read `checkpoints/index.md` to determine the full session scope (only after `[SESSION_DIR]/self-assessment.md` is written). Context compaction does not shorten the session. A self-assessment that covers only the final task of a 9-hour session is incomplete. If `checkpoints/` does not exist, note the absence and determine scope from the compacted context summary and `events.jsonl` (or the declared substitute source) instead.
 5. **DISPATCHING agent:** Dispatch a `postmortem-reviewer` subagent as external reviewer. For self-assessment authorship rules, follow the Independence Gate in `references/POSTMORTEM_STRUCTURE.md`.
-   **EXTERNAL reviewer subagent:** No session memory. Read `events.jsonl` cold.
+   **EXTERNAL reviewer subagent:** No session memory. Read `events.jsonl` cold, or the substitute source declared per item 2 if `events.jsonl` is missing.
 
 [+] All 5 met -> proceed through all postmortem parts in order
-[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, run self-evaluation and write `[SESSION_DIR]/self-assessment.md` from memory first (Independence Gate), then read checkpoints/index.md (or note its absence) to determine scope, then dispatch the external reviewer.
+[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, run self-evaluation and write `[SESSION_DIR]/self-assessment.md` from memory first (Independence Gate), then read checkpoints/index.md (or note its absence) to determine scope, then dispatch the external reviewer; if `events.jsonl` is missing, follow item 2 (declared substitute, or STOP-and-report when no substitute exists).
 
 ---
 
@@ -60,6 +60,7 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 - **External reviewer not dispatched -- STOP. Dispatch `postmortem-reviewer` subagent now.**
 - **Postmortem report not written to `[SESSION_DIR]/postmortem.md` -- STOP. Create the file now.**
 - Declare-clean or causal verdict COUNTS reported as defect counts without a precision split -- STOP. A raw flag count is a triage input, not a defect count; classify each flagged claim as evidence-absent (defect) / evidence-gathered-not-shown (presentation gap) / epistemically-marked (OK) and report precision first. Use the empirical-backing precision-split dimension in `agents/postmortem-reviewer.md`.
+- A source read presented as complete when only a slice was read -- STOP. A `[0:N]` read of `events.jsonl`, a raw transcript, or any substitute is permitted only when the output declares N, the total size, and the coverage percentage (N/total); an undeclared partial read presented as full is a false-coverage claim. Procedural/self-check only -- checkable signal: slice notation, or a non-`events.jsonl`/substitute source with no declared coverage line; no automated detector exists.
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 
@@ -80,6 +81,7 @@ To check whether a recurring defect is already a known pattern and find its reme
 | "I'll skip the external reviewer, it's just overhead" | The external reviewer reads events the agent rationalized away. Skipping it means the postmortem finds only what the agent was willing to find. |
 | "User asked a direct question while the external reviewer is still running -- I can answer while it finishes" | NO. The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT answer the question, summarize findings, or output any assessment. Tell the user you are waiting for the external reviewer to complete, then continue polling. |
 | "The detector flagged N declare-clean claims, so there are N defects" | A flag count is not a defect count until you split it: evidence-absent = defect, evidence-gathered-not-shown = presentation gap, epistemically-marked = OK. Run the 3-way precision split (`agents/postmortem-reviewer.md`) before calling any flagged claim a defect. |
+| "The full log is too big, I'll just read `[0:4000]` and move on" | Silent truncation is a false-coverage claim, not a shortcut. Declare N, the total size, and the coverage percentage every time a slice is read -- or read the whole thing. |
 
 ---
 

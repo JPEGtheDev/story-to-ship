@@ -90,6 +90,7 @@ These thoughts mean stop immediately:
 | "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
 | "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
 | "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
+| "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
 
 ---
 
@@ -139,6 +140,8 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 **Limitations-field check (before Stage 1):** The implementer output contract requires a `Limitations:` field. If the implementer result contains no `Limitations:` line, the result is incomplete -- resubmit for it before dispatching Stage 1. DO NOT infer "no limitations" from its absence: absence means the contract was not followed, not that there were none.
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
+
+**Re-review required for review-covered territory:** The GAPS/REQUEST CHANGES re-run rules above are one instance of a general rule: any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances. A prior PASS/APPROVE does not extend to the new change, even one the agent itself initiates. The sole exemption is an explicit user waiver given in the same turn -- not an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial or already covered. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch visible in the transcript is the checkable signal; no automated detector exists.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
 
@@ -195,3 +198,4 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |
 | "The subagent hit a rate limit -- I'll do the review inline instead" | Rate limits are temporary. Inline review inherits your assumptions and blind spots. The whole point of a dispatched reviewer is independence from the author's context. Wait for the reset and dispatch. |
+| "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Documented failure mode (source postmortem): the agent adjudicating whether its own change is "covered enough" to skip re-review IS the failure -- not a valid exemption. YOU MUST re-review any change in review-covered territory. |

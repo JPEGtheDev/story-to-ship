@@ -1,0 +1,1 @@
+{"session_id": "sess-i", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "// Workflow: intentionally truncated script (simulates a bug or malformed input).\nagent({\n  name: \"explorer\",\n  prompt: \"never closed block probe\"\n"}}

@@ -1,0 +1,1 @@
+{"session_id": "sess-h", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "agent({ name: \"a\", prompt: \"first unpinned\" }); agent({ name: \"b\", model: \"sonnet\", prompt: \"second pinned\" });\n"}}

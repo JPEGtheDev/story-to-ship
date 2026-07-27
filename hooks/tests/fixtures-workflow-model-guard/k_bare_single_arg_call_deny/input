@@ -1,0 +1,1 @@
+{"session_id": "sess-k", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "agent(\"run the nightly sweep\");\nagent({ name: \"explorer\", model: \"sonnet\", prompt: \"scheduled cleanup\" });\n"}}

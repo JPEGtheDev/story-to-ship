@@ -30,7 +30,7 @@ Before starting the postmortem analysis:
    **EXTERNAL reviewer subagent:** No session memory. Read `events.jsonl` cold, or the substitute source declared per item 2 if `events.jsonl` is missing.
 
 [+] All 5 met -> proceed through all postmortem parts in order
-[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, run self-evaluation and write `[SESSION_DIR]/self-assessment.md` from memory first (Independence Gate), then read checkpoints/index.md (or note its absence) to determine scope, then dispatch the external reviewer.
+[-] Any unmet -> STOP. Wait for the session to complete, locate the events log, run self-evaluation and write `[SESSION_DIR]/self-assessment.md` from memory first (Independence Gate), then read checkpoints/index.md (or note its absence) to determine scope, then dispatch the external reviewer; if `events.jsonl` is missing, follow item 2 (declared substitute, or STOP-and-report when no substitute exists).
 
 ---
 
@@ -60,7 +60,7 @@ If any of the following apply, the verdict is at minimum NEEDS IMPROVEMENT:
 - **External reviewer not dispatched -- STOP. Dispatch `postmortem-reviewer` subagent now.**
 - **Postmortem report not written to `[SESSION_DIR]/postmortem.md` -- STOP. Create the file now.**
 - Declare-clean or causal verdict COUNTS reported as defect counts without a precision split -- STOP. A raw flag count is a triage input, not a defect count; classify each flagged claim as evidence-absent (defect) / evidence-gathered-not-shown (presentation gap) / epistemically-marked (OK) and report precision first. Use the empirical-backing precision-split dimension in `agents/postmortem-reviewer.md`.
-- A source read presented as complete when only a slice was read -- STOP. A `[0:N]` read of `events.jsonl`, a raw transcript, or any substitute is permitted only when the output declares N, the total size, and the coverage percentage (N/total); an undeclared partial read presented as full is a false-coverage claim. Procedural/self-check only -- the checkable signal is a postmortem output with slice notation or a non-`events.jsonl` source path and no declared substitution/coverage line; no automated detector exists.
+- A source read presented as complete when only a slice was read -- STOP. A `[0:N]` read of `events.jsonl`, a raw transcript, or any substitute is permitted only when the output declares N, the total size, and the coverage percentage (N/total); an undeclared partial read presented as full is a false-coverage claim. Procedural/self-check only -- no automated detector exists.
 
 Three or more of the above = SYSTEMIC ISSUE. Relevant skills need immediate rationalization table updates.
 

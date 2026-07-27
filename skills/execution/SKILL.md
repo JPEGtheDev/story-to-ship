@@ -117,6 +117,7 @@ If you catch yourself thinking any of these:
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
 - "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
 - About to write a file while `git branch --show-current` returns `main` or `master` -- **STOP. Return to BEFORE PROCEEDING item 1. Create a new branch before writing any file.**
+- "The user said 'merge first', so I'm authorized to click merge" -- **STOP. Sequence authorization is not actor authorization. Hand off the PR unmerged and ask.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -204,6 +205,21 @@ When a mistake is discovered:
 
 ---
 
+## User-Reserved Decisions
+
+Some decisions belong to the user, not the agent, no matter how strongly the work context implies them:
+
+- **PR merges:** Build, review, and get CI green, then hand off unmerged. An instruction naming a reserved action as part of a sequence (e.g. "merge first") authorizes the sequence, not the agent performing the action.
+- **Branch structure:** Creating, retargeting, or deleting shared branches beyond your own working branch is a user decision.
+- **Task-completion marking:** Marking a user-owned task or acceptance item complete is the user's call, not yours to infer from finished work.
+- **Reserved-by-doc:** Any decision a project document explicitly reserves to the user follows the same rule.
+
+When in doubt, hand off and ask -- do not infer authorization from context.
+
+**Enforcement is procedural/self-check:** the checkable signal is a transcript showing a reserved action (e.g. `gh pr merge`) executed with no same-turn explicit user instruction naming that action. No automated detector exists.
+
+---
+
 ## Continuous Refinement
 
 After a mistake, apply the Continuous Refinement protocol -- see `references/EXECUTION_PATTERNS.md`.
@@ -236,11 +252,12 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "I'll review the spec compliance myself, no need to dispatch" | You wrote the code -- you will rationalize away the gaps. Dispatch spec-compliance-reviewer.md every time. |
 | "The previous todo had no issues, this one is probably fine too" | Each todo is independent. Prior clean reviews do not carry over. Dispatch reviewers after this todo. |
 | "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
-| "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. If the fix is a structural change (heading level, path format, sentence replacement), dispatch a re-review or apply only to content you can verify in the same view call. |
+| "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (subagent-driven-development A1; exemption is only an explicit same-turn user waiver). |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
 | "I'm just investigating -- I'll create the branch before I actually start coding" | Investigation shapes the fix before you notice it is shaping it. By the time you "start coding," the investigation has already informed the edit. Run BEFORE PROCEEDING item 1 at skill load, not at first edit. |
+| "The user said 'merge first', so I am authorized to merge" | Sequence authorization is not actor authorization. PR merges, branch structure, and task-completion marking are reserved to the user regardless of instruction sequencing -- hand off and ask. |
 
 ---
 

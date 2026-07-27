@@ -119,7 +119,7 @@ the verdict if needed before returning.
 - "The Iron Law is present but mild" -- `YOU MUST` and `No exceptions.` must be INSIDE the backtick block.
 - "4 rows is close enough" -- 4 is a FAIL. >=5 is the rule.
 - "The announcement is implied" -- implied is a FAIL. Must be an explicit line.
-- "I'll note issues but still give PASS" -- no PASS with open issues.
+- "I'll note issues but still give PASS" -- no PASS with open issues. Exception: advisory Jargon Rule findings are reported with evidence but are not verdict-blocking (see the Verdict section).
 - "The path is just an example" -- any machine-specific absolute path is a FAIL.
 - "The gate function exists under a different heading" -- must be `## BEFORE PROCEEDING`.
 - "`YOU MUST` and `No exceptions.` are in prose, not the block" -- prose-only is a FAIL.
@@ -223,8 +223,8 @@ Return findings in EXACTLY this structure:
 ### Verdict: PASS / PASS (size advisory) / NEEDS WORK
 ```
 
-**PASS** -- all criteria met, size within ideal max.
-**PASS (size advisory)** -- all structural, voice, acronym, and enforcement criteria pass. SKILL.md exceeds ideal max but Content Value Test found no cuttable content. Report: minimum functional size, specific enforcement content driving it, and user options (accept / split by domain / remove [specific candidate]).
+**PASS** -- all criteria met (Jargon Rule rows are advisory -- see below), size within ideal max.
+**PASS (size advisory)** -- all structural, voice, acronym, and enforcement criteria pass (Jargon Rule rows are advisory -- see below). SKILL.md exceeds ideal max but Content Value Test found no cuttable content. Report: minimum functional size, specific enforcement content driving it, and user options (accept / split by domain / remove [specific candidate]).
 **NEEDS WORK** -- structural issue or cuttable content above ideal max. Skill MUST be updated before production dispatch.
 
 **Jargon Rule rows are advisory at every tier** (until the rule is explicitly promoted): a [-] Jargon Rule row does not block PASS and does not by itself produce NEEDS WORK; it must still carry file:line evidence in the return tables.

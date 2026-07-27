@@ -99,7 +99,7 @@ run_case() {
   fi
 
   local expect_exit=0
-  [[ -f "$expect_exit_file" ]] && expect_exit="$(cat "$expect_exit_file" | tr -d '[:space:]')"
+  [[ -f "$expect_exit_file" ]] && expect_exit="$(tr -d '[:space:]' <"$expect_exit_file")"
 
   local actual_stdout actual_exit
   actual_stdout="$(

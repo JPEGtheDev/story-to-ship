@@ -133,7 +133,7 @@ run_case() {
   fi
 
   local hook_kind
-  hook_kind="$(cat "$hook_file" | tr -d '[:space:]')"
+  hook_kind="$(tr -d '[:space:]' <"$hook_file")"
 
   local hook_bin
   case "$hook_kind" in
@@ -180,7 +180,7 @@ run_case() {
   fi
 
   local expect_exit=0
-  [[ -f "$expect_exit_file" ]] && expect_exit="$(cat "$expect_exit_file" | tr -d '[:space:]')"
+  [[ -f "$expect_exit_file" ]] && expect_exit="$(tr -d '[:space:]' <"$expect_exit_file")"
 
   local actual_stdout actual_exit
   actual_stdout="$(
@@ -242,7 +242,7 @@ run_case() {
 
   if [[ -f "$expect_log_lines_file" ]]; then
     local expected_lines
-    expected_lines="$(cat "$expect_log_lines_file" | tr -d '[:space:]')"
+    expected_lines="$(tr -d '[:space:]' <"$expect_log_lines_file")"
     if [[ "$log_line_count" -ne "$expected_lines" ]]; then
       ok=0
       reasons+=("log line count mismatch: expected $expected_lines got $log_line_count")
@@ -251,7 +251,7 @@ run_case() {
 
   if [[ -f "$expect_log_min_lines_file" ]]; then
     local expected_min
-    expected_min="$(cat "$expect_log_min_lines_file" | tr -d '[:space:]')"
+    expected_min="$(tr -d '[:space:]' <"$expect_log_min_lines_file")"
     if [[ "$log_line_count" -lt "$expected_min" ]]; then
       ok=0
       reasons+=("log line count too low: expected >= $expected_min got $log_line_count")

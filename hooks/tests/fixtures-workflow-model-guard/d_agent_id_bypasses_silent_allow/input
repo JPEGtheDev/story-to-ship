@@ -1,0 +1,1 @@
+{"session_id": "sess-d", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "agent({ name: \"explorer\", prompt: \"should never be evaluated because agent_id is set\" });\n"}, "agent_id": "agent-777", "agent_type": "explorer"}

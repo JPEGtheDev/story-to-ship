@@ -1,0 +1,1 @@
+../../hooks/workflow-model-guard.sh

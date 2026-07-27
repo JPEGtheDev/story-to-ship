@@ -20,4 +20,14 @@ Only a fresh `Skill` tool call counts -- not a Read call, memory, or hook text. 
 4. Context compacted OR session resumed (`--continue`/`--resume`) -- reload every skill + `honesty`; a 'resume directly' summary does NOT waive it (completed-call evidence does not survive)
 
 For full reload rules and examples, see the skill.
+
+---
+
+## Core Skill Routing (per turn)
+
+Invoke `honesty` immediately after `session-bootstrap` returns, before any task skill.
+
+Process combos: before any completion claim, commit, or PR, load `verification-before-completion`. For any plan with 2+ todos, dispatch the Skeptic + plan-reviewer pair; if plan.md contains a `## Feature Specification`, dispatch `three-amigos` Refinement instead. For multi-step planning, load `writing-plans` first. Before dispatching any subagent, load `subagent-driven-development` and `using-git-worktrees` together.
+
+Domain skills keep their own dispatch rows -- not here.
 </IMPORTANT>

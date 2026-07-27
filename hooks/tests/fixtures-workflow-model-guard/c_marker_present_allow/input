@@ -1,0 +1,1 @@
+{"session_id": "sess-c", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "// WORKFLOW-MODEL-INHERIT-OK: intentionally inheriting the caller's model tier for this quick lookup.\nagent({ name: \"explorer\", prompt: \"grep for the config key\" });\n"}}

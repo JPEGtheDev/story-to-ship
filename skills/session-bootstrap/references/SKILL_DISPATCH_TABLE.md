@@ -21,20 +21,66 @@ Adding dispatch rows before their referenced skills exist causes broken sessions
 
 These rows are present in the session-bootstrap "On Start" table:
 
-| Task type | Skill |
-|-----------|-------|
-| Starting a new project from scratch | `greenfield-discovery` |
+| Task type | Skill | Tier |
+|-----------|-------|------|
+| Starting a new project from scratch | `greenfield-discovery` | domain |
 
 ## Dispatch Rows (deferred)
 
 The following rows are NOT yet in the session-bootstrap table because the referenced skills
 do not exist. Add each row only when its skill ships:
 
-| Task type | Skill | Ships with |
-|-----------|-------|------------|
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 |
-| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 |
+| Task type | Skill | Ships with | Tier |
+|-----------|-------|------------|------|
+| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 | domain |
+| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 | domain |
+| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 | domain |
+
+## Core Skill Tags (per-turn routing block source)
+
+Tag format: a trailing `Tier` column (`core` or `domain`) rather than an HTML comment
+marker, because both dispatch-rows tables above already use multi-column pipe tables
+(the deferred table has 3 columns) -- a Tier column is a lower-diff, mechanically
+greppable extension of the existing structure.
+
+DISCLOSURE: the "Core Skill Tags" table below is a NEW table added together with
+the per-turn core skill-map routing block injected via `hooks/pre-message-gates.md`,
+not in-place tagging of the pre-existing "Dispatch Rows" tables above -- every row in
+those two tables was already greenfield/domain before this table existed, so the
+greenfield rows carry the `Tier` column purely for consistency, and the core rows had
+to be introduced from scratch. Adding a new table (rather than trying to tag
+mixed-skill rows in session-bootstrap SKILL.md's own "On Start" table, e.g. "Creating
+a PR or commit" maps to both `versioning` (domain) and `verification-before-completion`
+(core) in one row) was a deliberate design decision, not an oversight.
+
+`core` = routes on a structural trigger (every session, every plan, every dispatch)
+rather than task domain. These are the skills the compressed per-turn routing block in
+`hooks/pre-message-gates.md` must name; `hooks/tests/run-skill-map-drift.sh` asserts
+every skill tagged `core` here is present in that file. Domain skills (testing, cpp,
+flatpak, build, docs, etc.) are tagged `domain` in the tables above and MUST NOT be
+added here or to the per-turn block -- they keep their own dispatch rows.
+
+| Skill | Tier | Routing trigger (source) |
+|-------|------|---------------------------|
+| `session-bootstrap` | core | First tool call this response, every session, sent alone (hooks/pre-message-gates.md, Bootstrap Gate) |
+| `honesty` | core | Immediately after `session-bootstrap` returns, before any task skill (session-bootstrap SKILL.md, "On Start" table) |
+| `verification-before-completion` | core | Before any completion claim, commit, or PR (session-bootstrap "On Start" table) |
+| `subagent-driven-development` | core | Before dispatching the first subagent for any plan/todo (session-bootstrap "On Start" table) |
+| `using-git-worktrees` | core | Before creating any worktree or dispatching any subagent -- attributed to `subagent-driven-development` SKILL.md's BEFORE PROCEEDING item 3 and its worktree-before-dispatch Red Flag, NOT the "On Start" table (that table lists it only under "Parallel agent work / A/B testing") |
+| `writing-plans` | core | Any new plan with 2+ todos, or any multi-step task/feature work (session-bootstrap "On Start" table) |
+
+DISCLOSED DEVIATION: `writing-plans` is tagged `core` here because it is routed as
+core by the per-turn injection block -- `hooks/pre-message-gates.md`'s "Core Skill
+Routing" section states "For multi-step planning, load `writing-plans` first." This
+conflicts with the plugin-split core manifest per a 2026-07-26 user ruling: honesty,
+session-bootstrap, verification-before-completion, subagent-driven-development,
+using-git-worktrees, plus the 5 generic agent templates -- `writing-plans` is omitted
+from that manifest. The ruling is recorded in this session's corrections plan, an
+UNTRACKED scratch artifact (not in git history, not searchable via `git log` or issue
+tracker) -- it will be formalized in the future plugin-split tracking issue. This
+tagging follows the injection block as it currently stands; the discrepancy with the
+manifest ruling is not resolved by this change and is called out here for reviewer
+attention.
 
 ## Greenfield Invocation Chain
 

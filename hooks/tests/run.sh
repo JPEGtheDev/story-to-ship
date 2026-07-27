@@ -38,8 +38,10 @@ run_case() {
     export STOP_TURN_LOG="$tmp_log"
     unset CLAUDE_PROJECT_DIR
     if [[ -f "$env_file" ]]; then
+      set -a
       # shellcheck disable=SC1090
       source "$env_file"
+      set +a
     fi
     bash "$HOOK" <"$input_file"
   )"

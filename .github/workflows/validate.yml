@@ -32,29 +32,46 @@ jobs:
           shellcheck hooks/pre-message-gates.sh
           shellcheck hooks/pre-message.sh
           shellcheck hooks/stop-turn-log.sh
+          shellcheck hooks/bootstrap-gate-pre.sh
+          shellcheck hooks/bootstrap-gate-post.sh
+          shellcheck hooks/workflow-model-guard.sh
           shellcheck hooks/tests/run.sh
+          shellcheck hooks/tests/run-bootstrap-gate.sh
+          shellcheck hooks/tests/run-all.sh
+          shellcheck hooks/tests/run-skill-map-drift.sh
+          shellcheck hooks/tests/run-workflow-model-guard.sh
           echo "[+] All hook scripts pass shellcheck"
 
-      - name: Run Stop turn-log hook tests
+      - name: Run all hook fixture suites
         run: |
           set -e
-          bash hooks/tests/run.sh
+          bash hooks/tests/run-all.sh
+
+      - name: Stop turn-log wedge safety (empty stdin)
+        run: |
+          set -e
           out=$(printf '' | bash hooks/stop-turn-log.sh)
           test "$out" = "{}" || { echo "FAILED: empty-stdin did not yield {}"; exit 1; }
           printf '%s' "$out" | jq empty || { echo "FAILED: empty-stdin output not valid JSON"; exit 1; }
           echo "[+] Stop turn-log hook: fixture suite passed and empty-stdin is wedge-safe"
 
+      # Cap raised from 400 to 470 to fit the "Core Skill Routing (per turn)"
+      # block in hooks/pre-message-gates.md (the per-turn skill-map routing
+      # text injected into every message); slack kept <=20 words above the
+      # actual combined total (gates + message, currently 460) to preserve
+      # the budget's anti-creep function (a large buffer defeats the point
+      # of the gate).
       - name: Enforce pre-message hook word budget
         run: |
           gates=$(wc -w < hooks/pre-message-gates.md)
           message=$(wc -w < hooks/pre-message.md)
           total=$((gates + message))
-          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 400)"
-          if [ "$total" -gt 400 ]; then
-            echo "FAILED: combined pre-message hook word count $total exceeds 400"
+          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 470)"
+          if [ "$total" -gt 470 ]; then
+            echo "FAILED: combined pre-message hook word count $total exceeds 470"
             exit 1
           fi
-          echo "[+] Combined pre-message hook injection is within the 400-word budget"
+          echo "[+] Combined pre-message hook injection is within the 470-word budget"
 
       - name: Check for broken references in skill files
         run: |

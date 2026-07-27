@@ -1,0 +1,1 @@
+{"session_id": "sess-a", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "// Workflow: investigate a flaky test failure.\nagent({ name: \"explorer\", prompt: \"investigate the flaky test failure in ci\" });\n"}}

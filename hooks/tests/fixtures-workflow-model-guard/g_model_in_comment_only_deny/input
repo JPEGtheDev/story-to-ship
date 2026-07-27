@@ -1,0 +1,1 @@
+{"session_id": "sess-g", "hook_event_name": "PreToolUse", "tool_name": "Workflow", "tool_input": {"script": "// model: sonnet -- note only, not applied to the call below\nagent({ name: \"explorer\", prompt: \"check the schema migration\" });\n"}}

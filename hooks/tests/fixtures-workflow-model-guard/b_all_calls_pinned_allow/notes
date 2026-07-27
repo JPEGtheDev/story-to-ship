@@ -1,0 +1,5 @@
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live.
+
+Contract pinned: two agent( calls both carry model:. Call 1 is single-line with model: in the same-line opts object. Call 2 spans multiple lines (opts object on its own lines, closing with the literal two-char sequence "})" on its own line) -- this is the multi-line shape the GREEN implementer must detect; per the dispatch task's own caveat, if multi-line detection proves not robustly testable, the implementer may keep only single-line cases and must renegotiate this fixture explicitly rather than silently drop it.
+
+TIGHTENED (Stage 1 fix round): this guard has no warn mode, so the allow contract is BYTE-EXACT EMPTY STDOUT + exit 0 -- identical to the d (agent_id bypass) and f (malformed JSON) cases, not merely "non-deny." expect_stdout is now an empty file; the prior expect_stdout_not_grep (deny/permissionDecision) has been removed because it could not distinguish a correct silent allow from an allow that happens to emit some other, wrong-reason non-deny text. Expected result: exit 0, stdout completely empty.

@@ -1,0 +1,5 @@
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live -- in particular, the existence of a scriptPath-only (file-reference) invocation shape, alongside an inline-script shape, is inferred from the dispatch task description, not observed.
+
+Disclosed boundary: this guard only inspects INLINE scripts (tool_input.script). A scriptPath-only or name-only invocation (no tool_input.script key at all) has no inline text for the guard to scan for agent( calls, so it fails OPEN (allow) rather than denying or erroring. This is a known, deliberate coverage gap, not a bug -- a scriptPath-referenced file's model-pin discipline is out of scope for this hook.
+
+TIGHTENED (Stage 1 fix round): this guard has no warn mode, so the allow contract is BYTE-EXACT EMPTY STDOUT + exit 0 -- identical to the d (agent_id bypass) and f (malformed JSON) cases, not merely "non-deny." expect_stdout is now an empty file; the prior expect_stdout_not_grep (deny/permissionDecision) has been removed for the same reason as cases b/c. Expected result: exit 0, stdout completely empty.

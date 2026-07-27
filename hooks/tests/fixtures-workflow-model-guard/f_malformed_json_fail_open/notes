@@ -1,0 +1,1 @@
+Contract pinned: malformed/non-JSON stdin must fail open exactly like every other hook in this family (bootstrap-gate-pre.sh's 'no jq parse, no gate' rule) -- exit 0, stdout byte-for-byte empty (expect_stdout is an empty file). No schema-disclosure note applies to this case since it deliberately is NOT valid JSON of any schema.

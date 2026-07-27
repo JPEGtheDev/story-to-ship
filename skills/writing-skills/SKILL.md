@@ -89,7 +89,7 @@ Related skills: `skill-reviewer`, `documentation`, `self-evaluation` -- see `ref
 
 - `references/SKILL_ANATOMY_ELEMENTS.md` -- full element schemas, bad/good examples, rationale, Alexandrian Pattern Form guide
 - `references/SIZE_AND_COMPRESSION.md` -- token count targets, compression rules, line limits
-- `references/VOICE_AUTHORITY_RULES.md` -- authority table, Absolute Path Rule, Acronym Rule
+- `references/VOICE_AUTHORITY_RULES.md` -- authority table, Absolute Path Rule, Acronym Rule, Jargon Rule
 - `references/MODEL_COMPATIBILITY.md` -- patterns most likely to be skipped by lower-end models
 - `references/REVIEW_INSTRUCTIONS.md` -- review process, checklist, qualitative questions, return format; injected into `skill-reviewer` agent at dispatch time
 - `references/DISPATCH_PATTERN.md` -- step-by-step dispatch instructions; read before auditing any skill

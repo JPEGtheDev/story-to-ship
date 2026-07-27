@@ -1,4 +1,4 @@
-Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED (R5), not captured live.
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live.
 
 Contract pinned: two agent( calls both carry model:. Call 1 is single-line with model: in the same-line opts object. Call 2 spans multiple lines (opts object on its own lines, closing with the literal two-char sequence "})" on its own line) -- this is the multi-line shape the GREEN implementer must detect; per the dispatch task's own caveat, if multi-line detection proves not robustly testable, the implementer may keep only single-line cases and must renegotiate this fixture explicitly rather than silently drop it.
 

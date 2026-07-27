@@ -1,4 +1,4 @@
-Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED (R5), not captured live.
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live.
 
 Pins Stage 2 reviewer Bug A (false negative, reproduced independently by the dispatcher): two agent( calls on ONE line. A line-oriented block extractor (block = whole line, closed on the first "})" anywhere in that line) assigns BOTH calls' text to a single block before ever checking for a pin, so the second call's model: satisfies the first (unpinned) call's check -- a silent allow. The correct contract scans per OCCURRENCE of "agent(", not per line: two calls on one line are two separate blocks. Call 1 (name "a") carries no model: key and must deny, naming its own prompt fragment "first unpinned" -- not call 2's ("second pinned"). Call 2 (name "b", model: "sonnet") is independently pinned and must not itself trigger a deny.
 

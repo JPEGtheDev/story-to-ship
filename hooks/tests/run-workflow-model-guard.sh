@@ -2,17 +2,17 @@
 # Hermetic test harness for the workflow-model-pin guard hook:
 #   hooks/workflow-model-guard.sh  (PreToolUse, matcher Workflow)
 #
-# RED PHASE NOTE (T4): hooks/workflow-model-guard.sh does not exist yet. This
-# suite is expected to fail every case until the GREEN todo (T5) implements
-# it -- see the per-case "missing hook script" failure reason below, which is
-# deliberately distinct from a fixture/assertion failure so a reader can tell
-# "hook not built" apart from "hook built wrong" at a glance.
+# MISSING-HOOK DIAGNOSTIC: if hooks/workflow-model-guard.sh does not exist,
+# every case in this suite fails with a distinct "missing hook script"
+# failure reason (see below), deliberately distinct from a fixture/assertion
+# failure so a reader can tell "hook not built" apart from "hook built
+# wrong" at a glance.
 #
 # CI WIRING NOTE: the lint job in .github/workflows/validate.yml enumerates
 # an explicit file list (not a glob). This runner and
-# hooks/workflow-model-guard.sh itself are both wired into that list as of
-# T5 (GREEN), alongside the hook implementation -- shellcheck now covers
-# both files on every CI run.
+# hooks/workflow-model-guard.sh itself are both wired into that list,
+# alongside the hook implementation -- shellcheck covers both files on
+# every CI run.
 #
 # Sibling to hooks/tests/run-bootstrap-gate.sh and hooks/tests/run.sh,
 # following the same fixture-dir pattern: per-case directories under
@@ -30,9 +30,9 @@
 #   input                  - stdin JSON fed to the hook (required). Every
 #                             fixture using tool_name "Workflow" carries a
 #                             per-case "notes" file disclosing that the
-#                             Workflow tool_input shape is schema-doc-derived
-#                             (research input R5), not captured from a live
-#                             session -- see fixtures-workflow-model-guard/
+#                             Workflow tool_input shape is schema-doc-derived,
+#                             not captured from a live session -- see
+#                             fixtures-workflow-model-guard/
 #                             for the disclosure text and any per-case
 #                             contract choices the GREEN implementer must
 #                             honor or explicitly renegotiate.
@@ -87,13 +87,13 @@ run_case() {
     return
   fi
 
-  # Fail loudly and specifically when the hook under test does not exist yet
-  # (expected during the RED phase), rather than letting `bash "$HOOK"` blow
-  # up with an opaque "No such file or directory" per case.
+  # Fail loudly and specifically when the hook under test does not exist,
+  # rather than letting `bash "$HOOK"` blow up with an opaque "No such file
+  # or directory" per case.
   if [[ ! -f "$HOOK" ]]; then
     echo "FAIL: $name"
     echo "  - hook script not found at $HOOK"
-    echo "  - hooks/workflow-model-guard.sh has not been implemented yet (RED phase, T4/T5 pair)"
+    echo "  - hooks/workflow-model-guard.sh is missing -- distinct from a fixture assertion failure"
     fail=$((fail + 1))
     return
   fi

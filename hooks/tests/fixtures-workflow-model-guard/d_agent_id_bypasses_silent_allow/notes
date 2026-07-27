@@ -1,3 +1,3 @@
-Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED (R5), not captured live.
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live.
 
 Contract pinned: same subagent exemption contract as bootstrap-gate-pre.sh -- a non-empty agent_id in the PreToolUse envelope means the invocation came from a dispatched subagent, and the gate must never apply to subagents (repo rule targets top-level dispatch, not nested agent-of-agent calls). The script here deliberately contains an UNPINNED agent( call, to prove the exemption is checked and short-circuits BEFORE the guard ever inspects the script body -- if the guard incorrectly parsed the script first, this case would wrongly deny. Expected result: exit 0, stdout byte-for-byte empty (expect_stdout is an empty file), matching the bootstrap-gate family's 'plain allow, no log, no output' convention for the agent_id short-circuit.

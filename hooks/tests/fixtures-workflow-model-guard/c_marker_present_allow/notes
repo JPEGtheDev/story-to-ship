@@ -1,5 +1,5 @@
-Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED (R5), not captured live.
+Schema disclosure: Workflow tool_input shape is SCHEMA-DOC-DERIVED, not captured live.
 
-Contract pinned: the script's only agent( call has no model: key at all, but the script (in a comment, above the call) carries the literal marker WORKFLOW-MODEL-INHERIT-OK, acknowledging deliberate inheritance of the caller's model tier per plan A3's escape hatch. The marker check must be a plain substring search over the WHOLE script (not scoped per-call like the model: check) -- a script-level opt-out, not a per-call one.
+Contract pinned: the script's only agent( call has no model: key at all, but the script (in a comment, above the call) carries the literal marker WORKFLOW-MODEL-INHERIT-OK, acknowledging deliberate inheritance of the caller's model tier via the guard's own escape hatch. The marker check must be a plain substring search over the WHOLE script (not scoped per-call like the model: check) -- a script-level opt-out, not a per-call one.
 
 TIGHTENED (Stage 1 fix round): this guard has no warn mode, so the allow contract is BYTE-EXACT EMPTY STDOUT + exit 0 -- identical to the d (agent_id bypass) and f (malformed JSON) cases, not merely "non-deny." expect_stdout is now an empty file; the prior expect_stdout_not_grep (deny/permissionDecision) has been removed for the same reason as case b: it could not distinguish a correct silent allow from an allow that happens to emit other, wrong-reason non-deny text. Expected result: exit 0, stdout completely empty.

@@ -62,9 +62,9 @@ Skipping any step = lying, not verifying.
 
 ## New Gates: Gate-Can-Fail Proof Required
 
-**Context:** Applies when shipping any NEW gate -- a test suite, fixture, CI check, hook, or lint rule meant to catch a class of defect going forward. Does NOT apply to ordinary business-logic changes that are not themselves verification mechanisms.
+**Context:** Applies when shipping any NEW gate -- a test suite, fixture, CI check, hook, or lint rule meant to catch a class of defect going forward. Also applies when extending an existing gate to enforce a property it did not previously check -- the extension is a new detector for that property and carries the same vacuous-test risk. Does NOT apply to ordinary business-logic changes that are not themselves verification mechanisms.
 
-**Forces:** A gate whose only evidence is a green run is unproven -- it can pass regardless of whether the mechanism it claims to enforce actually works (the vacuous-test class: a fixture that passes whether or not the property holds catches nothing). Without proof the gate CAN fail, a green run is indistinguishable from a gate that never runs the check at all.
+**Forces:** A gate whose only evidence is a green run is unproven -- it can pass regardless of whether the mechanism it claims to enforce actually works (the vacuous-test class: a fixture that passes whether or not the property holds catches nothing). Without proof the gate CAN fail, a green run is indistinguishable from a gate that never runs the check at all. This pattern is established in this repo's own practice: RED-phase commits that intentionally leave a suite failing before the fix lands, and mutation proofs that name the exact fixtures expected to fail per broken property.
 
 **Solution:** Shipping a new gate requires pasting proof the gate CAN FAIL, in addition to its green run:
 - A mutation run: break the enforced property, run the gate, paste the named failing case(s) it produced, then restore the property.
@@ -73,8 +73,6 @@ Skipping any step = lying, not verifying.
 A green run alone is not sufficient evidence a new gate is correctly wired.
 
 **Consequences:** Doubles the verification work for every new gate (a break-it run in addition to the pass-it run). This is the cost of ruling out the vacuous-test class; skipping it trades a small amount of upfront effort for an unproven detector that can silently do nothing.
-
-This pattern is established in this repo's own practice: RED-phase commits that intentionally leave a suite failing before the fix lands, and mutation proofs that name the exact fixtures expected to fail per broken property.
 
 **Enforcement scope:** No mechanical detector checks this rule. It is procedurally checkable in review -- the pasted mutation proof either exists in the message or it does not, and a reviewer can verify its presence directly.
 
@@ -129,7 +127,7 @@ For Particle-Viewer build and test commands, see `references/PV_VERIFICATION_COM
 
 ## Plausibility Baseline Check
 
-**Context:** Applies to any green signal accepted as completion evidence -- exit 0, "N passed," "completed," or a similar success status. Does NOT apply when a claim is explicitly scoped as partial (for example, "12 of an unknown total ran clean") and stated as such.
+**Context:** Applies to any green signal accepted as completion evidence -- exit 0, "N passed," "completed," or a similar success status. Does NOT apply when a claim is explicitly scoped as partial (for example, "12 of an unknown total ran clean") and stated as such. That carve-out does not survive the claim's scope changing: a partial-scoped claim may never later be treated as completion evidence without the baseline check being run at that point.
 
 **Forces:** A green signal can be real and still fall short of the claim -- the mechanism produced a genuine exit 0 while covering less than the full scope, and nothing compared the result to what was expected. An unexamined count is a plausibility gap masquerading as verification.
 

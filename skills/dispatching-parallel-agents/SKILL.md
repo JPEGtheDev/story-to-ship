@@ -107,7 +107,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 ## Concurrency Rules
 
-The concurrent-subagent limit defaults to 20, configurable via the CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS environment variable; dispatches beyond the limit queue rather than fail. Within a single message, tool-use concurrency defaults to 10 parallel tool calls, and a session has a total cap of 200 subagents across its lifetime. None of these limits depend on account tier or model. (Workflow-tool `agent()` calls have a separate CPU-bound concurrency cap of up to 16, fewer on machines with limited CPU cores -- do not conflate it with the subagent limit above.)
+The concurrent-subagent limit defaults to 20, configurable via the CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS environment variable; dispatches beyond the limit queue rather than fail. Within a single message, tool-use concurrency defaults to 10 parallel tool calls, and a session has a total cap of 200 subagents across its lifetime. None of these limits depend on account tier or model. (Workflow-tool `agent()` calls have a separate concurrency cap bound by available processor cores -- up to 16, fewer on machines with limited cores -- do not conflate it with the subagent limit above.)
 
 State your concurrency basis before dispatching: "Dispatching N agents in parallel -- [default 20-agent subagent limit / CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS raised to N]."
 

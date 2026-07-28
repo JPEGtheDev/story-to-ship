@@ -19,7 +19,7 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 | File | Covers |
 |------|--------|
 | `SKILL_ANATOMY_ELEMENTS.md` | Full schemas and BAD/GOOD examples for all 5 required skill elements (FRONTMATTER, IRON LAW, ANNOUNCEMENT, GATE FUNCTION, RATIONALIZATION TABLE); Alexandrian Pattern Form guide |
-| `VOICE_AUTHORITY_RULES.md` | Authority table, Absolute Path Rule, Acronym Rule; applies to every line of a skill file or agent template |
+| `VOICE_AUTHORITY_RULES.md` | Authority table, Absolute Path Rule, Acronym Rule, Jargon Rule; applies to every line of a skill file or agent template |
 | `SIZE_AND_COMPRESSION.md` | Token count targets, compression rules, line limits, Skill Composition Model; baseline is GPT-4.1 |
 | `MODEL_COMPATIBILITY.md` | Patterns most likely skipped or misapplied by lower-capability models; mitigations built into each skill |
 | `REVIEW_INSTRUCTIONS.md` | Review checklist, qualitative questions, and return format; injected into `skill-reviewer` agent at dispatch time |

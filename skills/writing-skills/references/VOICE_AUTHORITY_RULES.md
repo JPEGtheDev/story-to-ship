@@ -1,6 +1,6 @@
 # Voice Authority Rules
 
-These rules apply to every line of a skill file or agent template. Apply all three sections.
+These rules apply to every line of a skill file or agent template. Apply all four sections.
 
 ---
 
@@ -38,7 +38,7 @@ Rules:
 
 ## Acronym Rule
 
-**Spell out all terms on first use.** Do not introduce acronyms unless they fall into an exempt category. Project-specific and skill-specific abbreviations are forbidden -- they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
+**Spell out all acronyms on first use.** Do not introduce acronyms unless they fall into an exempt category. Project-specific and skill-specific abbreviations are forbidden -- they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
 
 Exempt categories (no expansion required):
 - Universally known: CI, PR, API
@@ -61,3 +61,25 @@ Examples:
 - OK: "Use YAML frontmatter." (file format -- no expansion needed)
 
 Apply this rule to every sentence in every skill file, including rationalization tables, return formats, and quick reference blocks.
+
+---
+
+## Jargon Rule
+
+**Define every term of art on first use.** The Acronym Rule above covers initialisms and abbreviations (form); this rule covers meaning -- words whose sense in the skill is narrower than or shifted from their everyday or general-programming sense.
+
+Test (the bright line): would another agent with no project context, reading this file alone, know what this term means here? If not, the first use must carry one of:
+1. A parenthetical gloss -- `the canary (the observable line proving the gate ran)`.
+2. A one-sentence inline definition.
+3. A concrete example immediately after the abstract statement.
+
+Exempt categories (scoped narrowly):
+- Terms defined earlier in the same file.
+- Skill names in backticks (`verification-before-completion`) -- the name is the pointer.
+- Terms used in their ordinary general-programming sense (function, commit, branch). The exemption fails -- and the rule applies -- the moment the skill assigns the term a narrower or shifted meaning ("class" as defect-class, "register" as prose style, "canary" as proof-of-execution line).
+
+Examples:
+- WRONG: "An instance fixed is not evidence the class is gone." ("class" undefined)
+- RIGHT: "An instance fixed is not evidence the class is gone. Example: fixing an em-dash (the instance) and grepping for em-dashes returns 0, but the class is 'non-ASCII characters' -- curly quotes and Unicode arrows belong to the same class, and the em-dash grep structurally cannot find them."
+
+Enforcement is procedural/self-check: the checkable signal is the Jargon Rule row in the skill-review return format carrying a file:line citation for every flagged term. No automated detector exists -- no grep can implement the first-use test. The rule is advisory (findings reported with evidence, not NEEDS WORK-eligible) until its precision is measured on a hand-adjudicated sample and it is explicitly promoted.

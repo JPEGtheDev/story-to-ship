@@ -101,6 +101,7 @@ If you catch yourself thinking any of these, STOP and start over with RED:
 - "I already manually tested it"
 - Test passes immediately without seeing it fail first
 - Fixed a bug without writing a regression test that reproduces it first
+- A test double that only ever returns happy-path values -- STOP. A double exists to FORCE the rare condition (error return, timeout, boundary value) deterministically on every run. Add the failure-forcing case, or state in the test why the double's collaborator cannot fail.
 
 **All of these mean: Delete any code written before the test. Start over with RED.**
 

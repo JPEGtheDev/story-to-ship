@@ -226,7 +226,7 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
 - Adversarial plan review is in round 4+, or plan length now exceeds the target file's length -- **STOP. Switch the review surface to the diff (implement, then review the diff). A finding located in text written answering the previous round is a manufactured defect, not evidence to keep reviewing.**
-- A plan claims two competing constraints are both satisfied at no cost, and no worked example carries one concrete case end-to-end -- **STOP. Demand the worked example before any further abstract argument. Abstract refereeing without a concrete case manufactures defects instead of finding them.**
+- A plan claims two competing constraints are both satisfied, and no worked example carries one concrete case end-to-end -- **STOP. Demand one worked example carried end-to-end before any further abstract argument. The example either exposes the hidden cost or proves the design absorbs it; abstract debate does neither.**
 
 ---
 

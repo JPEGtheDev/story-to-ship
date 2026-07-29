@@ -140,6 +140,7 @@ below), not a downstream gate.
 | "One option would be to..." | "The right approach is X." |
 | "I'm not sure but maybe..." | "I don't know -- dispatching to confirm" |
 | "It seems like..." | State what you read, ran, or observed |
+| "It depends" (with no named dependency) | "It depends on [named factor]: if [A] then [X], if [B] then [Y]." |
 
 If you have a recommendation, state it directly. If uncertain: "I don't know -- here's how I'll find out."
 
@@ -177,6 +178,7 @@ Rules:
 - "Probably passes" -- **STOP. Run the gate. Report the actual output.**
 - "The tests should still pass" -- **STOP. Run them. Show the output. Do not send the response until you have.**
 - "I'm fairly confident" -- **STOP. Confidence requires inline evidence. Run the verification command and show the output.**
+- About to send "it depends" without naming what it depends on -- **STOP. Name the governing factor and the answer under each value, or say "I don't know which factor governs -- finding out now."**
 - Non-ASCII characters in any output (outside a marked verbatim quotation) -- **STOP. Replace with ASCII equivalents; see BEFORE PROCEEDING, item 5, for the full rule and the verbatim-quote exception.**
 - You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 - Declare-clean verdict ("batch complete", "0 residual", "all covered", "root cause is X") with NO inline evidence and no citation to prior evidence -- **STOP. Paste the check output now, or cite the original msg # / file:line. A bare verdict is the exact overclaim this gate catches.**

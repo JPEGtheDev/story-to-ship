@@ -187,16 +187,12 @@ The visual test **MUST fail before the baseline is correct.** If it never failed
 
 **Why it is wrong:** the rare failure is exactly what a double is _for_. Real collaborators fail rarely and nondeterministically -- a double is the only way to make that branch run deterministically, on every run. A double that only ever hands back success values idealizes the collaborator away instead of standing in for it.
 
-This does not contradict using a happy-path default: Anti-Pattern 3's GOOD example sets `ON_CALL(...).WillByDefault(Return(GL_NO_ERROR))` as a legitimate default when the test targets logic above the boundary. A happy-path default is fine. The defect is when no test anywhere in the suite ever overrides that default to force the failure branch.
+This does not contradict using a happy-path default: Anti-Pattern 3's GOOD example sets `ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1))` so the test can target pure logic above the boundary -- that is a legitimate happy-path default. The defect this entry names is different: no test anywhere in the suite ever overrides such a default to force the failure branch.
 
-**The fix:** for each mocked failure-capable call, add at least one test that forces its failure mode, or record in the test why this collaborator cannot fail.
+**The fix:** for each mocked failure-capable call, add at least one test that forces its failure mode, or state in the test why this collaborator cannot fail.
 
 ```cpp
 // BAD: every configured return is success -- the error path never runs
-MockOpenGL mockGL;
-ON_CALL(mockGL, glCreateShader(_)).WillByDefault(Return(1));
-ON_CALL(mockGL, glGetShaderiv(_, _, _)).WillByDefault(SetArgPointee<2>(GL_TRUE));  // always compiles
-
 TEST(ShaderTest, Compile_ValidSource_Succeeds)
 {
     // Arrange

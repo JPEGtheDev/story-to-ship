@@ -74,6 +74,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 | "The auto-formatter will handle it" | Run your project's formatter explicitly -- it does not run itself. |
 | "I'll clean up style in a follow-up PR" | Style debt compounds. Clean now while context is fresh. |
 | "I'll add this hook or parameter now so it is ready when we need it later" | YAGNI. Code with no current caller is Speculative Generality -- a smell, not foresight. Add it when a real requirement needs it. |
+| "Deleting a method or class with no current callers is overreach -- it will be needed again eventually" | Removing dead code -- an unused method, an uninstantiated class -- is ordinary engineering hygiene, not a rare or risky event. YAGNI is not just restraint on adding: it is the ongoing work of pruning code that no longer earns its place, on the same footing as refusing to add speculative code before it is needed. This pruning depends on tests and shared ownership to make restoring the capability cheap if the need resurfaces; skip that safety net and aggressive deletion turns into a real risk instead of routine cleanup. |
 
 ---
 
@@ -85,7 +86,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - Writing code and planning to format "later in this session" -- **STOP. Run your project's formatter now.**
 - Running Step 2 paradigm detection before Step 1 passes -- **STOP. Universal tier is mandatory first. Paradigm tier does not substitute for it.**
 - Adding an abstraction, interface, parameter, or config flag for a use case that does not exist yet -- **STOP. YAGNI: if no current requirement needs it, cut it. Speculative Generality is a code smell (`references/design-principles.md`), not foresight.**
-- Renaming or moving a short/common identifier via sed/awk/find-replace -- **STOP. A rename must preserve semantics: grep it and compare hits to rename sites; substrings in longer names, strings, or comments change meaning. Use scope-aware rename.**
+- Renaming or moving a short/common identifier via sed/awk/find-replace -- **STOP. Rename or move must preserve semantics: grep, compare hits to rename sites; substrings in longer names, strings, or comments differ. Use scope-aware rename (IDE rename).**
 
 ---
 

@@ -202,7 +202,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 | "The approach is obvious" | Obvious approaches still need trade-offs named to be defensible. |
 | "TBD for now" | TBD is not a file path. It is a deferred decision that will block the implementer. |
 | "I'll figure it out as I code" | Exploratory coding without a gate produces uncommittable work. |
-| "[Big company / respected expert / the confident one] recommends it" | A recommendation is only as strong as the argument behind it -- ask for the evidence and the trade-offs, and judge those. Confidence, reputation, and credentials do not substitute for evidence, and deferring to them skips the design gate this skill exists to run. Weighting an expert's track record is fine when the reasoning comes with it -- the failure is accepting a name in place of that reasoning. |
+| "A respected expert recommends it" | Reputation is not an argument -- ask for the evidence and reasoning behind the recommendation, and judge those. Expertise still counts when the reasoning is included; the gap is a name standing in for it. |
 
 ---
 

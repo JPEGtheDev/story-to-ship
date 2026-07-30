@@ -103,10 +103,10 @@ When an override replaces a base method, its contract may only move in one direc
   promised, or more, never less.
 
 This is the same substitutability guarantee the Liskov Substitution Principle describes in the
-abstract, made concrete and checkable: the contract is the specific part of a type's behavior
-that substitution is not allowed to change. A subtype that narrows what it accepts or promises
-less than its base breaks any code written against the base's contract, even if that code never
-changes.
+abstract, made concrete and checkable: whatever the contract commits to becomes the one boundary
+substitution is never allowed to cross, while anything the contract leaves unstated is free to
+differ between base and override. A subtype that narrows what it accepts or promises less than
+its base breaks any code written against the base's contract, even if that code never changes.
 
 This is consistent with the oop-principles gate: a derived class that "only adds methods" can
 still violate substitutability if any override tightens a precondition or weakens a
@@ -125,9 +125,10 @@ whoever reviews the override, not something the toolchain checks.
 Contracts are a useful discipline, not a clean, universally safe one:
 
 - **Side effects can corrupt the check itself.** A contract expression that calls another
-  method to read a value is only safe to evaluate if that method has no side effects. In most
-  object-oriented languages, ordinary method calls can mutate state, so a naively written
-  contract check can change the very state it was meant to verify.
+  method to read a value can only be trusted if that call leaves no side effects behind --
+  evaluating the contract must not itself change anything. In most object-oriented languages,
+  ordinary method calls can mutate state, so a naively written contract check can change the
+  very state it was meant to verify.
 - **Reentrancy, concurrency, and distribution weaken the guarantee.** A precondition or
   invariant is checked at one moment, but the operation it guards runs afterward. Under
   reentrancy, concurrent execution, or a distributed call, the condition that held at check time

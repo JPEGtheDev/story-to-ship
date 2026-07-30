@@ -18,7 +18,7 @@ Reference files consulted during design exploration -- techniques for generating
 
 | File | Covers |
 |------|--------|
-| `STRUCTURED_IDEATION.md` | Design exploration and critique techniques from Ward Cunningham's wiki audit -- working backward from an ideal interface, vague vs. abstract, Visitor from Mars fresh-eye review, Writers Workshop critique format, minimizing undesirable interactions, when not to use design patterns, evolutionary/XP design, wiki design principles, Six Thinking Hats, the Brainstorm Protocol, and good vs. bad clarifying-question examples. |
+| `STRUCTURED_IDEATION.md` | Design exploration and critique techniques from Ward Cunningham's wiki audit -- working backward from an ideal interface, vague vs. abstract, Visitor from Mars fresh-eye review, Writers Workshop critique format, minimizing undesirable interactions, when not to use design patterns, evolutionary/Extreme Programming (XP) design, wiki design principles, Six Thinking Hats, the Brainstorm Protocol, and good vs. bad clarifying-question examples. |
 | `DEBATE_COLLAPSE_DIAGNOSTIC.md` | Diagnostic for a design debate that loops without converging -- distinguishes a definition fight from two topics sharing one label, and the namespacing tactic (tagging each side's usage of a contested term) for dissolving or sharpening the underlying disagreement. |
 
 ---

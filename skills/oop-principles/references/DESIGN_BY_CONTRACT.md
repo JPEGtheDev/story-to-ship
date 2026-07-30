@@ -97,16 +97,19 @@ hard design problem in its own right, not a mechanical exercise.
 
 When an override replaces a base method, its contract may only move in one direction:
 
-- The precondition may only **weaken** -- the override may accept a broader range of inputs
-  than the base required, never a narrower one.
-- The postcondition may only **strengthen** -- the override may promise as much as the base
-  promised, or more, never less.
+- The precondition may only **weaken** -- an override must keep accepting everything the base
+  method accepted, and may open its acceptance further, but may never turn away an input the
+  base allowed.
+- The postcondition may only **strengthen** -- an override must keep every guarantee the base
+  made, and may add stronger guarantees on top, but may never deliver less than the base did.
 
 This is the same substitutability guarantee the Liskov Substitution Principle describes in the
 abstract, made concrete and checkable: whatever the contract commits to becomes the one boundary
 substitution is never allowed to cross, while anything the contract leaves unstated is free to
-differ between base and override. A subtype that narrows what it accepts or promises less than
-its base breaks any code written against the base's contract, even if that code never changes.
+differ between base and override. If an override instead narrows what it accepts or delivers
+less than its base promised, code that was written and tested only against the base type can
+fail the moment a subtype instance is substituted in -- without a single line of that calling
+code ever being touched.
 
 This is consistent with the oop-principles gate: a derived class that "only adds methods" can
 still violate substitutability if any override tightens a precondition or weakens a
@@ -136,12 +139,15 @@ Contracts are a useful discipline, not a clean, universally safe one:
 - **Nothing in the tooling enforces side-effect-free contracts**, even in languages built
   around contracts natively. Writing a contract expression that does not itself mutate state is
   a matter of author discipline and reviewer attention, not a compiler guarantee.
-- **A contract only formalizes an assumption someone already suspected was worth stating.**
-  Whether adding contracts to a codebase would have caught a specific class of latent bug in
-  advance is genuinely debated: a contract only exists for a condition someone thought to write
-  down, so an assumption nobody yet suspected was fragile will not appear as a contract before
-  it fails. Treat "contracts would have caught this" as a claim to check against the specific
-  bug, not a general guarantee.
+- **Whether contracts would have caught bugs like Y2K is a live, unresolved dispute.** One
+  position: writing preconditions and postconditions forces a fragile, undocumented assumption
+  -- such as representing a year with only two digits -- out into the open, where it becomes
+  visible before it breaks anything. The opposing position: a contract only gets written for a
+  condition someone already suspects might break, so if nobody yet suspects a given assumption
+  is fragile, no contract exists to catch it until after it has already failed. Treat both
+  positions as live, not as a solved rule, the same way the caller/callee trust question earlier
+  in this file stays open, and treat "contracts would have caught this" as a claim to check
+  against the specific bug, not a general guarantee.
 
 ---
 

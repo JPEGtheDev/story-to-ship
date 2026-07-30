@@ -86,6 +86,10 @@ To evaluate whether a function is too long: memorize a chunk of it, close the fi
 
 YAGNI (You Are Not Going to Need It) governs feature additions -- not refactoring, not naming, not structural clarity. Once and Only Once and YAGNI sit at opposite ends of a continuum. Refactoring moves code between them. Clean structure is foundational, not optional.
 
+A feature idea that surfaces mid-task does not have to be lost or fully built out right away. Note it cheaply and go back to the task you committed to: add a placeholder method whose sole job is to throw when someone eventually calls it, so testing announces the gap the moment that capability turns out to be needed, or write a heavy comment that spells out the plan for later. This is a way of taking notes, not a loophole around YAGNI -- the placeholder and the comment still leave the actual feature waiting on a real requirement.
+
+YAGNI only works safely alongside a set of practices that keep adding a feature cheap once it is genuinely needed. Collective ownership means any developer can touch any part of the codebase to add that capability without waiting on a designated owner. Relentless refactoring, paired with a discipline that keeps each rule living in only one spot, means new behavior has an obvious place to land instead of a hunt through duplicated logic. A thorough automated test suite catches regressions the new addition would otherwise introduce silently. Remove any single one of these practices and deferred work stops being a disciplined choice -- it turns into skipping the design work and hoping things go fine. Disciplined deferral is not the same as reckless just-ship-it speed, even though the two can look alike from the outside. Source: C2 Wiki "YouArentGonnaNeedIt".
+
 ## Global State Is a Smell
 
 A global variable is a hidden parameter to every function that reads it and a hidden side effect in every function that writes it. When code breaks after a change that "shouldn't have touched anything," a global is usually implicated. If shared state is required, make it explicit: pass it as a parameter, or encapsulate it in a single owner. Source: C2 Wiki "GlobalVariablesAreBad".

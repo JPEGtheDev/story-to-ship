@@ -216,7 +216,7 @@ Why the gap exists: C's string-handling library was built without automatic boun
 
 Watch out: how sufficient the fix above actually is remains disputed. One camp holds that `dst[n - 1] = 0` fully closes the issue and no further checking is needed. Another camp considers `strncpy` itself buggy or badly named, and pushes for a proper string-handling library or explicit length checks instead of patching around `strncpy`'s behavior. Treat `strncpy` plus manual termination as a partial safety mechanism, not a settled one.
 
-Source: C2 Wiki "CeeLanguage"
+Source: C2 Wiki "CeeLanguage".
 
 ---
 
@@ -230,9 +230,9 @@ Two concrete constructs illustrate the gap:
 
 When code depends on implementation-defined, unspecified, or undefined behavior, an explicit comment or a separate specification records the assumption being made. Without that record, the source cannot convey which behavior class applies, or what happens once the assumption stops holding.
 
-Watch out: it is easy to mistake "this compiler produced a result without warning" for "this behavior is well-defined." That confusion holds until a compiler upgrade or a platform change produces a different result. Reading the code that ran correctly yesterday does not substitute for knowing what the language's actual guarantees are -- this is the same class of hazard as undefined behavior that is visible at `-O0` and silently optimized away at `-O2` (see the `systematic-debugging` skill, `CPP_HEISENBUG_PATTERNS.md`).
+Watch out: it is easy to mistake "this compiler produced a result without warning" for "this behavior is well-defined." That confusion holds until a compiler upgrade or a platform change produces a different result. Reading the code that ran correctly yesterday does not substitute for knowing what the language's actual guarantees are.
 
-Source: C2 Wiki "TheSourceCodeIsTheDesign"
+Source: C2 Wiki "TheSourceCodeIsTheDesign".
 
 ---
 

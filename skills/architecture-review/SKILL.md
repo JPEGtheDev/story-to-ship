@@ -104,6 +104,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 - "The test utility is small, it won't hurt in src/" -> Stop. Test code in production is a maintenance trap. Flag it.
 - "It's in the same layer, so the dependency is acceptable" -> Stop. Same layer, different files -- check for circular dependencies. Design smell if found.
 - "The violation is minor, I'll note it but give CLEAN" -> Stop. There is no CLEAN with open violations. Verdict is VIOLATIONS FOUND.
+- "It's what we already use/know" -> Stop. Familiarity is not fit. Name the problem-fit argument or run a comparison against at least one alternative; familiarity is a trade-off to state, not a silent default.
 
 ---
 

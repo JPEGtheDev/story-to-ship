@@ -71,6 +71,8 @@ Apply when working on class-based code. For universal smells see `../code-smells
 
 **Why it hurts:** Tight coupling to navigation structure. Violates Law of Demeter.
 
+**Standard carve-outs (not violations):** Chains through collections/iterators, immutable value objects, or factories/builders that return a newly constructed object at each step (not a mutated `*this`) are not violations -- the law targets reaching through a collaborator's mutable internal structure. When the chain walks a heterogeneous object structure (a hierarchy of different node types), refactor via Visitor, not just a Facade.
+
 **Primary Refactorings:** Move Method, introduce a Facade method that hides the chain
 
 ---

@@ -85,6 +85,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - Writing code and planning to format "later in this session" -- **STOP. Run your project's formatter now.**
 - Running Step 2 paradigm detection before Step 1 passes -- **STOP. Universal tier is mandatory first. Paradigm tier does not substitute for it.**
 - Adding an abstraction, interface, parameter, or config flag for a use case that does not exist yet -- **STOP. YAGNI: if no current requirement needs it, cut it. Speculative Generality is a code smell (`references/design-principles.md`), not foresight.**
+- Renaming or moving a short/common identifier via sed/awk/find-replace -- **STOP. A rename must preserve semantics: grep it and compare hits to rename sites; substrings in longer names, strings, or comments change meaning. Use scope-aware rename.**
 
 ---
 

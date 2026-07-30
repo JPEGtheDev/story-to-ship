@@ -101,6 +101,7 @@ If you catch yourself thinking any of these, STOP and start over with RED:
 - "I already manually tested it"
 - Test passes immediately without seeing it fail first
 - Fixed a bug without writing a regression test that reproduces it first
+- A test double (mock or stub) that only ever returns happy-path values -- STOP. A double exists to FORCE the rare condition (error return, timeout, boundary value) deterministically on every run. Add the failure-forcing case, or state in the test why the double's collaborator cannot fail.
 
 **All of these mean: Delete any code written before the test. Start over with RED.**
 
@@ -145,7 +146,7 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 
 ## Reference Files
 
-- `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green)
+- `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green, happy-path-only doubles)
 - `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
 - `references/PV_TEST_CONVENTIONS.md` -- Particle-Viewer test conventions: project-specific testing patterns, examples, and design principles. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 

@@ -107,6 +107,8 @@ This output proves the ceremony was identified before dispatch. It does not prov
 - "AC is obvious" -> Informal AC is exactly what Discovery solves. Run Discovery now.
 - "AskUserQuestion was used for clarification, skipping Discovery" -> STOP. AskUserQuestion output is not a Feature Specification. Run Discovery now.
 - "REVISIONS NEEDED -- fix and merge" -> Requires new todos, completion, and re-Signoff.
+- "The acceptance criteria all describe the happy path" -> STOP. A criteria set with no criterion for invalid input, failure, or deliberate misuse is incomplete -- misuse is a failure case (things going wrong by intent). In Discovery (Ceremony 1), surface the gap under agenda question 4 (failure cases).
+- "The AC has zero failure-path coverage at Refinement" -> STOP. That is a CONDITIONS/REJECT ground under Refinement's (Ceremony 2) agenda question 4 (missing edge cases, error handling, or failure modes); such a criteria set cannot receive APPROVE.
 
 ---
 

@@ -184,6 +184,24 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 
 ---
 
+## Golden Hammer
+
+**What:** A technology, pattern, or tool is selected because it is what the team already uses or knows, not because it fits the problem at hand.
+
+**Symptoms:**
+- The stated justification for a technology choice names familiarity ("it's what we use", "we know it") rather than problem fit
+- No comparison against alternatives is offered before committing
+- Workarounds accumulate to force-fit the familiar tool onto problems it doesn't suit
+- The team's toolbox never grows; every new problem gets mapped onto the same solution
+
+**Remediation:**
+- State the problem-fit argument explicitly before choosing a technology
+- Run a short comparison against at least one alternative, even informally
+- Treat familiarity (velocity, operational knowledge) as a named trade-off, not a silent default
+- Revisit the choice when workarounds start accumulating -- that is a signal of misfit, not just friction
+
+---
+
 ## Anti-Pattern Taxonomy
 
 Anti-patterns occur at all levels -- development (code style), architecture (module structure), and management (process). The same root cause manifests differently at each level:
@@ -191,6 +209,7 @@ Anti-patterns occur at all levels -- development (code style), architecture (mod
 - **Root cause: unclear ownership** -> God Class (architecture), Analysis Paralysis (process)
 - **Root cause: fear of change** -> Big Design Up Front, Big Ball of Mud (architecture debt)
 - **Root cause: premature optimization** -> Global State, Jumble Anti-Pattern (coupling)
+- **Root cause: familiarity bias** -> Golden Hammer (technology selection)
 
 Recognizing the root cause helps address the true problem, not just the symptom.
 

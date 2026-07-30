@@ -181,6 +181,52 @@ The visual test **MUST fail before the baseline is correct.** If it never failed
 
 ---
 
+## Anti-Pattern 6: Happy-Path-Only Doubles
+
+**The trap:** You mock a failure-capable collaborator -- file I/O, a GL call, an allocator -- and every configured return is a success value. The failure branch in the production code that handles that collaborator's error case is never executed by any test.
+
+**Why it is wrong:** the rare failure is exactly what a double is _for_. Real collaborators fail rarely and nondeterministically -- a double is the only way to make that branch run deterministically, on every run. A double that only ever hands back success values idealizes the collaborator away instead of standing in for it.
+
+This does not contradict using a happy-path default: Anti-Pattern 3's GOOD example sets `ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1))` so the test can target pure logic above the boundary -- that is a legitimate happy-path default. The defect this entry names is different: no test anywhere in the suite ever overrides such a default to force the failure branch.
+
+**The fix:** for each mocked failure-capable call, add at least one test that forces its failure mode, or state in the test why this collaborator cannot fail.
+
+```cpp
+// BAD: every configured return is success -- the error path never runs
+TEST(ShaderTest, Compile_ValidSource_Succeeds)
+{
+    // Arrange
+    MockOpenGL mockGL;
+    ON_CALL(mockGL, glGetShaderiv(_, _, _)).WillByDefault(SetArgPointee<2>(GL_TRUE));
+
+    // Act
+    Shader shader(mockGL, vertSrc, fragSrc);
+
+    // Assert
+    EXPECT_TRUE(shader.isValid());
+    // No test anywhere forces glGetShaderiv to report failure --
+    // the error-handling branch in Shader is never exercised.
+}
+```
+
+```cpp
+// GOOD: a companion test forces the failure mode deterministically
+TEST(ShaderTest, Compile_ShaderCompileFails_IsValidReturnsFalse)
+{
+    // Arrange
+    MockOpenGL mockGL;
+    ON_CALL(mockGL, glGetShaderiv(_, _, _)).WillByDefault(SetArgPointee<2>(GL_FALSE));
+
+    // Act
+    Shader shader(mockGL, vertSrc, fragSrc);
+
+    // Assert
+    EXPECT_FALSE(shader.isValid());
+}
+```
+
+---
+
 ## Red Flags -- Stop Before Proceeding
 
 - Mock setup is longer than the test logic
@@ -202,3 +248,4 @@ The visual test **MUST fail before the baseline is correct.** If it never failed
 | Mock without understanding | Run real code first; mock minimally and intentionally |
 | Incomplete mock data | Mirror complete real data structure; prefer production classes |
 | Visual test passes before baseline | Delete baseline; see it fail first, then promote |
+| Happy-path-only doubles | Force each mocked failure mode in at least one test |

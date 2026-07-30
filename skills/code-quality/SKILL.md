@@ -92,7 +92,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 
 ## Reference
 
-- `references/code-smells.md` -- universal smells (Long Method, Long Parameter List, Duplicated Code, Speculative Generality, Divergent Change, Shotgun Surgery)
+- `references/code-smells.md` -- universal smells (Long Method, Long Parameter List, Duplicated Code, Speculative Generality, Divergent Change, Shotgun Surgery, Implicit State Through an Unstructured Jump)
 - `references/oop/cpp/oop-smells.md` -- OOP-specific smells (Feature Envy, Data Clumps, Primitive Obsession, etc.)
 - `references/design-principles.md` -- design heuristics (all paradigms)
 - `references/oop/cpp/index.md` -- OOP tier dispatch table

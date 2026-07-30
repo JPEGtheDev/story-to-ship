@@ -67,6 +67,16 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smell
 
 ---
 
+### 7. Implicit State Through an Unstructured Jump
+
+**What it looks like:** A goto, or any equivalent unstructured jump, whose destination reads local-variable state that was set earlier at or near the jump site, with nothing in the code spelling out that dependency as an explicit contract.
+
+**Why it hurts:** Carrying state this way puts a jump in the same failure category as scattered global flags -- both hide a dependency instead of stating it, and a jump offers little structural cue about intent compared with an if or a loop's condition. That gap in signal is exactly what let a stray, duplicated goto pass review undetected in the widely-known "goto fail" defect. C/C++'s goto is already narrower than the unrestricted jump found in early languages -- it cannot land inside a block, cannot skip past a declaration, and its label must sit within the same function that jumps to it -- so escaping several levels of nested control flow with it, the construct's most ordinary use, stays relatively benign on its own; the danger sits specifically in the undocumented state dependency, not in the jump itself.
+
+**Primary Refactorings:** Restructure the jump into structured control flow (if/loop) so the state dependency becomes visible, or document the contract the destination relies on.
+
+---
+
 ## Detection Heuristics (Universal)
 
 Triggers to investigate -- not absolute violations.

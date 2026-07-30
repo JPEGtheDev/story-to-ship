@@ -40,12 +40,12 @@ function withdraw(account, amount):
 If a precondition is stated explicitly, satisfying it belongs entirely to the caller. A
 violated precondition is therefore a bug in the caller, not in the method that was called.
 
-The practical consequence: by default, a method should not re-verify a condition its own
+The practical consequence: by default, a method does not re-verify a condition its own
 contract already assigns to the caller. If every method in a call stack re-checks what its
 caller already checked, the result is clutter and repeated error-handling that adds no real
 safety -- only the illusion of it.
 
-This does not settle the question in every case, and it should not be flattened into "never
+This does not settle the question in every case; do not flatten it into "never
 double-check." A method whose precondition failure would leave shared or persistent state
 inconsistent -- not just return a wrong value to one caller -- has a real reason to re-check
 anyway. Consider a bank-account `withdraw()` method: its precondition already says "amount must
@@ -138,7 +138,9 @@ Contracts are a useful discipline, not a clean, universally safe one:
   is not guaranteed to still hold when the guarded operation actually executes.
 - **Nothing in the tooling enforces side-effect-free contracts**, even in languages built
   around contracts natively. Writing a contract expression that does not itself mutate state is
-  a matter of author discipline and reviewer attention, not a compiler guarantee.
+  a matter of author discipline and reviewer attention, not a compiler guarantee. In review,
+  treat any contract expression that calls another method as suspect until that method is
+  confirmed side-effect-free.
 - **Whether contracts would have caught bugs like Y2K is a live, unresolved dispute.** One
   position: writing preconditions and postconditions forces a fragile, undocumented assumption
   -- such as representing a year with only two digits -- out into the open, where it becomes

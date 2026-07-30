@@ -33,6 +33,8 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smell
 
 **Primary Refactorings:** Extract Function, extract shared utility
 
+**Extraction trigger (contested):** One practical compromise: tolerate a single duplicate, but leave a comment at each copy cross-referencing the other so the next person to copy it has enough context to factor out every occurrence at once; treat a second or third copy as the point to stop tolerating and extract. This is informed convention rather than a settled rule -- other practitioners argue for deduplicating at the very first repetition instead.
+
 ---
 
 ### 4. Speculative Generality

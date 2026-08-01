@@ -77,11 +77,11 @@ Guidance for arguing in good faith and for evaluating arguments made by others.
 | Ending a debate by naming its shape (flame war, bikeshedding, religious debate) | Address the specific claims inside the discussion; the label's assumption that the whole debate is tribal noise is itself a claim needing defense, not a self-evident fact. |
 | Treating a value as inherently global, a claim as flatly absolute, or a fact as true in every context | State the specific frame the claim depends on -- which machine, process, run, or context -- as distinct from invariants that stay true no matter the frame or observer. When a disagreement looks factual, check whether it is really about facts or about where each side draws its category lines. |
 | A proof-demand debate where more examples keep arriving but no one shifts position | Check what class of evidence would resolve the disagreement before treating another example as progress -- good-faith arguers can still be applying different evidentiary standards (mass-market visibility versus narrow real deployments). |
-| A single popular product cited as proof a design approach's premises are correct | Treat a lone successful product as weak support for the design philosophy behind it -- popularity proves the product succeeded, not that its underlying premises are sound. |
+| A single popular product cited as proof a design approach's premises are correct | Treat a lone successful product as weak support for the design philosophy behind it -- popularity proves the product is popular, not that its underlying premises are sound. |
 
-Nuance: many such debates are genuinely psychology-driven and rarely resolve cleanly -- this
-targets pre-emptive labeling that dodges a claim that might be falsifiable, not skepticism of
-the debate generally.
+Nuance on the first row (pattern-labeling): many such debates are genuinely psychology-driven
+and rarely resolve cleanly -- this targets pre-emptive labeling that dodges a claim that might
+be falsifiable, not skepticism of the debate generally.
 
 ---
 

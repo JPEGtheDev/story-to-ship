@@ -73,10 +73,14 @@ Test (the bright line): would another agent with no project context, reading thi
 2. A one-sentence inline definition.
 3. A concrete example immediately after the abstract statement.
 
+For a term whose meaning is narrower than or shifted from its general sense, a parenthetical gloss or one-sentence definition alone does not satisfy first use -- the first use must also carry a concrete example (mechanism 3), alone or alongside the gloss. This constraint is scoped to shifted meanings only; a term already glossed at first use in its plain, unshifted sense is unaffected.
+
 Exempt categories (scoped narrowly):
 - Terms defined earlier in the same file.
 - Skill names in backticks (`verification-before-completion`) -- the name is the pointer.
 - Terms used in their ordinary general-programming sense (function, commit, branch). The exemption fails -- and the rule applies -- the moment the skill assigns the term a narrower or shifted meaning ("class" as defect-class, "register" as prose style, "canary" as proof-of-execution line).
+- A term that appears only inside a pointer sentence naming its defining location (`See references/X.md for A, B, C`) is exempt. The exemption fails -- and the rule applies -- when the named file does not actually define the term; a pointer to a file that does not define it is not a definition.
+- Tool and mechanism names of the agent platform that are self-identifying in context (TaskList, TaskCreate -- the name states what it is), and platform-runtime concepts every reading agent directly experiences (context compaction). The exemption fails -- and the rule applies -- when the name is a project-local abstraction that an agent with no project context cannot resolve compositionally from the words alone; that name needs a gloss on first use.
 
 Examples:
 - WRONG: "An instance fixed is not evidence the class is gone." ("class" undefined)

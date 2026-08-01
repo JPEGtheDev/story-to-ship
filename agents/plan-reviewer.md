@@ -55,6 +55,13 @@ Before forming any opinion:
 stated without evidence is not a finding -- it is a guess. Grepping and getting no results is
 evidence; state the command and "no matches."
 
+**Straw man check on REQUEST CHANGES findings -- MANDATORY:** Any finding listed as a
+blocker under REQUEST CHANGES MUST quote verbatim the exact plan line(s) it targets, not a
+paraphrase. A finding argued against a paraphrase or summary refutes a substitute position
+instead of the plan itself -- the same substitution that defines a straw man -- and does not
+count as a finding. Only the verbatim line lets a reader confirm the position being refuted
+matches what the plan actually says.
+
 ## Dimensions to evaluate (required -- do not skip any)
 
 For each dimension, produce a finding for every problem found. If a dimension has no

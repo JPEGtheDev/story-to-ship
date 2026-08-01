@@ -54,6 +54,7 @@ See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patt
 | "The substitution test passes today" | Does it pass under all invariants, including error semantics? |
 | "The derived class only adds methods; it doesn't change base behavior" | Adding methods can still tighten preconditions or weaken postconditions. Run the Liskov Substitution Principle (LSP) check for every added method. |
 | "Interface Segregation doesn't apply -- all clients need all methods" | Verify by inspection: find every caller of every interface method. If any caller never calls a method, the interface is too fat. |
+| "The callee will validate it" / "the caller already checked" | With no stated contract, both sides are guessing -- the check lands nowhere, or twice, and neither side actually knows which. The missing contract is the defect, not the missing check. State the precondition explicitly, assign it to caller or callee, then verify it lands exactly where assigned. |
 
 ---
 
@@ -72,3 +73,10 @@ See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patt
 - `architecture-review` -- parent; layer boundary rules apply to any hierarchy
 - `contract-testing` -- sibling; every approved interface needs a contract test
 - `cpp-safety` -- sibling; resource-owning hierarchy types need destructor review
+
+---
+
+## Reference
+
+- `references/OOP_PRINCIPLES.md` -- hierarchy and interface anti-patterns beyond the Iron Law: Single Choice Principle, Speculative Hierarchy, Uniform Access, Value Interface over reference exposure, Weakened Interface, coupling/cohesion, dependency injection mechanics, Ubiquitous Language.
+- `references/DESIGN_BY_CONTRACT.md` -- the contract triad (precondition/postcondition/invariant), who owns each check (caller vs. callee by default, with the withdraw() shared-state exception left open), the Liskov Substitution direction rules (preconditions may only weaken, postconditions may only strengthen), and the practical limits of contracts (side-effect-free evaluation, reentrancy/concurrency, the unresolved Y2K dispute).

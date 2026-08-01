@@ -199,6 +199,43 @@ See also: the `systematic-debugging` skill (Fail Fast section) for the general p
 
 ---
 
+## strncpy Does Not Guarantee NUL Termination
+
+Replacing `strcpy` with `strncpy` looks like a complete buffer-overflow fix, but it only closes half the gap. `strncpy` halts copying once it reaches the given length, yet nothing in its contract forces the destination to end in a NUL byte, and nothing guarantees a well-formed string was produced at all -- depending on the source length relative to the bound, `strncpy` can leave the buffer unterminated or copy fewer meaningful bytes than the caller expects.
+
+The pattern that closes the gap: after `strncpy(dst, src, n)`, terminate the buffer explicitly.
+
+```c
+strncpy(dst, src, n);
+dst[n - 1] = 0;  // force termination -- strncpy does not do this for you
+```
+
+Checking the copied length or return value works as an alternative to blind termination. Either way, the call to `strncpy` by itself is not the safety mechanism -- the follow-up step is.
+
+Why the gap exists: C's string-handling library was built without automatic bounds or termination checking. That omission is the same speed-over-safety tradeoff woven through the rest of the standard library, not a `strncpy`-specific oversight.
+
+Watch out: how sufficient the fix above actually is remains disputed. One camp holds that `dst[n - 1] = 0` fully closes the issue and no further checking is needed. Another camp considers `strncpy` itself buggy or badly named, and pushes for a proper string-handling library or explicit length checks instead of patching around `strncpy`'s behavior. Treat `strncpy` plus manual termination as a partial safety mechanism, not a settled one.
+
+Source: C2 Wiki "CeeLanguage".
+
+---
+
+## Implementation-Defined and Undefined Behavior Limit What Source Alone Reveals
+
+The strongest form of the claim "source code is the design" holds that everything about intended behavior lives in the source. C breaks that claim directly: some constructs are implementation-defined, unspecified, or fully undefined, so reading the source -- no matter how carefully -- cannot tell you what a given construct actually does on a given compiler and platform. Only a comment at the call site or an external specification can supply that information, and most code carries neither.
+
+Two concrete constructs illustrate the gap:
+- The expression `x = x++;` -- its outcome depends on compiler behavior, not on anything fixed by the language standard.
+- Memory-mapped IPv4 header structures that type an address field as `unsigned long` -- an assumption of 32-bit width that no standard guarantees on every platform.
+
+When code depends on implementation-defined, unspecified, or undefined behavior, an explicit comment or a separate specification records the assumption being made. Without that record, the source cannot convey which behavior class applies, or what happens once the assumption stops holding.
+
+Watch out: it is easy to mistake "this compiler produced a result without warning" for "this behavior is well-defined." That confusion holds until a compiler upgrade or a platform change produces a different result. Reading the code that ran correctly yesterday does not substitute for knowing what the language's actual guarantees are.
+
+Source: C2 Wiki "TheSourceCodeIsTheDesign".
+
+---
+
 ## Related Skills
 
 - `cpp-safety` -- iron law: every resource is owned by a scope-bound guard; destructors never throw

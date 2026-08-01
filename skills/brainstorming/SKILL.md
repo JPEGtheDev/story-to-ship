@@ -156,7 +156,7 @@ When the gate is fully passed, output this record. It becomes part of the PR des
 
 **Test strategy:** [how correctness will be verified]
 
-**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong -- required for any test design, research methodology, or evaluation framework]
+**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong -- required for any test design, research methodology, or evaluation framework; if you cannot name one, the claim is an unfalsifiable rationalization, not a testable design claim]
 
 **Gate passed:** YES -- awaiting user approval
 ```
@@ -202,6 +202,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 | "The approach is obvious" | Obvious approaches still need trade-offs named to be defensible. |
 | "TBD for now" | TBD is not a file path. It is a deferred decision that will block the implementer. |
 | "I'll figure it out as I code" | Exploratory coding without a gate produces uncommittable work. |
+| "A respected expert recommends it" | Reputation is not an argument -- ask for the evidence and reasoning behind the recommendation, and judge those. Expertise still counts when the reasoning is included; the gap is a name standing in for it. |
 
 ---
 
@@ -218,3 +219,4 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 ## References
 
 - Structured ideation protocols: `references/STRUCTURED_IDEATION.md` -- Six Thinking Hats table, BrainStorm two-phase protocol (generation separate from evaluation)
+- Debate collapse diagnostic: `references/DEBATE_COLLAPSE_DIAGNOSTIC.md` -- definition fights, two-topics-one-label, the namespacing tactic, exit criteria

@@ -56,6 +56,8 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - Design in layers: sketch the boundary (coarse), code the interior (fine)
 - Revisit assumptions regularly; update the design as understanding improves
 
+**Balance:** This entry targets freezing the design phase, not the act of designing early. The actual fault line is whether exploratory design work sits in a boxed-off phase -- often handed to a separate team -- or continues alongside coding throughout the project. Neither pole survives contact with practice: teams that swear by upfront design still cannot nail down the full architecture before writing code, and teams that swear by iterative design still fix some early decisions just to have a starting point. Both are running the same exploratory research and development (R&D) under different labels; reading this entry as "never design ahead of time" misses that point.
+
 ---
 
 ## Big Ball of Mud

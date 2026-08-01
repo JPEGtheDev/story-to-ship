@@ -47,6 +47,20 @@ Header filter excludes embedded libs: `glad`, `stb_*`.
 
 ---
 
+## STL vs. C++ Standard Library
+
+The Standard Template Library started out as an independent, template-based library of generic containers and algorithms, organized around an iterator abstraction that lets a pre-written algorithm run over both built-in and user-defined containers. It predates the C++ Standard Library, having been absorbed into it only afterward; the resulting Standard Library added a large amount of functionality that the earlier template library had never included.
+
+Treating "STL" and "the C++ standard library" as interchangeable produces concrete, checkable errors. Four categories belong to the Standard Library but were never part of the STL proper:
+- numeric-limits queries
+- locale and character-facet support
+- the string class
+- the stream-based I/O types
+
+**Check:** Before accepting a documentation line, code comment, or claim that attributes a C++ feature to "the STL," verify the feature is not one of the four categories above.
+
+---
+
 ## PV Workflow Patterns
 
 ## Step 7: Adding a Feature / Fixing a Bug

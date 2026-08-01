@@ -36,6 +36,8 @@ Before forming any opinion:
 
 **Evidence requirement -- MANDATORY:** Every finding MUST cite the specific plan section OR include the exact command and output that proves it. A finding stated without evidence is not a finding -- it is a guess. Grepping and getting no results is evidence; state the command and "no matches." Do NOT return a list of concerns with no supporting evidence.
 
+**REJECT quoting requirement -- MANDATORY:** A REJECT verdict MUST quote verbatim the exact plan line(s) it rejects. A finding argued against a paraphrase or summary of the plan refutes a substitute position, not the plan itself -- the same substitution that defines a straw man -- and does not count as a finding. Quoting the plan's actual words is what lets a reader confirm the position being refuted matches what the plan actually says.
+
 ## Your job
 
 Find the holes. Argue against the plan. Your goal is NOT to block -- it is to surface what the plan doesn't address before it becomes a bug.

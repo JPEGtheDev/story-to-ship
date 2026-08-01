@@ -169,6 +169,20 @@ Choosing the wrong strategy for the context creates risk:
 
 ---
 
+## Design Exploration Spectrum: Match Medium to Uncertainty
+
+How much a team invests in answering a design question must track what kind of question it is. Three different situations call for three different levels of investment:
+
+**Scope is undecided** -- whether a feature belongs in the product at all is still unresolved. Reach for a cheap, disposable form: a rough sketch, a pseudo-code outline, or a prototype meant to be thrown away once it answers the question. Spending effort on production-quality code before that question closes risks wasting work built on a direction that gets rejected.
+
+**Mechanics are undecided** -- the feature itself is confirmed and the only unknown is the approach for building it. Write the actual implementation instead of a design document. A written description of an implementation choice can quietly stop matching what actually ships; running code has no way to drift from itself.
+
+**A numeric target is contested** -- for example, two people disagree on whether a response stays under a latency budget. Build the system and clock it; that is the only way to close that argument.
+
+Picking the wrong investment level for the uncertainty at hand wastes effort in either direction: a carefully written specification answering a scope question is words spent that nobody will revisit, and a sketch cannot close an argument that only a stopwatch can settle.
+
+---
+
 ## Low Hanging Fruit First
 
 When entering a codebase with accumulated debt, address the easiest improvements first. Benefits:

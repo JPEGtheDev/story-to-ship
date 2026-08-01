@@ -83,7 +83,7 @@ Dispatch agents in parallel when ALL of the following are true:
 BEFORE DISPATCHING PARALLEL AGENTS, verify:
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
-3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (excess dispatches queue)
+3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (past the limit, dispatch fails with `Concurrent subagent limit reached`; it succeeds again once the running count drops below the limit)
 4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
@@ -96,7 +96,7 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 1. All tasks are truly independent -- no agent needs another agent's output to start
 2. Return format is explicitly defined for every agent before dispatch
-3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (excess dispatches queue)
+3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (past the limit, dispatch fails with `Concurrent subagent limit reached`; it succeeds again once the running count drops below the limit)
 4. Every agent has its own isolated worktree.
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
@@ -107,7 +107,9 @@ BEFORE DISPATCHING PARALLEL AGENTS, verify:
 
 ## Concurrency Rules
 
-The concurrent-subagent limit defaults to 20, configurable via the CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS environment variable; dispatches beyond the limit queue rather than fail. Within a single message, tool-use concurrency defaults to 10 parallel tool calls, and a session has a total cap of 200 subagents across its lifetime. None of these limits depend on account tier or model. (Workflow-tool `agent()` calls have a separate concurrency cap bound by available processor cores -- up to 16, fewer on machines with limited cores -- do not conflate it with the subagent limit above.)
+The Agent tool enforces two separate limits. The concurrent-subagent limit defaults to 20 agents running at once, configurable via the CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS environment variable (v2.1.217+); ultracode sessions are exempt. Dispatching past this limit fails immediately with the error `Concurrent subagent limit reached`, and the error tells Claude not to retry. The limit frees up as the running count drops below it. Separately, a session has a total cap of 200 subagents across its lifetime, configurable via CLAUDE_CODE_MAX_SUBAGENTS_PER_SESSION (v2.1.212+, any positive whole number, no upper bound, cannot be disabled). This cap is cumulative -- a finished subagent still counts against it -- and exceeding it fails with the error `Subagent spawn limit reached`. Within a single message, tool-use concurrency defaults to 10 parallel tool calls. None of these limits depend on account tier or model. (Workflow-tool `agent()` calls have a separate concurrency cap bound by available processor cores -- up to 16, fewer on machines with limited cores -- do not conflate it with the subagent limits above.)
+
+Match the error text to the limit: `Concurrent subagent limit reached` means reduce the number of agents in flight or raise CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS; `Subagent spawn limit reached` means the session hit its 200-agent lifetime total. Run `/clear` to reset the total and start a new conversation with the full budget -- if work that can still spawn subagents survives the clear, such as a running workflow, the count carries over instead. A settings-file env block takes effect in the running session; a shell export only applies to sessions launched after it. Sending a follow-up message to an already-completed agent resumes it without spending a new spawn from the total. Workflow `agent()` calls do not count toward the session total -- workflows have their own per-run limit.
 
 State your concurrency basis before dispatching: "Dispatching N agents in parallel -- [default 20-agent subagent limit / CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS raised to N]."
 
@@ -175,7 +177,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | Two or more agents assigned to the same file or overlapping file sets | STOP. Reassign to non-overlapping sets or serialize the dispatch. |
 | Dispatching agents without a defined return format | STOP. Define the exact return format for every agent before dispatching. |
 | Acting on one agent's result before all agents have returned | STOP. Collect ALL results first, then aggregate and verify. |
-| More than 20 concurrent agents dispatched without raising CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS | STOP. Confirm the environment variable is raised, or expect excess dispatches to queue instead of running in parallel. |
+| More than 20 concurrent agents dispatched without raising CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS | STOP. Confirm the environment variable is raised or reduce the batch size. Read the error text to identify which limit fired -- `Concurrent subagent limit reached` or `Subagent spawn limit reached`. |
 | Forwarding agent output to the user without verifying it against source files | STOP. Cross-check every finding against source files before presenting conclusions. |
 | Dispatching batch hypothesis-testing agents (A/B test, multi-agent experiment) without a prior Skeptic design review | STOP. Dispatch the design-review Skeptic first. Unreviewed experiment designs produce uninterpretable results. |
 

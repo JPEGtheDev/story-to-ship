@@ -144,7 +144,7 @@ std::vector<glm::vec4> particles = {
 };
 ```
 
-When a production factory or generator method already produces the exact structure the code needs, use it -- for test data here, the production `Particle` class (see the GOOD example above). Otherwise, hand-build data that mirrors the complete real structure:
+When a production factory or generator method already produces the exact structure the code needs, use it -- for test data here, the production `Particle` class. Otherwise, hand-build data that mirrors the complete real structure (see the GOOD example above):
 
 ```cpp
 Particle particles;

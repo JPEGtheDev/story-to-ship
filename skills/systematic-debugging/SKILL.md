@@ -75,7 +75,7 @@ Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., `.../build` for `./tests/ParticleViewerTests`). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
+**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
@@ -192,12 +192,6 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "The code shows the behavior is correct -- the user must be misreading the output" | Source code describes programmer intent; the running application produces what the user observes. For runtime behavior bugs, the running application is the ground truth. Dispatch the researcher with "Build + observe" required. |
 | "Reading the relevant code is faster than running the app" | Speed does not matter if the investigation is wrong. Code reading for a runtime behavior bug is theorizing. The observation artifact determines Phase 2 scope. Dispatch the researcher. |
 | "The fix is small -- I don't need to load `subagent-driven-development`" | Fix size is irrelevant to the Phase 4 gate. Phase 4 is an implementation step regardless of scope. Load `subagent-driven-development` before creating a worktree or editing any file. No exceptions. |
-
----
-
-## Project-Specific Commands
-
-For Particle-Viewer debug commands (build, test filter, visual regression diffs, CI reproduction), see `references/PV_DEBUG_REFERENCE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 ---
 

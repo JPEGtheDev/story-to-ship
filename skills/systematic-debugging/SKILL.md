@@ -14,8 +14,6 @@ This skill is **mandatory before proposing any fix**. It applies whenever you en
 - Unexpected rendering or application behavior
 - Anything the user describes as "broken"
 
-When activated, announce: **"I am using the systematic-debugging skill to [brief description of issue]."**
-
 ---
 
 ## Iron Law
@@ -46,7 +44,7 @@ CANARY: systematic-debugging loaded. Issue: [name it]. No fix before root cause.
    **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not compiler output, static analysis output, or test runner output.
 3. I can state: "The root cause is X because Y" with evidence
 
-[+] All met -> proceed
+[+] All met -> proceed to Phase 2
 [-] Any unmet -> continue Phase 1 investigation; do not proceed
 
 ---
@@ -91,7 +89,7 @@ For runtime behavior bugs: dispatch a researcher agent with "Build + observe" as
 
 If the researcher returns INCONCLUSIVE, escalate to the user before continuing. Do not substitute code analysis for the missing observation artifact.
 
-The existing Phase 1 BEFORE PROCEEDING items 1-3 and the global BEFORE PROCEEDING items 1-3 still apply to runtime behavior bugs in addition to this gate -- they are cumulative, not alternative. For item 2 in both blocks, "reproduction steps" means the observation artifact from the researcher. Items 1 and 3 apply as stated.
+The BEFORE PROCEEDING gate above still applies to runtime behavior bugs, in addition to the observation-artifact requirement above -- they are cumulative, not alternative. For item 2, "reproduction steps" means the observation artifact from the researcher. Items 1 and 3 apply as stated.
 
 - Read the error message **completely** -- do not skim the last line and assume you understand it
 - Reproduce consistently -- what exact steps trigger the failure?
@@ -101,14 +99,7 @@ The existing Phase 1 BEFORE PROCEEDING items 1-3 and the global BEFORE PROCEEDIN
 - For **visual regression failures**: examine the diff image, compare pixels
 - For **CI failures**: reproduce locally with the equivalent command before touching code
 
-BEFORE proceeding to Phase 2, verify:
-1. The error message has been read completely.
-2. The failure reproduces consistently with identified reproduction steps.
-   **Note for runtime behavior bugs:** "reproduction steps" means the observation artifact returned by the researcher agent -- not compiler output, static analysis output, or test runner output.
-3. You can state: "The root cause is X because Y."
-
-[+] All 3 met -> proceed to Phase 2
-[-] Any unmet -> continue Phase 1 investigation; do not proceed
+Run the BEFORE PROCEEDING gate above before proceeding to Phase 2.
 
 ### Phase 2: Pattern Analysis
 

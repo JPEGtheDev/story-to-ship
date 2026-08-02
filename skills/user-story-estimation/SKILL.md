@@ -74,7 +74,7 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 - Performance requirements with unclear targets
 - Legacy code with unclear dependencies
 
-**Counter-factor:** WHEN prerequisites are already clear (style guide in place, dependencies settled), "foundational" work is LIGHTER than it looks -- calibrate down, not up.
+**Counter-factor:** When prerequisites are already clear (style guide in place, dependencies settled), "foundational" work is LIGHTER than it looks -- calibrate down, not up.
 
 ---
 
@@ -125,4 +125,4 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 
 ## Related Skills
 
-- `user-story-generator` -- companion skill for generating the stories this skill estimates; its own story template defines a separate Effort Estimate section with different fields (Total Premium Requests, Recommended Model Tier, Reasoning)
+- `user-story-generator` -- companion skill for generating the stories this skill estimates; uses a separate Effort Estimate template with different fields (see that skill)

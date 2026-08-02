@@ -39,7 +39,7 @@ These are better than:
 
 ### Make Stories INVEST-Compliant
 
-The INVEST checklist is maintained inline in `SKILL.md`. See the INVEST Checklist section there.
+The INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) checklist is maintained inline in `SKILL.md`. See the INVEST Checklist section there.
 
 If a story violates INVEST, fix it or suggest breaking it down.
 

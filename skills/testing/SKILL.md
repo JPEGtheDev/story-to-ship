@@ -41,6 +41,9 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 - **Unit test** -- single class/function in isolation -> `tests/core/`
 - **Integration test** -- component interactions -> `tests/integration/`
+
+Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU/display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
+
 - **Visual regression test** -- pixel comparison -> load `visual-regression-testing` skill
 - **Test review** -- check existing tests against standards -> apply the `## BEFORE PROCEEDING` checklist
 
@@ -50,7 +53,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 Every test MUST have three distinct comment sections: `// Arrange`, `// Act`, `// Assert`.
 
-For the complete AAA rule set, code examples, and advanced patterns, see `references/TESTING_EXAMPLES.md`.
+For the complete AAA rule set and template, see `references/TESTING_PATTERNS.md`.
 
 ### Naming Convention
 
@@ -61,7 +64,7 @@ Examples:
 
 **`_ExpectedResult` must describe the behavior or invariant proven -- not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
 
-See `references/TESTING_EXAMPLES.md` for naming examples.
+See `references/TESTING_PATTERNS.md` for naming examples.
 
 For visual regression, see the `visual-regression-testing` skill.
 
@@ -71,19 +74,20 @@ For visual regression, see the `visual-regression-testing` skill.
 
 Before presenting tests, verify:
 
-1. Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no `// Arrange & Act`)
+1. Every test has separate `// Arrange`, `// Act`, `// Assert` comments (no `// Arrange & Act`). Exception: `// Act & Assert` is acceptable ONLY for `EXPECT_THROW`/`EXPECT_NO_THROW` tests where the action IS the assertion; if no Arrange is needed, omit the `// Arrange` comment. Full text: `references/TESTING_PATTERNS.md`.
 2. Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
 3. Expected values are named variables in Arrange (not inline literals in Assert)
 4. One logical concept per test
-5. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
-6. External dependencies are mocked (OpenGL, file I/O)
-7. No testing of external libraries (std::, third-party code)
-8. Group related configuration into structs/POCOs instead of flat variables
-9. Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
-10. Tests compile and pass
-11. For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
-12. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
-13. For visual regression tests: see visual-regression-testing skill checklist
+5. Depended-upon behavior is tested: any behavior your code relies on has a test; if behavior can change and no test breaks, it was untested. Full text: `references/TESTING_PATTERNS.md`.
+6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
+7. External dependencies are mocked (OpenGL, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
+8. No testing of external libraries (std::, third-party code)
+9. Group related configuration into structs/POCOs instead of flat variables
+10. Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
+11. Tests compile and pass
+12. For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
+13. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
+14. For visual regression tests: see visual-regression-testing skill checklist
 
 [+] All met -> proceed
 [-] Any unmet -> write the test first before touching implementation code
@@ -102,10 +106,13 @@ If you catch yourself thinking any of these, STOP and start over with RED:
 - Test passes immediately without seeing it fail first
 - Fixed a bug without writing a regression test that reproduces it first
 - A test double (mock or stub) that only ever returns happy-path values -- STOP. A double exists to FORCE the rare condition (error return, timeout, boundary value) deterministically on every run. Add the failure-forcing case, or state in the test why the double's collaborator cannot fail.
+- A test that mirrors the implementation's structure, or that you could only write by reading the source -- it tests a coincidence, not a contract. Full text: `references/TESTING_PATTERNS.md`.
+- "Let's refactor without writing tests first" -- reckless restructuring, not refactoring; characterization tests come first. Full text: `references/TESTING_PATTERNS.md`.
+- "Tests after achieve the same goals"
+- "I need to get the implementation right before I know what to test"
+- "Just this once" or "This is different because..."
 
 **All of these mean: Delete any code written before the test. Start over with RED.**
-
-See `references/TESTING_EXAMPLES.md` for the Agile Alarm Bell warning on refactoring without tests.
 
 ---
 
@@ -119,6 +126,9 @@ See `references/TESTING_EXAMPLES.md` for the Agile Alarm Bell warning on refacto
 | "Too complex to test in isolation" | That's a design signal. Simplify the interface. MockOpenGL is there for GL calls. |
 | "Already manually tested it" | Manual testing is ad-hoc. No record, can't re-run, misses edge cases. |
 | "TDD slows me down" | TDD is faster than debugging production failures. |
+| "Tests after achieve the same goals" | Tests-after answer "what does this do?" Tests-first answer "what SHOULD this do?" |
+| "Deleting X hours of work is wasteful" | Sunk cost. Keeping untested code is technical debt. |
+| "The bug was a one-off, no regression test needed" | One-off bugs recur after the next refactoring. A regression test takes 5 minutes; a re-investigation takes hours. |
 
 ---
 
@@ -148,5 +158,5 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 
 - `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green, happy-path-only doubles)
 - `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
-- `references/PV_TEST_CONVENTIONS.md` -- Particle-Viewer test conventions: project-specific testing patterns, examples, and design principles. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+- `references/TESTING_PATTERNS.md` -- generic testing canon: AAA rules + template, test double taxonomy, test size (SE@G) model, depended-upon behavior rule, coincidence articulation, Agile Alarm Bell, naming examples
 

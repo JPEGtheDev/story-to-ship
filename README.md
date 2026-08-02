@@ -115,6 +115,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
+| `summarization-method` | One of three parallel summarization methods (Abstractive, Extractive, or SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |
 | `claim-enrichment` | Analytical claim enrichment |

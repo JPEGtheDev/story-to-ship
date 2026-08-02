@@ -125,4 +125,4 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 
 ## Related Skills
 
-- `user-story-generator` -- generates INVEST-aligned stories; every generated story must include the Effort Estimate section defined here
+- `user-story-generator` -- companion skill for generating the stories this skill estimates; its own story template defines a separate Effort Estimate section with different fields (Total Premium Requests, Recommended Model Tier, Reasoning)

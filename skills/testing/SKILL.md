@@ -42,7 +42,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 - **Unit test** -- single class/function in isolation -> `tests/core/`
 - **Integration test** -- component interactions -> `tests/integration/`
 
-Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU (Graphics Processing Unit)/display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
+Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU (Graphics Processing Unit) or display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
 
 - **Visual regression test** -- pixel comparison -> load `visual-regression-testing` skill
 - **Test review** -- check existing tests against standards -> apply the `## BEFORE PROCEEDING` checklist

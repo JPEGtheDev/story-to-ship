@@ -22,8 +22,6 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Software layers are concentric: inner layers hold domain logic and policy; outer layers hold I/O, frameworks, UI, and external integrations. Dependencies point inward only -- an inner layer never imports, calls, or names a type from an outer layer. Every file belongs to exactly one layer. Judge each change by which layer its file occupies and which direction its dependencies run.
 
-For the Particle-Viewer layer model, file-to-layer mapping, and dependency table, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about that project, skip the reference -- it is project-specific.
-
 ---
 
 ## Hyrum's Law Gate
@@ -76,14 +74,6 @@ Run every item for each file under review:
 
 [+] All pass -> verdict: CLEAN
 [-] Any fail -> verdict: VIOLATIONS FOUND -- document every failure in the Review Report
-
-For a Particle-Viewer session, also run the project-specific checks, red flags, and rationalizations in `references/PV_LAYER_ARCHITECTURE.md` before writing the verdict.
-
----
-
-## Common Violations
-
-For project-specific violation examples and fixes, see `references/PV_LAYER_ARCHITECTURE.md`. If this session is NOT about the Particle-Viewer project, skip that file -- it is project-specific.
 
 ---
 

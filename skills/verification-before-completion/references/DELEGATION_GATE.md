@@ -21,12 +21,10 @@ Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
    Read the diff -- do the files changed match what was requested?
     v
 3. Run verification commands on the output
-   Run the project verification commands (see `references/PV_VERIFICATION_COMMANDS.md`)
+   Run the host project's verification commands (build, test, lint -- as its docs define them)
     v
 4. ONLY THEN claim the subagent's work is complete
 ```
-
-Step 3 cites `references/PV_VERIFICATION_COMMANDS.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 [+] All steps passed -> claim the subagent's work is complete
 [-] Any step failed -> do not relay the completion claim; investigate and fix before claiming done
@@ -37,7 +35,7 @@ Step 3 cites `references/PV_VERIFICATION_COMMANDS.md`. If this session is NOT ab
 |-------------|---------------|
 | "I committed [X]" | `git log --oneline -5` -- does the commit exist? |
 | "I updated the file" | `git diff HEAD [file]` -- are the changes present? |
-| "All tests pass" | Run `./build/tests/ParticleViewerTests` yourself |
+| "All tests pass" | Run the project's test suite yourself |
 | "I created the skill" | `ls .claude/skills/[skill-name]/SKILL.md` -- does it exist? |
 
 **Never relay a subagent's completion claim to the user without first running this gate.**

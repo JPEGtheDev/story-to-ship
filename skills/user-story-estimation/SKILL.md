@@ -72,6 +72,8 @@ Every generated story must include this section:
 - Performance requirements with unclear targets
 - Legacy code with unclear dependencies
 
+**Counter-factor:** "foundational" work is often LIGHTER than it looks when prerequisites are already clear (style guide in place, dependencies settled) -- calibrate down, not up, when the groundwork already exists.
+
 ---
 
 ## Estimation Formula
@@ -116,9 +118,3 @@ Every generated story must include this section:
 | "The story is probably S" | Use the complexity indicators above. When uncertain, size up. |
 | "I'll update the estimate after starting" | Estimates set expectations. Revise before beginning, not during. |
 | "XL is fine, we can figure it out as we go" | XL means the estimate is undefined. Decompose first. |
-
----
-
-## References
-
-- `references/PV_ESTIMATION_EXAMPLES.md` -- validated real-world estimates from completed Particle-Viewer stories, for calibrating estimates against actual outcomes. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.

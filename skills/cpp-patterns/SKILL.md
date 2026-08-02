@@ -101,7 +101,6 @@ if (!success) {
 - Bounds-check SDL3 scancode values before indexing key state arrays
 - Use `glGetIntegerv(GL_VIEWPORT, ...)` over cached viewport values where viewport may change
 - `gl_PointSize` clamped by `GL_POINT_SIZE_RANGE` (max 256px on Mesa/llvmpipe)
-- For Flatpak/SDL3/GL gotchas: see the `flatpak` skill
 
 ### SDL3 Gotchas
 

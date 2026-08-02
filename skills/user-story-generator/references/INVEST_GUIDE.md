@@ -55,7 +55,7 @@ If a story violates INVEST, fix it or suggest breaking it down.
 
 ### Include Concrete Details for Your Project
 
-When generating stories, reference project-specific files, naming conventions, CI requirements, and test framework conventions. For Particle-Viewer specifics, see `references/PARTICLE_VIEWER_CONTEXT.md`.
+When generating stories, reference project-specific files, naming conventions, CI requirements, and test framework conventions.
 
 ## Common Edge Cases
 
@@ -67,7 +67,7 @@ Response:
 > "Got it! Testing what specifically--visual regression, unit tests for a component, or integration tests? Also, is this for existing code or new functionality?"
 
 **User wants to refactor globals**  
-This is a common Particle-Viewer task. Consult `references/PARTICLE_VIEWER_CONTEXT.md` for refactoring patterns.
+Consult the host project's architecture documentation for refactoring patterns.
 
 **Story is too large (L or epic-sized)**  
 Suggest breaking it down:

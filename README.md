@@ -48,7 +48,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ### Implementation
 | Skill | Purpose |
 |-------|---------|
-| `execution` | Commitment and right-wrongs protocol (acknowledge the mistake, state its impact, and fix it without minimizing) for any non-trivial implementation |
+| `execution` | Commitment and right-wrongs protocol (acknowledge the mistake, state what was wrong and the correct answer, state its impact, and fix it without minimizing) for any non-trivial implementation |
 | `code-quality` | Formatting, naming, and static analysis gates |
 | `session-bootstrap` | Session initialization -- loads context and routing table |
 | `subagent-driven-development` | Delegation protocol with mandatory post-todo review |

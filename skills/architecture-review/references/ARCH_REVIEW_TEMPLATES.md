@@ -25,7 +25,7 @@ A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in t
 
 For PR reviews or major refactors:
 
-1. Dispatch 1 `architecture-reviewer.md` agent per changed file (parallel) -- use `agent_type: "code-review"`
+1. Dispatch 1 architecture-review agent per changed file (parallel) -- use `agent_type: "code-review"`
 2. Provide: `{{FILE_PATH}}`, `{{INCLUDE_LIST}}`, and `{{DIFF_OR_EMPTY}}`
 3. Collect all reports before approving the PR
 4. Any VIOLATIONS FOUND verdict = block the PR

@@ -103,7 +103,6 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `code-quality-reviewer` | Stage 2 post-todo review: code quality |
 | `explorer` | Read-only multi-file research |
 | `researcher` | Hypothesis confirmation or denial |
-| `architecture-reviewer` | Layer boundary and interface compliance |
 | `infrastructure-reviewer` | CI/CMake compliance |
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |

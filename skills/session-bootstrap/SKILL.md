@@ -61,8 +61,6 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Requesting code review                       | `requesting-code-review`                           |
 | Receiving code review feedback               | `receiving-code-review`                            |
 | CI/CD or workflow changes                    | `workflow`                                         |
-| Flatpak packaging or OpenGL runtime          | `flatpak`                                          |
-| Build system or dependency changes           | `build`                                            |
 | Writing or editing documentation             | `documentation`                                    |
 | Bug fixes or error resolution                | `execution`, `systematic-debugging`                |
 | Any failure or unexpected behavior           | `systematic-debugging`, `verification-before-completion` |

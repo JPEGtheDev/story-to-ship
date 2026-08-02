@@ -379,7 +379,6 @@ Use this when classifying a captured lesson into a skill update. The Examples co
 | **Testing** | AAA violations, missing directory setup, save checks | `testing` skill |
 | **CI/CD** | Workflow structure, artifact patterns | `workflow` skill |
 | **Documentation** | Link fixes, formatting, content standards | `documentation` skill |
-| **Build** | CMake, dependencies, Flatpak packaging | `build` skill |
 | **Versioning** | PR title format, commit conventions, releases | `versioning` skill |
 
 

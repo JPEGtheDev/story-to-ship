@@ -29,6 +29,8 @@ Every generated story must include this section:
 **Reasoning:** [One sentence explaining complexity level]
 ```
 
+Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
+
 ---
 
 ## T-Shirt Size Guide
@@ -72,7 +74,7 @@ Every generated story must include this section:
 - Performance requirements with unclear targets
 - Legacy code with unclear dependencies
 
-**Counter-factor:** "foundational" work is often LIGHTER than it looks when prerequisites are already clear (style guide in place, dependencies settled) -- calibrate down, not up, when the groundwork already exists.
+**Counter-factor:** WHEN prerequisites are already clear (style guide in place, dependencies settled), "foundational" work is LIGHTER than it looks -- calibrate down, not up.
 
 ---
 
@@ -118,3 +120,9 @@ Every generated story must include this section:
 | "The story is probably S" | Use the complexity indicators above. When uncertain, size up. |
 | "I'll update the estimate after starting" | Estimates set expectations. Revise before beginning, not during. |
 | "XL is fine, we can figure it out as we go" | XL means the estimate is undefined. Decompose first. |
+
+---
+
+## Related Skills
+
+- `user-story-generator` -- generates INVEST-aligned stories; every generated story must include the Effort Estimate section defined here

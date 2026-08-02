@@ -6,7 +6,7 @@ When activated, engage in a conversational process to build the story collaborat
 
 ---
 
-When this skill is activated, your goal is to **collaborate conversationally** with the user to build an excellent INVEST-aligned user story. Focus on understanding their needs through questions rather than rushing to generate output.
+When this skill is activated, your goal is to **collaborate conversationally** with the user to build an excellent INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)-aligned user story. Focus on understanding their needs through questions rather than rushing to generate output.
 
 ## Core Approach: Conversation First, Generation Second
 

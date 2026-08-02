@@ -78,7 +78,7 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 | "The story depends on another, but we'll handle it" | Dependent stories can't be independently delivered. Redesign the split. |
 | "We can estimate it after starting" | Inestimable stories signal unclear scope. Clarify before committing. |
 | "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
-| "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery produces a Feature Specification that validates field optionality, invocation paths, and behavioral Acceptance Criteria under three personas. They are not equivalent. |
+| "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery (the three-amigos skill's Ceremony 1) produces a Feature Specification (the structured spec Discovery writes to plan.md) that validates field optionality, invocation paths, and behavioral Acceptance Criteria under three personas (the three-amigos skill's Business, Developer, and Tester amigos). They are not equivalent. |
 
 ## Output Destination
 
@@ -109,4 +109,4 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 
 ## Related Skills
 
-See the `user-story-estimation` skill for the T-shirt size scale (XS-XL) and validated examples. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story.
+See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story.

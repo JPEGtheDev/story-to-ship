@@ -1,6 +1,6 @@
 # INVEST Framework
 
-**INVEST** is a checklist for well-formed user stories in Agile development. Each letter represents a principle:
+**INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)** is a checklist for well-formed user stories in Agile development. Each letter represents a principle:
 
 ## I - Independent
 
@@ -175,7 +175,7 @@ Testable:
 
 ### [-] Too Large (Not Small + Estimable)
 **Bad:** "Refactor the entire authentication system"
-**Good:** "Extract JWT validation into a reusable service class"
+**Good:** "Extract JWT (JSON Web Token) validation into a reusable service class"
 
 ### [-] Too Vague (Not Testable + Estimable)
 **Bad:** "Improve the dashboard"

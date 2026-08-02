@@ -29,6 +29,8 @@ Every generated story must include this section:
 **Reasoning:** [One sentence explaining complexity level]
 ```
 
+Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
+
 ---
 
 ## T-Shirt Size Guide
@@ -71,6 +73,8 @@ Every generated story must include this section:
 - Tight integration with external APIs
 - Performance requirements with unclear targets
 - Legacy code with unclear dependencies
+
+**Counter-factor:** When prerequisites are already clear (style guide in place, dependencies settled), "foundational" work is LIGHTER than it looks -- calibrate down, not up.
 
 ---
 
@@ -119,6 +123,6 @@ Every generated story must include this section:
 
 ---
 
-## References
+## Related Skills
 
-- `references/PV_ESTIMATION_EXAMPLES.md` -- validated real-world estimates from completed Particle-Viewer stories, for calibrating estimates against actual outcomes. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+- `user-story-generator` -- companion skill for generating the stories this skill estimates; uses a separate Effort Estimate template with different fields (see that skill)

@@ -21,7 +21,7 @@ Test code requires its own refactoring discipline. Just like production code can
 **What:** The test uses external data or resources (files, databases, environment variables, system clock) without making that dependency explicit in the test.
 
 ```
-[-] BAD: Test reads from /home/user/data/test-config.json without explaining where it comes from
+[-] BAD: Test reads from <path-to-data>/test-config.json without explaining where it comes from
 [+] GOOD: Test creates all data inline or via explicit factory; reader immediately understands what data the test needs
 ```
 
@@ -181,8 +181,8 @@ Test code requires its own refactoring discipline. Just like production code can
 
 **Fix:**
 - Assert specific, observable outcomes
-- Prefer exact expected values over "is not null" or "is true"
-- If you can't specify an expected value, ask: does this test matter?
+- Assert exact expected values instead of "is not null" or "is true" whenever a specific expected value exists
+- If no specific expected value exists, do not fall back to a weak assertion -- ask instead: does this test matter?
 - Use equality assertions (`==`, `===`) before inequality assertions (`>`, `<`)
 - Test boundary conditions and specific cases, not just "something happened"
 
@@ -228,8 +228,8 @@ Test code requires its own refactoring discipline. Just like production code can
 - Slows debugging
 
 **Fix:**
-- Prefer: one assert per test (simplest and clearest)
-- Alternatively: multiple asserts with clear messages identifying context
+- Use one assert per test when the test verifies a single fact
+- When the test verifies several related facts about one outcome (e.g., checking each element of a produced structure), use multiple asserts, each with a clear message identifying context
 - Use assertion messages that identify what you're checking: "Element at index 2", "Vector capacity", etc.
 - Test name must describe the single behavior being verified
 

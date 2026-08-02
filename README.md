@@ -1,10 +1,20 @@
 # story-to-ship
 
-SDLC governance for Claude Code -- behavioral constraints, evidence gates, and ceremony systems covering the developer loop from story through merged branch.
+SDLC (Software Development Life Cycle) governance for Claude Code -- behavioral constraints, evidence gates, and ceremony systems covering the developer loop from story through merged branch.
 
 Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipelines, write PR descriptions. This governs behavior: blocks forward progress without inline evidence, enforces ceremony gates before implementation, requires root-cause analysis before any fix.
 
-**Scope:** Requirements, planning, implementation, testing, code review, CI/CD, documentation, retrospective. Does not cover deployment, monitoring, or security review.
+**Scope:** Requirements, planning, implementation, testing, code review, CI/CD (Continuous Delivery), documentation, retrospective. Does not cover deployment, monitoring, or security review.
+
+## Table of Contents
+
+- [Install](#install)
+- [Skills by Phase](#skills-by-phase)
+- [Agents](#agents)
+- [How It Works](#how-it-works)
+- [Repository Layout](#repository-layout)
+- [C++ and OpenGL](#c-and-opengl)
+- [License](#license)
 
 ## Install
 
@@ -27,7 +37,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `brainstorming` | Design gate -- required before committing to any approach |
 | `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
 | `greenfield-discovery` | Domain model interview for new projects -- blocks code decisions until the domain is documented |
-| `user-story-generator` | INVEST-aligned story authoring |
+| `user-story-generator` | INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)-aligned story authoring |
 | `user-story-estimation` | T-shirt sizing and effort estimation |
 
 ### Planning
@@ -38,7 +48,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ### Implementation
 | Skill | Purpose |
 |-------|---------|
-| `execution` | Commitment and right-wrongs protocol for any non-trivial implementation |
+| `execution` | Commitment and right-wrongs protocol (acknowledge the mistake, state what was wrong and the correct answer, state its impact, and fix it without minimizing) for any non-trivial implementation |
 | `code-quality` | Formatting, naming, and static analysis gates |
 | `session-bootstrap` | Session initialization -- loads context and routing table |
 | `subagent-driven-development` | Delegation protocol with mandatory post-todo review |
@@ -48,7 +58,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ### Testing and Verification
 | Skill | Purpose |
 |-------|---------|
-| `testing` | TDD gate -- no production code without a failing test first |
+| `testing` | TDD (Test-Driven Development) gate -- no production code without a failing test first |
 | `contract-testing` | Interface and abstract base class test coverage |
 | `systematic-debugging` | Root-cause protocol -- no patches without tracing to root |
 
@@ -81,13 +91,11 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ### C++ and OpenGL
 | Skill | Purpose |
 |-------|---------|
-| `build` | CMake build, dependency, and Flatpak packaging gates |
 | `architecture-review` | Layer boundary compliance and class hierarchy review |
 | `infrastructure-review` | CI/CMake/Flatpak manifest compliance review |
-| `oop-principles` | Is-A/Has-A and SOLID gate before any class hierarchy change |
+| `oop-principles` | Is-A/Has-A (inheritance vs. composition) and SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) gate before any class hierarchy change |
 | `cpp-patterns` | GL resource management and public interface documentation patterns |
-| `cpp-safety` | RAII and destructor safety for resource-owning classes |
-| `flatpak` | Sandbox-aware Flatpak packaging and debugging |
+| `cpp-safety` | RAII (Resource Acquisition Is Initialization) and destructor safety for resource-owning classes |
 | `visual-regression-testing` | Visual baseline management and render regression testing |
 
 ---
@@ -103,11 +111,11 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `code-quality-reviewer` | Stage 2 post-todo review: code quality |
 | `explorer` | Read-only multi-file research |
 | `researcher` | Hypothesis confirmation or denial |
-| `architecture-reviewer` | Layer boundary and interface compliance |
 | `infrastructure-reviewer` | CI/CMake compliance |
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
+| `summarization-method` | One of three parallel summarization methods (Abstractive, Extractive, or SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |
 | `claim-enrichment` | Analytical claim enrichment |
@@ -115,11 +123,11 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 33 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 15 agents to `.claude/agents/` -- dispatched via the `Agent` tool
-- Two hooks: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (active per-turn enforcement)
+- Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 
-Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active.
+Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.
 
 ## Repository Layout
 
@@ -133,7 +141,7 @@ See CONTRIBUTING.md for how to add a skill and the CI gates.
 
 ## C++ and OpenGL
 
-C++ and OpenGL-specific skills (`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`) are bundled in this plugin. No separate install required.
+C++ and OpenGL-specific skills (`architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `visual-regression-testing`) are bundled in this plugin. No separate install required.
 
 ## License
 

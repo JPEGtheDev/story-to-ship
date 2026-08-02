@@ -144,7 +144,7 @@ std::vector<glm::vec4> particles = {
 };
 ```
 
-Use the production `Particle` class to generate test data wherever possible:
+When a production factory or generator method already produces the exact structure the code needs, use it -- for test data here, the production `Particle` class. Otherwise, hand-build data that mirrors the complete real structure (see the GOOD example above):
 
 ```cpp
 Particle particles;
@@ -246,6 +246,6 @@ TEST(ShaderTest, Compile_ShaderCompileFails_IsValidReturnsFalse)
 | Assert on mock behavior | Test real behavior; remove the mock assertion |
 | Test-only method in production class | Move to test fixtures / `TearDown()` |
 | Mock without understanding | Run real code first; mock minimally and intentionally |
-| Incomplete mock data | Mirror complete real data structure; prefer production classes |
+| Incomplete mock data | Use a production generator if one exists; otherwise hand-build the full structure |
 | Visual test passes before baseline | Delete baseline; see it fail first, then promote |
 | Happy-path-only doubles | Force each mocked failure mode in at least one test |

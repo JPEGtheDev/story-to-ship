@@ -57,7 +57,7 @@ a PR or commit" maps to both `versioning` (domain) and `verification-before-comp
 rather than task domain. These are the skills the compressed per-turn routing block in
 `hooks/pre-message-gates.md` must name; `hooks/tests/run-skill-map-drift.sh` asserts
 every skill tagged `core` here is present in that file. Domain skills (testing, cpp,
-flatpak, build, docs, etc.) are tagged `domain` in the tables above and MUST NOT be
+docs, etc.) are tagged `domain` in the tables above and MUST NOT be
 added here or to the per-turn block -- they keep their own dispatch rows.
 
 | Skill | Tier | Routing trigger (source) |

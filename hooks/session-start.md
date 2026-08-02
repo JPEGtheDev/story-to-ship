@@ -96,7 +96,6 @@ loading a skill:
 | Claiming work is done | `verification-before-completion` |
 | Creating PR or commit | `versioning` |
 | CI/CD changes | `workflow` |
-| Build/dependency changes | `build` |
 
 Announce every skill load in the same turn as its `Skill` tool call: "I am using the [skill-name] skill to [purpose]." An announcement without the matching call in that turn is a false statement. Not optional.
 

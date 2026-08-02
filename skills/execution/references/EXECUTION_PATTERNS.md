@@ -78,7 +78,7 @@ Breaking refactoring into atomic steps makes it reversible at any point. If a st
 ## Refactoring Friction as Signal
 
 If a refactoring feels expensive, risky, or requires extensive coordination, that friction is information -- not a reason to skip the refactoring. High friction signals:
-- Tight coupling that should be loosened
+- Tight coupling that forces coordinated changes across unrelated components
 - Missing abstractions that make changes ripple
 - Inadequate test coverage that makes changes risky
 - Unclear ownership that requires coordination
@@ -90,7 +90,7 @@ Address the source of friction rather than working around it. A system that is h
 ## Related Skills
 
 - `execution` -- work loop, commit rhythm, mode declaration
-- `writing-plans` -- SIMPLICITY_PRINCIPLES.md for Assign Problems Not Tasks; YAGNI gate
+- `writing-plans` -- SIMPLICITY_PRINCIPLES.md for Assign Problems Not Tasks; YAGNI (You Ain't Gonna Need It) gate
 - `systematic-debugging` -- Profile Before Optimizing applies equally to debugging: measure before concluding
 
 ---
@@ -126,7 +126,7 @@ This behavior is the foundation of predictable trust. Consistent commitment-keep
 
 ## MIWMIRMIF -- Extended Rationale
 
-**Relationship to the TDD cycle:**
+**Relationship to the TDD (Test-Driven Development) cycle:**
 
 The TDD Red/Green/Refactor cycle enforces Make It Work -> Make It Right at the *micro level* (each individual test). This macro rule enforces the same discipline at the *feature level*: do not optimize code that does not yet pass its tests; do not clean up code that does not yet work.
 
@@ -154,9 +154,7 @@ After any mistake or user correction:
 | Writing tests | `testing` |
 | Writing/editing C++ | `code-quality` |
 | Commits or PRs | `versioning` |
-| CI/CD work | `workflow` |
-| Flatpak packaging or GL runtime | `flatpak` |
-| Build or dependencies | `build` |
+| CI/CD (Continuous Delivery) work | `workflow` |
 | Code review | `code-review agent`, 1 per file |
 | Skill review | `writing-skills` + `skill-reviewer` agent template |
 
@@ -179,7 +177,7 @@ Trivial (1 file, 1 step)? -> Implement directly
     v (multi-step)
 Invoke writing-plans -> clarify -> plan -> Skeptic + plan-reviewer pair
     v
-Per todo: in-progress -> PPP gate -> implement -> prove -> done -> commit
+Per todo: in-progress -> PPP (Plain Programmer's Purpose) gate -> implement -> prove -> done -> commit
     v
 Bug? -> systematic-debugging
 Stuck? -> stop, re-plan

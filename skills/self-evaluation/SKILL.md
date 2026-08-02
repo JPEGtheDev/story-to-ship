@@ -68,7 +68,6 @@ Classify each lesson into one of these categories:
 | **Testing** | `testing` skill |
 | **CI/CD** | `workflow` skill |
 | **Documentation** | `documentation` skill |
-| **Build** | `build` skill |
 | **Versioning** | `versioning` skill |
 
 ---

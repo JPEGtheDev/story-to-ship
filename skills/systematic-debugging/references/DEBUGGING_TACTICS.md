@@ -35,7 +35,7 @@ Diagnostic pattern: reproduce the bug with a failing test **first**, then fix. T
 
 A seam is a place where behavior can be changed without editing the code at that location. Michael Feathers: legacy code is code without unit tests.
 
-**Finding seams in GL code:**
+**Finding seams in OpenGL code:**
 - GL state mutation functions (texture binding, buffer upload) are seams if wrapped behind an interface
 - Event dispatch callbacks are seams if the handler is injected rather than hardcoded
 - Shader compilation is a seam if `IOpenGLContext::compileShader()` is mockable
@@ -117,7 +117,7 @@ Corollary: if a subagent cannot restate the problem in its own words at the star
 
 ## Passing Tests, Shipped Defect: Suspect the Requirement First
 
-A green suite that let a real defect through is not automatically a testing-technique problem. Across acceptance tests, unit tests, and test-driven development, the more common cause is that the test's author had not fully grasped the requirement before writing the check -- syntax and tooling are rarely the limiting factor. When a passing suite still lets a defect through, treat a misunderstood requirement as the leading explanation before blaming the technique, and direct the investigation accordingly. The pattern surfaces in several forms: tools such as FIT built to let the business stakeholder write the check directly; paired work catching cases a solo author missed, because the pairing partner's understanding of the requirement differs from the author's own; and developers inventing a stand-in customer role when no one on the team had a firm enough grip on the requirement to spell it out themselves.
+A green suite that let a real defect through is not automatically a testing-technique problem. Across acceptance tests, unit tests, and test-driven development, the more common cause is that the test's author had not fully grasped the requirement before writing the check -- syntax and tooling are rarely the limiting factor. When a passing suite still lets a defect through, treat a misunderstood requirement as the leading explanation before blaming the technique, and direct the investigation accordingly. The pattern surfaces in several forms: tools such as FIT (Framework for Integrated Test) built to let the business stakeholder write the check directly; paired work catching cases a solo author missed, because the pairing partner's understanding of the requirement differs from the author's own; and developers inventing a stand-in customer role when no one on the team had a firm enough grip on the requirement to spell it out themselves.
 
 Watch out: this rests on a handful of anecdotes, not a controlled study -- a heuristic for where to look first, not a settled rule.
 

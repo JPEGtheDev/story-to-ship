@@ -19,21 +19,6 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ---
 
-## The Done Definition Problem
-
-**"Done" is the most overloaded word in software development.** Every misuse is a false completion claim.
-
-| What you finished | Correct vocabulary | NOT "Done" |
-|-------------------|--------------------|------------|
-| Unit tests pass locally | "Verified locally, ready for pipeline" | ~~Done~~ |
-| CI green on branch | "CI green, ready for acceptance review" | ~~Done~~ |
-| Staging deployed and tested | "Staging verified, pending production" | ~~Done~~ |
-| Production deployed, monitored, working | **"Done"** (the only correct use) | -- |
-
-**Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains.
-
----
-
 ## BEFORE PROCEEDING
 
 Apply this BEFORE any completion claim or expression of satisfaction:
@@ -55,6 +40,21 @@ BEFORE claiming any status or expressing satisfaction:
 Skipping any step = lying, not verifying.
 
 **For runtime behavior fixes** (the original bug report described what the user sees, hears, or experiences in the running application): Step 2 (RUN) MUST produce an observation artifact (a screenshot of the relevant user interface (UI) state or a log excerpt from the running process) that shows the reported symptom is absent. A pass/fail test result does not satisfy this step -- it verifies code logic, not observed runtime behavior. Show the observation artifact inline before claiming the fix is complete.
+
+---
+
+## The Done Definition Problem
+
+**"Done" is the most overloaded word in software development.** Every misuse is a false completion claim.
+
+| What you finished | Correct vocabulary | NOT "Done" |
+|-------------------|--------------------|------------|
+| Unit tests pass locally | "Verified locally, ready for pipeline" | ~~Done~~ |
+| CI green on branch | "CI green, ready for acceptance review" | ~~Done~~ |
+| Staging deployed and tested | "Staging verified, pending production" | ~~Done~~ |
+| Production deployed, monitored, working | **"Done"** (the only correct use) | -- |
+
+**Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains.
 
 ---
 
@@ -169,7 +169,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "Small change, can't break things" | Small changes cause subtle failures. |
 | "I ran it earlier" | Earlier run does not cover current changes. |
 | "CI will catch it" | CI is a safety net, not your job. |
-| "Just this once" | No exceptions. |
+| "Just this once" | This "once" becomes the precedent the next one cites. The gate has no exception path. |
 | "I already manually verified" | Manual != automated. Results can't be reproduced or cited. |
 | "Build passed, tests must be fine" | Build and tests are separate gates. |
 | "The automated tests pass -- the runtime behavior fix is done" | Pass/fail tests verify code logic. They do not demonstrate what the user observes in the running application. Show an observation artifact demonstrating the reported symptom is absent. |

@@ -91,13 +91,11 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ### C++ and OpenGL
 | Skill | Purpose |
 |-------|---------|
-| `build` | CMake build, dependency, and Flatpak packaging gates |
 | `architecture-review` | Layer boundary compliance and class hierarchy review |
 | `infrastructure-review` | CI/CMake/Flatpak manifest compliance review |
 | `oop-principles` | Is-A/Has-A (inheritance vs. composition) and SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) gate before any class hierarchy change |
 | `cpp-patterns` | GL resource management and public interface documentation patterns |
 | `cpp-safety` | RAII (Resource Acquisition Is Initialization) and destructor safety for resource-owning classes |
-| `flatpak` | Sandbox-aware Flatpak packaging and debugging |
 | `visual-regression-testing` | Visual baseline management and render regression testing |
 
 ---
@@ -124,7 +122,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 33 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 15 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 
@@ -142,7 +140,7 @@ See CONTRIBUTING.md for how to add a skill and the CI gates.
 
 ## C++ and OpenGL
 
-C++ and OpenGL-specific skills (`build`, `architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `flatpak`, `visual-regression-testing`) are bundled in this plugin. No separate install required.
+C++ and OpenGL-specific skills (`architecture-review`, `infrastructure-review`, `oop-principles`, `cpp-patterns`, `cpp-safety`, `visual-regression-testing`) are bundled in this plugin. No separate install required.
 
 ## License
 

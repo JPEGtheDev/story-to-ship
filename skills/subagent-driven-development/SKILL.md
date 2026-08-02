@@ -23,12 +23,7 @@ Violating the letter of these rules is violating the spirit of these rules.
 
 Pick up todo -> Dispatch implementer -> Handle status code -> Stage 1 spec review -> Stage 2 quality review -> Mark done.
 
-**Status code branches:**
-- `NEEDS_CONTEXT` -> Provide missing info. Re-dispatch.
-- `BLOCKED` -> **Invoke Three Amigos Pivot Assessment (Ceremony 4).** If unavailable: assess, escalate to user.
-- `PARTIAL` -> Verify completed portion. Create new todo(s) for remaining. Stage 1 for completed portion only.
-- `DONE_WITH_CONCERNS` -> Read concerns. Correctness or scope risk? -> **Ceremony 4.** Otherwise -> canary + Stage 1.
-- `DONE` -> Canary confirmation -> Stage 1 -> Stage 2 -> mark done.
+**Status code branches:** See `## Implementer Status Codes` below for all five codes and their required actions.
 
 **After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
@@ -46,7 +41,7 @@ Before dispatching any subagent:
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
-4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `infrastructure-reviewer.md`.
+4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `plan-reviewer.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `skill-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `infrastructure-reviewer.md`.
 5. Agent type is correct for the task: explore for read-only research, code-review for analysis, general-purpose+worktree for file modifications, task for build/test/lint.
 
 [+] All 5 met -> dispatch the agent

@@ -1,6 +1,6 @@
 # Multi-Component Debugging
 
-When a failure could involve multiple layers (e.g., OpenGL, SDL3, shader, parser, UI), standard per-file investigation is insufficient. Use this instrumentation template to isolate the layer boundary where the failure originates.
+When a failure could involve multiple layers (e.g., OpenGL, SDL3, shader, parser, UI (User Interface)), standard per-file investigation is insufficient. Use this instrumentation template to isolate the layer boundary where the failure originates.
 
 ## Layer Boundary Isolation Protocol
 
@@ -39,4 +39,4 @@ Before proposing any fix in a multi-component failure:
 | SDL3 window creates but hangs | SDL3/OpenGL init sequence | Add `SDL_GetError()` and `glGetError()` probes at each init step |
 | Flatpak crash on startup | Library version mismatch | Run `ldd` on the binary; check manifest pinned versions |
 
-For the Particle-Viewer layer taxonomy (SDL3 events -> ViewerApp -> UI -> Graphics -> OpenGL -> Shader -> GPU), see `references/PV_DEBUG_REFERENCE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
+For the Particle-Viewer layer taxonomy (SDL3 events -> ViewerApp -> UI -> Graphics -> OpenGL -> Shader -> GPU (Graphics Processing Unit)), see `references/PV_DEBUG_REFERENCE.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.

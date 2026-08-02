@@ -51,7 +51,7 @@ Use the **least sophisticated double** that answers your question. Reaching for 
 
 ---
 
-## Test Size Taxonomy (SE@G Model)
+## Test Size Taxonomy (Software Engineering at Google Model)
 
 Apply this taxonomy when classifying tests and deciding where they belong:
 

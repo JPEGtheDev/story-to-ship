@@ -158,5 +158,5 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 
 - `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green, happy-path-only doubles)
 - `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
-- `references/TESTING_PATTERNS.md` -- generic testing canon: AAA rules + template, test double taxonomy, test size (SE@G) model, depended-upon behavior rule, coincidence articulation, Agile Alarm Bell, naming examples
+- `references/TESTING_PATTERNS.md` -- generic testing canon: AAA rules + template, test double taxonomy, test size model (Software Engineering at Google), depended-upon behavior rule, coincidence articulation, Agile Alarm Bell, naming examples
 

@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 ## BEFORE PROCEEDING
 
 After you've had the conversation and before generating, mentally verify you have:
-1. **Loaded `references/PV_PROJECT_CONTEXT.md`** if this is a Particle-Viewer session. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific. Use the actual project context from the repo README or the user's description instead.
+1. **Loaded the actual project context** (repo README, docs, or the user's description) BEFORE generating -- never infer scope or functionality from the project's NAME; if the request names functionality that does not exist in the project, ask a clarifying question before generating.
 2. **Confirmed the functionality/component actually exists** (didn't assume based on naming)
 3. Clear understanding of what they want to accomplish
    [-] Ask: "What specifically do you want this story to enable?"
@@ -99,7 +99,6 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 # Instructions for Agent
 
 See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scripts.
-See `references/PV_PROJECT_CONTEXT.md` for project scope verification and reference loading guide (Particle-Viewer sessions only).
 
 **Always include the Effort Estimate section** with:
 - Total premium requests (range)

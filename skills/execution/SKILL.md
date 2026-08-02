@@ -130,7 +130,7 @@ If you catch yourself thinking any of these:
 Before claiming any task done:
 - Diff: `git --no-pager diff --staged` -- read every hunk for accidental changes. **Applies to ALL file types including documentation. Documentation commits are not exempt.**
 
-For project-specific build, test, and format commands, see `references/PROJECT_COMMANDS.md`.
+See the host project's docs for project-specific commands.
 
 ---
 

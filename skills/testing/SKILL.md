@@ -42,7 +42,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 - **Unit test** -- single class/function in isolation -> `tests/core/`
 - **Integration test** -- component interactions -> `tests/integration/`
 
-Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU/display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
+Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU (Graphics Processing Unit)/display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
 
 - **Visual regression test** -- pixel comparison -> load `visual-regression-testing` skill
 - **Test review** -- check existing tests against standards -> apply the `## BEFORE PROCEEDING` checklist
@@ -82,10 +82,10 @@ Before presenting tests, verify:
 6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
 7. External dependencies are mocked (OpenGL, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
 8. No testing of external libraries (std::, third-party code)
-9. Group related configuration into structs/POCOs instead of flat variables
+9. Group related configuration into structs/POCOs (Plain Old C++ Objects) instead of flat variables
 10. Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
 11. Tests compile and pass
-12. For any class whose state feeds the UI: each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
+12. For any class whose state feeds the UI (User Interface): each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
 13. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
 14. For visual regression tests: see visual-regression-testing skill checklist
 

@@ -57,7 +57,7 @@ Apply this taxonomy when classifying tests and deciding where they belong:
 
 | Size | Resource use | Scope | Directory |
 |------|-------------|-------|-----------|
-| **Small** | No I/O, no network, no filesystem, no external processes, no GPU/display context | Single unit in memory | `tests/` root or subdirectory |
+| **Small** | No I/O, no network, no filesystem, no external processes, no GPU (Graphics Processing Unit)/display context | Single unit in memory | `tests/` root or subdirectory |
 | **Medium** | Localhost I/O permitted (files, sockets), no external services, no real GPU/display context | Component interactions, file I/O | `tests/integration/` |
 | **Large** | Real GPU/display context, real GPU, external processes, full system | End-to-end rendering, visual output | `tests/visual-regression/` |
 

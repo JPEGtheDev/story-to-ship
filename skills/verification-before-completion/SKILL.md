@@ -32,8 +32,6 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains.
 
-For Particle-Viewer-specific Done stages, see `references/PV_DONE_DEFINITION.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
-
 ---
 
 ## BEFORE PROCEEDING
@@ -118,10 +116,6 @@ Evidence must be **inline**, not referenced:
 [+] `"Ran <project-test-runner>: **247 passed, 0 failures.** [exit 0]"`
 
 See `references/HONESTY_PATTERNS.md` for why "should work" is banned, process language alternatives, and the 4-Cores final integrity check.
-
----
-
-For Particle-Viewer build and test commands, see `references/PV_VERIFICATION_COMMANDS.md`. If this session is NOT about the Particle-Viewer project, skip this file -- it is PV-specific.
 
 ---
 

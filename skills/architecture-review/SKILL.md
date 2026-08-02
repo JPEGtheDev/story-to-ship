@@ -115,6 +115,6 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 - `code-quality` -- naming conventions and C++ patterns; architecture-review checks structure, code-quality checks form
 - `testing` -- governs what lives in `tests/` vs `src/testing/`; architecture-review enforces the boundary
 - `infrastructure-review` -- CMake build structure; architecture-review checks source structure
-- `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID gate for every class hierarchy change reviewed here
+- `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID (Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion) gate for every class hierarchy change reviewed here
 
 **Design patterns and architectural principles:** `references/DESIGN_PATTERNS.md` and `references/ANTIPATTERNS.md`

@@ -45,7 +45,7 @@ When applying this skill, before the first file modification in any work-loop it
 
 > `Intent: [what this change does in one sentence] -- proven by [the command or check that will verify it]`
 
-This is the observable signal that the PPP gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer reads the event log for this line: a work-loop iteration that modified a file with no preceding `Intent:` line is a skipped gate, reported as a finding.
+This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer reads the event log for this line: a work-loop iteration that modified a file with no preceding `Intent:` line is a skipped gate, reported as a finding.
 
 **Note:** The canary raises the cost of skipping for a compliant agent -- it is not cryptographically bound to execution.
 
@@ -117,7 +117,7 @@ If you catch yourself thinking any of these:
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
 - "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
 - About to write a file while `git branch --show-current` returns `main` or `master` -- **STOP. Return to BEFORE PROCEEDING item 1. Create a new branch before writing any file.**
-- "The user said 'merge first', so I'm authorized to click merge" -- **STOP. Sequence authorization is not actor authorization. Hand off the PR unmerged and ask.**
+- "The user said 'merge first', so I'm authorized to click merge" -- **STOP. Sequence authorization is not actor authorization. See `User-Reserved Decisions` below.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -175,7 +175,7 @@ For trade-off discipline structure and the Approach A/B/Choice template, see `re
 - Refactoring while tests are red (behavior is unknown)
 - Profiling before a clean design exists (profiling a mess optimizes the wrong thing)
 
-For the relationship between Make It Work, Make It Right, Make It Fast (MIWMIRMIF) and the TDD cycle, see `references/EXECUTION_PATTERNS.md`.
+For the relationship between Make It Work, Make It Right, Make It Fast (MIWMIRMIF) and the TDD (Test-Driven Development) cycle, see `references/EXECUTION_PATTERNS.md`.
 
 ---
 
@@ -257,10 +257,10 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
 | "I'm just investigating -- I'll create the branch before I actually start coding" | Investigation shapes the fix before you notice it is shaping it. By the time you "start coding," the investigation has already informed the edit. Run BEFORE PROCEEDING item 1 at skill load, not at first edit. |
-| "The user said 'merge first', so I am authorized to merge" | Sequence authorization is not actor authorization. PR merges, branch structure, and task-completion marking are reserved to the user regardless of instruction sequencing -- hand off and ask. |
+| "The user said 'merge first', so I am authorized to merge" | Sequence authorization is not actor authorization. See `User-Reserved Decisions` above for the full rule. |
 
 ---
 
 ## Quick Reference
 
-See `references/EXECUTION_PATTERNS.md` for: quick-reference flowchart, Profile Before Optimizing, Assign Problems Not Tasks, Technical Debt Visibility, Trade-Off Discipline template, and Continuous Refinement protocol.
+See `references/EXECUTION_PATTERNS.md` for: quick-reference flowchart, Profile Before Optimizing, Assign Problems Not Tasks, Technical Debt Visibility, Technical Debt Tracking Practices, Relentless Testing as Integration Prerequisite, Atomic Refactoring Steps, Refactoring Friction as Signal, Trade-Off Discipline template, Keep Commitments Extended Rationale, Right Wrongs Extended Rules, and Continuous Refinement protocol.

@@ -52,7 +52,8 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 | Task type | Correct agent | Wrong choice |
 |-----------|--------------|--------------|
 | Read-only research across 3+ files -- patterns, symbols, hypotheses | `explore` | `general-purpose` |
-| Code compliance, style, logic, or spec review | `code-review` | `general-purpose` |
+| Skill review (skill `.md` files) | `skill-reviewer` | `general-purpose` |
+| Code review (code/config files) | `code-quality-reviewer` | `general-purpose` |
 | Multi-step implementation with file modifications | `general-purpose` + worktree | `explore` |
 | Build, test, or lint execution -- success/failure result only | `task` | `general-purpose` |
 | Any read-only + write combination | Separate explore and general-purpose agents | One general-purpose for everything |

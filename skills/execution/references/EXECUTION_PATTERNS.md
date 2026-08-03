@@ -155,8 +155,8 @@ After any mistake or user correction:
 | Writing/editing C++ | `code-quality` |
 | Commits or PRs | `versioning` |
 | CI/CD (Continuous Delivery) work | `workflow` |
-| Code review | `code-review agent`, 1 per file |
-| Skill review | `writing-skills` + `skill-reviewer` agent template |
+| Code review (code/config files) | `code-quality-reviewer` agent template, 1 per file |
+| Skill review (skill `.md` files) | `writing-skills` + `skill-reviewer` agent template |
 
 ---
 

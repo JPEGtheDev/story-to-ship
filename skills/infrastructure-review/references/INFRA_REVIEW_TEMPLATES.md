@@ -48,4 +48,4 @@ Run infrastructure-review on any PR that touches:
 - `CMakeLists.txt` -- root or any subdirectory
 - `flatpak/` -- any manifest or build file
 
-Dispatch 1 `infrastructure-reviewer.md` agent per changed file (parallel) -- use `agent_type: "code-review"`. Provide: `{{FILE_PATH}}` and `{{DIFF}}`. Collect all reports before approving the PR.
+Dispatch 1 `infrastructure-reviewer.md` agent per changed file (parallel) -- use `agent_type: "infrastructure-reviewer"`. Provide: `{{FILE_PATH}}` and `{{DIFF}}`. Collect all reports before approving the PR.

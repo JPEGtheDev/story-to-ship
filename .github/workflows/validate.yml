@@ -130,6 +130,7 @@ jobs:
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
           check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit"
+          check agents/architecture-reviewer.md "git -C {{WORKTREE_PATH}} rev-parse --show-toplevel" "{{DIFF_OR_EMPTY}}" "VERDICT: APPROVE | REQUEST CHANGES"
           check skills/execution/SKILL.md "## Canary"
           check skills/honesty/SKILL.md "buried caveat"
           if [ "$missing" -gt 0 ]; then

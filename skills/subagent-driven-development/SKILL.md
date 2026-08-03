@@ -41,8 +41,8 @@ Before dispatching any subagent:
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
-4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `plan-reviewer.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `skill-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `infrastructure-reviewer.md`.
-5. Agent type is correct for the task: explore for read-only research, code-review for analysis, general-purpose+worktree for file modifications, task for build/test/lint.
+4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `plan-reviewer.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `skill-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `infrastructure-reviewer.md`, `architecture-reviewer.md`.
+5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), general-purpose+worktree for file modifications, task for build/test/lint.
 
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
@@ -97,7 +97,8 @@ These thoughts mean stop immediately:
 | Scanning 5+ files for patterns | Yes | explore agent |
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic + plan-reviewer pair (see writing-plans skill) |
-| Code review (per-file) | Yes | code-review agent, 1 per file |
+| Code review (per-file) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- 1 per file |
+| Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
@@ -181,7 +182,7 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "This is just docs, no code review needed" | Documentation errors ship as silently as code bugs. Stage 1 spec compliance applies to every todo without exception. |
 | "I verified one file, the rest are probably fine" | Each file requires its own code-quality reviewer. One agent per file is the rule -- no extrapolation across files. |
 | "The subagent said PASS, that's good enough" | A subagent's self-assessment is not a review. PASS from an implementer means dispatch Stage 1 -- not skip it. |
-| "I'll do a quick scan instead of dispatching a code-review agent" | A quick scan inherits your assumptions. A dispatched code-review agent does not. Dispatch the agent. |
+| "I'll do a quick scan instead of dispatching a reviewer agent" | A quick scan inherits your assumptions. A dispatched `skill-reviewer.md` or `code-quality-reviewer.md` agent does not. Dispatch the agent. |
 | "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step verification above first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |

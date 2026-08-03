@@ -54,7 +54,7 @@ step, so this step only runs when a diff with architecturally relevant content e
 - [ ] An abstraction (interface, base class, plugin point) introduced for a single concrete use case with no second case in sight
 - [ ] A parameter, config option, or hook added for a hypothetical future requirement not driven by any stated need
 - [ ] A generic/configurable mechanism where a direct, concrete implementation would do
-- EXCEPTION (note, do not flag as a violation): a single-implementation interface that exists to invert a dependency across a stated boundary is a design choice -- record it in Notes for the human reviewer, not as a finding.
+- EXCEPTION (note, do not flag as a violation): a single-implementation interface that exists to invert a dependency across a stated boundary, or a seam introduced solely so core logic can be tested without pulling in framework, I/O, or UI dependencies, is a design choice -- record it in Notes for the human reviewer, not as a finding.
 
 ### 2. Clean Architecture (the Dependency Rule)
 - [ ] Source dependencies point outward toward frameworks, I/O, or UI instead of inward toward domain/policy logic

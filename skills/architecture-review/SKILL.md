@@ -72,8 +72,8 @@ Run every item for each file under review:
 4. Do any production (`src/`) files import from `tests/`? (VIOLATION -- production code must never depend on test code)
 5. Are there circular `#include` or import dependencies between any two files in the same layer?
 
-[+] All pass -> verdict: CLEAN
-[-] Any fail -> verdict: VIOLATIONS FOUND -- document every failure in the Review Report
+[+] All pass -> verdict: APPROVE
+[-] Any fail -> verdict: REQUEST CHANGES -- document every failure in the Review Report
 
 ---
 
@@ -81,7 +81,7 @@ Run every item for each file under review:
 
 For the report table template and per-file dispatch instructions, see `references/ARCH_REVIEW_TEMPLATES.md`.
 
-A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in the violations table is resolved.
+A verdict of REQUEST CHANGES means the PR is NOT mergeable until every finding in the table is resolved (findings classified `judgment call` do not block approval on their own).
 
 ---
 
@@ -93,7 +93,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 - "The orchestrator has just this one piece of logic inline, that is fine" -> Stop. Orchestration means delegation. Business, rendering, or compute logic belongs in a domain class, not the orchestrator.
 - "The test utility is small, it won't hurt in src/" -> Stop. Test code in production is a maintenance trap. Flag it.
 - "It's in the same layer, so the dependency is acceptable" -> Stop. Same layer, different files -- check for circular dependencies. Design smell if found.
-- "The violation is minor, I'll note it but give CLEAN" -> Stop. There is no CLEAN with open violations. Verdict is VIOLATIONS FOUND.
+- "The violation is minor, I'll note it but give APPROVE" -> Stop. There is no APPROVE with open violations -- only a finding classified judgment call may stand without blocking. Verdict is REQUEST CHANGES.
 - "It's what we already use/know" -> Stop. Familiarity is not fit. Name the problem-fit argument or run a comparison against at least one alternative; familiarity is a trade-off to state, not a silent default.
 
 ---

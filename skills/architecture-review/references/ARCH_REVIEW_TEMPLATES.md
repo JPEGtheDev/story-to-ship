@@ -14,10 +14,10 @@ Actual dependencies found: [list includes/calls]
 | File | Line | Violation | Fix |
 |------|------|-----------|-----|
 
-### Verdict: CLEAN / VIOLATIONS FOUND
+### Verdict: APPROVE / REQUEST CHANGES
 ```
 
-A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in the violations table is resolved.
+A verdict of REQUEST CHANGES means the PR is NOT mergeable until every finding in the table is resolved (findings classified `judgment call` -- a classification tracked in the dispatched agent's own findings table, not this local one -- do not block approval on their own).
 
 ---
 
@@ -25,7 +25,7 @@ A verdict of VIOLATIONS FOUND means the PR is NOT mergeable until every row in t
 
 For PR reviews or major refactors:
 
-1. Dispatch 1 architecture-review agent per changed file (parallel) -- use `agent_type: "code-review"`
+1. Dispatch 1 architecture-review agent per changed file (parallel) -- use `agent_type: "architecture-reviewer"`
 2. Provide: `{{FILE_PATH}}`, `{{INCLUDE_LIST}}`, and `{{DIFF_OR_EMPTY}}`
 3. Collect all reports before approving the PR
-4. Any VIOLATIONS FOUND verdict = block the PR
+4. Any REQUEST CHANGES verdict = block the PR

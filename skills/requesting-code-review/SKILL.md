@@ -59,19 +59,24 @@ Not all review is equal. State explicitly in the review request:
 
 For non-trivial PRs, dispatch code review agents before requesting human review:
 
-**Rule: one agent per file changed.**
+**Rule: one agent per file changed. Identify the file type first, then dispatch the matching template:**
+
+- Skill `.md` files (in `skills/`) -> `skill-reviewer.md`
+- Code/config files -> `code-quality-reviewer.md`
+- Architecture-relevant changes (available on request, not a mandatory per-file dispatch) -> `architecture-reviewer.md`
 
 ```
-# For each changed file, dispatch:
-task agent_type="code-review" prompt="
+# For each changed file, dispatch the matching template, e.g.:
+task agent_type="code-quality-reviewer" prompt="
 Review [file path] changed in this PR.
 SHA: [commit SHA]
 Focus: [specific concern for this file]
-Return: list of issues by severity (BLOCKER / CONCERN / SUGGESTION)
 "
 ```
 
-**Collect all agent results before acting on any of them.** A BLOCKER from any agent must be resolved before requesting human review.
+**Each template defines its own return format** -- do not impose a generic severity vocabulary on the dispatch prompt. `code-quality-reviewer.md` returns `VERDICT: APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT`. `skill-reviewer.md` returns `Verdict: PASS | PASS (size advisory) | NEEDS WORK`. `architecture-reviewer.md` returns `VERDICT: APPROVE | REQUEST CHANGES`.
+
+**Collect all agent results before acting on any of them.** A REQUEST CHANGES, REJECT, or NEEDS WORK verdict from any agent must be resolved before requesting human review.
 
 **Agent review does NOT replace human review** -- it catches the mechanical issues so human review can focus on design and intent.
 
@@ -120,7 +125,7 @@ If a reviewer approves without commenting on the specific concerns you listed:
 
 ## Red Flags -- STOP
 
-- Opening a pull request before the agent pre-review is complete and all BLOCKERs resolved
+- Opening a pull request before the agent pre-review is complete and all REQUEST CHANGES, REJECT, or NEEDS WORK verdicts are resolved
 - Requesting review without a description of what changed and what to focus on
 - Requesting review while CI is still running or red
 - Requesting review on a draft pull request
@@ -135,5 +140,5 @@ If a reviewer approves without commenting on the specific concerns you listed:
 | "The PR description explains everything -- reviewers will figure it out" | Reviewers read a lot of PRs. A focused review request is faster and produces better feedback. |
 | "I'll just ask for a quick look" | "Quick look" reviews find nothing. State what you want reviewed. |
 | "CI is red but it's a flaky test" | Red CI is red CI. Fix or document the flake; do not request review against it. |
-| "I'll address the agent findings after human review" | Agent BLOCKERs must be resolved first. Human review should not be spent on issues a machine already found. |
+| "I'll address the agent findings after human review" | Agent REQUEST CHANGES, REJECT, or NEEDS WORK verdicts must be resolved first. Human review should not be spent on issues a machine already found. |
 | "I reviewed the diff myself, that's equivalent" | Self-review does not catch the issues a fresh reviewer catches. Dispatch anyway. |

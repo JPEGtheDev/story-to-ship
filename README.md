@@ -111,6 +111,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `code-quality-reviewer` | Stage 2 post-todo review: code quality |
 | `explorer` | Read-only multi-file research |
 | `researcher` | Hypothesis confirmation or denial |
+| `architecture-reviewer` | Architecture and design principle compliance review |
 | `infrastructure-reviewer` | CI/CMake compliance |
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |
@@ -124,7 +125,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 
 Installing this plugin adds:
 - 33 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
-- 15 agents to `.claude/agents/` -- dispatched via the `Agent` tool
+- 16 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.

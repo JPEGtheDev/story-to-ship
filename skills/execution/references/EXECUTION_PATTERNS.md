@@ -158,6 +158,8 @@ After any mistake or user correction:
 | Code review (code/config files) | `code-quality-reviewer` agent template, 1 per file |
 | Skill review (skill `.md` files) | `writing-skills` + `skill-reviewer` agent template |
 
+Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-reference todos in `subagent-driven-development` (SKILL.md); scope from sweeps, never from known-site lists.
+
 ---
 
 ## Communicating Progress -- Extended Rules

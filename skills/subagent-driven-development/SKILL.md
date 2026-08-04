@@ -47,6 +47,8 @@ Before dispatching any subagent:
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
 
+**Unscoped-sweep rule for stale-reference todos:** any todo whose objective is 'fix the remaining/stale X' MUST begin with an unscoped repo-wide sweep; the implementer pastes the sweep command and its full output, and the todo's scope is the adjudicated sweep output -- never a pre-listed file set. Such dispatch prompts MUST NOT contain a 'do not touch any other file' constraint. Stage 1 treats an implementer report lacking the sweep command and its literal output as GAPS. Splitting a 'fix the remaining X' objective into per-site todos with pre-listed files is the same violation -- the sweep still comes first, and the todo set is derived from its adjudicated output.
+
 ---
 
 ## Canary
@@ -86,6 +88,7 @@ These thoughts mean stop immediately:
 | "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
 | "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
 | "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
+| "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
 
 ---
 

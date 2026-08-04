@@ -79,7 +79,11 @@ dependency direction itself.
 - [ ] A hard dependency on a specific external service or library taken directly in core logic when a seam is trivially available and would have deferred the commitment until it is actually needed
 - [ ] A data format or schema frozen into persisted storage or a public surface before any consumer requires it, creating early irreversibility
 - [ ] A configuration value or policy hard-coded at the call site when the requirement that should decide it has not arrived yet
-- Every finding here MUST be classified in the findings table: **reversible** (swapping the choice later is a local, contained change) or **irreversible** (swapping later requires touching call sites, consumers, or data across the codebase)
+- Every finding here MUST be classified in the findings table: **reversible** (swapping the
+  choice later is a local, contained change) or **irreversible** (swapping later requires
+  touching call sites, consumers, or data across the codebase) -- unless the finding meets
+  the Edge-case contract's tension-or-uncertain-adjudication bullet, which classifies it
+  `judgment call` instead.
 
 ### 5. Golden Hammer
 - [ ] A familiar pattern, tool, or idiom applied where the problem shape in this diff does not call for it
@@ -95,10 +99,20 @@ dependency direction itself.
   text with no code structure to evaluate): return `VERDICT: APPROVE` with `Findings: NONE`
   and `Notes: No architecturally relevant changes.` Do not force principle findings onto
   non-architectural text.
-- **Principle conflict on the same code** (e.g., YAGNI vs. Clean Architecture disagreeing
-  about a boundary interface): produce exactly ONE finding naming BOTH principles and the
-  tension, with Classification `judgment call` for the human reviewer. A conflict alone
-  never forces `REQUEST CHANGES` by itself.
+- **Principle tension or uncertain adjudication:** two triggers, one classification.
+  (a) Two principles pull in opposite directions on the same code (e.g., YAGNI vs.
+  Clean Architecture on a boundary interface): produce ONE finding naming BOTH principles
+  and the tension. (b) A checklist hit is real but you cannot decisively
+  adjudicate whether the surrounding context justifies the code: produce the finding
+  naming that principle plus one sentence naming the specific missing fact that would
+  resolve the uncertainty -- if you cannot name the missing fact, the hit is not
+  genuinely uncertain: adjudicate it decisively instead. Classify BOTH forms
+  `judgment call`: they stay visible in the findings table for the human reviewer and
+  never force `REQUEST CHANGES` on their own. Do NOT suppress an uncertain or
+  conflicted finding into Notes and do NOT silently resolve it -- uncertainty belongs
+  in the table, classified. Where the exception note above could plausibly apply but
+  its applicability is itself the uncertain part, that is trigger (b), not the
+  exception -- borderline exception fit is never silent grounds for Notes-only.
 
 ## Evidence rule
 
@@ -122,6 +136,8 @@ note; state "Notes: NONE" when there are none)
 ```
 
 Classification is `reversible` or `irreversible` for every Deferred Decisions finding,
-`judgment call` for every principle-conflict finding, and `-` for everything else. Any open
-finding that is not marked `judgment call` means `VERDICT: REQUEST CHANGES`. A file with only
-Notes (the YAGNI exception) or only `judgment call` findings may still be `APPROVE`.
+`judgment call` for every finding produced by either trigger of the Edge-case contract's
+tension-or-uncertain-adjudication bullet (any principle -- that bullet supersedes the
+per-principle classification rules), and `-` for everything else. Any open finding that is
+not marked `judgment call` means `VERDICT: REQUEST CHANGES`. A file with only Notes (the
+YAGNI exception) or only `judgment call` findings may still be `APPROVE`.

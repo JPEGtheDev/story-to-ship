@@ -92,7 +92,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | Skill | Purpose |
 |-------|---------|
 | `architecture-review` | Layer boundary compliance and class hierarchy review |
-| `infrastructure-review` | CI/CMake/Flatpak manifest compliance review |
+| `infrastructure-review` | CI, build configuration, and packaging manifest compliance review |
 | `oop-principles` | Is-A/Has-A (inheritance vs. composition) and SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) gate before any class hierarchy change |
 | `cpp-patterns` | GL resource management and public interface documentation patterns |
 | `cpp-safety` | RAII (Resource Acquisition Is Initialization) and destructor safety for resource-owning classes |

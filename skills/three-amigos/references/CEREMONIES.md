@@ -157,6 +157,8 @@ Read-set completeness gate: before dispatching any Signoff amigo, extract every 
 - Developer Amigo: Full session history, final code diff, test results summary.
 - Tester Amigo: Full session history, AC list, test coverage summary, edge case list.
 
+Retrospective dispatch prompts supply the evidence record (timeline, artifact paths) and the agenda questions ONLY. A factual timeline entry stating what happened -- including that a defect was found or a review caught it -- is evidence record, not leading. They MUST NOT state the orchestrator's own evaluative conclusion about any agenda question (what a catch means, which process step worked or failed, what the retro should surface) ahead of the amigo's answer -- a pre-stated conclusion converts the retro into confirmation. The orchestrator's own diagnosis may be shared AFTER all verdicts are collected, for synthesis.
+
 ### Agenda -- Questions
 
 1. What went well in the Three Amigos process for this feature?

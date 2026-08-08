@@ -41,9 +41,9 @@ This project uses **zero-manual releases**. Every push to main triggers an autom
 
 | Type | Version Bump | Example |
 |------|-------------|---------|
-| `feat:` | MINOR (0.1.0 -> 0.2.0) | `feat: add particle color picker` |
+| `feat:` | MINOR (0.1.0 -> 0.2.0) | `feat: add query result caching` |
 | `fix:` | PATCH (0.1.0 -> 0.1.1) | `fix: resolve crash on startup` |
-| `feat!:` / `fix!:` / `BREAKING CHANGE:` | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign shader API` |
+| `feat!:` / `fix!:` / `BREAKING CHANGE:` | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
 | `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `perf:` | PATCH (default) | `docs: update README` |
 
 Every commit type triggers at least a PATCH bump. The release workflow specifically detects `feat:` and `fix:` plus any `!` breaking marker.
@@ -66,8 +66,8 @@ The PR title **MUST** use conventional commits format:
 - `feat!: redesign public API`
 
 **Invalid:**
-- [-] "Add particle color customization" (missing type)
-- [-] "Update camera rotation" (missing type)
+- [-] "Add CSV import support" (missing type)
+- [-] "Update index rebuild logic" (missing type)
 
 ### Working on an Existing PR
 

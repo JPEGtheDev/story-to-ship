@@ -11,7 +11,7 @@ see whether it is a known pattern and where its remedy lives.
   (harness-injected pseudo-user turns -- task-notifications, system-reminders, skill-load
   bodies -- filtered out).
 - 140 of those pairs are user corrections, grouped into 46 canonical failure modes.
-- Sources: story-to-ship 92, Particle-Viewer 46, other-project 2 (= 140).
+- Sources: story-to-ship 92, prior C++ project 46, other-project 2 (= 140).
 - Every correction is grounded in a real quoted user message. That grounding is the only
   thing claimed as "verified" -- see the maps-to note below.
 - The registry now holds 47 entries: 46 from the 2026-07-19 user-correction mining run (grouped

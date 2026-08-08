@@ -2,10 +2,10 @@
 
 Concrete examples of lessons captured from past sessions and how they were incorporated into project skills.
 
-Project-specific war stories (Particle-Viewer OpenGL/SDL3/CMake incidents) have been moved to that
-project's own `docs/lessons-learned.md` so this harness-level file stays project-agnostic. Where a
-project-specific entry captured a lesson worth keeping here, a genericized distillation is kept below
-in its place -- the full original story lives in the project doc.
+Project-specific war stories have been moved to their source project's own `docs/lessons-learned.md`
+so this harness-level file stays project-agnostic. Where a project-specific entry captured a lesson
+worth keeping here, a genericized distillation is kept below in its place -- the full original
+story lives in the source project's doc.
 
 ---
 
@@ -17,15 +17,11 @@ in its place -- the full original story lives in the project doc.
 
 **Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every OS a developer tests on.
 
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Binary File I/O").
-
 ### Return Large Stored Objects by Const Reference
 
 **Rule:** When a getter returns a large object (matrix, vector, struct) that is already stored as a member, return it by `const&` instead of by value.
 
 **Why:** Returning by value copies the object on every call. In a hot path (a render loop, a per-frame update), that copy cost compounds silently and is easy to miss in a code review that only checks correctness, not allocation/copy cost.
-
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Return By Const Reference").
 
 ---
 
@@ -45,15 +41,11 @@ in its place -- the full original story lives in the project doc.
 
 **Why:** A missing output directory causes a silent write failure. Without checking the return value, the test (or the run) reports success while no artifact was actually produced -- the failure only surfaces later, far from its cause.
 
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Ensure Output Directories Exist").
-
 ### Binary Seek Tests Need N+1 Records to Reach the Target Offset
 
 **Rule:** When testing that a function seeks to record N in a binary file, the test fixture must contain at least N+1 records. A fixture with only N records makes the seek land past end-of-file, exercising the truncation/EOF branch instead of the intended read branch.
 
 **Why:** An EOF-truncation short read and a successful record read can produce the same failure signature at the assertion level -- the test silently verifies the wrong code path and passes for the wrong reason.
-
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Binary File Tests: Record Count Must Cover Target Frame").
 
 ---
 
@@ -65,8 +57,6 @@ in its place -- the full original story lives in the project doc.
 
 **Why:** Some tool invocations exit clean without ever checking for the class of issue that matters -- silence means "no reported problem," not "verified clean."
 
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Silent Tool Output Does Not Mean Success").
-
 ---
 
 ## Process Lessons
@@ -76,8 +66,6 @@ in its place -- the full original story lives in the project doc.
 **Rule:** When an automated check misclassifies output because of a naming or format mismatch, fix the producer's naming convention -- do not loosen the checker's pattern to accommodate the deviation.
 
 **Why:** A checker's pattern exists to enforce a convention. Expanding the pattern to match every deviation instead of fixing the deviation erodes the convention until the check no longer means anything.
-
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Fix Issues at the Source, Not in CI").
 
 ### Don't Modify README Unless Asked (PR #64)
 
@@ -98,8 +86,6 @@ in its place -- the full original story lives in the project doc.
 **Rule:** When removing a call site (e.g., a feature toggled off by user preference), do not also delete the API method it called -- unless the method is architecturally wrong or duplicates something else. Remove a method because it is structurally incorrect, not merely because it currently has zero callers.
 
 **Why:** Call sites driven by preference or feature flags are volatile and often come back. The underlying API is comparatively stable. Deleting the method on a temporary caller removal creates unnecessary rework the next time the caller returns.
-
-**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Don't Remove Camera API Methods When Only the Call Site Changes").
 
 ### Worktree `../` Relative Path Creates Sibling Outside Repo (Metaballs session)
 

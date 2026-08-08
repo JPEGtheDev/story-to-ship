@@ -47,6 +47,8 @@ Before dispatching any subagent:
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
 
+**Unscoped-sweep rule for stale-reference todos:** any todo whose objective is 'fix the remaining/stale X' MUST begin with an unscoped repo-wide sweep; the implementer pastes the sweep command and its full output, and the todo's scope is the adjudicated sweep output -- never a pre-listed file set. Such dispatch prompts MUST NOT contain a 'do not touch any other file' constraint. Stage 1 treats an implementer report lacking the sweep command and its literal output as GAPS. Splitting a 'fix the remaining X' objective into per-site todos with pre-listed files is the same violation -- the sweep still comes first, and the todo set is derived from its adjudicated output.
+
 ---
 
 ## Canary
@@ -86,6 +88,7 @@ These thoughts mean stop immediately:
 | "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
 | "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
 | "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
+| "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
 
 ---
 
@@ -143,7 +146,7 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 
-**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding. When dispatching Stage 2, pass the implementer's pasted verification output to the reviewer as the {{IMPLEMENTER_EVIDENCE}} value so the reviewer re-runs at least one command and reports MATCH or MISMATCH. A Stage 2 dispatch that omits {{IMPLEMENTER_EVIDENCE}} disables the spot-check and is incomplete.
+**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding. When dispatching Stage 2, pass the implementer's pasted verification output to the reviewer as the {{IMPLEMENTER_EVIDENCE}} value so the reviewer re-runs at least one command and reports MATCH or MISMATCH. A Stage 2 dispatch that omits {{IMPLEMENTER_EVIDENCE}} disables the spot-check and is incomplete. If the diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/: the Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` naming one unscripted real-world case checked against the clause wording. A Stage 2 return without that line, when the trigger matched, is an incomplete review -- re-dispatch. (Trigger is deliberately case-sensitive: uppercase EXCEPTION is the template convention; lowercase 'No exceptions.' boilerplate does not match. Residual false positives are accepted -- the gate favors over-firing.)
 
 BEFORE invoking any reviewer skill:
 1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`.

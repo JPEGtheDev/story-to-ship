@@ -80,6 +80,20 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 ---
 
+## New Gates: Behavioral Evidence for Contract Fixes
+
+**Context:** Applies when fixing a dispatched-agent contract, exception, or carve-out clause (e.g., agents/ templates, skill return-format contracts, gate trigger conditions in skills/) after review or post-merge catch. Does NOT apply to ordinary prose edits with no behavioral contract. If the fixed clause is itself a gate definition, the Gate-Can-Fail Proof Required entry above also applies -- the evidence composes, and the stricter bar (a run showing the previously-missed case is now caught) governs.
+
+**Forces:** Textual review (Stage 1/2 PASS) verifies wording, not behavior; a fix can read correctly and still not change what a dispatched agent does. A "Fixed" claim for a contract clause that no fixture ever exercised is a completion claim without behavioral evidence.
+
+**Solution:** A contract-clause fix may not close as DONE on textual review alone. Textual PASS plus a fixture run exercising the new sub-case (output pasted) = DONE. Without the fixture run, the maximum status is DONE_WITH_CONCERNS with the gap disclosed in the same message -- the word "Fixed" is not available for that change.
+
+**Consequences:** Every contract fix costs one fixture dispatch; that is the price of ruling out text-only closure.
+
+**Enforcement scope:** Reviewers and the coordinator check the fix todo's evidence for a fixture output specific to the new clause; procedurally checkable, no automated detector.
+
+---
+
 ## Pre-PR Checklist
 
 Before creating any PR -- answer all 6 questions:
@@ -155,6 +169,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 - Verified 1 of N parallel edits (N >= 3) -- **STOP. View at least 3 of the N edited files. "They all look the same" is an assumption, not evidence. A malformed edit still counts as a changed file.**
 - "My new test/gate passed on the first run" -- **STOP. A green run alone does not prove the gate can fail. Paste a mutation run or an equivalent failing-case run too.**
 - "Exit 0 means done" / "The count is probably fine" -- **STOP. Compare the result to a known baseline (an expected count, a known-bad case, or a prior-run reference) before accepting it as evidence.**
+- "The contract fix reads correctly" -- **STOP. Textual review does not prove a dispatched agent's behavior changed; run a fixture exercising the new sub-case before claiming DONE.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
 
@@ -176,6 +191,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "They all follow the same pattern" | If the pattern was wrong once, it was wrong for all N. For N >= 3 parallel edits of the same structure: view at least 3 of the edited files before committing -- not 1. |
 | "My new test passed on the first run" | A green run alone does not prove the gate can fail. Paste a mutation run or a failing-case run too -- a fixture that passes regardless of the mechanism is worse than none. |
 | "Exit 0 means done" / "The count is probably fine" | A green signal without a baseline comparison is not verification. State the expected count before reading the result, or name a known-bad case that must still fail. |
+| "The fix looks right on review" | Textual PASS is not behavioral evidence for a contract clause; paste a fixture run for the new sub-case, or cap the claim at DONE_WITH_CONCERNS. |
 
 ---
 

@@ -181,6 +181,8 @@ A self-evaluation that exists only in the message stream is not a self-evaluatio
 
 **Lifecycle:** `self-assessment.md` lives in the session directory, outside the repo. It is never committed.
 
+Staleness rule: if post-hoc evidence surfaces about already-self-assessed work in this session (a user catch, a retro finding, a postmortem discrepancy), append an addendum to self-assessment.md before the next final message. A segment's Trust Audit is stale the moment such evidence appears; an unamended stale verdict is a false record. Enforcement scope: self-check at write time; the same-session postmortem reviewer's existing self-assessment-vs-log discrepancy check surfaces violations after the fact. Cross-session staleness is not mechanically checked.
+
 ---
 
 ## Step 8: Generate Session Summary

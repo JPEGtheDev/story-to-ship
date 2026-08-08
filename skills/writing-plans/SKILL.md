@@ -167,6 +167,12 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 
 **Enforcement is procedural/self-check:** round count > 3 and plan-lines > target-file-lines are both countable from the transcript/plan file. No automated detector exists.
 
+### Untriggered-Branch Cap
+
+If a DoD-specified behavioral branch has had N>=2 fixture attempts that all resolved without triggering it: the next attempt must be a structural redesign (>=5 changed lines vs the prior fixture, measured by diff and pasted), OR the plan escalates to an explicit user ruling quoted in the PR body. Cosmetic retries (<5 changed lines) do not increment the attempt count. Disclosure prose alone cannot close the branch. The comparison baseline is the last attempt that incremented the count (the first fixture, when none has) -- cosmetic retries do not move the baseline.
+
+**Enforcement is procedural/self-check:** successive-fixture diffs and their changed-line counts are pasted artifacts a reviewer can recount; the user ruling, when taken, is quoted in the PR body. No automated detector exists.
+
 ---
 
 ## Heuristics: You Ain't Gonna Need It (YAGNI) - Simplest Thing - Plain Programmer's Purpose (PPP)
@@ -202,6 +208,7 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 | "Skeptic or Refinement approved with conditions, I addressed them -- I can proceed" | NO. Review findings change the plan -- user approval of the original does not carry forward. Re-present the revised post-review plan to the user. Wait for explicit re-approval before creating branches or dispatching implementers. |
 | "The Skeptic is enough -- the plan-reviewer is redundant" | The two jobs do not overlap: the Skeptic finds what is MISSING; the plan-reviewer judges whether what IS present is sound, sequenced, and enforceable. Both fire by default on every non-Discovery plan with 2+ todos -- dispatch them together, not one or the other. |
 | "Round 4 found a real defect, so the review is still productive" | Past round 3 the defects are manufactured by the review itself -- the round-3 cap and the plan-longer-than-file tripwire are the stop signals. Switch review surface to the diff instead of adding rounds. |
+| "The fixture almost triggered it -- one more small variation will do it" | Cosmetic retries (<5 changed lines) do not increment the attempt count and cannot close the branch. After two untriggered attempts: structural redesign with pasted diff, or user ruling. |
 
 ---
 
@@ -227,6 +234,7 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
 - Adversarial plan review is in round 4+, or plan length now exceeds the target file's length -- **STOP. Switch the review surface to the diff (implement, then review the diff). A finding located in text written answering the previous round is a manufactured defect, not evidence to keep reviewing.**
 - A plan claims two competing constraints are both satisfied, and no worked example carries one concrete case end-to-end -- **STOP. Demand one worked example carried end-to-end before any further abstract argument. The example either exposes the hidden cost or proves the design absorbs it; abstract debate does neither.**
+- A DoD behavioral branch has resolved untriggered across two fixture attempts and the next fixture is another small tweak -- **STOP. The next attempt must be a structural redesign (>=5 changed lines vs the baseline fixture, diff pasted), or the plan escalates to an explicit user ruling quoted in the PR body.**
 
 ---
 

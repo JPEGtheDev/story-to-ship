@@ -133,6 +133,8 @@ After all three Discovery amigos return:
 - Developer Amigo: Final code diff, test results, architecture impact.
 - Tester Amigo: Test coverage report, AC list, edge case list from Discovery.
 
+Read-set completeness gate: before dispatching any Signoff amigo, extract every artifact path the PR body, DoD, or todo evidence cites (scratchpad/, /tmp/claude-*, session directories); confirm each appears in that amigo's Read First; paste the path-diff in the dispatch turn. An empty diff is the dispatch precondition. A 'missing X' blocker from a dispatched amigo = first check the dispatch prompt for read-set omission before treating it as a work gap.
+
 ### Agenda -- Questions
 
 1. Does the implemented behavior match every acceptance criterion?
@@ -154,6 +156,8 @@ After all three Discovery amigos return:
 - Business Amigo: Full session history, original Feature Specification, ceremony verdict outputs.
 - Developer Amigo: Full session history, final code diff, test results summary.
 - Tester Amigo: Full session history, AC list, test coverage summary, edge case list.
+
+Retrospective dispatch prompts supply the evidence record (timeline, artifact paths) and the agenda questions ONLY. A factual timeline entry stating what happened -- including that a defect was found or a review caught it -- is evidence record, not leading. They MUST NOT state the orchestrator's own evaluative conclusion about any agenda question (what a catch means, which process step worked or failed, what the retro should surface) ahead of the amigo's answer -- a pre-stated conclusion converts the retro into confirmation. The orchestrator's own diagnosis may be shared AFTER all verdicts are collected, for synthesis. Enforcement scope: self-check by the dispatching orchestrator at prompt-authoring time; the postmortem reviewer's Retro-leading audit row (agents/postmortem-reviewer.md, Step 2) surfaces violations after the fact, when a postmortem runs.
 
 ### Agenda -- Questions
 

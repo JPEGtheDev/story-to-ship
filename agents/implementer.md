@@ -61,7 +61,7 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 ## Constraints
 - Follow the code-quality skill: `clang-format` before every commit, naming conventions, no raw `new`
 - Follow the testing skill: write a failing test FIRST, then implement
-- Follow the cpp-patterns skill: RAII, no GL leaks, docs-same-commit rule
+- Follow the cpp-patterns skill: RAII, no resource leaks, docs-same-commit rule
 - Conventional commits: `<type>[scope]: <description>`
 - Do NOT push to main or the parent branch
 - Commit to your branch: `agent/{{AGENT_NAME}}`
@@ -103,7 +103,7 @@ When writing or extending a language-agnostic reference file (a skill reference 
 | `std::string`, `std::vector` | `string`, `list` |
 | `nullptr` | `null` |
 | `TEST()`, `ASSERT_*`, `EXPECT_*` | `test "name":`, `assert()` |
-| `glm::vec3`, `glm::mat4` | `vec3`, `matrix` |
+| `math::Vec3`, `math::Mat4` | `vec3`, `matrix` |
 | `#include`, `#define` | *(omit; describe behavior in prose)* |
 | `class Foo : public Bar` | `class Foo extends Bar` |
 | `auto x = ...` | `var x = ...` or `x = ...` |
@@ -124,7 +124,7 @@ auto calculateTotal(std::vector<Item> items) -> int {
 }
 ```
 
-Before committing: grep every fenced code block for `std::`, `nullptr`, `#include`, `TEST(`, `ASSERT_`, `EXPECT_`, `glm::`. Any hit is a violation.
+Before committing: grep every fenced code block for `std::`, `nullptr`, `#include`, `TEST(`, `ASSERT_`, `EXPECT_`, `math::`. Any hit is a violation.
 
 ## Skill Content Moves -- Verbatim Gate
 
@@ -137,9 +137,9 @@ When moving content FROM a source file TO a target file (e.g., SKILL.md -> refer
 Removing content from the source without a verified paste in the target is a spec violation. There is no exception for "obviously identical" content.
 
 ## Verification gate before marking done
-1. `cmake --build build` -- must succeed
-2. `./build/tests/ParticleViewerTests` -- all tests green
-3. `find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i` -- format clean
+1. Run the host project's build command (as its docs define it) -- must succeed
+2. Run the host project's test suite -- all tests green
+3. Run the host project's formatter -- format clean
 4. `git diff HEAD~1` -- diff reviewed, no accidental changes
 
 ## Fix Agent Rules

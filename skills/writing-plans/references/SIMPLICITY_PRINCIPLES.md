@@ -23,9 +23,9 @@ Before implementation, write the ideal call site in free-form domain language --
 
 ```
 // Ideal:
-scene.render(particles, camera, lightingModel)
-  .withPostProcessing(bloom, toneMapping)
-  .saveAs("frame.png")
+queryEngine.run(query, connection, indexPlan)
+  .withTransforms(dedupe, normalize)
+  .saveAs("report.csv")
 ```
 
 Then work backward to fit the production language (C++20). If the production language requires significant ceremony to express the ideal, the gap reveals a missing abstraction -- add it.

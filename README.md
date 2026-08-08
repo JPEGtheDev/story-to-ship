@@ -112,7 +112,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | `explorer` | Read-only multi-file research |
 | `researcher` | Hypothesis confirmation or denial |
 | `architecture-reviewer` | Architecture and design principle compliance review |
-| `infrastructure-reviewer` | CI/CMake compliance |
+| `infrastructure-reviewer` | CI/build/packaging compliance |
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |

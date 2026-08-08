@@ -2,33 +2,30 @@
 
 Concrete examples of lessons captured from past sessions and how they were incorporated into project skills.
 
+Project-specific war stories (Particle-Viewer OpenGL/SDL3/CMake incidents) have been moved to that
+project's own `docs/lessons-learned.md` so this harness-level file stays project-agnostic. Where a
+project-specific entry captured a lesson worth keeping here, a genericized distillation is kept below
+in its place -- the full original story lives in the project doc.
+
 ---
 
 ## Code Quality Lessons
 
-### Binary File I/O (PR #73)
+### Open Binary Data Files in Binary Mode
 
-**Problem:** `getCOM()` opened binary data files with text mode (`"r"`), which on Windows translates `\r\n` bytes and corrupts binary reads.
+**Rule:** Always open binary data files with binary mode (`"rb"`/`"wb"`), never text mode (`"r"`/`"w"`).
 
-**Lesson:** Always open binary data files with `"rb"` mode for cross-platform correctness.
+**Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every OS a developer tests on.
 
-**Added to:** `AGENTS.md` -> Error Handling section, `testing` skill -> Key Design Principles
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Binary File I/O").
 
-### Return By Const Reference (PR #73)
+### Return Large Stored Objects by Const Reference
 
-**Problem:** `getProjection()` returned a `glm::mat4` by value, copying a 4x4 matrix every frame in the render loop.
+**Rule:** When a getter returns a large object (matrix, vector, struct) that is already stored as a member, return it by `const&` instead of by value.
 
-**Lesson:** Return large objects (matrices, vectors, structs) by `const&` from getters when the member is stored in the class.
+**Why:** Returning by value copies the object on every call. In a hot path (a render loop, a per-frame update), that copy cost compounds silently and is easy to miss in a code review that only checks correctness, not allocation/copy cost.
 
-**Added to:** `AGENTS.md` -> Common Pitfalls
-
-### GLFW Key Bounds Check (PR #73)
-
-**Problem:** `keys_[key]` indexed without validation. GLFW can pass `GLFW_KEY_UNKNOWN` (-1), causing out-of-bounds access.
-
-**Lesson:** Bounds-check GLFW key callbacks -- `GLFW_KEY_UNKNOWN` is -1.
-
-**Added to:** `AGENTS.md` -> OpenGL Usage section
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Return By Const Reference").
 
 ---
 
@@ -42,135 +39,45 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `testing` skill -> Critical Rules, `TESTING_EXAMPLES.md` -> Incorrect Examples
 
-### Production Classes in Tests (PR #73)
+### Ensure Output Directories Exist Before Writing
 
-**Problem:** Visual regression test helper duplicated Particle's cube generation logic, creating a maintenance burden and false confidence.
+**Rule:** In test setup (or any code that writes output files), create every directory the code writes to -- not only the ones already known to exist -- and check the write/save call's return value instead of assuming success.
 
-**Lesson:** Use production classes (e.g., `Particle`) directly in tests -- never duplicate production logic in test helpers.
+**Why:** A missing output directory causes a silent write failure. Without checking the return value, the test (or the run) reports success while no artifact was actually produced -- the failure only surfaces later, far from its cause.
 
-**Added to:** `testing` skill -> Key Design Principles, `TESTING_EXAMPLES.md` -> correct/incorrect patterns
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Ensure Output Directories Exist").
 
-### Ensure Output Directories Exist (PR #72)
+### Binary Seek Tests Need N+1 Records to Reach the Target Offset
 
-**Problem:** Tests saved artifacts to `artifacts/` but only ensured `baselines/` existed. Silent write failures in CI.
+**Rule:** When testing that a function seeks to record N in a binary file, the test fixture must contain at least N+1 records. A fixture with only N records makes the seek land past end-of-file, exercising the truncation/EOF branch instead of the intended read branch.
 
-**Lesson:** Ensure all output directories exist in test `SetUp()`, and check `save()` return values.
+**Why:** An EOF-truncation short read and a successful record read can produce the same failure signature at the assertion level -- the test silently verifies the wrong code path and passes for the wrong reason.
 
-**Added to:** `testing` skill -> Self-Review Checklist
-
-### Camera Positioning for Visual Tests (PR #71)
-
-**Problem:** Debug camera output was blindly copied as test camera coordinates, but debug shows interactive state, not ideal framing.
-
-**Lesson:** Extract viewing direction from debug output, but calculate distance based on desired viewport coverage. Formula: `distance = subject_size / (coverage_% * tan(FOV/2))`.
-
-**Added to:** `AGENTS.md` -> Visual Regression Tests section, `docs/visual-regression/camera-positioning-lessons-learned.md`
-
----
-
-## Architecture Lessons
-
-### Group Related State Into Structs (PR #73)
-
-**Problem:** `ViewerApp` had 10+ flat member variables for window, rendering, recording state.
-
-**Lesson:** Group related member variables into Plain Old C++ Objects (POCOs)/structs (e.g., `WindowConfig`, `RenderResources`). Structs must provide their own defaults.
-
-**Added to:** `AGENTS.md` -> Data Organization, `testing` skill -> Key Design Principles
-
-### Headers Must Be Self-Contained (PR #70)
-
-**Problem:** `debugOverlay.hpp` used `std::cerr` without including `<iostream>`, relying on transitive includes.
-
-**Lesson:** Headers must include all their own dependencies. Don't rely on transitive includes from other headers.
-
-**Added to:** `AGENTS.md` -> Common Pitfalls
-
-### GL Resource Cleanup (PR #73)
-
-**Problem:** `cleanup()` only deleted FBO, leaking other GL objects (textures, renderbuffers, VAOs, VBOs).
-
-**Lesson:** Clean up ALL GL resources in destructors -- VAOs, VBOs, FBOs, RBOs, textures. Check for non-zero before deleting.
-
-**Added to:** `AGENTS.md` -> Memory Management
-
-### GL_POINT_SIZE_RANGE Clamping (PR #81)
-
-**Problem:** Resolution independence test at 4K computed `gl_PointSize` of 366px, but hardware max was 256px. OpenGL silently clamped it, making the particle appear ~50% smaller. A loose test tolerance (0.01) masked the defect.
-
-**Lesson:** `gl_PointSize` is silently clamped by `GL_POINT_SIZE_RANGE` (256px on Mesa/llvmpipe). When testing resolution-independent scaling, choose camera distances that keep computed point sizes under this limit at all target resolutions. Use tolerances proportional to the values being compared -- an absolute tolerance larger than the expected value itself will mask real failures.
-
-**Added to:** `AGENTS.md` -> OpenGL Usage
-
-### Cross-Mesa Baseline Stability (PR #81)
-
-**Problem:** Adding `* (viewportHeight / REFERENCE_HEIGHT)` to the shader (where both equal 720.0, so `* 1.0`) caused a 1-pixel sprite-boundary difference on CI's Mesa version but not locally. The baseline comparison required 100% pixel match, so 1 pixel out of 921,600 failed the entire test.
-
-**Lesson:** Different Mesa/llvmpipe versions may compile the same shader differently, causing sprite-boundary rounding differences. Visual regression baselines MUST allow a small `MAX_DIFF_RATIO` (e.g., 0.01%) instead of requiring 100% pixel match. Always `ASSERT_TRUE(image.save(...))` artifact writes so debug images are not silently lost.
-
-**Added to:** `AGENTS.md` -> Test Issues
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Binary File Tests: Record Count Must Cover Target Frame").
 
 ---
 
 ## Code Formatting and Verification Lessons
 
-### Silent Tool Output Does Not Mean Success (S5 code-quality audit)
+### Silent Tool Output Is Not Proof of Success
 
-**Problem:** Session 5 ran `clang-format --dry-run -Werror src/shader.hpp` which had no output. Agent interpreted "no output = all files are clean" and skipped detailed verification. Later, an external formatting check failed, revealing that shader.hpp had three formatting issues: (1) exception caught by value instead of const reference, (2) unnecessary semicolons after function closing braces, (3) empty constructor using `{}` instead of `= default`.
+**Rule:** Never interpret "no output" from a dry-run or check command as "nothing to fix." After any formatting or lint pass: (1) run the mutating form and inspect the actual diff, (2) spot-check the diff for patterns the tool is known not to catch, (3) only then trust a clean dry-run result.
 
-**Lesson:** Never rely on tool output silence to mean success. Always:
-1. After running `clang-format -i`, check `git diff` to see actual changes
-2. Visually spot-check modified files for common patterns (trailing semicolons after `}`, exception handling, multi-declarations, bracing)
-3. Only then run the dry-run verification
+**Why:** Some tool invocations exit clean without ever checking for the class of issue that matters -- silence means "no reported problem," not "verified clean."
 
-**Added to:** `code-quality` skill -> Step 1 (Pre-Commit Checklist) + new Step 3 (Human-Reviewable Formatting Patterns table)
-
----
-
-
-### FetchContent for Libraries Without CMakeLists.txt (PR #79, updated PR #82)
-
-**Problem:** ImGui doesn't ship a CMakeLists.txt, so `FetchContent_MakeAvailable()` tries to call `add_subdirectory()` and fails. Using `FetchContent_Populate()` works but is deprecated in CMake 3.31+.
-
-**Lesson:** Use `FetchContent_Declare()` with `SOURCE_SUBDIR` set to a non-existent path, then call `FetchContent_MakeAvailable()`. This downloads the source without attempting `add_subdirectory()`, and avoids the `FetchContent_Populate()` deprecation warning. Then add the source files manually to your target.
-
-**Added to:** `AGENTS.md` -> ImGui Integration
-
-### GLFW Callback Chaining Order (PR #79)
-
-**Problem:** ImGui's GLFW backend saves and chains to existing callbacks when `install_callbacks=true`. If ImGui is initialized before ViewerApp sets its callbacks, the chain is broken.
-
-**Lesson:** Set application GLFW callbacks (e.g., `glfwSetKeyCallback`) **before** calling `ImGui_ImplGlfw_InitForOpenGL(window, true)`. ImGui saves the current callbacks and chains to them, ensuring both ImGui and the application receive input events.
-
-**Added to:** `AGENTS.md` -> ImGui Integration
-
-### ImGui Renders to Default Framebuffer (PR #79)
-
-**Problem:** Needed to ensure ImGui menus don't appear in FBO-based screenshots and frame recordings.
-
-**Lesson:** ImGui renders to the default framebuffer after the FBO blit pass. Since recording reads pixels from the offscreen FBO (before the blit), ImGui content is naturally excluded. This is an architectural advantage of the FBO pipeline -- no special handling needed.
-
-**Added to:** `AGENTS.md` -> ImGui Integration
-
-### Debug Overlay Must Offset for Menu Bar (PR #79)
-
-**Problem:** Debug overlay positioned at y=5 was hidden behind the ImGui menu bar (~25px high). The first line (including FPS counter) was not visible.
-
-**Lesson:** Use ImGui windows instead of raw GL overlays -- `ImGui::GetFrameHeight()` gives the actual menu bar height for dynamic positioning. This avoids hard-coded offsets that break with DPI/font scaling changes.
-
-**Added to:** `AGENTS.md` -> ImGui Integration
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Silent Tool Output Does Not Mean Success").
 
 ---
 
 ## Process Lessons
 
-### Fix Issues at the Source, Not in CI (PR #82)
+### Fix Naming/Categorization Issues at the Source, Not in the Checker
 
-**Problem:** Visual regression test artifacts used names like `single_particle_720p.png` that didn't match the CI workflow regex `_baseline|_current|_diff`. The quick fix was to expand the regex; the correct fix was to rename artifacts at the source.
+**Rule:** When an automated check misclassifies output because of a naming or format mismatch, fix the producer's naming convention -- do not loosen the checker's pattern to accommodate the deviation.
 
-**Lesson:** When CI reports show incorrect categorization (e.g., "unknown" type for test images), fix the naming convention in the test code -- not the CI regex. CI patterns MUST enforce conventions, not accommodate deviations.
+**Why:** A checker's pattern exists to enforce a convention. Expanding the pattern to match every deviation instead of fixing the deviation erodes the convention until the check no longer means anything.
 
-**Added to:** Self-evaluation skill (this file)
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Fix Issues at the Source, Not in CI").
 
 ### Don't Modify README Unless Asked (PR #64)
 
@@ -186,163 +93,13 @@ Concrete examples of lessons captured from past sessions and how they were incor
 
 **Added to:** `AGENTS.md` -> Skill Architecture section
 
-### Always Upload Current Images (PR #64)
+### Do Not Delete a Stable API Method When Only Its Caller Is Removed
 
-**Problem:** Visual regression CI only uploaded artifacts on failure, making it hard to review passing tests.
+**Rule:** When removing a call site (e.g., a feature toggled off by user preference), do not also delete the API method it called -- unless the method is architecturally wrong or duplicates something else. Remove a method because it is structurally incorrect, not merely because it currently has zero callers.
 
-**Lesson:** Always save and upload current rendered images, even when tests pass. Use `if: always()` on upload steps.
+**Why:** Call sites driven by preference or feature flags are volatile and often come back. The underlying API is comparatively stable. Deleting the method on a temporary caller removal creates unnecessary rework the next time the caller returns.
 
-**Added to:** `workflow` skill -> Artifact Upload Pattern
-
----
-
-## SDL3 Migration Lessons
-
-### SDL3 MSAA Strict Enforcement (SDL3 migration PR)
-
-**Problem:** `SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4)` caused `SDL_CreateWindow` to return NULL in Mesa/Xvfb environments. GLFW silently fell back to no MSAA; SDL3 strictly refuses to create the window if the requested visual isn't available.
-
-**Lesson:** Always add a fallback retry for MSAA: attempt creation with 4x MSAA first; if that returns NULL, reset the attribute to 0 and retry. This ensures headless/CI tests can run on software renderers.
-
-**Added to:** `AGENTS.md` -> OpenGL Usage section
-
----
-
-### FetchContent Ordering With Full-CMake Dependencies (SDL3 migration PR)
-
-**Problem:** Adding SDL3 via `FetchContent_MakeAvailable(SDL3)` (which has its own `CMakeLists.txt`) corrupted CMake 3.31's internal FetchContent state, causing subsequent `FetchContent_MakeAvailable(googletest)` to fail with "Internal error: SUBBUILD_DIR not set".
-
-**Lesson:** When mixing FetchContent dependencies, make all lightweight/header-only deps (ImGui) and all non-subdirectory deps (GoogleTest) available **before** a full-CMakeLists dep (SDL3). Declare all deps at the top, then call `FetchContent_MakeAvailable` in a safe order.
-
-**Added to:** `AGENTS.md` -> ImGui Integration / Architecture section
-
----
-
-### Search All Files During Backend Migration (SDL3 migration PR)
-
-**Problem:** During GLFW->SDL3 migration, `src/ui/imgui_menu.cpp` still included `<GLFW/glfw3.h>` and called `glfwGetPrimaryMonitor()`. Initial grep missed it because the search targeted `viewer_app*`, `camera*`, and `main.cpp` but not the UI layer.
-
-**Lesson:** When migrating a windowing/graphics backend, search ALL source files (`find src -name "*.cpp" -o -name "*.hpp" | xargs grep OLDLIBNAME`) rather than targeting specific files by name. The old API may appear in unexpected locations (monitor queries in menu code, etc.).
-
-**Added to:** `AGENTS.md` -> Common Pitfalls (as a Build Issues entry)
-
----
-
-### SDL3 Subsystem Flag Missing Causes Silent Failure (gamepad PR)
-
-**Problem:** Gamepad input was implemented and merged but never worked on any device (Steam Deck, Bluetooth, USB). `SDL_Init(SDL_INIT_VIDEO)` was never updated when the gamepad subsystem was added. Without `SDL_INIT_GAMEPAD`, `SDL_GetGamepads()` returns empty, `SDL_EVENT_GAMEPAD_ADDED` is never fired, and all controllers are invisible -- no error, no warning.
-
-**Lesson:** Every SDL3 subsystem needs its `SDL_INIT_*` flag in the `SDL_Init` call in `SDL3Context.cpp`. Adding a new SDL3 feature (gamepad, audio, haptic) **always** requires updating this call. Missing a flag is a silent failure -- SDL3 does not warn that the subsystem was never started.
-
-**Added to:** `code-quality` skill -> OpenGL Usage section
-
----
-
-### SDL3 `*ForID` Functions Avoid Unnecessary Device Open/Close (gamepad PR)
-
-**Problem:** In `addXInputMapping()`, the GUID was retrieved by calling `SDL_OpenJoystick()`, reading the GUID with `SDL_GetJoystickGUID()`, then calling `SDL_CloseJoystick()`. SDL3 provides `SDL_GetJoystickGUIDForID(instance_id)` specifically to avoid this open/close dance.
-
-**Lesson:** When querying joystick properties by instance ID, always check for a `SDL_Get*ForID()` variant first: `SDL_GetJoystickGUIDForID`, `SDL_GetJoystickTypeForID`, `SDL_GetJoystickVendorForID`, `SDL_GetJoystickProductForID`, etc. Opening a device to read a property and immediately closing it wastes a file handle and SDL3 reference counts unnecessarily.
-
-**Added to:** `code-quality` skill -> OpenGL Usage section
-
----
-
-### SDL3 Joystick Type Is Distro-Dependent (gamepad PR)
-
-**Problem:** `SDL_GetJoystickTypeForID()` returns `SDL_JOYSTICK_TYPE_GAMEPAD` on SteamOS for the 8BitDo 2.4GHz dongle, but `SDL_JOYSTICK_TYPE_UNKNOWN` on OpenSuse Tumbleweed (and presumably other non-SteamOS distros). The SDL3 joystick type is derived from udev properties that Valve sets via custom rules on SteamOS but are absent on stock Linux. The fallback that only checked `SDL_JOYSTICK_TYPE_GAMEPAD` silently skipped the device on OpenSuse.
-
-**Lesson:** Never rely on `SDL_GetJoystickTypeForID() == SDL_JOYSTICK_TYPE_GAMEPAD` alone for cross-distro gamepad detection. Always pair it with a capability-based fallback for `SDL_JOYSTICK_TYPE_UNKNOWN` devices: open the joystick briefly, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, close it, and treat as a gamepad candidate if the heuristic passes.
-
-**Added to:** `code-quality` skill -> OpenGL Usage section
-
----
-
-### Gamepad Hold-Button -> KeyReader Routing Causes Repeated Single-Press Events (gamepad PR)
-
-**Problem:** To mirror Shift-key speed boost on the B gamepad button, initial implementation called `cam_->KeyReader(SDL_SCANCODE_LSHIFT, held)` every frame. `KeyReader` has a `if (is_pressed)` single-press dispatch block -- calling it every frame with `is_pressed=true` would fire any single-press handlers for that scancode on every frame, not just on the initial press.
-
-**Lesson:** For gamepad hold-buttons that mirror keyboard *held* keys (e.g. B -> Shift for speed boost), **never** route through `Camera::KeyReader()`. Instead, add a dedicated thin method that sets only the key state directly (e.g. `Camera::setSpeedBoost(bool active) { keys[SDL_SCANCODE_LSHIFT] = active; }`). Call it every frame with the current hold state -- it's safe because it bypasses the single-press dispatch entirely.
-
-**Added to:** `code-quality` skill -> OpenGL Usage section
-
----
-
-### Don't Remove Camera API Methods When Only the Call Site Changes (gamepad PR)
-
-**Problem:** When L3/R3 sphere distance controls were removed at user request, `isRenderingSphere()` was also deleted from `Camera` because `viewer_app.cpp` was the only caller. One session later, the user re-requested L3/R3, requiring `isRenderingSphere()` to be restored -- unnecessary rework.
-
-**Lesson:** When removing a call site in `viewer_app.cpp` (e.g. a gamepad feature), **do not also delete the supporting `Camera` public method**. The Camera API is stable; call sites in `viewer_app` are volatile (controlled by user preference). Only remove a Camera method if it is architecturally incorrect or duplicates something, not merely because it has no callers at the moment.
-
-**Added to:** `code-quality` skill -> Step 7: Adding a Feature / Fixing a Bug
-
-### EXPECT_EQ Over EXPECT_LE for Deterministic Counts (PR #112)
-
-**Problem:** `FrameCache` pending-cap test used `EXPECT_LE(callCount, window)`. The count is deterministically equal to `window` -- using LE hid the fact that a regression (under-enqueue) would still pass.
-
-**Lesson:** Use `EXPECT_EQ` when the value is deterministic. `EXPECT_LE`/`EXPECT_GE` are for inherently non-deterministic values (timing, OS scheduling). An overly lenient bound masks regressions.
-
-**Added to:** `testing` skill -> `TESTING_EXAMPLES.md` -> Incorrect Examples
-
----
-
-### Binary File Tests: Record Count Must Cover Target Frame (PR #112)
-
-**Problem:** `COMFileProvider_FrameIndexMismatch_ReturnsFalse` was written with a single-record file and a request for frame 1. `fseek` to frame 1 went past EOF, so `fread` returned 0 (truncation), exercising the wrong branch.
-
-**Lesson:** When writing a binary file test that seeks to frame N, write at least N+1 records so `fseek` lands within the file and `fread` actually reads the target record. A single-record file will always produce a truncation result for any frame > 0.
-
-**Added to:** `testing` skill -> `TESTING_EXAMPLES.md` -> Incorrect Examples
-
----
-
-### Full Docstring Rewrite Required When void->bool (PR #112)
-
-**Problem:** After changing `getCOM()` from void to bool, the docstring was patched to mention the return value, but the first sentence still said "caller must call checkCOM() first" while a later sentence said "no extra checkCOM round-trip". The two sentences contradicted each other.
-
-**Lesson:** When changing a function's calling contract (especially void->bool), rewrite the *entire* docstring -- don't patch it. The new contract (all false-return cases, what the caller need not do) renders the old docstring structurally incorrect and patching a structurally wrong docstring still leaves it wrong.
-
-**Added to:** Self-evaluation skill (this file)
-
----
-
-### Test Names Must Describe Behavior Proven, Not Return Value (PR #112, round 2)
-
-**Problem:** `GetCOM_ValidFile_Frame1_ReturnsTrue` described the return value, not what property was being verified. Code review renamed it to `GetCOM_ValidFile_Frame1_SeekIsAbsolute` -- the test was specifically checking that `SEEK_SET` (absolute seek) was used.
-
-**Lesson:** The `_ExpectedResult` segment of `UnitName_StateUnderTest_ExpectedResult` must encode the *invariant or property proven*, not just the return value. `_SeekIsAbsolute` answers "what holds?"; `_ReturnsTrue` answers "what came back?" -- the latter masks what the test is actually verifying.
-
-**Added to:** `testing` skill -> Naming Convention section
-
----
-
-### Failure-Path Tests Must Assert Output Parameters Are Unchanged (PR #112, round 2)
-
-**Problem:** Failure-path tests for `getCOM()` only called `EXPECT_FALSE(...)` without asserting that the output parameter `value` was unchanged. A regression that modified `value` even on failure would pass all tests.
-
-**Lesson:** For any function returning bool/error-code: in failure-path tests, always assert output parameters remain at their initial value (`EXPECT_EQ(outValue, glm::vec3(0.f))` after `EXPECT_FALSE(...)`). Initialize output params to a known value in Arrange so the Assert is meaningful.
-
-**Added to:** `testing` skill -> Self-Review Checklist
-
----
-
-### Two-Step Factory Method Exception Safety (PR #112, round 2)
-
-**Problem:** `createCOMInfrastructure()` allocated `com_executor_` then `com_cache_`. If `COMCache` constructor threw, `com_executor_` leaked because the destructor was never called (method-level allocation, not a constructor).
-
-**Lesson:** When a factory method (not a constructor) sequentially allocates two raw pointers, wrap the second `new` in try-catch: delete and null the first pointer before rethrowing. This is the raw-pointer equivalent of scope-bound guards when `unique_ptr` is impractical.
-
-**Added to:** `cpp-safety` skill -> Constructor Rule section
-
----
-
-### Expose Derived Quantities on the Interface to Prevent DRY Violations (PR #112, round 2)
-
-**Problem:** `viewer_app.cpp` computed `bytes_used = frame_cache_->capacity() * particles_per_frame * sizeof(glm::vec4)` -- duplicating `FrameCache`'s internal `frame_size_bytes` formula. If per-particle data layout changed, the call site would silently produce wrong values.
-
-**Lesson:** When a call site derives a value from an interface (counts, sizes, compound formulas), add the derived quantity as a virtual method on the interface. The concrete class is the single source of truth; callers receive the value without re-deriving it. Signal: "if the formula changes, I need to update it in N places."
-
-**Added to:** `cpp-patterns` skill -> DRY section
+**Full war story:** moved to Particle-Viewer `docs/lessons-learned.md` ("Don't Remove Camera API Methods When Only the Call Site Changes").
 
 ### Worktree `../` Relative Path Creates Sibling Outside Repo (Metaballs session)
 

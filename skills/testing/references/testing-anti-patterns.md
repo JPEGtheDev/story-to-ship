@@ -14,18 +14,18 @@ Load this reference when writing tests, adding mocks, or tempted to add test-onl
 
 ## Anti-Pattern 1: Testing Mock Behavior
 
-**The trap:** You set up a `MockOpenGL`, call the code under test, then assert that the mock was called -- instead of asserting what the code _produced_.
+**The trap:** You set up a `MockDatabase`, call the code under test, then assert that the mock was called -- instead of asserting what the code _produced_.
 
 ```cpp
 // BAD: asserting mock was called proves nothing about real behavior
-TEST(ShaderTest, Compile_ValidSource_Succeeds)
+TEST(QueryCompilerTest, Compile_ValidSource_Succeeds)
 {
     // Arrange
-    MockOpenGL mockGL;
-    EXPECT_CALL(mockGL, glCreateShader(_)).Times(1);  // <- tests mock, not behavior
+    MockDatabase mockDB;
+    EXPECT_CALL(mockDB, compileQuery(_)).Times(1);  // <- tests mock, not behavior
 
     // Act
-    Shader shader(mockGL, vertSrc, fragSrc);
+    QueryCompiler compiler(mockDB, querySrc);
 
     // Assert
     // Nothing -- the EXPECT_CALL IS the assertion. This is wrong.
@@ -34,17 +34,17 @@ TEST(ShaderTest, Compile_ValidSource_Succeeds)
 
 ```cpp
 // GOOD: assert what the production code actually produces
-TEST(ShaderTest, Compile_ValidSource_ProgramIdIsNonZero)
+TEST(QueryCompilerTest, Compile_ValidSource_PlanIdIsNonZero)
 {
     // Arrange
-    MockOpenGL mockGL;
-    mockGL.DelegateToFake();  // fake returns realistic GL ids
+    MockDatabase mockDB;
+    mockDB.DelegateToFake();  // fake returns realistic plan ids
 
     // Act
-    Shader shader(mockGL, vertSrc, fragSrc);
+    QueryCompiler compiler(mockDB, querySrc);
 
     // Assert
-    EXPECT_NE(shader.getProgramId(), 0u);
+    EXPECT_NE(compiler.getPlanId(), 0u);
 }
 ```
 
@@ -67,20 +67,20 @@ TEST(ShaderTest, Compile_ValidSource_ProgramIdIsNonZero)
 
 ```cpp
 // BAD: production class polluted with test-only hook
-class Renderer {
+class IndexBuilder {
 public:
-    void render(const Scene& scene);
+    void build(const Dataset& dataset);
     void resetForTest();  // <- never called in production, dangerous
 };
 ```
 
 ```cpp
 // GOOD: test fixture owns its own lifecycle
-class RendererTest : public ::testing::Test {
+class IndexBuilderTest : public ::testing::Test {
 protected:
-    void SetUp() override   { renderer_ = std::make_unique<Renderer>(); }
-    void TearDown() override { renderer_.reset(); }
-    std::unique_ptr<Renderer> renderer_;
+    void SetUp() override   { builder_ = std::make_unique<IndexBuilder>(); }
+    void TearDown() override { builder_.reset(); }
+    std::unique_ptr<IndexBuilder> builder_;
 };
 ```
 
@@ -92,32 +92,32 @@ protected:
 
 ## Anti-Pattern 3: Mocking Without Understanding
 
-**The trap:** `MockOpenGL` makes tests compile, so you mock every GL call and ship the test -- without ever running the real path or knowing which calls actually matter.
+**The trap:** `MockDatabase` makes tests compile, so you mock every database call and ship the test -- without ever running the real path or knowing which calls actually matter.
 
 **Why it is wrong:** if you mock the very method that produces the state your test depends on, the test becomes circular. It passes because the mock returns what you told it to return, not because the code is correct.
 
 **The process:**
-1. Run the test against real code first -- even if it crashes or fails due to missing GL context
-2. Read the failure. Understand what the code needs from the GL layer
-3. Mock ONLY the GL boundary calls. Let the logic above the mock run for real
+1. Run the test against real code first -- even if it crashes or fails due to a missing database connection
+2. Read the failure. Understand what the code needs from the database layer
+3. Mock ONLY the database boundary calls. Let the logic above the mock run for real
 
 ```cpp
-// BAD: mocking glGetError "to be safe" when the test doesn't need it
-MockOpenGL mockGL;
-ON_CALL(mockGL, glGetError()).WillByDefault(Return(GL_NO_ERROR));
-ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1));
-ON_CALL(mockGL, glBindBuffer(_, _)).WillByDefault(Return());
-// ...20 more lines of mock setup for a test that checks a matrix calculation
+// BAD: mocking getLastError "to be safe" when the test doesn't need it
+MockDatabase mockDB;
+ON_CALL(mockDB, getLastError()).WillByDefault(Return(DB_NO_ERROR));
+ON_CALL(mockDB, openConnection()).WillByDefault(Return(1));
+ON_CALL(mockDB, bindParameter(_, _)).WillByDefault(Return());
+// ...20 more lines of mock setup for a test that checks a depth calculation
 ```
 
 ```cpp
-// GOOD: mock only the GL boundary; let the math run for real
-MockOpenGL mockGL;
-ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1));
+// GOOD: mock only the database boundary; let the math run for real
+MockDatabase mockDB;
+ON_CALL(mockDB, openConnection()).WillByDefault(Return(1));
 
-Camera camera(800, 600);  // no GL needed -- camera is pure math
-camera.moveForward();
-EXPECT_LT(camera.cameraPos.z, 0.0f);
+Submarine submarine(800, 600);  // maxDepth, ballastCapacity -- no DB needed, pure math
+submarine.dive();
+EXPECT_LT(submarine.position.z, 0.0f);
 ```
 
 **Gate function -- BEFORE mocking any method:**
@@ -127,28 +127,28 @@ EXPECT_LT(camera.cameraPos.z, 0.0f);
 
 ## Anti-Pattern 4: Incomplete Mock Data
 
-**The trap:** A test needs particle data, so you create a `std::vector<glm::vec4>` with one element and a made-up value -- without matching the layout the production code actually expects.
+**The trap:** A test needs index-entry data, so you create a `std::vector<std::array<float, 4>>` with one element and a made-up value -- without matching the layout the production code actually expects.
 
 **Why it is wrong:** the test passes because the mocked data never exercises structural assumptions. When real data arrives, the code fails.
 
 **The fix:** mirror the complete real data structure.
 
 ```cpp
-// BAD: partial mock -- real code expects w component to encode particle type
-std::vector<glm::vec4> particles = { {1.0f, 2.0f, 3.0f, 0.0f} };  // w=0 is uninitialized
+// BAD: partial mock -- real code expects the 4th element to encode record type
+std::vector<std::array<float, 4>> entries = { {1.0f, 2.0f, 3.0f, 0.0f} };  // last field is uninitialized
 
-// GOOD: mirror the real layout (x,y,z = position, w = particle type id)
-std::vector<glm::vec4> particles = {
+// GOOD: mirror the real layout (first 3 = coordinates, 4th = record type id)
+std::vector<std::array<float, 4>> entries = {
     {1.0f,  2.0f, 3.0f, 1.0f},   // type 1
     {-1.0f, 0.0f, 1.0f, 2.0f},   // type 2
 };
 ```
 
-When a production factory or generator method already produces the exact structure the code needs, use it -- for test data here, the production `Particle` class. Otherwise, hand-build data that mirrors the complete real structure (see the GOOD example above):
+When a production factory or generator method already produces the exact structure the code needs, use it -- for test data here, the production `IndexEntry` class. Otherwise, hand-build data that mirrors the complete real structure (see the GOOD example above):
 
 ```cpp
-Particle particles;
-particles.loadDefaultCube();  // real production method -- no duplication
+IndexEntry entries;
+entries.loadDefaultBatch();  // real production method -- no duplication
 ```
 
 ---
@@ -163,7 +163,7 @@ particles.loadDefaultCube();  // real production method -- no duplication
 
 ```
 BAD sequence:
-  1. Render scene
+  1. Generate report
   2. Save as baseline.png
   3. Write test comparing against baseline.png
   4. Test passes [+]
@@ -172,7 +172,7 @@ BAD sequence:
 GOOD sequence:
   1. Write the test with no baseline (or a deliberately wrong one)
   2. Run the test -> it FAILS [-]  (this is RED -- required)
-  3. Inspect the failure: is the rendered output visually correct?
+  3. Inspect the failure: is the output artifact correct?
   4. If yes: promote it to baseline.png
   5. Run the test -> it PASSES [+]  (GREEN)
 ```
@@ -183,45 +183,45 @@ The visual test **MUST fail before the baseline is correct.** If it never failed
 
 ## Anti-Pattern 6: Happy-Path-Only Doubles
 
-**The trap:** You mock a failure-capable collaborator -- file I/O, a GL call, an allocator -- and every configured return is a success value. The failure branch in the production code that handles that collaborator's error case is never executed by any test.
+**The trap:** You mock a failure-capable collaborator -- file I/O, a database call, an allocator -- and every configured return is a success value. The failure branch in the production code that handles that collaborator's error case is never executed by any test.
 
 **Why it is wrong:** the rare failure is exactly what a double is _for_. Real collaborators fail rarely and nondeterministically -- a double is the only way to make that branch run deterministically, on every run. A double that only ever hands back success values idealizes the collaborator away instead of standing in for it.
 
-This does not contradict using a happy-path default: Anti-Pattern 3's GOOD example sets `ON_CALL(mockGL, glCreateBuffer()).WillByDefault(Return(1))` so the test can target pure logic above the boundary -- that is a legitimate happy-path default. The defect this entry names is different: no test anywhere in the suite ever overrides such a default to force the failure branch.
+This does not contradict using a happy-path default: Anti-Pattern 3's GOOD example sets `ON_CALL(mockDB, openConnection()).WillByDefault(Return(1))` so the test can target pure logic above the boundary -- that is a legitimate happy-path default. The defect this entry names is different: no test anywhere in the suite ever overrides such a default to force the failure branch.
 
 **The fix:** for each mocked failure-capable call, add at least one test that forces its failure mode, or state in the test why this collaborator cannot fail.
 
 ```cpp
 // BAD: every configured return is success -- the error path never runs
-TEST(ShaderTest, Compile_ValidSource_Succeeds)
+TEST(QueryCompilerTest, Compile_ValidSource_Succeeds)
 {
     // Arrange
-    MockOpenGL mockGL;
-    ON_CALL(mockGL, glGetShaderiv(_, _, _)).WillByDefault(SetArgPointee<2>(GL_TRUE));
+    MockDatabase mockDB;
+    ON_CALL(mockDB, getCompileStatus(_, _, _)).WillByDefault(SetArgPointee<2>(true));
 
     // Act
-    Shader shader(mockGL, vertSrc, fragSrc);
+    QueryCompiler compiler(mockDB, querySrc);
 
     // Assert
-    EXPECT_TRUE(shader.isValid());
-    // No test anywhere forces glGetShaderiv to report failure --
-    // the error-handling branch in Shader is never exercised.
+    EXPECT_TRUE(compiler.isValid());
+    // No test anywhere forces getCompileStatus to report failure --
+    // the error-handling branch in QueryCompiler is never exercised.
 }
 ```
 
 ```cpp
 // GOOD: a companion test forces the failure mode deterministically
-TEST(ShaderTest, Compile_ShaderCompileFails_IsValidReturnsFalse)
+TEST(QueryCompilerTest, Compile_QueryCompileFails_IsValidReturnsFalse)
 {
     // Arrange
-    MockOpenGL mockGL;
-    ON_CALL(mockGL, glGetShaderiv(_, _, _)).WillByDefault(SetArgPointee<2>(GL_FALSE));
+    MockDatabase mockDB;
+    ON_CALL(mockDB, getCompileStatus(_, _, _)).WillByDefault(SetArgPointee<2>(false));
 
     // Act
-    Shader shader(mockGL, vertSrc, fragSrc);
+    QueryCompiler compiler(mockDB, querySrc);
 
     // Assert
-    EXPECT_FALSE(shader.isValid());
+    EXPECT_FALSE(compiler.isValid());
 }
 ```
 

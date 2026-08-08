@@ -45,7 +45,7 @@ Not all review is equal. State explicitly in the review request:
 **Template:**
 ```
 ## Review focus
-- [ ] [Specific concern 1 -- e.g., "Is the error handling in SDL3Context::init() complete?"]
+- [ ] [Specific concern 1 -- e.g., "Is the error handling in DatabaseConnection::open() complete?"]
 - [ ] [Specific concern 2 -- e.g., "Does the mock usage in test X correctly isolate the unit?"]
 
 ## Not requesting review on

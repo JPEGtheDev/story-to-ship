@@ -10,7 +10,7 @@ Start every design session by writing the ideal interface in free-form domain no
 
 ```
 // Ideal API (unconstrained):
-particles.simulate(dt).under(gravity, drag).clampTo(bounds)
+queryEngine.compileQuery(query).under(memoryBudget, timeBudget).clampTo(rowLimit)
 ```
 
 Then work backward to production code. The gap between the ideal and what the language allows reveals where abstractions are missing. This technique prevents language constraints from limiting design thinking.
@@ -129,7 +129,7 @@ After generation is complete: switch modes. Apply the Six Thinking Hats or a Ske
 **Good clarifying questions:**
 - "Should this work with existing data formats or a new format?"
 - "Is this feature gated by a user preference or always active?"
-- "Does 'fast' mean under 16ms per frame, or just noticeably faster?"
+- "Does 'fast' mean under 100ms per query, or just noticeably faster?"
 
 **Bad clarifying questions (don't ask):**
 - Hypotheticals you can answer by reading the codebase

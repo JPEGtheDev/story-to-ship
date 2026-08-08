@@ -94,16 +94,16 @@ Test code requires its own refactoring discipline. Just like production code can
       createDatabase()
       createNetwork()
       createFileSystem()
-      createRenderer()
-      createParticleSystem()
+      createQueryEngine()
+      createIndexer()
       createUI()
       createNetworkClients(10)
-      // ... test only needs one renderer
+      // ... test only needs one query engine
   }
 
 [+] GOOD:
   setUp() {
-      renderer = createRenderer()
+      queryEngine = createQueryEngine()
       // test creates additional state it actually needs
   }
 ```
@@ -297,21 +297,21 @@ Key principle: **test duplication is more tolerable than production duplication*
 ```
 [-] BAD: Over-abstracted test that obscures the behavior
   test "SeniorityAllValid":
-      cam = makeValidCamera(cameraPerspective)
-      verifyBehavior(cam, expectedStateA)
-  // Reader has to trace through makeValidCamera and verifyBehavior to understand what's being tested
+      sub = makeValidSubmarine(submarineClassStandard)
+      verifyBehavior(sub, expectedStateA)
+  // Reader has to trace through makeValidSubmarine and verifyBehavior to understand what's being tested
 
 [+] GOOD: Test repeats some setup but intent is clear
-  test "MoveForward_IncreasesDepth":
+  test "Dive_IncreasesDepth":
       // Arrange
-      camera = new Camera(width: 800, height: 600)
-      camera.position = Vector3(0, 0, 0)
+      submarine = new Submarine(maxDepth: 800, ballastCapacity: 600)
+      submarine.position = Vector3(0, 0, 0)
       
       // Act
-      camera.moveForward()
+      submarine.dive()
       
       // Assert
-      expectLt(camera.position.z, 0)
+      expectLt(submarine.position.z, 0)
 ```
 
 The balance: extract duplication that obscures nothing; keep inline whatever the reader needs to understand the test's intent.
@@ -332,8 +332,8 @@ If a test has always passed:
 - The test encodes the current behavior (buggy or correct) as "correct"
 
 **Examples:**
-- Visual regression test baseline created from first render without ever seeing the test fail
-- Baseline image generated from the same render loop it's testing
+- Visual regression test baseline created from first run without ever seeing the test fail
+- Baseline image generated from the same code path it's testing
 - Integration test that passes immediately without verifying any assertions are actually checked
 
 **Fix:**

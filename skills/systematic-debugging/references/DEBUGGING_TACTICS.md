@@ -9,18 +9,18 @@ Source: Ward Cunningham's C2 wiki audit -- tactics for investigating failures, w
 Build test instrumentation into code during initial development, not after. Add test-mode hooks that expose timing, state, and control flow:
 
 ```cpp
-class ParticleUpdater {
+class ImportWorker {
 #ifdef TEST_MODE
     std::chrono::milliseconds testingDelay{0};
 public:
     void setTestDelay(std::chrono::milliseconds d) { testingDelay = d; }
 #endif
 
-    void update() {
+    void process() {
 #ifdef TEST_MODE
         std::this_thread::sleep_for(testingDelay);
 #endif
-        // ... actual update logic
+        // ... actual import logic
     }
 };
 ```
@@ -35,10 +35,10 @@ Diagnostic pattern: reproduce the bug with a failing test **first**, then fix. T
 
 A seam is a place where behavior can be changed without editing the code at that location. Michael Feathers: legacy code is code without unit tests.
 
-**Finding seams in OpenGL code:**
-- GL state mutation functions (texture binding, buffer upload) are seams if wrapped behind an interface
+**Finding seams in query-engine code:**
+- State mutation functions (cache writes, index updates) are seams if wrapped behind an interface
 - Event dispatch callbacks are seams if the handler is injected rather than hardcoded
-- Shader compilation is a seam if `IOpenGLContext::compileShader()` is mockable
+- Query compilation is a seam if `IQueryEngine::compileQuery()` is mockable
 
 To add tests to legacy code: identify a seam, inject a test double through it, SafeGuard the existing behavior with characterization tests before refactoring.
 
@@ -48,7 +48,7 @@ To add tests to legacy code: identify a seam, inject a test double through it, S
 
 Before refactoring untested code, record its current output as "golden" values:
 
-1. Run the code and capture its current output (pixel values, log lines, state transitions)
+1. Run the code and capture its current output (response payloads, log lines, state transitions)
 2. Write tests that assert the golden output -- these are characterization tests
 3. Refactor until the characterization tests pass
 4. Discard the characterization tests once the feature under development is covered by intent-driven tests
@@ -72,9 +72,9 @@ Spike: minimal proof-of-concept that answers the structural question. If it work
 
 White-box testing accesses implementation internals to verify boundary conditions and failure handling:
 
-- **Fault injection:** trigger GL error states (`GL_OUT_OF_MEMORY`, invalid enum) to verify error-handling code
+- **Fault injection:** trigger query-engine error states (`QUERY_ERR_OUT_OF_MEMORY`, malformed query) to verify error-handling code
 - **Interface robustness:** analyze the implementation for precondition violations; write tests that trigger each one
-- **Seam-based injection:** replace real GL context with a fault-injecting mock for specific failure scenarios
+- **Seam-based injection:** replace the real query engine with a fault-injecting mock for specific failure scenarios
 
 Test coverage is one form of white-box testing, but not the only one. Structural analysis of code identifies cases that random coverage misses.
 

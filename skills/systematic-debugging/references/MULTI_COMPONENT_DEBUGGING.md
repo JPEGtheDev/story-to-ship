@@ -1,6 +1,6 @@
 # Multi-Component Debugging
 
-When a failure could involve multiple layers (e.g., OpenGL, SDL3, shader, parser, UI (User Interface)), standard per-file investigation is insufficient. Use this instrumentation template to isolate the layer boundary where the failure originates.
+When a failure could involve multiple layers (e.g., query engine, connection pool, serializer, parser, UI (User Interface)), standard per-file investigation is insufficient. Use this instrumentation template to isolate the layer boundary where the failure originates.
 
 ## Layer Boundary Isolation Protocol
 
@@ -8,7 +8,7 @@ Before proposing any fix in a multi-component failure:
 
 1. **Name the layers involved.** List every component the failing code path touches in execution order.
    ```
-   Example: File picker -> ViewerApp -> SDL3Context -> OpenGL -> Shader -> Render
+   Example: CLI -> ImportService -> DatabaseConnection -> QueryEngine -> Serializer -> Response
    ```
 
 2. **Identify the boundary between "working" and "broken."**
@@ -33,8 +33,8 @@ Before proposing any fix in a multi-component failure:
 
 | Symptom | Most likely boundary | Investigation action |
 |---------|---------------------|---------------------|
-| Renders blank / nothing visible | Shader or OpenGL state | Check `glGetError()` after each GL call; verify shader compile/link log |
-| Tests pass locally, fail in CI | Environment difference | Check: headless display? OpenGL driver? Font path? File path separator? |
-| Visual regression diff shows offset | Camera or viewport transform | Log camera matrix and viewport before render; compare against baseline |
-| SDL3 window creates but hangs | SDL3/OpenGL init sequence | Add `SDL_GetError()` and `glGetError()` probes at each init step |
+| Response body is empty | Serializer or query-engine state | Check `queryEngine.lastError()` after each query call; verify serializer schema/init log |
+| Tests pass locally, fail in CI | Environment difference | Check: test database seeded? Network access allowed? Config file path? File path separator? |
+| Output diff shows field misalignment | Serializer field-order or schema mapping | Dump `serializer.fieldOffsets()` and the schema-mapping log before writing output; compare against baseline |
+| Database connection opens but hangs | Connection/query-engine init sequence | Add `conn.lastError()` and `queryEngine.lastError()` probes at each init step |
 | Flatpak crash on startup | Library version mismatch | Run `ldd` on the binary; check manifest pinned versions |

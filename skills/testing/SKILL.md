@@ -80,10 +80,10 @@ Before presenting tests, verify:
 4. One logical concept per test
 5. Depended-upon behavior is tested: any behavior your code relies on has a test; if behavior can change and no test breaks, it was untested. Full text: `references/TESTING_PATTERNS.md`.
 6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
-7. External dependencies are mocked (OpenGL, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
+7. External dependencies are mocked (database, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
 8. No testing of external libraries (std::, third-party code)
 9. Group related configuration into structs/POCOs (Plain Old C++ Objects) instead of flat variables
-10. Resource cleanup: GL objects deleted in destructors/cleanup, check for leaks
+10. Resource cleanup: database connections and file handles closed in destructors/cleanup, check for leaks
 11. Tests compile and pass
 12. For any class whose state feeds the UI (User Interface): each UI-displayed field has a unit test verifying the public accessor returns the correct value (not just that the field is set internally)
 13. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged (e.g., `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`)
@@ -101,7 +101,7 @@ If you catch yourself thinking any of these, STOP and start over with RED:
 - Writing implementation code before writing a test
 - "I'll write tests after to verify it works"
 - "The visual regression test will cover this"
-- "It's too complex to unit test with MockOpenGL" (MockOpenGL exists for exactly this)
+- "It's too complex to unit test with MockDatabase" (MockDatabase exists for exactly this)
 - "I already manually tested it"
 - Test passes immediately without seeing it fail first
 - Fixed a bug without writing a regression test that reproduces it first
@@ -123,7 +123,7 @@ If you catch yourself thinking any of these, STOP and start over with RED:
 | "Too simple to test" | Simple code breaks. The test takes 30 seconds. |
 | "I'll write tests after" | Tests passing immediately after implementation prove nothing. |
 | "Visual regression test will cover it" | Visual tests are slow and test pixels, not logic. Unit test the logic. |
-| "Too complex to test in isolation" | That's a design signal. Simplify the interface. MockOpenGL is there for GL calls. |
+| "Too complex to test in isolation" | That's a design signal. Simplify the interface. MockDatabase is there for database calls. |
 | "Already manually tested it" | Manual testing is ad-hoc. No record, can't re-run, misses edge cases. |
 | "TDD slows me down" | TDD is faster than debugging production failures. |
 | "Tests after achieve the same goals" | Tests-after answer "what does this do?" Tests-first answer "what SHOULD this do?" |

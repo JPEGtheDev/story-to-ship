@@ -11,26 +11,26 @@ Write a test fixture for the abstract type using a minimal mock implementation. 
 ```cpp
 // Abstract typed fixture -- parameterised over each concrete implementation
 template <typename T>
-class IOpenGLContextTest : public ::testing::Test {
+class ICacheTest : public ::testing::Test {
 protected:
-    void SetUp() override { ctx_ = std::make_unique<T>(); }
-    std::unique_ptr<IOpenGLContext> ctx_;
+    void SetUp() override { cache_ = std::make_unique<T>(); }
+    std::unique_ptr<ICache> cache_;
 };
 
-TYPED_TEST_SUITE_P(IOpenGLContextTest);
+TYPED_TEST_SUITE_P(ICacheTest);
 
-TYPED_TEST_P(IOpenGLContextTest, Clear_DoesNotThrow) {
-    EXPECT_NO_THROW(ctx_->Clear(0, 0, 0, 1));
+TYPED_TEST_P(ICacheTest, Clear_DoesNotThrow) {
+    EXPECT_NO_THROW(cache_->Clear());
 }
 
-REGISTER_TYPED_TEST_SUITE_P(IOpenGLContextTest, Clear_DoesNotThrow);
+REGISTER_TYPED_TEST_SUITE_P(ICacheTest, Clear_DoesNotThrow);
 
 // Instantiate once per concrete type -- all contract tests run automatically:
-using GLContextImpls = ::testing::Types<MockOpenGLContext>;
-INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, IOpenGLContextTest, GLContextImpls);
+using CacheImpls = ::testing::Types<MockCache>;
+INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, ICacheTest, CacheImpls);
 ```
 
-`std::unique_ptr` owns the context -- no manual `TearDown` required. If any inherited test is inappropriate for a concrete subclass, that signals the behavior does not belong in the base type -- redesign the hierarchy.
+`std::unique_ptr` owns the cache -- no manual `TearDown` required. If any inherited test is inappropriate for a concrete subclass, that signals the behavior does not belong in the base type -- redesign the hierarchy.
 
 ---
 
@@ -72,9 +72,9 @@ This prevents analysis paralysis from dozens of simultaneous failures blocking f
 For every numeric parameter, test: **zero (or null), one (typical), maximum (or many).**
 
 ```cpp
-TEST(ParticleBuffer, HandlesEmpty)   { /* 0 particles */ }
-TEST(ParticleBuffer, HandlesSingle)  { /* 1 particle  */ }
-TEST(ParticleBuffer, HandlesLarge)   { /* 1M particles */ }
+TEST(CacheBuffer, HandlesEmpty)   { /* 0 entries */ }
+TEST(CacheBuffer, HandlesSingle)  { /* 1 entry   */ }
+TEST(CacheBuffer, HandlesLarge)   { /* 1M entries */ }
 ```
 
 Skipping boundary tests is the primary source of boundary-condition bugs.
@@ -89,7 +89,7 @@ Write acceptance criteria as passing tests -- not paper documents. Tests are una
 
 ## Writing Testable Classes
 
-Decompose large methods into units that can be tested individually. Extract `getTaxRate()` and `calculateTaxPayment()` from `determineTaxPayment()`. Isolate business logic from infrastructure (file I/O, GL state mutations, event dispatch).
+Decompose large methods into units that can be tested individually. Extract `getTaxRate()` and `calculateTaxPayment()` from `determineTaxPayment()`. Isolate business logic from infrastructure (file I/O, network calls, event dispatch).
 
 In C++: `friend class` declarations for test access are an accepted trade-off when the alternative is making methods public for testing purposes only.
 

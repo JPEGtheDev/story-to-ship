@@ -155,7 +155,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - "Let me just rerun the test" (for a failing test -- rerunning without understanding = ignoring root cause)
 - "It works on my machine" (still needs root cause)
 - "CI must have a glitch" (still needs root cause)
-- "The Flatpak environment must be doing something weird" (still needs systematic investigation)
+- "The packaging/sandbox environment must be doing something weird" (still needs systematic investigation)
 - First response to a runtime behavior bug report is code reading -- **STOP. Dispatch a researcher agent with "Build + observe" required. Source code cannot substitute for the observation artifact.**
 - Declaring root cause for a runtime behavior bug without an observation artifact from the running application -- **STOP. "The code shows X" is a theory. The observation artifact from the running application is required before Phase 2.**
 - "What the user is seeing is correct behavior" / "this is expected behavior" as a response to a user-reported runtime behavior bug -- **STOP. The running application is the ground truth for what the user observes, not the source code. Return to Phase 1 and dispatch the researcher.**
@@ -195,7 +195,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 
 ## Multi-Component Debugging
 
-For multi-component failures (OpenGL, SDL3, shader, parser, UI), use the Layer Boundary Isolation Protocol and instrumentation template in `references/MULTI_COMPONENT_DEBUGGING.md`.
+For multi-component failures (query engine, connection pool, serializer, parser, UI), use the Layer Boundary Isolation Protocol and instrumentation template in `references/MULTI_COMPONENT_DEBUGGING.md`.
 
 ---
 

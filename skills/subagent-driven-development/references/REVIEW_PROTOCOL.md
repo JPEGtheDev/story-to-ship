@@ -23,4 +23,6 @@ Provide to the Stage 2 reviewer:
 - Full diff or file contents of the implementation
 - The implementer's pasted verification output as the {{IMPLEMENTER_EVIDENCE}} value. The reviewer re-runs at least one command from it and reports MATCH or MISMATCH. If the implementer pasted no runnable command, state that explicitly so the reviewer records the spot-check as not possible.
 
+Adversarial-scenario gate: if the diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, the Stage 2 dispatch prompt MUST also require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` naming one unscripted real-world case checked against the clause wording; a Stage 2 return without that line, when the trigger matched, is an incomplete review -- re-dispatch. The canonical statement of this gate (including the case-sensitivity rationale and the accepted over-firing) is the Stage 2 paragraph of SKILL.md; on any wording divergence, SKILL.md governs.
+
 If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding.

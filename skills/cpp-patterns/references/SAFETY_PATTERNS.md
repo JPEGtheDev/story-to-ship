@@ -126,8 +126,8 @@ A `WeakPointer<T>` holds a non-owning reference that returns `nullptr` if the ta
 
 ```cpp
 // Observable holds strong ref; observer holds weak ref
-std::weak_ptr<ParticleSystem> weakSystem = system;
-if (auto s = weakSystem.lock()) { s->update(); }
+std::weak_ptr<TextureCache> weakCache = cache;
+if (auto s = weakCache.lock()) { s->update(); }
 ```
 
 Use `std::weak_ptr` instead of raw pointers for non-owning references to managed objects.

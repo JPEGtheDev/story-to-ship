@@ -31,13 +31,6 @@ Template examples for different story types. Customize based on your domain and 
 - [ ] [Edge case or error handling]
 - [ ] [Performance or quality target]
 
-### Example for Framebuffer Capture:
-
-- [ ] **Given** an OpenGL context with a bound framebuffer, **When** `captureFrame()` is called, **Then** a PPM file is written to disk within 16ms
-- [ ] Image data is captured with correct RGBA format and proper vertical flip (OpenGL origin compensation)
-- [ ] Handles edge cases: no active framebuffer, resolution changes mid-capture
-- [ ] File I/O succeeds with no memory leaks (validated with Valgrind)
-
 ---
 
 ### Technical Notes
@@ -49,14 +42,14 @@ Template examples for different story types. Customize based on your domain and 
 - Language, frameworks, libraries
 
 **Files to Create/Modify:**
-- `src/FramebufferCapture.hpp` (or target-state: `src/graphics/framebuffer_capture.hpp`)
-- `src/FramebufferCapture.cpp` (or target-state: `src/graphics/framebuffer_capture.cpp`)
-- `tests/FramebufferCaptureTests.cpp`
+- `[path/to/NewFile.hpp]` (or target-state: `[path/to/new/location/file.hpp]`)
+- `[path/to/NewFile.cpp]` (or target-state: `[path/to/new/location/file.cpp]`)
+- `[path/to/NewFileTests.cpp]`
 
 **Constraints:**
-- Must work in headless mode (no display)
-- Performance budget: <20ms per frame capture
-- Compatible with Mesa drivers on Linux CI
+- [Environment constraint, e.g. must run headless/offline/on a specific platform]
+- Performance budget: [X]ms per [operation]
+- [Compatibility constraint, e.g. supported platforms or dependency versions]
 
 ---
 
@@ -64,7 +57,7 @@ Template examples for different story types. Customize based on your domain and 
 
 - [ ] Code peer-reviewed and approved
 - [ ] Unit tests pass (min 85% coverage on new code)
-- [ ] Integration tested on Linux CI with Xvfb
+- [ ] Integration tested on CI
 - [ ] No new compiler warnings or linter errors
 - [ ] Comments/docs for public API
 - [ ] Ready to merge to main branch
@@ -105,18 +98,18 @@ Template examples for different story types. Customize based on your domain and 
 ### Technical Notes
 
 **Current State (Before):**
-- Global variables: `framebuffer`, `window`, `particle_set`
-- Issue: Hard to test in isolation, can't run tests in parallel
+- [Global variables or tightly-coupled state, e.g. `variable_a`, `variable_b`]
+- Issue: [Why the current state is hard to test/maintain, e.g. can't run tests in parallel]
 
 **Target State (After):**
-- `FramebufferManager` class encapsulating framebuffer state
-- `WindowManager` class managing window lifecycle
+- [New class/module] encapsulating [responsibility]
+- [Second new class/module, if applicable] managing [responsibility]
 - All state passed as constructor dependencies
 
 **Files to Create/Modify:**
-- `src/graphics/FramebufferManager.hpp` (new)
-- `src/graphics/FramebufferManager.cpp` (new)
-- `src/main.cpp` (refactored to use new manager)
+- `[path/to/NewClass.hpp]` (new)
+- `[path/to/NewClass.cpp]` (new)
+- `[path/to/existing_file]` (refactored to use new [class/module])
 
 ---
 
@@ -164,8 +157,8 @@ Template examples for different story types. Customize based on your domain and 
 ### Technical Notes
 
 **Open Questions:**
-1. Does Framework X support headless rendering?
-2. What's the performance overhead of capturing frames every frame?
+1. Does Framework X support [required capability] out of the box?
+2. What's the performance overhead of introducing Framework X into the hot path?
 3. Can we integrate this without breaking existing CI pipeline?
 
 **Research Methods:**
@@ -250,44 +243,23 @@ Template examples for different story types. Customize based on your domain and 
 When a larger story is broken into subtasks, use this format:
 
 ```markdown
-**Parent Story:** Create Framebuffer Capture Utility
+**Parent Story:** [parent story title]
 
-### Subtask 1: Design FramebufferCapture Class
-- [ ] Define public API (methods, error codes)
-- [ ] Document memory ownership (who deletes buffers?)
-- [ ] Sketch architecture: OpenGL initialization, capture, conversion
+### Subtask 1: [name]
+- [ ] [concrete action]
+- [ ] [concrete action]
+- [ ] [concrete action]
 
-**Estimate:** S (2-3 hours)
+**Estimate:** [S/M (hours)]
 
 ---
 
-### Subtask 2: Implement Frame Capture
-- [ ] Write FramebufferCapture::captureFrame() method
-- [ ] Test with manual OpenGL context in isolated test
-- [ ] Handle edge cases (no framebuffer bound, resolution mismatch)
+### Subtask 2: [name]
+- [ ] [concrete action]
+- [ ] [concrete action]
 
-**Estimate:** M (4-6 hours)  
+**Estimate:** [S/M (hours)]  
 **Depends on:** Subtask 1
-
----
-
-### Subtask 3: Implement PPM File Writing
-- [ ] Write pixel data to PPM format
-- [ ] Ensure vertical flip is correct
-- [ ] Test with ImageMagick `display` to verify output
-
-**Estimate:** S (2-3 hours)  
-**Depends on:** Subtask 2
-
----
-
-### Subtask 4: Unit Tests & Integration
-- [ ] Write GoogleTest tests for FramebufferCapture
-- [ ] Mock OpenGL calls
-- [ ] Test in headless mode with Xvfb
-
-**Estimate:** M (4-6 hours)  
-**Depends on:** Subtasks 2-3
 ```
 
 ---
@@ -296,20 +268,20 @@ When a larger story is broken into subtasks, use this format:
 
 ### BDD-Style (Given/When/Then)
 ```markdown
-- [ ] **Given** a valid OpenGL context, **When** captureFrame() is called with resolution 1920x1080, **Then** a 1920x1080 PPM file is created within 16ms
+- [ ] **Given** a connected DatabaseConnection, **When** `executeQuery()` is called with a 10,000-row result set, **Then** a serialized CSV is written within 100ms
 ```
 
 ### Metric-Based
 ```markdown
-- [ ] Frame capture latency <=16ms (60 FPS budget)
-- [ ] Memory overhead <=50MB per capture
+- [ ] Query execution latency <=100ms per query (p95 latency budget)
+- [ ] Memory overhead <=50MB per query batch
 - [ ] Zero memory leaks (Valgrind report)
 ```
 
 ### File/Component Specific
 ```markdown
-- [ ] Tests in `tests/core/FramebufferCaptureTests.cpp` (or target-state: `tests/graphics/FramebufferCaptureTests.cpp`)
-- [ ] Implementation in `src/FramebufferCapture.{hpp,cpp}` (or target-state: `src/graphics/framebuffer_capture.{hpp,cpp}`)
+- [ ] Tests in `tests/core/QueryEngineTests.cpp`
+- [ ] Implementation in `src/QueryEngine.{hpp,cpp}`
 ```
 
 ---

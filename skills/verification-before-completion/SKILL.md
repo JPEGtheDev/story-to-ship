@@ -199,7 +199,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 
 - After debugging: always verify with this skill before claiming the fix worked
 - Before every commit: run the full pre-commit gate
-- Before opening a PR: run all three verification commands and read the output
+- Before opening a PR: run the full verification gate and read the output
 - See `systematic-debugging` skill for how to investigate failures found during verification
 
 ---

@@ -150,7 +150,7 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 - `visual-regression-testing` -- sub-domain skill; pixel-level output testing boundary; unit and contract tests do not replace visual regression
 - `code-quality` -- clang-format and naming conventions apply to test code too
 
-**Testing principles (T2-T4):** See the `contract-testing` skill -- unit tests as constraints, acceptance vs unit boundary, simplicity check
+**Testing principles:** See the `contract-testing` skill -- unit tests as constraints, acceptance vs unit boundary, simplicity check
 
 ---
 

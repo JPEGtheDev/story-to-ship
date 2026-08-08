@@ -115,4 +115,4 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 ## Related Skills
 
 - `workflow` -- owns CI/CD pipeline patterns; infrastructure-review enforces compliance with those patterns
-- `architecture-review` -- checks source-level structure; infrastructure-review checks build and pipeline structure
+- `architecture-review` -- checks source-level structure; infrastructure-review checks build, pipeline, and packaging structure

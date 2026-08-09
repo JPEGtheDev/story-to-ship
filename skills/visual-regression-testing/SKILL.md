@@ -1,7 +1,7 @@
 ---
 name: visual-regression-testing
 license: MIT
-description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a GL-mock unit test.
+description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a GL-mock unit test, or debugging visual output by rendering and inspecting the result.
 ---
 
 
@@ -103,6 +103,30 @@ Use the application's default resolution. Do NOT copy debug camera coordinates.
 
 ---
 
+## Qualitative Visual Analysis (Render-Capture-Look)
+
+A multimodal agent debugging visual output can read image files and see what is in them, the same way a developer looks at a screenshot. This capability is not optional: before diagnosing a visual bug, the agent must produce a render, read the saved image, and describe what is on screen. Source code is a hypothesis about what the render will look like -- it is not the render. An agent that has read every line of shader code and confirmed the math is correct still does not know what pixels were actually written.
+
+**If the agent has not looked at a render, it has not investigated the bug.**
+
+| Mode | Can answer | Cannot answer |
+|------|-----------|----------------|
+| Reading source code | Is this formula correct? Does this value get set? | What does the render actually look like? |
+| Quantitative (pixel comparison) | Did this pixel change from baseline? | Is this correct? Is the screen blank? Are the colors wrong? |
+| Qualitative (render + look) | What is actually on screen? Does this look right? What changed between renders? | Whether a specific pixel differs by N/255 from a prior baseline |
+
+Quantitative tests answer "did it change." Qualitative analysis answers "does it look right." Both are necessary; neither substitutes for the other.
+
+**When to use:** the first action on any visual bug report, before any code inspection -- not a last resort; tuning render parameters and comparing the effect of different values; confirming a pipeline is producing fragments at all; any time "the code looks correct" would otherwise be the claim without having seen a render.
+
+**Qualitative leads, quantitative follows.** Never diagnose a new bug with a regression test -- it reports that pixels changed, not what changed or why. Qualitative analysis has no baseline and no pass/fail comparison; its artifacts are not committed. A quantitative baseline is written only after a human has confirmed the render is correct.
+
+**Inline statistics supplement vision -- they never replace it.** Printing coverage percentage and channel averages alongside a saved render catches things that are hard to describe verbally, but the image remains the primary artifact and the numbers are annotations on it. Coverage near 0% means the pipeline is not producing output -- diagnose the render path before examining shader code.
+
+Worked example: `references/VRT_EXAMPLES.md`.
+
+---
+
 ## Self-Review Checklist
 
 Before presenting visual regression tests:
@@ -123,6 +147,7 @@ Before presenting visual regression tests:
 - Tolerance above `5.0f/255.0f` without documented justification
 - Test resolution doesn't match the application default and reason isn't documented
 - Baseline set from debug camera position without calculating proper framing
+- Diagnosing a visual bug from source code alone, without producing and reading a render
 
 ---
 
@@ -135,6 +160,7 @@ Before presenting visual regression tests:
 | "High tolerance is more robust" | High tolerance masks real regressions |
 | "I'll set the resolution later" | Wrong resolution causes artifacts in every subsequent baseline |
 | "Visual tests cover what the unit tests don't" | Visual tests are slow and cover pixels; unit tests cover logic. Both are needed. |
+| "The code looks correct" | Source code is a hypothesis about the render, not the render. Produce the render, read the image, then diagnose. |
 
 ---
 

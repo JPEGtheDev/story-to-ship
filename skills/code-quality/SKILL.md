@@ -96,7 +96,7 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - `references/oop/cpp/oop-smells.md` -- OOP-specific smells (Feature Envy, Data Clumps, Primitive Obsession, etc.)
 - `references/design-principles.md` -- design heuristics (all paradigms)
 - `references/oop/cpp/index.md` -- OOP tier dispatch table
-- `references/oop/cpp/cpp-toolchain.md` -- clang-format, clang-tidy, cmake
+- `references/oop/cpp/cpp-toolchain.md` -- clang-format, clang-tidy
 - `references/oop/cpp/formatting-rules.md` -- human-reviewable C++ formatting patterns
 - `references/oop/cpp/naming-tables.md` -- OOP naming conventions
 - `references/oop/cpp/review-checklist.md` -- full OOP pre-commit checklist

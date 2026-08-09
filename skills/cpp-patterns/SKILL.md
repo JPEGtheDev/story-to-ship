@@ -1,7 +1,7 @@
 ---
 name: cpp-patterns
 license: MIT
-description: Use when implementing C++ code for Particle-Viewer, handling GL resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
+description: Use when implementing C++ code, handling GL resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
 ---
 
 
@@ -61,7 +61,7 @@ A system that terminates on detecting bad state causes less damage than one that
 |---|---|---|
 | Programmer error (invariant violation) | `assert()` | `assert(vao != 0 && "VAO must be initialized before bind")` |
 | Unrecoverable state | `std::terminate()` or `throw` | GL context creation failure |
-| User-recoverable error | Log + return `false`/error code | Missing particle data file |
+| User-recoverable error | Log + return `false`/error code | Missing input data file |
 
 ```cpp
 // WRONG -- ExceptionHiding: swallows compile error, propagates broken shader
@@ -96,7 +96,7 @@ if (!success) {
 
 - Check OpenGL errors after major operations
 - GL/OpenGL Loader Generator (GLAD) loader call: `gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)`
-- Shaders loaded from `Viewer-Assets/shaders/`
+- Load shaders from the project's asset directory
 - Modern VBO/VAO patterns for vertex data
 - Bounds-check SDL3 scancode values before indexing key state arrays
 - Use `glGetIntegerv(GL_VIEWPORT, ...)` over cached viewport values where viewport may change
@@ -107,7 +107,6 @@ if (!success) {
 - **Subsystem flags:** `SDL_Init` must include the flag for every SDL3 subsystem used. Missing a flag causes silent failure -- no error, no events, no devices.
 - **`*ForID` query functions:** Use `SDL_Get*ForID()` variants (e.g., `SDL_GetJoystickGUIDForID`) over opening a joystick just to read a value then close it. Unnecessary open consumes a file handle.
 - **Joystick type is distro-dependent:** `SDL_GetJoystickTypeForID()` returns `SDL_JOYSTICK_TYPE_GAMEPAD` on SteamOS but `SDL_JOYSTICK_TYPE_UNKNOWN` on generic Linux (OpenSuse, Ubuntu) because stock udev rules don't set the GAMEPAD property. Always pair type-based detection with a capability-based fallback: open the joystick, check `SDL_GetNumJoystickAxes() >= 4 && SDL_GetNumJoystickButtons() >= 6`, then close it.
-- **Gamepad hold-button state:** Don't route through `Camera::KeyReader()`. `KeyReader` has a single-press dispatch block -- calling it every frame fires single-press handlers repeatedly. For hold-buttons that mirror keyboard held keys, add a dedicated method (e.g., `Camera::setSpeedBoost(bool)`).
 
 ---
 
@@ -118,15 +117,9 @@ if (!success) {
 
 ---
 
-## ImGui Integration
-
-See `docs/IMGUI_INTEGRATION.md` for architecture, FetchContent setup, menu system, and overlay positioning.
-
----
-
 ## Removing Features / User-Requested Changes
 
-When removing a call site from `viewer_app.cpp`, **do not also delete the supporting `Camera` public method** unless it is architecturally wrong. The Camera API is stable; call sites in `viewer_app` change frequently with user preferences. Only remove a Camera method if it is architecturally wrong, not merely unused at the current moment.
+When removing a call site, **do not also delete the supporting public API method it calls** unless the method is architecturally wrong. Stable API surfaces outlive call sites; call sites change frequently with user preferences. Only remove a public method if it is architecturally wrong, not merely unused at the current moment.
 
 ---
 
@@ -150,7 +143,7 @@ When you encounter a code smell or quality violation while working on something 
 3. Apply the boarding protocol:
 
 ```
-[BROKEN WINDOW NOTED: src/viewer_app.cpp:142 -- raw glDrawArrays outside IOpenGLContext]
+[BROKEN WINDOW NOTED: src/audio_mixer.cpp:88 -- resource handle leaked on early return]
 ```
 
 Place this in a `// TODO` at the point of observation. After your current task completes, create a follow-up todo to address it. One window = one todo.
@@ -218,7 +211,7 @@ These smells are not caught by clang-tidy. Catch them in code review.
 | "The deprecation is signaled with [[deprecated]], that's enough" | Call sites still run deprecated code. Remove them or annotate them. |
 | "Docs can be updated separately" | Stale docs mislead the next developer. Same commit is the rule. |
 | "It's a transitive include, it works" | Transitive includes break when source headers change. Be explicit. |
-| "Removing the call site is enough to remove the feature" | If the Camera method is architecturally valid, keep it. Only the call site was user preference. |
+| "Removing the call site is enough to remove the feature" | If the supporting public method is architecturally valid, keep it. Only the call site was user preference. |
 | "The caller ensures this field is valid before I use it." | No guard + no test = a wish. If there is no `static_assert`, no bounds check, and no test enforcing the invariant, it is unspecified behavior. Add the guard. |
 
 ---

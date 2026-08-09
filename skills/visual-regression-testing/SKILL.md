@@ -1,7 +1,7 @@
 ---
 name: visual-regression-testing
 license: MIT
-description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a MockOpenGL unit test.
+description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a GL-mock unit test.
 ---
 
 
@@ -22,7 +22,7 @@ A visual regression test proves output **hasn't changed**, not that it was corre
 
 ## BEFORE PROCEEDING
 
-1. Any associated logic (non-pixel behavior) has a passing MockOpenGL or unit test already.
+1. Any associated logic (non-pixel behavior) has a passing GL-mock or unit test already.
 2. The test file is in `tests/visual-regression/` -- not mixed with unit or integration tests.
 3. If updating an existing baseline: the old baseline has been deleted and the test is confirmed failing.
 4. Human baseline approval is an explicit, scheduled step in the workflow -- not auto-commit.
@@ -40,7 +40,7 @@ Load this skill when:
 - Writing visual regression tests (`tests/visual-regression/`)
 - Baseline images need to be created or updated
 - Debugging a visual regression failure
-- Deciding whether something belongs in a visual test vs a MockOpenGL unit test
+- Deciding whether something belongs in a visual test vs a GL-mock unit test
 
 ---
 
@@ -48,23 +48,23 @@ Load this skill when:
 
 OpenGL rendering is inherently visual. Pixel output depends on Graphics Processing Unit (GPU) drivers, platform, and rendering state that unit tests cannot fully capture.
 
-### What MockOpenGL CAN test (full TDD applies)
+### What a GL mock CAN test (full TDD applies)
 
 - Shader compilation logic (uniform locations, program linking)
 - Buffer creation and binding sequences (VAO, VBO, EBO)
 - Draw call parameters (primitive type, index count, offset)
 - State machine transitions (depth test, blending, viewport)
-- Camera matrix calculations
-- Particle data loading and transformation
-- Any logic in `viewer_app`, `camera`, `shader` that doesn't produce pixels
+- View/projection matrix calculations
+- Scene data loading and transformation
+- Any logic that doesn't produce pixels
 
-**TDD iron law applies fully here.** Write the failing MockOpenGL test first.
+**TDD iron law applies fully here.** Write the failing GL-mock test first.
 
 ### What visual regression tests cover (NOT unit tests)
 
 - Final rendered pixel output
 - Color correctness and blending
-- Particle rendering at scale
+- Instanced rendering at scale
 - UI overlay rendering
 
 ---
@@ -73,7 +73,7 @@ OpenGL rendering is inherently visual. Pixel output depends on Graphics Processi
 
 | Path | TDD rule |
 |------|----------|
-| Logic (MockOpenGL, unit tests) | Full RED-GREEN-REFACTOR. No exceptions. |
+| Logic (GL-mock, unit tests) | Full RED-GREEN-REFACTOR. No exceptions. |
 | New visual baseline (first render) | Write the test framework first. Run it against no baseline (fail). Human approves the first baseline. THEN the test is green. |
 | Changing existing visual output | Delete the old baseline. Test fails. Implement the change. Human reviews the new diff. Approve new baseline. Green. |
 
@@ -97,11 +97,9 @@ Use production classes directly -- **never duplicate production logic in test he
 
 ## Camera Positioning
 
-Use the viewer's default resolution (1280x720). Do NOT copy debug camera coordinates.
+Use the application's default resolution. Do NOT copy debug camera coordinates.
 
 **Distance calculation (where FOV = Field of View):** `distance = subject_size / (coverage_% x tan(FOV/2))`
-
-Full guidance: `docs/visual-regression/camera-positioning-lessons-learned.md`
 
 ---
 
@@ -109,10 +107,10 @@ Full guidance: `docs/visual-regression/camera-positioning-lessons-learned.md`
 
 Before presenting visual regression tests:
 
-- [ ] Visual tests use production classes (`Particle`, `Camera`) -- no duplicated test helpers
+- [ ] Visual tests use production classes directly -- no duplicated test helpers
 - [ ] `SetUp()` creates all output directories (`artifacts/`, `baselines/`, `diffs/`)
 - [ ] `save()` return values are checked, not silently ignored
-- [ ] Resolution is 1280x720 (viewer default) unless specifically testing other resolutions
+- [ ] Resolution is the application default unless specifically testing other resolutions
 - [ ] Tolerance is appropriate for the render type (`0.0f` for synthetic, `~2/255` for GPU)
 - [ ] Human baseline approval is an explicit workflow step -- not auto-committed
 
@@ -121,9 +119,9 @@ Before presenting visual regression tests:
 ## Red Flags -- STOP
 
 - Auto-committing a new baseline without human review
-- Using a visual regression test to verify logic that MockOpenGL could test
+- Using a visual regression test to verify logic that a GL mock could test
 - Tolerance above `5.0f/255.0f` without documented justification
-- Test resolution doesn't match viewer defaults and reason isn't documented
+- Test resolution doesn't match the application default and reason isn't documented
 - Baseline set from debug camera position without calculating proper framing
 
 ---
@@ -133,7 +131,7 @@ Before presenting visual regression tests:
 | Excuse | Reality |
 |--------|---------|
 | "The visual looks fine to me" | Auto-approval bypasses the human review requirement |
-| "MockOpenGL can't test this" | If it's logic, not pixels, MockOpenGL likely can -- reconsider |
+| "A GL mock can't test this" | If it's logic, not pixels, a GL mock likely can -- reconsider |
 | "High tolerance is more robust" | High tolerance masks real regressions |
 | "I'll set the resolution later" | Wrong resolution causes artifacts in every subsequent baseline |
 | "Visual tests cover what the unit tests don't" | Visual tests are slow and cover pixels; unit tests cover logic. Both are needed. |

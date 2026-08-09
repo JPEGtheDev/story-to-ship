@@ -26,7 +26,7 @@ If the answer to (2) is "yes, actually" -> redesign to composition.
 
 ## Single Choice Principle
 
-When a system supports an exhaustive set of alternatives (particle emitter types, render modes, shader variants), exactly **one** module owns the complete list. All other modules ask that one module which alternative to use.
+When a system supports an exhaustive set of alternatives (render modes, shader variants, image export formats), exactly **one** module owns the complete list. All other modules ask that one module which alternative to use.
 
 Benefits: adding a new alternative requires changing exactly one place. Directly supports Open/Closed Principle.
 

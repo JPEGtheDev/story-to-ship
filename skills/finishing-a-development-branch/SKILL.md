@@ -23,8 +23,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 Before beginning the branch ceremony:
 
 1. All acceptance criteria from the original task are addressed (DONE or tracked in a new issue)
-2. `cmake --build build` exits 0 - no build errors
-3. `./build/tests/ParticleViewerTests` exits 0 - all tests pass
+2. The host project's build command (as its docs define it) exits 0 - no build errors
+3. The host project's test suite exits 0 - all tests pass
 4. Every commit on the branch uses conventional commit format
 5. No debug-only, Work In Progress (WIP), or dead code remains in the diff
 
@@ -37,12 +37,10 @@ Before beginning the branch ceremony:
 
 Before opening a PR or squashing commits, run the full verification sequence:
 
-```bash
-cmake --build build
-./build/tests/ParticleViewerTests
-find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format -i
-git diff  # verify no unintended changes from formatting
-```
+1. Run the host project's build command (as its docs define it) -- must succeed
+2. Run the host project's test suite -- all tests green
+3. Run the host project's formatter -- format clean
+4. `git diff` -- verify no unintended changes from formatting
 
 [+] All four pass -> proceed to Step 2
 [-] Any fail -> fix before proceeding; do not open a PR against a red branch

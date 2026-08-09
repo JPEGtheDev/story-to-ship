@@ -71,8 +71,8 @@ This reference provides concrete examples of correct and incorrect CI/CD (Contin
   with:
     name: visual-regression-images
     path: |
-      build/tests/artifacts/
-      build/tests/diffs/
+      path/to/artifacts/
+      path/to/diffs/
     retention-days: 30
     if-no-files-found: ignore
 ```
@@ -147,7 +147,7 @@ await github.rest.issues.createComment({
 
 ## Job Dependency Patterns
 
-### Sequential: Unit -> Integration -> Visual
+### Sequential: Unit -> Visual Regression
 
 ```yaml
 jobs:
@@ -195,12 +195,3 @@ wc -c hooks/*.md
 ```
 
 Any file at or above 10,000 characters will be truncated when the hook fires.
-
----
-
-## Current Workflow Structure
-
-The project uses `unit-tests.yml` with two jobs:
-
-1. **`test`** -- Build, run unit tests, generate coverage, comment on PR
-2. **`visual-regression`** -- Build, run `VisualRegressionTest.*` under Xvfb (X Virtual Framebuffer), upload artifact images, comment on PR

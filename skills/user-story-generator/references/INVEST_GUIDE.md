@@ -48,7 +48,7 @@ If a story violates INVEST, fix it or suggest breaking it down.
 [+] "Cyclomatic complexity reduced from 15 to 8"
 
 [-] "Performance should improve"  
-[+] "Frame capture completes in <=16ms (60 FPS budget)"
+[+] "QueryEngine returns results in <=100ms per query (p95 latency budget)"
 
 [-] "UI should look good"  
 [+] "Dashboard displays last 10 activities with <200ms load time"

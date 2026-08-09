@@ -41,9 +41,9 @@ Do not ask the caller to provide a diff. Derive it yourself.
 ## Review checklist (required -- check every item)
 
 ### Correctness
-- [ ] No GL resource leaks (every owner destructor cleans up VAO, VBO, FBO, RBO, textures)
-- [ ] Copy constructors deleted for classes owning GL resources
-- [ ] Error return values checked (OpenGL, file I/O, SDL3)
+- [ ] No resource leaks (every owning class's destructor releases what it acquired -- memory, handles, file descriptors)
+- [ ] Copy constructors deleted for classes owning non-copyable resources
+- [ ] Error return values checked (external library calls, file I/O)
 - [ ] No undefined behavior: bounds checked, no signed overflow, no null deref paths
 
 ### Tests
@@ -67,7 +67,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] No reference file contains a pointer that refers back to itself (self-referential pointer). A fix that changes a broken pointer to a self-reference is still a bug -- flag as critical regardless of whether the reviewer can construct a justification for why it looks intentional.
 
 ### Architecture
-- [ ] No direct OpenGL calls outside `IOpenGLContext` implementations
+- [ ] Where the project isolates a third-party API behind an interface wrapper, no direct calls to that API outside the wrapper's implementations
 - [ ] No layer boundary violations (UI -> Core OK; Core -> UI NOT OK)
 - [ ] No tight coupling introduced between subsystems
 

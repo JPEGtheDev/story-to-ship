@@ -26,7 +26,7 @@ description: Use when writing tests. Follows AAA pattern, naming conventions, co
 
 **Good (triggering conditions):**
 ```yaml
-description: Use when writing or reviewing any test for Particle-Viewer.
+description: Use when writing or reviewing any test for this project.
 ```
 
 ---

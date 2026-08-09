@@ -14,7 +14,7 @@ Thanks for contributing to story-to-ship. This guide covers the repository layou
 
 ## Overview
 
-story-to-ship ships 35 skills, 14 agents, and two behavioral hook events (three scripts). Skills are invoked via the `Skill` tool or loaded on demand; agents are dispatched via the `Agent` tool. The two hook events are `SessionStart` (one script: injects the Honesty Gate and Iron Laws at every startup) and `UserPromptSubmit` (two scripts: active per-turn enforcement) -- three scripts total across the two events. Skills load on demand rather than all at once, so behavioral standards are enforced without paying the context cost of injecting every skill at startup.
+story-to-ship ships 33 skills, 16 agents, and four behavioral hook events (six scripts). Skills are invoked via the `Skill` tool or loaded on demand; agents are dispatched via the `Agent` tool. The four hook events are `SessionStart` (one script: injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (two scripts: active per-turn enforcement), `PreToolUse` (two scripts: bootstrap-gate enforcement and workflow model guard), and `PostToolUse` (one script: bootstrap-gate post-check) -- six scripts total across the four events. Skills load on demand rather than all at once, so behavioral standards are enforced without paying the context cost of injecting every skill at startup.
 
 ## Repository Structure
 

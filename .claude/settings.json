@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "BOOTSTRAP_GATE_MODE=warn ${CLAUDE_PROJECT_DIR}/.claude/hooks/bootstrap-gate-pre.sh"
+            "command": "BOOTSTRAP_GATE_MODE=deny ${CLAUDE_PROJECT_DIR}/.claude/hooks/bootstrap-gate-pre.sh"
           }
         ]
       },
@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "BOOTSTRAP_GATE_MODE=warn ${CLAUDE_PROJECT_DIR}/.claude/hooks/bootstrap-gate-post.sh"
+            "command": "BOOTSTRAP_GATE_MODE=deny ${CLAUDE_PROJECT_DIR}/.claude/hooks/bootstrap-gate-post.sh"
           }
         ]
       }

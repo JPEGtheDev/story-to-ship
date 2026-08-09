@@ -12,7 +12,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | Every turn |
 | `pre-message.sh` + `pre-message.md` | UserPromptSubmit | Every turn |
 | `stop-turn-log.sh` | Stop | Never -- passive log, no injection |
-| `bootstrap-gate-pre.sh` | PreToolUse | Only in warn mode, only when the session is un-bootstrapped |
+| `bootstrap-gate-pre.sh` | PreToolUse | No context injection in deny mode (shipped default) -- it denies the call instead; in warn fallback, a nudge only when the session is un-bootstrapped |
 | `bootstrap-gate-post.sh` | PostToolUse | Never -- clears state, no injection |
 | `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 
@@ -45,16 +45,18 @@ A PreToolUse/PostToolUse pair that gates tool use in a session that has not yet 
 
 Mode contract, via `BOOTSTRAP_GATE_MODE`:
 
-- `deny` (exact string) -- a user-flipped promotion, never the shipped default. Blocks the tool call with a `permissionDecision: deny` reason instead of injecting context.
-- anything else -- **warn**, including unset and any value that isn't exactly `deny`. Allows the tool call, injects an `additionalContext` nudge to run `Skill(session-bootstrap)`, and appends a line to the JSONL log.
+- `deny` (exact string) -- the shipped default, pinned by the `BOOTSTRAP_GATE_MODE=deny` prefix in both registration files. Blocks the tool call with a `permissionDecision: deny` reason instead of injecting context.
+- anything else -- **warn**, the fallback: any value that isn't exactly `deny`, including unset. Allows the tool call and injects an `additionalContext` nudge to run `Skill(session-bootstrap)`.
 
-Unset already resolves to warn (`MODE="${BOOTSTRAP_GATE_MODE:-warn}"`); the explicit `BOOTSTRAP_GATE_MODE=warn` prefix in both configs documents the default, it doesn't activate it. There is no gate-off value -- disabling the gate means removing (or commenting out) its `PreToolUse`/`PostToolUse` entries in `.claude/settings.json` / `hooks/hooks.json`. To promote to deny, change `BOOTSTRAP_GATE_MODE=warn` to `=deny` in the hook command lines for `bootstrap-gate-pre.sh` in both `.claude/settings.json` and `hooks/hooks.json`.
+The script's own unset default is warn (`MODE="${BOOTSTRAP_GATE_MODE:-warn}"`); the shipped default is deny only because the registration lines in both configs pin `BOOTSTRAP_GATE_MODE=deny` -- the prefix activates the mode, it isn't just documentation. There is no gate-off value -- disabling the gate means removing (or commenting out) its `PreToolUse`/`PostToolUse` entries in `.claude/settings.json` / `hooks/hooks.json`. To fall back to warn, change `BOOTSTRAP_GATE_MODE=deny` to `=warn` in the hook command lines for `bootstrap-gate-pre.sh` in both `.claude/settings.json` and `hooks/hooks.json`.
 
-State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the flag file `.bootstrap-pending-<session_id>` and, in warn mode, the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`).
+State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the flag file `.bootstrap-pending-<session_id>` and the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`), which is appended in both modes -- the JSONL write happens before the mode branch, and each logged line carries its own `mode` field.
 
 Subagents identify themselves via an `agent_id` field on the hook payload; `bootstrap-gate-pre.sh` exempts any call carrying one, so the gate only ever applies to the main-thread session.
 
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
+
+Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` reload gates (`pre-message-gates.sh`, `pre-message.sh`) remain the backup enforcement for a session that slips through this gap.
 
 ## workflow-model-guard.sh
 

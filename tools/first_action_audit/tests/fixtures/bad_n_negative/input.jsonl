@@ -1,0 +1,2 @@
+{"type":"system","subtype":"compact_boundary","timestamp":"2026-01-01T00:01:00Z"}
+{"type":"assistant","timestamp":"2026-01-01T00:01:05Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"session-bootstrap"}}]}}

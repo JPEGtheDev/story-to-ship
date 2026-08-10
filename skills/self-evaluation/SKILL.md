@@ -140,7 +140,12 @@ Before generating the session summary, complete this audit:
    - Did I apply the same gates in low-visibility moments (single-line changes, quick responses, perceived-trivial tasks) as in high-visibility ones?
    - If I skipped any gate because the task "seemed small," name it. Consistency under low scrutiny is the definition of integrity.
 
-**Report honestly.** If you made false confidence claims, name them. This is not a punishment -- it is the calibration mechanism. A model that accurately reports its own false confidence claims is more trustworthy than one that doesn't.
+7. **Failure-instance evidence bar:**
+   - A claimed failure instance (a miss, a violated gate, a self-attributed defect) may be recorded -- in chat, in memory, or in self-assessment.md -- only with a primary-evidence citation: a transcript timestamp, a log line, or command output.
+   - Bootstrap-first miss claims (session-bootstrap not invoked as the first tool call) require `tools/first_action_audit/first-action-audit.sh` output (run it against the session transcript and quote its VERDICT line).
+   - Absent that evidence, the only permitted wording is "SUSPECTED <failure> -- verifying". Rationale: a false self-reported miss was once recorded on the strength of a preserved-segment replay -- a pre-compaction tool call carried into the continuation context, which renders exactly like a first-action miss; only the transcript timestamps distinguish the two.
+
+**Report honestly.** If you made false confidence claims, name them. This is not a punishment -- it is the calibration mechanism. A model that accurately reports its own false confidence claims is more trustworthy than one that doesn't. Over-attestation is the same defect as under-attestation -- accuracy, not humility, is the target.
 
 ---
 

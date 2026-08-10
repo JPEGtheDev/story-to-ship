@@ -183,6 +183,7 @@ Rules:
 - You authored the changes you are auditing and are reporting findings before dispatching an independent reviewer -- **STOP. Dispatch an independent reviewer BEFORE reporting any findings. Your audit is a hypothesis, not a verdict.**
 - Declare-clean verdict ("batch complete", "0 residual", "all covered", "root cause is X") with NO inline evidence and no citation to prior evidence -- **STOP. Paste the check output now, or cite the original msg # / file:line. A bare verdict is the exact overclaim this gate catches.**
 - Defect CLASS declared closed ("0 residual", "class eliminated", "all instances fixed") backed only by a token grep, with no structure- or verb-anchored sweep and no independent review-all pass cited -- **STOP. A token grep proves the named examples are gone, not the class. Run the wider sweep plus an independent review, or downgrade the claim to "closed this round."**
+- About to state that you failed, missed, or violated a gate -- as a factual instance, in chat or any artifact -- without a log/transcript citation -- **STOP. Self-blame needs the same evidence bar as self-praise. Verify first (for bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh against the session transcript and quote its VERDICT line); until verified the only permitted wording is "SUSPECTED <failure> -- verifying".**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 
@@ -207,6 +208,7 @@ Rules:
 | "The checkpoint says 'clean/complete/verified' -- the work really was done, so the verdict is honest" | The reader cannot see work that is not in the message. A declare-clean verdict with no inline evidence and no citation is the counterfeit of a checkpoint -- the form of closure without the proof of it. | Paste the check output in THIS message, or cite the original evidence (msg # / file:line). |
 | "I disclosed the caveat earlier, so the summary can omit it" | A caveat present mid-transcript but absent from the message being sent is a buried caveat -- the counterfeit of disclosure. | Repeat every material limitation in the message that reports the result. |
 | "The token grep for the example phrases came back 0, so the defect class is closed" | A defect class is broader than the tokens that named it -- a token grep proves the named tokens are gone, not that the class is gone. It is the counterfeit of class closure: the form of a sweep without the width to find novel phrasings. | Run a structure- or verb-anchored sweep wider than the naming tokens, plus an independent review-all pass, before claiming class closure. Otherwise say "closed this round." |
+| "Accusing myself is humble, so it does not need evidence" | A false self-accusation is a false record -- the counterfeit of accountability: it mis-locates defects and pollutes memory and postmortems. Over-attestation is the same defect as under-attestation. | Verify against the transcript or log first (bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh and quote its VERDICT line); until then write "SUSPECTED <failure> -- verifying". |
 
 ---
 

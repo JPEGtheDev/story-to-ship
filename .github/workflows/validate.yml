@@ -40,12 +40,17 @@ jobs:
           shellcheck hooks/tests/run-all.sh
           shellcheck hooks/tests/run-skill-map-drift.sh
           shellcheck hooks/tests/run-workflow-model-guard.sh
+          shellcheck tools/first_action_audit/first-action-audit.sh
+          shellcheck tools/first_action_audit/tests/run.sh
           echo "[+] All hook scripts pass shellcheck"
 
       - name: Run all hook fixture suites
         run: |
           set -e
           bash hooks/tests/run-all.sh
+
+      - name: Run first-action audit tests
+        run: bash tools/first_action_audit/tests/run.sh
 
       - name: Stop turn-log wedge safety (empty stdin)
         run: |
@@ -133,6 +138,9 @@ jobs:
           check agents/architecture-reviewer.md "git -C {{WORKTREE_PATH}} rev-parse --show-toplevel" "{{DIFF_OR_EMPTY}}" "VERDICT: APPROVE | REQUEST CHANGES"
           check skills/execution/SKILL.md "## Canary"
           check skills/honesty/SKILL.md "buried caveat"
+          check skills/honesty/SKILL.md "Self-blame needs the same evidence bar"
+          check skills/self-evaluation/SKILL.md "Failure-instance evidence bar" "first-action-audit.sh"
+          check agents/postmortem-reviewer.md "{{TRANSCRIPT_PATH}}" "blame direction"
           if [ "$missing" -gt 0 ]; then
             printf 'Found %s missing contract string(s)\n' "$missing"
             exit 1

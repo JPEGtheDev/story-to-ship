@@ -66,6 +66,8 @@ check_rc() {
 # Boundary is the LAST system/compact_boundary line's .timestamp, or the
 # literal string "none". Candidates are main-thread assistant messages
 # containing at least one tool_use item, strictly after the boundary.
+# jq program: $-identifiers are jq variables, not shell expansions
+# shellcheck disable=SC2016
 readonly PARSE_PROG='
 reduce inputs as $line (
   {parsed: [], bad: 0};
@@ -106,6 +108,8 @@ RESULT="$(jq -Rn "$PARSE_PROG" "$TRANSCRIPT")"
 check_rc "$?"
 
 # Pass 2: derive the listing lines and the verdict from pass 1's output.
+# jq program: $-identifiers are jq variables, not shell expansions
+# shellcheck disable=SC2016
 readonly REPORT_PROG='
 . as $in
 | ($in.boundary) as $boundary

@@ -103,7 +103,7 @@ Specifically flag any case where:
 - The self-assessment says a gate was followed but no corresponding `skill.invoked` event precedes the relevant tool calls
 - The self-assessment omits an event that appears in the log (dropped commits, reverted changes, user corrections)
 - The self-assessment describes an outcome as "clean" but the log shows user correction or iteration
-- The self-assessment asserts a failure (a miss, a violated gate, a self-attributed defect) with no corresponding log or transcript event -- verify blame direction with the same rigor as the clean direction; for bootstrap-miss assertions run tools/first_action_audit/first-action-audit.sh against {{TRANSCRIPT_PATH}} and quote its VERDICT line; if the script exits 2 with no VERDICT line (transcript missing or unreadable) or the transcript input's derivation-fails case applies, record the claim as UNVERIFIED instead; an unsubstantiated self-blame claim is a discrepancy, not humility.
+- The self-assessment asserts a failure (a miss, a violated gate, a self-attributed defect) with no corresponding log or transcript event -- verify blame direction with the same rigor as the clean direction; for ANY bootstrap-miss assertion, confirming or refuting, the required evidence is a run of tools/first_action_audit/first-action-audit.sh against {{TRANSCRIPT_PATH}} with its VERDICT line quoted verbatim in the report -- events-log ordering alone is not sufficient in either direction (the transcript is the ground truth for tool_use ordering); if the script exits 2 with no VERDICT line (transcript missing or unreadable) or the transcript input's derivation-fails case applies, record the claim as UNVERIFIED instead; an unsubstantiated self-blame claim is a discrepancy, not humility.
 
 ---
 

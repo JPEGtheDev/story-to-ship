@@ -69,7 +69,7 @@ check_rc() {
 # jq program: $-identifiers are jq variables, not shell expansions
 # shellcheck disable=SC2016
 readonly PARSE_PROG='
-reduce inputs as $line (
+(reduce inputs as $line (
   {parsed: [], bad: 0};
   ($line | try fromjson catch {"__malformed": true}) as $v
   | if ($v|type)=="object" and ($v.__malformed // false) then
@@ -77,12 +77,12 @@ reduce inputs as $line (
     else
       .parsed += [$v]
     end
-) as $p1
+)) as $p1
 | ($p1.parsed) as $all
 | ( [ $all[] | select(.type=="system" and .subtype=="compact_boundary") ] ) as $boundaries
 | ( if ($boundaries|length) > 0 then ($boundaries[-1].timestamp // null) else null end ) as $braw
 | ( if $braw == null then "none" else $braw end ) as $boundary
-| reduce $all[] as $line (
+| (reduce $all[] as $line (
     {cands: [], bad: $p1.bad};
     if ($line.type=="assistant") and ($line.isSidechain != true)
        and (($line.message.content // []) | any(.type=="tool_use")) then
@@ -100,7 +100,7 @@ reduce inputs as $line (
     else
       .
     end
-  ) as $r
+  )) as $r
 | {boundary: $boundary, bad: $r.bad, candidates: $r.cands}
 '
 

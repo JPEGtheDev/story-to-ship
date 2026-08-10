@@ -13,10 +13,15 @@
 #   args                 - optional; if present, its single line is
 #                           word-split and used as the full argument list
 #                           to the script INSTEAD of the default
-#                           "<case_dir>/input.jsonl" argument
+#                           "<case_dir>/input.jsonl" argument. Any literal
+#                           token {{INPUT}} in the resulting argument list
+#                           is substituted with "<case_dir>/input.jsonl",
+#                           so a case can combine its own input.jsonl with
+#                           extra arguments (e.g. an explicit N).
 #   expect_exit          - required; exact integer exit code
 #   expect_stdout_grep   - required; newline list, every pattern must be
-#                           found in stdout via grep -qF
+#                           found in stdout via grep -qF. A 0-byte (empty)
+#                           file means no stdout assertions for this case.
 #
 # stderr is captured by the script under test but NOT asserted by this
 # runner (a later fixture will assert stderr warning content separately).
@@ -71,6 +76,14 @@ run_case() {
     # Unquoted on purpose (word-split into args); this also globs -- a literal * or ? in an args file would be pathname-expanded against CWD, not passed literally.
     # shellcheck disable=SC2206
     invoke_args=($args_line)
+    # Substitute the {{INPUT}} token (if present) with this case's own
+    # input.jsonl, so a case can pair its input with extra arguments.
+    local i
+    for i in "${!invoke_args[@]}"; do
+      if [[ "${invoke_args[$i]}" == "{{INPUT}}" ]]; then
+        invoke_args[$i]="$input_file"
+      fi
+    done
   else
     invoke_args=("$input_file")
   fi

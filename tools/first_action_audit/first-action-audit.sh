@@ -30,15 +30,35 @@ fi
 TRANSCRIPT="$1"
 N="${2:-3}"
 
+# Argument-syntax errors precede environment checks: validate N before
+# touching jq or the filesystem, so a bad N never leaks internal detail.
+if [[ ! "$N" =~ ^[0-9]+$ ]]; then
+  usage
+  exit 2
+fi
+
 if ! command -v jq &>/dev/null; then
   echo "$(basename "$0"): jq is required but not found in PATH" >&2
   exit 2
 fi
 
-if [[ ! -r "$TRANSCRIPT" ]]; then
-  echo "$(basename "$0"): cannot read transcript file: $TRANSCRIPT" >&2
+# Require a readable REGULAR file: -r alone also passes for directories
+# (readable/searchable), which would otherwise fall through jq into a
+# fabricated NO_TOOL_CALLS verdict.
+if [[ ! -f "$TRANSCRIPT" || ! -r "$TRANSCRIPT" ]]; then
+  echo "$(basename "$0"): cannot read transcript file (not a readable regular file): $TRANSCRIPT" >&2
   exit 2
 fi
+
+# An audit tool must never fall through a failed jq call into a fabricated
+# verdict: every jq invocation's exit status is checked via check_rc.
+check_rc() {
+  local rc="$1"
+  if [[ "$rc" -ne 0 ]]; then
+    echo "$(basename "$0"): internal jq failure (exit $rc) -- aborting" >&2
+    exit 2
+  fi
+}
 
 # Pass 1: parse each line as JSON, skipping (and counting) lines that fail
 # to parse. Also drops candidate assistant messages missing .timestamp
@@ -83,6 +103,7 @@ reduce inputs as $line (
 '
 
 RESULT="$(jq -Rn "$PARSE_PROG" "$TRANSCRIPT")"
+check_rc "$?"
 
 # Pass 2: derive the listing lines and the verdict from pass 1's output.
 readonly REPORT_PROG='
@@ -110,11 +131,16 @@ readonly REPORT_PROG='
 '
 
 REPORT="$(jq -c --argjson n "$N" "$REPORT_PROG" <<<"$RESULT")"
+check_rc "$?"
 
 BAD="$(jq -r '.bad' <<<"$REPORT")"
+check_rc "$?"
 EXIT_CODE="$(jq -r '.exit' <<<"$REPORT")"
+check_rc "$?"
 
-jq -r '.lines[]' <<<"$REPORT"
+LINES_OUT="$(jq -r '.lines[]' <<<"$REPORT")"
+check_rc "$?"
+printf '%s\n' "$LINES_OUT"
 
 if [[ "$BAD" -gt 0 ]]; then
   echo "warning: skipped $BAD malformed line(s)" >&2

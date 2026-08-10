@@ -12,6 +12,7 @@ You are an external reviewer analyzing a completed agent session. You have NO me
 
 **Session ID:** {{SESSION_ID}}
 **Events log:** {{EVENTS_JSONL_PATH}}
+**Session transcript (raw, optional):** {{TRANSCRIPT_PATH}} -- if not provided, derive as ~/.claude/projects/<project-slug>/<SESSION_ID>.jsonl, where <project-slug> is the absolute project path ({{REPO_PATH}}) with every "/" replaced by "-" (example: /home/JPEG/Projects/story-to-ship -> -home-JPEG-Projects-story-to-ship); if derivation fails and no path was supplied, state "transcript unavailable" and cap any blame-direction verdict at UNVERIFIED.
 **Session workspace:** {{SESSION_WORKSPACE_PATH}}
 **Repo root:** {{REPO_PATH}}
 **Scratch directory:** {{REPO_PATH}}/scratch/
@@ -82,7 +83,7 @@ Answer these questions directly from the log before moving to the analysis:
 | Evidence-spot-check audit: did each Stage 2 reviewer re-run at least one of the implementer's pasted verification commands and report MATCH or MISMATCH, or did it relay implementer claims without an independent spot-check? | |
 | Intent-canary audit: did each execution work-loop iteration that modified a file emit an `Intent:` line before the first edit (per the execution skill Canary), or did file modifications occur with no preceding stated intent? | |
 | Buried-caveat audit: did any response state a limitation, caveat, or skipped item earlier in the transcript that was then omitted from a later summary or completion message reporting the same work? | |
-| Continuation-reload audit: after each SessionStart continuation event (`SessionStart:compact` / `SessionStart:resume`) in the log, was the agent's next `skill.invoked` a re-invocation of `session-bootstrap` (and `honesty`) BEFORE any `edit`/`create`/`bash`/`subagent.started` -- or did it act first and reload later (or not at all)? | |
+| Continuation-reload audit: after each SessionStart continuation event (`SessionStart:compact` / `SessionStart:resume`) in the log, was the agent's next `skill.invoked` a re-invocation of `session-bootstrap` (and `honesty`) BEFORE any `edit`/`create`/`bash`/`subagent.started` -- or did it act first and reload later (or not at all)? On any disagreement between the events log and the raw transcript about first-action ordering, tools/first_action_audit/first-action-audit.sh run against {{TRANSCRIPT_PATH}} is the authoritative tiebreaker -- quote its VERDICT line. | |
 | Empirical-backing precision-split audit: for each claim in the empirical-backing candidate set (the COVERAGE / CLOSURE-COMPLETION / CAUSAL verdicts defined in Step 3), is it classified as exactly one of {evidence-absent \| evidence-gathered-not-shown \| epistemically-marked}, and is the reported defect count restricted to the evidence-absent class only? | |
 | Retro-leading audit: did any Retrospective dispatch prompt state the dispatcher's own evaluative conclusion about an agenda question (what a catch means, which process step worked or failed) ahead of the amigo's answer? (Read the retro dispatch prompts in the `subagent.started` events of `events.jsonl`, or the declared substitute source; a factual timeline entry naming a defect or catch is evidence record, not leading -- flag only pre-stated judgments.) | |
 
@@ -96,12 +97,13 @@ Apply every part of the framework from the skill file. Do not skip sections.
 
 ### Critical difference from self-assessment
 
-The self-assessing agent has session memory and emotional investment in the outcome. You have only the log. Where the self-assessment says "gate fired," look for the log event that proves it. Where no event exists, note the discrepancy. A self-assessment claim without a log citation is unverified.
+The self-assessing agent has session memory and emotional investment in the outcome. You have only the log. Where the self-assessment says "gate fired," look for the log event that proves it. Where no event exists, note the discrepancy. A self-assessment claim without a log citation is unverified. This applies to self-blame claims exactly as it applies to self-praise: an asserted failure with no log or transcript event behind it is unverified, not conservatively safe.
 
 Specifically flag any case where:
 - The self-assessment says a gate was followed but no corresponding `skill.invoked` event precedes the relevant tool calls
 - The self-assessment omits an event that appears in the log (dropped commits, reverted changes, user corrections)
 - The self-assessment describes an outcome as "clean" but the log shows user correction or iteration
+- The self-assessment asserts a failure (a miss, a violated gate, a self-attributed defect) with no corresponding log or transcript event -- verify blame direction with the same rigor as the clean direction; for bootstrap-miss assertions run tools/first_action_audit/first-action-audit.sh against {{TRANSCRIPT_PATH}} and quote its VERDICT line; if the script exits 2 with no VERDICT line (transcript missing or unreadable) or the transcript input's derivation-fails case applies, record the claim as UNVERIFIED instead; an unsubstantiated self-blame claim is a discrepancy, not humility.
 
 ---
 

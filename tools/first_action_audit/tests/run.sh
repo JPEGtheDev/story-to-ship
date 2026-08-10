@@ -81,7 +81,7 @@ run_case() {
     local i
     for i in "${!invoke_args[@]}"; do
       if [[ "${invoke_args[$i]}" == "{{INPUT}}" ]]; then
-        invoke_args[$i]="$input_file"
+        invoke_args[i]="$input_file"
       fi
     done
   else

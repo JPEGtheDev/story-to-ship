@@ -1,0 +1,2 @@
+{"type":"assistant","timestamp":"2026-01-01T00:00:05Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"session-bootstrap"}}]}}
+{"type":"assistant","timestamp":"2026-01-01T00:00:10Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"honesty"}}]}}

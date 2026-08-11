@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 ## BEFORE PROCEEDING
 
 After you've had the conversation and before generating, mentally verify you have:
-1. **Loaded the actual project context** (repo README, docs, or the user's description) BEFORE generating -- never infer scope or functionality from the project's NAME; if the request names functionality that does not exist in the project, ask a clarifying question before generating.
+1. **Loaded the actual project context** (repo README, docs, or the user's description) BEFORE generating -- never infer scope or functionality from the project's NAME; if the request names functionality that does not exist in the project, ask a clarifying question before generating. Also check for a ratified Definition of Done (DoD) canon at docs/DOD.md: if present, read it before generating (see DoD Canon Consumption below); if absent, generate using the generic template and state in the generated story that no ratified canon exists.
 2. **Confirmed the functionality/component actually exists** (didn't assume based on naming)
 3. Clear understanding of what they want to accomplish
    [-] Ask: "What specifically do you want this story to enable?"
@@ -68,6 +68,45 @@ See `references/INVEST_FRAMEWORK.md` for per-criterion elaboration and examples.
 
 See `references/STORY_TEMPLATE.md` for the full story template with all sections.
 
+## DoD Canon Consumption
+
+The generated story's Definition of Done section depends on whether a ratified DoD
+canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
+
+**Canon present and parses:**
+- Derive the Definition of Done section from the canon instead of the generic
+  template checklist.
+- Header annotation: `*(derived from docs/DOD.md, ratified v<N>)*` where `<N>` is the
+  canon's `Stamp:` value.
+- Every ALWAYS layer becomes a checklist item tagged `(always-on)`.
+- Every CONDITIONAL layer whose trigger fires against the story's anticipated diff
+  scope becomes a checklist item stating the trigger and that it fired.
+- Non-firing CONDITIONAL layers and canon-level N/A layers are ABSENT from the
+  story's Definition of Done section -- no line, no stub.
+- A story MAY drop an ALWAYS layer only via a story-level N/A line carrying one of
+  the three closed categories (target-absent | covered-elsewhere | repo-ruled-N/A) --
+  same form as the canon's own N/A ruling lines.
+- **Refusal:** if the story would omit an ALWAYS layer with no valid category-tagged
+  N/A line, refuse to emit the story and emit the literal line
+  `DOD-VIOLATION: <layer>` (the layer's canonical Key).
+- **Staleness:** if the canon's `Stamp:` is older than the `defining-done` skill's
+  taxonomy's current stamp, still consume the canon and emit the literal line
+  `DOD-STALE: canon v<N> behind taxonomy v<M>`.
+- **Hash check:** recompute the canon's content-hash per the `defining-done` skill's
+  byte-range definition; on mismatch, emit the literal line `DOD-HASH: MISMATCH` and
+  continue consuming the canon (warn-and-consume -- a trust flag, not a parse
+  failure; distinct from the malformed-canon case below, which refuses instead of
+  consuming).
+
+**Canon present but malformed** (missing or unparseable `Stamp:` line, a ruling line
+matching none of the three forms, missing `Content-hash:` line): refuse to generate
+the story. State exactly what failed to parse. Never silently fall back to the
+generic template as if no canon existed -- "present but unreadable" is not "absent".
+
+**Canon absent:** generate the Definition of Done section from the generic template
+and state in the generated story that no ratified canon exists and the Definition of
+Done section uses unratified template defaults.
+
 ## Rationalization Prevention
 
 | Excuse | Reality |
@@ -79,6 +118,10 @@ See `references/STORY_TEMPLATE.md` for the full story template with all sections
 | "We can estimate it after starting" | Inestimable stories signal unclear scope. Clarify before committing. |
 | "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
 | "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery (the three-amigos skill's Ceremony 1) produces a Feature Specification (the structured spec Discovery writes to plan.md) that validates field optionality, invocation paths, and behavioral Acceptance Criteria under three personas (the three-amigos skill's Business, Developer, and Tester amigos). They are not equivalent. |
+| "The canon is stale, I'll just use the generic template instead" | A stale canon is still consumed, with a `DOD-STALE` warning line -- never discard a ratified canon for staleness. |
+| "Hash mismatch means the canon might be corrupt, refuse to use it" | Hash mismatch is a warn-and-consume trust flag, not a parse failure -- emit `DOD-HASH: MISMATCH` and keep consuming the canon. |
+| "This always-on layer obviously doesn't apply here, I'll just drop it" | Only a category-tagged N/A line (or refusal) can drop an ALWAYS layer -- never drop it silently. |
+| "The canon is malformed, fall back to the generic template like it's absent" | Malformed is not absent -- refuse with a diagnostic naming exactly what failed to parse. |
 
 ## Output Destination
 

@@ -78,14 +78,23 @@ canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
   template checklist.
 - Header annotation: `*(derived from docs/DOD.md, ratified v<N>)*` where `<N>` is the
   canon's `Stamp:` value.
-- Every ALWAYS layer becomes a checklist item tagged `(always-on)`.
+- Every layer ruled ALWAYS in the canon (see the `defining-done` skill's taxonomy)
+  becomes a checklist item tagged `(always-on)`.
 - Every CONDITIONAL layer whose trigger fires against the story's anticipated diff
   scope becomes a checklist item stating the trigger and that it fired.
 - Non-firing CONDITIONAL layers and canon-level N/A layers are ABSENT from the
   story's Definition of Done section -- no line, no stub.
-- A story MAY drop an ALWAYS layer only via a story-level N/A line carrying one of
-  the three closed categories (target-absent | covered-elsewhere | repo-ruled-N/A) --
-  same form as the canon's own N/A ruling lines.
+- **Dropping an ALWAYS layer (Context/Forces/Solution/Consequence):** Context:
+  applies only when the story's actual diff scope genuinely produces no surface the
+  ALWAYS layer verifies -- never because a layer "feels" inapplicable. Forces: the
+  owner ratified the layer ALWAYS for every change, but a specific story can have no
+  surface for it; an unbounded drop right would gut the canon, while zero exit forces
+  checklist noise; the closed-category N/A line plus the refusal default is the
+  bound. Solution: a story MAY drop an ALWAYS layer only via a story-level N/A line
+  carrying one of the three closed categories (target-absent | covered-elsewhere |
+  repo-ruled-N/A) -- same form as the canon's own N/A ruling lines, e.g.
+  `- coverage: N/A | category: target-absent | docs-only story, no code surface`.
+  Consequence: every drop is auditable by its category tag.
 - **Refusal:** if the story would omit an ALWAYS layer with no valid category-tagged
   N/A line, refuse to emit the story and emit the literal line
   `DOD-VIOLATION: <layer>` (the layer's canonical Key).
@@ -98,10 +107,10 @@ canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
   failure; distinct from the malformed-canon case below, which refuses instead of
   consuming).
 
-**Canon present but malformed** (missing or unparseable `Stamp:` line, a ruling line
-matching none of the three forms, missing `Content-hash:` line): refuse to generate
-the story. State exactly what failed to parse. Never silently fall back to the
-generic template as if no canon existed -- "present but unreadable" is not "absent".
+**Canon present but malformed** (structurally unparseable per the `defining-done`
+skill's malformed-canon rule): refuse to generate the story. State exactly what
+failed to parse. Never silently fall back to the generic template as if no canon
+existed -- "present but unreadable" is not "absent".
 
 **Canon absent:** generate the Definition of Done section from the generic template
 and state in the generated story that no ratified canon exists and the Definition of
@@ -136,6 +145,8 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
 - Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.
 - Generating 2+ stories with new Acceptance Criteria without running Three Amigos Discovery first -> STOP. Acceptance Criteria written before Discovery are unvalidated. Run `three-amigos` Ceremony 1 before finalizing any acceptance criterion.
+- Canon present but fails to parse, tempted to fall back to the generic template -> STOP. "Present but unreadable" is not "absent" -- refuse and name what failed.
+- About to omit an ALWAYS-ruled checklist item with no category-tagged N/A line -> STOP. Add the N/A line or refuse.
 
 ---
 
@@ -152,4 +163,4 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 
 ## Related Skills
 
-See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story.
+See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the hash/malformed-canon definitions this skill consumes.

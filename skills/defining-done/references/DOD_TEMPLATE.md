@@ -179,8 +179,8 @@ no canon exists yet at all (its absence is the "no canon" state consumers check 
 ## C. Consumer notes
 
 Downstream todos (generator consumption, completion-gate consumption) MUST quote
-these three literal marker strings verbatim -- they are the canonical source for all
-three:
+these four literal marker strings verbatim -- they are the canonical source for all
+four:
 
 - `DOD-VIOLATION: <layer>` -- the generator's refusal marker, emitted when a story
   omits an ALWAYS layer with no category-tagged N/A line.
@@ -192,12 +192,13 @@ three:
   warn-and-consume oracle (assumption A14): the canon is still read and used: the
   mismatch is a trust flag about possible hand-editing, not a parse failure, so
   consumption does not stop.
+- `DOD-STALE: canon v<N> behind taxonomy v<M>` -- emitted by either consumer when the
+  canon's `Stamp: vN` is older than `DOD_TAXONOMY.md`'s current stamp. The canon is
+  STILL consumed: staleness is a currency warning, not a refusal trigger. Never
+  silently consume a stale canon as if it were current.
 
-Two additional non-marker rules apply to every consumer:
+One additional non-marker rule applies to every consumer:
 
-- **Staleness rule:** if the canon's `Stamp: vN` is older than `DOD_TAXONOMY.md`'s
-  current stamp, consumers MUST note the staleness in their output. Never silently
-  consume a stale canon as if it were current.
 - **Malformed-canon rule:** if `docs/DOD.md` exists but its structure cannot be
   parsed (missing `Stamp:` line, a ruling line matching none of the three forms in
   Section A.3, missing `Content-hash:` line), consumers MUST refuse with a diagnostic

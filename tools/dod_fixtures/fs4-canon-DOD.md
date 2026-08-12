@@ -16,8 +16,7 @@ Ratified against fs4-taxonomy-v1.md v1.
 - changelog-entry: CONDITIONAL | trigger: diff modifies a file under
   web/routes/ or web/components/ with no CHANGELOG.md entry in the same
   commit
-- feature-flag-cleanup: N/A | category: repo-ruled-N/A | TaskFlow has no
-  feature-flag system as of this ratification; the product owner ruled the
-  layer out rather than leaving it unconsidered
+- feature-flag-cleanup: N/A | category: target-absent | TaskFlow has no
+  feature-flag system; nothing for this layer to verify
 Stamp: v1
-Content-hash: sha256:55413e7ea5c49e42baa9dfa16b711790a44f317b20470f4a32a56f2f7355041a
+Content-hash: sha256:a0d047d06e87ab8c525588c7b76f3c2ef6a833a879b5007d427ada0b372d5f20

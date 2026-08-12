@@ -3,7 +3,7 @@
 ## 1. Purpose
 
 This directory holds the fixture-proof harness for the Definition of Done
-(DoD) canon skill chain built under issue #66. Three todos in that plan
+(DoD) canon skill chain built under issue #66. Four todos in that plan
 (T4a, T4b, T6, T8 -- see `plan.md`'s Review-closure rule) cap their Stage
 1/2 review at `DONE_WITH_CONCERNS` until an observed fixture run proves
 their behavior end to end. `check-markers.sh` is the oracle that turns a
@@ -12,7 +12,11 @@ run's output file for the pinned marker strings defined below and asserts
 each one is present (a positive assertion) or absent (a negative
 assertion). T12a-c's fixture-run dispatches are the todos that actually
 exercise this harness and use its PASS/FAIL verdict to upgrade T4b, T6,
-and T8 from `DONE_WITH_CONCERNS` to `DONE`.
+and T8 from `DONE_WITH_CONCERNS` to `DONE`. T4a upgrades the same way but
+rides on T12a's FS4 fixture transcript rather than a dedicated fixture of
+its own (plan.md's AC mapping table: FS1's owning todo is T4a, fixture
+"none -- covered by FS4 fixture's transcript"), so T12a's PASS verdict
+upgrades both T4a and T4b together.
 
 ## 2. Oracle definitions
 

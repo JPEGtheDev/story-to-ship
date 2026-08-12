@@ -94,6 +94,25 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 ---
 
+## New Gates: DoD Canon Check on Completion Claims
+
+**Context:** Applies to every completion claim made in a repo that has a ratified Definition of Done (DoD) canon at `docs/DOD.md`, as produced by the `defining-done` skill's ratification interview. If `docs/DOD.md` does not exist, this section does not apply -- the canon-absent state is not in force, and the generic verification rules elsewhere in this skill govern the claim unchanged.
+
+**Forces:** A repo with a ratified canon has already ruled, layer by layer, which verification is always required and which is conditional on the diff. A completion claim that ignores those rulings and falls back to generic verification silently discards a ratification the product owner did. But a canon can itself be stale, hand-edited, or corrupted -- treating a compromised canon as authoritative without surfacing that is its own failure mode, and refusing to evaluate any claim just because the canon looks imperfect throws out a real ratification over a warning-grade defect.
+
+**Solution:** Before evaluating a completion claim against the canon:
+- Read `docs/DOD.md`. If its structure cannot be parsed -- per the `defining-done` skill's malformed-canon rule -- REFUSE to evaluate the completion claim and emit a diagnostic naming exactly what failed to parse. Never proceed as if no canon existed; "present but unreadable" and "absent" are different states.
+- Recompute the canon's content-hash per the `defining-done` skill's hash definition. On mismatch, emit the literal line `DOD-HASH: MISMATCH` and continue evaluating the claim against the canon (warn-and-consume).
+- Compare the canon's `Stamp:` value against the `defining-done` skill's taxonomy's current stamp. If the canon is older, emit the literal line `DOD-STALE: canon v<N> behind taxonomy v<M>` and continue evaluating the claim against the canon.
+
+The gate check itself: for every layer ruled ALWAYS in the canon (unless the story's Definition of Done section carries a valid category-tagged N/A line for it) and every layer ruled CONDITIONAL whose trigger fired against the actual diff, the completion claim MUST carry that layer's evidence inline, meeting that layer's own verification standard -- not a lesser substitute. Example: a CONDITIONAL mutation-testing layer whose trigger fired requires a mutation run -- break the property, run the gate, paste the named failing case, then restore the property; a green suite run alone does not satisfy it. Missing or generic evidence for any such layer -> emit the literal line `DOD-GATE: FAIL <layer>`, using the layer's canonical Key. The claim fails the gate observably; it is not marked DONE.
+
+**Consequences:** A ratified canon adds up to four checks to every in-scope completion claim (malformed-refusal check, hash check, staleness check, per-layer evidence check) beyond this skill's generic verification rules. This is the cost of making the canon's rulings actually bind completion claims instead of remaining a document nobody consults.
+
+**Enforcement scope:** Whether a CONDITIONAL layer's trigger fired against a given diff is evaluated by the Stage 1 spec-compliance reviewer and recorded in the review output -- this is reviewer judgment, not a mechanical detector (the trigger predicate is objectively checkable in principle, but no automated tool evaluates it here). The malformed-refusal, hash-mismatch, and staleness checks are procedurally checkable: a reviewer can recompute the hash and compare stamps directly. The `DOD-GATE: FAIL <layer>` marker itself is mechanically greppable once emitted.
+
+---
+
 ## Pre-PR Checklist
 
 Before creating any PR -- answer all 6 questions:
@@ -170,6 +189,10 @@ If you find yourself thinking any of the following, you are about to make an unv
 - "My new test/gate passed on the first run" -- **STOP. A green run alone does not prove the gate can fail. Paste a mutation run or an equivalent failing-case run too.**
 - "Exit 0 means done" / "The count is probably fine" -- **STOP. Compare the result to a known baseline (an expected count, a known-bad case, or a prior-run reference) before accepting it as evidence.**
 - "The contract fix reads correctly" -- **STOP. Textual review does not prove a dispatched agent's behavior changed; run a fixture exercising the new sub-case before claiming DONE.**
+- "The canon is stale, so the gate doesn't bind" -- **STOP. A stale canon still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate the claim against it anyway.**
+- "Hash mismatch, skip the gate" -- **STOP. Hash mismatch is warn-and-consume; emit `DOD-HASH: MISMATCH` and continue evaluating the claim against the canon.**
+- "The trigger didn't obviously fire, skip the layer" -- **STOP. Trigger firing is a recorded Stage 1 reviewer judgment, not a silent self-exemption -- the reviewer decides and records it, not the claimant.**
+- "The canon is malformed, fall back to generic verification" -- **STOP. Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
 
@@ -192,6 +215,10 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "My new test passed on the first run" | A green run alone does not prove the gate can fail. Paste a mutation run or a failing-case run too -- a fixture that passes regardless of the mechanism is worse than none. |
 | "Exit 0 means done" / "The count is probably fine" | A green signal without a baseline comparison is not verification. State the expected count before reading the result, or name a known-bad case that must still fail. |
 | "The fix looks right on review" | Textual PASS is not behavioral evidence for a contract clause; paste a fixture run for the new sub-case, or cap the claim at DONE_WITH_CONCERNS. |
+| "The canon is stale so the gate doesn't bind" | A stale canon is still consumed and still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate anyway. |
+| "Hash mismatch, skip the gate" | Hash mismatch is a warn-and-consume trust flag, not a parse failure; emit `DOD-HASH: MISMATCH` and keep evaluating the claim against the canon. |
+| "The trigger didn't obviously fire, skip the layer" | Trigger firing is recorded Stage 1 reviewer judgment, not a self-exemption the claimant grants itself. |
+| "The canon is malformed, fall back to generic verification" | Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse. |
 
 ---
 

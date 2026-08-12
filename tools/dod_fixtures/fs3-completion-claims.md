@@ -80,11 +80,11 @@ This diff touches `tools/ingest/dedupe.py` and `tools/ingest/test_dedupe.py`,
 both under `tools/`, so `fs3-canon-DOD.md`'s `mutation-testing` CONDITIONAL
 trigger fires. The claim's `mutation-testing` evidence is a green suite run
 only -- no property was broken, no failing case is named, nothing was
-restored. That is exactly the substitute DOD_TEMPLATE.md Section C's
-canonical example calls out as insufficient ("a green suite run alone is NOT
-evidence"). Per `verification-before-completion` SKILL.md's "New Gates: DoD
-Canon Check on Completion Claims" gate check, the claim MUST fail the gate
-for this layer: `DOD-GATE: FAIL mutation-testing`.
+restored. That is exactly what `verification-before-completion` SKILL.md's
+"New Gates: DoD Canon Check on Completion Claims" gate check calls out as
+insufficient ("a green suite run alone does not satisfy it"). Per that same
+gate check, the claim MUST fail the gate for this layer:
+`DOD-GATE: FAIL mutation-testing`.
 
 **Oracle** (README.md Section 3, FS3 positive case):
 ```
@@ -122,9 +122,11 @@ placed at `docs/DOD.md` per Design notes:
 Every ALWAYS layer (`coverage`, `lint-format-static-analysis`) and the fired
 CONDITIONAL layer (`mutation-testing`) carry evidence meeting that layer's
 own standard -- the `mutation-testing` entry names the broken property, the
-named failing case, and the restore step, per DOD_TEMPLATE.md Section C's
-canonical example. `visual-regression` is the canon's only other layer and is
-ruled N/A (`target-absent`), so it needs no evidence line. No layer is
+named failing case, and the restore step, per `verification-before-completion`
+SKILL.md's "New Gates: DoD Canon Check on Completion Claims" gate check
+("break the property, run the gate, paste the named failing case, then
+restore the property"). `visual-regression` is the canon's only other layer
+and is ruled N/A (`target-absent`), so it needs no evidence line. No layer is
 missing or generic; the gate must not fire, and no marker is emitted.
 
 All evidence above is plausible fake fixture content (fabricated command

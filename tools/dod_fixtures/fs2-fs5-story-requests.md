@@ -21,7 +21,7 @@ Design notes (read before dispatching):
   and adds nothing this file needs to prove.
 - Both canons here (the clean one and the Case D variant below) are
   intentionally partial subsets of the real
-  `skills/defining-done/references/DOD_TAXONOMY.md` (18 layers across 5
+  `skills/defining-done/references/DOD_TAXONOMY.md` (20 layers across 5
   groups as of this writing) -- they do not carry a ruling line for every
   taxonomy layer, unlike a genuine ratified canon (DOD_TEMPLATE.md
   Section A.3's completeness rule is an authoring rule for real canon; a

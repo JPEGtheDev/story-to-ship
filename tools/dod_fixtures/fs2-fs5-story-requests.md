@@ -47,12 +47,17 @@ Design notes (read before dispatching):
   tracking app), deliberately distinct from T11b's "TaskFlow" fixture so
   the two fixture sets stay easy to tell apart in a shared transcript or
   log.
+- **Canon placement idiom:** wherever a case below says a canon file is
+  "placed at `docs/DOD.md`", that means `cp <fixture-path> docs/DOD.md` in
+  the dispatched agent's working repo copy before dispatch, removed after
+  the run; for Case C, placement means confirming no file exists at
+  `docs/DOD.md` instead of copying one.
 
 ## Case A -- violating story request (FS2 refusal)
 
 Dispatch this request text verbatim to `user-story-generator`, with
-`tools/dod_fixtures/fs2-canon-DOD.md` made readable at `docs/DOD.md` for
-the run (per README.md Section 3's run procedure):
+`tools/dod_fixtures/fs2-canon-DOD.md` placed at `docs/DOD.md` per Design
+notes:
 
 > As the Fernglen product owner, I want a story for: "Add a
 > `normalize_species_code()` helper to the ingest pipeline that maps
@@ -83,7 +88,7 @@ tools/dod_fixtures/check-markers.sh <fs2-violating-story-output> --require 'DOD-
 ## Case B -- compliant story request (FS2 negative control)
 
 Dispatch this request text verbatim to `user-story-generator`, with the
-same `fs2-canon-DOD.md` canon in place at `docs/DOD.md`:
+same `fs2-canon-DOD.md` canon placed at `docs/DOD.md` per Design notes:
 
 > As the Fernglen product owner, I want a story for: "Add a
 > `dedupe_nearby_sightings()` function to the ingest pipeline that
@@ -164,8 +169,8 @@ awk '/^<!-- FS7-VARIANT-CANON:BEGIN -->$/{f=1;next}/^<!-- FS7-VARIANT-CANON:END 
 
 Then dispatch the Case A or Case B request text (either works -- this case
 isolates canon staleness/tamper, not story content) to
-`user-story-generator` with the materialized file made readable at
-`docs/DOD.md` for the run.
+`user-story-generator` with the materialized file placed at `docs/DOD.md`
+per Design notes.
 
 <!-- FS7-VARIANT-CANON:BEGIN -->
 ---

@@ -121,6 +121,8 @@ Every field MUST contain project-specific vocabulary. Run the completeness gate 
 
 The `## Domain Model` block is the authoritative domain source for `greenfield-architecture` and `greenfield-bootstrap`. When multiple `## Domain Model` blocks exist in conversation history, the most recent is authoritative.
 
+**Definition of Done ratification (named inception step).** Immediately after producing the `## Domain Model` block, and before invoking `greenfield-architecture` or `greenfield-bootstrap`, invoke the `defining-done` skill (`Skill(defining-done)`) with the product owner -- who is already live in this conversation from the domain interview -- to ratify the repo's Definition of Done canon. `greenfield-architecture` and `greenfield-bootstrap` generate stories through `user-story-generator`, which reads `docs/DOD.md`; generating those stories before ratification would carry an unratified fallback DoD forward into every downstream story.
+
 `greenfield-architecture` and `greenfield-bootstrap` MUST read the existing `## Domain Model` block before asking the user any questions about their project. They MUST NOT ask the user to re-describe or re-paste domain information that is already present in the block.
 
 ---
@@ -148,6 +150,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 - Architecture or code recommendations appearing before `## Domain Model` is written -> STOP. Finish the domain interview first. No architecture without a domain model.
 - Re-running the interview when a `## Domain Model` block already exists in the conversation -> STOP. Read the existing block. Do not ask the user to repeat information.
 - Continuing past a contradictory answer without flagging it -> STOP. Write the `[UNCLEAR:]` label at the point of detection. Resolve it before asking the next question.
+- Invoking `greenfield-architecture` or `greenfield-bootstrap` before invoking `defining-done` -> STOP. Ratify the Definition of Done canon with the product owner first; stories generated before ratification carry an unratified fallback DoD forward.
 
 ---
 

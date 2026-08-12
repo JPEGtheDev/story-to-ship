@@ -27,17 +27,15 @@ After you've had the conversation and before generating, mentally verify you hav
    [-] Ask: "What outcome or value does this deliver?"
 5. Rough scope and size estimate (S/M/L)
    [-] Ask: "Is this small (hours), medium (days), or large (sprint)?"
-6. Premium request estimate based on complexity
-   [-] Estimate from scope; state the assumption
-7. Model recommendation with reasoning
+6. Model recommendation with reasoning
    [-] Default to Standard tier; state the assumption
-8. Format preference (if they expressed one)
+7. Format preference (if they expressed one)
    [-] Default to Story Template format; state the assumption
-9. Any specific constraints or requirements
+8. Any specific constraints or requirements
    [-] Assume no constraints; state the assumption
 
-[+] All 9 met -> proceed to generate the story
-[-] Any unmet -> ask the missing questions or gather the missing information. Do not generate until all 9 conditions are met.
+[+] All 8 met -> proceed to generate the story
+[-] Any unmet -> ask the missing questions or gather the missing information. Do not generate until all 8 conditions are met.
 
 **RED FLAGS - Stop and ask for clarification:**
 - Story mentions functionality not in project context
@@ -155,7 +153,6 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scripts.
 
 **Always include the Effort Estimate section** with:
-- Total premium requests (range)
 - Recommended model tier (Economy/Standard/Premium)
 - One-sentence reasoning for the model choice
 

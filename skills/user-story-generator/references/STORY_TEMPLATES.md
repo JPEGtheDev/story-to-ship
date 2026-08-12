@@ -2,6 +2,8 @@
 
 Template examples for different story types. Customize based on your domain and writing style.
 
+**Note:** This file is legacy example content, unreferenced by SKILL.md. Its Definition of Done checklists are unratified and not canon-derived; ratify a repo's real Definition of Done with the defining-done skill.
+
 ---
 
 ## Feature Story Template
@@ -54,6 +56,8 @@ Template examples for different story types. Customize based on your domain and 
 ---
 
 ### Definition of Done
+
+*(legacy example checklist -- unratified, not canon-derived; a repo's real Definition of Done comes from docs/DOD.md via the defining-done skill)*
 
 - [ ] Code peer-reviewed and approved
 - [ ] Unit tests pass (min 85% coverage on new code)
@@ -115,6 +119,8 @@ Template examples for different story types. Customize based on your domain and 
 
 ### Definition of Done
 
+*(legacy example checklist -- unratified, not canon-derived; a repo's real Definition of Done comes from docs/DOD.md via the defining-done skill)*
+
 - [ ] Old code deleted (no dead code left behind)
 - [ ] All tests pass on CI
 - [ ] Code review completed
@@ -169,6 +175,8 @@ Template examples for different story types. Customize based on your domain and 
 ---
 
 ### Definition of Done
+
+*(legacy example checklist -- unratified, not canon-derived; a repo's real Definition of Done comes from docs/DOD.md via the defining-done skill)*
 
 - [ ] Research document in `/docs/spikes/`
 - [ ] PoC code (if any) in temporary branch
@@ -228,6 +236,8 @@ Template examples for different story types. Customize based on your domain and 
 ---
 
 ### Definition of Done
+
+*(legacy example checklist -- unratified, not canon-derived; a repo's real Definition of Done comes from docs/DOD.md via the defining-done skill)*
 
 - [ ] Bug fixed and tested locally
 - [ ] Regression test passes

@@ -17,8 +17,7 @@ Only after the user confirms, generate the story using this template:
 
 ## Effort Estimate
 
-**Total Premium Requests:** [Range, e.g., 30-40]
-**Recommended Model Tier:** [Small | Standard | Advanced]
+**Recommended Model Tier:** [Economy | Standard | Premium]
 **Reasoning:** [One sentence explaining complexity level and why this tier is appropriate]
 
 ---
@@ -57,6 +56,8 @@ Only after the user confirms, generate the story using this template:
 
 ## Definition of Done
 
+*(unratified template defaults -- no ratified canon at docs/DOD.md; ratify one with the defining-done skill)*
+
 - [ ] Code written and peer-reviewed
 - [ ] Unit tests pass (min. 85% coverage on new code)
 - [ ] No new linter/compiler warnings
@@ -78,4 +79,4 @@ Only after the user confirms, generate the story using this template:
 
 ## Estimating Effort and Model Selection
 
-Load the `user-story-estimation` skill for S/M/L size breakdown, premium request ranges, model tier selection, and validated examples. Always include the Effort Estimate section in every generated story.
+Load the `user-story-estimation` skill for S/M/L size breakdown, model tier selection, and validated examples. Always include the Effort Estimate section in every generated story.

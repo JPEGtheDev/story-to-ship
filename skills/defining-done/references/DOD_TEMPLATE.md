@@ -166,13 +166,22 @@ rationale) per file.
 ### B.4 Write order (assumption A15)
 
 Canon writes happen in exactly this order, as a single atomic write step performed
-only at ratification (or delta re-ratification): detail files first, then
-`docs/DOD.md`, then `docs/INDEX.md`. Nothing is written before this step -- an
-interview abandoned before the final ratification pass leaves no file changed.
-Because `docs/DOD.md` is written before `docs/INDEX.md`, an interruption between
-those two steps leaves detail files and/or an index that `docs/INDEX.md` does not
-yet catalog (inert, not live); an interruption before `docs/DOD.md` is written means
-no canon exists yet at all (its absence is the "no canon" state consumers check for).
+only at ratification (or delta re-ratification): (1) detail files; (2) when any
+detail files exist, the per-level index chain for them -- `docs/dod/<group-slug>/INDEX.md`
+for each group directory that has detail files, then `docs/dod/INDEX.md` linking
+those subdomain indexes (create or update either as needed), per the documentation
+skill's per-level INDEX.md rule (`DOCUMENTATION_PRINCIPLES.md` "Documentation Index"
+section); (3) `docs/DOD.md`; (4) the `docs/INDEX.md` update -- a row for DOD.md plus
+a row linking `docs/dod/INDEX.md` when it exists (never a row for individual leaf
+detail files at root; that is the child index's job). Nothing is written before this
+step -- an interview abandoned before the final ratification pass leaves no file
+changed. Because `docs/DOD.md` is written after every file under `docs/dod/` and
+before the `docs/INDEX.md` update, its presence remains the reliable canon signal:
+an interruption anywhere under `docs/dod/` (detail files or their index chain)
+before `docs/DOD.md` is written means no canon exists yet at all (its absence is the
+"no canon" state consumers check for), leaving at most inert orphan files under
+`docs/dod/`; an interruption between `docs/DOD.md` and the `docs/INDEX.md` update
+leaves a live canon with a stale root index (inert, not live).
 
 ---
 

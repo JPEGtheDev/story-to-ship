@@ -42,13 +42,13 @@ any other `docs/` file.
 | File | Domain | Subdomain | Description |
 |------|--------|-----------|-------------|
 | [DOD.md](DOD.md) | cross-cutting | -- | Ratified Definition of Done canon: one owner ruling per taxonomy layer, stamped and hashed. |
-| [dod/non-functional-verification/performance-spend-budgets.md](dod/non-functional-verification/performance-spend-budgets.md) | dod | non-functional-verification | Token-size budgets on skill files. |
-| [dod/process-static-gates/lint-format-static-analysis.md](dod/process-static-gates/lint-format-static-analysis.md) | dod | process-static-gates | Skill-driven content checks. |
-| [dod/process-static-gates/2-stage-review.md](dod/process-static-gates/2-stage-review.md) | dod | process-static-gates | Two agent review stages plus the owner merge gate. |
-| [dod/process-static-gates/versioning-conventional-commits.md](dod/process-static-gates/versioning-conventional-commits.md) | dod | process-static-gates | Conventional commit format on every commit. |
-| [dod/process-static-gates/documentation-updates.md](dod/process-static-gates/documentation-updates.md) | dod | process-static-gates | Skills are the process documentation. |
-| [dod/release-readiness/exploratory-testing.md](dod/release-readiness/exploratory-testing.md) | dod | release-readiness | Spike issues; findings live on the issue. |
-| [dod/release-readiness/definition-of-ready.md](dod/release-readiness/definition-of-ready.md) | dod | release-readiness | Ready bar for feature work; balloon rule. |
+| [performance-spend-budgets](dod/non-functional-verification/performance-spend-budgets.md) | dod | non-functional-verification | Token-size budgets on skill files. |
+| [lint-format-static-analysis](dod/process-static-gates/lint-format-static-analysis.md) | dod | process-static-gates | Skill-driven content checks. |
+| [2-stage-review](dod/process-static-gates/2-stage-review.md) | dod | process-static-gates | Two agent review stages plus the owner merge gate. |
+| [versioning-conventional-commits](dod/process-static-gates/versioning-conventional-commits.md) | dod | process-static-gates | Conventional commit format on every commit. |
+| [documentation-updates](dod/process-static-gates/documentation-updates.md) | dod | process-static-gates | Skills are the process documentation. |
+| [exploratory-testing](dod/release-readiness/exploratory-testing.md) | dod | release-readiness | Spike issues; findings live on the issue. |
+| [definition-of-ready](dod/release-readiness/definition-of-ready.md) | dod | release-readiness | Ready bar for feature work; balloon rule. |
 
 ## Related
 

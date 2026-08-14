@@ -150,10 +150,13 @@ A14 (Refinement fold): hash-mismatch is a THIRD distinct consumer oracle (separa
      trust flag, not a parse failure).
 A15 (Refinement fold): A1 (abandon-interview writes nothing) is proven statically by
      the skill's write-order design (nothing written before the single final write
-     step), NOT by a dispatched fixture -- disclosed as the one behavior claim
-     without an observed-proof fixture. Write order at ratification: detail files ->
-     docs/DOD.md -> docs/INDEX.md, so an interrupted write leaves no live canon
-     (DOD.md absent = no canon; details without index are inert).
+     step), NOT by a dispatched fixture -- disclosed as a behavior claim without an
+     observed-proof fixture. A8 (malformed-canon refusal) is the second such claim:
+     specified in the skill text and consumer gate, with no fixture run exercising a
+     structurally-broken canon; both are disclosed in the PR body. Write order at
+     ratification: detail files -> the docs/dod per-level index chain -> docs/DOD.md
+     -> docs/INDEX.md, so an interrupted write leaves no live canon (DOD.md absent =
+     no canon; files under docs/dod/ without it are inert).
 
 ## Refinement verdicts (Ceremony 2, 2026-08-11)
 

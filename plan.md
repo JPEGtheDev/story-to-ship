@@ -28,7 +28,7 @@ From then on:
 - New projects get the interview as a named step of project inception; existing repos
   invoke it directly.
 - The repo's own canon is produced by actually running the interview with the product
-  owner (dogfood) -- a real artifact, not a demonstration fixture.
+  owner (real use in this repo) -- a real artifact, not a demonstration fixture.
 
 Behavioral acceptance criteria (numbered, synthesized from Business AC-B1..B5 +
 Tester verifiability findings):
@@ -192,7 +192,7 @@ build time; the CONCERNS flag marks the pending behavioral evidence only.
 | FS7 staleness on read | (new, Discovery) | T6, T8, T12b/c staleness inputs |
 | taxonomy + template + docs | AC1, AC8 | T2, T3, T5 |
 | greenfield + sweeps + cleanup | AC9, AC10, Q3 | T9, T7a-d, T10 |
-| dogfood | AC11 | T13 |
+| real-use ratification | AC11 | T13 |
 
 ## Todos (revised post-Refinement; labels use Feature Spec (FS) numbering)
 
@@ -284,7 +284,7 @@ T12b (FS2/FS5/FS7 proof): Dispatch fixture runs -- observed DOD-VIOLATION on the
 T12c (FS3 proof): Dispatch fixture runs -- observed DOD-GATE: FAIL on the missing-
     evidence claim, observed pass with no marker on the complete claim, observed
     staleness/hash warnings. Upgrades T8. Files: none.
-T13 (dogfood, OWNER LIVE): Interview with the product owner -> this repo's real
+T13 (real-use ratification, OWNER LIVE): Interview with the product owner -> this repo's real
     docs/DOD.md (+ detail files per A12), hash stamped; rulings + taxonomy gaps
     recorded. Files: docs/DOD.md + details (count depends on owner rulings; disclosed
     open-ended, index+details all land in docs/).

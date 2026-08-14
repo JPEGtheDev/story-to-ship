@@ -153,7 +153,12 @@ A15 (Refinement fold): A1 (abandon-interview writes nothing) is proven staticall
      step), NOT by a dispatched fixture -- disclosed as a behavior claim without an
      observed-proof fixture. A8 (malformed-canon refusal) is the second such claim:
      specified in the skill text and consumer gate, with no fixture run exercising a
-     structurally-broken canon; both are disclosed in the PR body. Write order at
+     structurally-broken canon. The Write Step's index-chain step (added by Signoff
+     revision R2b) is the third: the skill writing the per-level docs/dod index
+     chain live has not been exercised by any dispatched run (T12a's delta run had
+     no detail files, so the step's precondition was false; the existing chain was
+     backfilled by R2a's implementer, not written by the skill). All three are
+     disclosed in the PR body. Write order at
      ratification: detail files -> the docs/dod per-level index chain -> docs/DOD.md
      -> docs/INDEX.md, so an interrupted write leaves no live canon (DOD.md absent =
      no canon; files under docs/dod/ without it are inert).

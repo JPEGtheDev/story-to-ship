@@ -29,13 +29,15 @@ optional longer rationale in per-layer detail files at
 The canon is written and updated only by the `defining-done` skill's
 ratification interview (see `skills/defining-done/references/DOD_TEMPLATE.md`
 for the authoring format) -- no other process creates or edits it.
-The write order at ratification is: detail files, then `docs/DOD.md`, then
-this file's row for it. `docs/DOD.md` is written after any detail files, so
-its presence is the reliable canon signal: if `docs/DOD.md` does not exist,
-no canon has been ratified yet in this repo, and any DoD-aware tooling
-should fall back to its canon-less default behavior. Once ratified,
-`docs/DOD.md` and any detail files are catalogued in the table below like
-any other `docs/` file.
+The write order at ratification is: detail files, then their per-level index
+chain under `docs/dod/` (subdomain `INDEX.md` files, then `docs/dod/INDEX.md`),
+then `docs/DOD.md`, then this file's update. `docs/DOD.md` is written after
+everything under `docs/dod/` and before this file's update, so its presence
+is the reliable canon signal: if `docs/DOD.md` does not exist, no canon has
+been ratified yet in this repo, and any DoD-aware tooling should fall back to
+its canon-less default behavior. Once ratified, `docs/DOD.md` is catalogued
+in the table below; detail files are catalogued by the `docs/dod/` index
+chain (linked from the table), not listed here.
 
 ## Files
 

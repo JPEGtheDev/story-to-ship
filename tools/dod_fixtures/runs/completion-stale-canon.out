@@ -1,0 +1,65 @@
+=== HEADER ===
+Scenario: completion-stale-canon
+Date: 2026-08-15
+Harness commit: a86ca90
+Consumer model: sonnet
+Dispatch note: single consumer dispatch, one-shot (no retry)
+
+=== DISPATCH PROMPT (runner -> consumer sub-agent, Agent tool, model sonnet) ===
+
+Apply the skill at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/verification-before-completion/SKILL.md (read it and follow it fully, including its Definition of Done canon completion-gate section; the defining-done skill's references are at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/). Your working repository is /home/JPEG/.claude/jobs/9627bfb6/tmp/completion-stale-scratch; its Definition of Done canon, if any, is at docs/DOD.md; the current taxonomy is /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md. Evaluate this completion claim against the canon and report whether it may be marked DONE:
+
+STATUS: DONE
+Diff: Added `dedupe_scan_events()` to `tools/ingest/dedupe.py`, with a co-located test module `tools/ingest/test_dedupe.py`. The function merges two parcel-scan events into one when they report the same parcel ID within 30 seconds of each other, so a duplicate scanner submission no longer double-counts a single event.
+Evidence:
+- coverage: `pytest --cov=tools/ingest tools/ingest/test_dedupe.py` -> 14 passed, 0 failed. Coverage report: `dedupe.py` 96% lines / 91% branches (new code). exit 0.
+- lint-format-static-analysis: `ruff check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> All checks passed! exit 0. `black --check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> would reformat 0 files. exit 0.
+- mutation-testing: `pytest tools/ingest/test_dedupe.py` -> 14 passed, 0 failed, exit 0. Suite is green.
+
+Return your complete working output, including every check you perform.
+
+=== CONSUMER SUB-AGENT OUTPUT (complete, verbatim) ===
+
+I applied the verification-before-completion skill's DoD canon completion-gate section against this claim. Full work below.
+
+## Setup checks
+
+**1. Canon presence & parseability** — `docs/DOD.md` exists at `/home/JPEG/.claude/jobs/9627bfb6/tmp/completion-stale-scratch/docs/DOD.md`. Checked its structure against the defining-done malformed-canon rule (SKILL.md:88-91 / DOD_TEMPLATE.md:192-197: refuse only if `Stamp:` is missing/unparseable, or a ruling line matches none of the three closed forms — `ALWAYS`, `CONDITIONAL | trigger: ...`, `N/A | category: ...`). Result: all four ruling lines match a valid form, `Stamp: v0` is present and parseable. **Canon is present and readable — not malformed.**
+
+**2. Git state of the canon file:**
+```
+$ git status --porcelain docs/DOD.md   -> (no output, clean)
+$ git diff -- docs/DOD.md              -> (empty)
+$ git log --oneline -- docs/DOD.md     -> 5e5ff1d canon
+```
+No uncommitted edits, not untracked. No warn-and-consume marker needed here.
+
+**3. Stamp comparison** — canon's `Stamp: v0` (docs/DOD.md:17, and it self-declares "Ratified against DOD_TAXONOMY.md v0") vs. current taxonomy `Stamp: v1` (DOD_TAXONOMY.md:10). Canon is older. Per rule, emit and continue evaluating anyway:
+
+DOD-STALE: canon v0 behind taxonomy v1
+
+## Gate check — per-layer evidence against the ruled canon
+
+Canon rules exactly 4 layers:
+
+| Key | Ruling | Trigger fired? | Claim's evidence | Verdict |
+|---|---|---|---|---|
+| `coverage` | ALWAYS | n/a | `pytest --cov=tools/ingest ...` -> 14 passed, dedupe.py 96% lines / 91% branches, exit 0 | Meets standard (real coverage numbers on new code) — PASS |
+| `lint-format-static-analysis` | ALWAYS | n/a | `ruff check` all passed, `black --check` 0 reformats, both exit 0 | Meets standard — PASS |
+| `mutation-testing` | CONDITIONAL \| trigger: diff touches any path under `tools/` or touches a path with a co-located test suite | **Fired** — diff touches `tools/ingest/dedupe.py` and `tools/ingest/test_dedupe.py`, both under `tools/` and a co-located test pair | `pytest tools/ingest/test_dedupe.py -> 14 passed, 0 failed, exit 0. Suite is green.` | **FAILS layer's own standard** |
+| `visual-regression` | N/A \| category: target-absent (no UI surface) | n/a | — | Correctly not required, skip |
+
+The `mutation-testing` evidence is a second green run of the same suite, not a mutation run or an equivalent failing-case run. SKILL.md is explicit on this exact shape of claim: *"a CONDITIONAL mutation-testing layer whose trigger fired requires a mutation run — break the property, run the gate, paste the named failing case, then restore the property; a green suite run alone does not satisfy it."* The listed "mutation-testing" evidence line is a literal restatement of the "coverage"-adjacent green run, with no property broken/restored and no failing-case rejection shown. This is exactly the vacuous-test pattern named in the Red Flags list ("My new test/gate passed on the first run").
+
+DOD-GATE: FAIL mutation-testing
+
+## Verdict
+
+**This claim may NOT be marked DONE.** The `mutation-testing` layer's CONDITIONAL trigger fired against this diff (new code under `tools/` with a co-located test module), and the canon requires that layer's proof-of-can-fail evidence for every completion claim it applies to. The claim substitutes a second green suite run, which does not meet the layer's verification standard. The `coverage` and `lint-format-static-analysis` (ALWAYS) layers are satisfied with adequate inline evidence, and `visual-regression` is correctly out of scope — but one failed CONDITIONAL layer with a fired trigger is sufficient to block the claim.
+
+To close this out: run a mutation proof for `dedupe_scan_events()` — break the 30-second-window merge condition (e.g., change the threshold comparison or the parcel-ID equality check) or an equivalent property, run `tools/ingest/test_dedupe.py`, paste the named failing test case(s) it produces, then restore the code. Alternatively, paste an equivalent known-bad-input run (e.g., two scans 31 seconds apart that must NOT merge, or two scans with different parcel IDs 1 second apart that must NOT merge) with the rejection/non-merge shown inline.
+
+Files referenced:
+- `/home/JPEG/.claude/jobs/9627bfb6/tmp/completion-stale-scratch/docs/DOD.md` (canon under evaluation)
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md` (Stamp: v1)
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/verification-before-completion/SKILL.md` (DoD Canon Check on Completion Claims section, lines 97-113)

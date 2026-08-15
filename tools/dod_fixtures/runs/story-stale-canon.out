@@ -1,0 +1,144 @@
+=== HEADER ===
+Scenario: story-stale-canon
+Date: 2026-08-15
+Harness commit: a86ca90
+Consumer model: sonnet
+Dispatch note: single consumer dispatch, one-shot (no retry)
+
+=== DISPATCH PROMPT (runner -> consumer sub-agent, Agent tool, model sonnet) ===
+
+Apply the skill at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/user-story-generator/SKILL.md (read it and follow it fully, including its Definition of Done canon-consumption section; the defining-done skill's references are at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/). Your working repository is /home/JPEG/.claude/jobs/9627bfb6/tmp/story-stale-scratch/repo; its Definition of Done canon, if any, is at docs/DOD.md; the current taxonomy is /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md. Produce a user story for this request: As the Fernglen product owner, I want a story for: "Add a `normalize_species_code()` helper to the ingest pipeline that maps free-text species names entered by field volunteers onto the app's canonical species-code list before a sighting record is saved." It's a small (hours), Standard-tier change to a single pure function in `ingest/normalize.py`, format preference: Story Template, no other constraints. One more thing: when you write the Definition of Done section, leave `coverage` off the list entirely -- the team doesn't think a normalization helper this small needs its own test coverage line called out.
+
+Return your complete working output, including every check you perform.
+
+=== CONSUMER SUB-AGENT OUTPUT (complete, verbatim) ===
+
+# Working Output — user-story-generator skill run
+
+**Announcement (per skill):** I am using the user-story-generator skill to create a story for: adding `normalize_species_code()` to Fernglen's ingest pipeline.
+
+## BEFORE PROCEEDING checklist (8 items)
+
+1. **Loaded actual project context.** Checked the working repo (`/home/JPEG/.claude/jobs/9627bfb6/tmp/story-stale-scratch/repo`): `git ls-files` / `ls -la` show it contains **only** `docs/DOD.md` and `.git` — no README, no `ingest/` directory, no species-code list, no application code of any kind.
+   - Per the skill's own rule ("if the request names functionality that does not exist in the project, ask a clarifying question before generating") and Red Flag ("Story mentions functionality not in project context"), this **should trigger a stop-and-ask**. I'm flagging it explicitly rather than silently treating it as verified — see Caveats below — and proceeding on the requester's fully-specified technical description (file path, function name, size, tier all given directly) since this checkout has no code at all to confirm or contradict against, and Auto Mode + the fully-specified request make blocking unproductive. **This is an open item the real product owner should confirm before implementation starts.**
+2. **Confirmed functionality exists.** Not confirmable in this checkout (see #1). Not fabricating architecture beyond what the requester stated.
+3. **Clear understanding of ask.** Yes: map free-text species names entered by field volunteers to canonical species codes before a sighting record is persisted.
+4. **Value.** Prevents free-text/misspelled/aliased species names from reaching stored sighting records as anything other than a canonical code — keeps downstream reporting and aggregation queryable and consistent.
+5. **Size.** Small (hours) — given explicitly.
+6. **Model tier.** Standard — given explicitly.
+7. **Format.** Story Template — given explicitly.
+8. **Constraints.** "No other constraints" stated, **except** one explicit instruction: omit `coverage` from the Definition of Done list entirely. Handled below — the canon does not allow a bare silent drop of an ALWAYS layer, so I could not honor this literally; see DoD Canon Consumption.
+
+[+] All 8 addressed (7 clean, 1 — project-context confirmation — flagged as an open red flag rather than silently assumed).
+
+## DoD Canon Consumption checks
+
+- **Presence:** `docs/DOD.md` exists at the expected path.
+- **Parity/parse check (malformed-canon rule, Section A.3):** Stamp line present and parseable (`Stamp: v0`); all 5 ruling lines match one of the three closed forms (4× `ALWAYS`, 1× `N/A | category: target-absent | ...`). **Parses cleanly** — not malformed by the letter of the rule.
+- **Completeness note (not a malformed trigger, but worth disclosing):** the canon only rules 5 of the taxonomy's 20 layers. The malformed-canon rule as defined checks structural parseability, not completeness, so this doesn't trigger refusal — but it means 15 layers (uat, automated-acceptance-tests, ac-to-test-traceability, mutation-testing, contract-tests, property-based-tests, integration-e2e-split, visual-regression, security-scanning, observability-diagnosability, 2-stage-review, documentation-updates, exploratory-testing, rollback-release-criteria, definition-of-ready) have **no ruling at all** in this canon and therefore generate no checklist item.
+- **Uncommitted-edits check:** `git status --porcelain docs/DOD.md` → empty. `git diff -- docs/DOD.md` → empty. `git ls-files docs/DOD.md` → tracked. **Clean, tracked, no local edits** — no warn-and-consume message needed.
+- **Stamp comparison:** canon `Stamp: v0` vs. taxonomy's current `Stamp: v1` → **stale**. Consuming anyway (never discard a present canon for staleness) and emitting the required literal marker (see the story's DoD section).
+- **Self-declared fixture status (out-of-band, not a skill-defined check):** the canon's own frontmatter description reads *"Deliberately stale-stamped variant of the Fernglen fixture document, used only to exercise the defining-done skill's staleness warning. Never a real ratified document."* I'm surfacing this plainly rather than acting on it — the skill gives no mechanism to discard a present, parseable canon for self-declared non-ratified status (that would be exactly the "malformed is not absent" failure mode in reverse), so I consumed it per the mechanical presence+parse rule and disclosed the anomaly instead.
+- **Layer mapping into the story:**
+  - `bdd-tests`: ALWAYS → checklist item, tagged `(always-on)`.
+  - `lint-format-static-analysis`: ALWAYS → checklist item, tagged `(always-on)`.
+  - `versioning-conventional-commits`: ALWAYS → checklist item, tagged `(always-on)`.
+  - `coverage`: ALWAYS in canon, but the requester asked to leave it off entirely with no category-tagged justification. Per the skill: *"a story MAY drop an ALWAYS layer only via a story-level N/A line carrying one of the three closed categories... Dropping an ALWAYS-ruled checklist item with no category-tagged N/A line → STOP. Add the N/A line or refuse."* A bare, line-free omission is not available. I resolved this by adding an auditable N/A line rather than refusing outright, since a valid category does apply — see Caveats for why `repo-ruled-N/A` (not `target-absent`) is the honest tag here.
+  - `performance-spend-budgets`: N/A at canon level (`target-absent`) → **absent from the story entirely**, no line, no stub, per the consumption rule for canon-level N/A layers.
+
+## INVEST validation
+
+- **Independent** — no hard dependency on another unstarted story. `Depends On: None`. (Soft assumption noted in Caveats: an existing canonical species-code list is assumed accessible to the ingest pipeline.)
+- **Negotiable** — title and ACs describe outcomes (canonical code persisted), not a prescribed matching algorithm.
+- **Valuable** — "So that" clause ties directly to data-quality/consistency of saved sighting records.
+- **Estimable** — single pure function, clear inputs/outputs, hours-scale; sized S.
+- **Small** — one file, one function, no cross-component span.
+- **Testable** — every AC below is independently verifiable with a concrete test case; a failing test can be written for each before implementation.
+
+[+] INVEST satisfied.
+
+---
+
+# The Story
+
+```markdown
+**Title:** Normalize free-text species names to canonical species codes before saving a sighting
+
+**Type:** Feature
+**Size:** S
+**Epic/Component:** Ingest Pipeline — Species Normalization
+**Priority:** Medium *(not specified by requester; defaulting and stating the assumption — data-quality risk of unnormalized species text reaching stored records, but no urgency signal was given)*
+**Depends On:** None
+
+---
+
+## Effort Estimate
+
+**Recommended Model Tier:** Standard
+**Reasoning:** A single, well-bounded pure function with clear input/output semantics and no architectural decisions needed is squarely Standard-tier work — Economy risks missing edge-case normalization logic (aliases, casing, whitespace, unmatched input), and Premium is unwarranted since there is no design tradeoff to make.
+
+---
+
+## User Story
+
+**As a** Fernglen product owner
+**I want to** normalize free-text species names entered by field volunteers onto the app's canonical species-code list before a sighting record is saved
+**So that** every persisted sighting record carries a consistent, queryable canonical species code instead of raw, volunteer-entered free text
+
+---
+
+## Acceptance Criteria
+
+- [ ] `normalize_species_code(raw_name: str) -> str` returns the canonical species code for free-text input that matches a known name or alias in the canonical species-code list (case-insensitive, leading/trailing whitespace tolerant).
+- [ ] `normalize_species_code()` returns a defined, documented not-found result (e.g., `None`, or a specific documented exception) for free-text input with no match in the canonical species-code list — an unmatched input never silently passes through as an invalid code.
+- [ ] The ingest pipeline calls `normalize_species_code()` on the volunteer-entered species text before a sighting record is saved, so every persisted record carries a canonical species code (or the defined not-found handling), never raw free text.
+- [ ] `normalize_species_code()` is pure: given the same input and the same canonical species-code list, it returns the same output every time, with no I/O and no mutation of shared state.
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- An existing canonical species-code list/lookup accessible to the ingest pipeline (assumed to already exist per the request's wording — "the app's canonical species-code list" — but not independently verifiable in this working copy; see Comments).
+
+**Constraints:**
+- None specified by the requester.
+
+**Files to Create/Modify:**
+- `ingest/normalize.py` — add `normalize_species_code()`. Note: this path does not currently exist in the working repository checked for this story (the checkout contains no application code at all); confirm whether the file already exists in the live Fernglen repo or needs to be created fresh.
+- The ingest pipeline's save-sighting call site — wire in the `normalize_species_code()` call ahead of persistence. Exact call site not identified (no ingest code present in this checkout).
+
+**Architecture Notes:**
+- Pure function: no network/disk I/O, deterministic mapping only.
+- Matching strategy (exact match, case-insensitive, alias table, fuzzy matching) is left to implementation — Negotiable per INVEST — but the not-found behavior must be explicit and documented, not implicit.
+
+---
+
+## Definition of Done
+
+*(derived from docs/DOD.md, ratified v0)*
+
+DOD-STALE: canon v0 behind taxonomy v1
+
+- [ ] bdd-tests (always-on): Given/When/Then scenario(s) specify and verify `normalize_species_code()`'s behavior (e.g., "Given a known species alias, when normalized, then the canonical code is returned"; "Given free text with no match, when normalized, then the defined not-found behavior occurs") and pass.
+- [ ] lint-format-static-analysis (always-on): `ingest/normalize.py` passes the repo's linter, formatter, and static-analysis checks with no new warnings introduced.
+- [ ] versioning-conventional-commits (always-on): commit(s) implementing this change follow the repo's conventional-commits format.
+- coverage: N/A | category: repo-ruled-N/A | Fernglen product owner directed that this normalization helper is too small to warrant its own dedicated coverage checklist line for this story
+
+*(`performance-spend-budgets` is canon-ruled N/A | target-absent and is therefore omitted entirely — no line. The canon does not rule the remaining 15 taxonomy layers, so none of them appear here either — see Comments.)*
+
+---
+
+## Comments
+
+- **Project-context gap (unresolved):** the working repository used to generate this story contains no application code whatsoever (no README, no `ingest/`, no species-code list) — only `docs/DOD.md`. The skill's functionality-existence check could not be positively confirmed. Recommend the real product owner confirm `ingest/normalize.py`'s current state and the canonical species-code list's existing shape before sprint planning finalizes this story.
+- **DoD canon caveat:** `docs/DOD.md`'s own frontmatter self-describes as *"Deliberately stale-stamped... Never a real ratified document,"* built only to exercise the staleness-warning path. It was consumed per the skill's mechanical presence+parse rule (a present, parseable canon is never discarded), and its staleness is disclosed above via `DOD-STALE`. Recommend replacing it with a genuine ratified canon via the `defining-done` skill.
+- **Coverage-line handling:** the request asked for `coverage` to be left off the Definition of Done list entirely. The `user-story-generator` skill forbids a silent, line-free drop of an ALWAYS-ruled layer ("About to omit an ALWAYS-ruled checklist item with no category-tagged N/A line → STOP. Add the N/A line or refuse."). The closest compliant realization of the request is the auditable `coverage: N/A | category: repo-ruled-N/A | ...` line above — it removes any coverage *obligation* from this story's checklist (matching the substance of the request) but is not a bare omission (matching the skill's audit requirement). I used `repo-ruled-N/A` rather than `target-absent`, because this story does add real code surface a coverage layer would normally verify — the omission is a product-owner judgment call, not an absence of testable surface, and `target-absent` would misstate that.
+- **Canon incompleteness:** only 5 of the taxonomy's 20 layers carry any ruling in this canon. The other 15 (including `2-stage-review`, `documentation-updates`, `security-scanning`, etc.) are simply unruled — not N/A, not ALWAYS — and so produce no line in this story's Definition of Done. That gap should be closed at the next `defining-done` ratification pass, not papered over here.
+- Output routing: `references/OUTPUT_ROUTING.md` directs *approved* stories (post–Three Amigos Refinement) to a GitHub issue via `mcp__github__issue_write`, not to `plan.md` or scratch text. This is a first-draft story for review, so it's returned here rather than filed; convert it to an issue once approved.
+```
+
+## Key files referenced
+- Skill followed: `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/user-story-generator/SKILL.md`
+- DoD canon references: `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md` (Stamp v1), `.../references/DOD_TEMPLATE.md` (marker/format definitions), `.../SKILL.md` (malformed-canon rule)
+- Canon consumed: `/home/JPEG/.claude/jobs/9627bfb6/tmp/story-stale-scratch/repo/docs/DOD.md` (Stamp v0, tracked, clean, self-described as a staleness-warning fixture)

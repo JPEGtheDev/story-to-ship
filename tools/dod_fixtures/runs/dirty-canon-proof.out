@@ -1,0 +1,116 @@
+=== HEADER ===
+Scenario: dirty-canon-proof
+Date: 2026-08-15
+Harness commit: a86ca90
+Consumer model: sonnet
+Dispatch note: single consumer dispatch, one-shot (no retry)
+
+=== INDUCED-STATE RECORD (runner-side setup, before dispatch) ===
+
+Scratch repo: /home/JPEG/.claude/jobs/9627bfb6/tmp/dirty-check-scratch
+Setup: `git init`; `docs/DOD.md` copied from
+tools/dod_fixtures/completion-claim-canon.md and committed ("canon");
+then a trailing uncommitted line appended to docs/DOD.md WITHOUT
+committing:
+`- lint-format-static-analysis note: local draft annotation, not ratified`
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/dirty-check-scratch status --porcelain docs/DOD.md
+ M docs/DOD.md
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/dirty-check-scratch diff -- docs/DOD.md
+diff --git a/docs/DOD.md b/docs/DOD.md
+index a012f61..8107fed 100644
+--- a/docs/DOD.md
++++ b/docs/DOD.md
+@@ -16,3 +16,4 @@ Ratified against DOD_TAXONOMY.md v1.
+   backend parcel-routing service with no UI, image-generation, or
+   graphics-rendering surface
+ Stamp: v1
++- lint-format-static-analysis note: local draft annotation, not ratified
+
+=== DISPATCH PROMPT (runner -> consumer sub-agent, Agent tool, model sonnet) ===
+
+Apply the skill at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/verification-before-completion/SKILL.md (read it and follow it fully, including its Definition of Done canon completion-gate section; the defining-done skill's references are at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/). Your working repository is /home/JPEG/.claude/jobs/9627bfb6/tmp/dirty-check-scratch; its Definition of Done canon, if any, is at docs/DOD.md; the current taxonomy is /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md. Evaluate this completion claim against the canon and report whether it may be marked DONE:
+
+STATUS: DONE
+Diff: Added `dedupe_scan_events()` to `tools/ingest/dedupe.py`, with a co-located test module `tools/ingest/test_dedupe.py`. The function merges two parcel-scan events into one when they report the same parcel ID within 30 seconds of each other, so a duplicate scanner submission no longer double-counts a single event.
+Evidence:
+- coverage: `pytest --cov=tools/ingest tools/ingest/test_dedupe.py` -> 14 passed, 0 failed. Coverage report: `dedupe.py` 96% lines / 91% branches (new code). exit 0.
+- lint-format-static-analysis: `ruff check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> All checks passed! exit 0. `black --check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> would reformat 0 files. exit 0.
+- mutation-testing (trigger fired: diff touches tools/): broke the property by changing the boundary comparison in `dedupe_scan_events()` from `elapsed <= 30` to `elapsed < 30` (excludes exact-30-second-boundary duplicates from merging). Re-ran `pytest tools/ingest/test_dedupe.py`: `test_dedupe_at_exact_30_second_boundary` FAILED (AssertionError: expected 1 merged event, got 2) -- 1 failed, 13 passed. Restored `elapsed <= 30`. Re-ran `pytest tools/ingest/test_dedupe.py`: 14 passed, 0 failed, exit 0.
+
+Return your complete working output, including every check you perform.
+
+=== CONSUMER SUB-AGENT OUTPUT (complete, verbatim) ===
+
+## Verification-before-completion / DoD canon-gate evaluation
+
+**Working repo:** `/home/JPEG/.claude/jobs/9627bfb6/tmp/dirty-check-scratch`
+**Canon:** `docs/DOD.md` (only tracked content in this repo besides `.git`; confirmed via `find . -not -path './.git/*' -type f` → only `docs/DOD.md`)
+
+### 1. Malformed-canon check (defining-done rule, via DOD_TEMPLATE.md Section C)
+
+Read `docs/DOD.md` in full:
+
+```
+Ratified against DOD_TAXONOMY.md v1.
+- coverage: ALWAYS
+- lint-format-static-analysis: ALWAYS
+- mutation-testing: CONDITIONAL | trigger: diff touches any path under
+  tools/ or touches any path with a co-located test suite (*_test.*,
+  test_*.*, *.spec.* in the same directory or an adjacent tests/ directory)
+- visual-regression: N/A | category: target-absent | Driftmark is a
+  backend parcel-routing service with no UI, image-generation, or
+  graphics-rendering surface
+Stamp: v1
+- lint-format-static-analysis note: local draft annotation, not ratified
+```
+
+- `Stamp:` line present and parseable: `v1`.
+- All four normative ruling lines (`coverage`, `lint-format-static-analysis`, `mutation-testing`, `visual-regression`) match one of the three valid forms in DOD_TEMPLATE.md §A.3 exactly.
+- The trailing `- lint-format-static-analysis note: ...` line does **not** take the form `<key>: <ALWAYS|CONDITIONAL|N/A>` — the colon follows "note", not the key — so it does not parse as a second ruling line for that key at all; it reads as non-normative trailing commentary (same status as the "Ratified against..." narrative line), and it self-discloses as unratified draft content.
+
+**Result: canon is parseable, not malformed. Proceed.**
+
+### 2. Uncommitted-edit check
+
+```
+$ git status --porcelain docs/DOD.md
+ M docs/DOD.md
+$ git diff -- docs/DOD.md
++- lint-format-static-analysis note: local draft annotation, not ratified
+```
+
+This is a modification (` M`), not an untracked (`??`) file. Per the skill's warn-and-consume rule: **the canon carries uncommitted local edits — this is stated plainly here, and evaluation proceeds against the file as it currently reads.** No marker line is emitted for this case (per skill instructions). The uncommitted line does not alter any of the four existing rulings — it neither redefines `lint-format-static-analysis`'s ruling nor removes it.
+
+### 3. Staleness check
+
+Canon: `Stamp: v1`. Taxonomy (`DOD_TAXONOMY.md` line 10): `Stamp: v1`. **Equal — no `DOD-STALE` marker.**
+
+### 4. Per-layer gate check against the diff
+
+Diff touches `tools/ingest/dedupe.py` and `tools/ingest/test_dedupe.py`.
+
+| Layer | Ruling | Trigger fired? | Evidence in claim | Verdict |
+|---|---|---|---|---|
+| `coverage` | ALWAYS | n/a | `pytest --cov=tools/ingest tools/ingest/test_dedupe.py` → 14 passed, 0 failed; 96% lines / 91% branches (new code); exit 0 | Satisfied |
+| `lint-format-static-analysis` | ALWAYS | n/a | `ruff check ...` → All checks passed, exit 0; `black --check ...` → would reformat 0 files, exit 0 | Satisfied |
+| `mutation-testing` | CONDITIONAL \| trigger: diff touches `tools/` or a co-located test suite | Yes — both conditions hold (`tools/ingest/...`, co-located `test_dedupe.py`) | Boundary mutation `elapsed <= 30` → `elapsed < 30`; re-run named the failing case `test_dedupe_at_exact_30_second_boundary` (AssertionError, 1 failed/13 passed); property restored; re-run 14 passed/0 failed, exit 0 | Satisfied — meets the Gate-Can-Fail Proof standard (break/run/name-the-failure/restore), not just a green run |
+| `visual-regression` | N/A \| category: target-absent | n/a | — | Not applicable, skipped |
+
+No `DOD-GATE: FAIL <layer>` condition is met for any ruled layer.
+
+The remaining 16 `DOD_TAXONOMY.md` layers (BDD tests, UAT, automated-acceptance-tests, ac-to-test-traceability, contract-tests, property-based-tests, integration-e2e-split, security-scanning, observability-diagnosability, performance-spend-budgets, 2-stage-review, versioning-conventional-commits, documentation-updates, exploratory-testing, rollback-release-criteria, definition-of-ready) carry **no ruling line at all** in this canon. The gate-check procedure in `verification-before-completion` SKILL.md only binds layers actually ruled ALWAYS or CONDITIONAL-and-fired in the canon; it does not instruct treating an absent ruling as a gate failure. That is a canon-completeness gap (worth flagging to whoever owns this canon, since `defining-done`'s ratification interview requires all 20 layers ruled), not a completion-gate failure for this claim.
+
+### 5. Generic verification-before-completion checks
+
+- No banned phrases (`Should work`, `Works`, unverified `Done`) — the claim's evidence is inline, command + output + exit code for every check.
+- Iron Law satisfied: fresh commands, full output, exit codes stated.
+- "New Gates: Gate-Can-Fail Proof Required" is independently satisfied by the same mutation-testing evidence (new test module for new code = new gate; break/pass/restore pattern followed exactly).
+- No runtime-observation-artifact requirement applies — this is backend logic with no described user-observed symptom and `visual-regression` is ruled N/A (target-absent) for this service.
+
+### Verdict
+
+No `DOD-STALE`, no `DOD-GATE: FAIL`, canon not malformed (uncommitted edit disclosed and consumed per warn-and-consume). All layers that are ruled ALWAYS, or ruled CONDITIONAL with a fired trigger, carry evidence meeting their own standard (mutation-testing meets the stricter Gate-Can-Fail Proof bar with a named failing case, not just a green run).
+
+**The completion claim may be marked DONE.**

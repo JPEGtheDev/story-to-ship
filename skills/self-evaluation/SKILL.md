@@ -162,9 +162,8 @@ Before editing any skill file, check the `Base directory for this skill:` header
 If changes are warranted and the session scope allows:
 
 1. **Update the relevant skill** -- Add the lesson to the appropriate section
-2. **Increment the skill version** -- Bump the version in YAML frontmatter
-3. **Keep changes minimal** -- Add only what's necessary, don't restructure
-4. **Maintain skill boundaries** -- Don't duplicate content across skills
+2. **Keep changes minimal** -- Add only what's necessary, don't restructure
+3. **Maintain skill boundaries** -- Don't duplicate content across skills
 
 ---
 

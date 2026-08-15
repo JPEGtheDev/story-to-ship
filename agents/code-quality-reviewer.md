@@ -71,6 +71,16 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] No layer boundary violations (UI -> Core OK; Core -> UI NOT OK)
 - [ ] No tight coupling introduced between subsystems
 
+### Shipped-File Hygiene
+Check every tracked file in the diff for:
+- [ ] No campaign or planning labels -- letter-plus-digit task or assumption tags (for example FS3, T11c, A14, R2, Q2), issue-number tags, or references to a plan document
+- [ ] No repo-internal jargon a reader with no project context could not resolve from the file alone
+- [ ] Every acronym expanded on first use, except a recognized exempt category (for example CI, PR, API, or a file format name like YAML or JSON)
+- [ ] No cross-skill or cross-tree file references cited as a path or bare filename -- another skill's internals are named in prose (for example "the documentation skill"), never as a path
+- [ ] No non-ASCII characters (curly quotes, em-dashes, Unicode arrows, or other non-ASCII characters)
+
+A hygiene hit in the changed files is a REQUEST CHANGES verdict regardless of any other findings.
+
 ## Evidence Spot-Check (required)
 
 Implementer's pasted verification output:
@@ -92,6 +102,7 @@ Pre-existing issues (log for cleanup, do not block merge): [list or NONE]
 Nits (fix or explain): [list or NONE]
 Missing tests: [list or NONE]
 Architecture violations: [list or NONE]
+Shipped-file hygiene: [list file:line hits, or NONE]
 ```
 
 Do NOT comment on style issues already handled by clang-format. Only flag things clang-format cannot catch.

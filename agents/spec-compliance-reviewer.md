@@ -74,9 +74,23 @@ For extension tasks, apply this duplication check for every new section or subse
 
 Include this comparison in your verdict for every new section, even if the overall verdict is PASS.
 
+## Shipped-File Hygiene (required -- check every tracked file in the diff)
+
+In addition to requirements coverage, check every tracked file changed in the diff for:
+1. **Campaign or planning labels.** Letter-plus-digit task or assumption tags (for example FS3, T11c, A14, R2, Q2), issue-number tags, or references to a plan document.
+2. **Repo-internal jargon.** Any term whose meaning a reader with no project context could not work out from the file alone.
+3. **Unexpanded acronyms.** Every acronym must be spelled out on first use, except a recognized exempt category (for example CI, PR, API, or a file format name like YAML or JSON).
+4. **Cross-skill or cross-tree file references.** Another skill's internal file must be named in prose (for example "the documentation skill"), never cited as a file path or bare filename.
+5. **Non-ASCII characters.** Curly quotes, em-dashes, Unicode arrows, and other non-ASCII characters must not appear in a shipped file.
+
+Report each hit with file and line under "Shipped-file hygiene" in your verdict, or state NONE. This check applies regardless of whether the hygiene issue contradicts a requirement.
+
+A hygiene hit in the changed files is a GAPS verdict regardless of any other findings.
+
 ## Return format
 ```
 VERDICT: [PASS | GAPS]
+Shipped-file hygiene: [list file:line hits, or NONE]
 
 Requirements:
 

@@ -67,6 +67,21 @@ Before writing the PR, answer:
 4. **Is there dead code?**
    Unused functions, commented-out blocks, or prototype code left over from exploration must be removed.
 
+5. **Has a pre-PR hygiene sweep been run over every changed tracked file?**
+   Before opening or updating any PR, run a repo-wide sweep over every file changed on the branch:
+   ```
+   for f in $(git diff --name-only main...HEAD); do
+     [ -f "$f" ] || continue
+     grep -nE '[A-Z][0-9]{1,2}' "$f"      # campaign/planning labels (letter+digit tags, e.g. FS3, T11c, A14, R2, Q2)
+     grep -nE '#[0-9]+' "$f"              # issue-number tags
+     grep -nP '[^\x00-\x7F]' "$f"         # non-ASCII characters
+     grep -nE '(\.\./\.\./skills/|skills/[A-Za-z0-9_-]+/references/)' "$f"   # cross-tree file references in non-machine contexts
+     grep -nE '\b[A-Z][A-Z0-9_]{2,}\.md\b' "$f"   # bare doc-file names -- real only when the named file lives in a different skill tree than the file being scanned
+   done
+   ```
+   Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern.
+   A real hit -- a campaign or planning label, an issue-number tag, repo-internal jargon, an unexpanded acronym, a cross-tree file reference (a slash path, or a bare doc-file name whose file lives in a different skill tree than the file being scanned), or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the defect classes above -- may instead be adjudicated in the PR body, named hit-by-hit. Bare doc-file name matches are the sole class exempt from hit-by-hit naming: adjudicate them as one class, stating the hit count and that every hit names a file outside any other skill tree. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
+
 ---
 
 ## Step 3: Commit Cleanup
@@ -147,6 +162,7 @@ See `versioning` skill for conventional commit rules.
 | "The PR description can be filled in later" | PR descriptions written after the fact are summaries, not design records. Write them now. |
 | "CI passed on the branch, merge is safe" | CI on the branch does not verify the merge commit. Verify CI is green on main AFTER the merge. |
 | "Reviewers will just read the diff -- the PR description is optional" | Reality: YOU MUST write the PR description before opening the PR. The diff shows what changed; the description explains why. |
+| "The sweep hit is in a fixture or test input, so it doesn't count" | Fixture and test input files are tracked shipped files like any other file on the branch. A label or jargon hit inside a fixture is a real hit -- fix it, no exceptions; the PR body may adjudicate a sweep match only when it is a detector false positive, not actually one of the defect classes. No exemption for fixture or test-input scenarios. |
 
 ---
 

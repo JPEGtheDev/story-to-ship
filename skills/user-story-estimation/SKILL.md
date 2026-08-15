@@ -125,4 +125,4 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 
 ## Related Skills
 
-- `user-story-generator` -- companion skill for generating the stories this skill estimates; uses a separate Effort Estimate template with different fields (see that skill)
+- `user-story-generator` -- companion skill for generating the stories this skill estimates; its generated stories carry **Size:** S | M | L in the story header (the restricted subset of this skill's XS-XL scale) plus an Effort Estimate block with **Recommended Model Tier:** Economy | Standard | Premium and a one-sentence **Reasoning:**; this skill owns the full XS-XL scale and the **Size** + **Reasoning** estimate block

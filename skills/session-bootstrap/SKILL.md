@@ -117,9 +117,8 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 1. **Load** the `self-evaluation` skill and follow its steps.
 2. **Identify lessons learned** -- mistakes made, user corrections, patterns discovered.
 3. **Check existing skills** -- is the lesson already documented? If yes, skip.
-4. **Apply updates** -- for High/Medium priority lessons, update the relevant skill file
-   and bump its version in the YAML frontmatter. Commit the skill update with the
-   session's work.
+4. **Apply updates** -- for High/Medium priority lessons, update the relevant skill file.
+   Commit the skill update with the session's work.
 5. **Compact** -- scan any files you touched for bloated comments or duplicated docs.
    Migrate detail to skills/docs and leave 1-line references.
 6. **Report** -- include a `### Session Self-Evaluation` block in your final message:

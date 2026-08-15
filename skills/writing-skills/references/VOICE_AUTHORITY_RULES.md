@@ -1,6 +1,6 @@
 # Voice Authority Rules
 
-These rules apply to every line of a skill file or agent template. Apply all four sections.
+These rules apply to every line of a skill file or agent template. Apply all five sections.
 
 ---
 
@@ -87,3 +87,25 @@ Examples:
 - RIGHT: "An instance fixed is not evidence the class is gone. Example: fixing an em-dash (the instance) and grepping for em-dashes returns 0, but the class is 'non-ASCII characters' -- curly quotes and Unicode arrows belong to the same class, and the em-dash grep structurally cannot find them."
 
 Enforcement is procedural/self-check: the checkable signal is the Jargon Rule row in the skill-review return format carrying a file:line citation for every flagged term. No automated detector exists -- no grep can implement the first-use test. The rule is advisory (findings reported with evidence, not NEEDS WORK-eligible) until its precision is measured on a hand-adjudicated sample and it is explicitly promoted.
+
+---
+
+## Cross-Skill Reference Rule
+
+**Reference another skill by name in prose. Never cite another skill's file paths or bare internal filenames.** A shipped skill must stand alone -- another skill's internal files are private implementation detail that can be renamed, split, or reorganized without notice, and a file that points to them by path breaks the moment that reorganization happens.
+
+Rules:
+- Covers slash paths into another skill's tree (`skills/x/references/Y.md`, `../../skills/x/SKILL.md`)
+- Covers bare internal filenames belonging to another skill (`Y.md`, `SKILL.md`) cited outside prose that names the skill
+- Files inside the SAME skill may reference each other by path (a skill's own `references/` files, or its own `SKILL.md`)
+- Machine-executed paths in commands or scripts are governed by the Absolute Path Rule above, not this rule
+
+**Violation:** Any skill or agent template that cites another skill's internal file by path or bare filename, outside that skill's own tree, is an automatic NEEDS WORK in skill review.
+
+Examples:
+- WRONG: "See skills/writing-skills/references/VOICE_AUTHORITY_RULES.md for the authority table."
+- RIGHT: "See the writing-skills skill for the authority table."
+- WRONG: "Run the check described in DISPATCH_PATTERN.md."
+- RIGHT: "Run the check described in the writing-skills skill's dispatch pattern."
+- WRONG: "This follows the same gate as ../../skills/verification-before-completion/SKILL.md."
+- RIGHT: "This follows the same gate as the verification-before-completion skill."

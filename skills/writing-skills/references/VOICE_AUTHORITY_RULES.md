@@ -96,7 +96,7 @@ Enforcement is procedural/self-check: the checkable signal is the Jargon Rule ro
 
 Rules:
 - Covers slash paths into another skill's tree (`skills/x/references/Y.md`, `../../skills/x/SKILL.md`)
-- Covers bare internal filenames belonging to another skill (`Y.md`, `SKILL.md`) cited outside prose that names the skill
+- Covers bare internal filenames belonging to another skill (`Y.md`, `SKILL.md`); naming the skill in the same sentence does not exempt the filename
 - Files inside the SAME skill may reference each other by path (a skill's own `references/` files, or its own `SKILL.md`)
 - Machine-executed paths in commands or scripts are governed by the Absolute Path Rule above, not this rule
 
@@ -104,8 +104,8 @@ Rules:
 
 Examples:
 - WRONG: "See skills/writing-skills/references/VOICE_AUTHORITY_RULES.md for the authority table."
-- RIGHT: "See the writing-skills skill for the authority table."
+- RIGHT: "See the `writing-skills` skill for the authority table."
 - WRONG: "Run the check described in DISPATCH_PATTERN.md."
-- RIGHT: "Run the check described in the writing-skills skill's dispatch pattern."
+- RIGHT: "Run the check described in the `writing-skills` skill's dispatch pattern."
 - WRONG: "This follows the same gate as ../../skills/verification-before-completion/SKILL.md."
-- RIGHT: "This follows the same gate as the verification-before-completion skill."
+- RIGHT: "This follows the same gate as the `verification-before-completion` skill."

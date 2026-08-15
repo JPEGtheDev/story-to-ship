@@ -7,6 +7,7 @@ related:
   - "delta-reratification-taxonomy-v1.md"
   - "delta-reratification-taxonomy-v2.md"
 ---
+This file is a synthetic test fixture for a fictional app, used only to exercise Definition of Done tooling; its content is invented.
 
 Ratified against delta-reratification-taxonomy-v1.md v1.
 - idempotency-checks: CONDITIONAL | trigger: diff adds or modifies a POST/PUT
@@ -18,4 +19,3 @@ Ratified against delta-reratification-taxonomy-v1.md v1.
 - feature-flag-cleanup: N/A | category: target-absent | TaskFlow has no
   feature-flag system; nothing for this layer to verify
 Stamp: v1
-Content-hash: sha256:7713e28fe0050fcaca0fa5eca77124145cb453970c061c1f583aa2f9131ae5ff

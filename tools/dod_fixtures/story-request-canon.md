@@ -4,6 +4,7 @@ description: "Synthetic, ratified Definition of Done document for the fictional 
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
+This file is a synthetic test fixture for a fictional app, used only to exercise Definition of Done tooling; its content is invented.
 
 Ratified against DOD_TAXONOMY.md v1.
 - bdd-tests: ALWAYS
@@ -13,4 +14,3 @@ Ratified against DOD_TAXONOMY.md v1.
 - performance-spend-budgets: N/A | category: target-absent | Fernglen has no
   metered API calls or perf-sensitive surface
 Stamp: v1
-Content-hash: sha256:3fd3fd4f6a28d6ec992a3d099f6b5193b38dbde76dbd97cf5e580eceb4b95384

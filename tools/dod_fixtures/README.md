@@ -19,9 +19,15 @@ only when some transcript line starts with it; a line that merely
 mentions the marker text elsewhere -- for example, in a sentence
 describing what did or did not happen -- does not count.
 
+The fixtures in this directory are synthetic test data for fictional
+apps. The apps they describe, their code paths, and every request,
+claim, and command output they quote are invented. They exist only to
+exercise the Definition of Done tooling, and they describe no real
+repository.
+
 ## 2. Marker definitions
 
-The four marker strings below are quoted verbatim from the defining-done
+The three marker strings below are quoted verbatim from the defining-done
 skill's Definition of Done canon template reference, Section C ("Consumer
 notes"), which is their authoritative source. That reference file is
 authoritative if this README and it ever disagree.
@@ -32,10 +38,6 @@ authoritative if this README and it ever disagree.
 - `DOD-GATE: FAIL <layer>` -- the completion gate's failure marker,
   emitted when a completion claim lacks evidence for an always-required
   layer, or for a conditional layer whose trigger condition fired.
-- `DOD-HASH: MISMATCH` -- emitted by either consumer when the recomputed
-  content hash does not match the DoD document's `Content-hash:` footer.
-  This is a warn-and-consume check: the document is still read and used,
-  so this marker signals a trust flag, not a parse failure.
 - `DOD-STALE: canon v<N> behind taxonomy v<M>` -- emitted by either
   consumer when the DoD document's `Stamp: vN` is older than the current
   stamp of the taxonomy (the master list of verification layers) it was
@@ -50,7 +52,6 @@ up to that parameter, not the full parameterized string:
 |---|---|
 | `DOD-VIOLATION: <layer>` | `DOD-VIOLATION:` |
 | `DOD-GATE: FAIL <layer>` | `DOD-GATE: FAIL` |
-| `DOD-HASH: MISMATCH` | `DOD-HASH: MISMATCH` (no parameter, use in full) |
 | `DOD-STALE: canon v<N> behind taxonomy v<M>` | `DOD-STALE: canon v` |
 
 ## 3. Run procedure
@@ -91,25 +92,19 @@ tools/dod_fixtures/check-markers.sh <evidence-missing-output> --require 'DOD-GAT
 tools/dod_fixtures/check-markers.sh <evidence-complete-output> --forbid 'DOD-GATE: FAIL'
 ```
 
-**Stale-stamp and tampered-hash scenarios** (one run per consumer --
-story generator and completion gate -- each with a stale/tampered
-document variant embedded in its scenario file, plus a fresh/untampered
-negative control). The fixtures in this directory combine both defects
-into one variant document (see Case D in `story-request-scenarios.md`
-and Case C in `completion-claim-scenarios.md`), so the expected marker
-check requires both markers from a single transcript. This is the
-actual command `run-scenario.sh` prints for these scenarios:
+**Stale-stamp scenarios** (one run per consumer -- story generator and
+completion gate -- each with a stale document variant embedded in its
+scenario file, plus a fresh negative control). A stale `Stamp:` is the
+single induced defect in each variant (see Case D in
+`story-request-scenarios.md` and Case C in
+`completion-claim-scenarios.md`). The first command below is what
+`run-scenario.sh` prints for the `story-stale-canon` and
+`completion-stale-canon` scenarios. The second is the fresh negative
+control, run by hand against a transcript captured with the clean
+document in place -- no separate scenario exists for it:
 ```
-tools/dod_fixtures/check-markers.sh <stale-tampered-output> --require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH'
-tools/dod_fixtures/check-markers.sh <fresh-untampered-output> --forbid 'DOD-STALE: canon v' --forbid 'DOD-HASH: MISMATCH'
-```
-Illustrative only -- not shipped in this directory: a setup that
-isolated staleness or hash-tamper into two separate documents, instead
-of the one combined variant these fixtures ship, would assert the one
-relevant marker per file:
-```
-tools/dod_fixtures/check-markers.sh <stale-only-output> --require 'DOD-STALE: canon v'
-tools/dod_fixtures/check-markers.sh <tampered-only-output> --require 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <stale-canon-output> --require 'DOD-STALE: canon v'
+tools/dod_fixtures/check-markers.sh <fresh-canon-output> --forbid 'DOD-STALE: canon v'
 ```
 
 A `RESULT: PASS (N/N)` line and exit code 0 from every invocation in a

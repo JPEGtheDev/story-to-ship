@@ -11,8 +11,9 @@ related:
 
 # Non-Functional Verification Index
 
-Subdomain index for `docs/dod/non-functional-verification/`, the DoD
-canon's non-functional-verification layer detail file.
+Subdomain index for `docs/dod/non-functional-verification/`, the
+Definition of Done (DoD) canon's non-functional-verification
+layer detail file.
 
 ## Files
 

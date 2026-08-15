@@ -127,7 +127,7 @@ Content-hash: sha256:4b6f1a2c9e3d7f0851c4a9d6e2b8f3701c5a9e4d2b7f6013c8a5e9d2f4b
 
 Detail files are OPTIONAL per layer -- created only when a ruling's rationale or
 elaboration exceeds what the index line's optional free-text tail can carry. The
-index stays lean by design (Q2 ruling); anything longer belongs in a detail file
+index stays lean by design; anything longer belongs in a detail file
 linked from the index's `related` frontmatter field.
 
 ### B.2 Path and the group-slug transform

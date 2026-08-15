@@ -76,6 +76,11 @@ Rules for each form:
   reason not captured by the first two categories). An optional free-text
   elaboration MAY follow the category tag after a second `|`.
 
+A ruling line MAY soft-wrap: an indented continuation line belongs to the ruling line
+above it and is parsed as part of that single ruling line, as the worked example in
+Section A.5 shows. Continuation lines are not independently checked against the three
+forms.
+
 ### A.4 Canon integrity
 
 The canon carries no integrity field of its own, and one MUST NOT be added. Integrity
@@ -84,7 +89,13 @@ is version control's job: an uncommitted edit to `docs/DOD.md` is visible in
 via `git log` and `git blame`. A reviewer asking whether the canon changed, and how,
 reads that history rather than a value recorded inside the file itself.
 
-The index therefore ends with the `Stamp:` line (Section A.2).
+The index MUST end with the `Stamp:` line (Section A.2), and content MUST NOT follow it.
+Trailing content would present lines the malformed-canon rule in Section C cannot
+distinguish from invalid ruling lines -- the annotated links under a `## Related`
+heading, for one, open much like ruling lines. Ending at the stamp is a deliberate,
+scoped exception to the documentation skill's rule that every doc file ends with a
+`## Related` section: the exception covers only `docs/DOD.md`, the index; detail files
+keep the requirement per Section B.3.
 
 ### A.5 Worked example (canonical form)
 

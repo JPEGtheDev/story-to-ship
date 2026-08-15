@@ -1,10 +1,8 @@
 ---
-title: "Driftmark Definition of Done (FS3 fixture)"
-description: "Synthetic, ratified Definition of Done canon for the fictional Driftmark parcel-routing backend service, used only to exercise the verification-before-completion skill's DoD canon completion-gate check (FS3 fixture, issue #66)."
+title: "Driftmark Definition of Done"
+description: "Synthetic, ratified Definition of Done document for the fictional Driftmark parcel-routing backend service. Used only to exercise the verification-before-completion skill's Definition of Done completion-gate check."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
-related:
-  - "../../docs/INDEX.md"
 ---
 
 Ratified against DOD_TAXONOMY.md v1.
@@ -17,4 +15,4 @@ Ratified against DOD_TAXONOMY.md v1.
   backend parcel-routing service with no UI, image-generation, or
   graphics-rendering surface
 Stamp: v1
-Content-hash: sha256:9d1845512105fa30d299aff2e1fe0d87459b3a1770ce1e9a08bed584c32b6473
+Content-hash: sha256:9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e

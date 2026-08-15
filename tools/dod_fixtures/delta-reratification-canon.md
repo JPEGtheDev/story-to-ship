@@ -1,15 +1,14 @@
 ---
-title: "TaskFlow Definition of Done (FS4 fixture)"
-description: "Synthetic, ratified Definition of Done canon for the fictional TaskFlow todo-list web app, used only to exercise the defining-done skill's delta re-ratification path (FS4 fixture, issue #66)."
+title: "TaskFlow Definition of Done"
+description: "Synthetic, ratified Definition of Done document for the fictional TaskFlow to-do list web app. Used only to exercise the defining-done skill's delta re-ratification path, where a newer taxonomy version is interviewed for only the layers it added or changed."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 related:
-  - "../../docs/INDEX.md"
-  - "fs4-taxonomy-v1.md"
-  - "fs4-taxonomy-v2.md"
+  - "delta-reratification-taxonomy-v1.md"
+  - "delta-reratification-taxonomy-v2.md"
 ---
 
-Ratified against fs4-taxonomy-v1.md v1.
+Ratified against delta-reratification-taxonomy-v1.md v1.
 - idempotency-checks: CONDITIONAL | trigger: diff adds or modifies a POST/PUT
   handler under api/ with no dedup or idempotency-key check
 - schema-migration-safety: ALWAYS
@@ -19,4 +18,4 @@ Ratified against fs4-taxonomy-v1.md v1.
 - feature-flag-cleanup: N/A | category: target-absent | TaskFlow has no
   feature-flag system; nothing for this layer to verify
 Stamp: v1
-Content-hash: sha256:a0d047d06e87ab8c525588c7b76f3c2ef6a833a879b5007d427ada0b372d5f20
+Content-hash: sha256:7713e28fe0050fcaca0fa5eca77124145cb453970c061c1f583aa2f9131ae5ff

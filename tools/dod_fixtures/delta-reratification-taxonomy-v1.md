@@ -1,10 +1,12 @@
-# Verification Layer Taxonomy (FS4 delta fixture)
+# Verification layer taxonomy (delta-reratification fixture, v1)
 
-This is a synthetic, repo-agnostic taxonomy of verification layers used only to
-exercise the defining-done skill's delta re-ratification path (FS4). It mirrors
-the structure of `DOD_TAXONOMY.md` -- same group/layer shape, same field names
--- but every group, layer, and trigger below is invented for this fixture and
-MUST NOT be read as real canon content or copied into any live taxonomy.
+This is a synthetic, repo-agnostic taxonomy of verification layers used only
+to exercise the defining-done skill's delta re-ratification path (where a
+re-ratification interview against a newer taxonomy version only asks about
+the layers that changed). It mirrors the structure of the real Definition of
+Done taxonomy -- same group/layer shape, same field names -- but every group,
+layer, and trigger below is invented for this fixture and MUST NOT be read as
+real canon content or copied into any live taxonomy.
 
 Stamp: v1
 Delta rule: a re-ratification interview against a newer stamp elicits ONLY the

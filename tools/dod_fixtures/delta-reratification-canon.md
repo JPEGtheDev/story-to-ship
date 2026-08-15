@@ -1,12 +1,11 @@
 ---
-title: "TaskFlow Definition of Done (FS4 fixture)"
-description: "Synthetic, ratified Definition of Done canon for the fictional TaskFlow todo-list web app, used only to exercise the defining-done skill's delta re-ratification path (FS4 fixture, issue #66)."
+title: "TaskFlow Definition of Done"
+description: "Synthetic, ratified Definition of Done document for the fictional TaskFlow to-do list web app. Used only to exercise the defining-done skill's delta re-ratification path, where a newer taxonomy version is interviewed for only the layers it added or changed."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 related:
-  - "../../docs/INDEX.md"
-  - "fs4-taxonomy-v1.md"
-  - "fs4-taxonomy-v2.md"
+  - "delta-reratification-taxonomy-v1.md"
+  - "delta-reratification-taxonomy-v2.md"
 ---
 
 Ratified against fs4-taxonomy-v1.md v1.

@@ -1,10 +1,8 @@
 ---
-title: "Fernglen Definition of Done (FS2/FS5 fixture)"
-description: "Synthetic, ratified Definition of Done canon for the fictional Fernglen wildlife-sighting tracking app, used only to exercise the user-story-generator skill's canon-derived Definition of Done section and ALWAYS-layer refusal path (FS2/FS5 fixtures, issue #66)."
+title: "Fernglen Definition of Done"
+description: "Synthetic, ratified Definition of Done document for the fictional Fernglen wildlife-sighting tracking app. Used only to exercise the user-story-generator skill's canon-derived Definition of Done section and its refusal path when an always-required layer is dropped."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
-related:
-  - "../../docs/INDEX.md"
 ---
 
 Ratified against DOD_TAXONOMY.md v1.

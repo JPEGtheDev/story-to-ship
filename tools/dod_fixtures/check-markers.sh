@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# check-markers.sh -- asserts fixed-string presence/absence of pinned DoD
-# canon oracle markers (see ../../skills/defining-done/references/DOD_TEMPLATE.md
-# Section C) in a captured fixture-run output file.
+# check-markers.sh -- checks for the fixed-string presence or absence of
+# pinned Definition of Done (DoD) marker lines (see the defining-done
+# skill's Definition of Done canon template reference, Section C,
+# "Consumer notes") in a captured fixture-run output file.
 #
 # Usage: check-markers.sh <output-file> [--require '<literal>']... [--forbid '<literal>']...
 #   --require LITERAL  assert LITERAL is present in output-file (grep -F)
 #   --forbid LITERAL   assert LITERAL is absent from output-file (grep -F)
 # At least one --require/--forbid flag is required.
 #
-# Fail loud by design (this repo's postmortem on silent gate loops): every
-# failure path -- missing argument, unreadable file, zero assertion flags,
-# an unknown flag, a failed assertion -- exits nonzero. Assertions are
+# Fail loud by design: this script greps a captured output file for exact
+# marker strings, so every failure path -- missing argument, unreadable
+# file, zero assertion flags, an unknown flag, a failed assertion -- exits
+# nonzero. That makes a run's pass/fail outcome machine-checkable rather
+# than something a person has to eyeball from scrollback. Assertions are
 # decided on grep's exit status directly, never on captured stdout.
 
 usage() {

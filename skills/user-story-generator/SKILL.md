@@ -106,9 +106,12 @@ canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
 - **Uncommitted local edits:** run `git status --porcelain docs/DOD.md` and
   `git diff -- docs/DOD.md`. If the output shows an uncommitted modification, state
   plainly that the canon carries uncommitted local edits and continue consuming it
-  (warn-and-consume -- no marker line is emitted for this case). If the canon file is
-  not under git control (for example a test copy in a temporary directory), note that
-  the check does not apply and continue.
+  (warn-and-consume -- no marker line is emitted for this case). If the status output
+  shows the canon as untracked (`??` -- a freshly ratified canon not yet committed),
+  state plainly that the canon is not yet tracked by git and continue consuming it
+  (no marker line is emitted for this case either). If the canon file is not under
+  git control (for example a test copy in a temporary directory), note that the
+  check does not apply and continue.
 
 **Canon present but malformed** (structurally unparseable per the `defining-done`
 skill's malformed-canon rule): refuse to generate the story. State exactly what

@@ -1,6 +1,6 @@
 ---
 title: "Definition of Done"
-description: "This repo's ratified Definition of Done canon: one owner ruling per verification layer of the defining-done taxonomy, stamped and content-hashed."
+description: "This repo's ratified Definition of Done canon: one owner ruling per verification layer of the defining-done taxonomy, stamped."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod]
 related:
@@ -43,4 +43,3 @@ Ratified against DOD_TAXONOMY.md v1.
 - definition-of-ready: CONDITIONAL | trigger: the commit type is feat: or
   the change implements a linked GitHub issue
 Stamp: v1
-Content-hash: sha256:c1de4662d3587130249f1a1b28d8b52936c249878f032dfb3a8d5dd517e14a41

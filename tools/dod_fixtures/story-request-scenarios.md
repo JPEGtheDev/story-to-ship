@@ -191,6 +191,7 @@ description: "Deliberately stale-stamped variant of the Fernglen fixture documen
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
+This file is a synthetic test fixture for a fictional app, used only to exercise Definition of Done tooling; its content is invented.
 
 Ratified against DOD_TAXONOMY.md v0.
 - bdd-tests: ALWAYS

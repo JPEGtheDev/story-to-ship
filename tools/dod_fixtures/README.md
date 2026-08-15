@@ -12,9 +12,12 @@ considered fully proven once an actual, captured run of the skill
 against one of these fixtures shows the expected pass/fail behavior end
 to end, rather than being proven by code review alone. `check-markers.sh`
 is the script that turns a captured fixture-run transcript into a
-pass/fail verdict: it greps a run's output file for the pinned marker
+pass/fail verdict: it checks a run's output file for the pinned marker
 strings defined below and asserts each one is present (a positive
-assertion) or absent (a negative assertion).
+assertion) or absent (a negative assertion). A marker counts as present
+only when some transcript line starts with it; a line that merely
+mentions the marker text elsewhere -- for example, in a sentence
+describing what did or did not happen -- does not count.
 
 ## 2. Marker definitions
 

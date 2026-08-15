@@ -85,7 +85,7 @@ In addition to requirements coverage, check every tracked file changed in the di
 
 Report each hit with file and line under "Shipped-file hygiene" in your verdict, or state NONE. This check applies regardless of whether the hygiene issue contradicts a requirement.
 
-A hygiene hit in the changed files is a GAPS verdict regardless of any other findings; a hit may stand only if the PR body already explicitly adjudicates that exact hit.
+A hygiene hit in the changed files is a GAPS verdict regardless of any other findings.
 
 ## Return format
 ```

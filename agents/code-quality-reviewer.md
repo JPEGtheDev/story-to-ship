@@ -79,7 +79,7 @@ Check every tracked file in the diff for:
 - [ ] No cross-skill or cross-tree file references cited as a path or bare filename -- another skill's internals are named in prose (for example "the documentation skill"), never as a path
 - [ ] No non-ASCII characters (curly quotes, em-dashes, Unicode arrows, or other non-ASCII characters)
 
-A hygiene hit in the changed files is a REQUEST CHANGES verdict regardless of any other findings; a hit may stand only if the PR body already explicitly adjudicates that exact hit.
+A hygiene hit in the changed files is a REQUEST CHANGES verdict regardless of any other findings.
 
 ## Evidence Spot-Check (required)
 

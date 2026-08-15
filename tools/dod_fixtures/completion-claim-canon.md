@@ -4,6 +4,7 @@ description: "Synthetic, ratified Definition of Done document for the fictional 
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
+This file is a synthetic test fixture for a fictional app, used only to exercise Definition of Done tooling; its content is invented.
 
 Ratified against DOD_TAXONOMY.md v1.
 - coverage: ALWAYS
@@ -15,4 +16,3 @@ Ratified against DOD_TAXONOMY.md v1.
   backend parcel-routing service with no UI, image-generation, or
   graphics-rendering surface
 Stamp: v1
-Content-hash: sha256:9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e

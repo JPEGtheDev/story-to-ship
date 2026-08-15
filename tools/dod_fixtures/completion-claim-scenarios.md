@@ -5,13 +5,17 @@
 This file carries three scenarios dispatched against the
 verification-before-completion skill: the Definition of Done
 completion-gate check (`DOD-GATE: FAIL <layer>` on missing or generic
-evidence, silent pass on complete evidence) and a stale-stamp plus
-tampered-hash variant that exercises the staleness and hash-mismatch
-warnings on the completion gate's document-consumption path. "Canon"
-here means the ratified Definition of Done document a repository keeps
-at `docs/DOD.md`. The paired document fixture is
-`tools/dod_fixtures/completion-claim-canon.md` (Case A and Case B run
-against it as-is).
+evidence, silent pass on complete evidence) and a stale-stamp variant
+that exercises the staleness warning on the completion gate's
+document-consumption path. "Canon" here means the ratified Definition of
+Done document a repository keeps at `docs/DOD.md`. The paired document
+fixture is `tools/dod_fixtures/completion-claim-canon.md` (Case A and
+Case B run against it as-is).
+
+These fixtures are synthetic test data. The app named below, its code
+paths, and every quoted claim and command output are invented for this
+file. They exist only to exercise the Definition of Done tooling, and
+they describe no real repository.
 
 Design notes (read before dispatching):
 
@@ -151,33 +155,31 @@ artifact to evaluate.
 tools/dod_fixtures/check-markers.sh <evidence-complete-output> --forbid 'DOD-GATE: FAIL'
 ```
 
-## Case C -- stale-stamp and tampered-hash variant
+## Case C -- stale-stamp variant
 
-This is a complete fenced variant of the Case A/B document carrying two
-deliberate defects at once: a `Stamp:` older than the real taxonomy's
-current stamp (v1, per Design notes above), and a `Content-hash:` value
-that does not match the variant's own recomputed hash. It differs from
+This is a complete fenced variant of the Case A/B document carrying one
+deliberate defect: a `Stamp:` older than the real taxonomy's current
+stamp (v1, per Design notes above). It differs from
 `completion-claim-canon.md` in title, description, the narrative line,
-`Stamp:`, and `Content-hash:` -- the ruling lines are left identical on
-purpose, so staleness and hash-tamper are the only two induced defects
-under test.
+and `Stamp:` -- the ruling lines are left identical on purpose, so
+staleness is the only induced defect under test.
 
 Materialize it to a temp file before dispatch (tested below; the pattern
 is anchored to a whole-line match so this command's own text, which
 necessarily contains the same sentinel substrings, cannot self-match):
 ```
-awk '/^<!-- STALE-TAMPERED-CANON:BEGIN -->$/{f=1;next}/^<!-- STALE-TAMPERED-CANON:END -->$/{f=0}f' tools/dod_fixtures/completion-claim-scenarios.md > /tmp/completion-stale-tampered-canon-DOD.md
+awk '/^<!-- STALE-CANON:BEGIN -->$/{f=1;next}/^<!-- STALE-CANON:END -->$/{f=0}f' tools/dod_fixtures/completion-claim-scenarios.md > /tmp/completion-stale-canon-DOD.md
 ```
 
 Then dispatch the Case A or Case B claim text (either works -- this case
-isolates document staleness/tamper, not claim evidence completeness) to
-the verification-before-completion skill with the materialized file
-placed at `docs/DOD.md` per Design notes.
+isolates document staleness, not claim evidence completeness) to the
+verification-before-completion skill with the materialized file placed
+at `docs/DOD.md` per Design notes.
 
-<!-- STALE-TAMPERED-CANON:BEGIN -->
+<!-- STALE-CANON:BEGIN -->
 ---
-title: "Driftmark Definition of Done (stale-stamp and tampered-hash variant)"
-description: "Deliberately stale-stamped and hash-tampered variant of the Driftmark fixture document, used only to exercise the verification-before-completion skill's staleness warning and hash-mismatch warn-and-consume path on the completion-gate consumption path. Never a real ratified document."
+title: "Driftmark Definition of Done (stale-stamp variant)"
+description: "Deliberately stale-stamped variant of the Driftmark fixture document, used only to exercise the verification-before-completion skill's staleness warning on the completion-gate consumption path. Never a real ratified document."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
@@ -192,52 +194,38 @@ Ratified against DOD_TAXONOMY.md v0.
   backend parcel-routing service with no UI, image-generation, or
   graphics-rendering surface
 Stamp: v0
-Content-hash: sha256:d140f9695e0e88cc043a78952b603c54affbf70c1c16ccd38146f601c0647d56
-<!-- STALE-TAMPERED-CANON:END -->
+<!-- STALE-CANON:END -->
 
-Do not edit this Stamp or Content-hash to make them match -- the
-mismatch is exactly what this scenario tests.
+Do not edit this Stamp to make it current -- the stale value is exactly
+what this scenario tests.
 
-**Defect 1 -- staleness:** `Stamp: v0` is older than the defining-done
-skill's real taxonomy reference, whose current stamp is `Stamp: v1`. Per
-the completion gate's staleness rule, it must still evaluate the claim
-against the document and additionally emit
+**Induced defect -- staleness:** `Stamp: v0` is older than the
+defining-done skill's real taxonomy reference, whose current stamp is
+`Stamp: v1`. Per the completion gate's staleness rule, it must still
+evaluate the claim against the document and additionally emit
 `DOD-STALE: canon v0 behind taxonomy v1`.
 
-**Defect 2 -- hash tamper:** the embedded `Content-hash:` value above
-does not match this content's true recomputed digest. Recompute it
-directly to confirm: extract the variant with the awk command above,
-then run
-`sed '/^Content-hash:/,$d' /tmp/completion-stale-tampered-canon-DOD.md | sha256sum`
--- the result will not match the `Content-hash:` value embedded above.
-Per the completion gate's hash-check rule, this is warn-and-consume: it
-must still evaluate the claim against the document and additionally emit
-`DOD-HASH: MISMATCH`.
-
-**Expected marker check** (a single combined require, since this is one
-combined stale-plus-tampered variant rather than two separate
-stale-only/tampered-only files):
+**Expected marker check**:
 ```
-tools/dod_fixtures/check-markers.sh <stale-tampered-output> --require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <stale-canon-output> --require 'DOD-STALE: canon v'
 ```
 
-**Fresh/untampered negative control:** README.md Section 3 also calls for
-a fresh/untampered negative control per consumer. No third file is
-needed for it -- Case A's or Case B's output (run against the clean,
-untampered `completion-claim-canon.md`, `Stamp: v1` matching the
-taxonomy's current stamp) already is that control:
+**Fresh negative control:** README.md Section 3 also calls for a fresh
+negative control per consumer. No third file is needed for it -- Case A's
+or Case B's output (run against the clean `completion-claim-canon.md`,
+`Stamp: v1` matching the taxonomy's current stamp) already is that
+control:
 ```
-tools/dod_fixtures/check-markers.sh <fresh-untampered-output> --forbid 'DOD-STALE: canon v' --forbid 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <fresh-canon-output> --forbid 'DOD-STALE: canon v'
 ```
 
 The same run against the materialized variant also carries whichever
 `DOD-GATE:` outcome its underlying claim earns on evidence completeness
 alone -- Case A's evidence-missing claim still fails the gate on
 `mutation-testing` (`DOD-GATE: FAIL mutation-testing`) even when run
-against this stale/tampered document, and Case B's evidence-complete
-claim still produces no `DOD-GATE:` marker. Staleness and hash-tamper
-are additive warnings on top of the existing per-layer evidence check,
-not a substitute for it.
+against this stale document, and Case B's evidence-complete claim still
+produces no `DOD-GATE:` marker. Staleness is an additive warning on top
+of the existing per-layer evidence check, not a substitute for it.
 
 ## Related
 

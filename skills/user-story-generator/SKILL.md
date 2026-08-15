@@ -95,15 +95,20 @@ canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
   Consequence: every drop is auditable by its category tag.
 - **Refusal:** if the story would omit an ALWAYS layer with no valid category-tagged
   N/A line, refuse to emit the story and emit the literal line
-  `DOD-VIOLATION: <layer>` (the layer's canonical Key).
+  `DOD-VIOLATION: <layer>` (the layer's canonical Key). Emit the marker as a bare
+  line: the line begins with the marker string itself, with no surrounding
+  formatting (no backticks, no list markers, no quotation marks).
 - **Staleness:** if the canon's `Stamp:` is older than the `defining-done` skill's
   taxonomy's current stamp, still consume the canon and emit the literal line
-  `DOD-STALE: canon v<N> behind taxonomy v<M>`.
-- **Hash check:** recompute the canon's content-hash per the `defining-done` skill's
-  byte-range definition; on mismatch, emit the literal line `DOD-HASH: MISMATCH` and
-  continue consuming the canon (warn-and-consume -- a trust flag, not a parse
-  failure; distinct from the malformed-canon case below, which refuses instead of
-  consuming).
+  `DOD-STALE: canon v<N> behind taxonomy v<M>`. Emit the marker as a bare line: the
+  line begins with the marker string itself, with no surrounding formatting (no
+  backticks, no list markers, no quotation marks).
+- **Uncommitted local edits:** run `git status --porcelain docs/DOD.md` and
+  `git diff -- docs/DOD.md`. If the output shows an uncommitted modification, state
+  plainly that the canon carries uncommitted local edits and continue consuming it
+  (warn-and-consume -- no marker line is emitted for this case). If the canon file is
+  not under git control (for example a test copy in a temporary directory), note that
+  the check does not apply and continue.
 
 **Canon present but malformed** (structurally unparseable per the `defining-done`
 skill's malformed-canon rule): refuse to generate the story. State exactly what
@@ -126,7 +131,6 @@ Done section uses unratified template defaults.
 | "Good enough -- the team will figure out the details" | Vague stories produce vague implementations. Write precise acceptance criteria. |
 | "AskUserQuestion covered the clarification, Discovery is redundant" | AskUserQuestion is informal Q&A. Discovery (the three-amigos skill's Ceremony 1) produces a Feature Specification (the structured spec Discovery writes to plan.md) that validates field optionality, invocation paths, and behavioral Acceptance Criteria under three personas (the three-amigos skill's Business, Developer, and Tester amigos). They are not equivalent. |
 | "The canon is stale, I'll just use the generic template instead" | A stale canon is still consumed, with a `DOD-STALE` warning line -- never discard a ratified canon for staleness. |
-| "Hash mismatch means the canon might be corrupt, refuse to use it" | Hash mismatch is a warn-and-consume trust flag, not a parse failure -- emit `DOD-HASH: MISMATCH` and keep consuming the canon. |
 | "This always-on layer obviously doesn't apply here, I'll just drop it" | Only a category-tagged N/A line (or refusal) can drop an ALWAYS layer -- never drop it silently. |
 | "The canon is malformed, fall back to the generic template like it's absent" | Malformed is not absent -- refuse with a diagnostic naming exactly what failed to parse. |
 
@@ -160,4 +164,4 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 
 ## Related Skills
 
-See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the hash/malformed-canon definitions this skill consumes.
+See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the malformed-canon definition this skill consumes.

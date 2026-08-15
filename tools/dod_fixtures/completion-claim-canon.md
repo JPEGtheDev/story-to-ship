@@ -15,4 +15,4 @@ Ratified against DOD_TAXONOMY.md v1.
   backend parcel-routing service with no UI, image-generation, or
   graphics-rendering surface
 Stamp: v1
-Content-hash: sha256:9d1845512105fa30d299aff2e1fe0d87459b3a1770ce1e9a08bed584c32b6473
+Content-hash: sha256:9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e

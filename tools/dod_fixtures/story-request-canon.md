@@ -13,4 +13,4 @@ Ratified against DOD_TAXONOMY.md v1.
 - performance-spend-budgets: N/A | category: target-absent | Fernglen has no
   metered API calls or perf-sensitive surface
 Stamp: v1
-Content-hash: sha256:2b1a9835781865346c32e3f6248b5bcc65d58f6dda1053a43ae961511cd2f67c
+Content-hash: sha256:3fd3fd4f6a28d6ec992a3d099f6b5193b38dbde76dbd97cf5e580eceb4b95384

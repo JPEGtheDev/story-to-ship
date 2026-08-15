@@ -78,7 +78,7 @@ Rules for each form:
 
 ### A.4 Canon integrity
 
-The canon carries no integrity field of its own, and none should be added. Integrity
+The canon carries no integrity field of its own, and one MUST NOT be added. Integrity
 is version control's job: an uncommitted edit to `docs/DOD.md` is visible in
 `git status` and `git diff`, and a committed edit is visible in the file's history
 via `git log` and `git blame`. A reviewer asking whether the canon changed, and how,

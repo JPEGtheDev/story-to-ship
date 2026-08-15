@@ -11,8 +11,8 @@ related:
 
 # Process/Static Gates Index
 
-Subdomain index for `docs/dod/process-static-gates/`, the DoD canon's
-process and static-gate layer detail files.
+Subdomain index for `docs/dod/process-static-gates/`, the Definition
+of Done (DoD) canon's process and static-gate layer detail files.
 
 ## Files
 

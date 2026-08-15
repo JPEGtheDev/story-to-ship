@@ -1,0 +1,38 @@
+## DoD Canon Gate Evaluation
+
+**Canon discovery:** `docs/DOD.md` found at repo root (`/tmp/tmp.4K7ReBeH0U/docs/DOD.md`). Canon is present, so the DoD Canon Check on Completion Claims section applies (not the "canon absent" fallback).
+
+**1. Malformed-canon check:** Structural elements all present and each ruling line matches one of the three valid forms (`ALWAYS` / `CONDITIONAL | trigger:` / `N/A | category:`):
+- `Stamp: v1` — present, parseable.
+- `Content-hash: sha256:9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e` — present, well-formed (64 lowercase hex chars).
+- 4 ruling lines (`coverage`, `lint-format-static-analysis`, `mutation-testing`, `visual-regression`), each conforms to one of the three closed forms.
+
+Not malformed. Proceeding.
+
+**2. Hash check:** Recomputed SHA-256 over the byte range defined in `DOD_TEMPLATE.md` Section A.4 (file bytes from offset 0 through the newline ending the line before the `Content-hash:` line):
+
+```
+computed: 9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e
+canon:    9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e
+```
+
+Match. No `DOD-HASH: MISMATCH` emitted.
+
+**3. Staleness check:** Canon `Stamp: v1` vs. `DOD_TAXONOMY.md`'s current `Stamp: v1` (`skills/defining-done/references/DOD_TAXONOMY.md:10`). Equal — canon is current. No `DOD-STALE` line emitted.
+
+**4. Per-layer gate check against the diff** (`tools/ingest/dedupe.py` + co-located `tools/ingest/test_dedupe.py`):
+
+| Layer | Ruling | Trigger fired? | Evidence in claim | Verdict |
+|---|---|---|---|---|
+| `coverage` | ALWAYS | n/a | `pytest --cov` — 14 passed/0 failed, 96% lines / 91% branches, exit 0 | met |
+| `lint-format-static-analysis` | ALWAYS | n/a | `ruff check` all-passed exit 0; `black --check` 0 reformatted exit 0 | met |
+| `mutation-testing` | CONDITIONAL \| trigger: diff touches `tools/` or has a co-located test suite | Yes — diff is under `tools/ingest/` AND `test_dedupe.py` matches the `test_*.*` co-located pattern | Boundary mutated (`<=30`→`<30`), named failing case `test_dedupe_at_exact_30_second_boundary` pasted with assertion detail, property restored, re-verified green (14 passed) | met — matches the layer's own mutation-run standard exactly (break/name-failure/restore), not a lesser substitute |
+| `visual-regression` | N/A \| category: target-absent | — | none required | not applicable |
+
+All layers that apply have evidence meeting their own standard. No `DOD-GATE: FAIL <layer>` triggered.
+
+## Verdict
+
+**PASS.** The claim clears this repo's ratified DoD canon: canon is well-formed, hash matches, stamp is current, and every ALWAYS layer plus the one CONDITIONAL layer whose trigger fired (mutation-testing) carry inline evidence meeting that layer's canonical standard — the mutation-testing evidence in particular is a textbook example of the Gate-Can-Fail proof (break the property → name the failing case → restore → re-verify green), not a green-run-only substitute. `STATUS: DONE` is a supportable claim under the canon as evaluated.
+
+One non-blocking observation outside the canon gate itself: the generic Plausibility Baseline Check (verification-before-completion skill, separate from the DoD canon section) asks for a stated expectation before reading a count. The claim doesn't state an expected test count up front for the "14 passed" figure — this is minor since the coverage percentages are reported explicitly rather than a bare unexamined count, but a stricter reviewer could ask for that baseline statement. It does not change the DoD gate verdict above.

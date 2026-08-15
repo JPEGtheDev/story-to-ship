@@ -1,0 +1,39 @@
+## DoD Canon Gate Evaluation
+
+**Canon located:** `/tmp/tmp.Y4N5gTvdiH/docs/DOD.md` (title: "Driftmark Definition of Done"). It exists, so this skill's DoD Canon Check section is in force for this claim.
+
+### Pre-checks
+
+**Malformed-canon check:** Structure parses cleanly against `DOD_TEMPLATE.md` Section A.3 — frontmatter present, narrative line (`Ratified against DOD_TAXONOMY.md v1.`), four ruling lines each matching one of the three closed forms (`ALWAYS`, `CONDITIONAL | trigger:`, `N/A | category:`), a `Stamp:` line, and a `Content-hash:` line. Not malformed — proceeding.
+
+**Hash check:** Recomputed SHA-256 over the byte range defined in `DOD_TEMPLATE.md` A.4 (file start through the newline ending the line before `Content-hash:`):
+```
+computed: 9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e
+canon:    9cb6f6ddc3ba353d9c50fe691081d2bfdbc0632aaa0de9d55a2b8162dee04c0e
+```
+Match — no `DOD-HASH: MISMATCH` needed.
+
+**Stamp check:** Canon `Stamp: v1` vs. `DOD_TAXONOMY.md`'s current `Stamp: v1` — equal, canon is current. No `DOD-STALE` line needed.
+
+### Per-layer gate check against the diff
+
+The canon rules four layers:
+
+| Layer | Ruling | Trigger fired? | Evidence in claim | Verdict |
+|---|---|---|---|---|
+| coverage | ALWAYS | n/a | `pytest --cov` run, 96% lines / 91% branches on new code, exit 0 | Meets standard — PASS |
+| lint-format-static-analysis | ALWAYS | n/a | `ruff check` clean, `black --check` clean, both exit 0 | Meets standard — PASS |
+| mutation-testing | CONDITIONAL \| trigger: diff touches any path under `tools/` OR touches a path with a co-located test suite | **Fired** — `tools/ingest/dedupe.py` is under `tools/`, and `test_dedupe.py` is a co-located `test_*.*` file in the same directory | `pytest tools/ingest/test_dedupe.py -> 14 passed, 0 failed, exit 0. Suite is green.` | **FAIL** — this is a plain green suite run, not a mutation run |
+| visual-regression | N/A \| category: target-absent | n/a | not applicable | n/a |
+
+The mutation-testing evidence is exactly the insufficient case the skill names as its own worked example (line 108): *"a CONDITIONAL mutation-testing layer whose trigger fired requires a mutation run — break the property, run the gate, paste the named failing case, then restore the property; a green suite run alone does not satisfy it."* The claim's mutation-testing bullet re-runs the same already-passing test suite and calls it evidence — it does not break `dedupe_scan_events()`'s dedup property (e.g., widen/shrink the 30-second window, or return the events unmerged), show the named test(s) that then fail, and restore. A green run twice is not proof the tests can fail.
+
+### Result
+
+```
+DOD-GATE: FAIL mutation-testing
+```
+
+The claim does not clear the DoD gate. Per the skill: *"The claim fails the gate observably; it is not marked DONE."*
+
+**Verdict: NOT DONE.** Coverage and lint-format-static-analysis evidence are adequate. To close the gate, add a mutation run for `dedupe_scan_events()`: break the merge condition (e.g., change the window comparison or the parcel-ID equality check), run `tools/ingest/test_dedupe.py`, paste the specific test name(s) that fail as a result, then restore the code and re-confirm green. Until that's pasted inline, the maximum honest status for this diff is not "DONE."

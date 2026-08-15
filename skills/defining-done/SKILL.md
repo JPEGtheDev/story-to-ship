@@ -74,7 +74,7 @@ After all 5 groups: present the complete ruling set back to the owner in `DOD_TE
 
 > Context: once only, after the owner ratifies the complete ruling set. Never mid-interview -- not for "obviously final" partial answers, not to save state for a later resume.
 > Forces: incremental writes let a partial, unratified ruling set leak onto disk as if it were canon; but holding everything only in conversation risks loss if the session ends first.
-> Solution: `mkdir -p docs/` (and `docs/dod/<group-slug>/` per the template's group-slug transform, as needed), then write in exactly this order: (1) detail files (only for layers whose elaboration needs one); (2) when any detail files exist, the per-level index chain for them -- `docs/dod/<group-slug>/INDEX.md` for each group directory that has detail files, then `docs/dod/INDEX.md` linking those subdomain indexes (create or update either as needed), per the documentation skill's per-level INDEX.md rule; (3) `docs/DOD.md`; (4) the `docs/INDEX.md` update -- a row for DOD.md plus a row linking `docs/dod/INDEX.md` when it exists (never a row for individual leaf detail files at root; that is the child index's job). Formats per `references/DOD_TEMPLATE.md` exactly: cross-cutting frontmatter, ruling lines, `Stamp: vN` from the taxonomy's current stamp, and a `Content-hash:` line. Compute the hash over exactly the byte range `references/DOD_TEMPLATE.md` Section A.4 defines (every byte through the end of the line preceding the `Content-hash:` line): write the file's content without that line, hash those bytes with SHA-256, then append `Content-hash: sha256:<64-hex>` as the file's final line. This same computation applies at every canon write, fresh or delta.
+> Solution: `mkdir -p docs/` (and `docs/dod/<group-slug>/` per the template's group-slug transform, as needed), then write in exactly this order: (1) detail files (only for layers whose elaboration needs one); (2) when any detail files exist, the per-level index chain for them -- `docs/dod/<group-slug>/INDEX.md` for each group directory that has detail files, then `docs/dod/INDEX.md` linking those subdomain indexes (create or update either as needed), per the documentation skill's per-level INDEX.md rule; (3) `docs/DOD.md`; (4) the `docs/INDEX.md` update -- a row for DOD.md plus a row linking `docs/dod/INDEX.md` when it exists (never a row for individual leaf detail files at root; that is the child index's job). Formats per `references/DOD_TEMPLATE.md` exactly: cross-cutting frontmatter, ruling lines, and `Stamp: vN` from the taxonomy's current stamp.
 > Consequences: `docs/DOD.md` is still written after every file under `docs/dod/` and before the `docs/INDEX.md` update, so its presence remains the reliable canon signal. An interruption anywhere under `docs/dod/` -- detail files or their index chain -- before `docs/DOD.md` is written leaves no canon at all, the same "no canon" state consumers already check for (at most inert orphan files sit under `docs/dod/`, never a live-canon defect). An interruption between `docs/DOD.md` and `docs/INDEX.md` leaves a live canon with a stale root index (inert catalog gap, not a live-canon defect).
 
 **Abandonment:** if the interview ends, is interrupted, or the owner stops before the ratification pass completes, NO file is created or modified. Nothing is written before the write step above -- there is no partial canon and no scratch canon file. Holding the ruling set in conversation is the only intermediate state.
@@ -86,18 +86,11 @@ After all 5 groups: present the complete ruling set back to the owner in `DOD_TE
 Entered from BEFORE PROCEEDING item 3 when `docs/DOD.md` is already present.
 
 **Read and parse.** Read the existing `docs/DOD.md`. A structural failure -- a
-missing or unparseable `Stamp:` line, a ruling line matching none of
-`references/DOD_TEMPLATE.md` Section A.3's three forms, or a missing
-`Content-hash:` line -- means REFUSE: state exactly what failed to parse, then STOP.
-Never run the fresh group-by-group interview over an unreadable canon, and never
-guess a ruling to paper over the gap. "Present but unreadable" is a different,
-observable state from "absent."
-
-**Hash check.** Recompute the content-hash over the byte range `references/DOD_TEMPLATE.md`
-Section A.4 defines and compare it to the canon's `Content-hash:` footer. A mismatch
-is NOT a structural failure and does NOT trigger refusal: emit the literal line
-`DOD-HASH: MISMATCH` and continue -- the canon is still read and used; the mismatch
-is a trust flag about possible hand-editing, not a parse failure.
+missing `Stamp:` line, or a ruling line matching none of the three forms in
+Section A.3 of the template -- means REFUSE: state exactly what failed to parse,
+then STOP. Never run the fresh group-by-group interview over an unreadable canon,
+and never guess a ruling to paper over the gap. "Present but unreadable" is a
+different, observable state from "absent."
 
 **Compare stamps.** Parse the canon's `Stamp: vN` and compare it against
 `references/DOD_TAXONOMY.md`'s current `Stamp:` line.
@@ -129,11 +122,11 @@ delta set triggers the write step.
 > already open, since the owner is present anyway; but a delta pass only ratified
 > the delta layers -- touching any other line would ship an unratified change under
 > the guise of a stamp bump.
-> Solution: the new `docs/DOD.md` is the old file with exactly three kinds of
-> change: delta ruling lines added or replaced for the layers identified above, the
-> `Stamp:` line updated to the taxonomy's current stamp, and `Content-hash:`
-> recomputed per the Write Step above. Every other byte -- every untouched ruling
-> line, the frontmatter, the narrative line -- is carried over byte-for-byte.
+> Solution: the new `docs/DOD.md` is the old file with exactly two kinds of
+> change: delta ruling lines added or replaced for the layers identified above, and
+> the `Stamp:` line updated to the taxonomy's current stamp. Every other byte --
+> every untouched ruling line, the frontmatter, the narrative line -- is carried
+> over byte-for-byte.
 > Consequences: prior rulings survive byte-untouched except the stamp; an owner or
 > reviewer can diff the old and new canon and see exactly, and only, the delta.
 
@@ -155,7 +148,6 @@ before its ratification pass completes leaves `docs/DOD.md` unmodified.
 | "The owner gave a reason for N/A, that's enough" | A reason is not a category. Re-ask until one of the three closed categories is named. |
 | "We're on attempt 4 of the trigger, one more phrasing might land" | The loop is bounded at 3. Offer the binary choice now -- ALWAYS or N/A repo-ruled -- never a 4th attempt. |
 | "Prior rulings look stale, I'll refresh a few while the file's open" | Byte-preservation is absolute. A delta pass ratifies only the delta layers; touching any other ruling line ships an unratified change under the guise of a stamp bump. |
-| "The hash doesn't match, the canon must be corrupt -- I'll refuse" | A hash mismatch is warn-and-consume, not a parse failure. Emit `DOD-HASH: MISMATCH` and continue; refusal is reserved for structural failures (an unparseable Stamp/Content-hash line or a malformed ruling line). |
 | "Stamps are equal, but I'll re-ask a couple of layers just to be safe" | Equal stamps means the canon is current. Stop -- there is nothing to elicit and nothing to write. |
 
 ---
@@ -169,8 +161,7 @@ before its ratification pass completes leaves `docs/DOD.md` unmodified.
 - Past 3 failed trigger attempts and still drafting a new phrasing -- STOP. Offer the bounded ALWAYS/N/A choice now.
 - N/A ruling given with only free text, no category tag -- STOP. Re-ask for one of the three closed categories.
 - Interview interrupted and a partial DOD.md or detail file already exists -- STOP. This skill's design makes that state impossible; do not compound it by continuing the write.
-- In delta mode, about to edit a ruling line the delta pass did not just ratify -- STOP. Byte-preservation is absolute; only delta lines, `Stamp:`, and `Content-hash:` change.
-- A hash mismatch was found on read and refusal is about to happen instead of a warning -- STOP. `DOD-HASH: MISMATCH` is warn-and-consume, not a refusal trigger.
+- In delta mode, about to edit a ruling line the delta pass did not just ratify -- STOP. Byte-preservation is absolute; only delta lines and `Stamp:` change.
 - An existing `docs/DOD.md` failed to parse and the fresh interview is about to run anyway -- STOP. Refuse with a diagnostic naming what failed; never guess over an unreadable canon.
 
 ---

@@ -57,16 +57,20 @@ up to that parameter, not the full parameterized string:
 ## 3. Run procedure
 
 Each fixture scenario below is a pairing of an input file (a story
-request, a completion claim, or a DoD document) with the expected
-marker outcome once that input is dispatched to the relevant skill. Use
+request, a completion claim, a DoD document, or a taxonomy) with the
+expected outcome once that input is dispatched to the relevant skill --
+a marker, for every scenario but delta re-ratification, which instead
+checks the resulting document for byte-preservation (see below). Use
 `run-scenario.sh` (in this directory) to perform or print the mechanical
 steps for a scenario: placing the right DoD document at `docs/DOD.md` in
 a scratch copy of the repository, naming the request or claim text to
 feed the dispatched agent, and invoking `check-markers.sh` against the
 captured transcript. Run `./run-scenario.sh --help` for its usage text.
 
-The scenarios this harness covers, one positive and one negative case per
-behavior it proves:
+The scenarios this harness covers: one positive and one negative case per
+marker-emitting behavior it proves, plus the delta re-ratification
+scenario below, which proves a non-marker behavior and so has its own
+pass condition:
 
 **Story-generator scenarios** (input file: `story-request-scenarios.md`,
 DoD document: `story-request-canon.md`):
@@ -107,11 +111,31 @@ tools/dod_fixtures/check-markers.sh <stale-canon-output> --require 'DOD-STALE: c
 tools/dod_fixtures/check-markers.sh <fresh-canon-output> --forbid 'DOD-STALE: canon v'
 ```
 
-A `RESULT: PASS (N/N)` line and exit code 0 from every invocation in a
-scenario is what confirms that scenario's behavior end to end. Any
-`RESULT: FAIL` or nonzero exit means the behavior did not match what the
-scenario expects; treat it as a real finding rather than re-running until
-it passes.
+**Delta re-ratification scenario** (existing canon:
+`delta-reratification-canon.md`, ratified against
+`delta-reratification-taxonomy-v1.md`; current taxonomy:
+`delta-reratification-taxonomy-v2.md`, which adds one layer):
+```
+tools/dod_fixtures/run-scenario.sh delta-reratification
+```
+This exercises delta re-ratification: dispatch the defining-done skill's
+re-ratification interview against the v2 taxonomy with the v1-ratified
+canon already in place, and confirm the interview elicits a ruling only
+for the added layer. This scenario has no marker check --
+`run-scenario.sh` rejects `--check` for it by design, since it emits no
+`DOD-VIOLATION:`, `DOD-GATE: FAIL`, or `DOD-STALE:` marker. Its pass
+condition is read directly from the transcript and the resulting
+document: the canon produced by the interview must differ from the input
+canon by exactly the new ruling line(s) plus the `Stamp:` line update,
+with every other byte preserved.
+
+A `RESULT: PASS (N/N)` line and exit code 0 from every `check-markers.sh`
+invocation in a marker-based scenario is what confirms that scenario's
+behavior end to end. Any `RESULT: FAIL` or nonzero exit means the
+behavior did not match what the scenario expects; treat it as a real
+finding rather than re-running until it passes. The delta re-ratification
+scenario has no `check-markers.sh` invocation; its own byte-preservation
+pass condition, above, is what confirms its behavior instead.
 
 ## 4. Consent note
 

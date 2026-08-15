@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# run-scenario.sh -- performs or prints the mechanical steps for one DoD
-# fixture scenario: which Definition of Done document (canon) fixture to
-# place at docs/DOD.md, where to find the request or claim text to feed
-# the dispatched agent skill, and how to invoke check-markers.sh against
-# the transcript afterward.
+# run-scenario.sh -- performs or prints the mechanical steps for one
+# Definition of Done (DoD) fixture scenario: which DoD document (canon)
+# fixture to place at docs/DOD.md, where to find the request or claim
+# text to feed the dispatched agent skill, and how to invoke
+# check-markers.sh against the transcript afterward.
 #
 # This script does NOT dispatch the agent skill itself -- that requires an
 # actual agent session, and every dispatch is a spend-bearing operation

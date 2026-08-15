@@ -5,12 +5,16 @@
 This file carries four scenarios dispatched against the
 user-story-generator skill: a canon-derived Definition of Done section
 with a refusal when a required layer is dropped, a canon-less fallback,
-and a stale-stamp plus tampered-hash variant that exercises the staleness
-and hash-mismatch warnings on the generator's document-consumption path.
-"Canon" here means the ratified Definition of Done document a repository
-keeps at `docs/DOD.md`. The paired document fixture is
-`tools/dod_fixtures/story-request-canon.md` (Case A and Case B run
-against it as-is).
+and a stale-stamp variant that exercises the staleness warning on the
+generator's document-consumption path. "Canon" here means the ratified
+Definition of Done document a repository keeps at `docs/DOD.md`. The
+paired document fixture is `tools/dod_fixtures/story-request-canon.md`
+(Case A and Case B run against it as-is).
+
+These fixtures are synthetic test data. The app named below, its code
+paths, and every quoted request text are invented for this file. They
+exist only to exercise the Definition of Done tooling, and they describe
+no real repository.
 
 Design notes (read before dispatching):
 
@@ -31,9 +35,9 @@ Design notes (read before dispatching):
   defining-done skill's canon template reference is an authoring rule for
   a real document; a partial fixture is not flagged malformed by that
   same reference's parse-level malformed check, which tests only the
-  `Stamp:` line, ruling-line form, and `Content-hash:` line, not layer
-  coverage). This keeps the fixture lean while still exercising every
-  derivation and refusal rule these two cases require.
+  `Stamp:` line and ruling-line form, not layer coverage). This keeps
+  the fixture lean while still exercising every derivation and refusal
+  rule these two cases require.
 - Layer keys are real taxonomy keys (not invented ones), unlike the
   delta-reratification fixture pair
   (`delta-reratification-taxonomy-v1.md`/
@@ -159,33 +163,31 @@ skill's story template reference:
 tools/dod_fixtures/check-markers.sh <no-canon-output> --forbid 'DOD-VIOLATION:'
 ```
 
-## Case D -- stale-stamp and tampered-hash variant
+## Case D -- stale-stamp variant
 
-This is a complete fenced variant of the Case A/B document carrying two
-deliberate defects at once: a `Stamp:` older than the real taxonomy's
-current stamp (v1, per Design notes above), and a `Content-hash:` value
-that does not match the variant's own recomputed hash. It differs from
-`story-request-canon.md` in title, description, the narrative line,
-`Stamp:`, and `Content-hash:` -- the ruling lines are left identical on
-purpose, so staleness and hash-tamper are the only two induced defects
-under test.
+This is a complete fenced variant of the Case A/B document carrying one
+deliberate defect: a `Stamp:` older than the real taxonomy's current
+stamp (v1, per Design notes above). It differs from
+`story-request-canon.md` in title, description, the narrative line, and
+`Stamp:` -- the ruling lines are left identical on purpose, so staleness
+is the only induced defect under test.
 
 Materialize it to a temp file before dispatch (tested below; the pattern
 is anchored to a whole-line match so this command's own text, which
 necessarily contains the same sentinel substrings, cannot self-match):
 ```
-awk '/^<!-- STALE-TAMPERED-CANON:BEGIN -->$/{f=1;next}/^<!-- STALE-TAMPERED-CANON:END -->$/{f=0}f' tools/dod_fixtures/story-request-scenarios.md > /tmp/story-stale-tampered-canon-DOD.md
+awk '/^<!-- STALE-CANON:BEGIN -->$/{f=1;next}/^<!-- STALE-CANON:END -->$/{f=0}f' tools/dod_fixtures/story-request-scenarios.md > /tmp/story-stale-canon-DOD.md
 ```
 
 Then dispatch the Case A or Case B request text (either works -- this
-case isolates document staleness/tamper, not story content) to the
+case isolates document staleness, not story content) to the
 user-story-generator skill with the materialized file placed at
 `docs/DOD.md` per Design notes.
 
-<!-- STALE-TAMPERED-CANON:BEGIN -->
+<!-- STALE-CANON:BEGIN -->
 ---
-title: "Fernglen Definition of Done (stale-stamp and tampered-hash variant)"
-description: "Deliberately stale-stamped and hash-tampered variant of the Fernglen fixture document, used only to exercise the defining-done skill's staleness warning and hash-mismatch warn-and-consume path. Never a real ratified document."
+title: "Fernglen Definition of Done (stale-stamp variant)"
+description: "Deliberately stale-stamped variant of the Fernglen fixture document, used only to exercise the defining-done skill's staleness warning. Never a real ratified document."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
@@ -198,40 +200,29 @@ Ratified against DOD_TAXONOMY.md v0.
 - performance-spend-budgets: N/A | category: target-absent | Fernglen has no
   metered API calls or perf-sensitive surface
 Stamp: v0
-Content-hash: sha256:6e265fc3ab3eca551755164e85121dd7d4cda23d0bd95623f7df69be566caeb3
-<!-- STALE-TAMPERED-CANON:END -->
+<!-- STALE-CANON:END -->
 
-Do not edit this Stamp or Content-hash to make them match -- the
-mismatch is exactly what this scenario tests.
+Do not edit this Stamp to make it current -- the stale value is exactly
+what this scenario tests.
 
-**Defect 1 -- staleness:** `Stamp: v0` is older than the defining-done
-skill's real taxonomy reference, whose current stamp is `Stamp: v1`. Per
-the generator's staleness rule, it must still consume the document and
-additionally emit `DOD-STALE: canon v0 behind taxonomy v1`.
+**Induced defect -- staleness:** `Stamp: v0` is older than the
+defining-done skill's real taxonomy reference, whose current stamp is
+`Stamp: v1`. Per the generator's staleness rule, it must still consume
+the document and additionally emit
+`DOD-STALE: canon v0 behind taxonomy v1`.
 
-**Defect 2 -- hash tamper:** the embedded `Content-hash:` value above
-does not match this content's true recomputed digest. Recompute it
-directly to confirm: extract the variant with the awk command above,
-then run
-`sed '/^Content-hash:/,$d' /tmp/story-stale-tampered-canon-DOD.md | sha256sum`
--- the result will not match the `Content-hash:` value embedded above.
-Per the generator's hash-check rule, this is warn-and-consume: it must
-still consume the document and additionally emit `DOD-HASH: MISMATCH`.
-
-**Expected marker check** (a single combined require, since this is one
-combined stale-plus-tampered variant rather than two separate
-stale-only/tampered-only files):
+**Expected marker check**:
 ```
-tools/dod_fixtures/check-markers.sh <stale-tampered-output> --require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <stale-canon-output> --require 'DOD-STALE: canon v'
 ```
 
-**Fresh/untampered negative control:** README.md Section 3 also calls for
-a fresh/untampered negative control per consumer. No third file is
-needed for it -- Case A's or Case B's output (run against the clean,
-untampered `story-request-canon.md`, `Stamp: v1` matching the taxonomy's
-current stamp) already is that control:
+**Fresh negative control:** README.md Section 3 also calls for a fresh
+negative control per consumer. No third file is needed for it -- Case A's
+or Case B's output (run against the clean `story-request-canon.md`,
+`Stamp: v1` matching the taxonomy's current stamp) already is that
+control:
 ```
-tools/dod_fixtures/check-markers.sh <violating-story-output-or-compliant-story-output> --forbid 'DOD-STALE: canon v' --forbid 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <violating-story-output-or-compliant-story-output> --forbid 'DOD-STALE: canon v'
 ```
 
 ## Related

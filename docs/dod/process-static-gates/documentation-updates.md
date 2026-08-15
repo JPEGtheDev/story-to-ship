@@ -6,7 +6,6 @@ subdomain: process-static-gates
 tags: [dod, process-static-gates, documentation-updates]
 related:
   - "../../DOD.md"
-  - "../../../skills/defining-done/references/DOD_TAXONOMY.md"
 ---
 
 # Documentation Updates Ruling
@@ -24,4 +23,4 @@ the documentation skill).
 ## Related
 
 - [DOD.md](../../DOD.md) -- the canon index this detail file elaborates.
-- [DOD_TAXONOMY.md](../../../skills/defining-done/references/DOD_TAXONOMY.md) -- the layer's taxonomy definition.
+- The defining-done skill's taxonomy defines this layer.

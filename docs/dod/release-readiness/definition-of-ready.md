@@ -6,7 +6,6 @@ subdomain: release-readiness
 tags: [dod, release-readiness, definition-of-ready]
 related:
   - "../../DOD.md"
-  - "../../../skills/defining-done/references/DOD_TAXONOMY.md"
 ---
 
 # Definition of Ready Ruling
@@ -29,4 +28,4 @@ work proceeds.
 ## Related
 
 - [DOD.md](../../DOD.md) -- the canon index this detail file elaborates.
-- [DOD_TAXONOMY.md](../../../skills/defining-done/references/DOD_TAXONOMY.md) -- the layer's taxonomy definition.
+- The defining-done skill's taxonomy defines this layer.

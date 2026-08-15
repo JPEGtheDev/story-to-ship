@@ -6,7 +6,6 @@ subdomain: release-readiness
 tags: [dod, release-readiness, exploratory-testing]
 related:
   - "../../DOD.md"
-  - "../../../skills/defining-done/references/DOD_TAXONOMY.md"
 ---
 
 # Exploratory Testing Ruling
@@ -25,4 +24,4 @@ Routine changes to established surfaces do not fire this layer.
 ## Related
 
 - [DOD.md](../../DOD.md) -- the canon index this detail file elaborates.
-- [DOD_TAXONOMY.md](../../../skills/defining-done/references/DOD_TAXONOMY.md) -- the layer's taxonomy definition.
+- The defining-done skill's taxonomy defines this layer.

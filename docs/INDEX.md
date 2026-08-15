@@ -11,12 +11,10 @@ related:
 # Documentation Index
 
 This is the top-level index for `docs/`, the cross-cutting level in the
-documentation skill's taxonomy (see
-`skills/documentation/references/DOCUMENTATION_PRINCIPLES.md`, Documentation
-Index section). It catalogs cross-cutting standards files stored directly
-under `docs/` and links to domain-level `docs/<domain>/INDEX.md` files as
-they are created. Every `docs/` directory level owns its own INDEX.md; this
-one owns the root.
+documentation skill's taxonomy. It catalogs cross-cutting standards files
+stored directly under `docs/` and links to domain-level
+`docs/<domain>/INDEX.md` files as they are created. Every `docs/` directory
+level owns its own INDEX.md; this one owns the root.
 
 ## Definition of Done canon
 
@@ -27,8 +25,8 @@ optional longer rationale in per-layer detail files at
 `docs/dod/<group-slug>/<layer-key>.md`.
 
 The canon is written and updated only by the `defining-done` skill's
-ratification interview (see `skills/defining-done/references/DOD_TEMPLATE.md`
-for the authoring format) -- no other process creates or edits it.
+ratification interview, which defines the authoring format -- no other
+process creates or edits it.
 The write order at ratification is: detail files, then their per-level index
 chain under `docs/dod/` (subdomain `INDEX.md` files, then `docs/dod/INDEX.md`),
 then `docs/DOD.md`, then this file's update. `docs/DOD.md` is written after

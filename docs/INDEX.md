@@ -41,7 +41,7 @@ chain (linked from the table), not listed here.
 
 | File | Domain | Subdomain | Description |
 |------|--------|-----------|-------------|
-| [DOD.md](DOD.md) | cross-cutting | -- | Ratified Definition of Done canon: one owner ruling per taxonomy layer, stamped and hashed. |
+| [DOD.md](DOD.md) | cross-cutting | -- | Ratified Definition of Done canon: one owner ruling per taxonomy layer, stamped. |
 | [dod/INDEX.md](dod/INDEX.md) | dod | -- | Domain index for the DoD canon's per-layer detail files. |
 
 ## Related

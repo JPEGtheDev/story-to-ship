@@ -195,6 +195,9 @@ Stamp: v0
 Content-hash: sha256:d140f9695e0e88cc043a78952b603c54affbf70c1c16ccd38146f601c0647d56
 <!-- STALE-TAMPERED-CANON:END -->
 
+Do not edit this Stamp or Content-hash to make them match -- the
+mismatch is exactly what this scenario tests.
+
 **Defect 1 -- staleness:** `Stamp: v0` is older than the defining-done
 skill's real taxonomy reference, whose current stamp is `Stamp: v1`. Per
 the completion gate's staleness rule, it must still evaluate the claim

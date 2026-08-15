@@ -185,11 +185,12 @@ echo
 # Step 1: materialize the variant document, if this scenario uses one.
 MATERIALIZED=""
 if [[ "$DOC_IS_VARIANT" -eq 1 ]]; then
-  MATERIALIZED="/tmp/$(basename "$VARIANT_SOURCE" .md)-$VARIANT_SENTINEL.md"
-  EXTRACT_CMD="awk '/^<!-- ${VARIANT_SENTINEL}:BEGIN -->\$/{f=1;next}/^<!-- ${VARIANT_SENTINEL}:END -->\$/{f=0}f' '$VARIANT_SOURCE' > '$MATERIALIZED'"
+  MATERIALIZED="$(mktemp --suffix=.md "/tmp/${VARIANT_SENTINEL}-XXXXXX")"
+  AWK_PROGRAM="/^<!-- ${VARIANT_SENTINEL}:BEGIN -->\$/{f=1;next}/^<!-- ${VARIANT_SENTINEL}:END -->\$/{f=0}f"
   echo "Step 1: materialize the variant document."
-  echo "  $EXTRACT_CMD"
-  eval "$EXTRACT_CMD"
+  echo "  awk '$AWK_PROGRAM' '$VARIANT_SOURCE' > '$MATERIALIZED'"
+  awk "$AWK_PROGRAM" "$VARIANT_SOURCE" > "$MATERIALIZED"
+  [[ -s "$MATERIALIZED" ]] || fail "sentinel ${VARIANT_SENTINEL}:BEGIN/END not found in $VARIANT_SOURCE"
   echo "  (done -- wrote $MATERIALIZED)"
   DOC_FIXTURE="$MATERIALIZED"
 fi

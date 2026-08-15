@@ -201,6 +201,9 @@ Stamp: v0
 Content-hash: sha256:6e265fc3ab3eca551755164e85121dd7d4cda23d0bd95623f7df69be566caeb3
 <!-- STALE-TAMPERED-CANON:END -->
 
+Do not edit this Stamp or Content-hash to make them match -- the
+mismatch is exactly what this scenario tests.
+
 **Defect 1 -- staleness:** `Stamp: v0` is older than the defining-done
 skill's real taxonomy reference, whose current stamp is `Stamp: v1`. Per
 the generator's staleness rule, it must still consume the document and

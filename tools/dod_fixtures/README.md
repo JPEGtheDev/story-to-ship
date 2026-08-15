@@ -3,17 +3,18 @@
 ## 1. Purpose
 
 This directory holds a fixture-proof harness for the Definition of Done
-(DoD) canon skill chain: a set of skills that generate a user story's
-Definition of Done section from a project's ratified DoD document (kept at
-`docs/DOD.md`), ratify or re-ratify that document, and check a completion
-claim's evidence against it. Some of that skill work is only considered
-fully proven once an actual, captured run of the skill against one of
-these fixtures shows the expected pass/fail behavior end to end, rather
-than being proven by code review alone. `check-markers.sh` is the script
-that turns a captured fixture-run transcript into a pass/fail verdict: it
-greps a run's output file for the pinned marker strings defined below and
-asserts each one is present (a positive assertion) or absent (a negative
-assertion).
+(DoD) canon skill chain. "Canon" here means the ratified Definition of
+Done document a repository keeps at `docs/DOD.md`. The skill chain is a
+set of skills that generate a user story's Definition of Done section
+from a project's canon, ratify or re-ratify that canon, and check a
+completion claim's evidence against it. Some of that skill work is only
+considered fully proven once an actual, captured run of the skill
+against one of these fixtures shows the expected pass/fail behavior end
+to end, rather than being proven by code review alone. `check-markers.sh`
+is the script that turns a captured fixture-run transcript into a
+pass/fail verdict: it greps a run's output file for the pinned marker
+strings defined below and asserts each one is present (a positive
+assertion) or absent (a negative assertion).
 
 ## 2. Marker definitions
 
@@ -93,13 +94,19 @@ document variant embedded in its scenario file, plus a fresh/untampered
 negative control). The fixtures in this directory combine both defects
 into one variant document (see Case D in `story-request-scenarios.md`
 and Case C in `completion-claim-scenarios.md`), so the expected marker
-check requires both markers from a single transcript; a setup that
-isolated staleness or hash-tamper into separate documents would instead
-assert the one relevant marker per file:
+check requires both markers from a single transcript. This is the
+actual command `run-scenario.sh` prints for these scenarios:
+```
+tools/dod_fixtures/check-markers.sh <stale-tampered-output> --require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH'
+tools/dod_fixtures/check-markers.sh <fresh-untampered-output> --forbid 'DOD-STALE: canon v' --forbid 'DOD-HASH: MISMATCH'
+```
+Illustrative only -- not shipped in this directory: a setup that
+isolated staleness or hash-tamper into two separate documents, instead
+of the one combined variant these fixtures ship, would assert the one
+relevant marker per file:
 ```
 tools/dod_fixtures/check-markers.sh <stale-only-output> --require 'DOD-STALE: canon v'
 tools/dod_fixtures/check-markers.sh <tampered-only-output> --require 'DOD-HASH: MISMATCH'
-tools/dod_fixtures/check-markers.sh <fresh-untampered-output> --forbid 'DOD-STALE: canon v' --forbid 'DOD-HASH: MISMATCH'
 ```
 
 A `RESULT: PASS (N/N)` line and exit code 0 from every invocation in a

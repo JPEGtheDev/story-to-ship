@@ -86,9 +86,9 @@ After all 5 groups: present the complete ruling set back to the owner in `DOD_TE
 Entered from BEFORE PROCEEDING item 3 when `docs/DOD.md` is already present.
 
 **Read and parse.** Read the existing `docs/DOD.md`. A structural failure -- a
-missing `Stamp:` line, or a ruling line matching none of the three forms in
-Section A.3 of the template -- means REFUSE: state exactly what failed to parse,
-then STOP. Never run the fresh group-by-group interview over an unreadable canon,
+missing or unparseable `Stamp:` line, or a ruling line matching none of the three
+forms in Section A.3 of the template -- means REFUSE: state exactly what failed to
+parse, then STOP. Never run the fresh group-by-group interview over an unreadable canon,
 and never guess a ruling to paper over the gap. "Present but unreadable" is a
 different, observable state from "absent."
 

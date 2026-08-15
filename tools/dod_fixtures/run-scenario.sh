@@ -22,7 +22,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 CHECK_MARKERS="$SCRIPT_DIR/check-markers.sh"
 
-SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-tampered evidence-missing evidence-complete completion-stale-tampered delta-reratification"
+SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon evidence-missing evidence-complete completion-stale-canon delta-reratification"
 
 usage() {
   cat <<'EOF'
@@ -32,14 +32,14 @@ Usage:
   run-scenario.sh --help
 
 <scenario> is one of:
-  violating-story             story-generator refusal (story-request-scenarios.md Case A)
-  compliant-story              story-generator negative control (story-request-scenarios.md Case B)
-  no-canon-fallback             story-generator, no docs/DOD.md present (story-request-scenarios.md Case C)
-  story-stale-tampered          story-generator, stale + tampered document (story-request-scenarios.md Case D)
-  evidence-missing               completion-gate failure (completion-claim-scenarios.md Case A)
-  evidence-complete               completion-gate negative control (completion-claim-scenarios.md Case B)
-  completion-stale-tampered       completion-gate, stale + tampered document (completion-claim-scenarios.md Case C)
-  delta-reratification             defining-done delta re-ratification interview (no marker check -- see below)
+  violating-story         story-generator refusal (story-request-scenarios.md Case A)
+  compliant-story         story-generator negative control (story-request-scenarios.md Case B)
+  no-canon-fallback       story-generator, no docs/DOD.md present (story-request-scenarios.md Case C)
+  story-stale-canon       story-generator, stale document (story-request-scenarios.md Case D)
+  evidence-missing        completion-gate failure (completion-claim-scenarios.md Case A)
+  evidence-complete       completion-gate negative control (completion-claim-scenarios.md Case B)
+  completion-stale-canon  completion-gate, stale document (completion-claim-scenarios.md Case C)
+  delta-reratification    defining-done delta re-ratification interview (no marker check -- see below)
 
 --worktree <path>   an existing scratch git working copy of this repo. If
                     given, the scenario's Definition of Done document is
@@ -146,12 +146,12 @@ case "$SCENARIO" in
     REQUEST_SOURCE="story-request-scenarios.md, Case C"
     CHECK_ARGS=(--forbid 'DOD-VIOLATION:')
     ;;
-  story-stale-tampered)
+  story-stale-canon)
     DOC_IS_VARIANT=1
     VARIANT_SOURCE="$SCRIPT_DIR/story-request-scenarios.md"
-    VARIANT_SENTINEL="STALE-TAMPERED-CANON"
+    VARIANT_SENTINEL="STALE-CANON"
     REQUEST_SOURCE="story-request-scenarios.md, Case D (dispatch either Case A or Case B's request text)"
-    CHECK_ARGS=(--require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH')
+    CHECK_ARGS=(--require 'DOD-STALE: canon v')
     ;;
   evidence-missing)
     DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
@@ -163,12 +163,12 @@ case "$SCENARIO" in
     REQUEST_SOURCE="completion-claim-scenarios.md, Case B"
     CHECK_ARGS=(--forbid 'DOD-GATE: FAIL')
     ;;
-  completion-stale-tampered)
+  completion-stale-canon)
     DOC_IS_VARIANT=1
     VARIANT_SOURCE="$SCRIPT_DIR/completion-claim-scenarios.md"
-    VARIANT_SENTINEL="STALE-TAMPERED-CANON"
+    VARIANT_SENTINEL="STALE-CANON"
     REQUEST_SOURCE="completion-claim-scenarios.md, Case C (dispatch either Case A or Case B's claim text)"
-    CHECK_ARGS=(--require 'DOD-STALE: canon v' --require 'DOD-HASH: MISMATCH')
+    CHECK_ARGS=(--require 'DOD-STALE: canon v')
     ;;
   delta-reratification)
     DOC_FIXTURE="$SCRIPT_DIR/delta-reratification-canon.md"

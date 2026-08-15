@@ -76,29 +76,15 @@ Rules for each form:
   reason not captured by the first two categories). An optional free-text
   elaboration MAY follow the category tag after a second `|`.
 
-### A.4 Content-hash footer
+### A.4 Canon integrity
 
-The index ends with a content-hash footer of the exact form:
+The canon carries no integrity field of its own, and one MUST NOT be added. Integrity
+is version control's job: an uncommitted edit to `docs/DOD.md` is visible in
+`git status` and `git diff`, and a committed edit is visible in the file's history
+via `git log` and `git blame`. A reviewer asking whether the canon changed, and how,
+reads that history rather than a value recorded inside the file itself.
 
-```
-Content-hash: sha256:<64-hex>
-```
-
-**Hash input, defined unambiguously:** the hash input is every byte of `docs/DOD.md`
-starting at byte offset 0 up to and including the newline character that terminates
-the line immediately preceding the `Content-hash:` line. Concretely: locate the line
-that begins with the literal text `Content-hash:`; the hash input is the file's byte
-content from its start through the end of the previous line's trailing newline,
-exclusive of the `Content-hash:` line itself and anything after it. This means the
-frontmatter, the optional narrative line, every ruling line, and the `Stamp:` line
-are ALL included in the hash input; only the `Content-hash:` line (and any content
-after it) is excluded. Two independent implementations given the same file bytes
-MUST compute the same digest under this rule, because the boundary is defined by a
-literal, unambiguous string match (`Content-hash:` at the start of a line) rather
-than by counting lines or bytes from either end.
-
-The hash is a SHA-256 digest of that byte range, rendered as 64 lowercase hex
-characters. Any consumer recomputing the hash MUST use this exact input definition.
+The index therefore ends with the `Stamp:` line (Section A.2).
 
 ### A.5 Worked example (canonical form)
 
@@ -114,10 +100,7 @@ Ratified against DOD_TAXONOMY.md v1.
 - performance-spend-budgets: N/A | category: target-absent | no perf-sensitive
   surface or metered API calls in this repo
 Stamp: v1
-Content-hash: sha256:4b6f1a2c9e3d7f0851c4a9d6e2b8f3701c5a9e4d2b7f6013c8a5e9d2f4b6a1c7
 ```
-
-(The hex string above is illustrative, not a real digest of any file.)
 
 ---
 
@@ -185,30 +168,30 @@ leaves a live canon with a stale root index (inert, not live).
 
 ## C. Consumer notes
 
-Downstream todos (generator consumption, completion-gate consumption) MUST quote
-these four literal marker strings verbatim -- they are the canonical source for all
-four:
+Downstream consumers (the story generator and the completion gate) MUST quote these
+three literal marker strings verbatim -- this section is the canonical source for all
+three:
 
 - `DOD-VIOLATION: <layer>` -- the generator's refusal marker, emitted when a story
   omits an ALWAYS layer with no category-tagged N/A line.
 - `DOD-GATE: FAIL <layer>` -- the completion gate's failure marker, emitted when a
   completion claim lacks evidence for an ALWAYS layer or a CONDITIONAL layer whose
   trigger fired.
-- `DOD-HASH: MISMATCH` -- emitted by either consumer when the recomputed content-hash
-  (Section A.4) does not match the canon's `Content-hash:` footer. This is a
-  warn-and-consume rule: the canon is still read and used: the
-  mismatch is a trust flag about possible hand-editing, not a parse failure, so
-  consumption does not stop.
 - `DOD-STALE: canon v<N> behind taxonomy v<M>` -- emitted by either consumer when the
   canon's `Stamp: vN` is older than `DOD_TAXONOMY.md`'s current stamp. The canon is
   STILL consumed: staleness is a currency warning, not a refusal trigger. Never
   silently consume a stale canon as if it were current.
 
+**Emission format:** a marker is emitted as a bare line -- the line begins with the
+marker string itself, with no surrounding formatting: no backticks, no list markers,
+no quotation marks, no leading whitespace. The markers appear in backticks above only
+because this section is prose describing them; emitted output carries none.
+
 One additional non-marker rule applies to every consumer:
 
 - **Malformed-canon rule:** if `docs/DOD.md` exists but its structure cannot be
-  parsed (missing `Stamp:` line, a ruling line matching none of the three forms in
-  Section A.3, missing `Content-hash:` line), consumers MUST refuse with a diagnostic
+  parsed (a missing or unparseable `Stamp:` line, or a ruling line matching none of
+  the three forms in Section A.3), consumers MUST refuse with a diagnostic
   naming what failed to parse. Never silently fall back to the canon-less default as
   if no canon existed at all -- "present but unreadable" and "absent"
   are different states and MUST produce different, observable behavior.

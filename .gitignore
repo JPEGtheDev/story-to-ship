@@ -4,4 +4,3 @@ scratch/
 __pycache__/
 *.pyc
 .claude/.stop-turn-log.jsonl
-plan.md

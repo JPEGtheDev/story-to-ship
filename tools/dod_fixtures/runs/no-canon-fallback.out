@@ -1,0 +1,99 @@
+I am using the user-story-generator skill to create/refine a story for adding a `dedupe_nearby_sightings()` function to Fernglen's ingest pipeline.
+
+**Context check (BEFORE PROCEEDING gate):**
+- Project context: taken from the product owner's description — an existing ingest pipeline with an existing test module (`ingest/test_dedupe.py`), so the target function extends established code rather than assuming undocumented architecture.
+- Functionality confirmed: the request specifies existing files (`ingest/dedupe.py`, `ingest/test_dedupe.py`) rather than inventing components from the project name.
+- Goal: merge two sighting records into one when they match on species, are within 50 meters, and within 10 minutes of each other.
+- Value: not stated explicitly by the requester — assuming the value is data-quality/accuracy (avoiding duplicate sighting counts distorting species reports). Flagging this assumption for confirmation.
+- Size: Small (hours) — given.
+- Model tier: Standard — given.
+- Format: Story Template — given.
+- Constraints: none — given.
+- Priority: not specified — defaulting to Medium; flagging this assumption since it's a required template field but wasn't part of the stated inputs.
+- DoD canon check: checked `docs/DOD.md` against the designated canon-discovery root (`/tmp/tmp.jLdtWfeWkQ`) — the `docs/` directory exists but is empty; no `DOD.md` present. **Canon absent** → Definition of Done section below uses the generic template defaults, explicitly marked unratified.
+
+All 8 gate items are satisfied (six given directly, two flagged as stated assumptions) — proceeding to generate.
+
+---
+
+**Title:** Add `dedupe_nearby_sightings()` to Merge Near-Duplicate Sighting Records
+
+**Type:** Feature
+**Size:** S
+**Epic/Component:** Ingest Pipeline / Data Deduplication
+**Priority:** Medium *(assumed — not specified by requester)*
+**Depends On:** None
+
+---
+
+## Effort Estimate
+
+**Recommended Model Tier:** Standard
+**Reasoning:** The function is small and self-contained but requires careful boundary-condition logic (distance/time thresholds, which fields survive a merge) that benefits from a model above Economy tier without needing Premium-level architectural judgment.
+
+---
+
+## User Story
+
+**As a** Fernglen data analyst
+**I want to** have near-duplicate sighting records (same species, within 50 meters, within 10 minutes) automatically merged during ingest
+**So that** species counts and location reports reflect distinct observations instead of being inflated by duplicate reports of the same sighting
+
+---
+
+## Acceptance Criteria
+
+- [ ] Given two sighting records of the same species reported within 50 meters and within 10 minutes of each other, `dedupe_nearby_sightings()` merges them into a single sighting record.
+- [ ] Given two sighting records of different species (any distance/time), `dedupe_nearby_sightings()` does NOT merge them.
+- [ ] Given two sighting records of the same species more than 50 meters apart (even within 10 minutes), `dedupe_nearby_sightings()` does NOT merge them.
+- [ ] Given two sighting records of the same species within 50 meters but more than 10 minutes apart, `dedupe_nearby_sightings()` does NOT merge them.
+- [ ] Boundary values (exactly 50 meters, exactly 10 minutes) have explicit, documented, and tested behavior (inclusive or exclusive — decided during implementation and reflected in both code and tests).
+- [ ] The merged record's field-resolution rule (e.g., which timestamp, observer, or notes field is retained) is documented in code and covered by a test.
+- [ ] All existing tests in `ingest/test_dedupe.py` continue to pass unmodified.
+- [ ] New unit tests are added to `ingest/test_dedupe.py` covering each case above (merge, species mismatch, distance miss, time miss, boundary).
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- None
+
+**Constraints:**
+- None specified
+
+**Files to Create/Modify:**
+- `ingest/dedupe.py` — add `dedupe_nearby_sightings()`
+- `ingest/test_dedupe.py` — add test cases for the new function
+
+**Architecture Notes:**
+- Open implementation decision, not yet specified by the requester: when two records are merged, which record's non-key fields (timestamp, observer ID, notes) win, or are they combined? Resolve this during implementation and encode the answer as an acceptance criterion / test rather than leaving it undocumented.
+- Distance calculation method (e.g., haversine vs. simple planar approximation) should match whatever convention the rest of the ingest pipeline already uses, if one exists — check `ingest/` for an existing distance helper before adding a new one.
+
+---
+
+## Definition of Done
+
+*(unratified template defaults -- no ratified canon at docs/DOD.md; ratify one with the defining-done skill)*
+
+- [ ] Code written and peer-reviewed
+- [ ] Unit tests pass (min. 85% coverage on new code)
+- [ ] No new linter/compiler warnings
+- [ ] Documentation updated
+- [ ] Integration tested
+- [ ] Ready to merge to main branch
+
+---
+
+## Comments
+
+No ratified Definition of Done canon exists for this project yet — the checklist above is generic template defaults, not project-specific ratified criteria. If Fernglen wants project-specific DoD gates (e.g., geospatial-logic-specific review, or ingest-pipeline-specific integration checks), ratify a canon at `docs/DOD.md` via the `defining-done` skill; future stories will then derive their Definition of Done from that canon instead of these defaults.
+
+---
+
+I've written up the story above. A few things worth flagging:
+- I assumed the business value (data-quality/accurate counts) and Priority (Medium) since neither was stated — let me know if either should change.
+- The merge field-resolution rule (which record's data wins) isn't specified in the request; I've left it as an open implementation decision to resolve during development rather than guessing, per INVEST's "Negotiable" principle.
+- Since no DoD canon exists yet at `docs/DOD.md`, this story ships with generic template defaults for its Definition of Done — happy to help ratify a Fernglen-specific canon if that's wanted next.
+
+Let me know if you'd like adjustments to scope, acceptance criteria, or the Definition of Done section.

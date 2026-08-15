@@ -1,0 +1,87 @@
+I am using the user-story-generator skill to create/refine a story for: adding a `dedupe_nearby_sightings()` function to Fernglen's ingest pipeline.
+
+**BEFORE PROCEEDING check** — all 8 conditions were already satisfied by the request itself, so I'm proceeding straight to generation:
+
+1. Project context loaded — user's description of the ingest pipeline, plus canon check below.
+2. Functionality/component confirmed — request names existing `ingest/test_dedupe.py` and an addition to the existing ingest pipeline; taken as stated by the product owner.
+3. Goal clear — merge near-duplicate volunteer sighting reports.
+4. Value clear — stop duplicate submissions from double-counting one observation.
+5. Size given — Small (hours).
+6. Model tier given — Standard.
+7. Format given — Story Template.
+8. Constraints given — none.
+
+**DoD canon discovery** (repo root treated as `/tmp/tmp.aAxUU8Y67L` per instruction): `docs/DOD.md` is present. Parse result: well-formed — `Stamp: v1` line present, all 5 ruling lines match one of the three valid forms (`ALWAYS` x4, `N/A | category: target-absent` x1), `Content-hash:` line present. Recomputed the hash over the byte range `DOD_TEMPLATE.md` Section A.4 defines: matches the canon's stated `sha256:3fd3fd4f6a28d6ec992a3d099f6b5193b38dbde76dbd97cf5e580eceb4b95384` exactly — no `DOD-HASH: MISMATCH`. Compared canon `Stamp: v1` to taxonomy's current `Stamp: v1` — equal, canon is current — no `DOD-STALE` line. No `CONDITIONAL` layers are ruled in this canon, so none can fire. `performance-spend-budgets` is ruled `N/A | target-absent` — absent from the story's DoD section per the skill's rule. All 4 `ALWAYS` layers (`bdd-tests`, `coverage`, `lint-format-static-analysis`, `versioning-conventional-commits`) produce real surface against this story's diff scope (new business-rule function + its tests) — none are dropped.
+
+---
+
+```markdown
+**Title:** Merge near-duplicate wildlife sightings within 50m/10min
+
+**Type:** Feature
+**Size:** S
+**Epic/Component:** Ingest Pipeline / Deduplication
+**Priority:** Medium (assumed — not specified by requester)
+**Depends On:** None
+
+---
+
+## Effort Estimate
+
+**Recommended Model Tier:** Standard
+**Reasoning:** The change is a single, well-specified pure function with a clear geometric/temporal rule and an existing test module to extend, but it involves enough judgment (boundary handling, merge semantics, which record's fields win) to be more than mechanical Economy-tier work.
+
+---
+
+## User Story
+
+**As a** Fernglen ingest pipeline maintainer
+**I want to** merge two sighting records into one when they report the same species within 50 meters and 10 minutes of each other
+**So that** duplicate volunteer submissions stop double-counting a single observation
+
+---
+
+## Acceptance Criteria
+
+- [ ] Given two sighting records of the same species reported within 50 meters and within 10 minutes of each other, when `dedupe_nearby_sightings()` processes them, then they are merged into a single record.
+- [ ] Given two sighting records of different species (regardless of distance/time proximity), when processed, then they are NOT merged and both records are retained.
+- [ ] Given two sighting records of the same species more than 50 meters apart, when processed, then they are NOT merged, even if within 10 minutes of each other.
+- [ ] Given two sighting records of the same species more than 10 minutes apart, when processed, then they are NOT merged, even if within 50 meters of each other.
+- [ ] Given records exactly at the 50-meter or 10-minute boundary, when processed, then the boundary is treated as inclusive (merge occurs at exactly 50m/10min) and this behavior is asserted by an explicit test case.
+- [ ] Given a batch containing more than two candidate duplicates of the same species/location/time cluster, when processed, then the function's merge behavior on 3+-way clusters is defined and tested (either pairwise-chained merge or explicit rejection of >2-way clusters — implementer's choice, but it must be a stated, tested behavior, not undefined).
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- None
+
+**Constraints:**
+- None specified
+
+**Files to Create/Modify:**
+- `ingest/dedupe.py` — add `dedupe_nearby_sightings()`
+- `ingest/test_dedupe.py` — extend existing test module with cases covering the acceptance criteria above
+
+**Architecture Notes:**
+- Distance calculation between two sightings needs a defined method (e.g., haversine over lat/lon) — pick and document the existing convention if the ingest pipeline already has one, rather than introducing a second distance utility.
+- Merge semantics (which record's fields — timestamp, observer, notes — survive the merge) should be decided explicitly rather than left to whichever record happens to be first in iteration order.
+
+---
+
+## Definition of Done
+
+*(derived from docs/DOD.md, ratified v1)*
+
+- [ ] bdd-tests (always-on): Given/When/Then scenarios exist covering the merge and no-merge behaviors above (same-species/in-range, different-species, out-of-range-distance, out-of-range-time, boundary-inclusive) as executable scenarios tied to these acceptance criteria.
+- [ ] coverage (always-on): the new code in `dedupe_nearby_sightings()` is exercised by `ingest/test_dedupe.py` at line and branch level above the repo's agreed new-code coverage threshold, including the boundary and multi-candidate branches.
+- [ ] lint-format-static-analysis (always-on): `ingest/dedupe.py` and its test-module changes pass the repo's linter/formatter/static-analysis checks with no new warnings.
+- [ ] versioning-conventional-commits (always-on): the commit(s) shipping this change follow the repo's conventional-commits convention.
+
+---
+
+## Comments
+
+No ratified DoD layers in this canon are conditional, so no trigger-fired items apply beyond the four always-on layers above. `performance-spend-budgets` is ruled `N/A | target-absent` in the canon and is correctly omitted from this checklist — Fernglen's DoD canon judged it inapplicable repo-wide, not specific to this story.
+```

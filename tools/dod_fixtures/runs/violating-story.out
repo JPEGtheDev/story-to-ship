@@ -1,0 +1,35 @@
+I am using the user-story-generator skill to create/refine a story for: adding a `normalize_species_code()` helper to Fernglen's ingest pipeline.
+
+**Canon discovery** (repository root treated as `/tmp/tmp.V0TBvY9q81` per instructions): `docs/DOD.md` is present. Read and parsed it before generating, per BEFORE PROCEEDING item 1.
+
+- Structural check: frontmatter present, narrative line, four ruling lines (three `ALWAYS`, one `N/A | category: target-absent`), a `Stamp:` line, and a `Content-hash:` line — all matching one of `DOD_TEMPLATE.md` Section A.3's three closed ruling forms. Parses cleanly, not malformed.
+- Hash check: recomputed SHA-256 over the byte range `DOD_TEMPLATE.md` Section A.4 defines (everything through the newline before the `Content-hash:` line) → `3fd3fd4f6a28d6ec992a3d099f6b5193b38dbde76dbd97cf5e580eceb4b95384`, which matches the canon's stated hash exactly. No `DOD-HASH: MISMATCH`.
+- Staleness check: canon `Stamp: v1` vs. the `defining-done` skill's `DOD_TAXONOMY.md` current `Stamp: v1` — equal, not stale. No `DOD-STALE` line.
+- Ruling set consumed: `bdd-tests: ALWAYS`, `coverage: ALWAYS`, `lint-format-static-analysis: ALWAYS`, `versioning-conventional-commits: ALWAYS`, `performance-spend-budgets: N/A | category: target-absent`.
+
+**BEFORE PROCEEDING (remaining 7 items):** function/component is new work described directly by the requester (no invented capability), goal and value are clear (canonicalizing free-text species entries before save), size = Small (hours, stated), model tier = Standard (stated), format = Story Template (stated), constraints = none beyond the DoD instruction below (stated). All conditions otherwise met.
+
+**Stop — Definition of Done conflict.**
+
+The instruction to leave `coverage` off the Definition of Done section entirely cannot be honored as given. The consumed canon rules `coverage: ALWAYS`. Per the `DoD Canon Consumption` section of this skill, a story may only drop an ALWAYS-ruled layer via a story-level N/A line carrying one of the three closed categories — `target-absent`, `covered-elsewhere`, or `repo-ruled-N/A`. The stated rationale ("the team doesn't think a normalization helper this small needs its own test coverage line called out") is free text with no category tag, which this skill's own Rationalization Prevention table addresses directly: *"This always-on layer obviously doesn't apply here, I'll just drop it" → "Only a category-tagged N/A line (or refusal) can drop an ALWAYS layer — never drop it silently."*
+
+Per the skill's explicit Refusal clause, I refuse to emit the story:
+
+```
+DOD-VIOLATION: coverage
+```
+
+**To proceed**, supply a category-tagged N/A line for `coverage` and I'll regenerate immediately, e.g.:
+
+```
+- coverage: N/A | category: target-absent | pure single-function mapping helper, no branch surface beyond the lookup table
+```
+
+or `covered-elsewhere` / `repo-ruled-N/A` if either fits the team's actual reasoning better. Alternatively, drop the "leave coverage off" instruction and I'll generate the full Story Template with `coverage (always-on)` included as one of four checklist items (alongside `bdd-tests`, `lint-format-static-analysis`, `versioning-conventional-commits`), with `performance-spend-budgets` correctly absent as canon-level N/A.
+
+**Files consulted** (all absolute paths):
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/user-story-generator/SKILL.md`
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/SKILL.md`
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md`
+- `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TEMPLATE.md`
+- `/tmp/tmp.V0TBvY9q81/docs/DOD.md`

@@ -1,0 +1,102 @@
+I am using the user-story-generator skill to create/refine a story for: adding a `normalize_species_code()` helper to the Fernglen ingest pipeline.
+
+## BEFORE PROCEEDING check
+
+1. **Project context loaded** — checked the designated canon-discovery root (`/tmp/tmp.JQoajBH4In`): no README, no `ingest/` tree present there (it holds only `docs/DOD.md`), so project context is taken from the request itself plus the Fernglen framing already present in that repo's DoD fixture (sighting records, field volunteers, species data) — internally consistent, no contradiction found.
+2. **Functionality confirmed to exist as described** — the request describes extending an existing ingest pipeline and an existing canonical species-code list, not inventing new architecture; treated as a reasonable, non-hallucinated ask. Stated as an assumption since the fixture root has no actual `ingest/normalize.py` to inspect.
+3. **Understanding** — clear: a pure mapping helper, free-text species name → canonical species code, called before a sighting record is saved.
+4. **Value** — not stated explicitly by the requester; assumption stated: normalizes volunteer-entered free text so sighting records carry a consistent, queryable species code regardless of how a volunteer typed the name.
+5. **Size** — given: Small (hours).
+6. **Model tier** — given: Standard.
+7. **Format** — given: Story Template.
+8. **Constraints** — given: none.
+
+All 8 conditions met (two carried as stated assumptions per above) → proceeding to generate.
+
+## DoD canon discovery
+
+Checked `docs/DOD.md` under the designated canon root. Found and read:
+
+- Ruling lines present: `bdd-tests: ALWAYS`, `coverage: ALWAYS`, `lint-format-static-analysis: ALWAYS`, `versioning-conventional-commits: ALWAYS`, `performance-spend-budgets: N/A | category: target-absent | ...`
+- `Stamp: v0`; taxonomy's current stamp is `v1` → canon is stale.
+- Recomputed the content-hash over the byte range preceding the `Content-hash:` line (SHA-256): computed `a44ffb954b8775acd3865949099d3c75a83245f1cb6840dba49586e578eb7272`, canon states `6e265fc3ab3eca551755164e85121dd7d4cda23d0bd95623f7df69be566caeb3` → mismatch.
+- Structural check: `Stamp:` line present, all ruling lines match one of the three valid forms, `Content-hash:` line present → **not malformed**. Only 5 of the taxonomy's 20 layers carry a ruling line; the malformed-canon rule is scoped to the three enumerated structural failures (missing/unparseable `Stamp:`, an invalid ruling-line form, missing `Content-hash:`) and does not itself include layer-omission, so this is consumed as a valid (if partial) canon rather than refused.
+
+Emitting the required literal marker lines:
+
+```
+DOD-STALE: canon v0 behind taxonomy v1
+DOD-HASH: MISMATCH
+```
+
+Canon is still consumed (warn-and-consume for both). The Definition of Done section below is derived from the canon's 4 ALWAYS-ruled layers; `performance-spend-budgets` is N/A at canon level and correctly omitted (no line, no stub). None of the 4 ALWAYS layers were dropped — a mapping function with observable input/output behavior genuinely has surface for all four (behavior scenarios, new code paths, a changed file, and a commit), so no story-level N/A line was needed and no `DOD-VIOLATION` applies.
+
+---
+
+**Title:** Add `normalize_species_code()` Helper to the Ingest Pipeline
+
+**Type:** Feature
+**Size:** S
+**Epic/Component:** Ingest Pipeline / Species Normalization
+**Priority:** Medium *(not specified by requester; assumed — data-quality improvement, not blocking)*
+**Depends On:** None
+
+---
+
+## Effort Estimate
+
+**Recommended Model Tier:** Standard
+**Reasoning:** The function is small and pure, but correctly handling free-text variants (case, whitespace, aliases) and no-match cases requires judgment beyond a purely mechanical edit, while involving no architectural or cross-cutting design decisions that would justify Premium.
+
+---
+
+## User Story
+
+**As a** developer maintaining the Fernglen ingest pipeline
+**I want to** add a `normalize_species_code()` helper that maps a free-text species name entered by a field volunteer onto the app's canonical species-code list before a sighting record is saved
+**So that** sighting records always carry a consistent, canonical species code regardless of how a volunteer phrased the species name, keeping downstream species data reliable and queryable
+
+---
+
+## Acceptance Criteria
+
+- [ ] `normalize_species_code(raw_name: str) -> <canonical-code-type>` returns the correct canonical species code for a free-text name that exactly matches (or case/whitespace-insensitively matches) an entry in the canonical species-code list.
+- [ ] A free-text name matching a known alias/synonym for a canonical species (if the canonical list defines aliases) resolves to the correct canonical code.
+- [ ] A free-text name with no match anywhere in the canonical species-code list returns a defined not-found result (e.g. `None`) rather than raising, so the caller decides how to handle an unrecognized entry.
+- [ ] The function is pure: identical `(raw_name, canonical list state)` input always produces identical output, with no I/O and no mutation of the input or the sighting record.
+- [ ] Unit tests cover at least one match case, one no-match case, and one normalization-variant case (case/whitespace/alias).
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- None
+
+**Constraints:**
+- Must remain a pure function — no I/O, no side effects, no direct persistence calls from within `normalize_species_code()` itself.
+
+**Files to Create/Modify:**
+- `ingest/normalize.py` — add `normalize_species_code()`
+
+**Architecture Notes:**
+- Should read the canonical species-code list from wherever the ingest pipeline already sources it, rather than duplicating that list locally.
+- Call site: invoked ahead of the save step for a sighting record, so the record persists the canonical code rather than the raw volunteer-entered text.
+
+---
+
+## Definition of Done
+
+*(derived from docs/DOD.md, ratified v0 — DOD-STALE: canon v0 behind taxonomy v1 — DOD-HASH: MISMATCH)*
+
+- [ ] **bdd-tests** (always-on): Given/When/Then scenario(s) specified and validated for `normalize_species_code()`'s free-text-to-canonical-code mapping behavior (match, alias/variant match, no-match), tying the acceptance criteria above to executable scenarios.
+- [ ] **coverage** (always-on): New lines and branches in `normalize_species_code()` (match path, variant/alias path, no-match path) exercised by the test suite at line and branch level, meeting the repo's coverage threshold for new code.
+- [ ] **lint-format-static-analysis** (always-on): `ingest/normalize.py` passes the repo's linter, formatter, and static-analysis checks with no new warnings.
+- [ ] **versioning-conventional-commits** (always-on): Commit(s) for this change follow the repo's conventional-commit convention.
+
+---
+
+## Comments
+
+- The consumed canon only carries ruling lines for 5 of the taxonomy's 20 layers; the other 15 (including things like coverage-adjacent layers such as mutation testing, or process layers like 2-stage review) have no ruling in this canon and are therefore not represented in this checklist — that reflects the canon's own content, not a decision made here.
+- Per the `user-story-generator` skill's Output Routing rule, an approved story like this is normally filed as a GitHub issue (via Three Amigos Refinement approval) rather than left in scratch form; this response prints the story directly per the task's instruction and does not create an issue.

@@ -20,7 +20,7 @@ group by group to produce a repo's ratified Definition of Done canon.
 | File | Covers |
 |------|--------|
 | `DOD_TAXONOMY.md` | 20 verification layers (Behavior-Driven Development (BDD) tests through Definition of Ready), grouped into 5 coherent groups, each with a canonical kebab-case Key, what-it-verifies text, and example checkable trigger predicates; file-level Stamp v1 and delta re-ratification rule. |
-| `DOD_TEMPLATE.md` | Authoring template for a repo's ratified canon -- `docs/DOD.md` index format (three closed ruling forms, single `Stamp: vN` field, content-hash footer with an unambiguous hash-input definition), optional `docs/dod/<group-slug>/<layer-key>.md` detail-file format (group-slug transform worked for all 5 groups), the write-order rule, and the four consumer marker strings. |
+| `DOD_TEMPLATE.md` | Authoring template for a repo's ratified canon -- `docs/DOD.md` index format (three closed ruling forms, single `Stamp: vN` field), optional `docs/dod/<group-slug>/<layer-key>.md` detail-file format (group-slug transform worked for all 5 groups), the write-order rule, and the three consumer marker strings. |
 
 ---
 

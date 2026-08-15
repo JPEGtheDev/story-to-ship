@@ -79,7 +79,7 @@ Before writing the PR, answer:
    done
    ```
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern.
-   Every hit is fixed or explicitly adjudicated in the PR body before the PR goes up. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
+   A real hit -- a campaign or planning label, repo-internal jargon, an unexpanded acronym, a cross-tree file reference, or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the five defect classes -- may instead be adjudicated in the PR body, named hit-by-hit. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
 
 ---
 

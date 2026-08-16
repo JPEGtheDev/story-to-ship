@@ -9,7 +9,7 @@ description: Use when creating docs, updating guides, writing API references, or
 
 ```
 EVERY DOC IS SMALL, TAGGED, AND LINKED -- ONE CONCEPT PER FILE
-YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom. No exceptions.
+YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom (sole exception: `docs/DOD.md` -- see the defining-done skill's canon template). No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -54,7 +54,7 @@ Required fields: `title`, `description`, `domain`, `subdomain`, `tags`, `related
 - `tags` MUST include domain and subdomain as the first two entries
 - `related` uses relative paths from the file's own directory
 
-Every doc file MUST end with a `## Related` section with at least one annotated link.
+Every doc file MUST end with a `## Related` section with at least one annotated link. Scoped exception: `docs/DOD.md`, the Definition of Done canon index, ends at its `Stamp:` line with nothing after it -- the defining-done skill's canon template states the rationale and owns the exception; detail files under `docs/dod/` keep the requirement.
 
 ### Document Mode vs Thread Mode
 
@@ -81,7 +81,7 @@ Before presenting documentation, verify:
 4. All relative links resolve correctly from the file's directory
 5. Code examples have language tags
 6. No content duplicated from another file -- linked instead
-7. `## Related` section is present at the bottom
+7. `## Related` section is present at the bottom (sole exception: `docs/DOD.md`)
 8. Documentation matches current code state
 9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
 10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
@@ -109,7 +109,7 @@ Before presenting documentation, verify:
 
 - Doc file over 800 tokens -- **STOP. Split at the second concept.**
 - Missing YAML frontmatter -- **STOP. Add the full block before continuing.**
-- Missing `## Related` section -- **STOP. Add at least one annotated link.**
+- Missing `## Related` section -- **STOP. Add at least one annotated link.** (sole exception: `docs/DOD.md` -- see the defining-done skill's canon template)
 - Two files covering the same concept -- **STOP. Delete one; link from the other.**
 - Updating code without checking related docs -- **STOP. Update stale docs first.**
 

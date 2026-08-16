@@ -10,11 +10,12 @@
 # (get the user's explicit consent first; see README.md Section 4). It
 # only does the file-system setup (or prints it, if no worktree is given)
 # and prints the remaining manual steps. Pass --check to also run
-# check-markers.sh against a transcript you already captured. Two
-# scenarios, dirty-canon and malformed-canon, additionally create one
-# baseline commit inside the scratch worktree and then apply a pinned
-# mutation on top of it (or, if no worktree is given, print those
-# commands instead of running them) -- see their case entries below.
+# check-markers.sh against a transcript you already captured. Three
+# scenarios, dirty-canon, dirty-canon-generator, and malformed-canon,
+# additionally create one baseline commit inside the scratch worktree and
+# then apply a pinned mutation on top of it (or, if no worktree is given,
+# print those commands instead of running them) -- see their case
+# entries below.
 #
 # Usage:
 #   run-scenario.sh --list
@@ -26,7 +27,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 CHECK_MARKERS="$SCRIPT_DIR/check-markers.sh"
 
-SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon evidence-missing evidence-complete completion-stale-canon delta-reratification dirty-canon malformed-canon"
+SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon dirty-canon-generator evidence-missing evidence-complete completion-stale-canon delta-reratification dirty-canon malformed-canon"
 
 usage() {
   cat <<'EOF'
@@ -40,6 +41,7 @@ Usage:
   compliant-story         story-generator negative control (story-request-scenarios.md Case B)
   no-canon-fallback       story-generator, no docs/DOD.md present (story-request-scenarios.md Case C)
   story-stale-canon       story-generator, stale document (story-request-scenarios.md Case D)
+  dirty-canon-generator   story-generator, uncommitted canon edit (story-request-scenarios.md Case B; no marker expected -- see below)
   evidence-missing        completion-gate failure (completion-claim-scenarios.md Case A)
   evidence-complete       completion-gate negative control (completion-claim-scenarios.md Case B; forbid-only screen -- see below)
   completion-stale-canon  completion-gate, stale document (completion-claim-scenarios.md Case C)
@@ -52,17 +54,19 @@ Usage:
                     copied to <path>/docs/DOD.md (or, for no-canon-fallback,
                     <path>/docs/DOD.md is removed if present). If omitted,
                     the script prints the cp/rm command instead of running it.
-                    For dirty-canon and malformed-canon, the script
-                    additionally commits the placed document inside <path>
-                    and then applies that scenario's own pinned uncommitted
-                    edit on top of it (or, if --worktree is omitted, prints
-                    those commands instead of running them); dirty-canon
-                    edits an unrelated line, malformed-canon deletes the
-                    terminal Stamp: line. Both refuse to run at all against
-                    <path> when <path> is this repository's own working
-                    copy or a linked worktree of it, since either would
-                    leave a real uncommitted edit in a repo the scenario
-                    does not own.
+                    For dirty-canon, dirty-canon-generator, and
+                    malformed-canon, the script additionally commits the
+                    placed document inside <path> and then applies that
+                    scenario's own pinned uncommitted edit on top of it
+                    (or, if --worktree is omitted, prints those commands
+                    instead of running them); dirty-canon and
+                    dirty-canon-generator each edit an unrelated line in
+                    their own placed document, malformed-canon deletes
+                    the terminal Stamp: line. All three refuse to run at
+                    all against <path> when <path> is this repository's
+                    own working copy or a linked worktree of it, since
+                    any of them would leave a real uncommitted edit in a
+                    repo the scenario does not own.
 
 --check <file>      a transcript file you already captured from dispatching
                     the agent skill. Runs check-markers.sh against it with
@@ -82,6 +86,16 @@ Usage:
                     condition is a transcript read (see README.md
                     Section 3), and its DOD-GATE: FAIL forbid carries the
                     same grounding-driven caveat as evidence-complete's.
+                    dirty-canon-generator's set is likewise three
+                    --forbid literals and no --require -- the
+                    story-generator analogue of dirty-canon's negative
+                    control, necessary but not sufficient; its positive
+                    pass condition is also a transcript read (see
+                    README.md Section 3). Unlike dirty-canon's, none of
+                    its three forbids carries a grounding-driven caveat,
+                    since the story generator has no DOD-GATE: FAIL
+                    marker at all -- any RESULT: FAIL for this scenario
+                    is a straightforward real finding.
                     malformed-canon's set is one --require and three
                     --forbid literals: --require 'DOD-MALFORMED:' (the
                     consumer's refusal marker for an unparseable canon)
@@ -119,6 +133,15 @@ fail() {
 # scenario's own proof function here without touching the shared Step 2b
 # flow below.
 proof_dirty_canon() {
+  local wt="$1" numstat diff_text
+  numstat="$(git -C "$wt" diff --numstat -- docs/DOD.md)"
+  [[ "$numstat" == $'1\t1\tdocs/DOD.md' ]] || fail "induced-state proof failed: expected 'git diff --numstat -- docs/DOD.md' to read exactly '1<TAB>1<TAB>docs/DOD.md', got: $numstat"
+  diff_text="$(git -C "$wt" diff -- docs/DOD.md)"
+  [[ "$diff_text" == *"(edited locally)"* ]] || fail "induced-state proof failed: 'git diff -- docs/DOD.md' does not contain '(edited locally)'"
+  echo "Step 2b: induced-state proof -- numstat: $numstat"
+}
+
+proof_dirty_canon_generator() {
   local wt="$1" numstat diff_text
   numstat="$(git -C "$wt" diff --numstat -- docs/DOD.md)"
   [[ "$numstat" == $'1\t1\tdocs/DOD.md' ]] || fail "induced-state proof failed: expected 'git diff --numstat -- docs/DOD.md' to read exactly '1<TAB>1<TAB>docs/DOD.md', got: $numstat"
@@ -221,6 +244,29 @@ case "$SCENARIO" in
     REQUEST_SOURCE="story-request-scenarios.md, Case D (dispatch either Case A or Case B's request text)"
     CHECK_ARGS=(--require 'DOD-STALE: canon v')
     ;;
+  dirty-canon-generator)
+    DOC_FIXTURE="$SCRIPT_DIR/story-request-canon.md"
+    REQUEST_SOURCE="story-request-scenarios.md, Case B"
+    MUTATE_AFTER_PLACE=1
+    MUTATION_SED='s/wildlife-sighting tracking app/wildlife-sighting tracking app (edited locally)/'
+    MUTATION_DESC="applied an uncommitted local edit to docs/DOD.md"
+    MUTATION_PROOF_FN=proof_dirty_canon_generator
+    # Forbid-only screen (necessary, not sufficient -- see README.md
+    # Section 3): the story-generator analogue of dirty-canon, exercising
+    # the identical warn-and-continue rule on the generator side (Case B
+    # is the generator's own compliant/negative-control request, so no
+    # DOD-VIOLATION: is legitimately expected; the canon's Stamp: v1
+    # matches the taxonomy's current stamp, so no DOD-STALE: canon v is
+    # legitimately expected; the canon is well-formed, so no
+    # DOD-MALFORMED: is legitimately expected). Unlike dirty-canon, none
+    # of these three forbids carries a grounding-driven caveat -- the
+    # story generator has no DOD-GATE: FAIL equivalent, so any forbid
+    # failure here is a straightforward real finding. The scenario's
+    # actual pass condition is still a transcript read for the
+    # uncommitted-edit disclosure (a forbid-only pass does not by itself
+    # prove the generator noticed and disclosed the edit).
+    CHECK_ARGS=(--forbid 'DOD-VIOLATION:' --forbid 'DOD-STALE: canon v' --forbid 'DOD-MALFORMED:')
+    ;;
   evidence-missing)
     DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
     REQUEST_SOURCE="completion-claim-scenarios.md, Case A"
@@ -298,11 +344,12 @@ if [[ "$DOC_IS_VARIANT" -eq 1 ]]; then
 fi
 
 # Guard: any scenario with MUTATE_AFTER_PLACE=1 (currently dirty-canon,
-# malformed-canon) commits to and then mutates docs/DOD.md in whatever
-# worktree it targets, so refuse to run it against this repository's own
-# working copy or a linked worktree of it -- either would leave real,
-# unintended commit and edit state behind in a repo the scenario does not
-# own. This must run before Step 2's cp touches anything. The case
+# dirty-canon-generator, malformed-canon) commits to and then mutates
+# docs/DOD.md in whatever worktree it targets, so refuse to run it
+# against this repository's own working copy or a linked worktree of it
+# -- either would leave real, unintended commit and edit state behind in
+# a repo the scenario does not own. This must run before Step 2's cp
+# touches anything. The case
 # statement above (which sets each scenario's MUTATE_AFTER_PLACE flag and
 # MUTATION_* variables) always runs before this guard, since it appears
 # earlier in the script -- checking the flag directly here, rather than a
@@ -343,11 +390,11 @@ fi
 echo
 
 # Step 2b: for any scenario with MUTATE_AFTER_PLACE=1 (currently
-# dirty-canon, malformed-canon), commit the placed canon as a baseline
-# and then apply that scenario's own pinned uncommitted edit on top of
-# it, so
-# the scenario starts from a real ratified baseline with one deliberate
-# uncommitted mutation -- the same shape the completion-gate consumer's
+# dirty-canon, dirty-canon-generator, malformed-canon), commit the placed
+# canon as a baseline and then apply that scenario's own pinned
+# uncommitted edit on top of it, so the scenario starts from a real
+# ratified baseline with one deliberate uncommitted mutation -- the same
+# shape the completion-gate and story-generator consumers' shared
 # warn-and-continue and malformed-canon-refusal rules are meant to
 # handle. The edit command (MUTATION_SED), its description
 # (MUTATION_DESC), and its proof function (MUTATION_PROOF_FN) are all set

@@ -264,12 +264,15 @@ turns each one's induced edit into a single, scoped, attributable change
 on top of a known baseline, rather than an artifact of the placement
 mechanism shared by every other scenario.
 
-Scope note: dirty-canon fixture-proves the uncommitted-edit rule for the
-completion-gate consumer only. The story generator carries the identical
-warn-and-continue rule for an uncommitted `docs/DOD.md`; the
-dirty-canon-generator scenario above now exercises that fixture side, but
-no captured run against it exists yet -- that is a named follow-up
-candidate, not a proven case.
+Scope note: dirty-canon and dirty-canon-generator both fixture-prove
+the warn-and-continue uncommitted-edit rule now -- dirty-canon for the
+completion-gate consumer, dirty-canon-generator for the story
+generator's uncommitted `docs/DOD.md` case. Both are backed by
+captured runs (`tools/dod_fixtures/runs/dirty-canon.out`,
+`tools/dod_fixtures/runs/dirty-canon-generator.out`) on the
+`agent/dod-scenario-runs` evidence branch, each stating the
+uncommitted edit plainly, in prose, and continuing rather than
+refusing.
 
 **Malformed-canon scenario** (input file: `completion-claim-scenarios.md`
 Case B; DoD document: `completion-claim-canon.md`, committed as a

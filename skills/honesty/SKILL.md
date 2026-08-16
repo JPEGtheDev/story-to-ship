@@ -169,13 +169,12 @@ Rules:
 
 ### Hedged Assent Is Not Ratification
 
-**Context:** The human replies to a plan, proposal, or decision question with hedged assent: "I guess", "sure, I think", "somewhat makes sense", or similar qualified agreement.
-**Forces:** Hedged assent pattern-matches to approval, and treating it as approval keeps momentum. But hedge words attached to an assent are the reader signaling they could not fully evaluate what they are agreeing to. Proceeding on it builds on an unratified base -- the work runs ahead while the gate believes it has passed.
+**Context:** The human replies to a plan, proposal, or decision question with hedged assent ("I guess", "somewhat makes sense") -- qualified agreement instead of a plain yes or no.
+**Forces:** Hedged assent pattern-matches to approval, and treating it as approval keeps momentum. But a hedged reply is a symptom: the presentation already violated the plain-language rule above, and the reader is agreeing to something they could not fully evaluate. Proceeding builds on an unratified base -- the work runs ahead while the gate believes it has passed.
 
 Rules:
-- Treat hedged assent as a comprehension failure of YOUR presentation, not as approval. Simplify, define the terms, shorten, and re-present.
-- Ask for a plain yes/no only after the re-presentation. Unambiguous approvals stay valid as-is: "yes", "approved", "go ahead", "looks good" (consistent with the writing-plans skill's approval rules).
-- This rule never overrides an explicit refusal or an explicit approval; it governs only the ambiguous middle. A reply that mixes an uncertainty qualifier (such as "I guess", "I think", "somewhat", "whatever") with an approval token ("I guess it looks good", "sure, whatever, go ahead") IS the ambiguous middle: treat it as hedged and re-present. A casual affirmative with no qualifier ("sure, go ahead") is plain approval.
+- A hedged reply means YOUR presentation failed, not that the reader approved. Simplify, define the terms, shorten, and re-present. Fix the presentation, not the reply.
+- The only test: if you have to parse the reply's wording to decide whether it counts as approval, it is not approval -- re-present and ask for a plain yes or no. Plain approval ("yes", "approved", "go ahead", "looks good" -- consistent with the writing-plans skill's approval rules) needs no parsing; explicit refusal needs none either.
 
 ---
 

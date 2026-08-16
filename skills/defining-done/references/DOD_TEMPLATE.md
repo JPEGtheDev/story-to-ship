@@ -180,32 +180,43 @@ leaves a live canon with a stale root index (inert, not live).
 ## C. Consumer notes
 
 Downstream consumers (the story generator and the completion gate) MUST quote these
-three literal marker strings verbatim -- this section is the canonical source for all
-three:
+four literal marker strings verbatim -- this section is the canonical source for all
+four:
 
 - `DOD-VIOLATION: <layer>` -- the generator's refusal marker, emitted when a story
   omits an ALWAYS layer with no category-tagged N/A line.
 - `DOD-GATE: FAIL <layer>` -- the completion gate's failure marker, emitted when a
   completion claim lacks evidence for an ALWAYS layer or a CONDITIONAL layer whose
-  trigger fired.
+  trigger fired. The completion gate is also permitted, but not required, to ground
+  cited evidence against the repo under evaluation; when that grounding shows the
+  cited evidence does not hold there, the same marker MAY be emitted -- a
+  grounding-driven failure is a legitimate gate outcome, not a defect in the gate or
+  the claim-checking process.
 - `DOD-STALE: canon v<N> behind taxonomy v<M>` -- emitted by either consumer when the
   canon's `Stamp: vN` is older than `DOD_TAXONOMY.md`'s current stamp. The canon is
   STILL consumed: staleness is a currency warning, not a refusal trigger. Never
   silently consume a stale canon as if it were current.
+- `DOD-MALFORMED: <reason>` -- emitted by either consumer when `docs/DOD.md` exists
+  but its structure cannot be parsed (a missing or unparseable `Stamp:` line, or a
+  ruling line matching none of the three forms in Section A.3). The refusal states
+  exactly what failed to parse: `<reason>` carries that one-line diagnostic on the
+  marker line itself; fuller prose MAY follow.
 
 **Emission format:** a marker is emitted as a bare line -- the line begins with the
 marker string itself, with no surrounding formatting: no backticks, no list markers,
 no quotation marks, no leading whitespace. The markers appear in backticks above only
 because this section is prose describing them; emitted output carries none.
 
-One additional non-marker rule applies to every consumer:
+One additional rule, behind the `DOD-MALFORMED` marker above, applies to every
+consumer:
 
 - **Malformed-canon rule:** if `docs/DOD.md` exists but its structure cannot be
   parsed (a missing or unparseable `Stamp:` line, or a ruling line matching none of
-  the three forms in Section A.3), consumers MUST refuse with a diagnostic
-  naming what failed to parse. Never silently fall back to the canon-less default as
-  if no canon existed at all -- "present but unreadable" and "absent"
-  are different states and MUST produce different, observable behavior.
+  the three forms in Section A.3), consumers MUST refuse, emit the literal line
+  `DOD-MALFORMED: <reason>` naming what failed to parse, and state that diagnostic
+  in the refusal. Never silently fall back to the canon-less default as if no canon
+  existed at all -- "present but unreadable" and "absent" are different states and
+  MUST produce different, observable behavior.
 
 ---
 

@@ -142,15 +142,23 @@ verification-before-completion skill's Definition of Done gate check
 ("break the property, run the gate, paste the named failing case, then
 restore the property"). `visual-regression` is the document's only other
 layer and is ruled not-applicable (`target-absent`), so it needs no
-evidence line. No layer is missing or generic; the gate must not fire,
-and no marker is emitted.
+evidence line. No layer is missing or generic under the standard this
+gate check applies to evidence completeness; on that basis alone the gate
+must not fire and no marker is emitted. A consumer that additionally
+grounds cited evidence against the repo under evaluation may still
+legitimately emit `DOD-GATE: FAIL` here, since this claim cites fictional
+paths (`tools/ingest/dedupe.py` and its test module) that are absent from
+this repo -- see README.md Section 3's completion-gate scenarios entry
+for the two-tier read that distinguishes that grounding-driven case from
+a real evidence-completeness failure.
 
 All evidence above is plausible fake fixture content (fabricated command
 output for a fictional function on a fictional app), not a real test run
 -- it exists solely to give the gate check a structurally complete
 artifact to evaluate.
 
-**Expected marker check**:
+**Expected marker check** (a first-pass screen only -- see README.md
+Section 3 for the two-tier read if it fails):
 ```
 tools/dod_fixtures/check-markers.sh <evidence-complete-output> --forbid 'DOD-GATE: FAIL'
 ```
@@ -225,8 +233,11 @@ The same run against the materialized variant also carries whichever
 alone -- Case A's evidence-missing claim still fails the gate on
 `mutation-testing` (`DOD-GATE: FAIL mutation-testing`) even when run
 against this stale document, and Case B's evidence-complete claim still
-produces no `DOD-GATE:` marker. Staleness is an additive warning on top
-of the existing per-layer evidence check, not a substitute for it.
+produces no `DOD-GATE:` marker on evidence-completeness grounds alone --
+though the same grounding-driven caveat from Case B above applies if a
+consumer additionally grounds the cited evidence. Staleness is an
+additive warning on top of the existing per-layer evidence check, not a
+substitute for it.
 
 ## Related
 

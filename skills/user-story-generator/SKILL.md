@@ -114,9 +114,12 @@ canon was found at docs/DOD.md during BEFORE PROCEEDING item 1.
   check does not apply and continue.
 
 **Canon present but malformed** (structurally unparseable per the `defining-done`
-skill's malformed-canon rule): refuse to generate the story. State exactly what
-failed to parse. Never silently fall back to the generic template as if no canon
-existed -- "present but unreadable" is not "absent".
+skill's malformed-canon rule): refuse to generate the story and emit the literal line
+`DOD-MALFORMED: <reason>`, where `<reason>` names exactly what failed to parse. Emit
+the marker as a bare line: the line begins with the marker string itself, with no
+surrounding formatting (no backticks, no list markers, no quotation marks). State
+exactly what failed to parse. Never silently fall back to the generic template as if
+no canon existed -- "present but unreadable" is not "absent".
 
 **Canon absent:** generate the Definition of Done section from the generic template
 and state in the generated story that no ratified canon exists and the Definition of

@@ -96,7 +96,9 @@ completion-gate scenarios entry below for the two-tier read that resolves
 it), and dirty-canon (a forbid-only negative control on all three
 markers, paired with a transcript read for the plain-statement-and-continue
 behavior itself, with the same grounding-driven caveat applying to its
-`DOD-GATE: FAIL` forbid specifically):
+`DOD-GATE: FAIL` forbid specifically); malformed-canon's entry below
+carries its own lighter confirmation-read note, not a second-tier pass
+condition:
 
 **Story-generator scenarios** (input file: `story-request-scenarios.md`,
 DoD document: `story-request-canon.md`):
@@ -211,11 +213,12 @@ wording rather than any fixed required phrase or marker).
 Placing a fixture document at `docs/DOD.md` (every scenario above except
 no-canon-fallback) leaves the scratch worktree dirty relative to whatever
 it had committed before the run -- that is simply what `cp`'ing a fixture
-document does. Dirty-canon is the only scenario that commits the placed
-document as a baseline first and only then edits it locally; that commit
-step is what turns its induced edit into a single, scoped, attributable
-change on top of a known baseline, rather than an artifact of the
-placement mechanism shared by every other scenario.
+document does. Dirty-canon and malformed-canon are the only scenarios
+that commit the placed document as a baseline first and only then apply
+a local mutation; that commit step is what turns each one's induced
+edit into a single, scoped, attributable change on top of a known
+baseline, rather than an artifact of the placement mechanism shared by
+every other scenario.
 
 Scope note: dirty-canon fixture-proves the uncommitted-edit rule for the
 completion-gate consumer only. The story generator carries the identical

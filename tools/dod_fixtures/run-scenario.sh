@@ -28,11 +28,6 @@ CHECK_MARKERS="$SCRIPT_DIR/check-markers.sh"
 
 SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon evidence-missing evidence-complete completion-stale-canon delta-reratification dirty-canon malformed-canon"
 
-# Scenarios that place a committed baseline canon and then apply an
-# uncommitted, pinned mutation on top of it (see Step 2b below and each
-# scenario's MUTATION_* case-arm assignment).
-MUTATING_SCENARIOS="dirty-canon malformed-canon"
-
 usage() {
   cat <<'EOF'
 Usage:
@@ -114,17 +109,6 @@ list_scenarios() {
 fail() {
   echo "run-scenario.sh: $*" >&2
   exit 2
-}
-
-# is_mutating_scenario NAME -- true (exit 0) if NAME is in
-# MUTATING_SCENARIOS (set above), false otherwise. Used by the scratch
-# guard and by Step 2b below.
-is_mutating_scenario() {
-  local s
-  for s in $MUTATING_SCENARIOS; do
-    [[ "$s" == "$1" ]] && return 0
-  done
-  return 1
 }
 
 # Step 2b proof functions -- one per mutating scenario, each asserting on
@@ -313,16 +297,18 @@ if [[ "$DOC_IS_VARIANT" -eq 1 ]]; then
   DOC_FIXTURE="$MATERIALIZED"
 fi
 
-# Guard: the mutating scenarios (dirty-canon, malformed-canon; see
-# MUTATING_SCENARIOS above) each commit to and then mutate docs/DOD.md in
-# whatever worktree they target, so refuse to run any of them against
-# this repository's own working copy or a linked worktree of it -- either
-# would leave real, unintended commit and edit state behind in a repo the
-# scenario does not own. This must run before Step 2's cp touches
-# anything. The case statement above (which sets each scenario's
-# MUTATE_AFTER_PLACE flag and MUTATION_* variables) always runs before
-# this guard, since it appears earlier in the script.
-if is_mutating_scenario "$SCENARIO" && [[ -n "$WORKTREE" ]]; then
+# Guard: any scenario with MUTATE_AFTER_PLACE=1 (currently dirty-canon,
+# malformed-canon) commits to and then mutates docs/DOD.md in whatever
+# worktree it targets, so refuse to run it against this repository's own
+# working copy or a linked worktree of it -- either would leave real,
+# unintended commit and edit state behind in a repo the scenario does not
+# own. This must run before Step 2's cp touches anything. The case
+# statement above (which sets each scenario's MUTATE_AFTER_PLACE flag and
+# MUTATION_* variables) always runs before this guard, since it appears
+# earlier in the script -- checking the flag directly here, rather than a
+# separate name list, means a future mutating scenario cannot forget to
+# arm the guard: the same case arm that defines the mutation also arms it.
+if [[ "$MUTATE_AFTER_PLACE" -eq 1 && -n "$WORKTREE" ]]; then
   [[ -d "$WORKTREE" ]] || fail "--worktree path does not exist: $WORKTREE"
   TARGET_GIT_COMMON_DIR="$(git -C "$WORKTREE" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   SELF_GIT_COMMON_DIR="$(git -C "$SCRIPT_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
@@ -356,9 +342,10 @@ else
 fi
 echo
 
-# Step 2b: for a mutating scenario (dirty-canon, malformed-canon; see
-# MUTATING_SCENARIOS above), commit the placed canon as a baseline and
-# then apply that scenario's own pinned uncommitted edit on top of it, so
+# Step 2b: for any scenario with MUTATE_AFTER_PLACE=1 (currently
+# dirty-canon, malformed-canon), commit the placed canon as a baseline
+# and then apply that scenario's own pinned uncommitted edit on top of
+# it, so
 # the scenario starts from a real ratified baseline with one deliberate
 # uncommitted mutation -- the same shape the completion-gate consumer's
 # warn-and-continue and malformed-canon-refusal rules are meant to

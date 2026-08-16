@@ -187,7 +187,11 @@ three:
   omits an ALWAYS layer with no category-tagged N/A line.
 - `DOD-GATE: FAIL <layer>` -- the completion gate's failure marker, emitted when a
   completion claim lacks evidence for an ALWAYS layer or a CONDITIONAL layer whose
-  trigger fired.
+  trigger fired. The completion gate is also permitted, but not required, to ground
+  cited evidence against the repo under evaluation; when that grounding shows the
+  cited evidence does not hold there, the same marker MAY be emitted -- a
+  grounding-driven failure is a legitimate gate outcome, not a defect in the gate or
+  the claim-checking process.
 - `DOD-STALE: canon v<N> behind taxonomy v<M>` -- emitted by either consumer when the
   canon's `Stamp: vN` is older than `DOD_TAXONOMY.md`'s current stamp. The canon is
   STILL consumed: staleness is a currency warning, not a refusal trigger. Never

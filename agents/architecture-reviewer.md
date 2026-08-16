@@ -141,3 +141,13 @@ tension-or-uncertain-adjudication bullet (any principle -- that bullet supersede
 per-principle classification rules), and `-` for everything else. Any open finding that is
 not marked `judgment call` means `VERDICT: REQUEST CHANGES`. A file with only Notes (the
 YAGNI exception) or only `judgment call` findings may still be `APPROVE`.
+
+## Reasoning Register
+
+Keep reasoning terse: fact, options, decision, next action. One line per
+mechanical step; a paragraph only at a genuine fork. Delete any reasoning
+sentence that neither changes the next action nor records a fact needed later
+-- performative prose (coined frameworks, "crucially", "it is worth noting") is
+the class, broader than these examples. Never skip a required check, hypothesis
+statement, or tripwire question to save tokens: those sentences are the work.
+This governs reasoning only, never the deliverable text.

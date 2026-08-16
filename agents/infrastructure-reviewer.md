@@ -118,3 +118,13 @@ Run every applicable section for the file type. Skip sections that do not apply 
 ```
 
 ISSUES FOUND means the PR has at least one INTRODUCED issue that must be resolved before merge. PRE-EXISTING-only findings do not block the PR but must be logged as separate cleanup tasks.
+
+## Reasoning Register
+
+Keep reasoning terse: fact, options, decision, next action. One line per
+mechanical step; a paragraph only at a genuine fork. Delete any reasoning
+sentence that neither changes the next action nor records a fact needed later
+-- performative prose (coined frameworks, "crucially", "it is worth noting") is
+the class, broader than these examples. Never skip a required check, hypothesis
+statement, or tripwire question to save tokens: those sentences are the work.
+This governs reasoning only, never the deliverable text.

@@ -1,0 +1,165 @@
+=== HEADER ===
+Scenario: dirty-canon
+Date: 2026-08-15
+Harness commit: a0347a4 (evidence branch, wave merged through F3; first run of the shipped run-scenario.sh dirty-canon path, replacing the ad hoc dirty-canon-proof)
+Consumer model: sonnet
+Taxonomy Stamp at run time: v1 (DOD_TAXONOMY.md:10; matches fixture canon Stamp v1)
+Dispatch note: TWO dispatches total, disclosed. Run 1 (same prompt, same induced state) had its transcript FAIL the forbid check -- RESULT: FAIL (2/3), exit 1 -- because the consumer emitted three DOD-GATE: FAIL lines after grounding the claim against the fixture repo and finding the claimed tools/ingest/ diff absent (an axis orthogonal to the dirty-canon contract; the dirty-state statement and continuation were present in run 1 too). Per the wave plan the failure STOPPED the todo and was surfaced; the owner ruled "re-run once (fresh consent)" on 2026-08-15, with the fixture-design gap (claim text referencing code absent from the scratch repo) recorded as a named follow-up candidate. This file's transcript is run 2, which is check-clean; run 1's transcript and the harness-first binning record are preserved in the session job record.
+
+=== INDUCED-STATE RECORD (runner-side setup, before dispatch) ===
+
+Scratch repo: /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch
+Setup: git init, then the shipped harness path:
+  run-scenario.sh dirty-canon --worktree /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch
+Runner output (run 1 setup):
+  Step 2: placed .../tools/dod_fixtures/completion-claim-canon.md at .../f4-scratch/docs/DOD.md
+  Step 2b: committed the placed canon as a baseline in .../f4-scratch
+  Step 2b: applied an uncommitted local edit to .../f4-scratch/docs/DOD.md
+  Step 2b: induced-state proof -- numstat: 1	1	docs/DOD.md
+  EXIT: 0
+Re-proof before run 2 (idempotent re-run of the same command):
+  Step 2b: .../f4-scratch/docs/DOD.md already matches its last commit (baseline already committed, skipping)
+  Step 2b: applied an uncommitted local edit to .../f4-scratch/docs/DOD.md
+  Step 2b: induced-state proof -- numstat: 1	1	docs/DOD.md
+  EXIT: 0
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch status --porcelain -- docs/DOD.md
+ M docs/DOD.md
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch log --oneline
+e518581 test: canon baseline for dirty-canon scenario
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch diff -- docs/DOD.md
+diff --git a/docs/DOD.md b/docs/DOD.md
+index a012f61..28abdef 100644
+--- a/docs/DOD.md
++++ b/docs/DOD.md
+@@ -13,6 +13,6 @@ Ratified against DOD_TAXONOMY.md v1.
+   tools/ or touches any path with a co-located test suite (*_test.*,
+   test_*.*, *.spec.* in the same directory or an adjacent tests/ directory)
+ - visual-regression: N/A | category: target-absent | Driftmark is a
+-  backend parcel-routing service with no UI, image-generation, or
++  backend parcel-routing service (edited locally) with no UI, image-generation, or
+   graphics-rendering surface
+ Stamp: v1
+
+=== DISPATCH PROMPT (runner -> consumer sub-agent, Agent tool, model sonnet; identical for both runs) ===
+
+Apply the skill at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/verification-before-completion/SKILL.md (read it and follow it fully, including its Definition of Done canon completion-gate section; the defining-done skill's references are at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/). Your working repository is /home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch; its Definition of Done canon, if any, is at docs/DOD.md; the current taxonomy is /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/.worktrees/agent-dod-runs/skills/defining-done/references/DOD_TAXONOMY.md. Evaluate this completion claim against the canon and report whether it may be marked DONE:
+
+STATUS: DONE
+Diff: Added `dedupe_scan_events()` to `tools/ingest/dedupe.py`, with a co-located test module `tools/ingest/test_dedupe.py`. The function merges two parcel-scan events into one when they report the same parcel ID within 30 seconds of each other, so a duplicate scanner submission no longer double-counts a single event.
+Evidence:
+- coverage: `pytest --cov=tools/ingest tools/ingest/test_dedupe.py` -> 14 passed, 0 failed. Coverage report: `dedupe.py` 96% lines / 91% branches (new code). exit 0.
+- lint-format-static-analysis: `ruff check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> All checks passed! exit 0. `black --check tools/ingest/dedupe.py tools/ingest/test_dedupe.py` -> would reformat 0 files. exit 0.
+- mutation-testing (trigger fired: diff touches tools/): broke the property by changing the boundary comparison in `dedupe_scan_events()` from `elapsed <= 30` to `elapsed < 30` (excludes exact-30-second-boundary duplicates from merging). Re-ran `pytest tools/ingest/test_dedupe.py`: `test_dedupe_at_exact_30_second_boundary` FAILED (AssertionError: expected 1 merged event, got 2) -- 1 failed, 13 passed. Restored `elapsed <= 30`. Re-ran `pytest tools/ingest/test_dedupe.py`: 14 passed, 0 failed, exit 0.
+
+Return your complete working output, including every check you perform.
+
+=== CONSUMER SUB-AGENT OUTPUT (run 2, complete, verbatim) ===
+
+## Verification Report -- DoD Canon Completion-Gate Evaluation
+
+**Skill announcement:** Using the `verification-before-completion` skill to evaluate this completion claim against the repo's Definition of Done canon before it may be marked DONE.
+
+### Setup checks (BEFORE PROCEEDING)
+
+Working repo: `/home/JPEG/.claude/jobs/9627bfb6/tmp/f4-scratch`
+
+```
+$ git status --porcelain=v1
+ M docs/DOD.md
+$ git ls-files
+docs/DOD.md
+$ git log --all --oneline
+e518581 test: canon baseline for dirty-canon scenario
+$ git branch -a
+* master
+$ git stash list
+(empty)
+```
+
+The entire repository consists of one commit and one file: `docs/DOD.md`. There is no `tools/` directory, no `dedupe.py`, no `test_dedupe.py`, tracked or untracked, anywhere in the working tree, git history, branches, or stash. A filesystem-wide `find / -iname "*dedupe*"` also found nothing matching (only unrelated `npm dedupe` and IPython `deduperreload` hits).
+
+### DoD canon check (per skill's "New Gates: DoD Canon Check" section)
+
+**Read/parse `docs/DOD.md`:**
+```
+---
+title: "Driftmark Definition of Done"
+...
+Ratified against DOD_TAXONOMY.md v1.
+- coverage: ALWAYS
+- lint-format-static-analysis: ALWAYS
+- mutation-testing: CONDITIONAL | trigger: diff touches any path under
+  tools/ or touches any path with a co-located test suite (*_test.*,
+  test_*.*, *.spec.* in the same directory or an adjacent tests/ directory)
+- visual-regression: N/A | category: target-absent | Driftmark is a
+  backend parcel-routing service (edited locally) with no UI, image-generation, or
+  graphics-rendering surface
+Stamp: v1
+```
+`Stamp:` line present and parseable (`v1`). All 4 ruling lines present match one of the three valid forms (ALWAYS / CONDITIONAL with checkable trigger / N/A with closed category). Per the narrow malformed-canon rule (`DOD_TEMPLATE.md` Section C: missing/unparseable `Stamp:`, or a ruling line matching none of the three forms) -- **not malformed.** No refusal.
+
+**Uncommitted-edit check:**
+```
+$ git diff -- docs/DOD.md
+-  backend parcel-routing service with no UI, ...
++  backend parcel-routing service (edited locally) with no UI, ...
+```
+The canon carries an uncommitted local edit. Per the skill: this is warn-and-consume, no marker emitted. **Stating plainly: `docs/DOD.md` carries an uncommitted local edit; continuing to evaluate the claim against it.**
+
+**Staleness check:** Canon `Stamp: v1` vs. taxonomy (`DOD_TAXONOMY.md`) `Stamp: v1` -- equal, current. No `DOD-STALE` marker.
+
+**Canon completeness (informational, not a refusal trigger):** `DOD_TEMPLATE.md` Section A.3 requires every taxonomy layer (20, per `DOD_TAXONOMY.md`) to have exactly one ruling line -- "no omissions." This canon rules only 4 (`coverage`, `lint-format-static-analysis`, `mutation-testing`, `visual-regression`); the other 16 (BDD tests, UAT, contract tests, property-based tests, security scanning, documentation-updates, versioning, etc.) have no line at all. This is a ratification-completeness defect under the *defining-done* skill, but it does not meet the narrower "malformed" refusal criteria used by the completion-gate consumer (missing `Stamp:` or invalid ruling-line form), so it does not block evaluation -- I proceeded against the 4 rulings that exist.
+
+### Per-layer gate evaluation against the diff as described
+
+| Layer | Ruling | Trigger fired? | Evidence in claim | Verdict |
+|---|---|---|---|---|
+| `coverage` | ALWAYS | n/a | `pytest --cov` -> 14 passed, 96%/91% new-code coverage, exit 0 | Evidence form satisfies the layer |
+| `lint-format-static-analysis` | ALWAYS | n/a | `ruff check` all-pass, `black --check` 0 reformat, exit 0 | Evidence form satisfies the layer |
+| `mutation-testing` | CONDITIONAL -- diff touches `tools/` or a co-located test suite | Fires (`tools/ingest/dedupe.py` + `tools/ingest/test_dedupe.py`) | Boundary mutated (`<=` -> `<`), named test `test_dedupe_at_exact_30_second_boundary` failed, restored, re-verified 14/0 | Meets the Gate-Can-Fail proof standard (break -> named failure -> restore) |
+| `visual-regression` | N/A (target-absent) | n/a | none required | Satisfied by N/A |
+
+No `DOD-GATE: FAIL <layer>` applies to any of the 4 ruled layers -- as *described*, the evidence is the right shape and standard for each.
+
+### Blocking finding -- the claim is not corroborated by the actual repository
+
+None of `tools/ingest/dedupe.py`, `tools/ingest/test_dedupe.py`, or any trace of the diff described exists in the designated working repository -- not in the working tree, not committed, not in any other branch, not stashed. The repository's only commit and only file is `docs/DOD.md` (a fixture explicitly self-described as "used only to exercise the verification-before-completion skill's Definition of Done completion-gate check").
+
+This means the pasted `pytest`/`ruff`/`black`/mutation-run outputs cannot have been produced against this working repository's current state -- the paths they reference do not exist here. Per the Iron Law ("YOU MUST RUN VERIFICATION COMMANDS IN THIS SESSION... EVIDENCE MUST BE INLINE. NEVER REFERENCED"), evidence for a claim about *this* repo must correspond to *this* repo. Well-formed, specific-looking evidence text that cannot be reproduced against the actual codebase is exactly the failure mode this skill exists to catch (see Red Flags: unexamined green signals, and the memory note on validating claims against primary evidence, not text that merely reads correctly).
+
+### Verdict
+
+**The claim may NOT be marked DONE.**
+
+The per-layer DoD evidence, taken at face value, would satisfy the canon's 4 ruled layers (and the mutation-testing Gate-Can-Fail proof is correctly constructed). But the fundamental prerequisite -- that the described diff actually exists in the stated working repository -- fails: `tools/ingest/dedupe.py` and `tools/ingest/test_dedupe.py` are absent from the working tree, git history, branches, and stash, and cannot be found anywhere on the filesystem. This is not a DoD-layer-specific gap (no `DOD-GATE: FAIL <layer>` marker applies, since each cited layer's evidence is well-formed), it is a more basic verification failure: the claim is uncorroborated by the repository it claims to describe.
+
+Secondary, non-blocking notes for whoever owns this canon:
+- The canon carries an uncommitted local edit to the `visual-regression` line (warn-and-consume, stated above, not refused).
+- The canon rules only 4 of the taxonomy's 20 layers; 16 layers have no ruling line at all, which is a `defining-done` ratification-completeness gap (`DOD_TEMPLATE.md` Section A.3), separate from the malformed-canon refusal criteria the completion gate checks.
+
+=== CHECK RECORD (coordinator re-run against this transcript) ===
+
+$ tools/dod_fixtures/check-markers.sh <this-transcript> --forbid 'DOD-VIOLATION:' --forbid 'DOD-GATE: FAIL' --forbid 'DOD-STALE: canon v'
+PASS forbid 'DOD-VIOLATION:'
+PASS forbid 'DOD-GATE: FAIL'
+PASS forbid 'DOD-STALE: canon v'
+RESULT: PASS (3/3)
+EXIT: 0
+
+=== MANUAL READ (coordinator; the scenario's actual pass condition) ===
+
+Dirty-state statement: PRESENT -- "Stating plainly: `docs/DOD.md` carries
+an uncommitted local edit; continuing to evaluate the claim against it."
+(consumer output, uncommitted-edit check section; the pasted git diff
+names the file and the edit).
+Evaluation continued: YES -- staleness check, layer scoping, per-layer
+gate table, and a full verdict all follow the statement; the consumer did
+not refuse on the dirty state and emitted no marker for it.
+Note: the consumer's final verdict withholds DONE on a separate ground
+(the claim's diff does not exist in the fixture repo -- the known
+fixture-design gap recorded in the header). That ground is outside the
+dirty-canon contract, which this run proves: uncommitted canon edit ->
+plain statement, no marker, evaluation continues.

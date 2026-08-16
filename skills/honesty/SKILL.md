@@ -175,7 +175,7 @@ Rules:
 Rules:
 - Treat hedged assent as a comprehension failure of YOUR presentation, not as approval. Simplify, define the terms, shorten, and re-present.
 - Ask for a plain yes/no only after the re-presentation. Unambiguous approvals stay valid as-is: "yes", "approved", "go ahead", "looks good" (consistent with the writing-plans skill's approval rules).
-- This rule never overrides an explicit refusal or an explicit approval; it governs only the ambiguous middle.
+- This rule never overrides an explicit refusal or an explicit approval; it governs only the ambiguous middle. A reply that mixes hedge words with an approval token ("I guess it looks good", "sure, whatever, go ahead") IS the ambiguous middle: treat it as hedged and re-present.
 
 ---
 

@@ -42,15 +42,18 @@ be written this way, the reasoning is at a genuine fork and earns its paragraph.
 
 ## Enforcement and measurement
 
-- No gate inspects reasoning before it is generated. Checkable surfaces: the
-  postmortem reviewer's register-sampling audit row (samples reasoning SHAPE --
-  essay-structure, not banned-token grep: the class is broader than any token
-  list) and the dispatched-agent token trend.
-- Pre-rule baseline, for trend comparison: a 16-dispatch sample of
-  harness-reported per-dispatch token totals (prompt + completion, NOT
-  billing-grade) from the change that introduced this rule: mean ~64,000,
-  range ~40,000-90,000. Compare future samples via the same harness counter
-  only.
+- Self-check at generation time (SKILL.md's Red Flags entry) is the enforcement
+  mechanism, not a downstream gate -- no automated detector inspects reasoning
+  before it is sent. Checkable surfaces: the postmortem reviewer's
+  register-sampling audit row (samples reasoning SHAPE -- essay-structure, not
+  banned-token grep: the class is broader than any token list) and the
+  dispatched-agent token trend.
+- Pre-rule baseline, for trend comparison -- 16 harness-reported per-dispatch
+  token totals (prompt + completion, NOT billing-grade), recorded during the
+  development of the change that introduced this rule; the sample is this list,
+  mean ~64,000: 40264, 43706, 49388, 51960, 52499, 58225, 59105, 62458, 63470,
+  64911, 66837, 78409, 79192, 81650, 81738, 90244. Compare future samples via
+  the same harness counter only.
 - The per-template block adds ~110 tokens per dispatch; break-even is under a
   2% reasoning reduction on a typical dispatch.
 

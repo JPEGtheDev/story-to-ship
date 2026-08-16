@@ -64,7 +64,7 @@ The valid verdict values for `{{CEREMONY}}` are defined in `three-amigos/referen
 
 Every finding MUST cite the exact source and line/section. A finding without evidence is a guess.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

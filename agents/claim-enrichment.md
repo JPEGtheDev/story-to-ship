@@ -92,7 +92,7 @@ No unsourced claims found. Article passed through unchanged.
 Enriched article written to: [TEMP_PATH]
 ```
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

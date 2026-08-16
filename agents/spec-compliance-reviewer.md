@@ -106,7 +106,7 @@ If GAPS: list all gaps explicitly. Implementer must fix every gap before Stage 2
 If PASS: all requirements found and verified. Stage 2 (code quality) review may proceed.
 ```
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

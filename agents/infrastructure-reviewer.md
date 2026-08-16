@@ -119,7 +119,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 ISSUES FOUND means the PR has at least one INTRODUCED issue that must be resolved before merge. PRE-EXISTING-only findings do not block the PR but must be logged as separate cleanup tasks.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

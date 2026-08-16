@@ -63,7 +63,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 {{REVIEW_INSTRUCTIONS}}
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

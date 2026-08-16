@@ -179,13 +179,13 @@ Rules:
 ### Keep Reasoning Terse
 
 **Context:** All internal reasoning -- thinking blocks, scratch analysis, connective prose between tool calls. Reasoning only, never the deliverable text.
-**Forces:** Elaborate reasoning FEELS like rigor while adding none, but some reflective sentences ARE the work (required checks, hypothesis statements, tripwire questions). Cut the performance, keep the checks. Rationale, worked example, and measurement plan: `references/REASONING_REGISTER.md`.
+**Forces:** Elaborate reasoning FEELS like rigor while adding none, but some reflective sentences ARE the work (required checks, hypothesis statements, tripwire questions). Rationale, worked example, and measurement plan: `references/REASONING_REGISTER.md`.
 
 Rules:
 - State fact, options, decision, next action. One line for a mechanical step; a paragraph only at a genuine fork, and it weighs the choice.
 - Delete any reasoning sentence that neither changes the next action nor records a fact needed later. The class is performative prose -- broader than any listed example.
 - This rule never licenses skipping a required check, hypothesis statement, Intent line, or tripwire question: those sentences change the next action and are always earned.
-- Advisory until measured (the writing-skills Jargon Rule precedent): no gate inspects reasoning before it is generated; checkable surfaces are the postmortem reviewer's register-sampling row and the token trend against the recorded baseline.
+- Self-check at generation time (the Red Flags entry below) is the enforcement mechanism, not a downstream gate -- no automated detector inspects reasoning before it is sent. Checkable surfaces: the postmortem reviewer's register-sampling row and the token trend against the recorded baseline; promotion to a blocking check follows the writing-skills Jargon Rule precedent.
 
 | Forbidden in reasoning | Replace with |
 |------------------------|--------------|

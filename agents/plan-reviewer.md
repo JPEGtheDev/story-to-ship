@@ -123,7 +123,7 @@ If REQUEST CHANGES: list, in priority order, exactly which findings must be reso
 implementation begins.
 ```
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

@@ -42,7 +42,7 @@ Structure your reply in exactly this order:
 
 2. **The method summary.** Immediately after the echo block, produce the summary in the exact output format defined by the method instructions above.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

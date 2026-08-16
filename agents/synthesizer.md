@@ -112,7 +112,7 @@ If `{{OUTPUT_PATH}}` is `ASK_USER`: do not attempt to write the final file. Repo
 - A bad Notable Passages section contains quotes that are slightly longer, slightly reworded, or editorially smoothed relative to the extractive output. This is fabrication, even if the meaning is similar.
 - If you cannot find a passage in the extractive summary, do not include it. Use only what the extractive agent actually selected.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

@@ -107,7 +107,7 @@ Shipped-file hygiene: [list file:line hits, or NONE]
 
 Do NOT comment on style issues already handled by clang-format. Only flag things clang-format cannot catch.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

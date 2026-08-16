@@ -142,7 +142,7 @@ per-principle classification rules), and `-` for everything else. Any open findi
 not marked `judgment call` means `VERDICT: REQUEST CHANGES`. A file with only Notes (the
 YAGNI exception) or only `judgment call` findings may still be `APPROVE`.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

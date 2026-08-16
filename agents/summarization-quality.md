@@ -102,7 +102,7 @@ Unresolved issues: [list]
 3. Do not add new content during revision. Return only a list of corrections for the synthesizer to apply.
 4. Always write to `{{OUTPUT_PATH}}` at the end of the process -- either clean or with warnings.
 
-## Reasoning Register
+## Keep Reasoning Terse
 
 Keep reasoning terse: fact, options, decision, next action. One line per
 mechanical step; a paragraph only at a genuine fork. Delete any reasoning

@@ -155,6 +155,27 @@ Rules:
 - Do not apologize, do not hedge, do not revert or offer to revert unless asked.
 - If re-examining the rationale shows it was wrong, say so plainly and propose the fix. That is a correction, not a concession.
 
+### Plain Language for the Human Reader
+
+**Context:** Any text addressed to the human -- chat updates, plan presentations, decision questions, PR bodies, issue comments -- from the main agent or any dispatched agent.
+**Forces:** Long-running projects breed internal vocabulary: coined terms, todo IDs, decision labels. To the author this vocabulary is shared knowledge; to the reader -- including an expert reader -- it is opaque. Opaque updates still "somewhat make sense," so the reader assents without full understanding, and the human review gate silently stops gating. No error fires at send time when the reader cannot tell what was decided.
+
+Rules:
+- Define every project-internal term in one plain clause at its first use in each conversation (e.g. "spillDir -- the folder oversized outputs are saved into"). General engineering vocabulary needs no definition; anything coined in this repo or this session does.
+- Lead with decisions, not research: the first sentences of any update state what was decided or what changed, in plain sentences. Evidence and process follow for readers who want them.
+- Never use an internal label (todo ID, finding number, plan revision) as the only name for a thing in user-facing text. Call the thing what it is; the label is at most a parenthetical.
+- Self-test before sending: could a reader who never opened the plan file or the skill files act on this text? If not, rewrite it before sending.
+
+### Hedged Assent Is Not Ratification
+
+**Context:** The human replies to a plan, proposal, or decision question with hedged assent: "I guess", "sure, I think", "somewhat makes sense", or similar qualified agreement.
+**Forces:** Hedged assent pattern-matches to approval, and treating it as approval keeps momentum. But hedge words attached to an assent are the reader signaling they could not fully evaluate what they are agreeing to. Proceeding on it builds on an unratified base -- the work runs ahead while the gate believes it has passed.
+
+Rules:
+- Treat hedged assent as a comprehension failure of YOUR presentation, not as approval. Simplify, define the terms, shorten, and re-present.
+- Ask for a plain yes/no only after the re-presentation. Unambiguous approvals stay valid as-is: "yes", "approved", "go ahead", "looks good" (consistent with the writing-plans skill's approval rules).
+- This rule never overrides an explicit refusal or an explicit approval; it governs only the ambiguous middle.
+
 ---
 
 ## BEFORE PROCEEDING
@@ -165,6 +186,7 @@ Rules:
 4. No forbidden hedge phrases from the Talk Straight table are present
 5. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, CLI tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks. Exception: non-ASCII is permitted ONLY inside a clearly-marked verbatim quotation of external source material (e.g. a code block or block quote reproducing the source exactly) -- it MUST NOT appear in your own prose, arrows, dashes, or status marks
 6. Every known limitation, skipped item, or unverified area of the work being reported appears in THIS message, not only earlier in the transcript. A caveat disclosed mid-transcript but omitted from the summary being sent is a buried caveat -- that is false confidence.
+7. Every project-internal term in the outgoing text is defined at its first use in this conversation, and any update leads with the decision rather than the research trail (Plain Language rule above)
 
 [+] All met -> send the response
 [-] Any unmet -> rewrite the offending phrase or run the required verification before sending
@@ -184,6 +206,8 @@ Rules:
 - Declare-clean verdict ("batch complete", "0 residual", "all covered", "root cause is X") with NO inline evidence and no citation to prior evidence -- **STOP. Paste the check output now, or cite the original msg # / file:line. A bare verdict is the exact overclaim this gate catches.**
 - Defect CLASS declared closed ("0 residual", "class eliminated", "all instances fixed") backed only by a token grep, with no structure- or verb-anchored sweep and no independent review-all pass cited -- **STOP. A token grep proves the named examples are gone, not the class. Run the wider sweep plus an independent review, or downgrade the claim to "closed this round."**
 - About to state that you failed, missed, or violated a gate -- as a factual instance, in chat or any artifact -- without a log/transcript citation -- **STOP. Self-blame needs the same evidence bar as self-praise. Verify first (for bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh against the session transcript and quote its VERDICT line); until verified the only permitted wording is "SUSPECTED <failure> -- verifying".**
+- About to send user-facing text whose key nouns are undefined project-internal terms, or whose decision is buried under the research trail -- **STOP. Apply the Plain Language rule: define the term at first use, lead with the decision.**
+- User replied with hedged assent ("I guess", "sure, I think") and you are about to treat it as approval -- **STOP. Hedged assent means the presentation was too opaque. Simplify and re-present; proceed only on plain approval.**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 
@@ -209,6 +233,8 @@ Rules:
 | "I disclosed the caveat earlier, so the summary can omit it" | A caveat present mid-transcript but absent from the message being sent is a buried caveat -- the counterfeit of disclosure. | Repeat every material limitation in the message that reports the result. |
 | "The token grep for the example phrases came back 0, so the defect class is closed" | A defect class is broader than the tokens that named it -- a token grep proves the named tokens are gone, not that the class is gone. It is the counterfeit of class closure: the form of a sweep without the width to find novel phrasings. | Run a structure- or verb-anchored sweep wider than the naming tokens, plus an independent review-all pass, before claiming class closure. Otherwise say "closed this round." |
 | "Accusing myself is humble, so it does not need evidence" | A false self-accusation is a false record -- the counterfeit of accountability: it mis-locates defects and pollutes memory and postmortems. Over-attestation is the same defect as under-attestation. | Verify against the transcript or log first (bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh and quote its VERDICT line); until then write "SUSPECTED <failure> -- verifying". |
+| "The user said 'I guess' -- that is a yes" | Hedge words on an assent are the reader saying they could not evaluate it -- the counterfeit of ratification. Simplify and re-present; only plain approval authorizes. | Re-present in plainer terms and wait for plain approval. |
+| "I defined that term in an earlier session" | Definitions do not persist for the reader across conversations. Define at first use in EVERY conversation. | Restate the definition at first use in this conversation. |
 
 ---
 

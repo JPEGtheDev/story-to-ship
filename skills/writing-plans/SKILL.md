@@ -209,6 +209,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 | "The Skeptic is enough -- the plan-reviewer is redundant" | The two jobs do not overlap: the Skeptic finds what is MISSING; the plan-reviewer judges whether what IS present is sound, sequenced, and enforceable. Both fire by default on every non-Discovery plan with 2+ todos -- dispatch them together, not one or the other. |
 | "Round 4 found a real defect, so the review is still productive" | Past round 3 the defects are manufactured by the review itself -- the round-3 cap and the plan-longer-than-file tripwire are the stop signals. Switch review surface to the diff instead of adding rounds. |
 | "The fixture almost triggered it -- one more small variation will do it" | Cosmetic retries (<5 changed lines) do not increment the attempt count and cannot close the branch. After two untriggered attempts: structural redesign with pasted diff, or user ruling. |
+| "The user replied 'I guess' / 'sure, whatever' -- that's approval" | Hedged assent is not approval -- it signals the plan was too opaque to evaluate. Simplify, define the terms, re-present. Only plain approval ("go ahead", "approved", "looks good") starts implementation. |
 
 ---
 
@@ -235,6 +236,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 - Adversarial plan review is in round 4+, or plan length now exceeds the target file's length -- **STOP. Switch the review surface to the diff (implement, then review the diff). A finding located in text written answering the previous round is a manufactured defect, not evidence to keep reviewing.**
 - A plan claims two competing constraints are both satisfied, and no worked example carries one concrete case end-to-end -- **STOP. Demand one worked example carried end-to-end before any further abstract argument. The example either exposes the hidden cost or proves the design absorbs it; abstract debate does neither.**
 - A DoD behavioral branch has resolved untriggered across two fixture attempts and the next fixture is another small tweak -- **STOP. The next attempt must be a structural redesign (>=5 changed lines vs the baseline fixture, diff pasted), or the plan escalates to an explicit user ruling quoted in the PR body.**
+- Plan presented, user replied with hedged assent ("I guess", "sure, I think"), and you are about to start implementation -- **STOP. Hedged assent is a comprehension signal, not approval. Re-present the plan in plainer terms and wait for plain approval.**
 
 ---
 

@@ -74,10 +74,11 @@ feed the dispatched agent, and invoking `check-markers.sh` against the
 captured transcript. Run `./run-scenario.sh --help` for its usage text.
 
 The scenarios this harness covers: one positive and one negative case per
-marker-emitting behavior it proves, plus two scenarios that each prove a
-non-marker behavior and so carry their own pass condition instead of a
-`check-markers.sh` require/forbid pairing -- delta re-ratification (a
-byte-preservation check on the resulting document) and dirty-canon (a
+marker-emitting behavior it proves, plus two scenarios whose pass
+condition is not fully captured by a `check-markers.sh` require/forbid
+pairing alone, so each carries its own pass condition in addition --
+delta re-ratification (no marker check at all; a byte-preservation check
+on the resulting document instead) and dirty-canon (a forbid-only
 negative control on all three markers, paired with a transcript read for
 the plain-statement-and-continue behavior itself):
 
@@ -163,7 +164,10 @@ prove the consumer noticed and disclosed the uncommitted edit -- it would
 also pass if the consumer silently ignored the edit entirely. This
 scenario's actual pass condition is a transcript read: confirm the
 captured output states the uncommitted edit plainly, in prose, and that
-evaluation continues rather than refusing.
+evaluation continues rather than refusing (e.g. a sentence naming
+`docs/DOD.md` and noting that it carries uncommitted local edits; the
+exact phrasing is free, matching the consumer rule's own "state plainly"
+wording rather than any fixed required phrase or marker).
 
 Placing a fixture document at `docs/DOD.md` (every scenario above except
 no-canon-fallback) leaves the scratch worktree dirty relative to whatever

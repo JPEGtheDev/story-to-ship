@@ -66,6 +66,10 @@ Usage:
                     from the transcript (only the new/changed layers should
                     be asked about; every prior ruling must be left
                     byte-identical) -- so --check is rejected for it.
+                    dirty-canon's set is three --forbid literals and no
+                    --require -- a negative control that is necessary but
+                    not sufficient; its positive pass condition is a
+                    transcript read (see README.md Section 3).
 
 Every invocation is a dry run unless --worktree and/or --check are given:
 with neither flag, the script only prints the steps for the named scenario.
@@ -262,7 +266,7 @@ if [[ "$DIRTY_AFTER_PLACE" -eq 1 ]]; then
   if [[ -n "$WORKTREE" ]]; then
     if [[ -n "$(git -C "$WORKTREE" status --porcelain -- docs/DOD.md)" ]]; then
       git -C "$WORKTREE" add -- docs/DOD.md
-      git -C "$WORKTREE" -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -m "test: canon baseline for dirty-canon scenario" -- docs/DOD.md
+      git -C "$WORKTREE" -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -q -m "test: canon baseline for dirty-canon scenario" -- docs/DOD.md
       echo "Step 2b: committed the placed canon as a baseline in $WORKTREE"
     else
       echo "Step 2b: $WORKTREE/docs/DOD.md already matches its last commit (baseline already committed, skipping)"

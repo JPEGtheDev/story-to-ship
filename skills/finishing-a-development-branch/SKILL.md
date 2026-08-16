@@ -76,11 +76,11 @@ Before writing the PR, answer:
      grep -nE '#[0-9]+' "$f"              # issue-number tags
      grep -nP '[^\x00-\x7F]' "$f"         # non-ASCII characters
      grep -nE '(\.\./\.\./skills/|skills/[A-Za-z0-9_-]+/references/)' "$f"   # cross-tree file references in non-machine contexts
-     grep -nE '\b[A-Z][A-Z0-9_]{2,}\.md\b' "$f"   # bare doc-file names -- real only when the named file lives in a different skill tree than the file being scanned
+     grep -nE '\b[A-Z][A-Z0-9_]{2,}\.md\b' "$f"   # bare doc-file names -- real only when the scanning file is a skill or agent-template file AND the named file lives in a different skill tree
    done
    ```
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern.
-   A real hit -- a campaign or planning label, an issue-number tag, repo-internal jargon, an unexpanded acronym, a cross-tree file reference (a slash path, or a bare doc-file name whose file lives in a different skill tree than the file being scanned), or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the defect classes above -- may instead be adjudicated in the PR body, named hit-by-hit. Bare doc-file name matches are the sole class exempt from hit-by-hit naming: adjudicate them as one class, stating the hit count and that every hit names a file outside any other skill tree. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
+   A real hit -- a campaign or planning label, an issue-number tag, repo-internal jargon, an unexpanded acronym, a cross-tree file reference (a slash path, or a bare doc-file name cited by a skill or agent-template file, naming a file in a different skill tree), or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the defect classes above -- may instead be adjudicated in the PR body, named hit-by-hit. Bare doc-file name matches are the sole class exempt from hit-by-hit naming: adjudicate them as one class, stating the hit count and that either every hit names a file outside any other skill tree, or the citing file is outside skills/ and agents/, where the `writing-skills` skill's Cross-Skill Reference Rule does not bind. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
 
 ---
 

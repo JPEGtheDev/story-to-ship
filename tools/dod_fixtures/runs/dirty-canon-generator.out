@@ -1,0 +1,241 @@
+Scenario: dirty-canon-generator
+Date: 2026-08-16
+Harness commit: 98b83f0 (defining-done-rulings wave branch, merged through the dirty-canon-generator scenario arm; first run of the shipped run-scenario.sh dirty-canon-generator path)
+Consumer model: sonnet
+Taxonomy Stamp at run time: v1 (DOD_TAXONOMY.md:10; matches fixture canon Stamp v1)
+Dispatch note: ONE dispatch total. Owner consent granted 2026-08-16, covering exactly this one dispatch; the transcript below is that single run, check-clean on the first attempt (RESULT: PASS (3/3), exit 0). No re-run occurred and none was needed.
+
+=== INDUCED-STATE RECORD (runner-side setup, before dispatch) ===
+
+Scratch repo: /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch
+Setup: git init + empty initial commit, then the shipped harness path:
+  run-scenario.sh dirty-canon-generator --worktree /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch
+Runner output:
+  Step 2: placed .../tools/dod_fixtures/story-request-canon.md at .../t7-scratch/docs/DOD.md
+  Step 2b: committed the placed canon as a baseline in .../t7-scratch
+  Step 2b: applied an uncommitted local edit to docs/DOD.md
+  Step 2b: induced-state proof -- numstat: 1	1	docs/DOD.md
+  EXIT: 0
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch status --porcelain -- docs/DOD.md
+ M docs/DOD.md
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch log --oneline
+ed1a8e2 test: canon baseline for dirty-canon-generator scenario
+9f0b2bd chore: scratch repo init
+
+$ git -C /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch diff -- docs/DOD.md
+diff --git a/docs/DOD.md b/docs/DOD.md
+index 7c2490f..416cc3e 100644
+--- a/docs/DOD.md
++++ b/docs/DOD.md
+@@ -1,6 +1,6 @@
+ ---
+ title: "Fernglen Definition of Done"
+-description: "Synthetic, ratified Definition of Done document for the fictional Fernglen wildlife-sighting tracking app. Used only to exercise the user-story-generator skill's canon-derived Definition of Done section and its refusal path when an always-required layer is dropped."
++description: "Synthetic, ratified Definition of Done document for the fictional Fernglen wildlife-sighting tracking app (edited locally). Used only to exercise the user-story-generator skill's canon-derived Definition of Done section and its refusal path when an always-required layer is dropped."
+ domain: cross-cutting
+ tags: [cross-cutting, standards, dod, fixture]
+ ---
+
+=== DISPATCH PROMPT (runner -> consumer sub-agent, Agent tool, model sonnet) ===
+
+Apply the skill at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/user-story-generator/SKILL.md (read it and follow it fully, including its DoD Canon Consumption section; the defining-done skill's references are at /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/defining-done/references/). Your working repository is /home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch; its Definition of Done canon, if any, is at docs/DOD.md; the current taxonomy is /home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/defining-done/references/DOD_TAXONOMY.md. Generate the user story for this request:
+
+As the Fernglen product owner, I want a story for: "Add a `dedupe_nearby_sightings()` function to the ingest pipeline that merges two sighting records into one when they report the same species within 50 meters and 10 minutes of each other, to stop duplicate volunteer submissions from double-counting a single observation." It's a small (hours), Standard-tier change touching `ingest/dedupe.py` and its existing test module `ingest/test_dedupe.py`, format preference: Story Template, no other constraints.
+
+Return your complete working output, including every check you perform.
+
+=== CONSUMER SUB-AGENT OUTPUT (complete, verbatim) ===
+# Working Output — user-story-generator skill
+
+**Announcement:** I am using the user-story-generator skill to create a story for: adding a `dedupe_nearby_sightings()` function to the Fernglen ingest pipeline that merges duplicate same-species sighting records reported within 50 meters and 10 minutes of each other.
+
+## Checks performed
+
+**1. Project context / DoD canon lookup** — Working repo: `/home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch`. Full tracked tree is `docs/DOD.md` only; no `ingest/` directory exists anywhere in the working tree, in `git log --all`, or on any branch (`master` is the only branch). `ingest/dedupe.py` and `ingest/test_dedupe.py` could **not** be verified against the actual repo — the repo is a minimal DoD-canon fixture, not a full checkout of the Fernglen codebase.
+   - Per the skill's RED FLAGS ("story mentions functionality not in project context," "user story assumes capabilities the project doesn't have"), this is disclosed rather than silently assumed. I did not treat it as a hard block: the request comes from the Fernglen product owner directly, states the target paths concretely (not inferred from the project name), and all 8 BEFORE PROCEEDING items are otherwise explicitly answered in the prompt — so I proceeded and flagged the gap in the story's Comments section below for pre-implementation verification.
+
+**2. Component/functionality exists** — See above; unresolved, flagged, not assumed silently.
+
+**3–8 (BEFORE PROCEEDING items 3–8)** — all explicitly supplied by the requester: goal clear (dedupe merge logic), value clear (stop double-counting), size = S (hours), tier = Standard, format = Story Template, constraints = none stated. All 8/8 conditions met → proceeded to generate.
+
+**9. DoD canon lookup at `docs/DOD.md`** (working repo) — **present**. Read in full:
+```
+- bdd-tests: ALWAYS
+- coverage: ALWAYS
+- lint-format-static-analysis: ALWAYS
+- versioning-conventional-commits: ALWAYS
+- performance-spend-budgets: N/A | category: target-absent | ...
+Stamp: v1
+```
+- **Parses?** Yes — `Stamp: v1` present and well-formed; every present ruling line matches one of the three valid forms (Section A.3 of DOD_TEMPLATE.md). No `DOD-MALFORMED` trigger.
+- **Completeness note:** only 5 of the taxonomy's 20 layers carry a ruling line (4 ALWAYS + 1 N/A); 15 layers have no line at all. DOD_TEMPLATE.md Section A.3 requires every layer to have exactly one line, so this canon is incomplete relative to that authoring rule — but the consumer-side `DOD-MALFORMED` trigger (DOD_TEMPLATE.md Section C) is scoped specifically to "a missing or unparseable `Stamp:` line, or a ruling line matching none of the three forms" — not to missing coverage of the full layer set. Incompleteness alone does not meet that definition, so no refusal was triggered. The 15 unruled layers are treated as contributing nothing to the story's DoD section (no line, no stub), consistent with how the skill already treats non-firing CONDITIONAL/N/A layers.
+- **Staleness check:** canon `Stamp: v1` vs. `DOD_TAXONOMY.md` current `Stamp: v1` (taxonomy header). **Equal — not stale.** No `DOD-STALE` marker emitted.
+- **Uncommitted local edits check:** ran `git status --porcelain docs/DOD.md` → ` M docs/DOD.md` (modified, tracked). `git diff -- docs/DOD.md` shows only the frontmatter `description` field changed (cosmetic, not a ruling line). Per the warn-and-consume rule: **the canon carries uncommitted local edits; it was consumed anyway. No marker line is emitted for this case** (by rule).
+- **CONDITIONAL layers:** none present in this canon — nothing to trigger-check.
+- **ALWAYS-layer drop check:** for each of the 4 ALWAYS layers, checked whether this story's diff scope (`ingest/dedupe.py`, `ingest/test_dedupe.py`) genuinely has no surface for it. All four have surface (new merge logic to spec as BDD scenarios, new lines/branches to cover, Python files to lint, and a commit that must follow convention) — none qualify for a story-level N/A drop, so none were dropped. No `DOD-VIOLATION` refusal triggered.
+
+Result: canon consumed normally, header `*(derived from docs/DOD.md, ratified v1)*`, 4 always-on checklist items, `performance-spend-budgets` correctly absent (canon-level N/A).
+
+---
+
+## Generated Story
+
+**Title:** Deduplicate Nearby Same-Species Sighting Records in Ingest Pipeline
+
+**Type:** Feature
+**Size:** S
+**Epic/Component:** Ingest Pipeline / Data Quality
+**Priority:** Medium *(no priority stated; assumed Medium as a reasonable default)*
+**Depends On:** None
+
+---
+
+## Effort Estimate
+
+**Recommended Model Tier:** Standard *(explicitly specified by the requester)*
+**Reasoning:** The change is a small, well-bounded merge function with concrete numeric thresholds (50m / 10min) and no architectural or cross-module design decisions — too much domain-logic judgment (boundary handling, which record's fields win on merge) for Economy, but no design-space exploration warranting Premium.
+
+---
+
+## User Story
+
+**As a** Fernglen product owner
+**I want to** merge two sighting records into one when they report the same species within 50 meters and 10 minutes of each other
+**So that** duplicate volunteer submissions stop double-counting a single observation
+
+---
+
+## Acceptance Criteria
+
+- [ ] Given two sighting records of the same species reported within 50 meters and within 10 minutes of each other, `dedupe_nearby_sightings()` merges them into a single sighting record.
+- [ ] Given two sighting records of the same species reported more than 50 meters apart, `dedupe_nearby_sightings()` does not merge them (both records are preserved).
+- [ ] Given two sighting records of the same species reported more than 10 minutes apart, `dedupe_nearby_sightings()` does not merge them (both records are preserved).
+- [ ] Given two sighting records of different species (regardless of distance/time), `dedupe_nearby_sightings()` does not merge them.
+- [ ] Boundary values (exactly 50 meters, exactly 10 minutes) are handled by an explicit, documented inclusive/exclusive rule and covered by a dedicated test case (see Technical Notes — merge-semantics is otherwise unspecified by the request).
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- None
+
+**Constraints:**
+- None stated by requester
+
+**Files to Create/Modify:**
+- `ingest/dedupe.py` — add `dedupe_nearby_sightings()`
+- `ingest/test_dedupe.py` — add test cases for merge/no-merge/boundary conditions above
+
+**Architecture Notes:**
+- Merge-result semantics (which record's non-key fields win, e.g. observer notes, photo, exact timestamp) are unspecified in the request — negotiable at implementation time, but must be pinned down before the boundary-value acceptance criterion above can be finalized as a concrete test.
+- Distance calculation method (e.g., haversine vs. planar approximation) is unspecified — an implementation detail, left open per INVEST's Negotiable principle.
+
+---
+
+## Definition of Done
+
+*(derived from docs/DOD.md, ratified v1)*
+
+> Note: `docs/DOD.md` currently carries uncommitted local edits (`git status --porcelain` shows ` M docs/DOD.md`, diff limited to the frontmatter description). Consumed anyway per the canon's warn-and-consume rule.
+
+- [ ] **BDD Tests** (`bdd-tests`) *(always-on)* — Given/When/Then scenario(s) specified and passing for the merge behavior, e.g.: "Given two sighting records of the same species within 50m and 10min, When `dedupe_nearby_sightings()` runs, Then they merge into one record."
+- [ ] **Coverage** (`coverage`) *(always-on)* — new lines/branches added to `ingest/dedupe.py` are exercised by tests in `ingest/test_dedupe.py` at or above the repo's agreed new-code coverage threshold.
+- [ ] **Lint/Format/Static Analysis** (`lint-format-static-analysis`) *(always-on)* — `ingest/dedupe.py` and `ingest/test_dedupe.py` pass the repo's linter, formatter, and static-analysis checks with no new warnings.
+- [ ] **Versioning/Conventional Commits** (`versioning-conventional-commits`) *(always-on)* — commit(s) for this change follow the repo's conventional-commits format.
+
+---
+
+## Comments
+
+- **Unverified target paths:** `ingest/dedupe.py` and `ingest/test_dedupe.py` do not exist in the working repository checked for this generation (`/home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch`, which contains only `docs/DOD.md`). Verify these paths exist in the actual Fernglen codebase before starting implementation.
+- **Canon completeness:** the consumed `docs/DOD.md` rules only 5 of the 20 taxonomy layers (4 ALWAYS, 1 N/A); the remaining 15 have no ruling line at all. This did not meet the strict `DOD-MALFORMED` trigger (missing/unparseable `Stamp:` or an invalid ruling-line form), so the canon was consumed as-is, but a full re-ratification pass against `DOD_TAXONOMY.md` (currently `Stamp: v1`, matching) would close the gap.
+- **Merge-semantics decision needed** before the boundary-value acceptance criterion can be turned into a concrete test (see Technical Notes / Architecture Notes above).
+
+---
+
+## INVEST Validation
+
+```
+Story: Deduplicate Nearby Same-Species Sighting Records in Ingest Pipeline
+
+Independence:
+  [x] No hard dependencies on unstarted stories
+  [x] Can be picked up by any available developer
+  [x] Subtasks integrate independently (single function + its test module)
+
+Negotiable:
+  [x] Title focuses on outcome, not implementation
+  [x] Solution approach (distance calc method, merge-result field precedence) is not prescriptive
+  [x] Open to discussion during sprint planning (flagged explicitly in Architecture Notes)
+
+Valuable:
+  [x] Clear technical/business value: prevents double-counting volunteer submissions
+  [x] "So that" clause is compelling and concrete
+  [x] Stakeholder (product owner) is the requester
+
+Estimable:
+  [x] Team can rough-size the story (S / hours, given explicitly)
+  [x] Acceptance criteria are clear
+  [x] No hard blockers -- only an open merge-semantics decision, not an unknown
+
+Small:
+  [x] Completable well within one sprint (hours)
+  [x] One developer can own it start-to-finish
+  [x] Not an Epic
+
+Testable:
+  [x] All acceptance criteria are measurable (species match, 50m, 10min, boundary)
+  [x] Verifiable via ingest/test_dedupe.py
+  [x] Definition of Done is derived from the ratified canon, concrete per layer
+```
+
+**INVEST result:** PASS. No violations found; no split required.
+
+---
+
+**File paths referenced during generation:**
+- Skill: `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/user-story-generator/SKILL.md`
+- References: `references/STORY_TEMPLATE.md`, `references/INVEST_GUIDE.md`, `references/INVEST_FRAMEWORK.md`, `references/OUTPUT_ROUTING.md`
+- defining-done taxonomy: `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/defining-done/references/DOD_TAXONOMY.md`
+- defining-done template (malformed-canon rule, Section C): `/home/JPEG/Projects/story-to-ship/.claude/worktrees/defining-done/skills/defining-done/references/DOD_TEMPLATE.md`
+- Working repo canon: `/home/JPEG/.claude/jobs/9627bfb6/tmp/t7-scratch/docs/DOD.md`
+
+Per Output Routing (`OUTPUT_ROUTING.md`), this story would normally be filed as a GitHub issue after Three Amigos Refinement approval rather than left in a scratch file — no such issue was created here since this was a direct one-shot generation request, not a Three-Amigos-approved plan item.
+
+=== CHECK RECORD (coordinator run against this transcript) ===
+
+$ tools/dod_fixtures/check-markers.sh <this-transcript> --forbid 'DOD-VIOLATION:' --forbid 'DOD-STALE: canon v' --forbid 'DOD-MALFORMED:'
+PASS forbid 'DOD-VIOLATION:'
+PASS forbid 'DOD-STALE: canon v'
+PASS forbid 'DOD-MALFORMED:'
+RESULT: PASS (3/3)
+EXIT: 0
+
+=== MANUAL READ (coordinator; the scenario's actual pass condition) ===
+
+Uncommitted-edit statement: PRESENT -- "Uncommitted local edits check:
+ran `git status --porcelain docs/DOD.md` -> ` M docs/DOD.md` (modified,
+tracked). `git diff -- docs/DOD.md` shows only the frontmatter
+`description` field changed (cosmetic, not a ruling line). Per the
+warn-and-consume rule: the canon carries uncommitted local edits; it was
+consumed anyway. No marker line is emitted for this case (by rule)."
+The disclosure is restated inside the generated story's Definition of
+Done section: "Note: `docs/DOD.md` currently carries uncommitted local
+edits (`git status --porcelain` shows ` M docs/DOD.md`, diff limited to
+the frontmatter description). Consumed anyway per the canon's
+warn-and-consume rule."
+Generation continued: YES -- a complete story follows the statement
+(title, acceptance criteria, canon-derived Definition of Done section
+carrying all four always-on layers with the header "(derived from
+docs/DOD.md, ratified v1)", INVEST validation PASS); the generator did
+not refuse on the dirty state and emitted no marker for it.
+Note: the consumer flagged the request's target paths (ingest/dedupe.py)
+as absent from the scratch fixture repo and disclosed this in the
+story's Comments section rather than refusing -- a generation request
+carries no claimed-diff evidence axis, so no grounding-driven failure
+mode applies; the disclosure is outside the dirty-canon contract, which
+this run proves: uncommitted canon edit -> plain statement, no marker,
+generation continues.

@@ -220,9 +220,13 @@ fi
 # unintended commit and edit state behind in a repo the scenario does not
 # own. This must run before Step 2's cp touches anything.
 if [[ "$SCENARIO" == "dirty-canon" && -n "$WORKTREE" ]]; then
+  [[ -d "$WORKTREE" ]] || fail "--worktree path does not exist: $WORKTREE"
   TARGET_GIT_COMMON_DIR="$(git -C "$WORKTREE" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   SELF_GIT_COMMON_DIR="$(git -C "$SCRIPT_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
-  if [[ -n "$TARGET_GIT_COMMON_DIR" && "$TARGET_GIT_COMMON_DIR" == "$SELF_GIT_COMMON_DIR" ]]; then
+  if [[ -z "$TARGET_GIT_COMMON_DIR" ]]; then
+    fail "refusing to run dirty-canon against $WORKTREE: it is not a git repository (git -C '$WORKTREE' rev-parse --git-common-dir found none). dirty-canon needs an unrelated scratch git repository to commit the placed canon into -- run 'git init' there first."
+  fi
+  if [[ "$TARGET_GIT_COMMON_DIR" == "$SELF_GIT_COMMON_DIR" ]]; then
     fail "refusing to run dirty-canon against $WORKTREE: it shares this repository's own git-common-dir ($SELF_GIT_COMMON_DIR), so it is this repository's own working copy or a linked worktree of it. dirty-canon commits to and dirties docs/DOD.md in its target -- point --worktree at an unrelated scratch git repository instead."
   fi
 fi

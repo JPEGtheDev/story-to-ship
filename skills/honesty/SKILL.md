@@ -176,6 +176,24 @@ Rules:
 - A hedged reply means YOUR presentation failed, not that the reader approved. Simplify, define the terms, shorten, and re-present. Fix the presentation, not the reply.
 - The only test: if you have to parse the reply's wording to decide whether it counts as approval, it is not approval -- re-present and ask for a plain yes or no. Plain approval ("yes", "approved", "go ahead", "looks good" -- consistent with the writing-plans skill's approval rules) needs no parsing; explicit refusal needs none either.
 
+### Keep Reasoning Terse
+
+**Context:** All internal reasoning -- thinking blocks, scratch analysis, connective prose between tool calls. Reasoning only, never the deliverable text.
+**Forces:** Elaborate reasoning FEELS like rigor while adding none, but some reflective sentences ARE the work (required checks, hypothesis statements, tripwire questions). Rationale, worked example, and measurement plan: `references/REASONING_REGISTER.md`.
+
+Rules:
+- State fact, options, decision, next action. One line for a mechanical step; a paragraph only at a genuine fork, and it weighs the choice.
+- Delete any reasoning sentence that neither changes the next action nor records a fact needed later. The class is performative prose -- broader than any listed example.
+- This rule never licenses skipping a required check, hypothesis statement, Intent line, or tripwire question: those sentences change the next action and are always earned.
+- Self-check at generation time (the Red Flags entry below) is the enforcement mechanism, not a downstream gate -- no automated detector inspects reasoning before it is sent. Checkable surfaces: the postmortem reviewer's register-sampling row and the token trend against the recorded baseline; promotion to a blocking check follows the writing-skills Jargon Rule precedent.
+
+| Forbidden in reasoning | Replace with |
+|------------------------|--------------|
+| Coining a name or framework for what you are doing | Do the thing; no name needed |
+| "elegantly" / "crucially" / "the deeper principle here" | State the fact the flourish decorated |
+| "it is worth noting" / "let us consider" | State the note or option directly |
+| Re-deriving a conclusion whose evidence is still in context | Cite it (msg # or file:line); re-derive only when the evidence did not survive compaction |
+
 ---
 
 ## BEFORE PROCEEDING
@@ -208,6 +226,7 @@ Rules:
 - About to state that you failed, missed, or violated a gate -- as a factual instance, in chat or any artifact -- without a log/transcript citation -- **STOP. Self-blame needs the same evidence bar as self-praise. Verify first (for bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh against the session transcript and quote its VERDICT line); until verified the only permitted wording is "SUSPECTED <failure> -- verifying".**
 - About to send user-facing text whose key nouns are undefined project-internal terms, or whose decision is buried under the research trail -- **STOP. Apply the Plain Language rule: define the term at first use, lead with the decision.**
 - User replied with hedged assent ("I guess", "sure, I think") and you are about to treat it as approval -- **STOP. Hedged assent means the presentation was too opaque. Simplify and re-present; proceed only on plain approval.**
+- A reasoning paragraph forming around a mechanical step, or a coined framework or self-commentary appearing in your thinking -- **STOP. One line: fact, decision, next action. Delete the performance; keep every required check.**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
 
@@ -235,6 +254,7 @@ Rules:
 | "Accusing myself is humble, so it does not need evidence" | A false self-accusation is a false record -- the counterfeit of accountability: it mis-locates defects and pollutes memory and postmortems. Over-attestation is the same defect as under-attestation. | Verify against the transcript or log first (bootstrap-miss claims: run tools/first_action_audit/first-action-audit.sh and quote its VERDICT line); until then write "SUSPECTED <failure> -- verifying". |
 | "The user said 'I guess' -- that is a yes" | Hedge words on an assent are the reader saying they could not evaluate it -- the counterfeit of ratification. Simplify and re-present; only plain approval authorizes. | Re-present in plainer terms and wait for plain approval. |
 | "I defined that term in an earlier session" | Definitions do not persist for the reader across conversations. Define at first use in EVERY conversation. | Restate the definition at first use in this conversation. |
+| "Thorough-sounding reasoning proves rigor -- longer is safer" | Elaborate register is not rigor -- unneeded sentences burn budget and bury the actual checks. It is the counterfeit of diligence: the form of care without the checks that constitute it. | Keep every required check; delete the performance. One line per mechanical step. |
 
 ---
 

@@ -41,3 +41,13 @@ Structure your reply in exactly this order:
    The dispatcher compares these against the actual source ends to detect truncated injection -- a mismatch invalidates the run.
 
 2. **The method summary.** Immediately after the echo block, produce the summary in the exact output format defined by the method instructions above.
+
+## Keep Reasoning Terse
+
+Keep reasoning terse: fact, options, decision, next action. One line per
+mechanical step; a paragraph only at a genuine fork. Delete any reasoning
+sentence that neither changes the next action nor records a fact needed later
+-- performative prose (coined frameworks, "crucially", "it is worth noting") is
+the class, broader than these examples. Never skip a required check, hypothesis
+statement, or tripwire question to save tokens: those sentences are the work.
+This governs reasoning only, never the deliverable text.

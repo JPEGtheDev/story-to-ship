@@ -111,3 +111,13 @@ If `{{OUTPUT_PATH}}` is `ASK_USER`: do not attempt to write the final file. Repo
 - A good Notable Passages section copies blockquotes character-for-character from the extractive summary output. It does not reconstruct them from memory of the source.
 - A bad Notable Passages section contains quotes that are slightly longer, slightly reworded, or editorially smoothed relative to the extractive output. This is fabrication, even if the meaning is similar.
 - If you cannot find a passage in the extractive summary, do not include it. Use only what the extractive agent actually selected.
+
+## Keep Reasoning Terse
+
+Keep reasoning terse: fact, options, decision, next action. One line per
+mechanical step; a paragraph only at a genuine fork. Delete any reasoning
+sentence that neither changes the next action nor records a fact needed later
+-- performative prose (coined frameworks, "crucially", "it is worth noting") is
+the class, broader than these examples. Never skip a required check, hypothesis
+statement, or tripwire question to save tokens: those sentences are the work.
+This governs reasoning only, never the deliverable text.

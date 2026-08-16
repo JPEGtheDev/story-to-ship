@@ -27,7 +27,7 @@ repository.
 
 ## 2. Marker definitions
 
-The three marker strings below are quoted verbatim from the defining-done
+The four marker strings below are quoted verbatim from the defining-done
 skill's Definition of Done canon template reference, Section C ("Consumer
 notes"), which is their authoritative source. That reference file is
 authoritative if this README and it ever disagree.
@@ -43,6 +43,14 @@ authoritative if this README and it ever disagree.
   stamp of the taxonomy (the master list of verification layers) it was
   ratified against. The document is still consumed: staleness is a
   currency warning, not a refusal trigger.
+- `DOD-MALFORMED: <reason>` -- emitted by either consumer when
+  `docs/DOD.md` exists but its structure cannot be parsed (a missing or
+  unparseable `Stamp:` line, or a ruling line matching none of the three
+  forms in Section A.3 of the canon template). The refusal states exactly
+  what failed to parse: `<reason>` carries that one-line diagnostic on
+  the marker line itself. Unlike the other three markers, this one is a
+  refusal to evaluate at all -- the consumer must not also emit a verdict
+  marker from a canon it refused to consume.
 
 A separate condition -- the DoD document existing on disk with uncommitted
 local edits -- is deliberately marker-less: no `DOD-` marker of any kind
@@ -50,15 +58,17 @@ names it. The consumer states the uncommitted edit plainly and continues,
 consuming the file as it currently reads. See the dirty-canon scenario in
 Section 3 for how this is fixture-proven.
 
-`<layer>`, `<N>`, and `<M>` are parameterized tails (a layer's identifying
-key, or version numbers). `check-markers.sh` asserts on the fixed prefix
-up to that parameter, not the full parameterized string:
+`<layer>`, `<N>`, `<M>`, and `<reason>` are parameterized tails (a layer's
+identifying key, version numbers, or a one-line parse diagnostic).
+`check-markers.sh` asserts on the fixed prefix up to that parameter, not
+the full parameterized string:
 
 | Marker | Fixed-prefix literal to assert |
 |---|---|
 | `DOD-VIOLATION: <layer>` | `DOD-VIOLATION:` |
 | `DOD-GATE: FAIL <layer>` | `DOD-GATE: FAIL` |
 | `DOD-STALE: canon v<N> behind taxonomy v<M>` | `DOD-STALE: canon v` |
+| `DOD-MALFORMED: <reason>` | `DOD-MALFORMED:` |
 
 ## 3. Run procedure
 
@@ -213,6 +223,37 @@ warn-and-continue rule for an uncommitted `docs/DOD.md`, but no scenario
 in this harness exercises it there yet -- that is a named follow-up
 candidate, not a proven case.
 
+**Malformed-canon scenario** (input file: `completion-claim-scenarios.md`
+Case B; DoD document: `completion-claim-canon.md`, committed as a
+baseline in the scratch worktree and then given one uncommitted
+structural mutation -- its terminal `Stamp: v1` line deleted):
+```
+tools/dod_fixtures/run-scenario.sh malformed-canon --worktree <scratch-worktree>
+tools/dod_fixtures/check-markers.sh <malformed-canon-output> --require 'DOD-MALFORMED:' --forbid 'DOD-VIOLATION:' --forbid 'DOD-GATE: FAIL' --forbid 'DOD-STALE: canon v'
+```
+This exercises the malformed-canon refusal rule shared by both
+consumers: with `docs/DOD.md` present but missing its terminal `Stamp:`
+line, the consumer MUST refuse to evaluate the claim, emit
+`DOD-MALFORMED: <reason>` naming what failed to parse, and must not also
+emit a verdict marker from evaluating a canon it refused to consume.
+`run-scenario.sh` proves the induced state itself before any dispatch
+happens -- it fails loudly unless no line in the mutated `docs/DOD.md`
+starts with `Stamp:`, so a scenario run that reaches Step 3 has a
+provably malformed document behind it, not an accidentally-truncated
+fixture. Unlike dirty-canon's forbid-only screen, this
+`check-markers.sh` invocation is close to a full pass condition on its
+own: the `--require 'DOD-MALFORMED:'` half is a positive assertion that
+the refusal marker was actually emitted, not just an absence of the
+verdict markers. It is still worth a quick transcript read to confirm
+the emitted diagnostic actually names the missing `Stamp:` line (per the
+marker's own `<reason>` requirement) rather than some unrelated parse
+complaint, but that is a confirmation read, not a second-tier ambiguity
+resolution like evidence-complete's or dirty-canon's grounding-driven
+caveat -- malformed-canon has no such caveat, since a missing `Stamp:`
+line is a purely structural, non-grounded condition: a correctly
+refusing consumer never reaches evidence evaluation, so it cannot
+legitimately emit `DOD-GATE: FAIL` here for a grounding reason either.
+
 A `RESULT: PASS (N/N)` line and exit code 0 from every `check-markers.sh`
 invocation in a marker-based scenario is what confirms that scenario's
 behavior end to end, with one named exception. For every scenario except
@@ -231,7 +272,12 @@ scenario. The delta re-ratification scenario has no `check-markers.sh`
 invocation; its own byte-preservation pass condition, above, is what
 confirms its behavior instead. Dirty-canon does have a `check-markers.sh`
 invocation, but that invocation alone is not sufficient either -- see its
-pass condition above.
+pass condition above. Malformed-canon also forbids `DOD-GATE: FAIL`
+(alongside its required `DOD-MALFORMED:` and its other two forbids), but
+it is not part of this two-scenario exception: a correctly refusing
+consumer never reaches evidence evaluation, so any `RESULT: FAIL` for
+malformed-canon, on any assertion, is a straightforward real finding
+with no grounding-driven read needed.
 
 ## 4. Consent note
 

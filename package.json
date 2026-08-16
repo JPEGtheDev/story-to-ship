@@ -1,0 +1,31 @@
+{
+  "name": "@jpegthedeV/story-to-ship",
+  "version": "0.1.0",
+  "description": "story-to-ship: Claude Code skills + hooks for the full SDLC lifecycle, with OpenCode plugin support.",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "opencode/",
+    "hooks/",
+    ".claude-plugin/",
+    "skills/",
+    "agents/"
+  ],
+  "exports": {
+    ".": "./opencode/plugin.ts",
+    "./plugin": "./opencode/plugin.ts"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "claude-code",
+    "plugin",
+    "skills",
+    "hooks",
+    "sdlc",
+    "workflow"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

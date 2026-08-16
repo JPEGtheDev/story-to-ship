@@ -74,13 +74,19 @@ feed the dispatched agent, and invoking `check-markers.sh` against the
 captured transcript. Run `./run-scenario.sh --help` for its usage text.
 
 The scenarios this harness covers: one positive and one negative case per
-marker-emitting behavior it proves, plus two scenarios whose pass
+marker-emitting behavior it proves, plus three scenarios whose pass
 condition is not fully captured by a `check-markers.sh` require/forbid
 pairing alone, so each carries its own pass condition in addition --
 delta re-ratification (no marker check at all; a byte-preservation check
-on the resulting document instead) and dirty-canon (a forbid-only
-negative control on all three markers, paired with a transcript read for
-the plain-statement-and-continue behavior itself):
+on the resulting document instead), evidence-complete (a forbid-only
+negative control on `DOD-GATE: FAIL` that a legitimate grounding-driven
+failure can also trip, since the completion gate consumer is permitted to
+ground cited evidence against the repo under evaluation -- see the
+completion-gate scenarios entry below for the two-tier read that resolves
+it), and dirty-canon (a forbid-only negative control on all three
+markers, paired with a transcript read for the plain-statement-and-continue
+behavior itself, with the same grounding-driven caveat applying to its
+`DOD-GATE: FAIL` forbid specifically):
 
 **Story-generator scenarios** (input file: `story-request-scenarios.md`,
 DoD document: `story-request-canon.md`):
@@ -106,6 +112,20 @@ tools/dod_fixtures/check-markers.sh <no-canon-output> --forbid 'DOD-VIOLATION:'
 tools/dod_fixtures/check-markers.sh <evidence-missing-output> --require 'DOD-GATE: FAIL'
 tools/dod_fixtures/check-markers.sh <evidence-complete-output> --forbid 'DOD-GATE: FAIL'
 ```
+The evidence-complete forbid above is a first-pass screen, not the
+scenario's full pass condition. The completion gate consumer is permitted
+(not required) to ground cited evidence against the repo under
+evaluation, and this fixture's claim cites fictional paths
+(`tools/ingest/dedupe.py` and its test module) that do not exist in this
+repo -- so a consumer that grounds may legitimately emit `DOD-GATE: FAIL`
+here even though the claim's evidence is structurally complete. If the
+forbid check passes outright, the scenario is confirmed with no further
+read needed. If it fails, read the emitted `DOD-GATE: FAIL` line in the
+transcript: a line whose stated reason is the cited path's absence from
+the repo (grounding-driven) is not a scenario failure -- record it as a
+pass with the grounding disclosure noted; a line whose stated reason is
+missing or generic evidence for a layer is a real scenario failure, since
+Case B's evidence is deliberately structurally complete.
 
 **Stale-stamp scenarios** (one run per consumer -- story generator and
 completion gate -- each with a stale document variant embedded in its
@@ -161,8 +181,17 @@ dirty worktree. The `check-markers.sh` invocation above is a negative
 control only: forbidding all three markers rules out a violation, a gate
 failure, and a staleness claim, but a forbid-only pass does not by itself
 prove the consumer noticed and disclosed the uncommitted edit -- it would
-also pass if the consumer silently ignored the edit entirely. This
-scenario's actual pass condition is a transcript read: confirm the
+also pass if the consumer silently ignored the edit entirely. If the
+forbid check instead fails specifically on `DOD-GATE: FAIL`, apply the
+same two-tier read the evidence-complete scenario uses above (this
+scenario dispatches the same Case B claim text, citing the same fictional
+paths): a grounding-driven reason is not a scenario failure and does not
+by itself contradict the uncommitted-edit disclosure being sought; a
+missing/generic-evidence reason is a real failure, same as
+evidence-complete. A forbid failure on `DOD-VIOLATION:` or
+`DOD-STALE: canon v` instead has no such caveat -- either is a
+straightforward real finding. Either way, this scenario's actual pass
+condition is a transcript read: confirm the
 captured output states the uncommitted edit plainly, in prose, and that
 evaluation continues rather than refusing (e.g. a sentence naming
 `docs/DOD.md` and noting that it carries uncommitted local edits; the
@@ -186,13 +215,23 @@ candidate, not a proven case.
 
 A `RESULT: PASS (N/N)` line and exit code 0 from every `check-markers.sh`
 invocation in a marker-based scenario is what confirms that scenario's
-behavior end to end. Any `RESULT: FAIL` or nonzero exit means the
-behavior did not match what the scenario expects; treat it as a real
-finding rather than re-running until it passes. The delta re-ratification
-scenario has no `check-markers.sh` invocation; its own byte-preservation
-pass condition, above, is what confirms its behavior instead. Dirty-canon
-does have a `check-markers.sh` invocation, but that invocation alone is
-not sufficient either -- see its pass condition above.
+behavior end to end, with one named exception. For every scenario except
+evidence-complete and dirty-canon, any `RESULT: FAIL` or nonzero exit
+means the behavior did not match what the scenario expects; treat it as
+a real finding rather than re-running until it passes. Evidence-complete
+forbids `DOD-GATE: FAIL` only; dirty-canon forbids all three markers,
+including `DOD-GATE: FAIL`. In both, a `RESULT: FAIL` caused specifically
+by the `DOD-GATE: FAIL` assertion failing can be either a real finding or
+a legitimate grounding-driven failure -- read that line's stated reason
+per the two-tier condition in their scenario entries above before ruling
+either way. A `RESULT: FAIL` caused by any other assertion in either
+scenario (the `DOD-VIOLATION:` or `DOD-STALE: canon v` forbids in
+dirty-canon) is still a straightforward real finding, same as every other
+scenario. The delta re-ratification scenario has no `check-markers.sh`
+invocation; its own byte-preservation pass condition, above, is what
+confirms its behavior instead. Dirty-canon does have a `check-markers.sh`
+invocation, but that invocation alone is not sufficient either -- see its
+pass condition above.
 
 ## 4. Consent note
 

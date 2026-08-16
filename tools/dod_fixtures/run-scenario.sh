@@ -40,7 +40,7 @@ Usage:
   no-canon-fallback       story-generator, no docs/DOD.md present (story-request-scenarios.md Case C)
   story-stale-canon       story-generator, stale document (story-request-scenarios.md Case D)
   evidence-missing        completion-gate failure (completion-claim-scenarios.md Case A)
-  evidence-complete       completion-gate negative control (completion-claim-scenarios.md Case B)
+  evidence-complete       completion-gate negative control (completion-claim-scenarios.md Case B; forbid-only screen -- see below)
   completion-stale-canon  completion-gate, stale document (completion-claim-scenarios.md Case C)
   delta-reratification    defining-done delta re-ratification interview (no marker check -- see below)
   dirty-canon             completion-gate, uncommitted canon edit (completion-claim-scenarios.md Case B; no marker expected -- see below)
@@ -66,10 +66,17 @@ Usage:
                     from the transcript (only the new/changed layers should
                     be asked about; every prior ruling must be left
                     byte-identical) -- so --check is rejected for it.
-                    dirty-canon's set is three --forbid literals and no
-                    --require -- a negative control that is necessary but
-                    not sufficient; its positive pass condition is a
-                    transcript read (see README.md Section 3).
+                    evidence-complete's set is a single
+                    --forbid 'DOD-GATE: FAIL' -- necessary but not
+                    sufficient on its own: if it fails, read the emitted
+                    line's stated reason before ruling a real finding vs.
+                    a legitimate grounding-driven failure (see README.md
+                    Section 3). dirty-canon's set is three --forbid
+                    literals and no --require -- a negative control that
+                    is necessary but not sufficient; its positive pass
+                    condition is a transcript read (see README.md
+                    Section 3), and its DOD-GATE: FAIL forbid carries the
+                    same grounding-driven caveat as evidence-complete's.
 
 Every invocation is a dry run unless --worktree and/or --check are given:
 with neither flag, the script only prints the steps for the named scenario.
@@ -178,6 +185,9 @@ case "$SCENARIO" in
   evidence-complete)
     DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
     REQUEST_SOURCE="completion-claim-scenarios.md, Case B"
+    # Forbid-only screen: a FAIL here needs a transcript read to rule out
+    # a legitimate grounding-driven failure before it counts as a real
+    # finding -- see README.md Section 3.
     CHECK_ARGS=(--forbid 'DOD-GATE: FAIL')
     ;;
   completion-stale-canon)
@@ -198,6 +208,11 @@ case "$SCENARIO" in
     DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
     REQUEST_SOURCE="completion-claim-scenarios.md, Case B"
     DIRTY_AFTER_PLACE=1
+    # Forbid-only screen (necessary, not sufficient -- see README.md
+    # Section 3): the DOD-GATE: FAIL forbid carries the same
+    # grounding-driven caveat as evidence-complete's; the other two
+    # forbids have no such caveat. The scenario's actual pass condition
+    # is a transcript read for the uncommitted-edit disclosure.
     CHECK_ARGS=(--forbid 'DOD-VIOLATION:' --forbid 'DOD-GATE: FAIL' --forbid 'DOD-STALE: canon v')
     ;;
 esac

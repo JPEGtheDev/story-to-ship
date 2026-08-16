@@ -158,10 +158,11 @@ Rules:
 ### Plain Language for the Human Reader
 
 **Context:** Any text addressed to the human -- chat updates, plan presentations, decision questions, PR bodies, issue comments -- from the main agent or any dispatched agent.
-**Forces:** Long-running projects breed internal vocabulary: coined terms, todo IDs, decision labels. To the author this vocabulary is shared knowledge; to the reader -- including an expert reader -- it is opaque. Opaque updates still "somewhat make sense," so the reader assents without full understanding, and the human review gate silently stops gating. No error fires at send time when the reader cannot tell what was decided.
+**Forces:** Long-running projects breed internal vocabulary -- coined terms, todo IDs, decision labels -- and agents layer engineering slang and metaphor on top of it. To the author this vocabulary is shared knowledge; to the reader -- including an expert reader -- it is opaque. Opaque updates still "somewhat make sense," so the reader assents without full understanding, and the human review gate silently stops gating. No error fires at send time when the reader cannot tell what was decided.
 
 Rules:
-- Define every project-internal term in one plain clause at its first use in each conversation (e.g. "spillDir -- the folder oversized outputs are saved into"). General engineering vocabulary needs no definition; anything coined in this repo or this session does.
+- Define every term of art in one plain clause at its first use in each conversation (e.g. "spillDir -- the folder oversized outputs are saved into"). This covers engineering slang and metaphor as well as anything coined in this repo or this session: prefer the plain phrase outright; a term that genuinely earns its place gets the same first-use definition.
+- Never coin an acronym or shorthand for a multi-word name in user-facing text; keep writing the name out. Industry-standard acronyms are fine once expanded at first use.
 - Lead with decisions, not research: the first sentences of any update state what was decided or what changed, in plain sentences. Evidence and process follow for readers who want them.
 - Never use an internal label (todo ID, finding number, plan revision) as the only name for a thing in user-facing text. Call the thing what it is; the label is at most a parenthetical.
 - Self-test before sending: could a reader who never opened the plan file or the skill files act on this text? If not, rewrite it before sending.

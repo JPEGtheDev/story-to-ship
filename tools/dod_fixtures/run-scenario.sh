@@ -10,10 +10,11 @@
 # (get the user's explicit consent first; see README.md Section 4). It
 # only does the file-system setup (or prints it, if no worktree is given)
 # and prints the remaining manual steps. Pass --check to also run
-# check-markers.sh against a transcript you already captured. One
-# scenario, dirty-canon, additionally creates one baseline commit inside
-# the scratch worktree (or, if no worktree is given, prints that commit
-# instead of making it) -- see its case entry below.
+# check-markers.sh against a transcript you already captured. Two
+# scenarios, dirty-canon and malformed-canon, additionally create one
+# baseline commit inside the scratch worktree and then apply a pinned
+# mutation on top of it (or, if no worktree is given, print those
+# commands instead of running them) -- see their case entries below.
 #
 # Usage:
 #   run-scenario.sh --list
@@ -25,7 +26,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 CHECK_MARKERS="$SCRIPT_DIR/check-markers.sh"
 
-SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon evidence-missing evidence-complete completion-stale-canon delta-reratification dirty-canon"
+SCENARIOS="violating-story compliant-story no-canon-fallback story-stale-canon evidence-missing evidence-complete completion-stale-canon delta-reratification dirty-canon malformed-canon"
 
 usage() {
   cat <<'EOF'
@@ -44,20 +45,24 @@ Usage:
   completion-stale-canon  completion-gate, stale document (completion-claim-scenarios.md Case C)
   delta-reratification    defining-done delta re-ratification interview (no marker check -- see below)
   dirty-canon             completion-gate, uncommitted canon edit (completion-claim-scenarios.md Case B; no marker expected -- see below)
+  malformed-canon         completion-gate, unparseable canon (completion-claim-scenarios.md Case B; missing Stamp: line -- see below)
 
 --worktree <path>   an existing scratch git working copy of this repo. If
                     given, the scenario's Definition of Done document is
                     copied to <path>/docs/DOD.md (or, for no-canon-fallback,
                     <path>/docs/DOD.md is removed if present). If omitted,
                     the script prints the cp/rm command instead of running it.
-                    For dirty-canon, the script additionally commits the
-                    placed document inside <path> and then applies an
-                    uncommitted local edit on top of it (or, if --worktree
-                    is omitted, prints those commands instead of running
-                    them); dirty-canon refuses to run at all against <path>
-                    when <path> is this repository's own working copy or a
-                    linked worktree of it, since either would leave a real
-                    uncommitted edit in a repo the scenario does not own.
+                    For dirty-canon and malformed-canon, the script
+                    additionally commits the placed document inside <path>
+                    and then applies that scenario's own pinned uncommitted
+                    edit on top of it (or, if --worktree is omitted, prints
+                    those commands instead of running them); dirty-canon
+                    edits an unrelated line, malformed-canon deletes the
+                    terminal Stamp: line. Both refuse to run at all against
+                    <path> when <path> is this repository's own working
+                    copy or a linked worktree of it, since either would
+                    leave a real uncommitted edit in a repo the scenario
+                    does not own.
 
 --check <file>      a transcript file you already captured from dispatching
                     the agent skill. Runs check-markers.sh against it with
@@ -77,6 +82,18 @@ Usage:
                     condition is a transcript read (see README.md
                     Section 3), and its DOD-GATE: FAIL forbid carries the
                     same grounding-driven caveat as evidence-complete's.
+                    malformed-canon's set is one --require and three
+                    --forbid literals: --require 'DOD-MALFORMED:' (the
+                    consumer's refusal marker for an unparseable canon)
+                    plus --forbid on all three verdict markers
+                    (DOD-VIOLATION:, DOD-GATE: FAIL, DOD-STALE: canon v),
+                    since a consumer that refuses to evaluate the canon
+                    must not also emit a verdict from evaluating it. This
+                    check is close to a full pass condition on its own --
+                    unlike evidence-complete and dirty-canon, malformed-canon
+                    has no grounding-driven caveat on its DOD-GATE: FAIL
+                    forbid, since a correctly-refusing consumer never
+                    reaches evidence evaluation at all.
 
 Every invocation is a dry run unless --worktree and/or --check are given:
 with neither flag, the script only prints the steps for the named scenario.
@@ -92,6 +109,30 @@ list_scenarios() {
 fail() {
   echo "run-scenario.sh: $*" >&2
   exit 2
+}
+
+# Step 2b proof functions -- one per mutating scenario, each asserting on
+# a command's exit status or exact output (never on emptiness alone), so
+# a mutation that silently failed to apply is a hard script failure
+# rather than a scenario that quietly runs against unmutated state. Each
+# takes the target worktree path as its only argument. Add a new
+# scenario's own proof function here without touching the shared Step 2b
+# flow below.
+proof_dirty_canon() {
+  local wt="$1" numstat diff_text
+  numstat="$(git -C "$wt" diff --numstat -- docs/DOD.md)"
+  [[ "$numstat" == $'1\t1\tdocs/DOD.md' ]] || fail "induced-state proof failed: expected 'git diff --numstat -- docs/DOD.md' to read exactly '1<TAB>1<TAB>docs/DOD.md', got: $numstat"
+  diff_text="$(git -C "$wt" diff -- docs/DOD.md)"
+  [[ "$diff_text" == *"(edited locally)"* ]] || fail "induced-state proof failed: 'git diff -- docs/DOD.md' does not contain '(edited locally)'"
+  echo "Step 2b: induced-state proof -- numstat: $numstat"
+}
+
+proof_malformed_canon() {
+  local wt="$1"
+  if grep -q '^Stamp:' "$wt/docs/DOD.md"; then
+    fail "induced-state proof failed: expected no line starting with 'Stamp:' in $wt/docs/DOD.md after mutation, but found one"
+  fi
+  echo "Step 2b: induced-state proof -- confirmed no line in $wt/docs/DOD.md starts with 'Stamp:'"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -151,7 +192,10 @@ DOC_IS_VARIANT=0
 VARIANT_SOURCE=""
 VARIANT_SENTINEL=""
 REQUEST_SOURCE=""
-DIRTY_AFTER_PLACE=0
+MUTATE_AFTER_PLACE=0
+MUTATION_SED=""
+MUTATION_DESC=""
+MUTATION_PROOF_FN=""
 declare -a CHECK_ARGS=()
 
 case "$SCENARIO" in
@@ -207,13 +251,33 @@ case "$SCENARIO" in
   dirty-canon)
     DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
     REQUEST_SOURCE="completion-claim-scenarios.md, Case B"
-    DIRTY_AFTER_PLACE=1
+    MUTATE_AFTER_PLACE=1
+    MUTATION_SED='s/backend parcel-routing service/backend parcel-routing service (edited locally)/'
+    MUTATION_DESC="applied an uncommitted local edit to docs/DOD.md"
+    MUTATION_PROOF_FN=proof_dirty_canon
     # Forbid-only screen (necessary, not sufficient -- see README.md
     # Section 3): the DOD-GATE: FAIL forbid carries the same
     # grounding-driven caveat as evidence-complete's; the other two
     # forbids have no such caveat. The scenario's actual pass condition
     # is a transcript read for the uncommitted-edit disclosure.
     CHECK_ARGS=(--forbid 'DOD-VIOLATION:' --forbid 'DOD-GATE: FAIL' --forbid 'DOD-STALE: canon v')
+    ;;
+  malformed-canon)
+    DOC_FIXTURE="$SCRIPT_DIR/completion-claim-canon.md"
+    REQUEST_SOURCE="completion-claim-scenarios.md, Case B"
+    MUTATE_AFTER_PLACE=1
+    MUTATION_SED='/^Stamp: v1$/d'
+    MUTATION_DESC="deleted the terminal 'Stamp: v1' line from docs/DOD.md"
+    MUTATION_PROOF_FN=proof_malformed_canon
+    # Require-plus-forbid (see README.md Section 3): a consumer that
+    # refuses to evaluate an unparseable canon must not also emit a
+    # verdict marker from evaluating it, so every verdict marker is
+    # forbidden alongside the required refusal marker. No
+    # grounding-driven caveat applies here (unlike evidence-complete and
+    # dirty-canon): a correctly-refusing consumer never reaches evidence
+    # evaluation, so a DOD-GATE: FAIL forbid failure here is always a
+    # real finding.
+    CHECK_ARGS=(--require 'DOD-MALFORMED:' --forbid 'DOD-VIOLATION:' --forbid 'DOD-GATE: FAIL' --forbid 'DOD-STALE: canon v')
     ;;
 esac
 
@@ -233,20 +297,26 @@ if [[ "$DOC_IS_VARIANT" -eq 1 ]]; then
   DOC_FIXTURE="$MATERIALIZED"
 fi
 
-# Guard: dirty-canon commits to and then dirties docs/DOD.md in whatever
+# Guard: any scenario with MUTATE_AFTER_PLACE=1 (currently dirty-canon,
+# malformed-canon) commits to and then mutates docs/DOD.md in whatever
 # worktree it targets, so refuse to run it against this repository's own
 # working copy or a linked worktree of it -- either would leave real,
 # unintended commit and edit state behind in a repo the scenario does not
-# own. This must run before Step 2's cp touches anything.
-if [[ "$SCENARIO" == "dirty-canon" && -n "$WORKTREE" ]]; then
+# own. This must run before Step 2's cp touches anything. The case
+# statement above (which sets each scenario's MUTATE_AFTER_PLACE flag and
+# MUTATION_* variables) always runs before this guard, since it appears
+# earlier in the script -- checking the flag directly here, rather than a
+# separate name list, means a future mutating scenario cannot forget to
+# arm the guard: the same case arm that defines the mutation also arms it.
+if [[ "$MUTATE_AFTER_PLACE" -eq 1 && -n "$WORKTREE" ]]; then
   [[ -d "$WORKTREE" ]] || fail "--worktree path does not exist: $WORKTREE"
   TARGET_GIT_COMMON_DIR="$(git -C "$WORKTREE" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   SELF_GIT_COMMON_DIR="$(git -C "$SCRIPT_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
   if [[ -z "$TARGET_GIT_COMMON_DIR" ]]; then
-    fail "refusing to run dirty-canon against $WORKTREE: it is not a git repository (git -C '$WORKTREE' rev-parse --git-common-dir found none). dirty-canon needs an unrelated scratch git repository to commit the placed canon into -- run 'git init' there first."
+    fail "refusing to run $SCENARIO against $WORKTREE: it is not a git repository (git -C '$WORKTREE' rev-parse --git-common-dir found none). $SCENARIO needs an unrelated scratch git repository to commit the placed canon into -- run 'git init' there first."
   fi
   if [[ "$TARGET_GIT_COMMON_DIR" == "$SELF_GIT_COMMON_DIR" ]]; then
-    fail "refusing to run dirty-canon against $WORKTREE: it shares this repository's own git-common-dir ($SELF_GIT_COMMON_DIR), so it is this repository's own working copy or a linked worktree of it. dirty-canon commits to and dirties docs/DOD.md in its target -- point --worktree at an unrelated scratch git repository instead."
+    fail "refusing to run $SCENARIO against $WORKTREE: it shares this repository's own git-common-dir ($SELF_GIT_COMMON_DIR), so it is this repository's own working copy or a linked worktree of it. $SCENARIO commits to and mutates docs/DOD.md in its target -- point --worktree at an unrelated scratch git repository instead."
   fi
 fi
 
@@ -272,32 +342,34 @@ else
 fi
 echo
 
-# Step 2b: for dirty-canon, commit the placed canon as a baseline and then
-# apply an uncommitted local edit on top of it, so the scenario starts from
-# a real ratified baseline with one deliberate uncommitted change -- the
-# same shape the completion-gate consumer's warn-and-continue rule is
-# meant to handle.
-if [[ "$DIRTY_AFTER_PLACE" -eq 1 ]]; then
+# Step 2b: for any scenario with MUTATE_AFTER_PLACE=1 (currently
+# dirty-canon, malformed-canon), commit the placed canon as a baseline
+# and then apply that scenario's own pinned uncommitted edit on top of
+# it, so
+# the scenario starts from a real ratified baseline with one deliberate
+# uncommitted mutation -- the same shape the completion-gate consumer's
+# warn-and-continue and malformed-canon-refusal rules are meant to
+# handle. The edit command (MUTATION_SED), its description
+# (MUTATION_DESC), and its proof function (MUTATION_PROOF_FN) are all set
+# per-scenario in the case statement above; this shared block never
+# changes when a new mutating scenario is added.
+if [[ "$MUTATE_AFTER_PLACE" -eq 1 ]]; then
   if [[ -n "$WORKTREE" ]]; then
     if [[ -n "$(git -C "$WORKTREE" status --porcelain -- docs/DOD.md)" ]]; then
       git -C "$WORKTREE" add -- docs/DOD.md
-      git -C "$WORKTREE" -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -q -m "test: canon baseline for dirty-canon scenario" -- docs/DOD.md
+      git -C "$WORKTREE" -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -q -m "test: canon baseline for $SCENARIO scenario" -- docs/DOD.md
       echo "Step 2b: committed the placed canon as a baseline in $WORKTREE"
     else
       echo "Step 2b: $WORKTREE/docs/DOD.md already matches its last commit (baseline already committed, skipping)"
     fi
-    sed -i 's/backend parcel-routing service/backend parcel-routing service (edited locally)/' "$WORKTREE/docs/DOD.md"
-    echo "Step 2b: applied an uncommitted local edit to $WORKTREE/docs/DOD.md"
-    NUMSTAT="$(git -C "$WORKTREE" diff --numstat -- docs/DOD.md)"
-    [[ "$NUMSTAT" == $'1\t1\tdocs/DOD.md' ]] || fail "induced-state proof failed: expected 'git diff --numstat -- docs/DOD.md' to read exactly '1<TAB>1<TAB>docs/DOD.md', got: $NUMSTAT"
-    DIFF_TEXT="$(git -C "$WORKTREE" diff -- docs/DOD.md)"
-    [[ "$DIFF_TEXT" == *"(edited locally)"* ]] || fail "induced-state proof failed: 'git diff -- docs/DOD.md' does not contain '(edited locally)'"
-    echo "Step 2b: induced-state proof -- numstat: $NUMSTAT"
+    sed -i "$MUTATION_SED" "$WORKTREE/docs/DOD.md"
+    echo "Step 2b: $MUTATION_DESC"
+    "$MUTATION_PROOF_FN" "$WORKTREE"
   else
-    echo "Step 2b: in your scratch worktree, commit the placed canon as a baseline (only if it is not already committed), then apply an uncommitted local edit:"
+    echo "Step 2b: in your scratch worktree, commit the placed canon as a baseline (only if it is not already committed), then apply this scenario's pinned edit:"
     echo "  git add -- docs/DOD.md"
-    echo "  git -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -m 'test: canon baseline for dirty-canon scenario' -- docs/DOD.md"
-    echo "  sed -i 's/backend parcel-routing service/backend parcel-routing service (edited locally)/' docs/DOD.md"
+    echo "  git -c user.name=dod-fixture -c user.email=dod-fixture@invalid commit -m 'test: canon baseline for $SCENARIO scenario' -- docs/DOD.md"
+    echo "  sed -i '$MUTATION_SED' docs/DOD.md"
   fi
   echo
 fi

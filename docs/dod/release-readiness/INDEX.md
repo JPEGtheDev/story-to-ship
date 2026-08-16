@@ -11,8 +11,8 @@ related:
 
 # Release Readiness Index
 
-Subdomain index for `docs/dod/release-readiness/`, the DoD canon's
-release-readiness layer detail files.
+Subdomain index for `docs/dod/release-readiness/`, the Definition of
+Done (DoD) canon's release-readiness layer detail files.
 
 ## Files
 

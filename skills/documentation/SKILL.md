@@ -9,7 +9,7 @@ description: Use when creating docs, updating guides, writing API references, or
 
 ```
 EVERY DOC IS SMALL, TAGGED, AND LINKED -- ONE CONCEPT PER FILE
-YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom (sole exception: `docs/DOD.md` -- see the defining-done skill's canon template). No exceptions.
+YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom of every doc except `docs/DOD.md` (see the defining-done skill's canon template). No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.

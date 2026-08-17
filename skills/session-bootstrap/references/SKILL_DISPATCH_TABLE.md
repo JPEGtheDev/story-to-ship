@@ -75,8 +75,8 @@ core by the per-turn injection block -- `hooks/pre-message-gates.md`'s "Core Ski
 Routing" section states "For multi-step planning, load `writing-plans` first." This
 conflicts with the plugin-split core manifest per a 2026-07-26 user ruling: honesty,
 session-bootstrap, verification-before-completion, subagent-driven-development,
-using-git-worktrees, plus the 5 generic agent templates (amended 2026-08-16 by owner
-ruling to include `communication` -- six skills) -- `writing-plans` is omitted
+using-git-worktrees (amended 2026-08-16 by owner ruling to include `communication`
+-- six skills), plus the 5 generic agent templates -- `writing-plans` is omitted
 from that manifest. The ruling is recorded in this session's corrections plan, an
 UNTRACKED scratch artifact (not in git history, not searchable via `git log` or issue
 tracker) -- it will be formalized in the future plugin-split tracking issue. This

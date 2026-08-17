@@ -5,12 +5,12 @@
 FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT.
 ```
 
-Check this session's visible context now for a completed `Skill` tool call with `skill: honesty`.
+Check this session's visible context now for completed `Skill` tool calls with `skill: honesty` and `skill: communication`.
 
-- If the call is absent: invoke the `Skill` tool with `skill: honesty` in THIS response, after any required `Skill(session-bootstrap)` call returns.
-- If the completed call is visible: proceed to "Banned Vocabulary Reminders" below.
+- If either call is absent: invoke the `Skill` tool with `skill: honesty` and/or `skill: communication` in THIS response, after any required `Skill(session-bootstrap)` call returns.
+- If both completed calls are visible: proceed to "Banned Vocabulary Reminders" below.
 
-Do NOT announce "I am using the honesty skill" without the matching `Skill` tool call in the same response.
+Do NOT announce "I am using the honesty skill" or "I am using the communication skill" without the matching `Skill` tool call in the same response.
 
 ---
 
@@ -25,7 +25,7 @@ These words require prior verification and inline evidence. STOP before using:
 | "Tests pass", "Build succeeds" | Ran [cmd]: [output]. N passed, 0 failures. |
 | "I'm confident", "I'm sure" | State the evidence you have. No evidence = no claim. |
 
-For full ban tables, Red Flags, rationalization prevention, and process language, see the skill.
+For full ban tables, Red Flags, rationalization prevention, and process language, see honesty and communication.
 
 ---
 

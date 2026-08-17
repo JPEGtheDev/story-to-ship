@@ -101,3 +101,13 @@ Unresolved issues: [list]
 2. Do not penalize the article for being shorter than the source -- compression is intentional.
 3. Do not add new content during revision. Return only a list of corrections for the synthesizer to apply.
 4. Always write to `{{OUTPUT_PATH}}` at the end of the process -- either clean or with warnings.
+
+## Keep Reasoning Terse
+
+Keep reasoning terse: fact, options, decision, next action. One line per
+mechanical step; a paragraph only at a genuine fork. Delete any reasoning
+sentence that neither changes the next action nor records a fact needed later
+-- performative prose (coined frameworks, "crucially", "it is worth noting") is
+the class, broader than these examples. Never skip a required check, hypothesis
+statement, or tripwire question to save tokens: those sentences are the work.
+This governs reasoning only, never the deliverable text.

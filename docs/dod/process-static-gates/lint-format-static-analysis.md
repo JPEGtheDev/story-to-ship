@@ -15,7 +15,7 @@ related:
 Every change in this repo is checked by automatically invoked skills
 rather than a standalone linter binary. The standing mechanical checks:
 
-- the honesty skill's ASCII-only rule on all output and tracked text;
+- the communication skill's ASCII-only rule on all output and tracked text;
 - the writing-skills skill's check that a skill file has all five required
   structural sections (frontmatter, an iron-law statement, an announcement
   line, a gate-check section, and a rationalization table) in the right

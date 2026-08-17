@@ -60,23 +60,24 @@ jobs:
           printf '%s' "$out" | jq empty || { echo "FAILED: empty-stdin output not valid JSON"; exit 1; }
           echo "[+] Stop turn-log hook: fixture suite passed and empty-stdin is wedge-safe"
 
-      # Cap raised from 400 to 470 to fit the "Core Skill Routing (per turn)"
-      # block in hooks/pre-message-gates.md (the per-turn skill-map routing
-      # text injected into every message); slack kept <=20 words above the
-      # actual combined total (gates + message, currently 460) to preserve
-      # the budget's anti-creep function (a large buffer defeats the point
-      # of the gate).
+      # Cap raised from 470 to 495 to fit the communication skill into the
+      # "Core Skill Routing (per turn)" block in hooks/pre-message-gates.md
+      # and the Skill-call check in hooks/pre-message.md (both now name
+      # honesty and communication); slack kept <=20 words above the actual
+      # combined total (gates + message, currently 477) to preserve the
+      # budget's anti-creep function (a large buffer defeats the point of
+      # the gate).
       - name: Enforce pre-message hook word budget
         run: |
           gates=$(wc -w < hooks/pre-message-gates.md)
           message=$(wc -w < hooks/pre-message.md)
           total=$((gates + message))
-          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 470)"
-          if [ "$total" -gt 470 ]; then
-            echo "FAILED: combined pre-message hook word count $total exceeds 470"
+          echo "pre-message-gates.md: $gates words; pre-message.md: $message words; combined: $total (limit 495)"
+          if [ "$total" -gt 495 ]; then
+            echo "FAILED: combined pre-message hook word count $total exceeds 495"
             exit 1
           fi
-          echo "[+] Combined pre-message hook injection is within the 470-word budget"
+          echo "[+] Combined pre-message hook injection is within the 495-word budget"
 
       - name: Check for broken references in skill files
         run: |
@@ -139,6 +140,8 @@ jobs:
           check skills/execution/SKILL.md "## Canary"
           check skills/honesty/SKILL.md "buried caveat"
           check skills/honesty/SKILL.md "Self-blame needs the same evidence bar"
+          check skills/communication/SKILL.md "if you have to parse the reply's wording to decide whether it counts as approval, it is not approval"
+          check skills/communication/SKILL.md "Define every term of art in one plain clause at its first use"
           check skills/self-evaluation/SKILL.md "Failure-instance evidence bar" "first-action-audit.sh"
           check agents/postmortem-reviewer.md "{{TRANSCRIPT_PATH}}" "blame direction"
           if [ "$missing" -gt 0 ]; then
@@ -146,6 +149,29 @@ jobs:
             exit 1
           fi
           echo "[+] All agent template contracts present"
+
+      # This 20,000-character cap (roughly 5,000 tokens at the documented
+      # chars/4 estimate) is enforced here only for skills/honesty/SKILL.md
+      # and skills/communication/SKILL.md: this pair was measured and brought
+      # under the cap when the honesty skill was split into these two files.
+      # No repo-wide skill-size cap is CI-enforced; other skills have not
+      # been measured or adjudicated against this limit.
+      - name: Enforce size cap on honesty and communication skills
+        run: |
+          set -e
+          limit=20000
+          over=0
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md; do
+            size=$(wc -c < "$f")
+            if [ "$size" -gt "$limit" ]; then
+              echo "FAILED: $f is $size characters, exceeding the $limit-character limit"
+              over=$((over + 1))
+            fi
+          done
+          if [ "$over" -gt 0 ]; then
+            exit 1
+          fi
+          echo "[+] honesty and communication skill files are within the $limit-character cap"
 
       - name: Hook script smoke test
         run: |

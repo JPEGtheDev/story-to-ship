@@ -29,7 +29,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | Skill | Purpose |
 |-------|---------|
 | `honesty` | Evidence gate -- bans unverified completion claims, enforces inline verification |
-| `communication` | Register gate -- plain language for user-facing text, hedged-assent parse test, terse reasoning |
+| `communication` | Plain-language gate -- defines jargon in user-facing text, treats hedged agreement as unclear writing not approval, keeps reasoning terse |
 | `verification-before-completion` | Hard stop before any "done" claim |
 
 ### Requirements and Discovery

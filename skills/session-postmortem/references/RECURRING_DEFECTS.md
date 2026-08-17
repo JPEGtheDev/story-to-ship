@@ -97,7 +97,7 @@ Each entry has:
 ### RD-09: banned-language-used
 - signature: Used banned honesty vocabulary in output.
 - count: 5 (mined 2026-07-19)   domain: general
-- maps-to: skill: honesty
+- maps-to: skill: honesty (confidence class) / communication (hedge class)
 
 ### RD-10: weak-imperative-language
 - signature: Authored 'should/prefer/consider' where a MUST was required.

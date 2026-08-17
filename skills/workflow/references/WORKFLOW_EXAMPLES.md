@@ -187,7 +187,7 @@ When a hook exceeds the limit:
 
 **Rule:** Every hook content file MUST stay under 10,000 characters. Verify with `wc -c hooks/*.md`.
 
-Split large hook content into separate hooks, each under the limit. The project's UserPromptSubmit hooks demonstrate this pattern: `pre-message-gates.md` (bootstrap check, ~1.5KB) and `pre-message.md` (honesty gate, ~9.5KB) are separate hooks, each under the 10,000-character ceiling.
+Split large hook content into separate hooks, each under the limit. The project's UserPromptSubmit hooks demonstrate this pattern: `pre-message-gates.md` (bootstrap check and core-skill routing, ~1.6KB) and `pre-message.md` (honesty and communication gate, ~1.6KB) are separate hooks, each under the 10,000-character ceiling.
 
 **Check sizes:**
 ```bash

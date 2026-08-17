@@ -58,7 +58,7 @@ INCORRECT: "I ran the tests and they passed."
 
 ---
 
-## Top 11 Iron Laws -- Non-Negotiable
+## Top 12 Iron Laws -- Non-Negotiable
 
 | # | Law | Skill |
 |---|-----|-------|
@@ -73,6 +73,7 @@ INCORRECT: "I ran the tests and they passed."
 | 9 | **DISPATCH BEFORE GUESSING.** No theory, memory, or assumption justifies action. Point to a file/line/test, or dispatch. | `subagent-driven-development` |
 | 10 | **DISPATCH REVIEWERS AFTER EVERY TODO.** Stage 1: spec compliance. Stage 2: code quality. No next todo without both. | `subagent-driven-development` |
 | 11 | **THE BROWN M&M LAW.** Every skill with a `## Canary` section: produce that canary output when applying the skill. A missing canary is a trust violation. | `subagent-driven-development` |
+| 12 | **IF THE READER MUST PARSE IT, YOU HAVE NOT SAID IT.** Write so the reader can act without decoding; read replies without wishful decoding. | `communication` |
 
 **If you are tempted to rationalize past any of these: that thought is the rationalization. Stop. Follow the rule.**
 
@@ -94,6 +95,7 @@ loading a skill:
 | Unclear approach or design | `brainstorming` |
 | Dispatching subagents | `subagent-driven-development` |
 | Claiming work is done | `verification-before-completion` |
+| Writing any user-facing text, or reading a user's reply | `communication` |
 | Creating PR or commit | `versioning` |
 | CI/CD changes | `workflow` |
 

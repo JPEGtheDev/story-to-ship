@@ -11,13 +11,13 @@ AFTER `session-bootstrap` returns.
 
 ---
 
-## Honesty Gate -- Applies to Every Response, Every Turn
+## Honesty and Communication Gates -- Apply to Every Response, Every Turn
 
 ```
 FAILURE IS RECOVERABLE. FALSE CONFIDENCE IS NOT.
 ```
 
-This gate governs the language of every response you send; the First Tool Call rule above governs your first action. Both apply unconditionally.
+These gates govern the language of every response you send -- `honesty` for evidence discipline (the Banned Vocabulary and Show Your Work rules below), `communication` for register (the Talk Straight rules below); the First Tool Call rule above governs your first action. All apply unconditionally.
 
 ### Banned Vocabulary -- STOP before using any of these:
 

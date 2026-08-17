@@ -91,7 +91,7 @@ The Speed of Trust names 13 behaviors of high-trust actors. This repo practices 
 
 | Behavior | Mechanism in this repo (skill or gate) |
 |----------|----------------------------------------|
-| Talk Straight | `honesty` -- Talk Straight forbidden-hedge-vocabulary table |
+| Talk Straight | `communication` -- Talk Straight forbidden-hedge-vocabulary table |
 | Demonstrate Respect | `session-postmortem` -- consistency-under-low-scrutiny audit (cold read of the event log, regardless of outcome) |
 | Create Transparency | `honesty` -- buried-caveat transparency gate and Show Your Work inline evidence |
 | Right Wrongs | `execution` -- Right Wrongs protocol; `honesty` counterfeit-of-Right-Wrongs row |

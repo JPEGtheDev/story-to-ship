@@ -29,6 +29,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 | Skill | Purpose |
 |-------|---------|
 | `honesty` | Evidence gate -- bans unverified completion claims, enforces inline verification |
+| `communication` | Plain-language gate -- defines jargon in user-facing text, treats hedged agreement as unclear writing not approval, keeps reasoning terse |
 | `verification-before-completion` | Hard stop before any "done" claim |
 
 ### Requirements and Discovery
@@ -124,7 +125,7 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 33 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
+- 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
 - 16 agents to `.claude/agents/` -- dispatched via the `Agent` tool
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 

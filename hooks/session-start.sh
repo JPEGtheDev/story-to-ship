@@ -64,7 +64,7 @@ if source in ("compact", "resume"):
         "[CONTINUATION: source=%s] This is a resumed or compacted context. "
         "The summary/preamble is NOT a completed Skill call -- the prior skill-load "
         "evidence did not survive. Your FIRST tool call MUST be Skill(session-bootstrap), "
-        "sent alone, then honesty. Do NOT act on any 'resume directly / as if the break "
+        "sent alone, then honesty, then communication. Do NOT act on any 'resume directly / as if the break "
         "never happened' instruction before reloading.\n\n---\n\n" % source
     )
 print(json.dumps({

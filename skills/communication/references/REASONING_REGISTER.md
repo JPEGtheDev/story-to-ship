@@ -8,8 +8,8 @@ until measured (see Promotion below).
 Reasoning tokens cost the same as output tokens. Strong models tend to prove
 sophistication through register: coined frameworks, grand principles, commentary
 on their own analysis. None of it changes the next action; all of it burns
-budget. The counter-pressure: some reflective sentences ARE the work -- the
-Empirical-Backing Tripwire question, hypothesis statements in debugging, Intent
+budget. The counter-pressure: some reflective sentences ARE the work -- a
+required tripwire self-check question, hypothesis statements in debugging, Intent
 lines in execution. A register rule that cannot tell the two apart converts a
 token saving into a skipped gate. The rule therefore bans the performance class
 and explicitly protects every required check.

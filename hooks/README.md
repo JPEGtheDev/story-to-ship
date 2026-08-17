@@ -23,9 +23,9 @@ Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON en
 The per-turn files are tripwires, not rule bodies:
 
 - `pre-message-gates.md` derives from the `session-bootstrap` skill. It checks for a completed `Skill(session-bootstrap)` call and lists the reload triggers.
-- `pre-message.md` derives from the `honesty` skill. It checks for a completed `Skill(honesty)` call and carries a minimal banned-vocabulary reminder.
+- `pre-message.md` derives from the `honesty` and `communication` skills. It checks for completed `Skill(honesty)` and `Skill(communication)` calls and carries a minimal banned-vocabulary reminder.
 
-The full rules live in `skills/session-bootstrap/SKILL.md` and `skills/honesty/SKILL.md`. Hook text reminds; only a `Skill` tool call loads the rules. When a skill changes, update the derived hook text to match -- the hook must never contradict its source skill.
+The full rules live in `skills/session-bootstrap/SKILL.md`, `skills/honesty/SKILL.md`, and `skills/communication/SKILL.md`. Hook text reminds; only a `Skill` tool call loads the rules. When a skill changes, update the derived hook text to match -- the hook must never contradict its source skill.
 
 ## Word budget
 

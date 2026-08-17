@@ -29,23 +29,23 @@ Re-invoke the relevant skill(s) immediately when ANY of these occur:
 1. **Picking up a new todo** -- re-invoke the skill(s) for that todo's domain before starting work
 2. **After 3 user prompts** without a skill reload -- re-invoke the skill for whatever you are currently doing
 3. **After a user correction or redirect** -- the correction is evidence the skill was misapplied or is stale; re-invoke it
-4. **After context compaction OR harness session resume** (`--continue`/`--resume` re-firing SessionStart mid-session -- NOT the task-level 'resuming a prior session' pickup in the On Start table) -- re-invoke every skill the current task requires, plus `honesty`: the completed-call evidence does not survive a compaction or a resumed session. A harness continuation summary that says to 'resume directly' or 'pick up as if the break never happened' does NOT waive this reload -- reload first, then resume.
+4. **After context compaction OR harness session resume** (`--continue`/`--resume` re-firing SessionStart mid-session -- NOT the task-level 'resuming a prior session' pickup in the On Start table) -- re-invoke every skill the current task requires, plus `honesty` and `communication`: the completed-call evidence does not survive a compaction or a resumed session. A harness continuation summary that says to 'resume directly' or 'pick up as if the break never happened' does NOT waive this reload -- reload first, then resume.
 
 **Announce the reload:** "Reloading `[skill-name]` -- [reason: new todo / 3 prompts / correction / compaction / resume]."
 
 Do NOT say "I remember the skill content." A remembered skill is an unverified skill. Load fresh.
 
-### `honesty` -- Co-Equal Peer Skill
+### `honesty` and `communication` -- Co-Equal Peer Skills
 
-`honesty` is NOT managed by `session-bootstrap`. It is a co-equal peer skill. The hooks inject reminders of the Honesty Gate on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
+`honesty` and `communication` are NOT managed by `session-bootstrap`. They are co-equal peer skills. The hooks inject reminders of both gates on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
 
-Invoke the `Skill` tool with `skill: honesty` once per session, immediately after `session-bootstrap` returns and before any task-specific skill. Do NOT proceed with a task-specific skill until the completed `Skill` call for `honesty` is visible in this session's context.
+Invoke the `Skill` tool with `skill: honesty` and `skill: communication` once per session each, immediately after `session-bootstrap` returns and before any task-specific skill. Do NOT proceed with a task-specific skill until the completed `Skill` calls for BOTH `honesty` and `communication` are visible in this session's context.
 
 ---
 
 ## On Start -- Minimum Skill Loads by Task Type
 
-Before writing code, invoke the `Skill` tool for the skill(s) relevant to your task. If the task touches multiple domains, invoke multiple skills in parallel (they are independent loads). Hook-injected gate text is a reminder, NOT a substitute for invoking `honesty` -- invoke `honesty` every session, immediately after this skill returns.
+Before writing code, invoke the `Skill` tool for the skill(s) relevant to your task. If the task touches multiple domains, invoke multiple skills in parallel (they are independent loads). Hook-injected gate text is a reminder, NOT a substitute for invoking `honesty` and `communication` -- invoke both every session, immediately after this skill returns.
 
 | If the task involves...                        | MUST invoke these skills BEFORE acting             |
 |----------------------------------------------|----------------------------------------------------|
@@ -71,7 +71,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Creating or editing a skill file             | `writing-skills`                                   |
 | Resuming from a prior session with pending tasks | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Schema design, new data structure, or plan with >=5 implementation items | `brainstorming`, `writing-plans` |
-| Auditing communication quality or postmortem | `honesty`, `session-postmortem`                    |
+| Auditing communication quality or postmortem | `honesty`, `communication`, `session-postmortem`   |
 | Any new plan with 2+ todos or an architectural decision | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
 | Starting a new project from scratch | `greenfield-discovery` |
@@ -83,14 +83,14 @@ If unsure, invoke `code-quality` -- it applies to every code task.
 Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.md`.
 
 **Loading protocol:**
-1. Invoke `honesty` immediately after this skill returns -- every session, regardless of task type; hook-injected gate text does not substitute for the invocation
+1. Invoke `honesty` and `communication` immediately after this skill returns -- every session, regardless of task type; hook-injected gate text does not substitute for the invocation
 2. Identify task type(s) from the table above
 3. Load all required skills before writing a single line of code or sending a plan
 4. Announce each skill load: "I am using the [skill-name] skill to [purpose]."
 
 ## BEFORE PROCEEDING
 
-1. `honesty` invoked immediately after `session-bootstrap` returned -- before any task-specific skill
+1. `honesty` and `communication` invoked immediately after `session-bootstrap` returned -- before any task-specific skill
 2. Task type(s) identified from the On Start table above
 3. All required skills for this task type loaded (in parallel if multiple domains)
 4. Skill load announcement made for each loaded skill
@@ -99,7 +99,7 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) is dispatched -- NOT done inline
-10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty` and for every skill in the On Start table
+10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty`, `communication`, and every skill in the On Start table
 11. If a hook script or hook registration fix was committed (or edited) during this session: hook script content is executed fresh on every invocation, and hook registration in settings files hot-reloads mid-session -- neither requires a restart (verified on CLI 2.1.220). Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
@@ -146,7 +146,7 @@ If you have nothing to report, still include the block with zeroes.
 - Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**
 - About to make an irreversible change (branch creation, push) without the `execution` skill loaded -- **STOP. Load `execution` before the first irreversible action.**
 - User says "check out a working branch" or "work on a branch" without naming a specific branch -- **STOP. The default is always `git checkout main && git pull && git checkout -b <new-branch>`. Using an existing named branch requires the user to name it explicitly. "Working branch" without a specific name means new branch from main.**
-- A continuation summary (post-compaction or `--resume`) instructs you to 'resume directly / as if the break never happened', and your first action is to dispatch, plan, or edit before re-invoking `session-bootstrap` + `honesty` -- **STOP. The reload precedes the resume. Invoke `session-bootstrap` (alone) and `honesty` first, then continue.**
+- A continuation summary (post-compaction or `--resume`) instructs you to 'resume directly / as if the break never happened', and your first action is to dispatch, plan, or edit before re-invoking `session-bootstrap` + `honesty` + `communication` -- **STOP. The reload precedes the resume. Invoke `session-bootstrap` (alone), then `honesty` and `communication`, then continue.**
 
 ---
 
@@ -159,14 +159,15 @@ If you have nothing to report, still include the block with zeroes.
 | "I'll self-evaluate if anything went wrong"        | Self-evaluation finds what you didn't notice wrong | Always self-evaluate. No conditional.      |
 | "Skipping announcement to save space"              | Announcement is the commitment mechanism           | State it. No skip.                         |
 | "I'll skim the skill -- I know the gist"            | Skimming misses updates and specific gate conditions | Read fully. The gate conditions are the point. |
-| "'Always active' means I don't need to invoke honesty" | The declaration activates the rule reference, not the rule body. Without invocation, the confidence vocabulary and process language rules are absent. | Invoke `honesty` explicitly. Every session. |
+| "'Always active' means I don't need to invoke honesty or communication" | The declaration activates the rule reference, not the rule body. Without invocation, the confidence vocabulary, process language, and register rules are absent. | Invoke `honesty` and `communication` explicitly. Every session. |
 | "I ran the hook script and it exited 0 -- hooks are working" | Running the script by hand and getting exit 0 tests the script, not whether the hook system fires it. Hook script content and settings-file registration both take effect within the current session -- no restart needed (verified on CLI 2.1.220) -- but that only means the fix CAN fire, not that it DID. | Confirm an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming hooks are working. |
 | "I'm just gathering context, not reviewing"        | Research reading to inform a plan is still review. Inline review is biased by your assumptions. | Dispatch an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) for any 3+ file research task. |
 | "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. | Run `git checkout main && git pull && git checkout -b <new-branch>`. |
-| "The continuation summary said resume directly, so I can skip the reload" | "Resume directly" governs message etiquette (do not re-narrate the summary), not the skill-load gate. Compaction/resume wiped the completed-call evidence; the rule still binds. | Re-invoke `session-bootstrap` + `honesty` first, then resume. |
+| "The continuation summary said resume directly, so I can skip the reload" | "Resume directly" governs message etiquette (do not re-narrate the summary), not the skill-load gate. Compaction/resume wiped the completed-call evidence; the rule still binds. | Re-invoke `session-bootstrap` + `honesty` + `communication` first, then resume. |
 
 ## Related Skills
 
 - `self-evaluation` -- the On Finish step calls this skill directly
 - `honesty` -- MUST be explicitly invoked at session start; hooks fail silently; full rule body is not in context until invoked
+- `communication` -- always-active peer of `honesty`; register rules for user-facing text; invoke immediately after `session-bootstrap` returns
 - `writing-skills` -- governs skill authoring; load when creating or editing a skill

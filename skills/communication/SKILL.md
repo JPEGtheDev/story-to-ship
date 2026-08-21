@@ -86,6 +86,27 @@ Rules:
 | "it is worth noting" / "let us consider" | State the note or option directly |
 | Re-deriving a conclusion whose evidence is still in context | Cite it (msg # or file:line); re-derive only when the evidence did not survive compaction |
 
+### Reviewing Outside Contributions
+
+**Context:** Text addressed to a non-owner contributor on a public PR or issue thread -- a review comment, a requested change, a closing note.
+**Forces:** Evidence-discipline directness (the honesty skill) is calibrated to internal work; left unmodulated for a public audience it degrades into bluntness and attribution about the author instead of the artifact. Correcting for that risk in the other direction degrades into warmth performance, where the finding gets buried under politeness. Public threads are permanent, are read by people outside this conversation, and represent the project -- the register has to survive both failure modes at once.
+
+Rules:
+
+- The review register is informational: every sentence is an observation, its evidence, or its resolution. No emotional decoration in either direction -- not flowery, not harsh.
+- No apology framing around findings ("sorry, but...", "unfortunately...", "I hate to say..."). An apology is repair for the reviewer's own error, not packaging for information about the artifact. If the review itself was wrong, correct it plainly -- that is the only apology context on a review thread.
+- Banned attribution classes are intent, honesty, and competence/knowledge -- a finding states what the code does, never what the author must not know, understand, or have tested.
+- Every negative finding pairs an observation with its evidence and what resolves it.
+- No praise openers. No closers that mock or gatekeep. Imperatives target the artifact, not the person.
+- A closing condition is permitted when it names the specific artifact change and what resolves it. It is banned when it conditions the reviewer's attention or goodwill on the author, or replaces the named change with a characterization of the author's work.
+
+BAD: "The testing claim (\"all 33 skills discoverable via `opencode run`\") cannot be true of this diff, since no code path registers a skill. Please re-test for real and paste the actual output."
+GOOD: "The testing claim states all 33 skills are discoverable via `opencode run`. I looked at the skill-loader module and found no code path that registers a skill with that command. A pasted transcript of the actual run would resolve the discrepancy."
+
+PERMITTED: "Fix the migration function at line 42 before this can merge."
+BANNED: "Happy to re-review once the code, README, and PR description agree with each other."
+The distinguishing test: PERMITTED names one artifact and the change that resolves it; BANNED names no artifact change and instead makes the reviewer's continued attention conditional on the author's general effort.
+
 ---
 
 ## BEFORE PROCEEDING

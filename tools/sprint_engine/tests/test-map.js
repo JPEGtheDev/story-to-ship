@@ -522,6 +522,41 @@ async function main() {
     check('the halt uses the map-steps-not-array diagnostic', !!outcome.halt && outcome.halt.diagnostic === 'map-steps-not-array');
   }
 
+  // -- guard: a map body step declared with the literal id "item" collides
+  // -- with the synthetic per-iteration item key. Without this guard, the --
+  // -- step would still DISPATCH (spend occurs) and its result would then --
+  // -- be silently excluded from both <mapId>.<index>.item and the --------
+  // -- <mapId>.<index> keyed object -- status completed, halt null, the ---
+  // -- work surviving only buried in the trace. This is spend-attached ----
+  // -- silent data loss, the same class the contract's undefined-sentinel -
+  // -- rationale forbids elsewhere -- so this halts BEFORE any iteration --
+  // -- dispatches, exactly like the other malformed-shape guards above ----
+  {
+    const spec = {
+      steps: [
+        { id: 'chapterList', type: 'shape', template: { chapters: ['ch0'] } },
+        {
+          id: 'chapters',
+          type: 'map',
+          list: { step: 'chapterList', field: 'chapters' },
+          steps: [{ id: 'item', type: 'agent', prompt: 'summarize {{item}}' }],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ item: { ok: true } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a map body step declared with id "item" halts the whole run', outcome.status === 'failed');
+    check(
+      'the halt uses the map-body-step-id-item-reserved diagnostic',
+      !!outcome.halt && outcome.halt.diagnostic === 'map-body-step-id-item-reserved'
+    );
+    check(
+      'a map body step declared with id "item" is NEVER dispatched -- the guard fires before any spend occurs',
+      dispatch.calls.length === 0
+    );
+  }
+
   // -- malformed shape, execute-time guard: "list" missing entirely -------
   {
     const spec = {
@@ -590,6 +625,139 @@ async function main() {
     const outcome = await specEngineExecute(spec, dispatch);
     check('a map step whose resolved list is not an array halts the whole run', outcome.status === 'failed');
     check('the halt uses the map-list-not-array diagnostic', !!outcome.halt && outcome.halt.diagnostic === 'map-list-not-array');
+  }
+
+  // -- coverage: a 3-item map with a 3-step bare-name chain body ----------
+  // -- (stepA -> stepB -> stepC within each iteration), mirroring the ------
+  // -- ratified book/chapters worked example (split -> summarize -> -------
+  // -- consolidate). Pins per-step keys, the keyed-object iteration -------
+  // -- result carrying all 3 step IDs, and direction-sensitive item -------
+  // -- routing (iteration 0 got the FIRST item, iteration 2 the THIRD) ----
+  {
+    const spec = {
+      steps: [
+        { id: 'chapterList', type: 'shape', template: { chapters: ['ch0', 'ch1', 'ch2'] } },
+        {
+          id: 'chapters',
+          type: 'map',
+          list: { step: 'chapterList', field: 'chapters' },
+          steps: [
+            { id: 'stepA', type: 'agent', prompt: 'A sees {{item}}' },
+            { id: 'stepB', type: 'agent', prompt: 'B sees {{stepA.text}}' },
+            { id: 'stepC', type: 'agent', prompt: 'C sees {{stepB.text}}' },
+          ],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = async function (step, context) {
+      if (step.id === 'stepA') {
+        return { text: 'A-' + context.results.item };
+      }
+      if (step.id === 'stepB') {
+        return { text: 'B-' + context.results.stepA.text };
+      }
+      return { text: 'C-' + context.results.stepB.text };
+    };
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a 3-item map with a 3-step bare-name chain body completes', outcome.status === 'completed');
+    check(
+      'per-step <mapId>.<index>.<stepId> keys are present for all three steps, in iterations 0 and 2',
+      typeof outcome.results['chapters.0.stepA'] !== 'undefined' &&
+        typeof outcome.results['chapters.0.stepB'] !== 'undefined' &&
+        typeof outcome.results['chapters.0.stepC'] !== 'undefined' &&
+        typeof outcome.results['chapters.2.stepA'] !== 'undefined' &&
+        typeof outcome.results['chapters.2.stepB'] !== 'undefined' &&
+        typeof outcome.results['chapters.2.stepC'] !== 'undefined'
+    );
+    check(
+      'the keyed-object iteration result carries exactly the 3 step IDs the body declares, no more and no fewer',
+      !!outcome.results['chapters.0'] &&
+        Object.keys(outcome.results['chapters.0']).length === 3 &&
+        Object.keys(outcome.results['chapters.0']).indexOf('stepA') !== -1 &&
+        Object.keys(outcome.results['chapters.0']).indexOf('stepB') !== -1 &&
+        Object.keys(outcome.results['chapters.0']).indexOf('stepC') !== -1
+    );
+    check(
+      'the bare-name chain resolved end-to-end within each iteration (stepC traces back through stepB and stepA)',
+      !!outcome.results['chapters.0.stepC'] &&
+        outcome.results['chapters.0.stepC'].text === 'C-B-A-ch0' &&
+        !!outcome.results['chapters.2.stepC'] &&
+        outcome.results['chapters.2.stepC'].text === 'C-B-A-ch2'
+    );
+    check(
+      'iteration 0 got the FIRST list item and iteration 2 got the THIRD, never swapped (direction-sensitive)',
+      !!outcome.results['chapters.0.stepA'] &&
+        outcome.results['chapters.0.stepA'].text === 'A-ch0' &&
+        !!outcome.results['chapters.2.stepA'] &&
+        outcome.results['chapters.2.stepA'].text === 'A-ch2'
+    );
+  }
+
+  // -- coverage: POSITIVE field-absent list case -- list: { step } where --
+  // -- the named step's ENTIRE result IS the array (not a field carved ----
+  // -- out of a wrapper object). The existing malformed-shape guards only -
+  // -- prove the negative side of this; this proves the happy path -------
+  // -- actually iterates, not just that it validates. ----------------------
+  {
+    const spec = {
+      steps: [
+        { id: 'chapterList', type: 'agent' },
+        {
+          id: 'chapters',
+          type: 'map',
+          list: { step: 'chapterList' },
+          steps: [{ id: 'summarize', type: 'agent', prompt: 'summarize {{item}}' }],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = async function (step, context) {
+      if (step.id === 'chapterList') {
+        return ['ch0', 'ch1'];
+      }
+      return { text: 'summary-of-' + context.results.item };
+    };
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a map step whose list.step result IS the array directly (no "field") completes', outcome.status === 'completed');
+    check(
+      'both iterations ran against the field-absent array source, each against its own item, in order (direction-sensitive)',
+      !!outcome.results['chapters.0'] &&
+        outcome.results['chapters.0'].text === 'summary-of-ch0' &&
+        !!outcome.results['chapters.1'] &&
+        outcome.results['chapters.1'].text === 'summary-of-ch1'
+    );
+  }
+
+  // -- coverage: a post-map step consumes ONE SPECIFIC iteration's key ----
+  // -- via a dotted template reference ({{mapId.1.stepX.field}}), and the -
+  // -- rendered value must come from THAT iteration, not an adjacent one --
+  // -- (direction-sensitive: a swapped index would silently pass a --------
+  // -- symmetric fixture) --------------------------------------------------
+  {
+    const spec = {
+      steps: [
+        { id: 'chapterList', type: 'shape', template: { chapters: ['ch0', 'ch1', 'ch2'] } },
+        {
+          id: 'chapters',
+          type: 'map',
+          list: { step: 'chapterList', field: 'chapters' },
+          steps: [{ id: 'summarize', type: 'agent', prompt: 'summarize {{item}}' }],
+        },
+        { id: 'pick', type: 'shape', template: { picked: '{{chapters.1.summarize.text}}' } },
+      ],
+      config: {},
+    };
+    const dispatch = makeItemAwareDispatch();
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a post-map step referencing one specific iteration key by dotted template completes', outcome.status === 'completed');
+    check(
+      'the rendered value came from ITERATION 1 specifically, not iteration 0 or iteration 2',
+      !!outcome.results.pick &&
+        outcome.results.pick.picked === 'summarize-for-ch1' &&
+        outcome.results.pick.picked !== 'summarize-for-ch0' &&
+        outcome.results.pick.picked !== 'summarize-for-ch2'
+    );
   }
 
   console.log(passCount + ' passed, ' + failCount + ' failed');

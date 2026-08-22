@@ -2207,13 +2207,24 @@ async function specEngineExecuteParallelStep(step, dispatch, values, path, baseR
 // ready for the caller to re-namespace under this iteration's own
 // `<mapId>.<index>.` prefix.
 //
-// KNOWN LIMITATION, disclosed here rather than silently handled: `item` is
-// not a reserved segment (SPEC_SCHEMA.md's reserved-segments rule reserves
-// only `attempts` and bare-numeric segments), so a map body step legally
-// declared with the literal id `item` would have its own result
-// overwrite -- and then be excluded from -- this synthetic seed key, since
-// the seed's key set is captured once, before the body runs. This is a
-// narrow, disclosed edge case, not a defect this implementation resolves.
+// SHADOW-RISK NOTE: `item` is not itself a reserved segment in
+// SPEC_SCHEMA.md's own reserved-segments rule (that rule reserves only
+// `attempts` and bare-numeric segments), so nothing in the contract's own
+// static-validation vocabulary stops a spec author from declaring a map
+// body step with the literal id `item`. Without a guard, that step's own
+// result would overwrite -- and then be excluded from -- this synthetic
+// seed key, since the seed's key set is captured once, before the body
+// runs (the shared-reference caveat above still applies regardless: this
+// clone is shallow, and isolation across iterations holds only because
+// this file's own convention is to always assign a new key rather than
+// mutate a shared result object in place). specEngineExecuteMapStep's own
+// pre-dispatch guard (its 'map-body-step-id-item-reserved' diagnostic)
+// now catches this collision at the engine level, ahead of any dispatch,
+// before this function is ever reached with a colliding body -- so the
+// collision this paragraph describes can no longer occur in practice.
+// Reserving `item` in SPEC_SCHEMA.md's own reserved-segments rule (the
+// contract-level counterpart to this engine-level guard) remains an open
+// item for owner ratification, out of this engine's own scope.
 async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, values, baseResults, parentPath) {
   const seedResults = Object.assign({}, baseResults);
   seedResults.item = item;
@@ -2253,12 +2264,20 @@ async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, v
 //   1. `merge` present at all -> 'map-merge-not-supported' (recognized but
 //      rejected, mirroring gate-predicate-form-not-supported).
 //   2. `steps` missing or not an array -> 'map-steps-not-array'.
-//   3. `list` missing or not a well-formed `{step, field?}` object (a
+//   3. any top-level body step declared with the literal id "item" ->
+//      'map-body-step-id-item-reserved' -- "item" is the synthetic
+//      bare-name key every iteration is seeded with (see
+//      specEngineExecuteMapIteration's own header comment); left
+//      unguarded, that step would still dispatch (spend occurs) and then
+//      have its own result silently excluded from this map step's
+//      results, the spend-attached silent-data-loss class the
+//      undefined-sentinel rule forbids elsewhere.
+//   4. `list` missing or not a well-formed `{step, field?}` object (a
 //      non-empty string `step`) -> 'map-list-malformed'.
-//   4. `list.step` names a step with no result in `baseResults` at this
+//   5. `list.step` names a step with no result in `baseResults` at this
 //      point in the spec, OR `list.field` (when declared) does not resolve
 //      against that step's result -> 'map-list-unresolved'.
-//   5. the resolved list value is not an array -> 'map-list-not-array'.
+//   6. the resolved list value is not an array -> 'map-list-not-array'.
 // Any one of these halts the WHOLE run (returned as `wholeRunHalt`) --
 // these are structural defects in the map step's own declaration, not an
 // iteration's runtime failure, so none of them get the per-iteration
@@ -2315,6 +2334,42 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
         'Map step "' + step.id + '" must declare "steps" as an array of step objects.'
       ),
     };
+  }
+
+  // "item" is the synthetic bare-name key specEngineExecuteMapIteration
+  // seeds every iteration with (the current list item -- see the
+  // specEngineExecute header comment's own disclosed-design paragraph on
+  // this). A body step legally declared with that same literal id would
+  // still dispatch (spend occurs) and then have its own result silently
+  // excluded from the results this map step writes -- the seed's key set
+  // is captured before the body runs, so that step's own write to `item`
+  // never distinguishes itself from the synthetic seed value the ownResults
+  // diff already excludes. That is spend-attached silent data loss, the
+  // same class the "Undefined-sentinel rule" sections of SPEC_SCHEMA.md
+  // forbid elsewhere (halt loudly rather than let a broken reference --or
+  // here, a broken body -- masquerade as a normal completed run). Checked
+  // for every top-level body step, before any of them dispatches; nested
+  // container steps inside the body are not checked here, since a nested
+  // container's own steps are namespaced under ITS OWN scope (a track id,
+  // a further map's own index), never written as a bare `item` key at this
+  // map step's own iteration level.
+  for (let bsi = 0; bsi < step.steps.length; bsi += 1) {
+    const bodyStep = step.steps[bsi];
+    if (specEngineIsPlainObject(bodyStep) && bodyStep.id === 'item') {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          path + '.steps[' + bsi + ']',
+          'map-body-step-id-item-reserved',
+          'Map step "' +
+            step.id +
+            '" body step at "' +
+            path +
+            '.steps[' +
+            bsi +
+            ']" declares id "item"; "item" is the map iteration\'s current-item key and cannot be used as a body step ID.'
+        ),
+      };
+    }
   }
 
   const listSpec = step.list;

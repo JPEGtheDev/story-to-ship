@@ -63,6 +63,14 @@ function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+// specEngineIsFiniteNumber(value) -- strict type check, no string-to-number
+// coercion: true only for an actual finite JS number (not NaN, not
+// +/-Infinity, not a numeric string). Backs the lte/gte non-numeric-operand
+// halt in specEngineEvalPredicate below.
+function specEngineIsFiniteNumber(value) {
+  return typeof value === 'number' && isFinite(value);
+}
+
 function specEngineIsReservedSegment(segment) {
   return segment === SPEC_ENGINE_RESERVED_LITERAL_SEGMENT || SPEC_ENGINE_NUMERIC_SEGMENT_RE.test(String(segment));
 }
@@ -899,15 +907,39 @@ function specEngineEvalPredicate(predicate, results) {
   let result;
   if (operator === 'equals') {
     result = operand === expected;
-  } else if (operator === 'lte') {
-    result = operand <= expected;
-  } else if (operator === 'gte') {
-    result = operand >= expected;
+  } else if (operator === 'lte' || operator === 'gte') {
+    // INFERRED: "Predicate operator vocabulary" defines lte/gte as numeric
+    // ordering ("less than or equal", "greater than or equal") but does not
+    // define ordering over non-numeric operands. Rather than fall through
+    // to JavaScript's coercing "<="/">=" (which would silently treat a
+    // string as a number, or NaN-compare it to always-false), this
+    // evaluator halts on either side of a non-numeric ordering comparison --
+    // the resolved operand or the predicate's own literal "value" -- by a
+    // strict typeof+isFinite check, no string-to-number coercion. This is
+    // the same "broken reference must never masquerade as a legitimate
+    // failing check" rationale the undefined-sentinel rule states, applied
+    // to a non-numeric operand instead of a missing one.
+    if (!specEngineIsFiniteNumber(operand) || !specEngineIsFiniteNumber(expected)) {
+      return specEngineMakeHalt(
+        step + '.' + field,
+        'predicate-operand-not-numeric',
+        'Predicate operator "' + operator + '" requires both the resolved operand and the literal "value" to be ' +
+          'finite numbers (no string-to-number coercion); step "' + step + '", field "' + field + '" did not satisfy that.'
+      );
+    }
+    result = operator === 'lte' ? operand <= expected : operand >= expected;
   } else {
-    // Not reached on a spec validateSpec has already accepted:
-    // checkPredicateOperator rejects any operator outside this set before
-    // a predicate is ever evaluated at runtime.
-    result = false;
+    // Runtime enforcement of the same rule validateSpec's
+    // checkPredicateOperator already applies structurally: an operator
+    // outside equals/lte/gte must never silently evaluate (and so
+    // masquerade as a legitimate failing gate) -- it halts here too,
+    // reusing the same diagnostic name validateSpec uses for this defect
+    // class.
+    return specEngineMakeHalt(
+      step + '.' + field,
+      'unknown-predicate-operator',
+      'Predicate operator "' + operator + '" is not one of the three recognized operators (equals, lte, gte).'
+    );
   }
 
   return { halted: false, result: result };

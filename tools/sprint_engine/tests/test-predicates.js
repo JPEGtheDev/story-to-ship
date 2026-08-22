@@ -150,5 +150,56 @@ const results = {
   );
 }
 
+// -- lte/gte non-numeric ordering operand: INFERRED, contract-silent -------
+// SPEC_SCHEMA.md's "Predicate operator vocabulary" section defines lte/gte
+// as numeric ordering ("less than or equal", "greater than or equal") but
+// does not define ordering over non-numeric operands. This suite pins a
+// strict-typed halt (no string-to-number coercion) rather than JavaScript's
+// native coercing comparison, on both the resolved-operand side and the
+// predicate's own literal `value` side.
+
+// -- lte with a non-numeric RESOLVED operand halts, distinct from the -----
+// -- operand-unresolved and spilled-content diagnostics --------------------
+{
+  const outcome = specEngineEvalPredicate({ step: 'step1', field: 'name', operator: 'lte', value: 5 }, results);
+  check('lte over a non-numeric resolved operand halts', outcome.halted === true);
+  check(
+    'the halt is reported under the operand-not-numeric diagnostic',
+    outcome.diagnostic === 'predicate-operand-not-numeric'
+  );
+}
+
+// -- gte with a non-numeric RESOLVED operand halts the same way -----------
+{
+  const outcome = specEngineEvalPredicate({ step: 'step1', field: 'name', operator: 'gte', value: 5 }, results);
+  check('gte over a non-numeric resolved operand halts', outcome.halted === true);
+  check(
+    'the halt is reported under the operand-not-numeric diagnostic',
+    outcome.diagnostic === 'predicate-operand-not-numeric'
+  );
+}
+
+// -- lte with a numeric resolved operand but a non-numeric predicate.value -
+// -- (the VALUE side, not the resolved-operand side) halts the same way ---
+{
+  const outcome = specEngineEvalPredicate({ step: 'step1', field: 'score', operator: 'lte', value: '5' }, results);
+  check('lte with a non-numeric literal "value" halts even when the resolved operand is numeric', outcome.halted === true);
+  check(
+    'the halt is reported under the operand-not-numeric diagnostic',
+    outcome.diagnostic === 'predicate-operand-not-numeric'
+  );
+}
+
+// -- unknown operator (outside equals/lte/gte) halts at runtime, not just -
+// -- at validateSpec's structural check -------------------------------------
+// A broken predicate must never silently masquerade as a legitimate failing
+// gate -- the same rationale the undefined-sentinel rule states for an
+// unresolved operand applies to an operator the runtime does not recognize.
+{
+  const outcome = specEngineEvalPredicate({ step: 'step1', field: 'score', operator: 'lt', value: 5 }, results);
+  check('an operator outside equals/lte/gte halts', outcome.halted === true);
+  check('the halt reuses the existing unknown-predicate-operator diagnostic', outcome.diagnostic === 'unknown-predicate-operator');
+}
+
 console.log(passCount + ' passed, ' + failCount + ' failed');
 process.exit(failCount === 0 ? 0 : 1);

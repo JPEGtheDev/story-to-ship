@@ -137,7 +137,9 @@ if/else step kind.
   this aggregate count).
 - **branch step**: a nested step's key is `<branchId>.<stepId>`, where
   `branchId` is the branch step's own ID and `stepId` is a step inside
-  whichever path it selected.
+  whichever path it selected -- this format is inferred from the
+  container-namespacing pattern used elsewhere in this section, not carried
+  from a ratified wording specific to this step kind.
 - **map**: a nested step's key is `<mapId>.<index>`, one entry per item in
   the list the map iterated over.
 - **scored-retry**: each attempt's key is `<retryId>.attempts.<n>`; the

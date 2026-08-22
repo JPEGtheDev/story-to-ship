@@ -91,7 +91,7 @@ async function main() {
       second: { score: 8 },
     });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('the run completes', outcome.status === 'completed');
+    check('the results-map-accumulation run completes', outcome.status === 'completed');
     check(
       "the second step's dispatch context carries the first step's result under its step id",
       dispatch.calls[1].context.results.first.score === 7
@@ -137,10 +137,57 @@ async function main() {
       downstream: { summary: 'ok' },
     });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('the run completes', outcome.status === 'completed');
+    check('the agent-prompt-templating run completes', outcome.status === 'completed');
     check(
       "the downstream agent step's dispatched prompt has its template reference resolved",
       dispatch.calls[1].step.prompt === 'summarize sprints'
+    );
+  }
+
+  // -- a render halt from an unresolved reference in an agent step's ------
+  // -- prompt carries the steps[i] locator, not a bare renderer sub-path --
+  {
+    const spec = {
+      steps: [
+        { id: 'a1', type: 'agent' },
+        { id: 'broken', type: 'agent', prompt: 'refers to {{missingStep.field}}' },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ a1: { ok: true } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an unresolved agent-prompt template reference halts with status "failed"', outcome.status === 'failed');
+    check(
+      'the render halt reuses the existing template-operand-unresolved diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'template-operand-unresolved'
+    );
+    check(
+      'the render halt path carries the steps[i] locator for the failing agent step, not a bare renderer sub-path',
+      outcome.halt !== null && outcome.halt.path.indexOf('steps[1]') === 0
+    );
+    check('the broken agent step never dispatches (the render halts before dispatch)', dispatch.calls.length === 1 && dispatch.calls[0].id === 'a1');
+  }
+
+  // -- a render halt from an unresolved reference in a shape step's -------
+  // -- template carries the steps[i] locator the same way -----------------
+  {
+    const spec = {
+      steps: [
+        { id: 'upstream', type: 'agent' },
+        { id: 'broken', type: 'shape', template: { x: '{{missingStep.field}}' } },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ upstream: { ok: true } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an unresolved shape-template reference halts with status "failed"', outcome.status === 'failed');
+    check(
+      'the shape render halt reuses the existing template-operand-unresolved diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'template-operand-unresolved'
+    );
+    check(
+      'the shape render halt path carries the steps[i] locator for the failing shape step, not a bare renderer sub-path',
+      outcome.halt !== null && outcome.halt.path.indexOf('steps[1]') === 0
     );
   }
 
@@ -247,6 +294,40 @@ async function main() {
     check('the say-vs-do halt uses the verdict-unsupported diagnostic', outcome.halt.diagnostic === 'verdict-unsupported');
     check(
       'the trace records the verdict-unsupported flag for this gate',
+      outcome.trace[0].flags.indexOf('verdict-unsupported') !== -1
+    );
+  }
+
+  // -- gate verdict "uncertain", cause 3 (reported verdict "fail"): the ---
+  // -- say-vs-do cross-check trips REGARDLESS of what verdict was reported,
+  // -- so this halts "uncertain" with verdict-unsupported, NOT "gated" ----
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'check',
+          type: 'gate',
+          claimField: 'claim',
+          evidenceField: 'evidence',
+          minTokenOverlap: 3,
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({
+      check: { verdict: 'fail', claim: 'the tests all pass now', evidence: 'unrelated evidence text' },
+    });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check(
+      'a say-vs-do trip halts with status "uncertain", not "gated", even though the reported verdict was "fail"',
+      outcome.status === 'uncertain'
+    );
+    check(
+      'the say-vs-do halt (reported verdict "fail") uses the verdict-unsupported diagnostic, not gate-verdict-failed',
+      outcome.halt !== null && outcome.halt.diagnostic === 'verdict-unsupported'
+    );
+    check(
+      'the trace records the verdict-unsupported flag for this gate (reported verdict "fail")',
       outcome.trace[0].flags.indexOf('verdict-unsupported') !== -1
     );
   }

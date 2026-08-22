@@ -91,6 +91,7 @@ const SPEC_ENGINE_KNOWN_STEP_KINDS = ['agent', 'gate', 'shape', 'parallel', 'map
 const SPEC_ENGINE_CONTAINER_STEP_KINDS = ['parallel', 'map', 'scored-retry', 'branch'];
 const SPEC_ENGINE_PREDICATE_OPERATORS = ['equals', 'lte', 'gte'];
 const SPEC_ENGINE_SCORED_RETRY_MODES = ['first-passing', 'keep-best'];
+const SPEC_ENGINE_GATE_VERDICTS = ['pass', 'fail', 'uncertain'];
 const SPEC_ENGINE_RESERVED_LITERAL_SEGMENT = 'attempts';
 const SPEC_ENGINE_MAX_CONTAINER_DEPTH = 3;
 const SPEC_ENGINE_NUMERIC_SEGMENT_RE = /^[0-9]+$/;
@@ -1478,7 +1479,17 @@ function specEngineRegexExtract(text, pattern) {
 // one, is dispatched unchanged. A halt from that render (an unresolved
 // reference, or a direct reference to a spilled field) halts the whole run
 // under that render's own existing diagnostic, before any dispatch call is
-// made for that step.
+// made for that step. Both this prompt render and a shape step's own
+// template render (below) start specEngineRenderTemplate's own `path`
+// parameter at this loop's 'steps[i]' locator for that step, suffixed
+// with the specific field being rendered ('steps[i].prompt' for an agent
+// or gate step, 'steps[i].template' for a shape step) -- so the sub-path
+// specEngineRenderTemplate's own recursion appends beneath that (walking
+// into a shape step's template object) is APPENDED to the step's own
+// locator, not left to stand alone; a halt this render produces always
+// carries the full 'steps[i]...' locator, matching every other halt this
+// loop returns, instead of a bare renderer sub-path with no step of its
+// own to point back to.
 //
 // Each completed leaf step's result lands in the results map under its own
 // step id, per the "Result-key namespacing grammar" section (this loop
@@ -1567,23 +1578,29 @@ function specEngineRegexExtract(text, pattern) {
 // validateSpec's job, expected to run before execute) but must still fail
 // loudly rather than throw on a spec that never got validated.
 
-const SPEC_ENGINE_GATE_VERDICTS = ['pass', 'fail', 'uncertain'];
-
 function specEngineMakeExecuteResult(status, results, trace, halt) {
   return { status: status, results: results, trace: trace, halt: halt || null };
 }
 
-// specEngineRenderStepForDispatch(step, results, values) -- see the
+// specEngineRenderStepForDispatch(step, results, values, path) -- see the
 // specEngineExecute header comment above for the contract (renders a
 // string `prompt` field through specEngineRenderTemplate, leaves every
-// other step field untouched). Returns { halted: false, step: <step, with
-// prompt rendered if it had one> } on success, or the render's own halt
-// object directly (its existing diagnostic, unchanged) on failure.
-function specEngineRenderStepForDispatch(step, results, values) {
+// other step field untouched). `path` is the loop's own 'steps[i]'
+// locator for this step; it is threaded in as the render's starting path
+// (as 'steps[i].prompt', naming the specific field being rendered) so a
+// halt this render produces carries the full locator -- the step-prefix
+// PLUS whatever sub-path the renderer's own recursion appended beneath
+// it -- rather than just the renderer's bare sub-path on its own (a
+// top-level string like `prompt` has no sub-path of its own, so its halt
+// path is exactly 'steps[i].prompt'). Returns { halted: false, step:
+// <step, with prompt rendered if it had one> } on success, or the
+// render's own halt object directly (its existing diagnostic, now
+// carrying the full locator) on failure.
+function specEngineRenderStepForDispatch(step, results, values, path) {
   if (typeof step.prompt !== 'string') {
     return { halted: false, step: step };
   }
-  const rendered = specEngineRenderTemplate(step.prompt, results, values);
+  const rendered = specEngineRenderTemplate(step.prompt, results, values, path + '.prompt');
   if (rendered.halted) {
     return rendered;
   }
@@ -1725,7 +1742,7 @@ async function specEngineExecute(spec, dispatch) {
 
     if (type === 'shape') {
       const templateValue = specEngineIsPlainObject(step.template) ? step.template : {};
-      const rendered = specEngineRenderTemplate(templateValue, results, values);
+      const rendered = specEngineRenderTemplate(templateValue, results, values, path + '.template');
       if (rendered.halted) {
         return specEngineMakeExecuteResult('failed', results, trace, rendered);
       }
@@ -1753,7 +1770,7 @@ async function specEngineExecute(spec, dispatch) {
         );
       }
 
-      const dispatchPrep = specEngineRenderStepForDispatch(step, results, values);
+      const dispatchPrep = specEngineRenderStepForDispatch(step, results, values, path);
       if (dispatchPrep.halted) {
         return specEngineMakeExecuteResult('failed', results, trace, dispatchPrep);
       }

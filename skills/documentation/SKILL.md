@@ -124,3 +124,5 @@ Before presenting documentation, verify:
 For the domain taxonomy, frontmatter schema, and guide template, see [references/DOCUMENTATION_EXAMPLES.md](references/DOCUMENTATION_EXAMPLES.md).
 
 **Documentation principles:** `references/DOCUMENTATION_PRINCIPLES.md`
+
+**Wiki/knowledge-base principles:** `references/WIKI_PRINCIPLES.md`

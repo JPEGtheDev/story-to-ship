@@ -436,6 +436,11 @@ function resolveReferences(spec) {
       const inner = m[1];
       if (inner !== '/if') {
         if (inner.indexOf('#if') === 0) {
+          // Checking this condition as a resolvable reference is this
+          // implementation's own extension: SPEC_SCHEMA.md names {{#if}}
+          // as "recognized template syntax" but states "this document does
+          // not extend their behavior beyond that literal syntax," and
+          // does not itself specify that the condition must resolve.
           const cond = inner.slice(3).trim();
           if (cond.length > 0) {
             refs.push(cond);

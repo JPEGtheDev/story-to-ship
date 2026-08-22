@@ -262,6 +262,79 @@ function countOf(violations, diagnostic) {
   check('exactly one ordering violation is reported (the early one)', countOf(violations, 'parallel-track-reference-before-join') === 1);
 }
 
+// -- same-track sequential reference: a later step in the same track ------
+// -- referencing an earlier step in that same track resolves cleanly ------
+// Pins the sameTrackLater carve-out: the ordering rule invalidates
+// cross-track/concurrent references before the join, not an ordinary
+// sequential reference within one track.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'par1',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'trackA',
+            steps: [
+              { id: 'step1', type: 'shape', template: {} },
+              {
+                id: 'step2',
+                type: 'gate',
+                predicate: { step: 'trackA.step1', field: 'x', operator: 'equals', value: 1 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a same-track later step referencing an earlier step in the same track resolves cleanly',
+    violations.length === 0
+  );
+}
+
+// -- composite key referenced before the join is rejected ------------------
+// Pins that the ordering restriction covers pattern/composite keys
+// ("<trackId>.<retryId>.attempts.<n>"), not just exact ones.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'early',
+        type: 'gate',
+        predicate: { step: 'trackA.retry1.attempts.1', field: 'score', operator: 'gte', value: 1 },
+      },
+      {
+        id: 'par1',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'trackA',
+            steps: [
+              {
+                id: 'retry1',
+                type: 'scored-retry',
+                mode: 'keep-best',
+                step: { id: 'rs1', type: 'shape', template: {} },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a composite key referenced before its parallel step joins is reported at steps[0].predicate',
+    hasViolation(violations, 'parallel-track-reference-before-join', 'steps[0].predicate')
+  );
+}
+
 // -- {{values.PATH}} resolves against config values, not step results -----
 {
   const spec = {

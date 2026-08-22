@@ -76,6 +76,9 @@ const SPEC_ENGINE_RESERVED_LITERAL_SEGMENT = 'attempts';
 const SPEC_ENGINE_MAX_CONTAINER_DEPTH = 3;
 const SPEC_ENGINE_NUMERIC_SEGMENT_RE = /^[0-9]+$/;
 const SPEC_ENGINE_UNDEFINED_SENTINEL = '<<undefined>>';
+const SPEC_ENGINE_IF_BLOCK_RE = /\{\{#if\s+([^}]+?)\s*\}\}([\s\S]*?)\{\{\/if\}\}/;
+const SPEC_ENGINE_PLACEHOLDER_RE = /\{\{\s*([^}]+?)\s*\}\}/;
+const SPEC_ENGINE_IF_TOKEN_RE = /\{\{\s*(#if\b[^}]*|\/if)\s*\}\}/g;
 
 function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -987,6 +990,21 @@ function specEngineEvalPredicate(predicate, results) {
 // Returns { resolved: false } if no declared key is a prefix (or exact
 // match), matching specEngineResolveFieldPath's own return shape so callers
 // can treat both failure modes the same way.
+//
+// Empty path segments (a trailing dot, as in "step.", or a double dot, as
+// in "step..field") are unresolvable, the same halt-don't-guess class as an
+// absent field: this function tracks the EXACT-match case (bare "step",
+// legal, whole result value) separately from the prefix-match case ("step."
+// plus a field path, possibly empty), so a bare key never gets conflated
+// with a key followed by a trailing dot and nothing else. A bare key's
+// field path is never walked through specEngineResolveFieldPath (there is
+// no path to walk); a trailing-dot key's empty remainder IS routed through
+// specEngineResolveFieldPath, which already rejects a zero-length field
+// path as unresolved -- no separate empty-segment check is needed here. A
+// double dot produces a field path with a literal empty segment between
+// two dots, which specEngineResolveFieldPath's own hasOwnProperty walk
+// already rejects (an empty-string property practically never exists),
+// covered by its existing segment-by-segment walk without any change.
 function specEngineResolveTemplateRef(ref, results, values) {
   if (ref.indexOf('values.') === 0) {
     const valuesRoot = specEngineIsPlainObject(values) ? values : Object.create(null);
@@ -997,17 +1015,20 @@ function specEngineResolveTemplateRef(ref, results, values) {
   const keys = Object.keys(resultsMap);
   let bestKey = null;
   let bestFieldPath = null;
+  let bestIsExactKey = false;
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     if (ref === key) {
       if (bestKey === null || key.length > bestKey.length) {
         bestKey = key;
         bestFieldPath = '';
+        bestIsExactKey = true;
       }
     } else if (ref.indexOf(key + '.') === 0) {
       if (bestKey === null || key.length > bestKey.length) {
         bestKey = key;
         bestFieldPath = ref.slice(key.length + 1);
+        bestIsExactKey = false;
       }
     }
   }
@@ -1015,7 +1036,7 @@ function specEngineResolveTemplateRef(ref, results, values) {
   if (bestKey === null) {
     return { resolved: false };
   }
-  if (bestFieldPath === '') {
+  if (bestIsExactKey) {
     return { resolved: true, value: resultsMap[bestKey] };
   }
   return specEngineResolveFieldPath(resultsMap[bestKey], bestFieldPath);
@@ -1092,6 +1113,40 @@ function specEngineRenderTemplateRef(ref, path, results, values) {
   return resolution;
 }
 
+// specEngineDetectUnsupportedIfNesting(str) scans a string leaf for two
+// structural defects in its {{#if}}/{{/if}} tokens, before any block is
+// evaluated or replaced: an {{#if}} block whose own body contains another
+// {{#if}} (unsupported nesting), or a bare {{/if}} with no {{#if}} open at
+// that point (an unmatched closer). Both are detected the same way -- by
+// walking every {{#if ...}}/{{/if}} token left-to-right and tracking open-
+// block depth: seeing a second {{#if}} while depth is already > 0 is
+// nesting; seeing a {{/if}} while depth is 0 is an unmatched closer.
+// Returns true if either defect is present, false otherwise. Runs before
+// SPEC_ENGINE_IF_BLOCK_RE's own pairing regex ever executes, so a nested or
+// unmatched structure never reaches (and is never mis-paired by) that
+// regex in the first place.
+function specEngineDetectUnsupportedIfNesting(str) {
+  const re = new RegExp(SPEC_ENGINE_IF_TOKEN_RE.source, 'g');
+  let depth = 0;
+  let m = re.exec(str);
+  while (m !== null) {
+    const token = m[1];
+    if (token.indexOf('#if') === 0) {
+      if (depth > 0) {
+        return true;
+      }
+      depth += 1;
+    } else {
+      if (depth === 0) {
+        return true;
+      }
+      depth -= 1;
+    }
+    m = re.exec(str);
+  }
+  return false;
+}
+
 // specEngineRenderTemplateString(str, path, results, values) renders one
 // string leaf of a template value. Two passes, in order:
 //
@@ -1102,20 +1157,34 @@ function specEngineRenderTemplateRef(ref, path, results, values) {
 //    COND as a reference in the same {{step.field}}/{{values.PATH}}
 //    vocabulary (consistent with this file's own existing extension in
 //    resolveReferences' extractPlaceholders, which already reads an
-//    {{#if}} condition as a reference for static-resolution purposes),
-//    tests the resolved value with plain JS truthiness, and does not
-//    support nested {{#if}} blocks (the minimal reading: one {{#if}} level
-//    per string leaf).
+//    {{#if}} condition as a reference for static-resolution purposes) and
+//    tests the resolved value with plain JS truthiness. Nested {{#if}}
+//    blocks and unmatched {{/if}} closers are NOT silently mis-paired: a
+//    naive non-greedy pairing regex pairs an outer {{#if}} with the FIRST
+//    {{/if}} it finds, which silently drops trailing content when that
+//    first {{/if}} belongs to an inner block, or leaves a stray {{/if}}
+//    token behind that gets misreported as a dangling reference named
+//    "/if". specEngineDetectUnsupportedIfNesting runs first and halts
+//    under the 'template-if-nesting-unsupported' diagnostic for either
+//    case, before SPEC_ENGINE_IF_BLOCK_RE's pairing regex ever runs -- the
+//    minimal reading this renderer supports is one {{#if}} level per
+//    string leaf, well-matched.
 // 2. Remaining {{step.field}} / {{values.PATH}} placeholders, substituted
 //    with specEngineStringifyTemplateValue's rendering of the resolved
 //    value.
 //
-// Both passes are fail-fast: the first halt (from either an {{#if}}
-// condition or a plain placeholder) returns immediately.
-const SPEC_ENGINE_IF_BLOCK_RE = /\{\{#if\s+([^}]+?)\s*\}\}([\s\S]*?)\{\{\/if\}\}/;
-const SPEC_ENGINE_PLACEHOLDER_RE = /\{\{\s*([^}]+?)\s*\}\}/;
-
+// Both passes are fail-fast: the first halt (from the nesting check, an
+// {{#if}} condition, or a plain placeholder) returns immediately.
 function specEngineRenderTemplateString(str, path, results, values) {
+  if (specEngineDetectUnsupportedIfNesting(str)) {
+    return specEngineMakeHalt(
+      path,
+      'template-if-nesting-unsupported',
+      'Template string at "' + path + '" contains a nested {{#if}} block or an unmatched {{/if}}, neither of ' +
+        'which this renderer supports; only single-level, well-matched {{#if}}...{{/if}} blocks are rendered.'
+    );
+  }
+
   let working = str;
   let ifMatch = SPEC_ENGINE_IF_BLOCK_RE.exec(working);
   while (ifMatch !== null) {

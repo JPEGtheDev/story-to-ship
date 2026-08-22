@@ -65,6 +65,16 @@
 // its return shape -- { halted: false, value: <rendered> } or { halted:
 // true, path, diagnostic, message, value? } -- mirrors
 // specEngineEvalPredicate's own runtime-evaluator return shape.
+//
+// specEngineTokenOverlap, specEngineExtractLabeledLine,
+// specEngineSliceFromMarker, specEngineFirstMatchOf, and
+// specEngineRegexExtract are five pure text-extraction primitives -- no
+// halt machinery, no results-map lookups, no dispatch. Each returns an
+// explicit, documented miss value on a no-match or empty-input case
+// instead of throwing or returning undefined-by-accident. See each
+// function's own header comment below for its contract sourcing (only
+// specEngineTokenOverlap is named in SPEC_SCHEMA.md; the other four are
+// fully INFERRED, disclosed individually).
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -1262,6 +1272,149 @@ function specEngineRenderTemplate(value, results, values, path) {
   return { halted: false, value: value };
 }
 
+// specEngineTokenSet(text) -- helper for specEngineTokenOverlap below.
+// Lowercases `text` and splits it on runs of whitespace into a Set of
+// distinct tokens. A non-string input, or a string that is empty or
+// whitespace-only, yields an empty Set rather than throwing.
+function specEngineTokenSet(text) {
+  if (typeof text !== 'string' || text.trim().length === 0) {
+    return new Set();
+  }
+  return new Set(text.trim().toLowerCase().split(/\s+/));
+}
+
+// specEngineTokenOverlap(claim, evidence) computes the token overlap named
+// in the "Say-vs-do cross-check" section: "The engine computes the token
+// overlap between the claim and the evidence; if it falls below
+// minTokenOverlap, the engine records a trace flag named
+// verdict-unsupported". That section names the comparison and the
+// minTokenOverlap threshold it is measured against, but does not define
+// what a "token" is or how "overlap" is computed as a number -- INFERRED
+// here, the minimal reading implied by the name: both strings are
+// lowercased and split on whitespace into token sets (so word order and
+// repeat count do not matter), and the return value is the size of the
+// set intersection -- the count of distinct tokens present in both the
+// claim and the evidence. A non-string input contributes an empty token
+// set rather than throwing. Miss value: 0 (no shared tokens) -- which is
+// also the correct, non-distinguishable answer for two disjoint inputs,
+// so this primitive has no separate not-found value distinct from "found
+// zero shared tokens"; 0 serves as the explicit miss value the same way
+// null does for the string-returning primitives below.
+function specEngineTokenOverlap(claim, evidence) {
+  const claimTokens = specEngineTokenSet(claim);
+  const evidenceTokens = specEngineTokenSet(evidence);
+  let overlap = 0;
+  claimTokens.forEach(function (token) {
+    if (evidenceTokens.has(token)) {
+      overlap += 1;
+    }
+  });
+  return overlap;
+}
+
+// specEngineExtractLabeledLine(text, label) -- INFERRED: neither
+// SPEC_SCHEMA.md nor RUNTIME_FACTS.md names or describes this primitive
+// (confirmed by a full-text grep of both files); this is contract-silent
+// territory, picked to the minimal reading implied by the name. Scans
+// `text` line by line (splitting on "\n") for the first line whose
+// content, after stripping leading whitespace, starts with the literal
+// `label` text followed by optional whitespace and a colon; returns the
+// remainder of that line after the colon, trimmed. A label that appears
+// mid-line -- not at that line's own start, once indentation is stripped
+// -- does not count as a labeled line and is skipped, so a decoy
+// occurrence elsewhere on a line never wins over a true line-start label
+// on a later line. Returns null -- the explicit miss value -- when no
+// line matches, or when `text`/`label` are not both non-empty strings.
+function specEngineExtractLabeledLine(text, label) {
+  if (typeof text !== 'string' || typeof label !== 'string' || label.length === 0) {
+    return null;
+  }
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i += 1) {
+    const lineStart = lines[i].replace(/^\s+/, '');
+    if (lineStart.indexOf(label) === 0) {
+      const afterLabel = lineStart.slice(label.length);
+      const colonMatch = /^\s*:\s*(.*)$/.exec(afterLabel);
+      if (colonMatch) {
+        return colonMatch[1].trim();
+      }
+    }
+  }
+  return null;
+}
+
+// specEngineSliceFromMarker(text, marker) -- INFERRED: contract-silent,
+// same disclosure as specEngineExtractLabeledLine above. Finds the first
+// occurrence of the literal `marker` substring in `text` and returns
+// everything AFTER it (not including the marker itself) to the end of the
+// string. If the marker is present but sits at the very end of `text`,
+// the slice after it is the empty string '' -- a FOUND result, distinct
+// in kind from the marker not being present at all. Returns null -- the
+// explicit miss value -- when the marker does not occur in `text`, or
+// when `text`/`marker` are not both non-empty strings.
+function specEngineSliceFromMarker(text, marker) {
+  if (typeof text !== 'string' || typeof marker !== 'string' || marker.length === 0) {
+    return null;
+  }
+  const index = text.indexOf(marker);
+  if (index === -1) {
+    return null;
+  }
+  return text.slice(index + marker.length);
+}
+
+// specEngineFirstMatchOf(text, patterns) -- INFERRED: contract-silent,
+// same disclosure as specEngineExtractLabeledLine above. `patterns` is an
+// array of RegExp objects, tried in ARRAY ORDER -- not by which one would
+// match earliest in `text`: returns the matched substring of the first
+// pattern in the array that matches anywhere in `text`, even when a later
+// pattern in the array would have matched at an earlier position in the
+// string. A non-RegExp array entry is skipped rather than throwing.
+// Returns null -- the explicit miss value -- when no pattern in the array
+// matches, or when `patterns` is empty or not an array.
+function specEngineFirstMatchOf(text, patterns) {
+  if (typeof text !== 'string' || !Array.isArray(patterns)) {
+    return null;
+  }
+  for (let i = 0; i < patterns.length; i += 1) {
+    const pattern = patterns[i];
+    if (!(pattern instanceof RegExp)) {
+      continue;
+    }
+    const match = pattern.exec(text);
+    if (match) {
+      return match[0];
+    }
+  }
+  return null;
+}
+
+// specEngineRegexExtract(text, pattern) -- INFERRED: contract-silent,
+// same disclosure as specEngineExtractLabeledLine above. Runs `pattern` (a
+// RegExp) against `text` once. When `pattern` declares at least one
+// capture group and the match succeeds, returns the first capture group's
+// text (match[1]) -- which may itself be undefined if that particular
+// group did not participate in the match, in which case this function
+// returns null so a non-participating group still yields the explicit
+// miss value rather than the literal string "undefined" or a raw
+// undefined. When `pattern` declares no capture groups, returns the whole
+// match (match[0]) instead. Returns null -- the explicit miss value --
+// when the pattern does not match `text` at all, or when `text`/`pattern`
+// are not the expected types.
+function specEngineRegexExtract(text, pattern) {
+  if (typeof text !== 'string' || !(pattern instanceof RegExp)) {
+    return null;
+  }
+  const match = pattern.exec(text);
+  if (!match) {
+    return null;
+  }
+  if (match.length > 1) {
+    return typeof match[1] === 'undefined' ? null : match[1];
+  }
+  return match[0];
+}
+
 // ===ENGINE-CORE-END===
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -1270,5 +1423,10 @@ if (typeof module !== 'undefined' && module.exports) {
     resolveReferences: resolveReferences,
     specEngineEvalPredicate: specEngineEvalPredicate,
     specEngineRenderTemplate: specEngineRenderTemplate,
+    specEngineTokenOverlap: specEngineTokenOverlap,
+    specEngineExtractLabeledLine: specEngineExtractLabeledLine,
+    specEngineSliceFromMarker: specEngineSliceFromMarker,
+    specEngineFirstMatchOf: specEngineFirstMatchOf,
+    specEngineRegexExtract: specEngineRegexExtract,
   };
 }

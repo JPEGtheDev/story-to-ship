@@ -221,3 +221,9 @@ These smells are not caught by clang-tidy. Catch them in code review.
 - `cpp-safety` -- sub-domain skill; destructor must not throw and every resource must have a scope-bound owning guard -- load this skill when the class owns any resource
 - `code-quality` -- clang-format and naming conventions; cpp-patterns covers structural patterns, code-quality covers form
 - `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID gate before any new inheritance in C++ code
+
+---
+
+## Reference
+
+- `references/SAFETY_PATTERNS.md` -- 15 C++ resource-safety and structural-hazard patterns from the C2 wiki audit, spanning object-identity idioms, GL state and destructor safety, inheritance/polymorphism hazards, and C/undefined-behavior pitfalls, including Pimpl+NullObject, singleton avoidance, Non-Virtual Interface, and strncpy termination

@@ -70,8 +70,8 @@ step's wrapped step under `step`. These are no longer this document's own
 inference: the step-kind table above and the result-key namespacing grammar
 below presuppose that a parallel step has tracks, a branch step has paths, a
 map step repeats steps, and a scored-retry step wraps a result being
-retried, and the owner ruling settles the field names an author writes for
-each of that as-is, matching the shapes already in use below.
+retried. The owner ruling settles the field names an author writes for that
+vocabulary, matching the shapes already in use below.
 
 - **parallel**: nested steps live under `tracks`, an array of `{ id, steps
   }` -- one entry per track, `id` is the track's own ID (the `trackId` the
@@ -83,11 +83,11 @@ each of that as-is, matching the shapes already in use below.
   sequence taken when no case matches.
 - **map**: the steps repeated once per item live under `steps`, an array of
   step objects. This array may hold more than one step: a map body is
-  ratified as a full multi-step process replicated over the iterated list,
-  not limited to one step per item -- for example, splitting a book into
-  chapters and running, per chapter, a process of parallel summarization,
+  ratified as a full multi-step process replicated over the list, not
+  limited to one step per item. For example, a map step can split a book
+  into chapters and run, per chapter, a process of parallel summarization,
   then a consolidation step, then a scored retry until the consolidated
-  result is acceptable, with the end result being a book summary.
+  result is acceptable. The end result of that example is a book summary.
 - **scored-retry**: the step being retried lives under `step`, a single
   nested step object rather than a list -- one weak result is retried at a
   time, matching the singular `<retryId>.attempts.<n>` key the namespacing
@@ -135,21 +135,32 @@ single field lookup rather than a check across whichever key happens to
 be present.
 
 **Map-body addressing below the iteration boundary is ratified by owner
-ruling.** A specific step's result inside one map iteration is addressed as
+ruling.** Call one run of the map's body over one item of the list an
+iteration -- an item is one element of the list the map ran over; an
+iteration is the body's single run over that item, producing that item's
+results. A specific step's result inside one iteration is addressed as
 `<mapId>.<index>.<stepId>` -- for example, `chapters.0.consolidate` is the
-`consolidate` step's result for chapter `0`, in a map step whose body runs a
-`consolidate` step per chapter. The plain `<mapId>.<index>` key, without a
-step-ID suffix, refers to everything that iteration produced, not one step
-within it. This means a map iteration's result is stored as an object keyed
-by step ID whenever its body holds more than one step, so the template
-split rule below resolves a reference like `chapters.0.consolidate` the same
-way it resolves any other reference: `chapters.0` is the matched step key,
-and `consolidate` is the field path read from that key's result -- here,
-the `consolidate` member of the per-iteration object. Steps within the same
-map iteration reference each other by bare step name, without any index or
-map-ID prefix -- for example, a `consolidate` step reading an earlier
-`summarize` step's result from the same iteration writes `{{summarize}}`,
-not `{{chapters.0.summarize}}`.
+`consolidate` step's result from the iteration over chapter `0`, in a map
+step whose body runs a `consolidate` step per chapter. The plain
+`<mapId>.<index>` key, without a step-ID suffix, refers to everything that
+iteration produced, not one step within it. This means an iteration's
+result is stored as an object keyed by step ID whenever the body holds more
+than one step -- the storage shape here is this document's own account of
+how the ratified addressing format is realized under the pre-existing
+template split rule, not itself a separate ruling -- so the split rule
+below resolves a reference like `chapters.0.consolidate` the same way it
+resolves any other reference: `chapters.0` is the matched step key, and
+`consolidate` is the field path read from that key's result -- here, the
+`consolidate` member of the per-iteration object.
+
+Addressing between two steps in the same iteration works differently from
+addressing into an iteration from outside it: a step reads an earlier
+step's result from its own iteration by bare step name, without any index
+or map-ID prefix -- the same bare-name resolution the template split rule
+below defines (an exact-key reference with no trailing field path resolves
+to that step's entire result). For example, a `consolidate` step reading an
+earlier `summarize` step's result from the same iteration writes
+`{{summarize}}`, not `{{chapters.0.summarize}}`.
 
 **ID-uniqueness is scoped, inferred the same way.** A step ID must be
 unique within its addressing scope: the top-level spec is one scope, each
@@ -203,9 +214,12 @@ exactly as described here, to build the step's output from earlier results.
 
 Three template forms are recognized: `{{step.field}}`, `{{values.PATH}}`, and
 `{{#if}}`. `{{step.field}}` is the form fully documented here, resolved by
-the split rule below. The other two forms are named as recognized template
-syntax; this document does not extend their behavior beyond that literal
-syntax.
+the split rule below; a bare declared step name with no trailing field (such
+as `{{A}}`) is this same form's empty-field-path case, and resolves to that
+step's entire result rather than to one field of it, per the split rule's
+own account of that case below. The other two forms are named as recognized
+template syntax; this document does not extend their behavior beyond that
+literal syntax.
 
 **Undefined-sentinel rule (templates).** The same sentinel-and-halt
 discipline that applies to predicates also applies to template resolution:
@@ -226,7 +240,11 @@ template reference resolves by matching the longest declared step key that is
 a prefix of the reference; everything after that matched prefix is the field
 path read from that step's result. This also covers a declared step key that
 happens to be a prefix of another declared step key -- the longest match
-wins.
+wins. A reference that matches a declared step key exactly, with no field
+path following it (a bare step name, such as `{{A}}`), resolves to that
+step's entire result rather than to one field of it -- the empty-field-path
+case of the same rule. This is the mechanism a bare reference like
+`{{summarize}}` in the map-body addressing definition above relies on.
 
 **Reserved segments.** The segment `attempts` and any bare-numeric segment
 (such as `0`, `1`, `2`) are illegal in two places: as a spec step ID anywhere
@@ -273,10 +291,10 @@ if/else step kind.
   container-namespacing pattern used elsewhere in this section, not carried
   from a ratified wording specific to this step kind.
 - **map**: a nested step's key is `<mapId>.<index>.<stepId>`, one entry per
-  step per item in the list the map iterated over -- ratified by owner
-  ruling (see the map-body addressing definition above). The plain
-  `<mapId>.<index>` key, without a step-ID suffix, refers to everything
-  that iteration produced, one entry per item in the list.
+  step per iteration -- one iteration per item in the list the map ran
+  over -- ratified by owner ruling (see the map-body addressing definition
+  above). The plain `<mapId>.<index>` key, without a step-ID suffix, refers
+  to everything that iteration produced.
 - **scored-retry**: each attempt's key is `<retryId>.attempts.<n>`; the
   attempt the step actually kept (the winner, by whichever mode was
   declared) is additionally recorded at the plain `<retryId>` key.

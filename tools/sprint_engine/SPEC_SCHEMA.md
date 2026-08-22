@@ -63,15 +63,15 @@ reserved-segments rule below) and a `type` naming one of the seven step
 kinds in the table above. The rest of a step's fields vary by kind, as the
 rest of this section describes.
 
-**The field names in this section are inferred by the implementation to
-make the contract buildable, not carried from a ratified wording.** The
-step-kind table above and the result-key namespacing grammar below both
-presuppose that a parallel step has tracks, a branch step has paths, a map
-step repeats steps, and a scored-retry step wraps a result being retried --
-but no ratified wording fixes the JSON field names an author writes for any
-of that. The shapes below are the first implementation's rendering of that
-vocabulary, adopted here as the contract surface so specs and validators
-built against this document agree with each other.
+**The four container field names below are ratified by owner ruling.** A
+parallel step's nested steps live under `tracks`, a branch step's under
+`cases` and `default`, a map step's under `steps`, and a scored-retry
+step's wrapped step under `step`. These are no longer this document's own
+inference: the step-kind table above and the result-key namespacing grammar
+below presuppose that a parallel step has tracks, a branch step has paths, a
+map step repeats steps, and a scored-retry step wraps a result being
+retried, and the owner ruling settles the field names an author writes for
+each of that as-is, matching the shapes already in use below.
 
 - **parallel**: nested steps live under `tracks`, an array of `{ id, steps
   }` -- one entry per track, `id` is the track's own ID (the `trackId` the
@@ -82,7 +82,12 @@ built against this document agree with each other.
   sequence for that path. An optional `default: { steps }` holds the step
   sequence taken when no case matches.
 - **map**: the steps repeated once per item live under `steps`, an array of
-  step objects.
+  step objects. This array may hold more than one step: a map body is
+  ratified as a full multi-step process replicated over the iterated list,
+  not limited to one step per item -- for example, splitting a book into
+  chapters and running, per chapter, a process of parallel summarization,
+  then a consolidation step, then a scored retry until the consolidated
+  result is acceptable, with the end result being a book summary.
 - **scored-retry**: the step being retried lives under `step`, a single
   nested step object rather than a list -- one weak result is retried at a
   time, matching the singular `<retryId>.attempts.<n>` key the namespacing
@@ -129,13 +134,22 @@ named-operator form above instead, since operator validation is then a
 single field lookup rather than a check across whichever key happens to
 be present.
 
-**Map-body addressing below the iteration boundary is not specified.** The
-result-key namespacing grammar's map bullet keys a map step's nested
-results as `<mapId>.<index>` only -- it does not extend that key with a
-per-step suffix identifying which of a map's several repeated steps
-produced a given result. No ratified wording settles how, or whether, an
-author addresses one specific step's result inside one map iteration; this
-contract does not invent an addressing scheme below `<mapId>.<index>`.
+**Map-body addressing below the iteration boundary is ratified by owner
+ruling.** A specific step's result inside one map iteration is addressed as
+`<mapId>.<index>.<stepId>` -- for example, `chapters.0.consolidate` is the
+`consolidate` step's result for chapter `0`, in a map step whose body runs a
+`consolidate` step per chapter. The plain `<mapId>.<index>` key, without a
+step-ID suffix, refers to everything that iteration produced, not one step
+within it. This means a map iteration's result is stored as an object keyed
+by step ID whenever its body holds more than one step, so the template
+split rule below resolves a reference like `chapters.0.consolidate` the same
+way it resolves any other reference: `chapters.0` is the matched step key,
+and `consolidate` is the field path read from that key's result -- here,
+the `consolidate` member of the per-iteration object. Steps within the same
+map iteration reference each other by bare step name, without any index or
+map-ID prefix -- for example, a `consolidate` step reading an earlier
+`summarize` step's result from the same iteration writes `{{summarize}}`,
+not `{{chapters.0.summarize}}`.
 
 **ID-uniqueness is scoped, inferred the same way.** A step ID must be
 unique within its addressing scope: the top-level spec is one scope, each
@@ -144,19 +158,13 @@ step's combined cases-and-default is one scope (namespaced by the branch
 step's own ID), and each map step's body and each scored-retry step's
 wrapped step are each their own scope, isolated from the scope they are
 nested inside. Two steps sharing a declared ID in two different scopes do
-not collide, for one of two distinct reasons depending on the scope. For a
-parallel track or a branch step's cases-and-default, their namespaced
-result keys differ, because each is prefixed by its own trackId or branch
-step ID. For a map step's body, no ratified wording defines a per-step key
-at all, per the map-body addressing caveat above, so two different map
-bodies never produce a key to collide on in the first place. For a
-scored-retry step's wrapped step, by contrast, the namespacing grammar
-does define a key -- `<retryId>.attempts.<n>` -- and that key is prefixed
-by the enclosing retry step's own ID, so two identical wrapped steps under
-two different scored-retry steps key to different places and cannot
-collide either, for the same reason a parallel track or branch case
-doesn't. This scoping rule is this section's own inference, not carried
-from a ratified wording.
+not collide, because each scope's namespaced result keys differ, prefixed
+by that scope's own identifier: a parallel track or a branch step's
+cases-and-default by its trackId or branch step ID, a map step's body by
+its mapId and per-iteration index (per the ratified map-body addressing
+above), and a scored-retry step's wrapped step by the enclosing retry
+step's own ID in its `<retryId>.attempts.<n>` key. This scoping rule is
+this section's own inference, not carried from a ratified wording.
 
 ## Predicate operator vocabulary
 
@@ -264,8 +272,11 @@ if/else step kind.
   whichever path it selected -- this format is inferred from the
   container-namespacing pattern used elsewhere in this section, not carried
   from a ratified wording specific to this step kind.
-- **map**: a nested step's key is `<mapId>.<index>`, one entry per item in
-  the list the map iterated over.
+- **map**: a nested step's key is `<mapId>.<index>.<stepId>`, one entry per
+  step per item in the list the map iterated over -- ratified by owner
+  ruling (see the map-body addressing definition above). The plain
+  `<mapId>.<index>` key, without a step-ID suffix, refers to everything
+  that iteration produced, one entry per item in the list.
 - **scored-retry**: each attempt's key is `<retryId>.attempts.<n>`; the
   attempt the step actually kept (the winner, by whichever mode was
   declared) is additionally recorded at the plain `<retryId>` key.

@@ -184,6 +184,7 @@ async function main() {
     check('the step after a failing gate never dispatches', dispatch.calls.length === 2);
     check('the halt names the failing gate step', outcome.halt !== null && outcome.halt.path.indexOf('steps[1]') === 0);
     check('the halt uses a named gate-failure diagnostic', outcome.halt.diagnostic === 'gate-verdict-failed');
+    check('the halt carries the halted:true discriminator every halt-returning function in this file uses', outcome.halt.halted === true);
     check(
       'partial results collected before the failing gate are still returned',
       outcome.results.before.ok === true
@@ -329,6 +330,106 @@ async function main() {
       check(
         'container kind "' + kind + '" is rejected with the container-step-not-supported diagnostic',
         outcome.status === 'failed' && outcome.halt.diagnostic === 'container-step-not-supported'
+      );
+    }
+  }
+
+  // -- a gate step carrying a "predicate" field is a recognized-but------
+  // -- rejected form: it is never dispatched, and halts immediately -------
+  // -- under its own named diagnostic ---------------------------------------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'check',
+          type: 'gate',
+          predicate: { step: 'upstream', field: 'score', operator: 'gte', value: 1 },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ check: { verdict: 'pass' } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a predicate-form gate halts the run with status "failed"', outcome.status === 'failed');
+    check(
+      'the halt uses the gate-predicate-form-not-supported diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'gate-predicate-form-not-supported'
+    );
+    check(
+      'a predicate-form gate names the offending step in the halt path',
+      outcome.halt !== null && outcome.halt.path.indexOf('steps[0]') === 0
+    );
+    check('a predicate-form gate is never dispatched', dispatch.calls.length === 0);
+  }
+
+  // -- malformed-spec guard: a spec that is not a plain object halts ------
+  // -- with status "failed" under the reused spec-not-object diagnostic ---
+  {
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute('not a spec object', dispatch);
+    check('a non-object spec halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the reused spec-not-object diagnostic', outcome.halt.diagnostic === 'spec-not-object');
+    check('a non-object spec never reaches dispatch', dispatch.calls.length === 0);
+  }
+
+  // -- malformed-spec guard: a spec whose "steps" is not an array halts ---
+  // -- with status "failed" under the reused steps-not-array diagnostic ---
+  {
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute({ steps: 'not-an-array', config: {} }, dispatch);
+    check('a non-array spec.steps halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the reused steps-not-array diagnostic', outcome.halt.diagnostic === 'steps-not-array');
+    check('a non-array spec.steps never reaches dispatch', dispatch.calls.length === 0);
+  }
+
+  // -- malformed-step guard mid-sequence: a non-object entry in spec.steps
+  // -- halts with status "failed", and results collected before it are ----
+  // -- preserved, not discarded --------------------------------------------
+  {
+    const spec = {
+      steps: [{ id: 'a1', type: 'agent' }, 'not-a-step-object', { id: 'a2', type: 'agent' }],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ a1: { ok: true }, a2: { ok: true } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a non-object step mid-sequence halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the reused step-not-object diagnostic', outcome.halt.diagnostic === 'step-not-object');
+    check("the earlier step's result is preserved in the partial results map", outcome.results.a1.ok === true);
+    check('the step after the malformed entry never dispatches', dispatch.calls.length === 1 && dispatch.calls[0].id === 'a1');
+  }
+
+  // -- unknown-step-kind guard: a declared type outside the seven --------
+  // -- recognized step kinds halts with status "failed" -------------------
+  {
+    const spec = { steps: [{ id: 'x1', type: 'not-a-real-kind' }], config: {} };
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an unrecognized step kind halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the unknown-step-kind diagnostic', outcome.halt.diagnostic === 'unknown-step-kind');
+    check('an unrecognized step kind never reaches dispatch', dispatch.calls.length === 0);
+  }
+
+  // -- a dispatcher null result for a GATE step resolves instead of -------
+  // -- hanging, mirroring the agent-step race-style proof above -----------
+  {
+    const spec = { steps: [{ id: 'check', type: 'gate' }], config: {} };
+    const dispatch = makeRecordingDispatch({ check: null });
+    const raced = await Promise.race([
+      specEngineExecute(spec, dispatch).then(function (outcome) {
+        return { timedOut: false, outcome: outcome };
+      }),
+      new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve({ timedOut: true });
+        }, 1000);
+      }),
+    ]);
+    check('a null gate-dispatch result resolves instead of hanging', raced.timedOut === false);
+    if (!raced.timedOut) {
+      check('a null gate-dispatch result halts with status "uncertain"', raced.outcome.status === 'uncertain');
+      check(
+        'the halt uses the gate-verdict-unparseable diagnostic',
+        raced.outcome.halt.diagnostic === 'gate-verdict-unparseable'
       );
     }
   }

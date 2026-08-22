@@ -1514,22 +1514,52 @@ function specEngineRegexExtract(text, pattern) {
 // clears the say-vs-do check (or carries no say-vs-do config at all) lets
 // the run continue past the gate.
 //
-// Return shape: { status, results, trace, halt }. `status` is one of
-// "completed" (every step ran, no halt), "gated" (a gate's verdict was
-// "fail"), "uncertain" (a gate's verdict could not be trusted, by any of
-// the three causes above), or "failed" (every other halt cause: a
-// container step kind, a null/undefined dispatch outcome for an agent
-// step, a malformed spec, or a template-render halt for an agent step's
-// prompt or a shape step's template). `results` is the accumulated
-// results map, partial on any non-"completed" status. `trace` is an
-// ordered array with one entry per step actually attempted -- a container
-// step that halts the loop is NOT added to the trace, since it was never
+// A gate step that carries a `predicate` field (the deterministic
+// {step, field, operator, value} form the "Container authoring syntax"
+// section of SPEC_SCHEMA.md shows on a gate nested inside a parallel
+// step's worked example) is recognized but not run by this executor: it
+// is never dispatched, and the existing specEngineEvalPredicate evaluator
+// is never called on it either, because that worked example reads a
+// container step's own aggregate result (a parallel step's
+// failures/successes/total), and container execution is a later
+// capability this loop does not yet implement -- dispatching a
+// predicate-form gate today would mislabel the halt as an unparseable
+// dispatcher verdict, and silently ignoring the field would be exactly
+// the silent-skip this file's halt-loudly discipline forbids elsewhere.
+// A predicate-form gate instead halts immediately, before any dispatch
+// call is made for that step, under the
+// 'gate-predicate-form-not-supported' diagnostic, status "failed".
+// specEngineEvalPredicate will be consumed by this loop once
+// predicate-form gates are implemented alongside container support; of
+// the existing evaluators, this loop today reuses only
+// specEngineRenderTemplate (agent/gate prompt rendering, shape-template
+// rendering) and specEngineTokenOverlap (the say-vs-do cross-check).
+//
+// Return shape: { status, results, trace, halt }. `status` -- not the
+// `halted: true` flag every halt object below also carries, matching
+// every other halt-returning function in this file -- is this loop's
+// primary discriminator, because one execute run can halt for reasons a
+// bare boolean cannot tell apart from each other (a gate's own verdict
+// domain versus a structural failure elsewhere), and a caller branching
+// on the run's outcome needs that distinction, not just "did it halt".
+// `status` is one of "completed" (every step ran, no halt), "gated" (a
+// gate's verdict was "fail"), "uncertain" (a gate's verdict could not be
+// trusted, by any of the three causes above), or "failed" (every other
+// halt cause: a container step kind, a predicate-form gate, a
+// null/undefined dispatch outcome for an agent step, a malformed spec, or
+// a template-render halt for an agent step's prompt or a shape step's
+// template). `results` is the accumulated results map, partial on any
+// non-"completed" status. `trace` is an ordered array with one entry per
+// step actually attempted -- a container step or a predicate-form gate
+// that halts the loop is NOT added to the trace, since neither was ever
 // attempted as a leaf step; each entry is
 // { step, kind, status, outcome, flags }, `flags` non-empty only for a
-// gate step whose say-vs-do check tripped. `halt` is null when `status` is
-// "completed", otherwise the {path, diagnostic, message} object (from
-// specEngineMakeViolation, or forwarded directly from a render halt) that
-// caused the run to stop.
+// gate step whose say-vs-do check tripped. `halt` is null when `status`
+// is "completed", otherwise the halt object every halt-returning function
+// in this file returns -- built with specEngineMakeHalt (so it carries
+// the same {path, diagnostic, message, halted: true} shape as every other
+// halt in this file), or forwarded directly from a render halt, which
+// already carries that shape.
 //
 // Malformed-spec guards reuse validateSpec's own 'spec-not-object' and
 // 'steps-not-array' diagnostics for the same defect classes, since
@@ -1566,22 +1596,26 @@ function specEngineRenderStepForDispatch(step, results, values) {
   return { halted: false, step: dispatchStep };
 }
 
-// specEngineResolveGateVerdict(step, outcome) -- see the specEngineExecute
-// header comment above for the full contract this backs. Returns
-// { verdict: 'pass' | 'fail' | 'uncertain', diagnostic, message, flags },
-// never halts itself (specEngineExecute turns a non-"pass" verdict into a
-// halt using the diagnostic/message/flags returned here).
-function specEngineResolveGateVerdict(step, outcome) {
+// specEngineResolveGateVerdict(step, outcome, path) -- see the
+// specEngineExecute header comment above for the full contract this
+// backs. Returns { verdict: 'pass' | 'fail' | 'uncertain', halt, flags };
+// `halt` is null for a "pass" verdict, otherwise a full halt object built
+// with specEngineMakeHalt (path, diagnostic, message) -- so it already
+// carries the halted: true discriminator, ready for specEngineExecute to
+// return directly without any further construction.
+function specEngineResolveGateVerdict(step, outcome, path) {
   const stepId = step.id;
 
   if (!specEngineIsPlainObject(outcome) || SPEC_ENGINE_GATE_VERDICTS.indexOf(outcome.verdict) === -1) {
     return {
       verdict: 'uncertain',
-      diagnostic: 'gate-verdict-unparseable',
-      message:
+      halt: specEngineMakeHalt(
+        path,
+        'gate-verdict-unparseable',
         'Gate step "' +
-        stepId +
-        '" dispatch outcome did not carry a verdict field equal to "pass", "fail", or "uncertain"; recording uncertain rather than guessing.',
+          stepId +
+          '" dispatch outcome did not carry a verdict field equal to "pass", "fail", or "uncertain"; recording uncertain rather than guessing.'
+      ),
       flags: [],
     };
   }
@@ -1589,8 +1623,7 @@ function specEngineResolveGateVerdict(step, outcome) {
   if (outcome.verdict === 'uncertain') {
     return {
       verdict: 'uncertain',
-      diagnostic: 'gate-verdict-reported-uncertain',
-      message: 'Gate step "' + stepId + '" reported the verdict "uncertain" directly.',
+      halt: specEngineMakeHalt(path, 'gate-verdict-reported-uncertain', 'Gate step "' + stepId + '" reported the verdict "uncertain" directly.'),
       flags: [],
     };
   }
@@ -1604,17 +1637,19 @@ function specEngineResolveGateVerdict(step, outcome) {
     if (overlap < step.minTokenOverlap) {
       return {
         verdict: 'uncertain',
-        diagnostic: 'verdict-unsupported',
-        message:
+        halt: specEngineMakeHalt(
+          path,
+          'verdict-unsupported',
           'Gate step "' +
-          stepId +
-          '" claim/evidence token overlap (' +
-          overlap +
-          ') is below minTokenOverlap (' +
-          step.minTokenOverlap +
-          '); the reported verdict "' +
-          outcome.verdict +
-          '" is downgraded to uncertain regardless of what was reported.',
+            stepId +
+            '" claim/evidence token overlap (' +
+            overlap +
+            ') is below minTokenOverlap (' +
+            step.minTokenOverlap +
+            '); the reported verdict "' +
+            outcome.verdict +
+            '" is downgraded to uncertain regardless of what was reported.'
+        ),
         flags: ['verdict-unsupported'],
       };
     }
@@ -1623,13 +1658,12 @@ function specEngineResolveGateVerdict(step, outcome) {
   if (outcome.verdict === 'fail') {
     return {
       verdict: 'fail',
-      diagnostic: 'gate-verdict-failed',
-      message: 'Gate step "' + stepId + '" reported verdict "fail"; halting the run.',
+      halt: specEngineMakeHalt(path, 'gate-verdict-failed', 'Gate step "' + stepId + '" reported verdict "fail"; halting the run.'),
       flags: [],
     };
   }
 
-  return { verdict: 'pass', diagnostic: null, message: null, flags: [] };
+  return { verdict: 'pass', halt: null, flags: [] };
 }
 
 async function specEngineExecute(spec, dispatch) {
@@ -1638,7 +1672,7 @@ async function specEngineExecute(spec, dispatch) {
       'failed',
       {},
       [],
-      specEngineMakeViolation('', 'spec-not-object', 'A spec must be a JSON object with "steps" and "config".')
+      specEngineMakeHalt('', 'spec-not-object', 'A spec must be a JSON object with "steps" and "config".')
     );
   }
   if (!Array.isArray(spec.steps)) {
@@ -1646,7 +1680,7 @@ async function specEngineExecute(spec, dispatch) {
       'failed',
       {},
       [],
-      specEngineMakeViolation('steps', 'steps-not-array', 'spec.steps must be an array of step objects.')
+      specEngineMakeHalt('steps', 'steps-not-array', 'spec.steps must be an array of step objects.')
     );
   }
 
@@ -1663,7 +1697,7 @@ async function specEngineExecute(spec, dispatch) {
         'failed',
         results,
         trace,
-        specEngineMakeViolation(path, 'step-not-object', 'Each step must be a JSON object.')
+        specEngineMakeHalt(path, 'step-not-object', 'Each step must be a JSON object.')
       );
     }
 
@@ -1677,7 +1711,7 @@ async function specEngineExecute(spec, dispatch) {
         'failed',
         results,
         trace,
-        specEngineMakeViolation(
+        specEngineMakeHalt(
           path,
           'container-step-not-supported',
           'Step "' +
@@ -1701,6 +1735,24 @@ async function specEngineExecute(spec, dispatch) {
     }
 
     if (type === 'agent' || type === 'gate') {
+      if (type === 'gate' && specEngineIsPlainObject(step.predicate)) {
+        // Recognized-but-rejected form: never dispatched, never added to
+        // the trace (it was never attempted as a leaf step) -- see the
+        // specEngineExecute header comment above for the full rationale.
+        return specEngineMakeExecuteResult(
+          'failed',
+          results,
+          trace,
+          specEngineMakeHalt(
+            path,
+            'gate-predicate-form-not-supported',
+            'Gate step "' +
+              stepId +
+              '" carries a "predicate" field; predicate-form gates are not dispatched by this executor and are rejected until container support lands.'
+          )
+        );
+      }
+
       const dispatchPrep = specEngineRenderStepForDispatch(step, results, values);
       if (dispatchPrep.halted) {
         return specEngineMakeExecuteResult('failed', results, trace, dispatchPrep);
@@ -1715,7 +1767,7 @@ async function specEngineExecute(spec, dispatch) {
             'failed',
             results,
             trace,
-            specEngineMakeViolation(
+            specEngineMakeHalt(
               path,
               'agent-dispatch-null-result',
               'Agent step "' +
@@ -1730,26 +1782,16 @@ async function specEngineExecute(spec, dispatch) {
       }
 
       // type === 'gate'
-      const verdictOutcome = specEngineResolveGateVerdict(step, outcome);
+      const verdictOutcome = specEngineResolveGateVerdict(step, outcome, path);
 
       if (verdictOutcome.verdict === 'uncertain') {
         trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: outcome, flags: verdictOutcome.flags });
-        return specEngineMakeExecuteResult(
-          'uncertain',
-          results,
-          trace,
-          specEngineMakeViolation(path, verdictOutcome.diagnostic, verdictOutcome.message)
-        );
+        return specEngineMakeExecuteResult('uncertain', results, trace, verdictOutcome.halt);
       }
 
       if (verdictOutcome.verdict === 'fail') {
         trace.push({ step: stepId, kind: type, status: 'gated', outcome: outcome, flags: verdictOutcome.flags });
-        return specEngineMakeExecuteResult(
-          'gated',
-          results,
-          trace,
-          specEngineMakeViolation(path, verdictOutcome.diagnostic, verdictOutcome.message)
-        );
+        return specEngineMakeExecuteResult('gated', results, trace, verdictOutcome.halt);
       }
 
       results[stepId] = outcome;
@@ -1766,7 +1808,7 @@ async function specEngineExecute(spec, dispatch) {
       'failed',
       results,
       trace,
-      specEngineMakeViolation(
+      specEngineMakeHalt(
         path + '.type',
         'unknown-step-kind',
         'Step kind "' + type + '" is not one of the seven recognized step kinds.'

@@ -34,10 +34,11 @@ measured. No corruption and no rejection were observed at any size tried.
 
 The measurement below uses three internal labels: a "rung" is one step in an
 increasing-size ladder of test payloads; the "wf_..." identifier names the
-specific run that produced that rung's result; and "caller emission"
-(labeled F3 in the underlying finding) means the limit that bounded how
-large the tested payloads got was the sending side's own limit on how much
-text it could emit in one go, not any limit enforced by the runtime itself.
+specific run that produced that rung's result; and "caller emission" --
+which the parenthetical tag inside the quote below also names -- means the
+limit that bounded how large the tested payloads got was the sending side's
+own limit on how much text it could emit in one go, not any limit enforced
+by the runtime itself.
 
 > Measured maximum working size: 41,628 chars (rung 3, wf_791e813b). This is
 > a FLOOR on the true ceiling, not the ceiling: no failure was ever observed,

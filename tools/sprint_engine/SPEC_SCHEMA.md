@@ -32,12 +32,24 @@ hold no nested steps.
 | Field | Optionality | Rule |
 |---|---|---|
 | `config.spillDir` | REQUIRED whenever the spec contains any agent step | Every agent step can produce an oversized result (see the spill contract below), and the oversized-output rule has nowhere to save its file without this folder. Requiring it whenever an agent step is present means the rule can never fire in a workflow that has nowhere to save. `spillDir` must be an absolute path; a relative path is rejected at validation with a named diagnostic. |
-| `map.merge` | OPTIONAL | A map step may declare how its per-item results are combined; if it does not, a default combination applies. |
+| `map.merge` | OPTIONAL | A map step may declare how its per-item results are combined; if it does not, a default combination applies, but no sourced wording specifies what that default combination actually does -- this contract does not invent one. |
 | `scored-retry.augment` | OPTIONAL | A scored-retry step may declare extra instructions fed into a retry attempt; if absent, a retry attempt runs without augmentation. |
 | `scored-retry.mode` | REQUIRED | Two legal values: `first-passing` (stop and keep the first attempt that clears the threshold) and `keep-best` (run every attempt up to the bound and keep the highest-scoring one). |
 | `scored-retry.threshold` | REQUIRED for `first-passing` mode; OPTIONAL for `keep-best` mode | `first-passing` needs a threshold to know when to stop; `keep-best` runs to its bound regardless and does not need one. |
 | `branch.default` | OPTIONAL | If none of a branch step's conditions match and no `default` is declared, the run stops loudly with a diagnostic instead of guessing which path to take. |
 | `config.schemas` | OPTIONAL | An optional config field for declaring schemas. |
+
+**A note on "schema."** This word names two different things in this
+contract. An **output schema** is a JSON-shape declaration attached to a
+single step -- its properties, which of them are required, and so on --
+that constrains what that step's own structured output must look like; the
+"output-schema field name" the reserved-segments rule refers to below is
+this per-step field, and a gate step's verdict being reported as the
+`uncertain` **schema member** (in the gate verdict section further below)
+means the agent chose "uncertain" directly from that step's own output
+schema. `config.schemas`, by contrast, is a single config-level field, not a
+per-step schema, and this contract does not specify its internal structure
+or how it relates to per-step output schemas -- no source settles that.
 
 ## Predicate operator vocabulary
 
@@ -68,6 +80,11 @@ commonly inside an agent step's prompt) that the engine fills in with a value
 from an earlier step's result before that step runs. The engine resolves a
 template by reading the text inside the braces as a dotted path into the
 results collected so far and substituting the value found there.
+
+A shape step's own `template` field (see the minimal valid spec at the end
+of this document) is this same mechanism, not a separate one: its value is
+an object whose string leaves may contain `{{...}}` placeholders, resolved
+exactly as described here, to build the step's output from earlier results.
 
 Three template forms are recognized: `{{step.field}}`, `{{values.PATH}}`, and
 `{{#if}}`. `{{step.field}}` is the form fully documented here, resolved by

@@ -39,8 +39,11 @@ hold no nested steps.
 | `branch.default` | OPTIONAL | If none of a branch step's conditions match and no `default` is declared, the run stops loudly with a diagnostic instead of guessing which path to take. |
 | `config.schemas` | OPTIONAL | An optional config field for declaring schemas. |
 
-**A note on "schema."** This word names two different things in this
-contract. An **output schema** is a JSON-shape declaration attached to a
+**A note on "schema."** This word names three different things in this
+contract: two resolved here, and a third, unrelated sense -- the shape of a
+captured fixture record -- described in the reference-fixture capture
+schema section further below. An **output schema** is a JSON-shape
+declaration attached to a
 single step -- its properties, which of them are required, and so on --
 that constrains what that step's own structured output must look like; the
 "output-schema field name" the reserved-segments rule refers to below is

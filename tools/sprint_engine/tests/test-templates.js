@@ -266,7 +266,7 @@ const values = { region: 'us-east', nested: { flag: true } };
 }
 
 // -- nested {{#if}} blocks halt cleanly instead of corrupting output ------
-// Stage 2 review (executed repro): the non-greedy block regex pairs the
+// Executed repro: the non-greedy block regex pairs the
 // outer {{#if}} with the FIRST {{/if}} it finds, which is the INNER
 // block's closer, not the outer's own. With outer true + inner false, this
 // silently drops the trailing literal content after the inner block
@@ -290,7 +290,7 @@ const values = { region: 'us-east', nested: { flag: true } };
 }
 
 // -- nested {{#if}} blocks halt cleanly when the OUTER condition is false -
-// Stage 2 review (executed repro): with the outer condition false, the same
+// Executed repro: with the outer condition false, the same
 // mispairing left a leftover {{/if}} token in the string, which the
 // placeholder pass then reported as a bogus unresolved reference named
 // "/if" -- a diagnostic that names a syntax artifact, not the real defect.

@@ -404,22 +404,40 @@ function resolveReferences(spec) {
 
   let visitOrderCounter = 0;
 
+  // declaredAtOrder is the DFS order at which the declaring step STARTS
+  // (when the entry is created); availableAtOrder is the DFS order at
+  // which the declared key's value actually becomes readable. For a leaf
+  // step (agent/gate/shape) these are the same instant -- its result is
+  // whatever it is as soon as it is visited, since it has no subtree.
+  // For a container step's own key (a parallel's aggregate, a
+  // scored-retry's winner/attempts), the value depends on that
+  // container's own subtree finishing -- its own join -- so
+  // availableAtOrder starts equal to declaredAtOrder here and is
+  // overwritten by the caller once that subtree's end order is known (see
+  // the parallel/map/scored-retry recursion blocks below). The entry
+  // object is returned so the caller can make that later update.
   function declareExactKey(key, trackCtx, visitOrder) {
-    declaredExactKeys.push({
+    const entry = {
       key: key,
       ownerTrackId: trackCtx.trackId,
       joinOrderRef: trackCtx.joinOrderRef,
       declaredAtOrder: visitOrder,
-    });
+      availableAtOrder: visitOrder,
+    };
+    declaredExactKeys.push(entry);
+    return entry;
   }
 
   function declarePatternKey(base, trackCtx, visitOrder) {
-    declaredPatternKeys.push({
+    const entry = {
       base: base,
       ownerTrackId: trackCtx.trackId,
       joinOrderRef: trackCtx.joinOrderRef,
       declaredAtOrder: visitOrder,
-    });
+      availableAtOrder: visitOrder,
+    };
+    declaredPatternKeys.push(entry);
+    return entry;
   }
 
   // "Template forms and reference resolution": three forms are recognized.
@@ -549,23 +567,33 @@ function resolveReferences(spec) {
       collectTemplateSites(step.template, path + '.template', visitOrder, trackCtx);
     }
 
+    // ownKeyEntry / attemptsPatternEntry: captured so the container
+    // recursion blocks below can push their availableAtOrder out to the
+    // container's own subtree-end order, once that order is known.
+    let ownKeyEntry = null;
+    let attemptsPatternEntry = null;
+
     if (ownKey !== null) {
       if (type === 'parallel') {
         // "A parallel step's own result also carries aggregate counts
         // alongside the per-track results: {failures, successes, total}."
-        declareExactKey(ownKey, trackCtx, visitOrder);
+        // Not available until this parallel step's own join, below.
+        ownKeyEntry = declareExactKey(ownKey, trackCtx, visitOrder);
       } else if (type === 'scored-retry') {
         // "the attempt the step actually kept ... is additionally
         // recorded at the plain <retryId> key" plus the per-attempt
-        // "<retryId>.attempts.<n>" pattern.
-        declareExactKey(ownKey, trackCtx, visitOrder);
-        declarePatternKey(ownKey + '.attempts', trackCtx, visitOrder);
+        // "<retryId>.attempts.<n>" pattern. Neither is available until
+        // the wrapped step's own subtree finishes, below.
+        ownKeyEntry = declareExactKey(ownKey, trackCtx, visitOrder);
+        attemptsPatternEntry = declarePatternKey(ownKey + '.attempts', trackCtx, visitOrder);
       } else if (type === 'map') {
         // "<mapId>.<index>" -- the item count is a runtime fact, not
-        // statically known, so any bare-numeric index is accepted.
-        declarePatternKey(ownKey, trackCtx, visitOrder);
+        // statically known, so any bare-numeric index is accepted. Not
+        // available until the map body's own subtree finishes, below.
+        ownKeyEntry = declarePatternKey(ownKey, trackCtx, visitOrder);
       } else if (type !== 'branch') {
-        // agent, gate, shape: "the key is just its own step ID."
+        // agent, gate, shape: "the key is just its own step ID," available
+        // as soon as this leaf step is visited -- no subtree to wait on.
         declareExactKey(ownKey, trackCtx, visitOrder);
       }
       // branch: no key of its own is documented for the branch step
@@ -596,12 +624,32 @@ function resolveReferences(spec) {
         }
       }
       joinOrderRef.value = visitOrderCounter - 1;
+      // This parallel step's own aggregate key (failures/successes/total)
+      // is not readable until this same join point -- a descendant inside
+      // any of its own tracks referencing it is a circular reference.
+      if (ownKeyEntry !== null) {
+        ownKeyEntry.availableAtOrder = joinOrderRef.value;
+      }
     } else if (type === 'map' && Array.isArray(step.steps)) {
       for (let mi = 0; mi < step.steps.length; mi += 1) {
         visitStep(step.steps[mi], path + '.steps[' + mi + ']', null, trackCtx);
       }
+      // This map step's own per-item key is not readable until its body's
+      // own subtree finishes.
+      if (ownKeyEntry !== null) {
+        ownKeyEntry.availableAtOrder = visitOrderCounter - 1;
+      }
     } else if (type === 'scored-retry' && specEngineIsPlainObject(step.step)) {
       visitStep(step.step, path + '.step', null, trackCtx);
+      // Neither the winner key nor any attempt is readable until the
+      // wrapped step's own subtree finishes.
+      const retrySubtreeEnd = visitOrderCounter - 1;
+      if (ownKeyEntry !== null) {
+        ownKeyEntry.availableAtOrder = retrySubtreeEnd;
+      }
+      if (attemptsPatternEntry !== null) {
+        attemptsPatternEntry.availableAtOrder = retrySubtreeEnd;
+      }
     } else if (type === 'branch') {
       const branchId = typeof id === 'string' ? id : null;
       if (Array.isArray(step.cases)) {
@@ -721,8 +769,14 @@ function resolveReferences(spec) {
       // The referrer may be nested inside the owning track at any depth
       // (e.g. inside an inner parallel step that is itself one of that
       // track's steps) -- membership is chain-wide, not nearest-track-only.
+      // The gate is availableAtOrder, not declaredAtOrder: a container
+      // key's value isn't readable until that container's own subtree
+      // (its own join) finishes, so a site nested inside the declaring
+      // container's own still-open subtree can never satisfy this carve-
+      // out for that container's key, even though it is chain-wide a
+      // member of the same track.
       const sameTrackLater =
-        site.ancestorTrackIds.indexOf(entry.ownerTrackId) !== -1 && site.visitOrder > entry.declaredAtOrder;
+        site.ancestorTrackIds.indexOf(entry.ownerTrackId) !== -1 && site.visitOrder > entry.availableAtOrder;
       if (!afterJoin && !sameTrackLater) {
         violations.push(
           specEngineMakeViolation(

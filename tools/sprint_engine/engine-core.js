@@ -1437,27 +1437,66 @@ function specEngineRegexExtract(text, pattern) {
 }
 
 // specEngineExecute(spec, dispatch) runs the execute loop over spec.steps,
-// in order, for the three leaf step kinds only: agent, gate, shape.
-// Container step kinds (parallel, map, scored-retry, branch) are a later
-// capability -- meeting one at execute time is never a silent skip; the
-// loop halts immediately with a named 'container-step-not-supported'
-// diagnostic, the same {path, diagnostic, message} halt shape every other
-// halt in this file uses.
+// in order, for the three leaf step kinds (agent, gate, shape) plus one
+// container kind: "parallel", per the "Container authoring syntax" and
+// "Result-key namespacing grammar" sections of SPEC_SCHEMA.md, and the
+// PROBE_RESULTS.md observation that a failing gate verdict inside one
+// branch does not disrupt the other branch's result delivery or the
+// overall join. The other three container kinds (map, scored-retry,
+// branch) remain a later capability -- meeting one at execute time,
+// whether at the top level or inside a parallel step's own track, is never
+// a silent skip; the loop halts immediately with a named
+// 'container-step-not-supported' diagnostic, the same {path, diagnostic,
+// message} halt shape every other halt in this file uses. A parallel
+// step's own malformed shapes (a missing/non-array `tracks`, a track that
+// is not a plain object, or a track missing its own `id`/`steps`) are
+// guarded here too, under their own named diagnostics, since validateSpec
+// does not itself flag those defects (see specEngineExecuteParallelStep
+// below).
+//
+// Track execution is delegated to specEngineExecuteSequence, the same
+// step-sequence runner this function itself is now a thin wrapper around:
+// a parallel step's each track runs its own `steps` list as a full
+// sequence, with the exact same agent/gate/shape (and nested-parallel)
+// semantics the top-level loop uses, seeded with a private clone of the
+// results collected so far (so a track's steps can resolve an earlier,
+// pre-parallel step by bare name, and a later step in the SAME track can
+// resolve an earlier step in that same track by bare name too) but
+// isolated from every other track's own steps (so two tracks' bare-named
+// steps never collide with each other). See specEngineExecuteTrack and
+// specEngineExecuteParallelStep below for the full per-track contract:
+// tracks are dispatched concurrently (Promise.all over each track's own
+// sub-execution, sharing this call's single injected `dispatch` function),
+// a track's own internal halt (a gate fail, a gate "uncertain", or any
+// other leaf-halt cause, including a nested container-step-not-supported
+// halt) is CONTAINED to that track -- it fails only that track, is counted
+// in the parallel step's own aggregate, and the run continues past the
+// join rather than halting the whole run -- and each track's completed
+// steps land in the results map under `<trackId>.<stepId>` (the parallel
+// step's own id never prefixes a nested key), with the parallel step's own
+// aggregate counts {failures, successes, total} landing under its own id.
 //
 // Dispatch capability is injected, not owned by this file: the caller
 // supplies `dispatch`, an async function `dispatch(step, context) ->
-// outcome`, called once per agent or gate step, in step order, and always
-// awaited before the loop moves to the next step -- this is what makes
-// dispatch order observable to a caller-supplied stub. `context` is
-// `{ results, values }`: `results` is the SAME flat namespaced-key results
-// map object specEngineEvalPredicate and specEngineRenderTemplate read
-// elsewhere in this file (not a copy), so a dispatcher can itself resolve
-// further references if it needs to; `values` is spec.config.values (or an
-// empty object when absent), the same config-values object
-// specEngineRenderTemplate's `values` parameter reads for {{values.PATH}}.
-// specEngineExecute carries no dispatch primitive of its own -- shape steps
-// are the only leaf kind that never calls `dispatch`, since a shape step's
-// output is computed in-engine by rendering its own `template` field.
+// outcome`, called once per agent or gate step (including one inside a
+// track), in step order within whichever sequence it belongs to, and
+// always awaited before that sequence moves to its next step -- this is
+// what makes dispatch order observable to a caller-supplied stub, and,
+// across tracks, what makes concurrent dispatch observable too (nothing in
+// one track's own await chain blocks another track's dispatch calls from
+// starting). `context` is `{ results, values }`: `results` is the SAME
+// flat namespaced-key results map object specEngineEvalPredicate and
+// specEngineRenderTemplate read elsewhere in this file (not a copy) for a
+// top-level or post-join step; a step dispatched from inside a track
+// instead receives that track's own private results object (bare-named,
+// per the isolation described above), so a dispatcher can itself resolve
+// further references if it needs to, scoped exactly the way that step
+// itself resolves them; `values` is spec.config.values (or an empty object
+// when absent), the same config-values object specEngineRenderTemplate's
+// `values` parameter reads for {{values.PATH}}. specEngineExecute carries
+// no dispatch primitive of its own -- shape steps are the only leaf kind
+// that never calls `dispatch`, since a shape step's output is computed
+// in-engine by rendering its own `template` field.
 //
 // Timeout ownership: this function starts no internal timer and races no
 // promise against a clock. A dispatcher that never settles leaves the
@@ -1492,15 +1531,19 @@ function specEngineRegexExtract(text, pattern) {
 // own to point back to.
 //
 // Each completed leaf step's result lands in the results map under its own
-// step id, per the "Result-key namespacing grammar" section (this loop
-// only ever produces top-level, unnamespaced keys, since it does not
-// recurse into any container step): an agent step's result is whatever its
-// dispatch outcome was; a shape step's result is its rendered template
-// value; a gate step's result is its raw dispatch outcome, but ONLY when
-// that gate's verdict resolved to "pass" -- a gate that halts the run
-// (verdict "fail" or "uncertain") is not a completed step, so its own
-// outcome is deliberately left out of the returned results map (it is
-// still visible in the halt object and in the trace entry for that step).
+// step id, per the "Result-key namespacing grammar" section: a top-level
+// leaf step's key is its own step id (unnamespaced); a step inside a
+// track's key is namespaced as `<trackId>.<stepId>` once that track's own
+// sub-execution merges back into the enclosing results map, per the
+// parallel-step handling described above. An agent step's result is
+// whatever its dispatch outcome was; a shape step's result is its rendered
+// template value; a gate step's result is its raw dispatch outcome, but
+// ONLY when that gate's verdict resolved to "pass" -- a gate that halts
+// its own sequence (verdict "fail" or "uncertain") is not a completed
+// step, so its own outcome is deliberately left out of the results map
+// (it is still visible in the halt object and in the trace entry for that
+// step, and, for a gate inside a track, in that track's own halt detail
+// under the enclosing parallel step's trace entry).
 //
 // Gate verdict handling, per the "Gate verdict domain" and "Say-vs-do
 // cross-check" sections of SPEC_SCHEMA.md: a gate step's dispatch outcome
@@ -1553,30 +1596,45 @@ function specEngineRegexExtract(text, pattern) {
 // bare boolean cannot tell apart from each other (a gate's own verdict
 // domain versus a structural failure elsewhere), and a caller branching
 // on the run's outcome needs that distinction, not just "did it halt".
-// `status` is one of "completed" (every step ran, no halt), "gated" (a
-// gate's verdict was "fail"), "uncertain" (a gate's verdict could not be
-// trusted, by any of the three causes above), or "failed" (every other
-// halt cause: a container step kind, a predicate-form gate, a
-// null/undefined dispatch outcome for an agent step, a malformed spec, or
-// a template-render halt for an agent step's prompt or a shape step's
-// template). `results` is the accumulated results map, partial on any
-// non-"completed" status. `trace` is an ordered array with one entry per
-// step actually attempted -- a container step or a predicate-form gate
-// that halts the loop is NOT added to the trace, since neither was ever
-// attempted as a leaf step; each entry is
+// `status` is one of "completed" (every top-level step ran, no whole-run
+// halt -- a parallel step whose OWN tracks contained one or more internal
+// failures still reports "completed" at this top level, per the
+// containment rule above), "gated" (a top-level, non-contained gate's
+// verdict was "fail"), "uncertain" (a top-level, non-contained gate's
+// verdict could not be trusted, by any of the three causes above), or
+// "failed" (every other whole-run halt cause: an unsupported container
+// step kind reached outside any track, a malformed parallel step's own
+// shape, a predicate-form gate, a null/undefined dispatch outcome for a
+// top-level agent step, a malformed spec, or a template-render halt for a
+// top-level agent step's prompt or a shape step's template). `results` is
+// the accumulated results map, partial on any non-"completed" status.
+// `trace` is an ordered array with one entry per top-level step actually
+// attempted -- an unsupported container step or a predicate-form gate that
+// halts the loop is NOT added to the trace, since neither was ever
+// attempted as a leaf step; each leaf entry is
 // { step, kind, status, outcome, flags }, `flags` non-empty only for a
-// gate step whose say-vs-do check tripped. `halt` is null when `status`
-// is "completed", otherwise the halt object every halt-returning function
-// in this file returns -- built with specEngineMakeHalt (so it carries
-// the same {path, diagnostic, message, halted: true} shape as every other
-// halt in this file), or forwarded directly from a render halt, which
-// already carries that shape.
+// gate step whose say-vs-do check tripped; a parallel step's own trace
+// entry additionally carries `tracks`, an array of one summary per track
+// ({ trackId, status, trace, halt }, that track's own leaf-style trace and
+// halt/status, exactly as specEngineExecuteTrack below returns them) --
+// this is where a track-contained halt's detail stays inspectable even
+// though it never reaches this function's own top-level `halt`. `halt` is
+// null when `status` is "completed", otherwise the halt object every
+// halt-returning function in this file returns -- built with
+// specEngineMakeHalt (so it carries the same {path, diagnostic, message,
+// halted: true} shape as every other halt in this file), or forwarded
+// directly from a render halt, which already carries that shape.
 //
 // Malformed-spec guards reuse validateSpec's own 'spec-not-object' and
 // 'steps-not-array' diagnostics for the same defect classes, since
 // specEngineExecute is not itself a structural validator (that is
 // validateSpec's job, expected to run before execute) but must still fail
-// loudly rather than throw on a spec that never got validated.
+// loudly rather than throw on a spec that never got validated. A malformed
+// parallel step's own shape gets the same treatment under its own new
+// diagnostics ('parallel-tracks-not-array', 'parallel-track-not-object',
+// 'parallel-track-id-missing', 'parallel-track-steps-not-array'), since
+// validateSpec does not check a track's own `id`/`steps` shape or whether
+// `tracks` itself is an array (see specEngineExecuteParallelStep).
 
 function specEngineMakeExecuteResult(status, results, trace, halt) {
   return { status: status, results: results, trace: trace, halt: halt || null };
@@ -1683,6 +1741,359 @@ function specEngineResolveGateVerdict(step, outcome, path) {
   return { verdict: 'pass', halt: null, flags: [] };
 }
 
+// specEngineExecuteSequence(steps, dispatch, values, results, trace,
+// pathPrefix) runs one step-sequence loop -- the shared engine this file's
+// two callers (the top-level specEngineExecute wrapper below, and
+// specEngineExecuteTrack's own per-track sub-execution) both drive. `steps`
+// is the sequence to run; `dispatch`/`values` are threaded straight through
+// to every agent/gate dispatch and every template render, unchanged from
+// caller to caller; `results` and `trace` are the caller-owned, MUTATED IN
+// PLACE accumulators this loop writes into (never replaced with a new
+// object), so a caller can seed `results` with whatever should be visible
+// to this sequence's own bare-name template/prompt resolution before this
+// function is ever called (the top-level wrapper seeds an empty object;
+// specEngineExecuteTrack seeds a private clone of the results collected so
+// far, per the parallel-step contract in the specEngineExecute header
+// comment above); `pathPrefix` is this sequence's own locator base (e.g.
+// 'steps' for the top level, or 'steps[i].tracks[ti].steps' for a track),
+// so every halt this loop returns still names its offending step with a
+// full, unambiguous path. Returns { status, halt }: `status` is
+// "completed" once every step in `steps` has run, or one of "gated" /
+// "uncertain" / "failed" the moment a step halts this sequence; `halt` is
+// null on "completed", otherwise the halt object (see specEngineMakeHalt)
+// for whichever step halted. This is exactly the loop body
+// specEngineExecute owned directly before parallel-step support existed;
+// its only new branch is the `type === 'parallel'` case below, which
+// delegates to specEngineExecuteParallelStep and, on success, merges that
+// parallel step's own aggregate and namespaced per-track results into
+// `results` before continuing this same sequence -- every other branch
+// (shape, agent, gate, the three still-unsupported container kinds, and
+// the malformed-step/unknown-kind guards) is unchanged from before.
+async function specEngineExecuteSequence(steps, dispatch, values, results, trace, pathPrefix) {
+  for (let i = 0; i < steps.length; i += 1) {
+    const step = steps[i];
+    const path = pathPrefix + '[' + i + ']';
+
+    if (!specEngineIsPlainObject(step)) {
+      return { status: 'failed', halt: specEngineMakeHalt(path, 'step-not-object', 'Each step must be a JSON object.') };
+    }
+
+    const stepId = step.id;
+    const type = step.type;
+
+    if (type === 'parallel') {
+      const parallelOutcome = await specEngineExecuteParallelStep(step, dispatch, values, path, results);
+      if (parallelOutcome.wholeRunHalt) {
+        return { status: 'failed', halt: parallelOutcome.wholeRunHalt };
+      }
+      Object.keys(parallelOutcome.namespacedResults).forEach(function (namespacedKey) {
+        results[namespacedKey] = parallelOutcome.namespacedResults[namespacedKey];
+      });
+      results[stepId] = parallelOutcome.aggregate;
+      trace.push({
+        step: stepId,
+        kind: type,
+        status: 'completed',
+        outcome: parallelOutcome.aggregate,
+        flags: [],
+        tracks: parallelOutcome.trackSummaries,
+      });
+      continue;
+    }
+
+    if (SPEC_ENGINE_CONTAINER_STEP_KINDS.indexOf(type) !== -1) {
+      // Loud failure, never a silent skip: the three remaining container
+      // kinds (map, scored-retry, branch) are a later capability this loop
+      // does not implement, whether met at the top level or inside a
+      // track's own sequence.
+      return {
+        status: 'failed',
+        halt: specEngineMakeHalt(
+          path,
+          'container-step-not-supported',
+          'Step "' +
+            stepId +
+            '" is a container step kind ("' +
+            type +
+            '"); this executor only runs agent, gate, shape, and parallel -- the remaining container kinds are a later capability.'
+        ),
+      };
+    }
+
+    if (type === 'shape') {
+      const templateValue = specEngineIsPlainObject(step.template) ? step.template : {};
+      const rendered = specEngineRenderTemplate(templateValue, results, values, path + '.template');
+      if (rendered.halted) {
+        return { status: 'failed', halt: rendered };
+      }
+      results[stepId] = rendered.value;
+      trace.push({ step: stepId, kind: type, status: 'completed', outcome: rendered.value, flags: [] });
+      continue;
+    }
+
+    if (type === 'agent' || type === 'gate') {
+      if (type === 'gate' && specEngineIsPlainObject(step.predicate)) {
+        // Recognized-but-rejected form: never dispatched, never added to
+        // the trace (it was never attempted as a leaf step) -- see the
+        // specEngineExecute header comment above for the full rationale.
+        return {
+          status: 'failed',
+          halt: specEngineMakeHalt(
+            path,
+            'gate-predicate-form-not-supported',
+            'Gate step "' +
+              stepId +
+              '" carries a "predicate" field; predicate-form gates are not dispatched by this executor and are rejected until container support lands.'
+          ),
+        };
+      }
+
+      const dispatchPrep = specEngineRenderStepForDispatch(step, results, values, path);
+      if (dispatchPrep.halted) {
+        return { status: 'failed', halt: dispatchPrep };
+      }
+
+      const outcome = await dispatch(dispatchPrep.step, { results: results, values: values });
+
+      if (type === 'agent') {
+        if (outcome === null || typeof outcome === 'undefined') {
+          trace.push({ step: stepId, kind: type, status: 'failed', outcome: outcome, flags: [] });
+          return {
+            status: 'failed',
+            halt: specEngineMakeHalt(
+              path,
+              'agent-dispatch-null-result',
+              'Agent step "' +
+                stepId +
+                '" dispatch returned no result (null/undefined); halting rather than hanging or silently continuing.'
+            ),
+          };
+        }
+        results[stepId] = outcome;
+        trace.push({ step: stepId, kind: type, status: 'completed', outcome: outcome, flags: [] });
+        continue;
+      }
+
+      // type === 'gate'
+      const verdictOutcome = specEngineResolveGateVerdict(step, outcome, path);
+
+      if (verdictOutcome.verdict === 'uncertain') {
+        trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: outcome, flags: verdictOutcome.flags });
+        return { status: 'uncertain', halt: verdictOutcome.halt };
+      }
+
+      if (verdictOutcome.verdict === 'fail') {
+        trace.push({ step: stepId, kind: type, status: 'gated', outcome: outcome, flags: verdictOutcome.flags });
+        return { status: 'gated', halt: verdictOutcome.halt };
+      }
+
+      results[stepId] = outcome;
+      trace.push({ step: stepId, kind: type, status: 'completed', outcome: outcome, flags: verdictOutcome.flags });
+      continue;
+    }
+
+    // Any other declared type (including an unrecognized one) is a
+    // structural defect validateSpec is responsible for catching before
+    // execute ever runs; guarded here so this loop still fails loudly
+    // instead of silently falling through if it is ever called on an
+    // unvalidated spec.
+    return {
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.type',
+        'unknown-step-kind',
+        'Step kind "' + type + '" is not one of the seven recognized step kinds.'
+      ),
+    };
+  }
+
+  return { status: 'completed', halt: null };
+}
+
+// specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults,
+// parentPath) runs one parallel step's single track as a full sequence,
+// via specEngineExecuteSequence, seeded with a private clone of
+// `baseResults` (the results collected so far at the point this parallel
+// step was reached) -- per the "Within one track, bare step-name
+// references resolve to that track's own earlier steps" contract: a
+// shallow clone means a bare-named template/prompt reference inside this
+// track resolves against both every step that ran before the parallel
+// step AND this same track's own earlier steps, while mutations this
+// track makes (its own steps' results, added under their bare ids) never
+// leak into `baseResults` itself or into any sibling track's own clone --
+// each track's clone is independent. Returns
+// { trackId, status, halt, trace, localResults }: `status`/`halt`/`trace`
+// are exactly what this track's own specEngineExecuteSequence run
+// produced (a non-"completed" status here is this track's OWN internal
+// halt -- a gate fail, a gate "uncertain", or any other leaf-halt cause,
+// including a nested container-step-not-supported halt -- CONTAINED to
+// this track by the caller, specEngineExecuteParallelStep, never escalated
+// to a whole-run halt); `localResults` is this track's own contribution
+// only -- every key present in the post-run clone that was NOT already
+// present in `baseResults` before this track ran, i.e. exactly the bare-id
+// results this track's own steps produced (including, for a nested
+// container step, whatever namespaced sub-keys that container's own
+// execution already wrote into this track's local map) -- ready for the
+// caller to re-namespace under this track's own `<trackId>.` prefix.
+async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, parentPath) {
+  const localResults = Object.assign({}, baseResults);
+  const baseKeys = Object.keys(baseResults);
+  const localTrace = [];
+  const trackPath = parentPath + '.tracks[' + trackIndex + '].steps';
+
+  const seqOutcome = await specEngineExecuteSequence(track.steps, dispatch, values, localResults, localTrace, trackPath);
+
+  const ownResults = {};
+  Object.keys(localResults).forEach(function (key) {
+    if (baseKeys.indexOf(key) === -1) {
+      ownResults[key] = localResults[key];
+    }
+  });
+
+  return {
+    trackId: track.id,
+    status: seqOutcome.status,
+    halt: seqOutcome.halt,
+    trace: localTrace,
+    localResults: ownResults,
+  };
+}
+
+// specEngineExecuteParallelStep(step, dispatch, values, path, baseResults)
+// runs one "parallel" step's own `tracks`, per the "Container authoring
+// syntax" and "Result-key namespacing grammar" sections of
+// SPEC_SCHEMA.md, and the PROBE_RESULTS.md observation this design is
+// built on (a failing gate verdict inside one branch does not disrupt the
+// other branch's result delivery or the overall join).
+//
+// Malformed-shape guards run first, before any track is dispatched:
+// validateSpec's own parallel-step handling checks a track's NESTED
+// steps' ids/types (via the same registry every other container kind
+// uses) but never checks `tracks` itself is an array, that each
+// tracks[] entry is a plain object, or that a track declares its own
+// `id`/`steps` -- so those four defects can reach this function on an
+// otherwise-validated spec. Each is rejected here under its own
+// diagnostic ('parallel-tracks-not-array', 'parallel-track-not-object',
+// 'parallel-track-id-missing', 'parallel-track-steps-not-array'), and any
+// one of them halts the WHOLE run (returned as `wholeRunHalt`) -- this is
+// a structural defect in the parallel step's own declaration, not a
+// track's runtime failure, so it does not get the per-track containment
+// the rest of this function's own tracks get.
+//
+// Once every track passes that guard, every track's own sub-execution
+// runs CONCURRENTLY: `dispatch` is a single function shared across every
+// track (per the specEngineExecute header comment's dispatch-injection
+// contract), and every track's specEngineExecuteTrack call is started
+// (via Array.prototype.map) before any of them is awaited, so Promise.all
+// resolves them together -- nothing in one track's own await chain blocks
+// another track's dispatch calls from starting, which is what makes
+// concurrent dispatch order observable to a caller-supplied stub.
+//
+// On success (wholeRunHalt: null), returns
+// { wholeRunHalt: null, namespacedResults, aggregate, trackSummaries }:
+// `namespacedResults` is every track's own `localResults` entries,
+// re-keyed as `<trackId>.<stepId>` (the parallel step's own id never
+// prefixes a nested key, per the namespacing grammar); `aggregate` is
+// { failures, successes, total } -- a track counts as a success only when
+// its own status is "completed", and as a failure for every other status
+// ("gated", "uncertain", or "failed") -- this is where gate "uncertain"
+// inside a track is deliberately treated the same as a gate fail: BOTH
+// are contained to that track and counted as failures here, never
+// escalated to a whole-run "uncertain" or "gated" halt, since nothing
+// about this aggregation re-inspects a track's own internal status beyond
+// "did it complete"; `trackSummaries` is one { trackId, status, trace,
+// halt } entry per track, in track-declaration order, exactly as
+// specEngineExecuteTrack returned it -- this is where a track-contained
+// halt's own diagnostic stays inspectable from the enclosing parallel
+// step's own trace entry (see specEngineExecuteSequence's `type ===
+// 'parallel'` branch above, which threads this array through as that
+// trace entry's own `tracks` field).
+async function specEngineExecuteParallelStep(step, dispatch, values, path, baseResults) {
+  if (!Array.isArray(step.tracks)) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.tracks',
+        'parallel-tracks-not-array',
+        'Parallel step "' + step.id + '" must declare "tracks" as an array of { id, steps }; none was found.'
+      ),
+    };
+  }
+
+  for (let ti = 0; ti < step.tracks.length; ti += 1) {
+    const track = step.tracks[ti];
+    const trackPath = path + '.tracks[' + ti + ']';
+
+    if (!specEngineIsPlainObject(track)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          trackPath,
+          'parallel-track-not-object',
+          'Parallel step "' + step.id + '" track at "' + trackPath + '" must be a JSON object with "id" and "steps".'
+        ),
+      };
+    }
+    if (typeof track.id !== 'string' || track.id.length === 0) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          trackPath + '.id',
+          'parallel-track-id-missing',
+          'Parallel step "' + step.id + '" track at "' + trackPath + '" is missing a non-empty string "id".'
+        ),
+      };
+    }
+    if (!Array.isArray(track.steps)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          trackPath + '.steps',
+          'parallel-track-steps-not-array',
+          'Parallel step "' + step.id + '" track "' + track.id + '" must declare "steps" as an array of step objects.'
+        ),
+      };
+    }
+  }
+
+  const trackPromises = step.tracks.map(function (track, trackIndex) {
+    return specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, path);
+  });
+  const trackOutcomes = await Promise.all(trackPromises);
+
+  let failures = 0;
+  let successes = 0;
+  const namespacedResults = {};
+  const trackSummaries = [];
+
+  trackOutcomes.forEach(function (trackOutcome) {
+    if (trackOutcome.status === 'completed') {
+      successes += 1;
+    } else {
+      failures += 1;
+    }
+    Object.keys(trackOutcome.localResults).forEach(function (key) {
+      namespacedResults[trackOutcome.trackId + '.' + key] = trackOutcome.localResults[key];
+    });
+    trackSummaries.push({
+      trackId: trackOutcome.trackId,
+      status: trackOutcome.status,
+      trace: trackOutcome.trace,
+      halt: trackOutcome.halt,
+    });
+  });
+
+  return {
+    wholeRunHalt: null,
+    namespacedResults: namespacedResults,
+    aggregate: { failures: failures, successes: successes, total: trackOutcomes.length },
+    trackSummaries: trackSummaries,
+  };
+}
+
+// specEngineExecute(spec, dispatch) -- see the header comment above for the
+// full contract. This function is now a thin wrapper: it owns only the
+// malformed-spec guards ('spec-not-object', 'steps-not-array') and the
+// top-level results/trace accumulators, then delegates the actual
+// step-sequence loop to specEngineExecuteSequence, seeded with an empty
+// results object (the top level has no enclosing scope to inherit bare
+// names from) and the 'steps' path prefix.
 async function specEngineExecute(spec, dispatch) {
   if (!specEngineIsPlainObject(spec)) {
     return specEngineMakeExecuteResult(
@@ -1705,135 +2116,9 @@ async function specEngineExecute(spec, dispatch) {
   const results = {};
   const trace = [];
 
-  for (let i = 0; i < spec.steps.length; i += 1) {
-    const step = spec.steps[i];
-    const path = 'steps[' + i + ']';
+  const outcome = await specEngineExecuteSequence(spec.steps, dispatch, values, results, trace, 'steps');
 
-    if (!specEngineIsPlainObject(step)) {
-      return specEngineMakeExecuteResult(
-        'failed',
-        results,
-        trace,
-        specEngineMakeHalt(path, 'step-not-object', 'Each step must be a JSON object.')
-      );
-    }
-
-    const stepId = step.id;
-    const type = step.type;
-
-    if (SPEC_ENGINE_CONTAINER_STEP_KINDS.indexOf(type) !== -1) {
-      // Loud failure, never a silent skip: container kinds are a later
-      // capability this loop does not implement.
-      return specEngineMakeExecuteResult(
-        'failed',
-        results,
-        trace,
-        specEngineMakeHalt(
-          path,
-          'container-step-not-supported',
-          'Step "' +
-            stepId +
-            '" is a container step kind ("' +
-            type +
-            '"); specEngineExecute only runs the three leaf kinds (agent, gate, shape) -- container execution is a later capability.'
-        )
-      );
-    }
-
-    if (type === 'shape') {
-      const templateValue = specEngineIsPlainObject(step.template) ? step.template : {};
-      const rendered = specEngineRenderTemplate(templateValue, results, values, path + '.template');
-      if (rendered.halted) {
-        return specEngineMakeExecuteResult('failed', results, trace, rendered);
-      }
-      results[stepId] = rendered.value;
-      trace.push({ step: stepId, kind: type, status: 'completed', outcome: rendered.value, flags: [] });
-      continue;
-    }
-
-    if (type === 'agent' || type === 'gate') {
-      if (type === 'gate' && specEngineIsPlainObject(step.predicate)) {
-        // Recognized-but-rejected form: never dispatched, never added to
-        // the trace (it was never attempted as a leaf step) -- see the
-        // specEngineExecute header comment above for the full rationale.
-        return specEngineMakeExecuteResult(
-          'failed',
-          results,
-          trace,
-          specEngineMakeHalt(
-            path,
-            'gate-predicate-form-not-supported',
-            'Gate step "' +
-              stepId +
-              '" carries a "predicate" field; predicate-form gates are not dispatched by this executor and are rejected until container support lands.'
-          )
-        );
-      }
-
-      const dispatchPrep = specEngineRenderStepForDispatch(step, results, values, path);
-      if (dispatchPrep.halted) {
-        return specEngineMakeExecuteResult('failed', results, trace, dispatchPrep);
-      }
-
-      const outcome = await dispatch(dispatchPrep.step, { results: results, values: values });
-
-      if (type === 'agent') {
-        if (outcome === null || typeof outcome === 'undefined') {
-          trace.push({ step: stepId, kind: type, status: 'failed', outcome: outcome, flags: [] });
-          return specEngineMakeExecuteResult(
-            'failed',
-            results,
-            trace,
-            specEngineMakeHalt(
-              path,
-              'agent-dispatch-null-result',
-              'Agent step "' +
-                stepId +
-                '" dispatch returned no result (null/undefined); halting rather than hanging or silently continuing.'
-            )
-          );
-        }
-        results[stepId] = outcome;
-        trace.push({ step: stepId, kind: type, status: 'completed', outcome: outcome, flags: [] });
-        continue;
-      }
-
-      // type === 'gate'
-      const verdictOutcome = specEngineResolveGateVerdict(step, outcome, path);
-
-      if (verdictOutcome.verdict === 'uncertain') {
-        trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: outcome, flags: verdictOutcome.flags });
-        return specEngineMakeExecuteResult('uncertain', results, trace, verdictOutcome.halt);
-      }
-
-      if (verdictOutcome.verdict === 'fail') {
-        trace.push({ step: stepId, kind: type, status: 'gated', outcome: outcome, flags: verdictOutcome.flags });
-        return specEngineMakeExecuteResult('gated', results, trace, verdictOutcome.halt);
-      }
-
-      results[stepId] = outcome;
-      trace.push({ step: stepId, kind: type, status: 'completed', outcome: outcome, flags: verdictOutcome.flags });
-      continue;
-    }
-
-    // Any other declared type (including an unrecognized one) is a
-    // structural defect validateSpec is responsible for catching before
-    // execute ever runs; guarded here so this loop still fails loudly
-    // instead of silently falling through if it is ever called on an
-    // unvalidated spec.
-    return specEngineMakeExecuteResult(
-      'failed',
-      results,
-      trace,
-      specEngineMakeHalt(
-        path + '.type',
-        'unknown-step-kind',
-        'Step kind "' + type + '" is not one of the seven recognized step kinds.'
-      )
-    );
-  }
-
-  return specEngineMakeExecuteResult('completed', results, trace, null);
+  return specEngineMakeExecuteResult(outcome.status, results, trace, outcome.halt);
 }
 
 // ===ENGINE-CORE-END===

@@ -11,13 +11,18 @@
 // instead of the fully-synchronous top-level style the sibling suites use.
 //
 // specEngineExecute's own contract: it walks spec.steps in order, running
-// each leaf step (agent, gate, shape) and halting loudly the moment it
-// meets a container step kind (parallel/map/scored-retry/branch), since
-// container execution is a later capability this suite does not build.
-// Dispatch capability is injected: the caller supplies an async
-// dispatch(step, context) function; specEngineExecute itself carries no
-// dispatch primitive of its own. See engine-core.js's own header comment
-// above specEngineExecute for the full return-shape contract.
+// each leaf step (agent, gate, shape) and, since parallel-step support
+// landed, a "parallel" container step too -- halting loudly the moment it
+// meets one of the three still-unsupported container kinds (map,
+// scored-retry, branch), since their execution is a later capability this
+// suite does not build. Dispatch capability is injected: the caller
+// supplies an async dispatch(step, context) function; specEngineExecute
+// itself carries no dispatch primitive of its own. See engine-core.js's
+// own header comment above specEngineExecute for the full return-shape
+// contract; see test-parallel.js for the full "parallel" step-kind suite,
+// this file's own container-kind blocks below only prove that the three
+// remaining container kinds are still rejected, and that "parallel" no
+// longer is.
 
 'use strict';
 
@@ -379,20 +384,22 @@ async function main() {
     }
   }
 
-  // -- encountering a container step kind at execute time fails loudly, --
-  // -- never a silent skip ----------------------------------------------------
+  // -- encountering an UNSUPPORTED container step kind at execute time ----
+  // -- fails loudly, never a silent skip ("parallel" no longer belongs ----
+  // -- here -- it is now executed; see test-parallel.js for its own suite -
+  // -- and the two blocks below for the still-unsupported kinds) ----------
   {
     const spec = {
       steps: [
         { id: 'before', type: 'agent' },
-        { id: 'par1', type: 'parallel', tracks: [] },
+        { id: 'map1', type: 'map', steps: [] },
         { id: 'after', type: 'agent' },
       ],
       config: {},
     };
     const dispatch = makeRecordingDispatch({ before: { ok: true }, after: { ok: true } });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('a container step kind halts the run with status "failed"', outcome.status === 'failed');
+    check('an unsupported container step kind halts the run with status "failed"', outcome.status === 'failed');
     check(
       'the halt uses the container-step-not-supported diagnostic',
       outcome.halt.diagnostic === 'container-step-not-supported'
@@ -400,9 +407,11 @@ async function main() {
     check('the step after the container step never dispatches', dispatch.calls.length === 1 && dispatch.calls[0].id === 'before');
   }
 
-  // -- each of the four container kinds is rejected the same way ----------
+  // -- the three still-unsupported container kinds are rejected the same -
+  // -- way as before; "parallel" is deliberately no longer among them -----
+  // -- (see the next block for what happens to "parallel" instead) -------
   {
-    const kinds = ['parallel', 'map', 'scored-retry', 'branch'];
+    const kinds = ['map', 'scored-retry', 'branch'];
     for (let i = 0; i < kinds.length; i += 1) {
       const kind = kinds[i];
       const spec = { steps: [{ id: 'c1', type: kind }], config: {} };
@@ -413,6 +422,22 @@ async function main() {
         outcome.status === 'failed' && outcome.halt.diagnostic === 'container-step-not-supported'
       );
     }
+  }
+
+  // -- "parallel" is now executed, not rejected: a bare parallel step with
+  // -- no "tracks" field still halts, but for a DIFFERENT, more specific --
+  // -- reason -- its own execute-time malformed-shape guard, not the ------
+  // -- container-step-not-supported diagnostic the three kinds above get --
+  // -- (full parallel-execution coverage lives in test-parallel.js) -------
+  {
+    const spec = { steps: [{ id: 'c1', type: 'parallel' }], config: {} };
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a parallel step is no longer rejected with container-step-not-supported', outcome.status === 'failed');
+    check(
+      'a parallel step with no "tracks" field instead fails under its own parallel-tracks-not-array diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'parallel-tracks-not-array'
+    );
   }
 
   // -- a gate step carrying a "predicate" field is a recognized-but------

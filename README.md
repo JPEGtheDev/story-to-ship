@@ -18,10 +18,28 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 
 ## Install
 
+### Claude Code
+
 ```shell
 /plugin marketplace add jpegthedev/story-to-ship
 /plugin install story-to-ship@story-to-ship
 ```
+
+### OpenCode
+
+```shell
+opencode plugin https://github.com/jpgthedev/story-to-ship
+```
+
+or add to your project's `opencode.json`:
+
+```json
+{
+  "plugin": ["https://github.com/jpgthedev/story-to-ship"]
+}
+```
+
+OpenCode resolves the `opencode.json` manifest at the repository root and loads `index.js`. The same 33 skills and 16 agents ship as `Skill` tool definitions (via `skill()`), so every gate works identically in both runtimes. The hook-enforced enforcement (Iron Laws injection, bootstrap gate) is Claude Code only; in OpenCode the skills' own hard-stop language carries the enforcement.
 
 ## Skills by Phase
 
@@ -125,11 +143,15 @@ Existing skill packages automate SDLC tasks: generate changelogs, scaffold pipel
 ## How It Works
 
 Installing this plugin adds:
-- 35 skills to `.claude/skills/` -- invoked via the `Skill` tool or loaded on demand
-- 16 agents to `.claude/agents/` -- dispatched via the `Agent` tool
+- 35 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 16 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.
+
+### OpenCode adapter
+
+The repository doubles as an OpenCode plugin. `opencode.json` at the root declares the package (name, version, and a `runtime` field that satisfies OpenCode's `runtime`-or-`main` validation). `index.js` loads every `skills/<name>/SKILL.md`, strips the YAML frontmatter, and registers each as an OpenCode `skill()` tool whose description and instructions are sourced from the same files Claude Code uses, so both runtimes share one skill corpus. Claude-specific paths (`.claude/...`) in skill bodies are rewritten to OpenCode paths (`.opencode/...`) at load time. The `hooks/` system is not available in the OpenCode plugin API, so hook-only enforcement is Claude Code only.
 
 ## Repository Layout
 

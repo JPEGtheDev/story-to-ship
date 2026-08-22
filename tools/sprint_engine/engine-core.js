@@ -74,7 +74,16 @@
 // instead of throwing or returning undefined-by-accident. See each
 // function's own header comment below for its contract sourcing (only
 // specEngineTokenOverlap is named in SPEC_SCHEMA.md; the other four are
-// fully INFERRED, disclosed individually).
+// fully INFERRED, disclosed individually). Purity here means identical
+// arguments always produce identical results: specEngineFirstMatchOf and
+// specEngineRegexExtract accept caller-supplied RegExp objects, and a
+// global-flag ('g') RegExp carries mutable match-position state
+// (lastIndex) on that same object across calls -- left unhandled, a
+// second call with the identical pattern and text would silently resume
+// from wherever the first call's match left off, rather than repeating
+// the same match. Both functions reset lastIndex to 0 on every pattern
+// immediately before using it, so a caller-supplied global-flag pattern
+// is tolerated without breaking either function's own purity.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -1371,7 +1380,12 @@ function specEngineSliceFromMarker(text, marker) {
 // pattern in the array would have matched at an earlier position in the
 // string. A non-RegExp array entry is skipped rather than throwing.
 // Returns null -- the explicit miss value -- when no pattern in the array
-// matches, or when `patterns` is empty or not an array.
+// matches, or when `patterns` is empty or not an array. Each RegExp
+// entry's `lastIndex` is reset to 0 immediately before it is tried, so a
+// caller-supplied global-flag ('g') entry cannot carry mutated match-
+// position state from a previous call (or a previous entry in the same
+// array) into this attempt -- identical arguments always produce
+// identical results, per this file's pure-primitives purity claim above.
 function specEngineFirstMatchOf(text, patterns) {
   if (typeof text !== 'string' || !Array.isArray(patterns)) {
     return null;
@@ -1381,6 +1395,7 @@ function specEngineFirstMatchOf(text, patterns) {
     if (!(pattern instanceof RegExp)) {
       continue;
     }
+    pattern.lastIndex = 0;
     const match = pattern.exec(text);
     if (match) {
       return match[0];
@@ -1400,11 +1415,16 @@ function specEngineFirstMatchOf(text, patterns) {
 // undefined. When `pattern` declares no capture groups, returns the whole
 // match (match[0]) instead. Returns null -- the explicit miss value --
 // when the pattern does not match `text` at all, or when `text`/`pattern`
-// are not the expected types.
+// are not the expected types. `pattern.lastIndex` is reset to 0
+// immediately before use, so a caller-supplied global-flag ('g') pattern
+// cannot carry mutated match-position state from a previous call into
+// this one -- identical arguments always produce identical results, per
+// this file's pure-primitives purity claim above.
 function specEngineRegexExtract(text, pattern) {
   if (typeof text !== 'string' || !(pattern instanceof RegExp)) {
     return null;
   }
+  pattern.lastIndex = 0;
   const match = pattern.exec(text);
   if (!match) {
     return null;

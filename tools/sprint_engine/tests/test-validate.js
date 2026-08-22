@@ -9,19 +9,9 @@
 // spec pointing at the offending location, diagnostic is a short named
 // code, message is human-readable detail.
 //
-// Container internals (a parallel step's tracks, a branch step's cases and
-// default, a map step's repeated steps, a scored-retry step's wrapped
-// step) use field names SPEC_SCHEMA.md does not spell out as JSON syntax --
-// it defines the step-kind vocabulary and the result-key namespacing
-// grammar, not the authoring field names for container bodies. This suite
-// and engine-core.js agree on one convention throughout:
-//   parallel:     { tracks: [ { id, steps: [...] }, ... ] }
-//   branch:       { cases: [ { when: <predicate>, steps: [...] }, ... ],
-//                   default: { steps: [...] } }
-//   map:          { steps: [...] }
-//   scored-retry: { step: <single nested step> }
-// This mirrors the grammar's own vocabulary (track/trackId, branchId,
-// mapId, retryId) as directly as possible.
+// Container internals (tracks/cases/default/steps/step, outputSchema, and
+// predicate shapes) follow the "Container authoring syntax" section of
+// SPEC_SCHEMA.md; see that section for the full convention.
 
 'use strict';
 
@@ -462,6 +452,67 @@ function countOf(violations, diagnostic) {
     hasViolation(violations, 'duplicate-result-key', 'steps[4]')
   );
   check('a multi-violation spec is not fail-fast: all four violations present', violations.length === 4);
+}
+
+// -- duplicate-ID registry is scoped per container subtree: two map -------
+// -- steps with identical nested subtrees do not collide -----------------
+// Each map step's body is its own addressing scope. Two different map
+// steps each wrapping an identical branch "b1" with inner step "x" must
+// not report a collision on "b1.x" -- at runtime each map iteration
+// namespaces under its own <mapId>.<index>, so the two "b1.x" paths never
+// actually share a result key.
+{
+  const branchBody = function () {
+    return {
+      id: 'b1',
+      type: 'branch',
+      cases: [
+        {
+          when: { step: 'x', field: 'y', operator: 'equals', value: 1 },
+          steps: [{ id: 'x', type: 'shape', template: {} }],
+        },
+      ],
+    };
+  };
+  const spec = {
+    steps: [
+      { id: 'map1', type: 'map', steps: [branchBody()] },
+      { id: 'map2', type: 'map', steps: [branchBody()] },
+    ],
+    config: {},
+  };
+  const violations = validateSpec(spec);
+  check(
+    'two map steps with identical nested subtrees produce no duplicate-result-key violations',
+    countOf(violations, 'duplicate-result-key') === 0
+  );
+}
+
+// -- duplicate-ID registry is scoped per container subtree: two steps -----
+// -- with the same literal ID directly inside one map body DO collide -----
+// Within a single map step's body, step IDs must still be unique -- the
+// per-subtree scope isolates different map steps from each other, it does
+// not exempt steps within the same map body from the ordinary
+// duplicate-ID check.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'map1',
+        type: 'map',
+        steps: [
+          { id: 'x', type: 'shape', template: {} },
+          { id: 'x', type: 'shape', template: {} },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = validateSpec(spec);
+  check(
+    'two same-ID steps directly inside one map body are reported at steps[0].steps[1]',
+    hasViolation(violations, 'duplicate-result-key', 'steps[0].steps[1]')
+  );
 }
 
 // -- minimal valid spec (from SPEC_SCHEMA.md) returns an empty list --------

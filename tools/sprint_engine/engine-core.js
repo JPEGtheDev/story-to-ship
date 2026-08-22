@@ -21,18 +21,10 @@
 // agent calls, no filesystem access, pure data validation against the
 // rules in SPEC_SCHEMA.md.
 //
-// Container-body field names (a parallel step's tracks, a branch step's
-// cases and default, a map step's repeated steps, a scored-retry step's
-// wrapped step) are this file's own authoring convention -- SPEC_SCHEMA.md
-// defines the seven step kinds and the result-key namespacing grammar but
-// does not spell out JSON field names for container internals. The
-// convention here renders that grammar's own vocabulary as directly as
-// possible: a parallel step's tracks (track/trackId) live under `tracks`,
-// each `{ id, steps }`; a branch step's if/else paths live under `cases`
-// (each `{ when, steps }`) and an optional `default: { steps }`; a map
-// step's repeated body lives under `steps`; a scored-retry step wraps one
-// nested step under `step` (singular, matching "redo A weak result" and
-// the single-result-per-attempt namespacing).
+// Container-body field names (tracks/cases/default/steps/step, the
+// outputSchema.properties shape, the predicate shape) follow the
+// "Container authoring syntax" section of SPEC_SCHEMA.md; see that section
+// for the full convention and its inferred-not-ratified disclosure.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -80,11 +72,21 @@ function validateSpec(spec) {
   // Result-key namespacing grammar: "Every step's result lands in the
   // run's results map under a key." Two different steps computing to the
   // same key is exactly the collision the reserved-segments rule below
-  // guards the engine's own namespacing against; this map generalizes
+  // guards the engine's own namespacing against; a registry generalizes
   // that same collision check to author-declared step IDs colliding with
   // each other (plain duplicates) or with another step's namespaced key
   // (dotted collisions).
-  const resultKeyOwners = Object.create(null);
+  //
+  // Per the "Container authoring syntax" section's scoping rule, a step ID
+  // must be unique within its addressing scope, not across the whole
+  // spec: the top-level spec is one scope; a parallel track and a branch
+  // step's cases-and-default reuse their enclosing scope's registry
+  // (their results are still distinguished within it, by trackId/branchId
+  // prefixing); a map body and a scored-retry's wrapped step each open a
+  // brand new, isolated registry, because no ratified wording gives their
+  // contents a namespaced key that would let two different map/
+  // scored-retry steps' identical subtrees collide in reality.
+  const rootRegistry = Object.create(null);
   let hasAgentStep = false;
 
   function checkPredicateOperator(predicate, predicatePath) {
@@ -166,14 +168,14 @@ function validateSpec(spec) {
     }
   }
 
-  // resultKeyPrefix is null when this step's namespaced result key is not
-  // defined by the grammar at this granularity (map items and
-  // scored-retry attempts are keyed by index/attempt number, not by a
-  // nested step's own id -- see the map and scored-retry bullets of the
-  // result-key namespacing grammar); '' means "top level, key is the id
-  // itself"; any other string is the dotted prefix this step's id is
-  // appended to.
-  function visitStep(step, path, containerDepth, resultKeyPrefix) {
+  // registry is the id-uniqueness scope this step's own key is checked
+  // and registered against (see the scoping note above). resultKeyPrefix
+  // is null when this step's namespaced result key is not defined by the
+  // grammar at this granularity (a track or branch step with no usable
+  // id of its own -- an edge case, since a missing id is already reported
+  // separately); '' means "top of this scope, key is the id itself"; any
+  // other string is the dotted prefix this step's id is appended to.
+  function visitStep(step, path, containerDepth, registry, resultKeyPrefix) {
     if (!specEngineIsPlainObject(step)) {
       violations.push(specEngineMakeViolation(path, 'step-not-object', 'Each step must be a JSON object.'));
       return;
@@ -200,7 +202,7 @@ function validateSpec(spec) {
       }
       if (resultKeyPrefix !== null) {
         const resultKey = resultKeyPrefix === '' ? id : resultKeyPrefix + '.' + id;
-        if (Object.prototype.hasOwnProperty.call(resultKeyOwners, resultKey)) {
+        if (Object.prototype.hasOwnProperty.call(registry, resultKey)) {
           violations.push(
             specEngineMakeViolation(
               path,
@@ -210,12 +212,12 @@ function validateSpec(spec) {
                 '" produces the result-key "' +
                 resultKey +
                 '", which collides with the step already at "' +
-                resultKeyOwners[resultKey] +
-                '".'
+                registry[resultKey] +
+                '" within the same addressing scope.'
             )
           );
         } else {
-          resultKeyOwners[resultKey] = path;
+          registry[resultKey] = path;
         }
       }
     }
@@ -272,21 +274,30 @@ function validateSpec(spec) {
           if (specEngineIsPlainObject(track) && Array.isArray(track.steps)) {
             const trackId = typeof track.id === 'string' ? track.id : null;
             for (let si = 0; si < track.steps.length; si += 1) {
-              visitStep(track.steps[si], trackPath + '.steps[' + si + ']', childDepth, trackId);
+              // Same registry: a track's results are namespaced within
+              // the enclosing scope by trackId, not isolated from it.
+              visitStep(track.steps[si], trackPath + '.steps[' + si + ']', childDepth, registry, trackId);
             }
           }
         }
       }
     } else if (type === 'map') {
       if (Array.isArray(step.steps)) {
+        // Fresh, isolated registry: no ratified wording gives a map
+        // body's steps a namespaced key distinct per map step, so two
+        // different map steps' identical bodies must not collide with
+        // each other -- but IDs must still be unique within one body.
+        const mapBodyRegistry = Object.create(null);
         for (let mi = 0; mi < step.steps.length; mi += 1) {
-          visitStep(step.steps[mi], path + '.steps[' + mi + ']', childDepth, null);
+          visitStep(step.steps[mi], path + '.steps[' + mi + ']', childDepth, mapBodyRegistry, '');
         }
       }
     } else if (type === 'scored-retry') {
       checkScoredRetryFields(step, path);
       if (specEngineIsPlainObject(step.step)) {
-        visitStep(step.step, path + '.step', childDepth, null);
+        // Fresh, isolated registry, for the same reason as a map body.
+        const retryBodyRegistry = Object.create(null);
+        visitStep(step.step, path + '.step', childDepth, retryBodyRegistry, '');
       }
     } else if (type === 'branch') {
       const branchId = typeof id === 'string' ? id : null;
@@ -300,7 +311,10 @@ function validateSpec(spec) {
             }
             if (Array.isArray(branchCase.steps)) {
               for (let bsi = 0; bsi < branchCase.steps.length; bsi += 1) {
-                visitStep(branchCase.steps[bsi], casePath + '.steps[' + bsi + ']', childDepth, branchId);
+                // Same registry: a branch step's cases and default are
+                // namespaced within the enclosing scope by the branch
+                // step's own id, not isolated from it.
+                visitStep(branchCase.steps[bsi], casePath + '.steps[' + bsi + ']', childDepth, registry, branchId);
               }
             }
           }
@@ -308,7 +322,7 @@ function validateSpec(spec) {
       }
       if (specEngineIsPlainObject(step.default) && Array.isArray(step.default.steps)) {
         for (let dsi = 0; dsi < step.default.steps.length; dsi += 1) {
-          visitStep(step.default.steps[dsi], path + '.default.steps[' + dsi + ']', childDepth, branchId);
+          visitStep(step.default.steps[dsi], path + '.default.steps[' + dsi + ']', childDepth, registry, branchId);
         }
       }
     }
@@ -316,7 +330,7 @@ function validateSpec(spec) {
 
   if (stepsIsArray) {
     for (let i = 0; i < spec.steps.length; i += 1) {
-      visitStep(spec.steps[i], 'steps[' + i + ']', 0, '');
+      visitStep(spec.steps[i], 'steps[' + i + ']', 0, rootRegistry, '');
     }
   }
 

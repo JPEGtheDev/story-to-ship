@@ -180,6 +180,17 @@ function check(description, condition) {
   check('firstMatchOf honors array order over text position: /beta/ (listed first) wins', match === 'beta');
 }
 
+// -- edge case: a mixed array with a non-RegExp entry alongside a ---------
+// -- matching RegExp -- the non-RegExp entry is skipped without throwing --
+// -- and the RegExp still wins --------------------------------------------
+{
+  const match = specEngineFirstMatchOf('the answer is alpha', ['alpha', /alpha/]);
+  check(
+    'firstMatchOf skips a non-RegExp array entry without throwing and the RegExp still matches',
+    match === 'alpha'
+  );
+}
+
 // ===========================================================================
 // specEngineRegexExtract(text, pattern)
 // ===========================================================================
@@ -206,6 +217,18 @@ function check(description, condition) {
 {
   const value = specEngineRegexExtract('', /Status:\s*(\w+)/);
   check('regexExtract returns the explicit miss value null for empty input text', value === null);
+}
+
+// -- edge case: a capture group that exists syntactically but does not ----
+// -- participate in the match (the optional group never matched) returns --
+// -- the explicit miss value null, never JS's own undefined -- the direct -
+// -- pin of the never-accidental-undefined rule ----------------------------
+{
+  const value = specEngineRegexExtract('b', /(a)?b/);
+  check(
+    'regexExtract returns the explicit miss value null (not undefined) for a non-participating capture group',
+    value === null
+  );
 }
 
 console.log(passCount + ' passed, ' + failCount + ' failed');

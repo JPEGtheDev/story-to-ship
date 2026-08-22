@@ -1936,6 +1936,14 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
 // execution already wrote into this track's local map) -- ready for the
 // caller to re-namespace under this track's own `<trackId>.` prefix.
 async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, parentPath) {
+  // Object.assign only clones the KEY SET into a new top-level object; the
+  // values it copies are the SAME result objects `baseResults` already
+  // holds (shared references, not deep copies). Isolation across tracks
+  // holds only because this file's own convention is to always ASSIGN a
+  // new key (results[stepId] = outcome) and never mutate an existing
+  // result object's own fields in place -- a future change that mutated a
+  // shared result object in place would leak that mutation across every
+  // track (and the outer scope) holding the same reference.
   const localResults = Object.assign({}, baseResults);
   const baseKeys = Object.keys(baseResults);
   const localTrace = [];

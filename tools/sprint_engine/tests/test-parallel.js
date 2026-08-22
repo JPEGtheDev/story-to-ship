@@ -147,6 +147,68 @@ async function main() {
     );
   }
 
+  // -- aggregates, ASYMMETRIC case: the fixture above is 1-fail/1-pass, so
+  // -- a mutation that swaps which branch counts as a failure vs a --------
+  // -- success (counting "completed" as a failure and vice versa) passes --
+  // -- that fixture too, since a 1/1 split reads the same either way. ------
+  // -- Two failing tracks and one passing track makes the count itself ----
+  // -- direction-sensitive: failures !== successes, so a swapped branch ---
+  // -- flips which number lands where the assertion expects it. -----------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'par1',
+          type: 'parallel',
+          tracks: [
+            { id: 'trackA', steps: [{ id: 'okA', type: 'agent' }] },
+            { id: 'trackB', steps: [{ id: 'gateB', type: 'gate' }] },
+            { id: 'trackC', steps: [{ id: 'gateC', type: 'gate' }] },
+          ],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({
+      okA: { ok: true },
+      gateB: { verdict: 'fail', reason: 'engineered B' },
+      gateC: { verdict: 'fail', reason: 'engineered C' },
+    });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an asymmetric two-failing/one-passing parallel step still completes overall', outcome.status === 'completed');
+    check(
+      'the aggregate counts two failures and one success out of three tracks (direction-sensitive, unlike the 1/1 fixture above)',
+      outcome.results.par1.failures === 2 && outcome.results.par1.successes === 1 && outcome.results.par1.total === 3
+    );
+  }
+
+  // -- aggregates, second asymmetric pin: an all-passing three-track run --
+  // -- (0 failures, 3 successes) is also direction-sensitive -- a swapped -
+  // -- branch would report 3 failures, 0 successes instead. ---------------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'par1',
+          type: 'parallel',
+          tracks: [
+            { id: 'trackA', steps: [{ id: 'a1', type: 'agent' }] },
+            { id: 'trackB', steps: [{ id: 'b1', type: 'agent' }] },
+            { id: 'trackC', steps: [{ id: 'c1', type: 'agent' }] },
+          ],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ a1: { ok: true }, b1: { ok: true }, c1: { ok: true } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an all-passing three-track parallel step completes', outcome.status === 'completed');
+    check(
+      'the aggregate counts three successes and zero failures',
+      outcome.results.par1.successes === 3 && outcome.results.par1.failures === 0 && outcome.results.par1.total === 3
+    );
+  }
+
   // -- a post-join step can reference EITHER track's result via its -------
   // -- namespaced key ---------------------------------------------------------
   {
@@ -316,8 +378,8 @@ async function main() {
   }
 
   // -- gate verdict "uncertain" inside a track is contained the same way --
-  // -- as a gate fail: this suite's own design decision, since ------------
-  // -- SPEC_SCHEMA.md does not itself settle whether "uncertain" ----------
+  // -- as a gate fail: a design decision this suite pins explicitly, ------
+  // -- since SPEC_SCHEMA.md does not itself settle whether "uncertain" ----
   // -- escalates past a track boundary -------------------------------------
   {
     const spec = {

@@ -433,7 +433,7 @@ async function main() {
     const spec = { steps: [{ id: 'c1', type: 'parallel' }], config: {} };
     const dispatch = makeRecordingDispatch({});
     const outcome = await specEngineExecute(spec, dispatch);
-    check('a parallel step is no longer rejected with container-step-not-supported', outcome.status === 'failed');
+    check('a tracks-less parallel step fails at execute time', outcome.status === 'failed');
     check(
       'a parallel step with no "tracks" field instead fails under its own parallel-tracks-not-array diagnostic',
       outcome.halt !== null && outcome.halt.diagnostic === 'parallel-tracks-not-array'

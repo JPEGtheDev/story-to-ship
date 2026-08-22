@@ -47,6 +47,24 @@
 // on a halt -- is this implementation's own choice, reusing the file's
 // existing {path, diagnostic, message} violation shape; no ratified wording
 // fixes a runtime-evaluator return type.
+//
+// specEngineRenderTemplate(value, results, values) is a runtime evaluator
+// for the "Template forms and reference resolution" section, sibling to
+// specEngineEvalPredicate: it walks a template value (a string, or an
+// object/array of such strings, matching the shape a shape step's own
+// "template" field carries) and substitutes every {{step.field}},
+// {{values.PATH}}, and {{#if}} placeholder it finds against `results` (the
+// same flat namespaced-key map specEngineEvalPredicate reads) and `values`
+// (the spec's config.values object). It reuses specEngineResolveFieldPath
+// for dotted-path walks and specEngineMakeHalt for its halt shape, and
+// applies the same spilled-content-is-illegal check specEngineEvalPredicate
+// applies, under its own template-prefixed diagnostic name. Rendering is
+// fail-fast: the first unresolved reference or spilled-content violation
+// halts the whole render (this document's "halts the run" wording, unlike
+// validateSpec/resolveReferences' collect-everything static passes), and
+// its return shape -- { halted: false, value: <rendered> } or { halted:
+// true, path, diagnostic, message, value? } -- mirrors
+// specEngineEvalPredicate's own runtime-evaluator return shape.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -945,6 +963,236 @@ function specEngineEvalPredicate(predicate, results) {
   return { halted: false, result: result };
 }
 
+// specEngineResolveTemplateRef(ref, results, values) resolves one dotted
+// template reference (the text inside one pair of {{...}} braces, or an
+// {{#if}} condition) against the run's results-so-far map or the spec's
+// config values, per the "Template forms and reference resolution" section.
+//
+// {{values.PATH}} form: PATH is walked into `values` with
+// specEngineResolveFieldPath, the same dotted-path walker
+// specEngineEvalPredicate uses for a predicate's own field path.
+//
+// {{step.field}} form: "Template split rule" -- "a template reference
+// resolves by matching the longest declared step key that is a prefix of
+// the reference; everything after that matched prefix is the field path
+// read from that step's result. This also covers a declared step key that
+// happens to be a prefix of another declared step key -- the longest match
+// wins." resolveReferences applies this same rule statically, against the
+// spec's DECLARED keys (unknown at validation time whether a map/
+// scored-retry pattern key's index will exist at runtime); at render time
+// the run's actual `results` map already carries every concrete namespaced
+// key (including realized map/scored-retry indices), so this function
+// applies the identical longest-match rule directly against
+// Object.keys(results) instead of a separately-tracked declared-key list.
+// Returns { resolved: false } if no declared key is a prefix (or exact
+// match), matching specEngineResolveFieldPath's own return shape so callers
+// can treat both failure modes the same way.
+function specEngineResolveTemplateRef(ref, results, values) {
+  if (ref.indexOf('values.') === 0) {
+    const valuesRoot = specEngineIsPlainObject(values) ? values : Object.create(null);
+    return specEngineResolveFieldPath(valuesRoot, ref.slice('values.'.length));
+  }
+
+  const resultsMap = specEngineIsPlainObject(results) ? results : Object.create(null);
+  const keys = Object.keys(resultsMap);
+  let bestKey = null;
+  let bestFieldPath = null;
+  for (let i = 0; i < keys.length; i += 1) {
+    const key = keys[i];
+    if (ref === key) {
+      if (bestKey === null || key.length > bestKey.length) {
+        bestKey = key;
+        bestFieldPath = '';
+      }
+    } else if (ref.indexOf(key + '.') === 0) {
+      if (bestKey === null || key.length > bestKey.length) {
+        bestKey = key;
+        bestFieldPath = ref.slice(key.length + 1);
+      }
+    }
+  }
+
+  if (bestKey === null) {
+    return { resolved: false };
+  }
+  if (bestFieldPath === '') {
+    return { resolved: true, value: resultsMap[bestKey] };
+  }
+  return specEngineResolveFieldPath(resultsMap[bestKey], bestFieldPath);
+}
+
+// specEngineStringifyTemplateValue(value) -- INFERRED: SPEC_SCHEMA.md
+// specifies what a template reference resolves TO, not how a non-string
+// resolved value (a number, boolean, or an object/array field) is turned
+// into the substituted text; no ratified wording settles this. The minimal
+// reading applied here: a string substitutes as itself; null/undefined
+// substitute as an empty string; any other primitive uses JS's own String()
+// conversion; a plain object or array uses JSON.stringify so a template
+// author can still see the shape of what was substituted.
+function specEngineStringifyTemplateValue(value) {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === null || typeof value === 'undefined') {
+    return '';
+  }
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+// specEngineRenderTemplateRef(ref, path, results, values) resolves one
+// template reference and applies the two runtime-halt rules shared with
+// specEngineEvalPredicate, under this function's own template-prefixed
+// diagnostic names (disclosed in the file-header comment above): an
+// unresolved reference halts under 'template-operand-unresolved' (the
+// runtime counterpart to resolveReferences' static 'dangling-template-
+// reference' diagnostic, matching the existing predicate-operand-unresolved
+// / dangling-predicate-reference static-vs-runtime naming pair already in
+// this file), and a reference resolving to a spilled field's receipt
+// directly (not one of its pointer sub-fields) halts under
+// 'template-spilled-content-reference' (the runtime counterpart to
+// specEngineEvalPredicate's own 'predicate-spilled-content-reference' for
+// the identical defect class, per the "Pointer sub-fields are first-class
+// referents" paragraph of the spill contract). Returns
+// { resolved: true, value } on success, or a halt object (see
+// specEngineMakeHalt) on either rule firing.
+function specEngineRenderTemplateRef(ref, path, results, values) {
+  const resolution = specEngineResolveTemplateRef(ref, results, values);
+
+  if (!resolution.resolved) {
+    // "Undefined-sentinel rule (templates)": "if a template's dotted path
+    // does not resolve ... the engine does not silently substitute the
+    // literal text "undefined" into the rendered prompt and continue. It
+    // records the sentinel <<undefined>> and halts the run, exactly as an
+    // unresolved predicate operand does."
+    return specEngineMakeHalt(
+      path,
+      'template-operand-unresolved',
+      'Template reference "{{' + ref + '}}" at "' + path + '" does not resolve; recording the ' +
+        SPEC_ENGINE_UNDEFINED_SENTINEL + ' sentinel and halting.',
+      SPEC_ENGINE_UNDEFINED_SENTINEL
+    );
+  }
+
+  if (specEngineIsPlainObject(resolution.value) && resolution.value.spilled === true) {
+    // "Referencing the raw field directly -- {{A.content}}, or a predicate
+    // over A.content itself -- after it has spilled is illegal and halts
+    // the run with a named diagnostic, because that raw value no longer
+    // exists in the results map; only its receipt does."
+    return specEngineMakeHalt(
+      path,
+      'template-spilled-content-reference',
+      'Template reference "{{' + ref + '}}" at "' + path + '" resolves to a spilled field\'s receipt directly; ' +
+        'reference a pointer sub-field (.path, .sha256, .bytes) instead.'
+    );
+  }
+
+  return resolution;
+}
+
+// specEngineRenderTemplateString(str, path, results, values) renders one
+// string leaf of a template value. Two passes, in order:
+//
+// 1. {{#if COND}}...{{/if}} blocks. INFERRED: SPEC_SCHEMA.md names {{#if}}
+//    as "recognized template syntax" but states "this document does not
+//    extend their behavior beyond that literal syntax" -- the condition
+//    grammar and nesting behavior are not specified. This function reads
+//    COND as a reference in the same {{step.field}}/{{values.PATH}}
+//    vocabulary (consistent with this file's own existing extension in
+//    resolveReferences' extractPlaceholders, which already reads an
+//    {{#if}} condition as a reference for static-resolution purposes),
+//    tests the resolved value with plain JS truthiness, and does not
+//    support nested {{#if}} blocks (the minimal reading: one {{#if}} level
+//    per string leaf).
+// 2. Remaining {{step.field}} / {{values.PATH}} placeholders, substituted
+//    with specEngineStringifyTemplateValue's rendering of the resolved
+//    value.
+//
+// Both passes are fail-fast: the first halt (from either an {{#if}}
+// condition or a plain placeholder) returns immediately.
+const SPEC_ENGINE_IF_BLOCK_RE = /\{\{#if\s+([^}]+?)\s*\}\}([\s\S]*?)\{\{\/if\}\}/;
+const SPEC_ENGINE_PLACEHOLDER_RE = /\{\{\s*([^}]+?)\s*\}\}/;
+
+function specEngineRenderTemplateString(str, path, results, values) {
+  let working = str;
+  let ifMatch = SPEC_ENGINE_IF_BLOCK_RE.exec(working);
+  while (ifMatch !== null) {
+    const cond = ifMatch[1].trim();
+    const inner = ifMatch[2];
+    const outcome = specEngineRenderTemplateRef(cond, path, results, values);
+    if (outcome.halted) {
+      return outcome;
+    }
+    const replacement = outcome.value ? inner : '';
+    working = working.slice(0, ifMatch.index) + replacement + working.slice(ifMatch.index + ifMatch[0].length);
+    ifMatch = SPEC_ENGINE_IF_BLOCK_RE.exec(working);
+  }
+
+  let result = working;
+  let placeholderMatch = SPEC_ENGINE_PLACEHOLDER_RE.exec(result);
+  while (placeholderMatch !== null) {
+    const ref = placeholderMatch[1];
+    const outcome = specEngineRenderTemplateRef(ref, path, results, values);
+    if (outcome.halted) {
+      return outcome;
+    }
+    const substitution = specEngineStringifyTemplateValue(outcome.value);
+    result =
+      result.slice(0, placeholderMatch.index) + substitution + result.slice(placeholderMatch.index + placeholderMatch[0].length);
+    placeholderMatch = SPEC_ENGINE_PLACEHOLDER_RE.exec(result);
+  }
+
+  return { halted: false, value: result };
+}
+
+// specEngineRenderTemplate(value, results, values) -- see file header for
+// the contract. Walks `value` the same shape collectTemplateSites (in
+// resolveReferences above) walks a shape step's "template" field -- string
+// leaves, array entries, and plain-object properties -- rendering every
+// string leaf with specEngineRenderTemplateString and reassembling the
+// same tree shape. `path` (default '') accumulates the same dotted/
+// bracketed JSON-path format this file's other functions use, so a halt
+// deep in the tree still names the specific leaf where it happened.
+function specEngineRenderTemplate(value, results, values, path) {
+  const currentPath = typeof path === 'string' ? path : '';
+
+  if (typeof value === 'string') {
+    return specEngineRenderTemplateString(value, currentPath, results, values);
+  }
+
+  if (Array.isArray(value)) {
+    const renderedArray = [];
+    for (let i = 0; i < value.length; i += 1) {
+      const child = specEngineRenderTemplate(value[i], results, values, currentPath + '[' + i + ']');
+      if (child.halted) {
+        return child;
+      }
+      renderedArray.push(child.value);
+    }
+    return { halted: false, value: renderedArray };
+  }
+
+  if (specEngineIsPlainObject(value)) {
+    const renderedObject = {};
+    const keys = Object.keys(value);
+    for (let i = 0; i < keys.length; i += 1) {
+      const key = keys[i];
+      const child = specEngineRenderTemplate(value[key], results, values, currentPath + '.' + key);
+      if (child.halted) {
+        return child;
+      }
+      renderedObject[key] = child.value;
+    }
+    return { halted: false, value: renderedObject };
+  }
+
+  // Numbers, booleans, null, undefined: no placeholder syntax to render,
+  // pass through unchanged.
+  return { halted: false, value: value };
+}
+
 // ===ENGINE-CORE-END===
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -952,5 +1200,6 @@ if (typeof module !== 'undefined' && module.exports) {
     validateSpec: validateSpec,
     resolveReferences: resolveReferences,
     specEngineEvalPredicate: specEngineEvalPredicate,
+    specEngineRenderTemplate: specEngineRenderTemplate,
   };
 }

@@ -36,6 +36,17 @@
 // fail-fast -- plus any reference that resolves to a real key but violates
 // the parallel-track join ordering rule from that same section. It
 // performs zero dispatch, exactly like validateSpec.
+//
+// specEngineEvalPredicate(predicate, results) is a runtime evaluator, not a
+// static pass: it takes one already-resolved predicate object and the run's
+// results-so-far map (a flat "namespaced result key -> that step's result
+// value" object, per the same namespacing grammar) and applies the
+// "Predicate operator vocabulary" and "Oversized-output spill contract"
+// sections of SPEC_SCHEMA.md. Its return shape -- { halted, result } on a
+// clean comparison, or { halted: true, path, diagnostic, message, value? }
+// on a halt -- is this implementation's own choice, reusing the file's
+// existing {path, diagnostic, message} violation shape; no ratified wording
+// fixes a runtime-evaluator return type.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -46,6 +57,7 @@ const SPEC_ENGINE_SCORED_RETRY_MODES = ['first-passing', 'keep-best'];
 const SPEC_ENGINE_RESERVED_LITERAL_SEGMENT = 'attempts';
 const SPEC_ENGINE_MAX_CONTAINER_DEPTH = 3;
 const SPEC_ENGINE_NUMERIC_SEGMENT_RE = /^[0-9]+$/;
+const SPEC_ENGINE_UNDEFINED_SENTINEL = '<<undefined>>';
 
 function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -799,11 +811,114 @@ function resolveReferences(spec) {
   return violations;
 }
 
+// specEngineResolveFieldPath(root, fieldPath) walks a dotted field path
+// (e.g. "content.bytes") into a step's result object, the same
+// hasOwnProperty-guarded walk validateSpec/resolveReferences use elsewhere
+// in this file. Returns { resolved: false } as soon as any segment is
+// missing or the value being indexed into is not a plain object; otherwise
+// { resolved: true, value } with the final value reached.
+function specEngineResolveFieldPath(root, fieldPath) {
+  if (typeof fieldPath !== 'string' || fieldPath.length === 0) {
+    return { resolved: false };
+  }
+  const segments = fieldPath.split('.');
+  let cur = root;
+  for (let i = 0; i < segments.length; i += 1) {
+    const segment = segments[i];
+    if (!specEngineIsPlainObject(cur) || !Object.prototype.hasOwnProperty.call(cur, segment)) {
+      return { resolved: false };
+    }
+    cur = cur[segment];
+  }
+  return { resolved: true, value: cur };
+}
+
+// specEngineMakeHalt(path, diagnostic, message, sentinelValue) builds a
+// halt outcome for specEngineEvalPredicate, reusing specEngineMakeViolation
+// for the shared {path, diagnostic, message} shape and adding the `halted`
+// flag plus, for the undefined-sentinel case, the literal recorded value.
+function specEngineMakeHalt(path, diagnostic, message, sentinelValue) {
+  const halt = specEngineMakeViolation(path, diagnostic, message);
+  halt.halted = true;
+  if (typeof sentinelValue !== 'undefined') {
+    halt.value = sentinelValue;
+  }
+  return halt;
+}
+
+// specEngineEvalPredicate(predicate, results) -- see file header for the
+// contract. Traces every diagnostic below to a specific section of
+// SPEC_SCHEMA.md, the same way validateSpec and resolveReferences do.
+//
+// `predicate.step` is looked up as an exact key into `results`, matching
+// how resolveReferences treats a predicate's "step" attribute (a
+// standalone key, not a dotted reference needing the longest-prefix split
+// a template placeholder needs). `predicate.field` is then walked,
+// segment by segment, into that step's result value.
+function specEngineEvalPredicate(predicate, results) {
+  const resultsMap = specEngineIsPlainObject(results) ? results : Object.create(null);
+  const step = specEngineIsPlainObject(predicate) ? predicate.step : undefined;
+  const field = specEngineIsPlainObject(predicate) ? predicate.field : undefined;
+  const operator = specEngineIsPlainObject(predicate) ? predicate.operator : undefined;
+  const expected = specEngineIsPlainObject(predicate) ? predicate.value : undefined;
+
+  const stepKnown = typeof step === 'string' && Object.prototype.hasOwnProperty.call(resultsMap, step);
+  const fieldResolution = stepKnown ? specEngineResolveFieldPath(resultsMap[step], field) : { resolved: false };
+
+  if (!stepKnown || !fieldResolution.resolved) {
+    // "Undefined-sentinel rule": "A predicate's step/field lookup can fail
+    // to resolve -- the named step was never declared, or the field does
+    // not exist on that step's result. ... the engine records the literal
+    // sentinel value <<undefined>> for the unresolved operand and halts
+    // the run ... This sentinel-and-halt rule applies to lte and gte the
+    // same way it applies to equals."
+    return specEngineMakeHalt(
+      step + '.' + field,
+      'predicate-operand-unresolved',
+      'Predicate operand for step "' + step + '", field "' + field + '" does not resolve; recording the ' +
+        SPEC_ENGINE_UNDEFINED_SENTINEL + ' sentinel and halting.',
+      SPEC_ENGINE_UNDEFINED_SENTINEL
+    );
+  }
+
+  const operand = fieldResolution.value;
+
+  if (specEngineIsPlainObject(operand) && operand.spilled === true) {
+    // "Pointer sub-fields are first-class referents ... Referencing the
+    // raw field directly ... after it has spilled is illegal and halts the
+    // run with a named diagnostic, because that raw value no longer exists
+    // in the results map; only its receipt does."
+    return specEngineMakeHalt(
+      step + '.' + field,
+      'predicate-spilled-content-reference',
+      'Predicate field "' + field + '" on step "' + step + '" resolves to a spilled field\'s receipt directly; ' +
+        'reference a pointer sub-field (.path, .sha256, .bytes) instead.'
+    );
+  }
+
+  let result;
+  if (operator === 'equals') {
+    result = operand === expected;
+  } else if (operator === 'lte') {
+    result = operand <= expected;
+  } else if (operator === 'gte') {
+    result = operand >= expected;
+  } else {
+    // Not reached on a spec validateSpec has already accepted:
+    // checkPredicateOperator rejects any operator outside this set before
+    // a predicate is ever evaluated at runtime.
+    result = false;
+  }
+
+  return { halted: false, result: result };
+}
+
 // ===ENGINE-CORE-END===
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     validateSpec: validateSpec,
     resolveReferences: resolveReferences,
+    specEngineEvalPredicate: specEngineEvalPredicate,
   };
 }

@@ -59,7 +59,7 @@ or how it relates to per-step output schemas -- no source settles that.
 Every step object -- whether declared directly in the top-level `steps`
 array or nested inside a track, a case, a map's `steps`, or a
 scored-retry's `step` -- carries at minimum an `id` (a string; see the
-reserved-segments rule above) and a `type` naming one of the seven step
+reserved-segments rule below) and a `type` naming one of the seven step
 kinds in the table above. The rest of a step's fields vary by kind, as the
 rest of this section describes.
 

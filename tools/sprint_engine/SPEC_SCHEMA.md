@@ -56,6 +56,13 @@ or how it relates to per-step output schemas -- no source settles that.
 
 ## Container authoring syntax
 
+Every step object -- whether declared directly in the top-level `steps`
+array or nested inside a track, a case, a map's `steps`, or a
+scored-retry's `step` -- carries at minimum an `id` (a string; see the
+reserved-segments rule above) and a `type` naming one of the seven step
+kinds in the table above. The rest of a step's fields vary by kind, as the
+rest of this section describes.
+
 **The field names in this section are inferred by the implementation to
 make the contract buildable, not carried from a ratified wording.** The
 step-kind table above and the result-key namespacing grammar below both
@@ -81,6 +88,28 @@ built against this document agree with each other.
   time, matching the singular `<retryId>.attempts.<n>` key the namespacing
   grammar assigns per attempt.
 
+**Worked example (a parallel step).** A parallel step with one track
+holding one nested step, using the shapes above:
+
+```json
+{
+  "id": "par1",
+  "type": "parallel",
+  "tracks": [
+    {
+      "id": "trackA",
+      "steps": [
+        {
+          "id": "check",
+          "type": "gate",
+          "predicate": { "step": "upstream", "field": "score", "operator": "gte", "value": 1 }
+        }
+      ]
+    }
+  ]
+}
+```
+
 An **output schema** (the per-step field the reserved-segments rule refers
 to, named in the schema-disambiguation paragraph above) is carried on a
 step as `outputSchema: { properties: { ... } }`, `properties` reusing this
@@ -92,7 +121,13 @@ describes) is an object `{ step, field, operator, value }`: `step` and
 `field` are the step ID and field name it reads, `operator` is one of the
 three operators named in that section, `value` is what it compares
 against. A branch case's predicate is carried under `when`; a gate step's
-predicate is carried under `predicate`.
+predicate is carried under `predicate`. This repo's earlier prototype
+evidence instead records predicates with the operator itself as the JSON
+key (`{ step, field, <operator>: <value> }`), consistently across the
+instances checked, but this section deliberately adopts the
+named-operator form above instead, since operator validation is then a
+single field lookup rather than a check across whichever key happens to
+be present.
 
 **Map-body addressing below the iteration boundary is not specified.** The
 result-key namespacing grammar's map bullet keys a map step's nested
@@ -109,10 +144,19 @@ step's combined cases-and-default is one scope (namespaced by the branch
 step's own ID), and each map step's body and each scored-retry step's
 wrapped step are each their own scope, isolated from the scope they are
 nested inside. Two steps sharing a declared ID in two different scopes do
-not collide, because either their namespaced result keys differ, or -- for
-a map or scored-retry body -- no ratified wording defines a namespaced key
-for them at all, per the map-body addressing caveat above. This scoping
-rule is this section's own inference, not carried from a ratified wording.
+not collide, for one of two distinct reasons depending on the scope. For a
+parallel track or a branch step's cases-and-default, their namespaced
+result keys differ, because each is prefixed by its own trackId or branch
+step ID. For a map step's body, no ratified wording defines a per-step key
+at all, per the map-body addressing caveat above, so two different map
+bodies never produce a key to collide on in the first place. For a
+scored-retry step's wrapped step, by contrast, the namespacing grammar
+does define a key -- `<retryId>.attempts.<n>` -- and that key is prefixed
+by the enclosing retry step's own ID, so two identical wrapped steps under
+two different scored-retry steps key to different places and cannot
+collide either, for the same reason a parallel track or branch case
+doesn't. This scoping rule is this section's own inference, not carried
+from a ratified wording.
 
 ## Predicate operator vocabulary
 

@@ -459,7 +459,13 @@ function resolveReferences(spec) {
   function collectTemplateSites(value, path, visitOrder, trackCtx) {
     if (typeof value === 'string') {
       extractPlaceholders(value).forEach(function (ref) {
-        referenceSites.push({ path: path, kind: 'template', ref: ref, visitOrder: visitOrder, trackId: trackCtx.trackId });
+        referenceSites.push({
+          path: path,
+          kind: 'template',
+          ref: ref,
+          visitOrder: visitOrder,
+          ancestorTrackIds: trackCtx.ancestorTrackIds,
+        });
       });
     } else if (Array.isArray(value)) {
       for (let i = 0; i < value.length; i += 1) {
@@ -487,7 +493,7 @@ function resolveReferences(spec) {
       kind: 'predicate',
       ref: predicate.step,
       visitOrder: visitOrder,
-      trackId: trackCtx.trackId,
+      ancestorTrackIds: trackCtx.ancestorTrackIds,
     });
   }
 
@@ -503,11 +509,20 @@ function resolveReferences(spec) {
   // boundary is not specified" caveat -- so nothing is declared for it,
   // though its own reference sites are still collected and checked.
   //
-  // trackCtx: { trackId, joinOrderRef } identifies the nearest enclosing
-  // parallel track, if any, and the shared mutable holder for that track's
-  // parallel step's join point (filled in once every track has been
-  // visited). trackCtx.trackId is null outside any track, meaning keys
-  // declared there carry no ordering restriction.
+  // trackCtx: { trackId, joinOrderRef, ancestorTrackIds } identifies the
+  // nearest enclosing parallel track, if any (trackId, used when a key is
+  // DECLARED here -- a key's own namespace is always relative to its
+  // nearest track, per the grammar's single-level "<trackId>.<stepId>"
+  // format), the shared mutable holder for that nearest track's own
+  // parallel step's join point (joinOrderRef, filled in once every track
+  // of that parallel step has been visited), and the full chain of every
+  // track this step is nested within at any depth, outermost first
+  // (ancestorTrackIds, used when a step is a REFERRER -- a parallel step
+  // nested inside a track does not sever that track's membership for its
+  // own tracks' descendants, so the same-track-later carve-out below must
+  // check the whole chain, not just the nearest track). trackCtx.trackId
+  // is null outside any track, meaning keys declared there carry no
+  // ordering restriction.
   function visitStep(step, path, namespacePrefix, trackCtx) {
     if (!specEngineIsPlainObject(step)) {
       return;
@@ -570,7 +585,11 @@ function resolveReferences(spec) {
         const track = step.tracks[ti];
         if (specEngineIsPlainObject(track) && Array.isArray(track.steps)) {
           const trackId = typeof track.id === 'string' ? track.id : null;
-          const childTrackCtx = { trackId: trackId, joinOrderRef: joinOrderRef };
+          // Extend, don't replace: a track nested inside an outer track
+          // (via an inner parallel step) is still a member of that outer
+          // track too, for same-track-later reference purposes.
+          const ancestorTrackIds = trackId !== null ? trackCtx.ancestorTrackIds.concat([trackId]) : trackCtx.ancestorTrackIds;
+          const childTrackCtx = { trackId: trackId, joinOrderRef: joinOrderRef, ancestorTrackIds: ancestorTrackIds };
           for (let si = 0; si < track.steps.length; si += 1) {
             visitStep(track.steps[si], path + '.tracks[' + ti + '].steps[' + si + ']', trackId, childTrackCtx);
           }
@@ -609,7 +628,7 @@ function resolveReferences(spec) {
     }
   }
 
-  const rootTrackCtx = { trackId: null, joinOrderRef: null };
+  const rootTrackCtx = { trackId: null, joinOrderRef: null, ancestorTrackIds: [] };
   for (let i = 0; i < spec.steps.length; i += 1) {
     visitStep(spec.steps[i], 'steps[' + i + ']', '', rootTrackCtx);
   }
@@ -699,7 +718,11 @@ function resolveReferences(spec) {
     if (entry.ownerTrackId !== null) {
       const joinOrder = entry.joinOrderRef ? entry.joinOrderRef.value : null;
       const afterJoin = joinOrder !== null && site.visitOrder > joinOrder;
-      const sameTrackLater = site.trackId === entry.ownerTrackId && site.visitOrder > entry.declaredAtOrder;
+      // The referrer may be nested inside the owning track at any depth
+      // (e.g. inside an inner parallel step that is itself one of that
+      // track's steps) -- membership is chain-wide, not nearest-track-only.
+      const sameTrackLater =
+        site.ancestorTrackIds.indexOf(entry.ownerTrackId) !== -1 && site.visitOrder > entry.declaredAtOrder;
       if (!afterJoin && !sameTrackLater) {
         violations.push(
           specEngineMakeViolation(

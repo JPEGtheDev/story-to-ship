@@ -82,6 +82,14 @@ function check(description, condition) {
   check('tokenOverlap is case-insensitive and collapses repeated whitespace', overlap === 2);
 }
 
+// -- edge case: a repeated token on the claim side dedups rather than -----
+// -- inflating the count -- 'alpha' appears twice in the claim but the ----
+// -- shared-token count is still 1, not 2 ----------------------------------
+{
+  const overlap = specEngineTokenOverlap('alpha alpha beta', 'alpha gamma');
+  check('tokenOverlap dedups a repeated token rather than inflating the shared-token count', overlap === 1);
+}
+
 // ===========================================================================
 // specEngineExtractLabeledLine(text, label)
 // ===========================================================================
@@ -191,6 +199,22 @@ function check(description, condition) {
   );
 }
 
+// -- edge case: repeat-call determinism with a global-flag ('g') entry ----
+// -- a global-flag RegExp carries mutable state (lastIndex) on the caller's
+// -- own object; two calls with the SAME arguments (same array, same text)
+// -- must return the IDENTICAL match, not a second, different match driven
+// -- by the entry's lastIndex advancing from the first call --------------
+{
+  const patterns = [/\d+/g];
+  const first = specEngineFirstMatchOf('123 456', patterns);
+  const second = specEngineFirstMatchOf('123 456', patterns);
+  check('firstMatchOf with a global-flag pattern entry returns the expected match on a first call', first === '123');
+  check(
+    'firstMatchOf with a global-flag pattern entry returns the IDENTICAL match on a repeated call with the same arguments (not driven by the entry\'s mutated lastIndex)',
+    second === '123'
+  );
+}
+
 // ===========================================================================
 // specEngineRegexExtract(text, pattern)
 // ===========================================================================
@@ -228,6 +252,22 @@ function check(description, condition) {
   check(
     'regexExtract returns the explicit miss value null (not undefined) for a non-participating capture group',
     value === null
+  );
+}
+
+// -- edge case: repeat-call determinism with a global-flag ('g') pattern --
+// -- a global-flag RegExp carries mutable state (lastIndex) on the caller's
+// -- own object; two calls with the SAME arguments (same pattern object,
+// -- same text) must return the IDENTICAL match, not a second, different
+// -- match driven by the pattern's lastIndex advancing from the first call
+{
+  const pattern = /\d+/g;
+  const first = specEngineRegexExtract('123 456', pattern);
+  const second = specEngineRegexExtract('123 456', pattern);
+  check('regexExtract with a global-flag pattern returns the expected match on a first call', first === '123');
+  check(
+    'regexExtract with a global-flag pattern returns the IDENTICAL match on a repeated call with the same arguments (not driven by the pattern\'s mutated lastIndex)',
+    second === '123'
   );
 }
 

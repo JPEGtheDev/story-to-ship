@@ -73,6 +73,9 @@ const results = {
       bytes: 45000,
     },
   },
+  nullStep: { field: null },
+  condA: { flag: true },
+  condB: { flag: false },
 };
 
 const values = { region: 'us-east', nested: { flag: true } };
@@ -248,6 +251,7 @@ const values = { region: 'us-east', nested: { flag: true } };
       outcome.value.list[0] === 'leaf-value' &&
       outcome.value.list[1] === 'static text'
   );
+  check('the rendered list is the same length as the fixture template\'s list', outcome.value.list.length === template.list.length);
 }
 
 // -- whole-template-tree rendering: fail-fast propagation ------------------
@@ -259,6 +263,101 @@ const values = { region: 'us-east', nested: { flag: true } };
   const outcome = specEngineRenderTemplate(template, results, values);
   check('the first unresolved reference in a multi-leaf tree halts the whole render', outcome.halted === true);
   check('the halt path names the specific leaf that failed to resolve', outcome.path === '.b');
+}
+
+// -- nested {{#if}} blocks halt cleanly instead of corrupting output ------
+// Stage 2 review (executed repro): the non-greedy block regex pairs the
+// outer {{#if}} with the FIRST {{/if}} it finds, which is the INNER
+// block's closer, not the outer's own. With outer true + inner false, this
+// silently drops the trailing literal content after the inner block
+// ('{{#if a}}pre{{#if b}}X{{/if}}post{{/if}}' with a=true, b=false used to
+// render 'pre', not 'prepost' -- 'post' vanished with no halt, no
+// diagnostic). DECIDED BEHAVIOR: nesting is detected before any {{#if}}
+// block is evaluated or replaced, and halts under a new diagnostic
+// ('template-if-nesting-unsupported') naming the situation, regardless of
+// which branch's condition is true or false -- no silent content loss.
+{
+  const outerTrueInnerFalse = specEngineRenderTemplate(
+    '{{#if condA.flag}}pre{{#if condB.flag}}X{{/if}}post{{/if}}',
+    results,
+    values
+  );
+  check('a nested {{#if}} block (outer true, inner false) halts instead of silently dropping trailing content', outerTrueInnerFalse.halted === true);
+  check(
+    'the nested-{{#if}} halt is reported under the template-if-nesting-unsupported diagnostic',
+    outerTrueInnerFalse.diagnostic === 'template-if-nesting-unsupported'
+  );
+}
+
+// -- nested {{#if}} blocks halt cleanly when the OUTER condition is false -
+// Stage 2 review (executed repro): with the outer condition false, the same
+// mispairing left a leftover {{/if}} token in the string, which the
+// placeholder pass then reported as a bogus unresolved reference named
+// "/if" -- a diagnostic that names a syntax artifact, not the real defect.
+// DECIDED BEHAVIOR: the same nesting detection fires regardless of the
+// outer condition's truthiness (it runs before any condition is
+// evaluated), so this halts under the same named diagnostic, never the
+// bogus "/if" dangling reference.
+{
+  const outerFalse = specEngineRenderTemplate(
+    '{{#if condB.flag}}pre{{#if condA.flag}}X{{/if}}post{{/if}}',
+    results,
+    values
+  );
+  check('a nested {{#if}} block with a false OUTER condition halts cleanly too', outerFalse.halted === true);
+  check(
+    'the false-outer nesting halt reuses the same named diagnostic, never a bogus "/if" reference',
+    outerFalse.diagnostic === 'template-if-nesting-unsupported'
+  );
+}
+
+// -- an unmatched {{/if}} (no opening {{#if}} anywhere before it) halts ---
+// -- the same way, per the DECIDED BEHAVIOR sharing one diagnostic across -
+// -- both the nested-block and unmatched-closer cases ----------------------
+{
+  const outcome = specEngineRenderTemplate('hello {{/if}} world', results, values);
+  check('a stray {{/if}} with no matching {{#if}} halts', outcome.halted === true);
+  check('the unmatched-closer halt reuses the same template-if-nesting-unsupported diagnostic', outcome.diagnostic === 'template-if-nesting-unsupported');
+}
+
+// -- sibling, NON-nested {{#if}} blocks in the same string leaf keep ------
+// -- working -- the nesting detection must not over-reject two blocks that -
+// -- are merely adjacent, not nested inside one another ---------------------
+{
+  const outcome = specEngineRenderTemplate('{{#if condA.flag}}yes{{/if}} and {{#if condB.flag}}no{{/if}}', results, values);
+  check('two sibling (non-nested) {{#if}} blocks in the same string do not halt', outcome.halted === false);
+  check('each sibling block renders its own truthy/falsy branch independently', outcome.value === 'yes and ');
+}
+
+// -- empty path segment (trailing dot): treated as unresolvable, per the --
+// -- same halt-don't-guess class as the undefined-sentinel rule -----------
+// A trailing-dot reference like {{step.}} used to resolve silently to the
+// JSON-stringified whole step object (the longest-prefix match's "nothing
+// after the matched key" case was conflated with the legal bare-key "no
+// dot at all" case). DECIDED BEHAVIOR: a template reference containing an
+// empty path segment (trailing dot) is unresolvable, hitting the existing
+// template-operand-unresolved sentinel halt -- the same rule an absent
+// field already triggers. Bare {{step}} with no dot at all stays legal
+// (pinned by the existing "the shorter declared key trackA resolves to its
+// own leaf value" case above).
+{
+  const outcome = specEngineRenderTemplate('{{top1.}}', results, values);
+  check('a trailing-dot reference ({{step.}}) halts instead of silently resolving the whole step object', outcome.halted === true);
+  check('the trailing-dot halt records the "<<undefined>>" sentinel', outcome.value === '<<undefined>>');
+  check('the trailing-dot halt reuses the existing template-operand-unresolved diagnostic', outcome.diagnostic === 'template-operand-unresolved');
+}
+
+// -- resolved-but-null distinction: a field PRESENT with value null -------
+// -- renders as an empty string and does NOT halt, distinct from a field --
+// -- that is ABSENT (which halts with the sentinel, per the cases above) --
+// This is existing behavior (specEngineResolveFieldPath's hasOwnProperty
+// walk finds the "field" key with value null and resolves it; the null
+// check in specEngineStringifyTemplateValue renders it as ''); this test
+// pins that distinction with no code change.
+{
+  const outcome = specEngineRenderTemplate('value=[{{nullStep.field}}]', results, values);
+  check('a present field whose value is null does not halt', outcome.halted === false);
+  check('a present null field renders as an empty string substitution', outcome.value === 'value=[]');
 }
 
 console.log(passCount + ' passed, ' + failCount + ' failed');

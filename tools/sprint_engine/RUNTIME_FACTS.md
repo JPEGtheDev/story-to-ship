@@ -24,13 +24,20 @@ guarantee, so the trigger for re-checking it is a runtime-version change, not
 routine suspicion:
 
 > string delivery is harness-version behavior, so a runtime-version change
-> triggers a cheap re-probe, not silent trust.
+> triggers a cheap re-probe, not silent trust
 
 ## Carriage: byte-exact to 41,628 characters, ceiling unlocated
 
 A spec (or any inline payload) carried through this channel arrived intact,
 byte-for-byte, at every size actually measured, up to the largest size
 measured. No corruption and no rejection were observed at any size tried.
+
+The measurement below uses three internal labels: a "rung" is one step in an
+increasing-size ladder of test payloads; the "wf_..." identifier names the
+specific run that produced that rung's result; and "caller emission"
+(labeled F3 in the underlying finding) means the limit that bounded how
+large the tested payloads got was the sending side's own limit on how much
+text it could emit in one go, not any limit enforced by the runtime itself.
 
 > Measured maximum working size: 41,628 chars (rung 3, wf_791e813b). This is
 > a FLOOR on the true ceiling, not the ceiling: no failure was ever observed,

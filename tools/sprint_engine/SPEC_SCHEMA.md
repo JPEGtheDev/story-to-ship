@@ -31,7 +31,7 @@ hold no nested steps.
 
 | Field | Optionality | Rule |
 |---|---|---|
-| `config.spillDir` | REQUIRED whenever the spec contains any agent step | Every agent step can produce an oversized result (see the spill contract below), and the oversized-output rule has nowhere to save its file without this folder. Requiring it whenever an agent step is present means the rule can never fire in a workflow that has nowhere to save. |
+| `config.spillDir` | REQUIRED whenever the spec contains any agent step | Every agent step can produce an oversized result (see the spill contract below), and the oversized-output rule has nowhere to save its file without this folder. Requiring it whenever an agent step is present means the rule can never fire in a workflow that has nowhere to save. `spillDir` must be an absolute path; a relative path is rejected at validation with a named diagnostic. |
 | `map.merge` | OPTIONAL | A map step may declare how its per-item results are combined; if it does not, a default combination applies. |
 | `scored-retry.augment` | OPTIONAL | A scored-retry step may declare extra instructions fed into a retry attempt; if absent, a retry attempt runs without augmentation. |
 | `scored-retry.mode` | REQUIRED | Two legal values: `first-passing` (stop and keep the first attempt that clears the threshold) and `keep-best` (run every attempt up to the bound and keep the highest-scoring one). |
@@ -44,8 +44,10 @@ hold no nested steps.
 A predicate is how a gate step or a branch step's condition compares a value
 already produced by an earlier step against something expected. A predicate
 names the step and field it reads (for example, a step called `par` and its
-field `failures`) and an operator to apply. Three operators are defined:
-`equals`, `lte` (less than or equal), and `gte` (greater than or equal).
+field `failures` -- one of the aggregate counts a parallel step's result
+carries, defined in the result-key namespacing grammar below) and an
+operator to apply. Three operators are defined: `equals`, `lte` (less than
+or equal), and `gte` (greater than or equal).
 
 **Undefined-sentinel rule.** A predicate's step/field lookup can fail to
 resolve -- the named step was never declared, or the field does not exist on
@@ -73,6 +75,19 @@ the split rule below. The other two forms are named as recognized template
 syntax; this document does not extend their behavior beyond that literal
 syntax.
 
+**Undefined-sentinel rule (templates).** The same sentinel-and-halt
+discipline that applies to predicates also applies to template resolution:
+if a template's dotted path does not resolve -- the named step was never
+declared, or the field is missing from its result -- the engine does not
+silently substitute the literal text "undefined" into the rendered prompt
+and continue. It records the sentinel `<<undefined>>` and halts the run,
+exactly as an unresolved predicate operand does. This rule matters because
+without it, a dangling template reference could silently inject the word
+"undefined" into a live agent's prompt while the run kept going -- a
+prompt-corruption failure with spend attached and no halt and no
+diagnostic. Both resolution paths -- predicate lookups and template
+rendering -- carry the identical sentinel-and-halt rule for this reason.
+
 **Template split rule.** Because a step ID can itself contain dots, the
 engine cannot just split a template reference on the first dot. Instead, a
 template reference resolves by matching the longest declared step key that is
@@ -91,7 +106,7 @@ items are numbered) -- an author-declared field with the same name would
 collide with the engine's own namespacing.
 
 **Nesting depth cap.** Container steps may nest inside one another (a
-scored-retry inside a parallel branch, for example), but only to a depth of
+scored-retry step nested inside a parallel step, for example), but only to a depth of
 3 container levels. A spec nested deeper than that is rejected at validation
 with an error naming where the excess nesting occurs. Known use cases need
 only 2 levels; the cap can be raised later if a real case demands it.
@@ -100,9 +115,29 @@ only 2 levels; the cap can be raised later if a real case demands it.
 
 Every step's result lands in the run's results map under a key. For a simple
 top-level step, the key is just its own step ID. Container steps namespace
-their nested steps' keys as dotted paths:
+their nested steps' keys as dotted paths.
 
-- **branch**: a nested step's key is `<branchId>.<stepId>`.
+The word "branch" is used two ways elsewhere in this contract: a parallel
+step runs several branches (tracks) at once, and there is also a separate
+if/else "branch" step kind. To keep those apart here, this section calls one
+strand of a parallel step a **track**, and reserves **branch step** for the
+if/else step kind.
+
+- **parallel**: a nested step's key is `<trackId>.<stepId>`, one segment per
+  track that ran. A step positioned after the parallel step can reference
+  any track's namespaced results once the parallel step has completed;
+  referencing a track's step result from a step positioned BEFORE the
+  parallel step's join (that is, from inside a different track, or from a
+  step that runs concurrently rather than after) is invalid and is caught by
+  static validation before dispatch. A parallel step's own result also
+  carries aggregate counts alongside the per-track results: `{failures,
+  successes, total}`, one count of how many tracks failed, how many
+  succeeded, and how many ran in total. These are the fields the predicate
+  example above reads (a step called `par` with field `failures` is reading
+  this aggregate count).
+- **branch step**: a nested step's key is `<branchId>.<stepId>`, where
+  `branchId` is the branch step's own ID and `stepId` is a step inside
+  whichever path it selected.
 - **map**: a nested step's key is `<mapId>.<index>`, one entry per item in
   the list the map iterated over.
 - **scored-retry**: each attempt's key is `<retryId>.attempts.<n>`; the
@@ -110,20 +145,23 @@ their nested steps' keys as dotted paths:
   declared) is additionally recorded at the plain `<retryId>` key.
 - **composites**: when containers nest inside each other, their namespacing
   concatenates -- for example, a scored-retry nested inside a parallel
-  branch produces keys like `<branchId>.<retryId>.attempts.<n>`.
+  track produces keys like `<trackId>.<retryId>.attempts.<n>`.
 
 ## Oversized-output spill contract
 
 An agent step's result can contain a content field too large to return
 directly. The threshold is exactly 40,000 bytes -- chosen to sit just below
-the largest payload size this repo's evidence has actually carried
-byte-exact, so the rule engages before an untested size range is reached,
-rather than being padded out to some larger untested margin.
+the measured INLINE-carriage floor of 41,628 characters, the highest point
+this repo has confirmed inline payload carriage works intact at (no failure
+was ever observed above it, and no ceiling above it has been located). The
+threshold sits below that floor by policy: a deliberate, disclosed choice,
+not a margin padded out from an untested number.
 
 **Producer-side spill.** When a content field would exceed 40,000 bytes, the
 agent that produced it writes the content to a file instead of returning it:
 it creates the spill directory if needed (`mkdir -p`), writes the content to
-`<spillDir>/<stepId>.<field>`, computes the file's sha256 checksum, and
+`<spillDir>/<stepId>.<field>` -- `spillDir` is always an absolute path, per
+the field-optionality table above -- computes the file's sha256 checksum, and
 returns a receipt in place of the content: `{spilled: true, path, sha256,
 bytes}`. The engine stores that receipt in the results map; the oversized
 text itself never transits the agent's own output.
@@ -181,7 +219,7 @@ gate agents. One evaluated an upstream answer of `"alpha"` and returned
 `{"verdict":"pass","reason":"Answer is exactly \"alpha\"."}` -- the run
 continued past it. The other was deliberately built to fail regardless of
 its input and returned `{"verdict":"fail","reason":"engineered failure for
-probe"}` -- the branch carrying that gate recorded the failing verdict, and
+probe"}` -- the track carrying that gate recorded the failing verdict, and
 the overall run's handling of a gate failure applies from there. `uncertain`
 has not been exercised by a live probe in this repo; the halt behavior above
 is the rule this contract specifies for it.

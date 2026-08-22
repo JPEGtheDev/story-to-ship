@@ -25,6 +25,17 @@
 // outputSchema.properties shape, the predicate shape) follow the
 // "Container authoring syntax" section of SPEC_SCHEMA.md; see that section
 // for the full convention and its inferred-not-ratified disclosure.
+//
+// resolveReferences(spec) runs after validateSpec has already accepted a
+// spec structurally. It walks the same step tree collecting two things:
+// every reference site (a gate/branch-case predicate's {step, field} pair,
+// and every {{...}} template placeholder in a shape step's template) and
+// every result key the spec declares, per the "Result-key namespacing
+// grammar" section of SPEC_SCHEMA.md. It returns the full list of
+// references that do not resolve against the declared keys -- not
+// fail-fast -- plus any reference that resolves to a real key but violates
+// the parallel-track join ordering rule from that same section. It
+// performs zero dispatch, exactly like validateSpec.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -362,10 +373,355 @@ function validateSpec(spec) {
   return violations;
 }
 
+// resolveReferences(spec) -- see file header for the contract. Traces every
+// diagnostic below to a specific section of SPEC_SCHEMA.md; the section is
+// named in each comment beside the check it backs.
+function resolveReferences(spec) {
+  const violations = [];
+
+  if (!specEngineIsPlainObject(spec) || !Array.isArray(spec.steps)) {
+    return violations;
+  }
+
+  // Every declared result key, per the "Result-key namespacing grammar"
+  // section. Two shapes:
+  //  - an EXACT key (a plain step id, a parallel step's own aggregate key,
+  //    or a scored-retry step's winner key).
+  //  - a PATTERN key (a map step's "<mapId>.<index>" or a scored-retry
+  //    step's "<retryId>.attempts.<n>"): the item count / attempt count is
+  //    a runtime fact this static pass does not know, so any bare-numeric
+  //    segment after the declared base is accepted.
+  // Both carry ordering metadata: ownerTrackId/joinOrderRef/declaredAtOrder
+  // are non-null only for a key declared while inside a parallel track,
+  // and back the "parallel ordering rule" checked below.
+  const declaredExactKeys = [];
+  const declaredPatternKeys = [];
+
+  // Every reference site: a predicate's {step, field} (gate.predicate or a
+  // branch case's "when"), or one {{...}} template placeholder found in a
+  // shape step's "template" field.
+  const referenceSites = [];
+
+  let visitOrderCounter = 0;
+
+  function declareExactKey(key, trackCtx, visitOrder) {
+    declaredExactKeys.push({
+      key: key,
+      ownerTrackId: trackCtx.trackId,
+      joinOrderRef: trackCtx.joinOrderRef,
+      declaredAtOrder: visitOrder,
+    });
+  }
+
+  function declarePatternKey(base, trackCtx, visitOrder) {
+    declaredPatternKeys.push({
+      base: base,
+      ownerTrackId: trackCtx.trackId,
+      joinOrderRef: trackCtx.joinOrderRef,
+      declaredAtOrder: visitOrder,
+    });
+  }
+
+  // "Template forms and reference resolution": three forms are recognized.
+  // {{step.field}} and {{values.PATH}} are single placeholders; {{#if}} is
+  // a block form whose condition is a reference in the same vocabulary --
+  // "this document does not extend their behavior beyond that literal
+  // syntax," so the closing {{/if}} carries no reference and the
+  // condition is read out and checked exactly like any other placeholder.
+  function extractPlaceholders(text) {
+    const refs = [];
+    const re = /\{\{\s*([^}]+?)\s*\}\}/g;
+    let m = re.exec(text);
+    while (m !== null) {
+      const inner = m[1];
+      if (inner !== '/if') {
+        if (inner.indexOf('#if') === 0) {
+          const cond = inner.slice(3).trim();
+          if (cond.length > 0) {
+            refs.push(cond);
+          }
+        } else {
+          refs.push(inner);
+        }
+      }
+      m = re.exec(text);
+    }
+    return refs;
+  }
+
+  // A shape step's "template" field is "an object whose string leaves may
+  // contain {{...}} placeholders" -- walk every string leaf.
+  function collectTemplateSites(value, path, visitOrder, trackCtx) {
+    if (typeof value === 'string') {
+      extractPlaceholders(value).forEach(function (ref) {
+        referenceSites.push({ path: path, kind: 'template', ref: ref, visitOrder: visitOrder, trackId: trackCtx.trackId });
+      });
+    } else if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i += 1) {
+        collectTemplateSites(value[i], path + '[' + i + ']', visitOrder, trackCtx);
+      }
+    } else if (specEngineIsPlainObject(value)) {
+      const keys = Object.keys(value);
+      for (let i = 0; i < keys.length; i += 1) {
+        collectTemplateSites(value[keys[i]], path + '.' + keys[i], visitOrder, trackCtx);
+      }
+    }
+  }
+
+  function collectPredicateSite(predicate, path, visitOrder, trackCtx) {
+    // A predicate's "step" names the step/result key it reads; "field" is
+    // a separate attribute (possibly itself dotted, e.g. a spilled
+    // pointer's "content.bytes"), so unlike a template placeholder,
+    // predicate.step needs no split -- it must equal a declared key
+    // exactly.
+    if (typeof predicate.step !== 'string') {
+      return;
+    }
+    referenceSites.push({
+      path: path,
+      kind: 'predicate',
+      ref: predicate.step,
+      visitOrder: visitOrder,
+      trackId: trackCtx.trackId,
+    });
+  }
+
+  // namespacePrefix: '' at the top of an addressing scope whose steps key
+  // by their own id; a non-empty string is the dotted prefix a step's id
+  // is appended to (a trackId or a branch step's own id, per the
+  // "Container authoring syntax" scoping rule -- this prefix REPLACES
+  // whatever prefix was already in effect, it does not compose with it,
+  // matching the grammar's literal "<trackId>.<stepId>" / "<branchId>.
+  // <stepId>" formats). null means this step's own key is not defined by
+  // the grammar at all -- inside a map step's body, or a scored-retry
+  // step's wrapped step, per the "Map-body addressing below the iteration
+  // boundary is not specified" caveat -- so nothing is declared for it,
+  // though its own reference sites are still collected and checked.
+  //
+  // trackCtx: { trackId, joinOrderRef } identifies the nearest enclosing
+  // parallel track, if any, and the shared mutable holder for that track's
+  // parallel step's join point (filled in once every track has been
+  // visited). trackCtx.trackId is null outside any track, meaning keys
+  // declared there carry no ordering restriction.
+  function visitStep(step, path, namespacePrefix, trackCtx) {
+    if (!specEngineIsPlainObject(step)) {
+      return;
+    }
+    const visitOrder = visitOrderCounter;
+    visitOrderCounter += 1;
+
+    const id = step.id;
+    const ownKey =
+      typeof id === 'string' && id.length > 0 && namespacePrefix !== null
+        ? namespacePrefix === ''
+          ? id
+          : namespacePrefix + '.' + id
+        : null;
+    const type = step.type;
+
+    // "Predicate operator vocabulary" / branch case predicates: reference
+    // sites live on a gate step's own predicate and a branch case's "when".
+    if (type === 'gate' && specEngineIsPlainObject(step.predicate)) {
+      collectPredicateSite(step.predicate, path + '.predicate', visitOrder, trackCtx);
+    }
+    // "Template forms and reference resolution": a shape step's template.
+    if (type === 'shape' && specEngineIsPlainObject(step.template)) {
+      collectTemplateSites(step.template, path + '.template', visitOrder, trackCtx);
+    }
+
+    if (ownKey !== null) {
+      if (type === 'parallel') {
+        // "A parallel step's own result also carries aggregate counts
+        // alongside the per-track results: {failures, successes, total}."
+        declareExactKey(ownKey, trackCtx, visitOrder);
+      } else if (type === 'scored-retry') {
+        // "the attempt the step actually kept ... is additionally
+        // recorded at the plain <retryId> key" plus the per-attempt
+        // "<retryId>.attempts.<n>" pattern.
+        declareExactKey(ownKey, trackCtx, visitOrder);
+        declarePatternKey(ownKey + '.attempts', trackCtx, visitOrder);
+      } else if (type === 'map') {
+        // "<mapId>.<index>" -- the item count is a runtime fact, not
+        // statically known, so any bare-numeric index is accepted.
+        declarePatternKey(ownKey, trackCtx, visitOrder);
+      } else if (type !== 'branch') {
+        // agent, gate, shape: "the key is just its own step ID."
+        declareExactKey(ownKey, trackCtx, visitOrder);
+      }
+      // branch: no key of its own is documented for the branch step
+      // itself -- only for the steps nested in its cases/default, below.
+    }
+
+    if (type === 'parallel' && Array.isArray(step.tracks)) {
+      // Ordering rule: "a step positioned after the parallel step can
+      // reference any track's namespaced results once the parallel step
+      // has completed; referencing a track's step result from a step
+      // positioned before the parallel step's join ... is invalid." One
+      // shared joinOrderRef is filled in once every track has been
+      // visited; every key declared inside any of this parallel step's
+      // tracks points at it.
+      const joinOrderRef = { value: null };
+      for (let ti = 0; ti < step.tracks.length; ti += 1) {
+        const track = step.tracks[ti];
+        if (specEngineIsPlainObject(track) && Array.isArray(track.steps)) {
+          const trackId = typeof track.id === 'string' ? track.id : null;
+          const childTrackCtx = { trackId: trackId, joinOrderRef: joinOrderRef };
+          for (let si = 0; si < track.steps.length; si += 1) {
+            visitStep(track.steps[si], path + '.tracks[' + ti + '].steps[' + si + ']', trackId, childTrackCtx);
+          }
+        }
+      }
+      joinOrderRef.value = visitOrderCounter - 1;
+    } else if (type === 'map' && Array.isArray(step.steps)) {
+      for (let mi = 0; mi < step.steps.length; mi += 1) {
+        visitStep(step.steps[mi], path + '.steps[' + mi + ']', null, trackCtx);
+      }
+    } else if (type === 'scored-retry' && specEngineIsPlainObject(step.step)) {
+      visitStep(step.step, path + '.step', null, trackCtx);
+    } else if (type === 'branch') {
+      const branchId = typeof id === 'string' ? id : null;
+      if (Array.isArray(step.cases)) {
+        for (let ci = 0; ci < step.cases.length; ci += 1) {
+          const branchCase = step.cases[ci];
+          const casePath = path + '.cases[' + ci + ']';
+          if (specEngineIsPlainObject(branchCase)) {
+            if (specEngineIsPlainObject(branchCase.when)) {
+              collectPredicateSite(branchCase.when, casePath + '.when', visitOrder, trackCtx);
+            }
+            if (Array.isArray(branchCase.steps)) {
+              for (let bsi = 0; bsi < branchCase.steps.length; bsi += 1) {
+                visitStep(branchCase.steps[bsi], casePath + '.steps[' + bsi + ']', branchId, trackCtx);
+              }
+            }
+          }
+        }
+      }
+      if (specEngineIsPlainObject(step.default) && Array.isArray(step.default.steps)) {
+        for (let dsi = 0; dsi < step.default.steps.length; dsi += 1) {
+          visitStep(step.default.steps[dsi], path + '.default.steps[' + dsi + ']', branchId, trackCtx);
+        }
+      }
+    }
+  }
+
+  const rootTrackCtx = { trackId: null, joinOrderRef: null };
+  for (let i = 0; i < spec.steps.length; i += 1) {
+    visitStep(spec.steps[i], 'steps[' + i + ']', '', rootTrackCtx);
+  }
+
+  // "Template split rule": "a template reference resolves by matching the
+  // longest declared step key that is a prefix of the reference;
+  // everything after that matched prefix is the field path ... This also
+  // covers a declared step key that happens to be a prefix of another
+  // declared step key -- the longest match wins."
+  function resolveDotted(ref) {
+    let best = null;
+    function considerMatch(matchedKey, fieldPath, entry) {
+      if (best === null || matchedKey.length > best.matchedKey.length) {
+        best = { matchedKey: matchedKey, fieldPath: fieldPath, entry: entry };
+      }
+    }
+    for (let i = 0; i < declaredExactKeys.length; i += 1) {
+      const entry = declaredExactKeys[i];
+      if (ref === entry.key) {
+        considerMatch(entry.key, '', entry);
+      } else if (ref.indexOf(entry.key + '.') === 0) {
+        considerMatch(entry.key, ref.slice(entry.key.length + 1), entry);
+      }
+    }
+    for (let i = 0; i < declaredPatternKeys.length; i += 1) {
+      const entry = declaredPatternKeys[i];
+      const prefix = entry.base + '.';
+      if (ref.indexOf(prefix) === 0) {
+        const rest = ref.slice(prefix.length);
+        const m = /^([0-9]+)(?:\.(.*))?$/.exec(rest);
+        if (m) {
+          considerMatch(entry.base + '.' + m[1], m[2] || '', entry);
+        }
+      }
+    }
+    return best;
+  }
+
+  function declaredKeysSummary() {
+    const parts = declaredExactKeys.map(function (e) {
+      return e.key;
+    });
+    declaredPatternKeys.forEach(function (e) {
+      parts.push(e.base + '.<n>');
+    });
+    return parts.length > 0 ? parts.join(', ') : '(no result keys declared)';
+  }
+
+  for (let si = 0; si < referenceSites.length; si += 1) {
+    const site = referenceSites[si];
+
+    // "{{values.PATH}} references resolve against config values, not step
+    // results" -- a different namespace this static pass does not check,
+    // since no ratified wording specifies config.values' structure.
+    if (site.kind === 'template' && site.ref.indexOf('values.') === 0) {
+      continue;
+    }
+
+    const match = resolveDotted(site.ref);
+    // A predicate's "step" is a standalone attribute (not a dotted
+    // path with a field suffix baked in, per collectPredicateSite above),
+    // so it must equal a declared key exactly -- no leftover field path.
+    const resolved = site.kind === 'predicate' ? match !== null && match.fieldPath === '' && match.matchedKey === site.ref : match !== null;
+
+    if (!resolved) {
+      violations.push(
+        specEngineMakeViolation(
+          site.path,
+          site.kind === 'predicate' ? 'dangling-predicate-reference' : 'dangling-template-reference',
+          (site.kind === 'predicate' ? 'Predicate' : 'Template') +
+            ' reference at "' +
+            site.path +
+            '" names "' +
+            site.ref +
+            '", which does not resolve to any declared result key. Declared keys: ' +
+            declaredKeysSummary() +
+            '.'
+        )
+      );
+      continue;
+    }
+
+    // Ordering rule: only keys declared inside a parallel track carry this
+    // restriction (entry.ownerTrackId !== null); every other key kind
+    // (plain, branch-nested, map, scored-retry) is unrestricted.
+    const entry = match.entry;
+    if (entry.ownerTrackId !== null) {
+      const joinOrder = entry.joinOrderRef ? entry.joinOrderRef.value : null;
+      const afterJoin = joinOrder !== null && site.visitOrder > joinOrder;
+      const sameTrackLater = site.trackId === entry.ownerTrackId && site.visitOrder > entry.declaredAtOrder;
+      if (!afterJoin && !sameTrackLater) {
+        violations.push(
+          specEngineMakeViolation(
+            site.path,
+            'parallel-track-reference-before-join',
+            (site.kind === 'predicate' ? 'Predicate' : 'Template') +
+              ' reference at "' +
+              site.path +
+              '" names "' +
+              site.ref +
+              '", a result from track "' +
+              entry.ownerTrackId +
+              '" of a parallel step that has not joined yet at this point in the spec.'
+          )
+        );
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ===ENGINE-CORE-END===
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     validateSpec: validateSpec,
+    resolveReferences: resolveReferences,
   };
 }

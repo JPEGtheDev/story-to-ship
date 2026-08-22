@@ -1437,22 +1437,69 @@ function specEngineRegexExtract(text, pattern) {
 }
 
 // specEngineExecute(spec, dispatch) runs the execute loop over spec.steps,
-// in order, for the three leaf step kinds (agent, gate, shape) plus one
-// container kind: "parallel", per the "Container authoring syntax" and
-// "Result-key namespacing grammar" sections of SPEC_SCHEMA.md, and the
-// PROBE_RESULTS.md observation that a failing gate verdict inside one
-// branch does not disrupt the other branch's result delivery or the
-// overall join. The other three container kinds (map, scored-retry,
-// branch) remain a later capability -- meeting one at execute time,
-// whether at the top level or inside a parallel step's own track, is never
-// a silent skip; the loop halts immediately with a named
+// in order, for the three leaf step kinds (agent, gate, shape) plus two
+// container kinds: "parallel" and "map", per the "Container authoring
+// syntax" and "Result-key namespacing grammar" sections of SPEC_SCHEMA.md,
+// and the PROBE_RESULTS.md observation that a failing gate verdict inside
+// one branch does not disrupt the other branch's result delivery or the
+// overall join. The other two container kinds (scored-retry, branch)
+// remain a later capability -- meeting one at execute time, whether at the
+// top level or inside a parallel step's own track or a map step's own
+// body, is never a silent skip; the loop halts immediately with a named
 // 'container-step-not-supported' diagnostic, the same {path, diagnostic,
 // message} halt shape every other halt in this file uses. A parallel
 // step's own malformed shapes (a missing/non-array `tracks`, a track that
 // is not a plain object, or a track missing its own `id`/`steps`) are
 // guarded here too, under their own named diagnostics, since validateSpec
 // does not itself flag those defects (see specEngineExecuteParallelStep
-// below).
+// below); a map step's own malformed shapes (a missing/non-array `steps`,
+// or a missing/unresolvable/non-array `list`) get the same treatment (see
+// specEngineExecuteMapStep below).
+//
+// A map step's own list-source field, `list: { step, field? }`, is this
+// implementation's own disclosed choice -- SPEC_SCHEMA.md's map bullet
+// documents `steps` (the repeated body) and `merge` (an optional,
+// unimplemented combination field) but never names the field a map step
+// declares its LIST under. A `{{...}}` template string was rejected for
+// this: specEngineRenderTemplateString always stringifies its resolved
+// value (via specEngineStringifyTemplateValue), which would turn an actual
+// array into JSON text and break iteration outright. `list` instead reuses
+// the same `{step, field}` reference shape a predicate already carries
+// (minus predicate's own operator/value), resolved with the existing
+// specEngineResolveFieldPath primitive, which preserves the resolved
+// value's own type. `field` is optional; when absent, the named step's
+// entire result is the list.
+//
+// A map step's own per-iteration item, exposed to that iteration's body as
+// the bare-name reference `{{item}}` (or `{{item.someField}}`, the
+// ordinary split-rule field-path case), is this implementation's own
+// disclosed choice too -- SPEC_SCHEMA.md's own vocabulary names the map's
+// per-run unit "one item... of the list" (the map-body-addressing section)
+// but never names a field a body step reads that item through.
+//
+// A map step's own iteration order is SEQUENTIAL, not concurrent -- the
+// opposite of a parallel step's own tracks (see specEngineExecuteParallelStep
+// below). This is this implementation's own disclosed, owner-reversible
+// design: SPEC_SCHEMA.md's step-kind table describes parallel as running
+// "several tracks AT ONCE" but describes map only as repeating "steps once
+// per item in a list," with no concurrency language anywhere in the map
+// bullet or the map-body-addressing section -- this implementation reads
+// that omission as deliberate.
+//
+// A map step's own iteration containment mirrors track containment (one
+// iteration's own halt does not escalate to a whole-run halt; other
+// iterations still run; the run continues past the map step) -- but,
+// unlike a parallel step, a map step's own execution never writes an
+// aggregate object under the map step's own bare id: no ratified wording
+// defines aggregate counts for map, and the namespacing grammar never
+// declares a plain `<mapId>` key at all (only the `<mapId>.<index>`
+// pattern) -- inventing a `{failures, successes, total}`-shaped object
+// there the way parallel's own aggregate is written would put an
+// unaddressed object at a key the contract never names. A failed
+// iteration is instead inspectable only via the map step's own trace
+// entry, under a new `iterations` array (one `{ index, status, trace,
+// halt }` summary per iteration, mirroring parallel's own `tracks` trace
+// field) -- see specEngineExecuteMapStep below.
 //
 // Track execution is delegated to specEngineExecuteSequence, the same
 // step-sequence runner this function itself is now a thin wrapper around:
@@ -1634,7 +1681,19 @@ function specEngineRegexExtract(text, pattern) {
 // diagnostics ('parallel-tracks-not-array', 'parallel-track-not-object',
 // 'parallel-track-id-missing', 'parallel-track-steps-not-array'), since
 // validateSpec does not check a track's own `id`/`steps` shape or whether
-// `tracks` itself is an array (see specEngineExecuteParallelStep).
+// `tracks` itself is an array (see specEngineExecuteParallelStep). A
+// malformed map step's own shape gets the analogous treatment under its
+// own diagnostics ('map-steps-not-array', 'map-list-malformed',
+// 'map-list-unresolved', 'map-list-not-array'), since validateSpec's own
+// `type === 'map'` branch only recurses into `step.steps` when it is
+// already an array (silently doing nothing otherwise) and has no
+// knowledge of `list` at all -- that field name is this implementation's
+// own invention, documented above (see specEngineExecuteMapStep). A map
+// step declaring `merge` (a real, OPTIONAL contract field whose
+// combination semantics SPEC_SCHEMA.md explicitly declines to specify) is
+// a recognized-but-rejected form, mirroring the existing
+// gate-predicate-form-not-supported precedent: it halts immediately, under
+// 'map-merge-not-supported', before any iteration runs.
 
 function specEngineMakeExecuteResult(status, results, trace, halt) {
   return { status: status, results: results, trace: trace, halt: halt || null };
@@ -1801,11 +1860,34 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
       continue;
     }
 
+    if (type === 'map') {
+      const mapOutcome = await specEngineExecuteMapStep(step, dispatch, values, path, results);
+      if (mapOutcome.wholeRunHalt) {
+        return { status: 'failed', halt: mapOutcome.wholeRunHalt };
+      }
+      Object.keys(mapOutcome.namespacedResults).forEach(function (namespacedKey) {
+        results[namespacedKey] = mapOutcome.namespacedResults[namespacedKey];
+      });
+      // No plain `results[stepId]` is ever written for a map step: the
+      // namespacing grammar only defines the `<mapId>.<index>` pattern key,
+      // never a bare `<mapId>` key, so there is nothing ratified to write
+      // there -- see the specEngineExecute header comment above.
+      trace.push({
+        step: stepId,
+        kind: type,
+        status: 'completed',
+        outcome: null,
+        flags: [],
+        iterations: mapOutcome.iterations,
+      });
+      continue;
+    }
+
     if (SPEC_ENGINE_CONTAINER_STEP_KINDS.indexOf(type) !== -1) {
-      // Loud failure, never a silent skip: the three remaining container
-      // kinds (map, scored-retry, branch) are a later capability this loop
-      // does not implement, whether met at the top level or inside a
-      // track's own sequence.
+      // Loud failure, never a silent skip: the two remaining container
+      // kinds (scored-retry, branch) are a later capability this loop does
+      // not implement, whether met at the top level or inside a track's or
+      // a map iteration's own sequence.
       return {
         status: 'failed',
         halt: specEngineMakeHalt(
@@ -1815,7 +1897,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
             stepId +
             '" is a container step kind ("' +
             type +
-            '"); this executor only runs agent, gate, shape, and parallel -- the remaining container kinds are a later capability.'
+            '"); this executor only runs agent, gate, shape, parallel, and map -- the remaining container kinds are a later capability.'
         ),
       };
     }
@@ -2092,6 +2174,245 @@ async function specEngineExecuteParallelStep(step, dispatch, values, path, baseR
     namespacedResults: namespacedResults,
     aggregate: { failures: failures, successes: successes, total: trackOutcomes.length },
     trackSummaries: trackSummaries,
+  };
+}
+
+// specEngineExecuteMapIteration(bodySteps, index, item, dispatch, values,
+// baseResults, parentPath) runs one map step's single iteration -- one run
+// of `bodySteps` over one `item` of the resolved list -- as a full
+// sequence, via specEngineExecuteSequence, seeded with a private clone of
+// `baseResults` (the results collected so far at the point this map step
+// was reached) PLUS a synthetic bare-name `item` key holding this
+// iteration's own current item (this implementation's own disclosed choice
+// for how a body step reads "the current item" -- see the
+// specEngineExecute header comment above). This mirrors
+// specEngineExecuteTrack's own seeding contract exactly, with `item`
+// playing the same role a track's own earlier steps play: a bare-named
+// reference inside this iteration's body resolves against both every step
+// that ran before the map step AND this iteration's own earlier body steps
+// AND `item` itself, while mutations this iteration makes never leak into
+// `baseResults` or into any sibling iteration's own clone -- each
+// iteration's clone is independent, matching the "sibling iterations
+// isolated" requirement (a shallow clone, not a deep one -- the same
+// Object.assign-key-set-only caveat specEngineExecuteTrack's own header
+// comment documents applies here identically). Returns { index, status,
+// halt, trace, localResults }: `status`/`halt`/`trace` are exactly what
+// this iteration's own specEngineExecuteSequence run produced (a
+// non-"completed" status here is this iteration's OWN internal halt,
+// CONTAINED to it by the caller, specEngineExecuteMapStep, never escalated
+// to a whole-run halt); `localResults` is this iteration's own
+// contribution only -- every key present in the post-run clone that was
+// NOT already present in the seed (`baseResults` plus `item`), i.e.
+// exactly the bare-id results this iteration's own body steps produced --
+// ready for the caller to re-namespace under this iteration's own
+// `<mapId>.<index>.` prefix.
+//
+// KNOWN LIMITATION, disclosed here rather than silently handled: `item` is
+// not a reserved segment (SPEC_SCHEMA.md's reserved-segments rule reserves
+// only `attempts` and bare-numeric segments), so a map body step legally
+// declared with the literal id `item` would have its own result
+// overwrite -- and then be excluded from -- this synthetic seed key, since
+// the seed's key set is captured once, before the body runs. This is a
+// narrow, disclosed edge case, not a defect this implementation resolves.
+async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, values, baseResults, parentPath) {
+  const seedResults = Object.assign({}, baseResults);
+  seedResults.item = item;
+  const seedKeys = Object.keys(seedResults);
+  const localTrace = [];
+  const itemPath = parentPath + '.items[' + index + '].steps';
+
+  const seqOutcome = await specEngineExecuteSequence(bodySteps, dispatch, values, seedResults, localTrace, itemPath);
+
+  const ownResults = {};
+  Object.keys(seedResults).forEach(function (key) {
+    if (seedKeys.indexOf(key) === -1) {
+      ownResults[key] = seedResults[key];
+    }
+  });
+
+  return {
+    index: index,
+    status: seqOutcome.status,
+    halt: seqOutcome.halt,
+    trace: localTrace,
+    localResults: ownResults,
+  };
+}
+
+// specEngineExecuteMapStep(step, dispatch, values, path, baseResults) runs
+// one "map" step's own body once per item of its resolved list, per the
+// "Container authoring syntax", "Map-body addressing", and "Result-key
+// namespacing grammar" sections of SPEC_SCHEMA.md, plus this
+// implementation's own disclosed design choices documented in full in the
+// specEngineExecute header comment above (the `list: { step, field? }`
+// field, the `{{item}}` per-iteration reference, sequential-not-concurrent
+// iteration order, and no map-level aggregate object).
+//
+// Malformed-shape and recognized-but-rejected-form guards run first,
+// before any iteration is dispatched, in this order:
+//   1. `merge` present at all -> 'map-merge-not-supported' (recognized but
+//      rejected, mirroring gate-predicate-form-not-supported).
+//   2. `steps` missing or not an array -> 'map-steps-not-array'.
+//   3. `list` missing or not a well-formed `{step, field?}` object (a
+//      non-empty string `step`) -> 'map-list-malformed'.
+//   4. `list.step` names a step with no result in `baseResults` at this
+//      point in the spec, OR `list.field` (when declared) does not resolve
+//      against that step's result -> 'map-list-unresolved'.
+//   5. the resolved list value is not an array -> 'map-list-not-array'.
+// Any one of these halts the WHOLE run (returned as `wholeRunHalt`) --
+// these are structural defects in the map step's own declaration, not an
+// iteration's runtime failure, so none of them get the per-iteration
+// containment the rest of this function's own iterations get.
+//
+// Once every guard passes, iterations run SEQUENTIALLY (see the
+// specEngineExecute header comment for why this is a disclosed,
+// owner-reversible reading rather than Promise.all-style concurrency): a
+// later item's dispatch calls do not begin until the earlier item's own
+// full sequence has settled. An EMPTY resolved list runs zero iterations,
+// dispatches nothing, and contributes no namespaced result keys at all --
+// the run continues past the map step exactly as if it had never been
+// declared, other than its own (empty-`iterations`) trace entry.
+//
+// On success (wholeRunHalt: null), returns
+// { wholeRunHalt: null, namespacedResults, iterations }:
+// `namespacedResults` carries, per completed step of every iteration, the
+// `<mapId>.<index>.<stepId>` key (per the namespacing grammar, written
+// whenever that step actually produced a result -- a step that halted its
+// own iteration contributes nothing, the same contained-result rule the
+// top-level loop and specEngineExecuteTrack both already apply to a
+// failing gate), PLUS the plain `<mapId>.<index>` key per iteration, whose
+// shape depends on the map body's own DECLARED step count (not how many of
+// its steps actually completed): a single-step body's plain key is that
+// one step's own result directly (only written when that step completed);
+// a multi-step body's plain key is the same step-ID-keyed object
+// `localResults` already is (partial when the iteration halted partway
+// through, matching "the plain key refers to everything that iteration
+// produced" read literally); `iterations` is one { index, status, trace,
+// halt } entry per resolved list item, in list order, exactly as
+// specEngineExecuteMapIteration returned it -- this is where a contained
+// iteration's own halt detail stays inspectable from the enclosing map
+// step's own trace entry (see specEngineExecuteSequence's `type === 'map'`
+// branch above, which threads this array through as that trace entry's
+// own `iterations` field).
+async function specEngineExecuteMapStep(step, dispatch, values, path, baseResults) {
+  if (typeof step.merge !== 'undefined') {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.merge',
+        'map-merge-not-supported',
+        'Map step "' +
+          step.id +
+          '" declares a "merge" field; map.merge combination semantics are a known contract gap (SPEC_SCHEMA.md declines to specify a default) and are not implemented by this executor.'
+      ),
+    };
+  }
+
+  if (!Array.isArray(step.steps)) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.steps',
+        'map-steps-not-array',
+        'Map step "' + step.id + '" must declare "steps" as an array of step objects.'
+      ),
+    };
+  }
+
+  const listSpec = step.list;
+  if (!specEngineIsPlainObject(listSpec) || typeof listSpec.step !== 'string' || listSpec.step.length === 0) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.list',
+        'map-list-malformed',
+        'Map step "' +
+          step.id +
+          '" must declare "list" as { step, field? } naming the earlier step (and optional dotted field path) whose result is the list to iterate over.'
+      ),
+    };
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(baseResults, listSpec.step)) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.list',
+        'map-list-unresolved',
+        'Map step "' + step.id + '" list source names step "' + listSpec.step + '", which has no result at this point in the spec.'
+      ),
+    };
+  }
+
+  let listValue;
+  if (typeof listSpec.field === 'string' && listSpec.field.length > 0) {
+    const fieldResolution = specEngineResolveFieldPath(baseResults[listSpec.step], listSpec.field);
+    if (!fieldResolution.resolved) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          path + '.list',
+          'map-list-unresolved',
+          'Map step "' +
+            step.id +
+            '" list source field "' +
+            listSpec.field +
+            '" does not resolve on step "' +
+            listSpec.step +
+            '"\'s result.'
+        ),
+      };
+    }
+    listValue = fieldResolution.value;
+  } else {
+    listValue = baseResults[listSpec.step];
+  }
+
+  if (!Array.isArray(listValue)) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.list',
+        'map-list-not-array',
+        'Map step "' + step.id + '" list source resolved to a non-array value; a map step can only iterate over an array.'
+      ),
+    };
+  }
+
+  const namespacedResults = {};
+  const iterations = [];
+  const bodyStepCount = step.steps.length;
+  const onlyStepId = bodyStepCount === 1 && specEngineIsPlainObject(step.steps[0]) ? step.steps[0].id : null;
+
+  for (let index = 0; index < listValue.length; index += 1) {
+    const iterationOutcome = await specEngineExecuteMapIteration(
+      step.steps,
+      index,
+      listValue[index],
+      dispatch,
+      values,
+      baseResults,
+      path
+    );
+
+    Object.keys(iterationOutcome.localResults).forEach(function (key) {
+      namespacedResults[step.id + '.' + index + '.' + key] = iterationOutcome.localResults[key];
+    });
+
+    if (bodyStepCount === 1) {
+      if (typeof onlyStepId === 'string' && Object.prototype.hasOwnProperty.call(iterationOutcome.localResults, onlyStepId)) {
+        namespacedResults[step.id + '.' + index] = iterationOutcome.localResults[onlyStepId];
+      }
+    } else if (bodyStepCount > 1) {
+      namespacedResults[step.id + '.' + index] = iterationOutcome.localResults;
+    }
+
+    iterations.push({
+      index: index,
+      status: iterationOutcome.status,
+      trace: iterationOutcome.trace,
+      halt: iterationOutcome.halt,
+    });
+  }
+
+  return {
+    wholeRunHalt: null,
+    namespacedResults: namespacedResults,
+    iterations: iterations,
   };
 }
 

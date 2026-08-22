@@ -54,6 +54,66 @@ schema. `config.schemas`, by contrast, is a single config-level field, not a
 per-step schema, and this contract does not specify its internal structure
 or how it relates to per-step output schemas -- no source settles that.
 
+## Container authoring syntax
+
+**The field names in this section are inferred by the implementation to
+make the contract buildable, not carried from a ratified wording.** The
+step-kind table above and the result-key namespacing grammar below both
+presuppose that a parallel step has tracks, a branch step has paths, a map
+step repeats steps, and a scored-retry step wraps a result being retried --
+but no ratified wording fixes the JSON field names an author writes for any
+of that. The shapes below are the first implementation's rendering of that
+vocabulary, adopted here as the contract surface so specs and validators
+built against this document agree with each other.
+
+- **parallel**: nested steps live under `tracks`, an array of `{ id, steps
+  }` -- one entry per track, `id` is the track's own ID (the `trackId` the
+  namespacing grammar below keys results by), `steps` is that track's step
+  sequence.
+- **branch step**: nested steps live under `cases`, an array of `{ when,
+  steps }` -- `when` is a predicate (shape below), `steps` is the step
+  sequence for that path. An optional `default: { steps }` holds the step
+  sequence taken when no case matches.
+- **map**: the steps repeated once per item live under `steps`, an array of
+  step objects.
+- **scored-retry**: the step being retried lives under `step`, a single
+  nested step object rather than a list -- one weak result is retried at a
+  time, matching the singular `<retryId>.attempts.<n>` key the namespacing
+  grammar assigns per attempt.
+
+An **output schema** (the per-step field the reserved-segments rule refers
+to, named in the schema-disambiguation paragraph above) is carried on a
+step as `outputSchema: { properties: { ... } }`, `properties` reusing this
+contract's own word for "its properties, which of them are required" from
+that same paragraph.
+
+A **predicate** (the gate-step and branch-case comparison the next section
+describes) is an object `{ step, field, operator, value }`: `step` and
+`field` are the step ID and field name it reads, `operator` is one of the
+three operators named in that section, `value` is what it compares
+against. A branch case's predicate is carried under `when`; a gate step's
+predicate is carried under `predicate`.
+
+**Map-body addressing below the iteration boundary is not specified.** The
+result-key namespacing grammar's map bullet keys a map step's nested
+results as `<mapId>.<index>` only -- it does not extend that key with a
+per-step suffix identifying which of a map's several repeated steps
+produced a given result. No ratified wording settles how, or whether, an
+author addresses one specific step's result inside one map iteration; this
+contract does not invent an addressing scheme below `<mapId>.<index>`.
+
+**ID-uniqueness is scoped, inferred the same way.** A step ID must be
+unique within its addressing scope: the top-level spec is one scope, each
+parallel track is its own scope (namespaced by its `trackId`), each branch
+step's combined cases-and-default is one scope (namespaced by the branch
+step's own ID), and each map step's body and each scored-retry step's
+wrapped step are each their own scope, isolated from the scope they are
+nested inside. Two steps sharing a declared ID in two different scopes do
+not collide, because either their namespaced result keys differ, or -- for
+a map or scored-retry body -- no ratified wording defines a namespaced key
+for them at all, per the map-body addressing caveat above. This scoping
+rule is this section's own inference, not carried from a ratified wording.
+
 ## Predicate operator vocabulary
 
 A predicate is how a gate step or a branch step's condition compares a value

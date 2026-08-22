@@ -435,6 +435,159 @@ function countOf(violations, diagnostic) {
   );
 }
 
+// -- container-key availability: a descendant nested inside a container's -
+// -- own subtree cannot reference that container's own (not-yet-joined) ---
+// -- result key --------------------------------------------------------
+// outer (parallel) -> track A: [ inner (parallel) -> track X: [ x1 (gate,
+// predicate.step = 'A.inner') ] ]. inner's own aggregate result cannot
+// exist until inner's own join, which happens only after x1 finishes --
+// x1 referencing inner's own key from inside inner's own subtree is a
+// circular reference and must be rejected.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'outer',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'A',
+            steps: [
+              {
+                id: 'inner',
+                type: 'parallel',
+                tracks: [
+                  {
+                    id: 'X',
+                    steps: [
+                      {
+                        id: 'x1',
+                        type: 'gate',
+                        predicate: { step: 'A.inner', field: 'failures', operator: 'equals', value: 0 },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a descendant inside a container\'s own subtree referencing that container\'s own key is rejected',
+    hasViolation(
+      violations,
+      'parallel-track-reference-before-join',
+      'steps[0].tracks[0].steps[0].tracks[0].steps[0].predicate'
+    )
+  );
+}
+
+// -- container-key availability: the same key referenced by the container's
+// -- own later SIBLING in the same track (after the container has fully ---
+// -- joined) resolves cleanly -- the fix must not over-reject -------------
+// track A: [ inner (parallel with a track containing one step), a2 (gate,
+// predicate.step = 'A.inner') ] -- a2 sits AFTER inner in the same track
+// sequence, once inner has already joined.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'outer',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'A',
+            steps: [
+              {
+                id: 'inner',
+                type: 'parallel',
+                tracks: [{ id: 'X', steps: [{ id: 'x1', type: 'shape', template: {} }] }],
+              },
+              {
+                id: 'a2',
+                type: 'gate',
+                predicate: { step: 'A.inner', field: 'failures', operator: 'equals', value: 0 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a later sibling in the same track referencing an already-joined inner container key resolves cleanly',
+    violations.length === 0
+  );
+}
+
+// -- container-key availability, deeper variant: the referencing site -----
+// -- nested two containers down inside the open container is still --------
+// -- rejected ------------------------------------------------------------
+// inner -> track X -> innermost (parallel) -> track Y -> y1 referencing
+// A.inner -- y1 is even more deeply nested inside inner's own open
+// subtree than the shallow repro above.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'outer',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'A',
+            steps: [
+              {
+                id: 'inner',
+                type: 'parallel',
+                tracks: [
+                  {
+                    id: 'X',
+                    steps: [
+                      {
+                        id: 'innermost',
+                        type: 'parallel',
+                        tracks: [
+                          {
+                            id: 'Y',
+                            steps: [
+                              {
+                                id: 'y1',
+                                type: 'gate',
+                                predicate: { step: 'A.inner', field: 'failures', operator: 'equals', value: 0 },
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a site nested two containers deeper inside the open container is still rejected',
+    hasViolation(
+      violations,
+      'parallel-track-reference-before-join',
+      'steps[0].tracks[0].steps[0].tracks[0].steps[0].tracks[0].steps[0].predicate'
+    )
+  );
+}
+
 // -- {{values.PATH}} resolves against config values, not step results -----
 {
   const spec = {

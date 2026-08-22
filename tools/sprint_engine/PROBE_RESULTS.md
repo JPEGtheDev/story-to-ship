@@ -6,10 +6,12 @@ executed against the runtime to turn two design assumptions into observed
 behavior instead of guesses:
 
 1. How the runtime's `parallel()` primitive behaves -- what shape it returns,
-   whether a failing gate verdict produced inside one branch disrupts result
-   delivery for that branch or the overall join, and whether a step that runs
-   after the join can reference both branches' results.
-2. Whether a dispatched agent can *write* a file to a named absolute path on
+   whether a failing verdict from a gate -- a step that checks a prior step's
+   result and returns a pass or fail verdict -- produced inside one branch
+   disrupts result delivery for that branch or the overall join, and whether
+   a step that runs after the join can reference both branches' results.
+2. Whether a dispatched agent -- an AI agent the workflow starts as a
+   separate worker -- can *write* a file to a named absolute path on
    disk. Every prior observation of agent behavior in this repo's probe
    record was a read; the engine's design for handling oversized step output
    (spilling it to a file instead of returning it inline) depends on agents
@@ -90,9 +92,22 @@ writing agent's word alone:
 - An independent read-back agent, given no information from the write step
   beyond the target path, reported sha256 `38323d4d6d0dbec223419a87438edf106d70266620ca6a3b3a4bfc5eee9fc763`
   at 29 bytes -- the same digest and byte count.
-- The coordinator ran its own local `sha256sum` against the file and got
+- The session that launched the probe run (outside the workflow, on the same
+  machine) ran its own local `sha256sum` against the file and got
   `38323d4d6d0dbec223419a87438edf106d70266620ca6a3b3a4bfc5eee9fc763` at 29
   bytes again -- the same digest and byte count a third time.
+
+Before the run was started, that same launching session computed the digest
+and byte count the write was expected to produce, by running the intended
+file content through the same tools directly:
+
+```
+$ printf 'sprint-engine T0 write probe\n' | sha256sum
+38323d4d6d0dbec223419a87438edf106d70266620ca6a3b3a4bfc5eee9fc763
+
+$ printf 'sprint-engine T0 write probe\n' | wc -c
+29
+```
 
 All three values matched each other, and all three matched the sha256 digest
 computed from the intended file content before the run was started. Three
@@ -120,8 +135,8 @@ agent fabricating a plausible-looking success report.
   branches' output is visible to a later step in the same workflow.
 - **A dispatched agent can create a directory and write a file at a named
   absolute path.** The writer agent ran `mkdir -p`, wrote a file, and
-  reported a digest that the independent read-back agent and the
-  coordinator's own `sha256sum` both confirmed. This is the first observed
+  reported a digest that the independent read-back agent and the launching
+  session's own `sha256sum` both confirmed. This is the first observed
   agent write in this repo's probe record -- every prior probe observed
   reads only. The observation is a single instance: one path, one
   environment, a 29-byte file.

@@ -335,6 +335,106 @@ function countOf(violations, diagnostic) {
   );
 }
 
+// -- nested-parallel track membership: a same-outer-track-later reference -
+// -- through an inner parallel step still resolves cleanly ----------------
+// outer (parallel) -> track A: [ a1 (shape), inner (parallel) -> track X:
+// [ x1 (gate, predicate.step = 'A.a1') ] ]. x1 sits strictly after a1 in
+// track A's own sequence -- a legal same-track-later reference -- even
+// though x1 is additionally nested inside an inner parallel step's own
+// track X, one level deeper.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'outer',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'A',
+            steps: [
+              { id: 'a1', type: 'shape', template: {} },
+              {
+                id: 'inner',
+                type: 'parallel',
+                tracks: [
+                  {
+                    id: 'X',
+                    steps: [
+                      {
+                        id: 'x1',
+                        type: 'gate',
+                        predicate: { step: 'A.a1', field: 'x', operator: 'equals', value: 1 },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a same-outer-track-later reference through a nested inner parallel step resolves cleanly',
+    violations.length === 0
+  );
+}
+
+// -- nested-parallel track membership: a genuinely cross-track reference --
+// -- through an inner parallel step is still rejected ----------------------
+// outer (parallel) -> track A: [ inner (parallel) -> track X: [ x1 (gate,
+// predicate.step = 'B.b1') ] ], track B: [ b1 ]. x1 is nested inside track
+// A (and track X), never inside track B -- referencing track B's result
+// before the OUTER parallel's own join is still invalid, proving the fix
+// does not over-allow genuinely cross-track references.
+{
+  const spec = {
+    steps: [
+      {
+        id: 'outer',
+        type: 'parallel',
+        tracks: [
+          {
+            id: 'A',
+            steps: [
+              {
+                id: 'inner',
+                type: 'parallel',
+                tracks: [
+                  {
+                    id: 'X',
+                    steps: [
+                      {
+                        id: 'x1',
+                        type: 'gate',
+                        predicate: { step: 'B.b1', field: 'x', operator: 'equals', value: 1 },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          { id: 'B', steps: [{ id: 'b1', type: 'shape', template: {} }] },
+        ],
+      },
+    ],
+    config: {},
+  };
+  const violations = resolveReferences(spec);
+  check(
+    'a genuinely cross-track reference through a nested inner parallel step is still rejected',
+    hasViolation(
+      violations,
+      'parallel-track-reference-before-join',
+      'steps[0].tracks[0].steps[0].tracks[0].steps[0].predicate'
+    )
+  );
+}
+
 // -- {{values.PATH}} resolves against config values, not step results -----
 {
   const spec = {

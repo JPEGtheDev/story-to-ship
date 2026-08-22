@@ -89,6 +89,7 @@ Triggers to investigate -- not absolute violations.
 | Duplication ratio | Same code in 2+ locations | Duplicated Code |
 | Cyclic dependencies | Module A -> B -> A | Architectural problem |
 | Unused code paths | Code only executed in rare scenarios | Speculative Generality |
+| State carried across an unstructured jump | goto/jump whose target reads a local variable set earlier, with no comment or assert stating the dependency | Implicit State Through an Unstructured Jump |
 
 ---
 

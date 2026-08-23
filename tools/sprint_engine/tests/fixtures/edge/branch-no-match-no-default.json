@@ -1,6 +1,6 @@
 {
   "grade": "DETERMINISM-grade (deterministic replay, no live agents)",
-  "pins": "A branch step whose declared cases all fail to match, and which declares no default, halts with branch-no-match-no-default before any case or default step ever dispatches.",
+  "pins": "A branch step whose declared cases all fail to match, and which declares no default, halts with branch-no-match-no-default before any case or default step ever dispatches. config.spillDir is declared because validateSpec requires a spill directory whenever any agent step exists in the spec (including the undispatched case body), not because this fixture's halt path ever writes to it.",
   "scriptedOutputsShape": "Ordered array of objects with fields stepId and output, consumed by dispatch call order (index 0 first). This spec's only case fails to match and no default is declared, so only the upstream step ever dispatches; the branch's own case step never dispatches and so contributes no entry. Same ordered {stepId, output} array contract used by all four edge fixtures (sentinel-halt.json, uncertain-gate.json, spill-guard-violation.json, branch-no-match-no-default.json).",
   "spec": {
     "steps": [

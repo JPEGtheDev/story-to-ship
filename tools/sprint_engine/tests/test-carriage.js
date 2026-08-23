@@ -585,6 +585,132 @@ async function main() {
     check('a malformed verifyDigest declaration never dispatches anything (spend-free)', dispatch.calls.length === 0);
   }
 
+  // ======================================================================
+  // Spill-path containment: the target path this engine constructs must
+  // never escape spillDir, even when an untrusted input (a dispatch
+  // return's own field name, or a spec-authored step id) carries path
+  // syntax.
+  // ======================================================================
+
+  // -- a malicious field name in the dispatched agent's own return value --
+  // -- (untrusted producer output) halts under spill-path-unsafe, never --
+  // -- reaches a writer dispatch, and never leaks the payload -------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-UNSAFE-FIELD-';
+    const oversized = sentinel + 'x'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'report', type: 'agent' }], config: { spillDir: '/tmp/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ 'ok/../../escaped': oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an unsafe field name halts with status "failed"', outcome.status === 'failed');
+    check('an unsafe field name uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('an unsafe field name never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+    check(
+      'an unsafe field name never leaks the payload into the FULL returned outcome (status + results + trace + halt; sentinel scan)',
+      JSON.stringify(outcome).indexOf(sentinel) === -1
+    );
+  }
+
+  // -- a step id carrying path-traversal syntax halts the same way, before
+  // -- any writer dispatch, with the payload never leaked -----------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-UNSAFE-STEPID-';
+    const oversized = sentinel + 'x'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: '../../../etc/evil', type: 'agent' }], config: { spillDir: '/tmp/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ content: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an unsafe step id halts with status "failed"', outcome.status === 'failed');
+    check('an unsafe step id uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('an unsafe step id never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+    check(
+      'an unsafe step id never leaks the payload into the FULL returned outcome (status + results + trace + halt; sentinel scan)',
+      JSON.stringify(outcome).indexOf(sentinel) === -1
+    );
+  }
+
+  // ======================================================================
+  // Digest-verify halt trace safety: both digest-verify halt paths must
+  // scrub an oversized sibling field before pushing into the trace, the
+  // same way every spill-guard halt does.
+  // ======================================================================
+
+  // -- digest-verify-outcome-unparseable: the digest agent's own return is
+  // -- malformed AND carries an oversized sibling field -- the sentinel ---
+  // -- must never appear anywhere in the FULL returned outcome ------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-DIGEST-UNPARSEABLE-';
+    const oversized = sentinel + 'z'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'consume', type: 'agent', verifyDigest: { path: '/data/input.bin', sha256: HEX64_A } }], config: {} };
+    const dispatch = makeDispatch({ 'digest-verify': async () => ({ notDigest: 'nope', extra: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a malformed digest-verify return with an oversized sibling halts with status "uncertain"', outcome.status === 'uncertain');
+    check(
+      'a malformed digest-verify return with an oversized sibling uses the digest-verify-outcome-unparseable diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'digest-verify-outcome-unparseable'
+    );
+    check(
+      'a malformed digest-verify return never leaks its oversized sibling into the FULL returned outcome (sentinel scan)',
+      JSON.stringify(outcome).indexOf(sentinel) === -1
+    );
+  }
+
+  // -- digest-verify-mismatch: the digest agent returns a well-formed but -
+  // -- WRONG digest, plus an oversized sibling field -- same sentinel-free
+  // -- requirement -----------------------------------------------------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-DIGEST-MISMATCH-';
+    const oversized = sentinel + 'z'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'consume', type: 'agent', verifyDigest: { path: '/data/input.bin', sha256: HEX64_A } }], config: {} };
+    const dispatch = makeDispatch({ 'digest-verify': async () => ({ digest: HEX64_B, extra: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a mismatched digest-verify return with an oversized sibling halts with status "failed"', outcome.status === 'failed');
+    check(
+      'a mismatched digest-verify return with an oversized sibling uses the digest-verify-mismatch diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'digest-verify-mismatch'
+    );
+    check(
+      'a mismatched digest-verify return never leaks its oversized sibling into the FULL returned outcome (sentinel scan)',
+      JSON.stringify(outcome).indexOf(sentinel) === -1
+    );
+  }
+
+  // ======================================================================
+  // Untested scrub path: a malformed receipt AND an oversized sibling
+  // field reaching the SAME halt (pass 1 runs before pass 2, so this shape
+  // reaches spill-receipt-malformed with the oversized field still
+  // present in the working outcome).
+  // ======================================================================
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-MALFORMED-RECEIPT-PLUS-OVERSIZED-';
+    const oversized = sentinel + 'z'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'report', type: 'agent' }], config: {} };
+    const dispatch = makeDispatch({ agent: async () => ({ badReceipt: { spilled: true, sha256: HEX64_A, bytes: 5 }, other: oversized }) }); // badReceipt missing "path"
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a malformed receipt with an oversized sibling field halts with status "failed"', outcome.status === 'failed');
+    check(
+      'a malformed receipt with an oversized sibling field uses the spill-receipt-malformed diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'spill-receipt-malformed'
+    );
+    check(
+      'a malformed receipt with an oversized sibling field never leaks that sibling into the FULL returned outcome (sentinel scan)',
+      JSON.stringify(outcome).indexOf(sentinel) === -1
+    );
+  }
+
+  // ======================================================================
+  // Marker invariant: a scrubbed field's marker object must be
+  // non-confusable with a real spill receipt -- {spillFailed: true, bytes}
+  // present, {spilled: true, ...} shape absent.
+  // ======================================================================
+  {
+    const oversized = 'w'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const spec = { steps: [{ id: 'report', type: 'agent' }], config: {} };
+    const dispatch = makeDispatch({ agent: async () => ({ content: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    const traceEntry = outcome.trace[outcome.trace.length - 1];
+    check('a scrubbed oversized field carries the literal spillFailed marker key', traceEntry.outcome.content.spillFailed === true);
+    check('a scrubbed oversized field never carries the spilled key (non-confusable with a real receipt)', typeof traceEntry.outcome.content.spilled === 'undefined');
+  }
+
   console.log(passCount + ' passed, ' + failCount + ' failed');
   process.exit(failCount === 0 ? 0 : 1);
 }

@@ -86,9 +86,11 @@
 // is tolerated without breaking either function's own purity.
 //
 // specEngineSha256(str) is a pure hash primitive, not named in
-// SPEC_SCHEMA.md: this todo delivers only the hash function and its test
-// suite, ahead of the spill-verification caller that will use it to check
-// a large spilled output against a recorded digest. It takes one JS string
+// SPEC_SCHEMA.md. It backs the inline-spec integrity check
+// (specEngineCheckSpecIntegrity below, which hashes a spec's own canonical
+// form) and every spill-receipt/digest-verify shape check elsewhere in this
+// file that compares against a 64-char lowercase-hex digest. It takes one
+// JS string
 // and returns the lowercase hex digest of that string's UTF-8 encoding, via
 // a from-scratch SHA-256 implementation (FIPS 180-4). It is written by hand
 // rather than delegated to TextEncoder (not guaranteed to exist in every
@@ -136,6 +138,22 @@ const SPEC_ENGINE_SPILL_THRESHOLD_BYTES = 40000;
 // and the by-path digest-verify guard below so both accept and reject the
 // identical shape.
 const SPEC_ENGINE_SHA256_HEX_RE = /^[0-9a-f]{64}$/;
+// SPEC_ENGINE_SAFE_PATH_SEGMENT_RE -- the containment rule for every
+// segment of a spill target path this engine constructs: a plain
+// identifier, no '/', no '\', no '..', no empty segment. Applied to each
+// '.'-separated segment of a step's namespaced result key AND to the
+// oversized field's own name (both are untrusted -- a spec author controls
+// step ids, and a dispatched agent's own return value controls field
+// names) before that path is built and handed to the spill-writer
+// dispatch, by specEngineApplySpillGuard below. This is the tightest rule
+// consistent with every legal step id already accepted elsewhere in this
+// file (plain identifiers only; container namespacing only ever adds
+// '.'-joined plain segments, digits for map indices, and the fixed literal
+// "attempts" for scored-retry), so no existing legal spec is rejected by
+// it. SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE is the same pattern as a
+// string, reused in the halt message so the rule is stated once.
+const SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE = '/^[A-Za-z0-9_-]+$/';
+const SPEC_ENGINE_SAFE_PATH_SEGMENT_RE = /^[A-Za-z0-9_-]+$/;
 
 function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -1871,17 +1889,16 @@ function specEngineResolveGateVerdict(step, outcome, path) {
   return { verdict: 'pass', halt: null, flags: [] };
 }
 
-// specEngineScrubOversizedFieldsForTrace(outcome) -- FIX (payload leak into
-// trace on a spill-guard halt): a reviewer probe caught the ORIGINAL raw,
-// pre-guard dispatch outcome being pushed into the run's own trace array on
-// every spill-guard halt path (spill-receipt-malformed,
-// spill-guard-spilldir-unavailable, spill-writer-outcome-malformed) -- the
-// full oversized string this whole guard exists to keep out of the engine's
-// own output was landing in `outcome.trace` instead (measured: sentinel
-// found, serialized trace entry 40,443 bytes). specEngineApplySpillGuard
-// below now returns a trace-safe copy on every halted path, built by this
-// function, instead of letting its caller push the raw `outcome` closure
-// variable. Scans only top-level fields (matching the guard's own
+// specEngineScrubOversizedFieldsForTrace(outcome) -- every spill-guard halt
+// path (spill-receipt-malformed, spill-guard-spilldir-unavailable,
+// spill-writer-outcome-malformed) must push a trace-safe copy of its
+// outcome into the run's own trace, never the raw pre-guard dispatch
+// outcome: the full oversized string this whole guard exists to keep out
+// of the engine's own output must never land in `outcome.trace`.
+// specEngineApplySpillGuard below returns this trace-safe copy, built by
+// this function, on every halted path, instead of letting its caller push
+// the raw `outcome` closure variable. Scans only top-level fields (matching
+// the guard's own
 // non-recursive scope, per the guard's own "never receipt sub-fields" scan-
 // scope exclusion): any
 // STRING field whose UTF-8 byte length (specEngineUtf8Encode, the same
@@ -2015,7 +2032,16 @@ async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spil
   // Pass 1 (producer-pointer recording): malformed-receipt detection, over
   // every field, before any writer dispatch -- a malformed receipt is a
   // producer bug that must never be silently accepted or papered over by
-  // pass 2 below.
+  // pass 2 below. DISCLOSED, OWNER-REVERSIBLE: this pass records a
+  // producer-supplied receipt's own `path` as opaque data -- it never
+  // builds a filesystem path from it and never passes it to a dispatch
+  // this engine issues. Pass 2's own containment guard (below) therefore
+  // does not apply here: there is no engine-constructed path in this pass
+  // for an unsafe segment to corrupt. A receipt's `path` is not otherwise
+  // validated for shape here beyond non-empty-string (see the `problems`
+  // check below); a spec/producer that hands a later step a bogus path via
+  // a receipt is a contract violation the CONSUMER of that pointer is
+  // responsible for handling, not this engine.
   for (let i = 0; i < fieldNames.length; i += 1) {
     const field = fieldNames[i];
     const value = outcome[field];
@@ -2088,19 +2114,64 @@ async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spil
       };
     }
 
-    // FIX (spill-path collision): the target path and the writer step's own
-    // id are built from `namespacedKey` -- the FULL namespaced result key
-    // this field's step will eventually be recorded under (identical to
-    // `stepId` at the top level, per specEngineApplySpillGuard's own header
-    // comment; the caller resolves it via namespaceKeyFor, see
-    // specEngineExecuteSequence below) -- NEVER the bare, possibly-repeated
-    // `stepId`. Two parallel tracks (or two map iterations) that both
-    // happen to declare a step called "inner" now spill to
-    // "<spillDir>/t1.inner.<field>" and "<spillDir>/t2.inner.<field>"
-    // (or "<spillDir>/mp.0.inner.<field>" / "<spillDir>/mp.1.inner.<field>")
-    // respectively, never to the SAME path -- see SPEC_SCHEMA.md's own
-    // "Producer-side spill" paragraph for the clarifying sentence added
-    // alongside this fix.
+    // The target path and the writer step's own id are built from
+    // `namespacedKey` -- the FULL namespaced result key this field's step
+    // will eventually be recorded under (identical to `stepId` at the top
+    // level, per specEngineApplySpillGuard's own header comment; the caller
+    // resolves it via namespaceKeyFor, see specEngineExecuteSequence below)
+    // -- NEVER the bare, possibly-repeated `stepId`. Two parallel tracks (or
+    // two map iterations) that both happen to declare a step called "inner"
+    // spill to "<spillDir>/t1.inner.<field>" and
+    // "<spillDir>/t2.inner.<field>" (or "<spillDir>/mp.0.inner.<field>" /
+    // "<spillDir>/mp.1.inner.<field>") respectively, never to the SAME path
+    // -- see SPEC_SCHEMA.md's own "Producer-side spill" paragraph.
+    //
+    // Containment guard: `namespacedKey` and `field` are both untrusted
+    // inputs by construction -- `field` comes from Object.keys of the
+    // dispatched agent's own return value (an untrusted producer, not
+    // engine-controlled data), and `namespacedKey` is built by composing
+    // step ids, which a spec author also controls. Neither is validated
+    // against a filesystem-safe charset anywhere upstream of this point.
+    // Without a check here, a field or step id carrying '/', '\', or a '..'
+    // path segment lets the constructed target path escape `spillDir`
+    // entirely (e.g. a step id of "../../../etc/evil" or a field name of
+    // "ok/../../escaped"), and this engine module both constructs that path
+    // and hands it to the writer dispatch -- so containment is this
+    // engine's own guarantee to make, not the writer-agent's. The exact
+    // rule enforced: every '.'-separated segment of `namespacedKey`, and
+    // `field` itself, must match /^[A-Za-z0-9_-]+$/ -- no '/', no '\', no
+    // '..', no empty segment. This is the tightest rule consistent with
+    // every legal step id already accepted elsewhere in this file (step ids
+    // are always plain identifiers; container namespacing only ever adds
+    // '.'-joined plain segments, digits for map indices, and the fixed
+    // literal "attempts" for scored-retry). A violation halts under
+    // 'spill-path-unsafe', scrubbed like every other spill-guard halt,
+    // before any writer dispatch.
+    const keySegments = namespacedKey.split('.');
+    const unsafeSegment = keySegments.concat([field]).find(function (segment) {
+      return !SPEC_ENGINE_SAFE_PATH_SEGMENT_RE.test(segment);
+    });
+    if (typeof unsafeSegment !== 'undefined') {
+      return {
+        halted: true,
+        status: 'failed',
+        halt: specEngineMakeHalt(
+          path + '.' + field,
+          'spill-path-unsafe',
+          'Agent step "' +
+            stepId +
+            '" field "' +
+            field +
+            '" would spill to a path built from an unsafe segment ("' +
+            unsafeSegment +
+            '"); every namespaced-key segment and the field name must match ' +
+            SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE +
+            ' -- refusing to construct the target path.'
+        ),
+        safeOutcomeForTrace: specEngineScrubOversizedFieldsForTrace(workingOutcome),
+      };
+    }
+
     const targetPath = spillDir + '/' + namespacedKey + '.' + field;
     const writerStep = { id: namespacedKey + '.' + field + '.spill-writer', type: 'spill-writer', path: targetPath, prompt: value };
     const writerOutcome = await dispatch(writerStep, { results: {}, values: values });
@@ -2430,7 +2501,11 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
         const digestWellFormed = specEngineIsPlainObject(digestOutcome) && typeof digestOutcome.digest === 'string' && SPEC_ENGINE_SHA256_HEX_RE.test(digestOutcome.digest);
 
         if (!digestWellFormed) {
-          trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: digestOutcome, flags: [] });
+          // Scrub before pushing, the same way every spill-guard halt does
+          // (specEngineScrubOversizedFieldsForTrace above): digestOutcome is
+          // an untrusted dispatch return value and can carry an oversized
+          // field alongside its malformed `digest`.
+          trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: specEngineScrubOversizedFieldsForTrace(digestOutcome), flags: [] });
           return {
             status: 'uncertain',
             halt: specEngineMakeHalt(
@@ -2442,7 +2517,9 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
         }
 
         if (digestOutcome.digest !== declared.sha256) {
-          trace.push({ step: stepId, kind: type, status: 'failed', outcome: digestOutcome, flags: [] });
+          // Scrub here too -- digestOutcome can carry an oversized sibling
+          // field even when its own `digest` field is well-formed.
+          trace.push({ step: stepId, kind: type, status: 'failed', outcome: specEngineScrubOversizedFieldsForTrace(digestOutcome), flags: [] });
           return {
             status: 'failed',
             halt: specEngineMakeHalt(
@@ -2484,11 +2561,11 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
         const namespacedKey = namespaceKeyFor(stepId);
         const spillGuardOutcome = await specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path, namespacedKey);
         if (spillGuardOutcome.halted) {
-          // FIX (payload leak into trace): push the guard's own trace-safe
-          // scrub (see specEngineScrubOversizedFieldsForTrace above), never
-          // the raw pre-guard `outcome` -- that closure variable can still
-          // carry the full oversized string this whole guard exists to keep
-          // out of the engine's own output.
+          // Push the guard's own trace-safe scrub (see
+          // specEngineScrubOversizedFieldsForTrace above), never the raw
+          // pre-guard `outcome` -- that closure variable can still carry the
+          // full oversized string this whole guard exists to keep out of
+          // the engine's own output.
           trace.push({ step: stepId, kind: type, status: spillGuardOutcome.status, outcome: spillGuardOutcome.safeOutcomeForTrace, flags: [] });
           return { status: spillGuardOutcome.status, halt: spillGuardOutcome.halt };
         }
@@ -2576,12 +2653,12 @@ async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseR
   const localTrace = [];
   const trackPath = parentPath + '.tracks[' + trackIndex + '].steps';
 
-  // FIX (spill-path collision): compose a namespaceKeyFor for this track's
-  // own steps -- `<trackId>.<bareId>`, run through the OUTER namespaceKeyFor
-  // this function was handed (so a track nested inside further containers
-  // still gets the full composed key, e.g. "<outerPrefix>.<trackId>.<id>").
-  // This is what makes two tracks that both declare a step called "inner"
-  // spill to two DIFFERENT paths instead of colliding on the same file.
+  // Compose a namespaceKeyFor for this track's own steps --
+  // `<trackId>.<bareId>`, run through the OUTER namespaceKeyFor this
+  // function was handed (so a track nested inside further containers still
+  // gets the full composed key, e.g. "<outerPrefix>.<trackId>.<id>"). This
+  // is what makes two tracks that both declare a step called "inner" spill
+  // to two DIFFERENT paths instead of colliding on the same file.
   const trackNamespaceKeyFor = function (bareId) {
     return namespaceKeyFor(track.id + '.' + bareId);
   };
@@ -2787,10 +2864,10 @@ async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, v
   const localTrace = [];
   const itemPath = parentPath + '.items[' + index + '].steps';
 
-  // FIX (spill-path collision): `namespaceKeyFor` here is already fully
-  // composed by the caller (specEngineExecuteMapStep, which owns both the
-  // map step's own id and this iteration's own index) -- forwarded
-  // unchanged, the same way `spillDir` already is.
+  // `namespaceKeyFor` here is already fully composed by the caller
+  // (specEngineExecuteMapStep, which owns both the map step's own id and
+  // this iteration's own index) -- forwarded unchanged, the same way
+  // `spillDir` already is.
   const seqOutcome = await specEngineExecuteSequence(bodySteps, dispatch, values, seedResults, localTrace, itemPath, spillDir, namespaceKeyFor);
 
   const ownResults = {};
@@ -2993,14 +3070,14 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
   const onlyStepId = bodyStepCount === 1 && specEngineIsPlainObject(step.steps[0]) ? step.steps[0].id : null;
 
   for (let index = 0; index < listValue.length; index += 1) {
-    // FIX (spill-path collision): compose this iteration's own
-    // namespaceKeyFor -- "<mapId>.<index>.<bareId>", run through the OUTER
-    // namespaceKeyFor -- so two iterations of the same map body, both
-    // declaring a step called "inner", spill to two DIFFERENT paths
-    // ("<spillDir>/mp.0.inner.<field>" vs "<spillDir>/mp.1.inner.<field>"),
-    // each embedding its own iteration index. `index` is a `let` binding
-    // scoped fresh per for-loop iteration, so this closure correctly
-    // captures THIS iteration's own value, not the loop's final one.
+    // Compose this iteration's own namespaceKeyFor --
+    // "<mapId>.<index>.<bareId>", run through the OUTER namespaceKeyFor --
+    // so two iterations of the same map body, both declaring a step called
+    // "inner", spill to two DIFFERENT paths ("<spillDir>/mp.0.inner.<field>"
+    // vs "<spillDir>/mp.1.inner.<field>"), each embedding its own iteration
+    // index. `index` is a `let` binding scoped fresh per for-loop iteration,
+    // so this closure correctly captures THIS iteration's own value, not
+    // the loop's final one.
     const iterationNamespaceKeyFor = function (bareId) {
       return namespaceKeyFor(step.id + '.' + index + '.' + bareId);
     };
@@ -3330,25 +3407,24 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     const seedKeys = Object.keys(seedResults);
     const attemptLocalTrace = [];
 
-    // FIX (spill-path collision): compose this attempt's own
-    // namespaceKeyFor. The wrapped step's OWN bare id (wrappedStepId) is
-    // discarded here, not appended -- the namespacing grammar records the
-    // wrapped step's WHOLE result directly at the plain
-    // `<retryId>.attempts.<n>` key ("namespacedResults[step.id + '.attempts.'
-    // + n] = attemptResult", below), never at a further
-    // `<retryId>.attempts.<n>.<wrappedStepId>` sub-key -- so when this
-    // attempt's own leaf dispatch asks for ITS namespaced key (the common
-    // case: a plain agent/gate/shape wrapped step), the answer is exactly
-    // `<retryId>.attempts.<n>`, matching where its result actually lands.
-    // A wrapped step that is ITSELF a container (nested parallel/map/etc.)
-    // is a narrower case: this file's own pre-existing scored-retry
-    // handling only ever propagates `ownResults[wrappedStepId]` (see
-    // `attemptResult` below) into the outer results map, so any deeper
+    // Compose this attempt's own namespaceKeyFor. The wrapped step's OWN
+    // bare id (wrappedStepId) is discarded here, not appended -- the
+    // namespacing grammar records the wrapped step's WHOLE result directly
+    // at the plain `<retryId>.attempts.<n>` key
+    // ("namespacedResults[step.id + '.attempts.' + n] = attemptResult",
+    // below), never at a further `<retryId>.attempts.<n>.<wrappedStepId>`
+    // sub-key -- so when this attempt's own leaf dispatch asks for ITS
+    // namespaced key (the common case: a plain agent/gate/shape wrapped
+    // step), the answer is exactly `<retryId>.attempts.<n>`, matching where
+    // its result actually lands. A wrapped step that is ITSELF a container
+    // (nested parallel/map/etc.) is a narrower case: this file's own
+    // scored-retry handling only ever propagates `ownResults[wrappedStepId]`
+    // (see `attemptResult` below) into the outer results map, so any deeper
     // namespaced sub-key a nested container would produce is already
-    // dropped before it reaches the run's own results -- not a new gap this
-    // fix introduces. For that narrower, already-unreachable case this
-    // still avoids colliding with the attempt's own winner key by
-    // appending the sub-key rather than discarding it outright.
+    // dropped before it reaches the run's own results. For that narrower,
+    // already-unreachable case this still avoids colliding with the
+    // attempt's own winner key by appending the sub-key rather than
+    // discarding it outright.
     const attemptNamespaceKeyFor = function (bareId) {
       const attemptKey = step.id + '.attempts.' + n;
       return namespaceKeyFor(bareId === wrappedStepId ? attemptKey : attemptKey + '.' + bareId);
@@ -3738,11 +3814,10 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
   const localTrace = [];
   const selectedPath = path + '.' + selectedLabel + '.steps';
 
-  // FIX (spill-path collision): compose this branch's own namespaceKeyFor
-  // -- "<branchId>.<bareId>" -- the same pattern a track's own composition
-  // uses, since a branch step's nested steps namespace identically
-  // (`<branchId>.<stepId>`, per the "Result-key namespacing grammar"
-  // section's own branch-step bullet).
+  // Compose this branch's own namespaceKeyFor -- "<branchId>.<bareId>" --
+  // the same pattern a track's own composition uses, since a branch step's
+  // nested steps namespace identically (`<branchId>.<stepId>`, per the
+  // "Result-key namespacing grammar" section's own branch-step bullet).
   const branchNamespaceKeyFor = function (bareId) {
     return namespaceKeyFor(step.id + '.' + bareId);
   };
@@ -3789,25 +3864,22 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
 // own caller elsewhere, never routed through this function) -- so this
 // parsing step lives here, at specEngineExecute's own entry, not as a
 // shared primitive the other two static passes also call through.
-// Returns { halted: false, spec: <object>, rawString: <string|null> } on
-// success (rawString is the exact string received, kept on the return
-// shape for a caller/test that wants to know which arrival form this was,
-// though specEngineExecute's own inline-spec integrity check below does NOT
-// read it -- see specEngineCheckSpecIntegrity's own header comment for why that
-// check canonicalizes via JSON.stringify instead, identically for both
-// arrival forms; rawString is null when the caller already passed an
-// object), or a halt object (see specEngineMakeHalt) under the
-// 'spec-json-unparseable' diagnostic when a string input is not valid
-// JSON. An object input passes through completely unchanged (not even
-// re-serialized), so this function never masks a downstream
-// spec-not-object diagnostic behind a parsing step that already assumed a
-// particular shape.
+// Returns { halted: false, spec: <object> } on success, or a halt object
+// (see specEngineMakeHalt) under the 'spec-json-unparseable' diagnostic
+// when a string input is not valid JSON. An object input passes through
+// completely unchanged (not even re-serialized), so this function never
+// masks a downstream spec-not-object diagnostic behind a parsing step that
+// already assumed a particular shape. specEngineExecute's own inline-spec
+// integrity check (specEngineCheckSpecIntegrity below) canonicalizes via
+// JSON.stringify of the already-parsed spec, identically for both string-
+// and object-arrival forms, so this function has no need to also hand back
+// the original raw string.
 function specEngineParseSpecInput(spec) {
   if (typeof spec !== 'string') {
-    return { halted: false, spec: spec, rawString: null };
+    return { halted: false, spec: spec };
   }
   try {
-    return { halted: false, spec: JSON.parse(spec), rawString: spec };
+    return { halted: false, spec: JSON.parse(spec) };
   } catch (err) {
     return {
       halted: true,
@@ -3852,38 +3924,36 @@ function specEngineCanonicalizeSpecForIntegrity(parsedSpec) {
 }
 
 // specEngineCheckSpecIntegrity(parsedSpec) -- DISCLOSED, OWNER-REVERSIBLE
-// (gap-fill, inline-spec integrity): config.expectedSha256 is OPTIONAL and named nowhere in
-// SPEC_SCHEMA.md before this todo (see the "Inline-spec integrity" addition
-// to that document's field-optionality table, landed alongside this
-// function). When present, it is checked BEFORE any structural validation
-// below -- an integrity mismatch is its own, distinct failure mode, never
-// masked by (or racing) a spec-not-object / steps-not-array diagnostic.
+// (gap-fill, inline-spec integrity): config.expectedSha256 is OPTIONAL, and
+// is named in SPEC_SCHEMA.md's field-optionality table under the
+// "Inline-spec integrity" addition. When present, it is checked BEFORE any
+// structural validation below -- an integrity mismatch is its own, distinct
+// failure mode, never masked by (or racing) a spec-not-object /
+// steps-not-array diagnostic.
 //
-// CANONICAL-FORM RULING -- REVISED FROM THIS TODO'S OWN FIRST DRAFT,
-// disclosed here because the correction itself is load-bearing: the
-// literal reading "hash the exact raw string as received, including
-// config.expectedSha256's own text" was tried first and rejected once its
-// consequence became clear -- under that reading, the value written into
-// expectedSha256 is PART OF the very string being hashed to check it, so a
-// "match" requires expectedSha256 to equal the sha256 of a string that
-// contains that exact expectedSha256 value as a substring: a hash
-// preimage-of-itself. SHA-256's own preimage resistance (the property that
-// makes it a useful hash at all) makes that fixed point practically
-// unconstructible by any real caller or by this function's own test suite
-// -- the "matching digest runs" case this todo requires test coverage for
-// would be permanently unreachable, which fails the contract's own
-// "never-guess" idiom in a different way: a check that can never honestly
-// pass is not a meaningful gate, it is a decoration. This function instead
-// hashes a CANONICAL form that excludes expectedSha256 itself from what is
-// hashed (specEngineCanonicalizeSpecForIntegrity above), the same
-// self-exclusion idiom every other real content-addressed integrity format
-// uses for the same structural reason (a git tree object's own hash is
-// computed over its content, not over itself; a signed JSON Web Token
-// (JWT)'s signature covers the payload, not the signature field). This is
-// computed IDENTICALLY whether the spec arrived as a raw string (then
-// parsed, per the spec-input-forms parsing step above) or as an
-// already-parsed object -- the "object-form" fork this todo
-// asks to be decided and disclosed is resolved by NOT forking: both paths
+// CANONICAL-FORM RULING, disclosed here because the reasoning is
+// load-bearing: the literal reading "hash the exact raw string as
+// received, including config.expectedSha256's own text" is REJECTED --
+// under that reading, the value written into expectedSha256 is PART OF the
+// very string being hashed to check it, so a "match" requires
+// expectedSha256 to equal the sha256 of a string that contains that exact
+// expectedSha256 value as a substring: a hash preimage-of-itself. SHA-256's
+// own preimage resistance (the property that makes it a useful hash at
+// all) makes that fixed point practically unconstructible by any real
+// caller or by this function's own test suite -- the "matching digest
+// runs" case would be permanently unreachable, which fails the contract's
+// own "never-guess" idiom in a different way: a check that can never
+// honestly pass is not a meaningful gate, it is a decoration. This
+// function instead hashes a CANONICAL form that excludes expectedSha256
+// itself from what is hashed (specEngineCanonicalizeSpecForIntegrity
+// above), the same self-exclusion idiom every other real content-addressed
+// integrity format uses for the same structural reason (a git tree
+// object's own hash is computed over its content, not over itself; a
+// signed JSON Web Token (JWT)'s signature covers the payload, not the
+// signature field). This is computed IDENTICALLY whether the spec arrived
+// as a raw string (then parsed, per the spec-input-forms parsing step
+// above) or as an already-parsed object -- the "object-form" fork is
+// resolved by NOT forking: both paths
 // canonicalize via JSON.stringify(parsedSpec-minus-expectedSha256) the same
 // way, rather than rejecting the object-form path outright, since once the
 // self-referential field is excluded there is no remaining reason the two
@@ -3961,10 +4031,9 @@ async function specEngineExecute(spec, dispatch) {
   const results = {};
   const trace = [];
 
-  // FIX (spill-path collision): top-level namespaceKeyFor is the identity
-  // function -- a top-level step's namespaced result key IS its own bare
-  // id, unchanged from before this fix, so every EXISTING top-level fixture
-  // still spills to "<spillDir>/<stepId>.<field>" exactly as it always has.
+  // Top-level namespaceKeyFor is the identity function -- a top-level
+  // step's namespaced result key IS its own bare id, so a top-level step
+  // always spills to "<spillDir>/<stepId>.<field>".
   const topLevelNamespaceKeyFor = function (bareId) {
     return bareId;
   };

@@ -4326,7 +4326,7 @@ if (specEngineIsPlainObject(specInput)) {
   let parsedSpecInputForModel;
   try {
     parsedSpecInputForModel = JSON.parse(specInput);
-  } catch (e) {
+  } catch (err) {
     parsedSpecInputForModel = undefined;
   }
   runDefaultModel =

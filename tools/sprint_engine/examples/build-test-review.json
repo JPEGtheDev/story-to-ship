@@ -195,6 +195,7 @@
   ],
   "config": {
     "spillDir": "/tmp/sprint-engine-examples/build-test-review-spill",
-    "expectedSha256": "82a7fdca1ec77f2dac177d1236950326bcd0f096907d24c4cef37fdafe1e7d2a"
+    "model": "sonnet",
+    "expectedSha256": "b5e36a765f9566c2584690176cbeb11245b8896ab3c723746e7126feb2ebb265"
   }
 }

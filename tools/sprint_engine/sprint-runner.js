@@ -4209,6 +4209,33 @@ function specEngineSha256(str) {
 // own `path` field (below) always arrives with spillDir already baked in,
 // built by the engine as `<spillDir>/<namespacedKey>.<field>`.
 //
+// model: SPEC_SCHEMA.md documents an optional `model` field on agent/gate
+// steps and an optional run-wide `config.model` default (step overrides
+// config; both absent means inherit the invoking session's model, today's
+// behavior, unchanged). specEngineRenderStepForDispatch (in the region
+// above) copies every step field into the dispatch envelope, so a step's
+// own `model` already reaches sprintRunnerDispatch below with no glue
+// changes needed to carry it. The run default lives at spec.config.model,
+// which the dispatch context argument does not carry (only
+// `{results, values}`), so it is read once below, near `const specInput =
+// args`, straight from the raw workflow args instead. This glue never
+// validates a model value either way -- pass-through only; an unrecognized
+// model string fails loudly at the runtime's own agent() call, not here.
+// An engine-synthesized envelope (spill-writer, digest-verify) carries no
+// step.model of its own, so it always falls through to the run default.
+//
+// sprintRunnerAgentOpts(step, effectiveModel, schema) builds the opts
+// object every agent() call below passes, so the `model` -> opts.model
+// wiring and its omit-when-unset behavior live in one place instead of
+// three near-identical copies across the three call arms below.
+function sprintRunnerAgentOpts(step, effectiveModel, schema) {
+  const opts = { label: step.id, phase: 'Run', schema: schema };
+  if (typeof effectiveModel !== 'undefined') {
+    opts.model = effectiveModel;
+  }
+  return opts;
+}
+
 // sprintRunnerDispatch(step, context) is the `dispatch(step, context) ->
 // outcome` function specEngineExecute's own header comment (in the region
 // above) requires: an async function called once per step, mapping every
@@ -4231,7 +4258,15 @@ function specEngineSha256(str) {
 // addition introduces, rather than guessing at a new contract it was never
 // told about.
 async function sprintRunnerDispatch(step, context) {
-  log('dispatch: ' + step.id + ' (' + step.type + ')');
+  const effectiveModel = typeof step.model === 'string' ? step.model : runDefaultModel;
+  log(
+    'dispatch: ' +
+      step.id +
+      ' (' +
+      step.type +
+      ')' +
+      (typeof effectiveModel !== 'undefined' ? ' [' + effectiveModel + ']' : '')
+  );
 
   if (step.type === 'spill-writer') {
     const schema = {
@@ -4252,7 +4287,7 @@ async function sprintRunnerDispatch(step, context) {
       '---CONTENT-BEGIN---\n' +
       step.prompt +
       '\n---CONTENT-END---';
-    return agent(prompt, { label: step.id, phase: 'Run', schema: schema });
+    return agent(prompt, sprintRunnerAgentOpts(step, effectiveModel, schema));
   }
 
   if (step.type === 'digest-verify') {
@@ -4263,16 +4298,39 @@ async function sprintRunnerDispatch(step, context) {
       additionalProperties: false,
     };
     const prompt = 'Compute the sha256 digest of the file at the absolute path "' + step.path + '". Return {digest: the 64-character lowercase-hex digest}.';
-    return agent(prompt, { label: step.id, phase: 'Run', schema: schema });
+    return agent(prompt, sprintRunnerAgentOpts(step, effectiveModel, schema));
   }
 
   const schema =
     specEngineIsPlainObject(step.outputSchema) && specEngineIsPlainObject(step.outputSchema.properties)
       ? { type: 'object', properties: step.outputSchema.properties }
       : undefined;
-  return agent(step.prompt, { label: step.id, phase: 'Run', schema: schema });
+  return agent(step.prompt, sprintRunnerAgentOpts(step, effectiveModel, schema));
 }
 
 const specInput = args;
+// runDefaultModel: config.model, read once here (see the "model" comment
+// above). args can arrive as an already-parsed object or as the spec's own
+// raw JSON string (a measured platform fact -- the engine parses its own
+// copy internally, independent of this read), so both shapes are read
+// defensively; a parse failure on the string shape is swallowed into
+// `undefined` here rather than thrown -- an actually-malformed spec is
+// surfaced loudly by the engine's own validation/dispatch, not by this
+// glue's own defaulting read.
+let runDefaultModel;
+if (specEngineIsPlainObject(specInput)) {
+  runDefaultModel = specEngineIsPlainObject(specInput.config) ? specInput.config.model : undefined;
+} else if (typeof specInput === 'string') {
+  let parsedSpecInputForModel;
+  try {
+    parsedSpecInputForModel = JSON.parse(specInput);
+  } catch (e) {
+    parsedSpecInputForModel = undefined;
+  }
+  runDefaultModel =
+    specEngineIsPlainObject(parsedSpecInputForModel) && specEngineIsPlainObject(parsedSpecInputForModel.config)
+      ? parsedSpecInputForModel.config.model
+      : undefined;
+}
 const runOutcome = await specEngineExecute(specInput, sprintRunnerDispatch);
 return runOutcome;

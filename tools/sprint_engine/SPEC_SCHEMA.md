@@ -331,14 +331,18 @@ same file: a step called `inner` in track `t1` spills to
 `<spillDir>/t1.inner.<field>`, and the same-named step in track `t2` spills
 to `<spillDir>/t2.inner.<field>`.
 
-**Spill-path containment.** Names that participate in a spill path -- step
-ids on spilling steps, and outcome field names -- must not contain `.`,
-`/`, or `\`, and must be non-empty. A violation halts under
+**Spill-path containment.** Names that participate in a spill path -- every
+step id at any level (including a map, branch, or scored-retry step's own
+id, which composes into the namespaced key the same way a track id does),
+each parallel track's own id, and outcome field names -- must not contain
+`.`, `/`, or `\`, and must be non-empty. A violation halts under
 `spill-path-unsafe` before any writer dispatch. This is the first
 execute-time restriction on an author-controlled name: every other
 character legal to the validator (spaces, colons, parentheses, non-ASCII
-characters, and so on) remains legal in a step id, including one that
-spills.
+characters, and so on) remains legal in a step or track id, including one
+that spills. Engine-generated segments -- a map iteration's numeric index,
+and the literal `attempts` and attempt number a scored-retry step composes
+-- are never author-controlled and always pass this rule.
 
 **Pointer sub-fields are first-class referents.** Once a field has spilled,
 its receipt's own sub-fields are legal things to reference in a later

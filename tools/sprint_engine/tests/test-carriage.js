@@ -460,7 +460,13 @@ async function main() {
   }
 
   // -- two parallel tracks with a SAME-NAMED step ("inner") spill to two --
-  // -- DIFFERENT, trackId-qualified paths -- never the same file ----------
+  // -- DIFFERENT, trackId-qualified paths -- never the same file; a THIRD -
+  // -- track whose own id is unsafe halts, CONTAINED to that track alone --
+  // -- (engine-core.js:1606-1613's own design: a track-internal halt never
+  // -- propagates to the whole run's status, so the run-level status
+  // -- assertion alone cannot detect a regression here -- the track's own
+  // -- status/diagnostic in the parallel trace is the property that
+  // -- actually proves containment) ----------------------------------------
   {
     const oversized = 'y'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
     const spec = {
@@ -471,6 +477,7 @@ async function main() {
           tracks: [
             { id: 't1', steps: [{ id: 'inner', type: 'agent' }] },
             { id: 't2', steps: [{ id: 'inner', type: 'agent' }] },
+            { id: 'bad.track', steps: [{ id: 'inner', type: 'agent' }] },
           ],
         },
       ],
@@ -481,10 +488,35 @@ async function main() {
       'spill-writer': async (step) => ({ written: true, path: step.path, sha256: HEX64_A, bytes: oversized.length }),
     });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('the run with two same-named tracked steps still completes', outcome.status === 'completed');
-    check("track t1's own \"inner\" step spills under a trackId-qualified path", outcome.results['t1.inner'].content.path === '/spill/t1.inner.content');
-    check("track t2's own \"inner\" step spills under a trackId-qualified path", outcome.results['t2.inner'].content.path === '/spill/t2.inner.content');
-    check('the two tracks\' same-named steps spill to DIFFERENT paths, never the same file', outcome.results['t1.inner'].content.path !== outcome.results['t2.inner'].content.path);
+    check('the run with two same-named tracked steps (plus a third, unsafe-id track) still completes overall', outcome.status === 'completed');
+    check(
+      "track t1's own \"inner\" step spills under a trackId-qualified path",
+      typeof outcome.results['t1.inner'] !== 'undefined' && outcome.results['t1.inner'].content.path === '/spill/t1.inner.content'
+    );
+    check(
+      "track t2's own \"inner\" step spills under a trackId-qualified path",
+      typeof outcome.results['t2.inner'] !== 'undefined' && outcome.results['t2.inner'].content.path === '/spill/t2.inner.content'
+    );
+    check(
+      "the two tracks' same-named steps spill to DIFFERENT paths, never the same file",
+      typeof outcome.results['t1.inner'] !== 'undefined' &&
+        typeof outcome.results['t2.inner'] !== 'undefined' &&
+        outcome.results['t1.inner'].content.path !== outcome.results['t2.inner'].content.path
+    );
+    const trackSummaries = outcome.trace[0].tracks;
+    const badTrackSummary = trackSummaries.filter(function (t) {
+      return t.trackId === 'bad.track';
+    })[0];
+    check("the unsafe track id's own track status is \"failed\", CONTAINED to that track alone", typeof badTrackSummary !== 'undefined' && badTrackSummary.status === 'failed');
+    check(
+      "the unsafe track id's own track halts under the spill-path-unsafe diagnostic",
+      typeof badTrackSummary !== 'undefined' && badTrackSummary.halt !== null && badTrackSummary.halt.diagnostic === 'spill-path-unsafe'
+    );
+    check("the unsafe track id's own step never lands in the results map (contained, never merged)", typeof outcome.results['bad.track.inner'] === 'undefined');
+    check(
+      "the parallel step's own aggregate counts the contained track failure without miscounting it as a success",
+      outcome.results.par1.failures === 1 && outcome.results.par1.successes === 2
+    );
   }
 
   // -- a 2-item map body reusing the same step id per iteration spills to -
@@ -668,9 +700,30 @@ async function main() {
     // The genuinely-composed pair (track "a" containing step "b") joins to
     // the IDENTICAL path "/spill/a.b.content" -- and must still spill
     // normally, proving the guard tells the two apart by validating RAW
-    // segments before any join, not the already-joined string.
+    // segments before any join, not the already-joined string. A second
+    // step in the SAME track, "c.d", carries a raw id that itself
+    // contains a dot -- proving the same rule applies to a step id nested
+    // inside a track, CONTAINED to that track alone: step "b" (which
+    // already completed) keeps its own result, the track's own status/
+    // diagnostic in the parallel trace reads "failed"/spill-path-unsafe,
+    // and the whole run still completes (a track-internal halt never
+    // propagates to the run's own status -- engine-core.js:1606-1613).
     const specComposed = {
-      steps: [{ id: 'par', type: 'parallel', tracks: [{ id: 'a', steps: [{ id: 'b', type: 'agent' }] }] }],
+      steps: [
+        {
+          id: 'par',
+          type: 'parallel',
+          tracks: [
+            {
+              id: 'a',
+              steps: [
+                { id: 'b', type: 'agent' },
+                { id: 'c.d', type: 'agent' },
+              ],
+            },
+          ],
+        },
+      ],
       config: { spillDir: '/spill' },
     };
     const dispatchComposed = makeDispatch({
@@ -678,11 +731,27 @@ async function main() {
       'spill-writer': async (step) => ({ written: true, path: step.path, sha256: HEX64_A, bytes: oversized.length }),
     });
     const outcomeComposed = await specEngineExecute(specComposed, dispatchComposed);
-    check('track "a" containing step "b" still completes', outcomeComposed.status === 'completed');
     check(
-      'track "a" containing step "b" spills to the SAME joined path a dotted top-level id would otherwise produce',
-      outcomeComposed.results['a.b'].content.path === '/spill/a.b.content'
+      'track "a" containing step "b" (plus a later, unsafe-id step "c.d" in the SAME track) still completes overall',
+      outcomeComposed.status === 'completed'
     );
+    check(
+      'track "a" containing step "b" spills to the SAME joined path a dotted top-level id would otherwise produce (the earlier, already-completed step keeps its own result)',
+      typeof outcomeComposed.results['a.b'] !== 'undefined' && outcomeComposed.results['a.b'].content.path === '/spill/a.b.content'
+    );
+    const composedTrackSummaries = outcomeComposed.trace[0].tracks;
+    const trackASummary = composedTrackSummaries.filter(function (t) {
+      return t.trackId === 'a';
+    })[0];
+    check(
+      'the dotted step id nested in the track is caught: the track\'s own status is "failed", CONTAINED to that track alone',
+      typeof trackASummary !== 'undefined' && trackASummary.status === 'failed'
+    );
+    check(
+      'the dotted step id nested in the track halts under the spill-path-unsafe diagnostic',
+      typeof trackASummary !== 'undefined' && trackASummary.halt !== null && trackASummary.halt.diagnostic === 'spill-path-unsafe'
+    );
+    check("the dotted step id's own field never lands in the results map (contained, never merged)", typeof outcomeComposed.results['a.c.d'] === 'undefined');
   }
 
   // -- a dotted FIELD name (from a dispatched agent's own return value) ---
@@ -697,6 +766,66 @@ async function main() {
     check('a dotted field name uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
     check('a dotted field name never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
     check('a dotted field name never leaks the payload into the FULL returned outcome (sentinel scan)', JSON.stringify(outcome).indexOf(sentinel) === -1);
+  }
+
+  // ======================================================================
+  // Denylist arm isolation: every existing backslash fixture above also
+  // contains a dot, so the dot arm alone is enough to halt them -- it
+  // masks whether the backslash arm and the empty-segment arm are
+  // independently enforced. These fixtures use DOT-FREE vectors so each
+  // arm is exercised on its own.
+  // ======================================================================
+
+  // -- a dot-free backslash-containing step id halts on its own ----------
+  {
+    const oversized = 'k'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const spec = { steps: [{ id: 'C:\\spill\\sub\\evil', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ content: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a dot-free backslash-containing step id halts with status "failed"', outcome.status === 'failed');
+    check('a dot-free backslash-containing step id uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('a dot-free backslash-containing step id never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+  }
+
+  // -- a dot-free backslash-containing FIELD name halts on its own, never -
+  // -- leaking the payload -------------------------------------------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-BACKSLASH-FIELD-';
+    const oversized = sentinel + 'x'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'report', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ 'ok\\escaped': oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a dot-free backslash-containing field name halts with status "failed"', outcome.status === 'failed');
+    check('a dot-free backslash-containing field name uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('a dot-free backslash-containing field name never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+    check('a dot-free backslash-containing field name never leaks the payload into the FULL returned outcome (sentinel scan)', JSON.stringify(outcome).indexOf(sentinel) === -1);
+  }
+
+  // -- an empty-string FIELD name halts on its own (the empty-segment -----
+  // -- arm), rather than spilling to "<spillDir>/<stepId>." ---------------
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-EMPTY-FIELD-';
+    const oversized = sentinel + 'x'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'ok', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ '': oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an empty-string field name halts with status "failed"', outcome.status === 'failed');
+    check('an empty-string field name uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('an empty-string field name never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+    check('an empty-string field name never leaks the payload into the FULL returned outcome (sentinel scan)', JSON.stringify(outcome).indexOf(sentinel) === -1);
+  }
+
+  // -- an empty-string step id (reachable only by calling specEngineExecute
+  // -- directly, bypassing validateSpec's own non-empty-string rule) halts
+  // -- on its own too, the same empty-segment arm --------------------------
+  {
+    const oversized = 'j'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const spec = { steps: [{ id: '', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ content: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an empty-string step id halts with status "failed"', outcome.status === 'failed');
+    check('an empty-string step id uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('an empty-string step id never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
   }
 
   // ======================================================================

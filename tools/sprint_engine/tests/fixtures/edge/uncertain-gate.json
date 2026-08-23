@@ -1,0 +1,29 @@
+{
+  "grade": "DETERMINISM-grade (deterministic replay, no live agents)",
+  "pins": "A gate step whose scripted dispatch outcome is a JSON-encoded STRING verdict (not a plain object) is never unwrapped or re-parsed by the engine; the outcome fails the plain-object check and the run halts as uncertain with the gate-verdict-unparseable diagnostic.",
+  "scriptedOutputsShape": "Ordered array of objects with fields stepId and output, consumed by dispatch call order (index 0 first). This spec has no parallel, map, or branch structure, so dispatch call order is unambiguous and deterministic. Identical shape used in sentinel-halt.json.",
+  "spec": {
+    "steps": [
+      {
+        "id": "g1",
+        "type": "gate",
+        "prompt": "whatever"
+      }
+    ],
+    "config": {}
+  },
+  "scriptedOutputs": [
+    {
+      "stepId": "g1",
+      "output": "{\"verdict\":\"pass\"}"
+    }
+  ],
+  "expected": {
+    "status": "uncertain",
+    "dispatchCount": 1,
+    "halt": {
+      "path": "steps[0]",
+      "diagnostic": "gate-verdict-unparseable"
+    }
+  }
+}

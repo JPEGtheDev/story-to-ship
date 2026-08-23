@@ -1,0 +1,27 @@
+{
+  "grade": "DETERMINISM-grade (deterministic replay, no live agents)",
+  "pins": "A shape step's template reference to a step id that was never declared halts specEngineExecute with the template-operand-unresolved diagnostic and the literal <<undefined>> sentinel value, before any dispatch occurs.",
+  "scriptedOutputsShape": "Ordered array of objects with fields stepId and output, consumed by dispatch call order (index 0 first). This spec has no parallel, map, or branch structure, so dispatch call order is unambiguous and deterministic. Identical shape used in uncertain-gate.json.",
+  "spec": {
+    "steps": [
+      {
+        "id": "broken",
+        "type": "shape",
+        "template": {
+          "x": "{{missingStep.field}}"
+        }
+      }
+    ],
+    "config": {}
+  },
+  "scriptedOutputs": [],
+  "expected": {
+    "status": "failed",
+    "dispatchCount": 0,
+    "halt": {
+      "path": "steps[0].template.x",
+      "diagnostic": "template-operand-unresolved",
+      "value": "<<undefined>>"
+    }
+  }
+}

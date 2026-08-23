@@ -4210,19 +4210,21 @@ function specEngineSha256(str) {
 // built by the engine as `<spillDir>/<namespacedKey>.<field>`.
 //
 // model: SPEC_SCHEMA.md documents an optional `model` field on agent/gate
-// steps and an optional run-wide `config.model` default (step overrides
-// config; both absent means inherit the invoking session's model, today's
-// behavior, unchanged). specEngineRenderStepForDispatch (in the region
-// above) copies every step field into the dispatch envelope, so a step's
-// own `model` already reaches sprintRunnerDispatch below with no glue
-// changes needed to carry it. The run default lives at spec.config.model,
-// which the dispatch context argument does not carry (only
-// `{results, values}`), so it is read once below, near `const specInput =
-// args`, straight from the raw workflow args instead. This glue never
-// validates a model value either way -- pass-through only; an unrecognized
-// model string fails loudly at the runtime's own agent() call, not here.
-// An engine-synthesized envelope (spill-writer, digest-verify) carries no
-// step.model of its own, so it always falls through to the run default.
+// steps and an optional run-wide `config.model` default (a PRESENT step
+// `model` overrides config unconditionally, regardless of its type; both
+// absent means inherit the invoking session's model, today's behavior,
+// unchanged). specEngineRenderStepForDispatch (in the region above) copies
+// every step field into the dispatch envelope, so a step's own `model`
+// already reaches sprintRunnerDispatch below with no glue changes needed to
+// carry it. The run default lives at spec.config.model, which the dispatch
+// context argument does not carry (only `{results, values}`), so it is read
+// once below, near `const specInput = args`, straight from the raw workflow
+// args instead. This glue never validates a model value at either level --
+// pass-through only, presence decides the override, not type; an
+// unrecognized or malformed model value fails loudly at the runtime's own
+// agent() call, not here. An engine-synthesized envelope (spill-writer,
+// digest-verify) carries no step.model of its own, so it always falls
+// through to the run default.
 //
 // sprintRunnerAgentOpts(step, effectiveModel, schema) builds the opts
 // object every agent() call below passes, so the `model` -> opts.model
@@ -4258,7 +4260,7 @@ function sprintRunnerAgentOpts(step, effectiveModel, schema) {
 // addition introduces, rather than guessing at a new contract it was never
 // told about.
 async function sprintRunnerDispatch(step, context) {
-  const effectiveModel = typeof step.model === 'string' ? step.model : runDefaultModel;
+  const effectiveModel = step.model !== undefined ? step.model : runDefaultModel;
   log(
     'dispatch: ' +
       step.id +

@@ -121,9 +121,16 @@ extract_marker_region() {
   return 0
 }
 
+# Pre-declared empty and trapped BEFORE either mktemp call: `rm -f ""` is a
+# safe no-op, so if the first mktemp succeeds and the second fails, the
+# trap (already registered) still cleans up the first file on exit instead
+# of leaking it.
+ENGINE_TMP=""
+RUNNER_TMP=""
+trap 'rm -f "$ENGINE_TMP" "$RUNNER_TMP"' EXIT
+
 ENGINE_TMP="$(mktemp)" || { echo "inline-copy-check.sh: mktemp failed for the engine-core.js extraction temp file" >&2; exit 1; }
 RUNNER_TMP="$(mktemp)" || { echo "inline-copy-check.sh: mktemp failed for the sprint-runner.js extraction temp file" >&2; exit 1; }
-trap 'rm -f "$ENGINE_TMP" "$RUNNER_TMP"' EXIT
 
 if ! extract_marker_region "$ENGINE_CORE" "$ENGINE_TMP"; then
   exit 1

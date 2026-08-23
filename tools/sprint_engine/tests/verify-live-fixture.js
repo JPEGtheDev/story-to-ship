@@ -16,7 +16,7 @@
 // from is not tracked content, so it is only ever supplied by the caller
 // as an explicit --journal argument, and only affects check (1) below.
 //
-// Three checks, matching the capture ceremony's own integrity contract:
+// Four checks, matching the capture ceremony's own integrity contract:
 //   (1) [only with --journal] every fixture record's "output" matches the
 //       corresponding journal-recorded dispatch result, canonical-JSON-equal
 //       (compared via JSON.stringify of each side -- the values are JSON
@@ -43,6 +43,18 @@
 //       journal access is needed for this check -- it is the self-contained
 //       replay proof required before this fixture can be trusted by a fresh
 //       checkout with no /tmp state.
+//   (4) the replay's own terminal state matches this reference fixture's
+//       captured terminal state exactly: status, halt diagnostic, and halt
+//       path. These three expected values are pinned constants below (see
+//       EXPECTED_REPLAY_* ) -- properties of THIS specific captured run
+//       (live run 3 of build-test-review.json), not a general rule the
+//       engine enforces. A spec/fixture pair that still reproduces every
+//       promptSha256 (check 3) but replays to a different terminal state
+//       (for example, a tampered final-gate output record whose verdict was
+//       changed to "pass") is exactly the corruption class this check
+//       exists to catch -- checks (1)-(3) alone cannot catch it, since none
+//       of them inspect the replay's own outcome, only its per-dispatch
+//       inputs and hashes.
 //
 // Dispatch identity, for matching a live replay call back to the right
 // fixture record: every fixture stepKey is either an exact match for the
@@ -127,6 +139,18 @@ function spillWriterPrompt(step) {
 function digestVerifyPrompt(step) {
   return 'Compute the sha256 digest of the file at the absolute path "' + step.path + '". Return {digest: the 64-character lowercase-hex digest}.';
 }
+
+// Pinned expected terminal state for THIS reference fixture (live run 3 of
+// build-test-review.json): the final_release_gate step is engineered to
+// always fail (see its prompt in the committed spec), so a faithful replay
+// of this exact spec+fixture pair halts here, every time. These are not
+// general engine invariants -- a different spec or a different captured
+// run would pin different values -- so check (4) below is specific to this
+// fixture, not a reusable assertion for any future fixture this script
+// might also be pointed at.
+const EXPECTED_REPLAY_STATUS = 'gated';
+const EXPECTED_REPLAY_HALT_DIAGNOSTIC = 'gate-verdict-failed';
+const EXPECTED_REPLAY_HALT_PATH = 'steps[5]';
 
 const REVIEW_MODULE_STEP_ID = 'review_module';
 const REVIEW_MODULE_KEY_RE = /^per_module_review\.(\d+)\.code_review_with_retry\.attempts\.(\d+)$/;
@@ -245,6 +269,30 @@ async function main() {
     return;
   }
   console.log('replay status: ' + replayOutcome.status + (replayOutcome.halt ? ' (halt: ' + replayOutcome.halt.diagnostic + ')' : ''));
+
+  // Check (4): the replay's terminal state must match this fixture's own
+  // pinned expected terminal state -- see EXPECTED_REPLAY_* above. This is
+  // what actually proves the replay ended up in the SAME place the
+  // reference run did; checks (1)-(3) only prove the per-dispatch inputs
+  // and prompt hashes line up, not the run's own outcome.
+  const actualHaltDiagnostic = replayOutcome.halt ? replayOutcome.halt.diagnostic : null;
+  const actualHaltPath = replayOutcome.halt ? replayOutcome.halt.path : null;
+  let terminalStateMatches = true;
+  if (replayOutcome.status !== EXPECTED_REPLAY_STATUS) {
+    terminalStateMatches = false;
+    fail('check (4): replay status "' + replayOutcome.status + '" does not match the expected terminal status "' + EXPECTED_REPLAY_STATUS + '"');
+  }
+  if (actualHaltDiagnostic !== EXPECTED_REPLAY_HALT_DIAGNOSTIC) {
+    terminalStateMatches = false;
+    fail('check (4): replay halt diagnostic "' + actualHaltDiagnostic + '" does not match the expected "' + EXPECTED_REPLAY_HALT_DIAGNOSTIC + '"');
+  }
+  if (actualHaltPath !== EXPECTED_REPLAY_HALT_PATH) {
+    terminalStateMatches = false;
+    fail('check (4): replay halt path "' + actualHaltPath + '" does not match the expected "' + EXPECTED_REPLAY_HALT_PATH + '"');
+  }
+  if (terminalStateMatches) {
+    console.log('check (4) PASS: replay terminal state matches the fixture (status "' + EXPECTED_REPLAY_STATUS + '", halt "' + EXPECTED_REPLAY_HALT_DIAGNOSTIC + '" at "' + EXPECTED_REPLAY_HALT_PATH + '")');
+  }
 
   if (recomputed.length !== fixture.length) {
     fail('replay issued ' + recomputed.length + ' dispatches, fixture has ' + fixture.length + ' records');

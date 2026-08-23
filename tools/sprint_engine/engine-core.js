@@ -84,6 +84,27 @@
 // the same match. Both functions reset lastIndex to 0 on every pattern
 // immediately before using it, so a caller-supplied global-flag pattern
 // is tolerated without breaking either function's own purity.
+//
+// specEngineSha256(str) is a pure hash primitive, not named in
+// SPEC_SCHEMA.md: this todo delivers only the hash function and its test
+// suite, ahead of the spill-verification caller that will use it to check
+// a large spilled output against a recorded digest. It takes one JS string
+// and returns the lowercase hex digest of that string's UTF-8 encoding, via
+// a from-scratch SHA-256 implementation (FIPS 180-4). It is written by hand
+// rather than delegated to TextEncoder (not guaranteed to exist in every
+// dialect this region may be copied into) or to Buffer/crypto (Node-
+// specific, and the whole point of a pure-JS implementation is that the
+// byte-copied region never needs module resolution or a host API to hash
+// anything): specEngineUtf8Encode below walks the string by UTF-16 code
+// unit and combines high/low surrogate pairs into a single code point by
+// hand before applying the UTF-8 byte-count table. SPEC_ENGINE_SHA256_K and
+// SPEC_ENGINE_SHA256_H0 are the standard round constants and initial hash
+// values; specEngineSha256Rotr is the one bitwise helper both the message
+// schedule and the compression round share. None of the three is ever
+// mutated after module load and specEngineSha256 keeps all working state in
+// call-local variables, so repeated or interleaved calls never share state
+// through them -- two calls with the same input always return the same
+// digest, in either order.
 
 // ===ENGINE-CORE-BEGIN===
 
@@ -3318,6 +3339,194 @@ async function specEngineExecute(spec, dispatch) {
   return specEngineMakeExecuteResult(outcome.status, results, trace, outcome.halt);
 }
 
+// SPEC_ENGINE_SHA256_K: the 64 round constants FIPS 180-4 defines for
+// SHA-256 -- the first 32 bits of the fractional parts of the cube roots of
+// the first 64 prime numbers. Read-only for the whole life of this module:
+// specEngineSha256Compress below only ever reads this array by index, so
+// two calls (even interleaved ones) never observe each other's state
+// through it.
+const SPEC_ENGINE_SHA256_K = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
+];
+
+// SPEC_ENGINE_SHA256_H0: the eight initial hash values FIPS 180-4 defines
+// for SHA-256 -- the first 32 bits of the fractional parts of the square
+// roots of the first eight prime numbers. specEngineSha256 below copies
+// these into a fresh call-local array on every call; this module-level
+// array itself is never mutated.
+const SPEC_ENGINE_SHA256_H0 = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+
+// specEngineSha256Rotr(x, n) -- 32-bit right-rotation, the one bitwise
+// primitive both the SHA-256 message schedule and the compression round
+// share. `>>> 0` on the result keeps the value in the unsigned 32-bit range
+// every other SHA-256 helper below assumes.
+function specEngineSha256Rotr(x, n) {
+  return ((x >>> n) | (x << (32 - n))) >>> 0;
+}
+
+// specEngineUtf8Encode(str) converts a JS string to a plain array of its
+// UTF-8 bytes, by hand: no TextEncoder (not guaranteed to exist in every
+// dialect this region may be copied into), no Buffer (Node-specific).
+// Walks the string one UTF-16 code unit at a time; when a high surrogate
+// (0xd800-0xdbff) is immediately followed by a low surrogate
+// (0xdc00-0xdfff), the pair is combined into the single code point above
+// U+FFFF it encodes before the UTF-8 byte-count table is applied, exactly
+// as UTF-16 requires -- an unpaired surrogate (a malformed input this
+// function does not reject) falls through and is encoded on its own as a
+// 3-byte sequence, the same as any other code point in the
+// U+0800..U+FFFF range.
+function specEngineUtf8Encode(str) {
+  const bytes = [];
+  for (let i = 0; i < str.length; i += 1) {
+    let codePoint = str.charCodeAt(i);
+    if (codePoint >= 0xd800 && codePoint <= 0xdbff && i + 1 < str.length) {
+      const low = str.charCodeAt(i + 1);
+      if (low >= 0xdc00 && low <= 0xdfff) {
+        codePoint = (codePoint - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000;
+        i += 1;
+      }
+    }
+    if (codePoint <= 0x7f) {
+      bytes.push(codePoint);
+    } else if (codePoint <= 0x7ff) {
+      bytes.push(0xc0 | (codePoint >> 6));
+      bytes.push(0x80 | (codePoint & 0x3f));
+    } else if (codePoint <= 0xffff) {
+      bytes.push(0xe0 | (codePoint >> 12));
+      bytes.push(0x80 | ((codePoint >> 6) & 0x3f));
+      bytes.push(0x80 | (codePoint & 0x3f));
+    } else {
+      bytes.push(0xf0 | (codePoint >> 18));
+      bytes.push(0x80 | ((codePoint >> 12) & 0x3f));
+      bytes.push(0x80 | ((codePoint >> 6) & 0x3f));
+      bytes.push(0x80 | (codePoint & 0x3f));
+    }
+  }
+  return bytes;
+}
+
+// specEngineSha256Pad(bytes) applies the SHA-256 padding rule (FIPS 180-4
+// section 5.1.1) to a plain byte array and returns a NEW array -- the
+// input array is never mutated, keeping this a pure function of its
+// argument. Appends a single 0x80 byte, then as many 0x00 bytes as needed
+// so the length is congruent to 56 mod 64, then the original bit length of
+// `bytes` as a big-endian 64-bit integer (split into a high/low 32-bit
+// half; every input this module hashes is far below 2^32 bytes, but the
+// split itself is unconditional so the function's own correctness does not
+// depend on that being true).
+function specEngineSha256Pad(bytes) {
+  const byteLength = bytes.length;
+  const bitLengthLow = (byteLength * 8) >>> 0;
+  const bitLengthHigh = Math.floor((byteLength * 8) / 0x100000000) >>> 0;
+
+  const padded = bytes.slice();
+  padded.push(0x80);
+  while (padded.length % 64 !== 56) {
+    padded.push(0x00);
+  }
+  padded.push((bitLengthHigh >>> 24) & 0xff, (bitLengthHigh >>> 16) & 0xff, (bitLengthHigh >>> 8) & 0xff, bitLengthHigh & 0xff);
+  padded.push((bitLengthLow >>> 24) & 0xff, (bitLengthLow >>> 16) & 0xff, (bitLengthLow >>> 8) & 0xff, bitLengthLow & 0xff);
+  return padded;
+}
+
+// specEngineSha256Compress(paddedBytes) runs the SHA-256 compression
+// function (FIPS 180-4 section 6.2.2) over an already-padded byte array
+// (paddedBytes.length is always a multiple of 64, per
+// specEngineSha256Pad's own contract) and returns the eight-element array
+// of unsigned 32-bit hash words this message digests to. Starts from a
+// fresh copy of SPEC_ENGINE_SHA256_H0 on every call and never writes back
+// to either module-level constant array, so this function is as pure as
+// its argument: identical bytes in always produce identical words out.
+function specEngineSha256Compress(paddedBytes) {
+  const h = SPEC_ENGINE_SHA256_H0.slice();
+  const w = new Array(64);
+
+  for (let chunkStart = 0; chunkStart < paddedBytes.length; chunkStart += 64) {
+    for (let t = 0; t < 16; t += 1) {
+      const o = chunkStart + t * 4;
+      w[t] =
+        ((paddedBytes[o] << 24) | (paddedBytes[o + 1] << 16) | (paddedBytes[o + 2] << 8) | paddedBytes[o + 3]) >>> 0;
+    }
+    for (let t = 16; t < 64; t += 1) {
+      const s0 = specEngineSha256Rotr(w[t - 15], 7) ^ specEngineSha256Rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      const s1 = specEngineSha256Rotr(w[t - 2], 17) ^ specEngineSha256Rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (w[t - 16] + s0 + w[t - 7] + s1) >>> 0;
+    }
+
+    let a = h[0];
+    let b = h[1];
+    let c = h[2];
+    let d = h[3];
+    let e = h[4];
+    let f = h[5];
+    let g = h[6];
+    let hh = h[7];
+
+    for (let t = 0; t < 64; t += 1) {
+      const bigS1 = specEngineSha256Rotr(e, 6) ^ specEngineSha256Rotr(e, 11) ^ specEngineSha256Rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (hh + bigS1 + ch + SPEC_ENGINE_SHA256_K[t] + w[t]) >>> 0;
+      const bigS0 = specEngineSha256Rotr(a, 2) ^ specEngineSha256Rotr(a, 13) ^ specEngineSha256Rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (bigS0 + maj) >>> 0;
+
+      hh = g;
+      g = f;
+      f = e;
+      e = (d + temp1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) >>> 0;
+    }
+
+    h[0] = (h[0] + a) >>> 0;
+    h[1] = (h[1] + b) >>> 0;
+    h[2] = (h[2] + c) >>> 0;
+    h[3] = (h[3] + d) >>> 0;
+    h[4] = (h[4] + e) >>> 0;
+    h[5] = (h[5] + f) >>> 0;
+    h[6] = (h[6] + g) >>> 0;
+    h[7] = (h[7] + hh) >>> 0;
+  }
+
+  return h;
+}
+
+// specEngineSha256Word(word) renders one unsigned 32-bit hash word as an
+// 8-character lowercase hex string, zero-padded on the left -- the one
+// formatting step specEngineSha256 applies eight times to turn
+// specEngineSha256Compress's word array into the final digest string.
+function specEngineSha256Word(word) {
+  const hex = (word >>> 0).toString(16);
+  return '00000000'.slice(hex.length) + hex;
+}
+
+// specEngineSha256(str) -- see the file header comment above for the full
+// contract. Encodes `str` to UTF-8 bytes, pads per FIPS 180-4, runs the
+// compression function, and renders the resulting eight words as one
+// lowercase hex string. Deterministic and side-effect-free: every value
+// this function touches is either a call-local variable or a read-only
+// module-level constant, so two calls -- with the same input, or
+// interleaved with different inputs -- never influence each other.
+function specEngineSha256(str) {
+  const bytes = specEngineUtf8Encode(String(str));
+  const padded = specEngineSha256Pad(bytes);
+  const words = specEngineSha256Compress(padded);
+  let digest = '';
+  for (let i = 0; i < words.length; i += 1) {
+    digest += specEngineSha256Word(words[i]);
+  }
+  return digest;
+}
+
 // ===ENGINE-CORE-END===
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -3332,5 +3541,6 @@ if (typeof module !== 'undefined' && module.exports) {
     specEngineFirstMatchOf: specEngineFirstMatchOf,
     specEngineRegexExtract: specEngineRegexExtract,
     specEngineExecute: specEngineExecute,
+    specEngineSha256: specEngineSha256,
   };
 }

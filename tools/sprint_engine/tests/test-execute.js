@@ -389,7 +389,7 @@ async function main() {
   // -- fails loudly, never a silent skip ("parallel", "map", and now -----
   // -- "scored-retry" no longer belong here -- all three are now executed;
   // -- see test-parallel.js, test-map.js, and test-scored-retry.js for ----
-  // -- their own suites, and the blocks below for the one still---------
+  // -- their own suites, and the blocks below for the one still -----------
   // -- unsupported kind and for what "map"/"scored-retry" get instead) ----
   {
     const spec = {
@@ -464,7 +464,7 @@ async function main() {
   // -- "scored-retry" is now executed too, not rejected: a bare -----------
   // -- scored-retry step with none of its own required fields still -------
   // -- halts, but under its OWN execute-time malformed-shape guard, not ---
-  // -- the container-step-not-supported diagnostic the one still---------
+  // -- the container-step-not-supported diagnostic the one still ----------
   // -- unsupported kind above gets (full scored-retry-execution coverage --
   // -- lives in test-scored-retry.js) ---------------------------------------
   {

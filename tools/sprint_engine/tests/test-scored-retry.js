@@ -118,6 +118,33 @@ async function main() {
     check("the clearing attempt's own attempts key carries the same value", outcome.results['retryA.attempts.1'].score === 9);
   }
 
+  // -- first-passing gte semantics at the EXACT boundary: a score equal to
+  // -- (not merely above) the threshold clears it -- direction-sensitive: -
+  // -- an implementation using a strictly-greater comparison instead of ---
+  // -- gte would fail to stop here and dispatch a third, unnecessary ------
+  // -- attempt (scores 3, 5, 9 -- threshold 5 -- attempt 1 must clear) ----
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'first-passing',
+          threshold: 5,
+          maxAttempts: 3,
+          step: { id: 'attempt', type: 'agent' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ attempt: [{ score: 3 }, { score: 5 }, { score: 9 }] });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('an exactly-equal score clears first-passing and completes the run', outcome.status === 'completed');
+    check('exactly two attempts dispatch -- the equal-scoring attempt stops the run, the third never dispatches', dispatch.calls.length === 2);
+    check('the winner is the exactly-equal-scoring attempt (score 5), not the higher unused third', outcome.results.retryA.score === 5);
+    check('the never-dispatched third attempt contributes no attempts.2 key', typeof outcome.results['retryA.attempts.2'] === 'undefined');
+  }
+
   // -- keep-best runs exactly maxAttempts and keeps the highest scorer, ---
   // -- direction-sensitive: the winner is neither the first nor the last --
   // -- attempt (scores 2, 9, 5 -> winner is attempt 1, score 9) -----------
@@ -242,6 +269,59 @@ async function main() {
     check("attempt 3's own dispatched prompt carries the augment text too", dispatch.calls[2].step.prompt === 'base prompt\n\nextra instructions');
   }
 
+  // -- augment mechanics, edge case 1: an empty-string "augment" never -----
+  // -- augments ANY attempt (not just attempt 1) -- every dispatched -----
+  // -- prompt is identical, unaugmented ------------------------------------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'keep-best',
+          maxAttempts: 3,
+          augment: '',
+          step: { id: 'attempt', type: 'agent', prompt: 'base prompt' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ attempt: [{ score: 1 }, { score: 2 }, { score: 3 }] });
+    await specEngineExecute(spec, dispatch);
+    check('an empty-string augment leaves attempt 1 unaugmented', dispatch.calls[0].step.prompt === 'base prompt');
+    check('an empty-string augment leaves attempt 2 unaugmented too', dispatch.calls[1].step.prompt === 'base prompt');
+    check('an empty-string augment leaves attempt 3 unaugmented too', dispatch.calls[2].step.prompt === 'base prompt');
+  }
+
+  // -- augment mechanics, edge case 2: augment text carrying a -------------
+  // -- {{...}} placeholder resolves through the ordinary render pipeline --
+  // -- on retry attempts, against a value from an EARLIER, enclosing-scope
+  // -- step -- no separate rendering surface exists for augment text ------
+  {
+    const spec = {
+      steps: [
+        { id: 'seed', type: 'agent' },
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'keep-best',
+          maxAttempts: 2,
+          augment: 'ref: {{seed.value}}',
+          step: { id: 'attempt', type: 'agent', prompt: 'base prompt' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ seed: [{ value: 42 }], attempt: [{ score: 1 }, { score: 2 }] });
+    await specEngineExecute(spec, dispatch);
+    check('the seed step dispatches first', dispatch.calls[0].id === 'seed');
+    check("attempt 1's own prompt is unaugmented (no placeholder to resolve)", dispatch.calls[1].step.prompt === 'base prompt');
+    check(
+      "attempt 2's own prompt has the augment's {{seed.value}} placeholder resolved through the render pipeline",
+      dispatch.calls[2].step.prompt === 'base prompt\n\nref: 42'
+    );
+  }
+
   // -- the bound is never exceeded: maxAttempts caps dispatch count even ---
   // -- when more outcomes are available in the stub ------------------------
   {
@@ -290,6 +370,32 @@ async function main() {
       'the raw outcome that produced the score-parse halt is recorded in the trace',
       !!traceEntry && traceEntry.outcome && traceEntry.outcome.text === 'no score field here'
     );
+  }
+
+  // -- a score-parse failure on first-passing halts "uncertain" the same --
+  // -- way it does on keep-best (coverage was keep-best-only before) ------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'first-passing',
+          threshold: 5,
+          maxAttempts: 3,
+          step: { id: 'attempt', type: 'agent' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ attempt: [{ text: 'no score field here' }, { score: 9 }] });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a score-parse failure on first-passing halts the run with status "uncertain"', outcome.status === 'uncertain');
+    check(
+      'the halt uses the scored-retry-score-unparseable diagnostic on first-passing too',
+      outcome.halt !== null && outcome.halt.diagnostic === 'scored-retry-score-unparseable'
+    );
+    check('the score-parse failure on first-passing halts immediately -- the second attempt is never dispatched', dispatch.calls.length === 1);
   }
 
   // -- no-winner ruling: every attempt exhausted without a first-passing --
@@ -344,6 +450,36 @@ async function main() {
     check('the winner is the only attempt that ever completed', outcome.results.retryA.score === 9);
     check('the failed first attempt contributes no attempts.0 key (no completed result to address)', typeof outcome.results['retryA.attempts.0'] === 'undefined');
     check('the completed second attempt does contribute an attempts.1 key', !!outcome.results['retryA.attempts.1']);
+  }
+
+  // -- keep-best where EVERY attempt is scoreless (matching the scoreless-
+  // -- containment fixture's own shape -- a dispatch resolving to null,
+  // -- not a score-parse failure): bestIndex never advances past -1, so
+  // -- keep-best's own "at least one scored attempt" gate never fires --
+  // -- this is the no-winner ruling reached via keep-best instead of via -
+  // -- first-passing's own never-clears path -------------------------------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'keep-best',
+          maxAttempts: 2,
+          step: { id: 'attempt', type: 'agent' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ attempt: [null, null] });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('keep-best where every attempt is scoreless halts the run with status "failed"', outcome.status === 'failed');
+    check(
+      'the halt uses the scored-retry-no-winner diagnostic, not a false "completed" with a null winner',
+      outcome.halt !== null && outcome.halt.diagnostic === 'scored-retry-no-winner'
+    );
+    check('no plain retryA winner key is written when every attempt was scoreless', typeof outcome.results.retryA === 'undefined');
+    check('both attempts still dispatched before the no-winner halt', dispatch.calls.length === 2);
   }
 
   // -- malformed-shape guards: every one of these is spend-free -----------

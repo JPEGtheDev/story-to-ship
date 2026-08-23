@@ -2545,9 +2545,13 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
 //    `score` on the wrapped step's own completed result -- the same field
 //    name the contract's own predicate example reads off a step's result
 //    (SPEC_SCHEMA.md's `{ step: 'par', field: 'failures', operator: 'gte',
-//    value: 1 }` worked example). A scored-retry step may override the
-//    field name via an optional `scoreField` string; when absent, `score`
-//    is used. The resolved value is validated with the existing
+//    value: 1 }` worked example). This fixed field name is this
+//    implementation's own disclosed, owner-reversible choice -- an earlier
+//    revision of this function also accepted a per-step `scoreField`
+//    override, but that surface carried zero test coverage and went beyond
+//    what the contract's own silence requires, so it was removed; `score`
+//    is the only field name this executor reads an attempt's score from.
+//    The resolved value is validated with the existing
 //    specEngineIsFiniteNumber (the same strict, no-coercion check
 //    specEngineEvalPredicate already applies to lte/gte operands) --
 //    missing, unresolvable, or non-numeric halts the whole scored-retry
@@ -2601,7 +2605,13 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
 //    operator vocabulary" section, since first-passing's own one-clause
 //    definition ("stop and keep the first attempt that clears the
 //    threshold") is exactly the shape of a gte comparison already named
-//    elsewhere in this contract.
+//    elsewhere in this contract. A `threshold` that is PRESENT but not a
+//    finite number (either mode) is guarded against before any attempt
+//    dispatches, under 'scored-retry-threshold-invalid' -- see that guard's
+//    own inline comment, just below the mode/threshold-required checks,
+//    for the full disclosure (an owner-reversible, execute-time-only
+//    addition, never folded into validateSpec, the same scope boundary
+//    `maxAttempts` already has).
 // 5. KEEP-BEST TIE-BREAKING: when two or more attempts share the top score,
 //    the EARLIEST one (the lowest attempt index) wins -- the deterministic
 //    default with no further contract signal to prefer any other attempt,
@@ -2682,6 +2692,39 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     };
   }
 
+  // A PRESENT-but-non-numeric threshold (either mode -- "threshold" is
+  // legal, if pointless, on keep-best too) is its own malformed-shape
+  // defect, distinct from a MISSING threshold: without this guard, a
+  // string threshold like "5" would silently never clear (gap-fill 4's
+  // gte comparison is gated on specEngineIsFiniteNumber(step.threshold),
+  // so a non-numeric threshold simply never lets any attempt pass),
+  // masking the real defect (a malformed threshold) behind a generic
+  // scored-retry-no-winner halt only after every attempt had already
+  // dispatched. This mirrors the existing predicate-operand-not-numeric
+  // precedent in specEngineEvalPredicate above (a non-numeric lte/gte
+  // operand halts loudly rather than being coerced or silently
+  // mis-evaluated) and the maxAttempts type-check idiom immediately below
+  // -- checked here, spend-free, before any attempt dispatches. Like
+  // maxAttempts, this check is NOT added to validateSpec: it is this
+  // implementation's own execute-time-only guard over a value validateSpec
+  // never inspects for type, the same scope boundary maxAttempts already
+  // has (see this function's own header comment, gap-fill 2) -- an
+  // owner-reversible choice, disclosed here rather than folded into
+  // validateSpec's own structural checks.
+  if (typeof step.threshold !== 'undefined' && !specEngineIsFiniteNumber(step.threshold)) {
+    return {
+      ok: false,
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.threshold',
+        'scored-retry-threshold-invalid',
+        'scored-retry step "' + step.id + '" has "threshold" ' + JSON.stringify(step.threshold) + ', which is not a finite number.'
+      ),
+      namespacedResults: {},
+      attemptsTrace: [],
+    };
+  }
+
   const maxAttempts = step.maxAttempts;
   if (typeof maxAttempts === 'undefined') {
     return {
@@ -2725,7 +2768,6 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
   }
 
   const wrappedStepId = step.step.id;
-  const scoreFieldName = typeof step.scoreField === 'string' && step.scoreField.length > 0 ? step.scoreField : 'score';
   const augment = typeof step.augment === 'string' && step.augment.length > 0 ? step.augment : null;
   const attemptPath = path + '.step';
 
@@ -2771,7 +2813,7 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     const attemptResult = ownResults[wrappedStepId];
     namespacedResults[step.id + '.attempts.' + n] = attemptResult;
 
-    const scoreResolution = specEngineResolveFieldPath(attemptResult, scoreFieldName);
+    const scoreResolution = specEngineResolveFieldPath(attemptResult, 'score');
     if (!scoreResolution.resolved || !specEngineIsFiniteNumber(scoreResolution.value)) {
       // Gap-fill 1: a score-parse failure always halts the whole
       // scored-retry step, "uncertain," regardless of attempts remaining.
@@ -2786,9 +2828,7 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
             step.id +
             '" attempt ' +
             n +
-            "'s wrapped step result does not carry a finite numeric \"" +
-            scoreFieldName +
-            '" field; recording uncertain rather than guessing.'
+            '\'s wrapped step result does not carry a finite numeric "score" field; recording uncertain rather than guessing.'
         ),
         namespacedResults: namespacedResults,
         attemptsTrace: attemptsTrace,

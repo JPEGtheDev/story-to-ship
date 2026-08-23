@@ -21,9 +21,9 @@
 //     "keep-best".
 //   - `maxAttempts` is this implementation's own REQUIRED, execute-time-only
 //     field (mirroring map's own `list` field) -- a positive integer bound.
-//   - an attempt's score is read from a `score` field (or `scoreField`,
-//     when declared) on the wrapped step's own completed result, via
-//     specEngineIsFiniteNumber; unparseable -> "uncertain" halt.
+//   - an attempt's score is read from a fixed `score` field on the wrapped
+//     step's own completed result, via specEngineIsFiniteNumber;
+//     unparseable -> "uncertain" halt.
 //   - `augment`, when declared, is appended to the wrapped step's own
 //     `prompt` field on RETRY attempts only (never attempt 0).
 //   - each attempt's key is `<retryId>.attempts.<n>`; the kept winner is
@@ -34,6 +34,11 @@
 //     score-parse failure always halts immediately, "uncertain"; exhausting
 //     every attempt with no winner halts "failed" under
 //     'scored-retry-no-winner'.
+//   - a PRESENT but non-numeric `threshold` (either mode) halts spend-free,
+//     before any attempt dispatches, under 'scored-retry-threshold-invalid'
+//     -- an execute-time-only guard, never added to validateSpec, the same
+//     scope boundary `maxAttempts` already has (see
+//     specEngineExecuteScoredRetryStep's own header comment).
 
 'use strict';
 
@@ -178,6 +183,39 @@ async function main() {
     check(
       'the plain retryA key and the winning attempts.1 key hold the identical value',
       outcome.results.retryA === outcome.results['retryA.attempts.1']
+    );
+  }
+
+  // -- keep-best tie-breaking: when a LATER attempt ties the current best -
+  // -- (scores 4, 9, 9 -- attempts 1 and 2 tie), the EARLIEST top scorer ---
+  // -- wins, not the last one -- direction-sensitive: an implementation ---
+  // -- that replaced the best on a "greater-or-equal" comparison instead --
+  // -- of a strictly-greater one would keep attempts.2 here instead of ----
+  // -- attempts.1, and this fixture would fail --------------------------
+  {
+    const spec = {
+      steps: [
+        {
+          id: 'retryA',
+          type: 'scored-retry',
+          mode: 'keep-best',
+          maxAttempts: 3,
+          step: { id: 'attempt', type: 'agent' },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeSequencedDispatch({ attempt: [{ score: 4 }, { score: 9 }, { score: 9 }] });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a tied keep-best run still completes', outcome.status === 'completed');
+    check('all three attempts are dispatched -- keep-best always runs to the bound', dispatch.calls.length === 3);
+    check(
+      'the winner at the plain key is the EARLIEST tied top scorer (attempts.1), not the later tie (attempts.2)',
+      outcome.results.retryA === outcome.results['retryA.attempts.1']
+    );
+    check(
+      'the winner is NOT the later tied attempt',
+      outcome.results.retryA !== outcome.results['retryA.attempts.2']
     );
   }
 
@@ -387,6 +425,63 @@ async function main() {
       outcome.status === 'failed' && outcome.halt.diagnostic === 'scored-retry-step-not-object'
     );
     check('a missing wrapped step never dispatches', dispatch.calls.length === 0);
+  }
+
+  // -- a PRESENT but non-numeric "threshold" is a malformed-shape defect --
+  // -- of its own, distinct from a MISSING threshold: without this guard --
+  // -- a string threshold like "5" would silently never clear (since ------
+  // -- specEngineIsFiniteNumber('5') is false), masking the real defect ---
+  // -- (a malformed threshold) behind a generic scored-retry-no-winner ----
+  // -- halt after every attempt still dispatched -- this guard instead ----
+  // -- halts loudly, spend-free, before any attempt runs, naming the ------
+  // -- actual defect. Applies in BOTH modes whenever threshold is present -
+  {
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(
+      {
+        steps: [
+          {
+            id: 'retryA',
+            type: 'scored-retry',
+            mode: 'first-passing',
+            threshold: '5',
+            maxAttempts: 3,
+            step: { id: 'attempt', type: 'agent' },
+          },
+        ],
+        config: {},
+      },
+      dispatch
+    );
+    check(
+      'a string "threshold" on first-passing halts "failed" under scored-retry-threshold-invalid',
+      outcome.status === 'failed' && outcome.halt.diagnostic === 'scored-retry-threshold-invalid'
+    );
+    check('a string threshold on first-passing never dispatches -- spend-free', dispatch.calls.length === 0);
+  }
+  {
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(
+      {
+        steps: [
+          {
+            id: 'retryA',
+            type: 'scored-retry',
+            mode: 'keep-best',
+            threshold: '5',
+            maxAttempts: 3,
+            step: { id: 'attempt', type: 'agent' },
+          },
+        ],
+        config: {},
+      },
+      dispatch
+    );
+    check(
+      'a string "threshold" on keep-best (where threshold is otherwise optional) also halts under scored-retry-threshold-invalid',
+      outcome.status === 'failed' && outcome.halt.diagnostic === 'scored-retry-threshold-invalid'
+    );
+    check('a string threshold on keep-best never dispatches -- spend-free', dispatch.calls.length === 0);
   }
 
   // -- reserved-segments interplay: a wrapped step declared with the ------

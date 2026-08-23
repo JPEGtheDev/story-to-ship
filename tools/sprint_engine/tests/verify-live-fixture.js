@@ -16,7 +16,7 @@
 // from is not tracked content, so it is only ever supplied by the caller
 // as an explicit --journal argument, and only affects check (1) below.
 //
-// Four checks, matching the capture ceremony's own integrity contract:
+// Five checks, matching the capture ceremony's own integrity contract:
 //   (1) [only with --journal] every fixture record's "output" matches the
 //       corresponding journal-recorded dispatch result, canonical-JSON-equal
 //       (compared via JSON.stringify of each side -- the values are JSON
@@ -55,6 +55,10 @@
 //       exists to catch -- checks (1)-(3) alone cannot catch it, since none
 //       of them inspect the replay's own outcome, only its per-dispatch
 //       inputs and hashes.
+//   (5) the fixture's build-record content hash and its spill-writer
+//       receipt both match their own pinned values (see the constraint
+//       comment above EXPECTED_BUILD_CONTENT_SHA256 below for why these two
+//       hashes are pinned to two DIFFERENT values on purpose, not one).
 //
 // Dispatch identity, for matching a live replay call back to the right
 // fixture record: every fixture stepKey is either an exact match for the
@@ -71,7 +75,6 @@
 // stepKey.
 
 const fs = require('fs');
-const path = require('path');
 const { specEngineExecute, specEngineSha256 } = require('../engine-core.js');
 
 function fail(message) {
@@ -125,7 +128,13 @@ function loadJournalDispatches(journalPath) {
 
 // Exact glue prompt templates, copied verbatim from the committed
 // sprint-runner.js (below ===ENGINE-CORE-END===) -- see this file's header
-// comment for why these are needed here at all.
+// comment for why these are needed here at all. This copy can go silently
+// stale: if sprint-runner.js's own envelope-wrapper text ever changes,
+// these two functions keep matching the OLD fixture's already-recorded
+// promptSha256 values, so check (3) keeps passing -- it proves internal
+// consistency between this copy and the fixture, not that the copy still
+// matches the live glue, and gives no signal that the fixture needs
+// re-capture against the new wrapper text.
 function spillWriterPrompt(step) {
   return (
     'Write the content below, exactly as given between the two marker lines (no marker lines themselves), to the absolute path "' +
@@ -153,12 +162,16 @@ const EXPECTED_REPLAY_HALT_DIAGNOSTIC = 'gate-verdict-failed';
 const EXPECTED_REPLAY_HALT_PATH = 'steps[5]';
 
 const REVIEW_MODULE_STEP_ID = 'review_module';
-const REVIEW_MODULE_KEY_RE = /^per_module_review\.(\d+)\.code_review_with_retry\.attempts\.(\d+)$/;
 
 function findFixtureRecord(fixture, step, reviewModuleCounterRef) {
   if (step.id === REVIEW_MODULE_STEP_ID) {
     const n = reviewModuleCounterRef.value;
     reviewModuleCounterRef.value += 1;
+    // The literal 2 here is the example spec's own
+    // per_module_review.code_review_with_retry.maxAttempts: 2 -- every map
+    // iteration runs exactly that many scored-retry attempts, so a plain
+    // call counter divided by 2 (integer) and modulo 2 recovers
+    // (mapIndex, attemptIndex) from the flat dispatch sequence.
     const mapIndex = Math.floor(n / 2);
     const attemptIndex = n % 2;
     const wantedKey = 'per_module_review.' + mapIndex + '.code_review_with_retry.attempts.' + attemptIndex;
@@ -213,15 +226,11 @@ async function main() {
     }
   });
 
-  // Check (1) and (2): journal cross-check, only if --journal was given.
+  // Checks (1) and (2): journal cross-check, only if --journal was given.
+  // Printed in header order: (1) output equality first, then (2) count.
   if (journalPath) {
     const journalOutputs = loadJournalDispatches(journalPath);
     console.log('journal dispatch count: ' + journalOutputs.length);
-    if (journalOutputs.length !== fixture.length) {
-      fail('fixture record count (' + fixture.length + ') does not equal journal dispatch count (' + journalOutputs.length + ')');
-    } else {
-      console.log('check (2) PASS: fixture count == journal count == ' + fixture.length);
-    }
 
     let allOutputsMatch = true;
     sortedByIndex.forEach(function (record) {
@@ -235,6 +244,12 @@ async function main() {
     });
     if (allOutputsMatch) {
       console.log('check (1) PASS: every fixture output canonical-JSON-equals its journal result (dispatchIndex ' + (fixture.length - 1) + ' pairs checked)');
+    }
+
+    if (journalOutputs.length !== fixture.length) {
+      fail('fixture record count (' + fixture.length + ') does not equal journal dispatch count (' + journalOutputs.length + ')');
+    } else {
+      console.log('check (2) PASS: fixture count == journal count == ' + fixture.length);
     }
   } else {
     console.log('no --journal given: skipping checks (1) and (2) (journal-dependent, not required for a fresh checkout)');
@@ -270,6 +285,27 @@ async function main() {
   }
   console.log('replay status: ' + replayOutcome.status + (replayOutcome.halt ? ' (halt: ' + replayOutcome.halt.diagnostic + ')' : ''));
 
+  // Check (3): recomputed promptSha256 values, one per replay dispatch,
+  // must match the fixture's own recorded values. Printed before check (4)
+  // to match the header order above.
+  if (recomputed.length !== fixture.length) {
+    fail('replay issued ' + recomputed.length + ' dispatches, fixture has ' + fixture.length + ' records');
+  }
+
+  let allPromptsMatch = true;
+  recomputed.forEach(function (r) {
+    const record = fixture.filter(function (f) {
+      return f.dispatchIndex === r.dispatchIndex;
+    })[0];
+    if (!record || record.promptSha256 !== r.promptSha256) {
+      allPromptsMatch = false;
+      fail('dispatchIndex ' + r.dispatchIndex + ' (' + r.stepKey + '): recomputed promptSha256 (' + r.promptSha256 + ') does not match fixture (' + (record ? record.promptSha256 : '(no record)') + ')');
+    }
+  });
+  if (allPromptsMatch && recomputed.length === fixture.length) {
+    console.log('check (3) PASS: all ' + recomputed.length + ' promptSha256 values reproduced from the committed spec and fixture alone');
+  }
+
   // Check (4): the replay's terminal state must match this fixture's own
   // pinned expected terminal state -- see EXPECTED_REPLAY_* above. This is
   // what actually proves the replay ended up in the SAME place the
@@ -294,22 +330,73 @@ async function main() {
     console.log('check (4) PASS: replay terminal state matches the fixture (status "' + EXPECTED_REPLAY_STATUS + '", halt "' + EXPECTED_REPLAY_HALT_DIAGNOSTIC + '" at "' + EXPECTED_REPLAY_HALT_PATH + '")');
   }
 
-  if (recomputed.length !== fixture.length) {
-    fail('replay issued ' + recomputed.length + ' dispatches, fixture has ' + fixture.length + ' records');
-  }
+  // Check (5): the fixture's build-record content hash and its
+  // spill-writer receipt both match their own pinned values.
+  //
+  // These two pinned hashes deliberately DIFFER, and that is correct, not
+  // a bug: the run's spill-writer step is a live agent call asked to copy
+  // the build agent's raw content to disk verbatim, and in the run this
+  // fixture captures it introduced a one-character transcription
+  // infidelity (offset 35863 of the 52125-byte content: the producer wrote
+  // "8", the writer agent wrote "9"). Both values below were re-verified
+  // this session against the run's actual on-disk artifacts: the fixture's
+  // own build record content hashes to EXPECTED_BUILD_CONTENT_SHA256 (the
+  // producer's true output, byte-for-byte as returned), and the on-disk
+  // spilled file the writer agent actually produced independently re-hashes
+  // to EXPECTED_SPILL_RECEIPT.sha256 -- i.e. the receipt is faithful to
+  // what got written, just not to what the producer originally returned.
+  // Both are kept verbatim per the fixture-fidelity ruling: a spill receipt
+  // proves what the writer wrote, not that the writer transcribed
+  // faithfully, and this script's job is to pin and detect drift in EITHER
+  // captured value, not to adjudicate or correct the writer's own
+  // transcription fidelity (that implication belongs on the owner log, not
+  // in this checker).
+  const EXPECTED_BUILD_CONTENT_SHA256 = '5ebece9e148e088d0ea1b971e962f71acd3e5eb45e213796aa7de5f82b6ba2d5';
+  // NOTE: this is the spill-writer step's OWN raw dispatch return shape
+  // (required: written, path, sha256, bytes -- see spillWriterPrompt's
+  // schema comment above, copied from the glue in sprint-runner.js), not
+  // the "{spilled: true, ...}" receipt shape the engine later stores under
+  // the producing step's own oversized field (that shape lives in the
+  // BUILD record's output.content, checked separately above -- a
+  // different record, a different field, a different key).
+  const EXPECTED_SPILL_RECEIPT = {
+    written: true,
+    path: '/tmp/sprint-engine-examples/build-test-review-spill/build.content',
+    sha256: '5da7c678fbe6dda77d444d4f9567c8fbb3ddab6dacff4aea89030587f5f3317f',
+    bytes: 52125,
+  };
 
-  let allPromptsMatch = true;
-  recomputed.forEach(function (r) {
-    const record = fixture.filter(function (f) {
-      return f.dispatchIndex === r.dispatchIndex;
-    })[0];
-    if (!record || record.promptSha256 !== r.promptSha256) {
-      allPromptsMatch = false;
-      fail('dispatchIndex ' + r.dispatchIndex + ' (' + r.stepKey + '): recomputed promptSha256 (' + r.promptSha256 + ') does not match fixture (' + (record ? record.promptSha256 : '(no record)') + ')');
+  const buildRecord = fixture.filter(function (r) {
+    return r.stepKey === 'build';
+  })[0];
+  const spillWriterRecord = fixture.filter(function (r) {
+    return r.stepKey.slice(-'.spill-writer'.length) === '.spill-writer';
+  })[0];
+
+  let check5Matches = true;
+  if (!buildRecord) {
+    check5Matches = false;
+    fail('check (5): no fixture record with stepKey "build" found to check the producer content hash');
+  } else {
+    const actualBuildContentSha256 = specEngineSha256(buildRecord.output.content);
+    if (actualBuildContentSha256 !== EXPECTED_BUILD_CONTENT_SHA256) {
+      check5Matches = false;
+      fail('check (5): fixture build record output.content hashes to "' + actualBuildContentSha256 + '", expected the pinned producer hash "' + EXPECTED_BUILD_CONTENT_SHA256 + '"');
     }
-  });
-  if (allPromptsMatch && recomputed.length === fixture.length) {
-    console.log('check (3) PASS: all ' + recomputed.length + ' promptSha256 values reproduced from the committed spec and fixture alone');
+  }
+  if (!spillWriterRecord) {
+    check5Matches = false;
+    fail('check (5): no fixture record with a ".spill-writer" stepKey found to check the spill receipt');
+  } else {
+    const actualReceipt = JSON.stringify(spillWriterRecord.output);
+    const expectedReceipt = JSON.stringify(EXPECTED_SPILL_RECEIPT);
+    if (actualReceipt !== expectedReceipt) {
+      check5Matches = false;
+      fail('check (5): fixture spill-writer record output (' + actualReceipt + ') does not equal the pinned receipt (' + expectedReceipt + ')');
+    }
+  }
+  if (check5Matches) {
+    console.log('check (5) PASS: producer content hash and spill-writer receipt both match their pinned values (see the constraint comment above -- these two hashes deliberately differ)');
   }
 
   if (process.exitCode) {

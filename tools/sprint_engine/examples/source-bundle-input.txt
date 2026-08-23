@@ -1,0 +1,21 @@
+source bundle manifest for the build-test-review example pipeline
+generated as a fixture for the build step's verifyDigest check
+
+modules:
+  auth
+    src/auth/session.js
+    src/auth/token-store.js
+  billing
+    src/billing/invoice.js
+    src/billing/ledger.js
+  search-index
+    src/search-index/tokenizer.js
+    src/search-index/ranker.js
+  notifications
+    src/notifications/dispatcher.js
+
+build entry point: src/main.js
+test entry points: test/unit, test/integration
+
+this file stands in for a real source archive so the worked example's
+digest-verify step has a real, checked-in target to hash against

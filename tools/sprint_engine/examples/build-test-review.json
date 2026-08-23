@@ -4,8 +4,8 @@
       "id": "build",
       "type": "agent",
       "verifyDigest": {
-        "path": "/data/build-test-review/source-bundle.tar",
-        "sha256": "7694d9092c4589b26907a92fd1a5f15689776ce95a22c4848f15962747d0658e"
+        "path": "/tmp/sprint-engine-examples/build-test-review-input/source-bundle.txt",
+        "sha256": "6b80a3503db824105da509eb60998bc9fe0111244d169937b07292097f98d50a"
       },
       "prompt": "You are the build agent for the build-test-review pipeline. The engine has already verified the on-disk source bundle at the declared path against its expected sha256 digest via this step's verifyDigest check; proceed only because that check passed. Compile the project from the verified source bundle and report two fields on your result: `status` (the string \"success\" or \"failure\") and `content`, the complete, unabridged build log covering every compiler invocation, warning, and linker step. The `content` field is required to be at least 41628 characters long (this minimum is chosen to exceed this spec's configured spill threshold, so a compliant build log exercises the spillDir producer-spill path rather than returning inline) -- do not truncate, summarize, or abbreviate the log to fall under that size; emit the full text even if it must spill to a file under the configured spillDir. Also report `changedModules`, a list of the module names touched by this build, for the per-module review stage that follows.",
       "outputSchema": {
@@ -165,6 +165,6 @@
   ],
   "config": {
     "spillDir": "/tmp/sprint-engine-examples/build-test-review-spill",
-    "expectedSha256": "4ca02f75955320e9478fd00e9030e1de5c3dbda8dc1a9fe38c856b4e71f4e1ba"
+    "expectedSha256": "3ee70ea41af59841ce414e58561ff01f331177a6f60dfec8f7b6262c8b0c5a61"
   }
 }

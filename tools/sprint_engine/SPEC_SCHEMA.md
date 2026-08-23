@@ -331,6 +331,15 @@ same file: a step called `inner` in track `t1` spills to
 `<spillDir>/t1.inner.<field>`, and the same-named step in track `t2` spills
 to `<spillDir>/t2.inner.<field>`.
 
+**Spill-path containment.** Names that participate in a spill path -- step
+ids on spilling steps, and outcome field names -- must not contain `.`,
+`/`, or `\`, and must be non-empty. A violation halts under
+`spill-path-unsafe` before any writer dispatch. This is the first
+execute-time restriction on an author-controlled name: every other
+character legal to the validator (spaces, colons, parentheses, non-ASCII
+characters, and so on) remains legal in a step id, including one that
+spills.
+
 **Pointer sub-fields are first-class referents.** Once a field has spilled,
 its receipt's own sub-fields are legal things to reference in a later
 template or predicate: `{{A.content.path}}`, `{{A.content.sha256}}`, or a

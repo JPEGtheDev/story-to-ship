@@ -138,22 +138,40 @@ const SPEC_ENGINE_SPILL_THRESHOLD_BYTES = 40000;
 // and the by-path digest-verify guard below so both accept and reject the
 // identical shape.
 const SPEC_ENGINE_SHA256_HEX_RE = /^[0-9a-f]{64}$/;
-// SPEC_ENGINE_SAFE_PATH_SEGMENT_RE -- the containment rule for every
-// segment of a spill target path this engine constructs: a plain
-// identifier, no '/', no '\', no '..', no empty segment. Applied to each
-// '.'-separated segment of a step's namespaced result key AND to the
-// oversized field's own name (both are untrusted -- a spec author controls
-// step ids, and a dispatched agent's own return value controls field
-// names) before that path is built and handed to the spill-writer
-// dispatch, by specEngineApplySpillGuard below. This is the tightest rule
-// consistent with every legal step id already accepted elsewhere in this
-// file (plain identifiers only; container namespacing only ever adds
-// '.'-joined plain segments, digits for map indices, and the fixed literal
-// "attempts" for scored-retry), so no existing legal spec is rejected by
-// it. SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE is the same pattern as a
-// string, reused in the halt message so the rule is stated once.
-const SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE = '/^[A-Za-z0-9_-]+$/';
-const SPEC_ENGINE_SAFE_PATH_SEGMENT_RE = /^[A-Za-z0-9_-]+$/;
+// specEngineIsUnsafePathSegment(segment) -- the containment rule for every
+// RAW (pre-composition) segment that participates in a spill target path
+// this engine constructs. validateSpec places NO charset restriction on a
+// step id beyond non-empty-string and the reserved-segment rules (see
+// visitStep above): a step id of "a b" (a space) or "date: 2026" is
+// validator-legal and must still be able to spill. This function is
+// therefore a DENYLIST, not an allowlist -- it rejects only content that
+// is genuinely unsafe for a path segment, not content the validator itself
+// would reject:
+//   - not a string (a missing/non-string id reaching this point despite
+//     validateSpec -- e.g. specEngineExecute called directly, bypassing
+//     validation -- must fail closed here rather than throw downstream);
+//   - the empty string;
+//   - contains '/' or '\' (would let the constructed path escape
+//     `spillDir` via an extra path separator);
+//   - contains '.' (the namespace separator this engine's own composed
+//     keys use -- see the "raw segments, not a composed string" note on
+//     specEngineApplySpillGuard below for why a raw segment must never
+//     itself contain one). This one rule ALSO subsumes any '..'
+//     containment concern: a '..' segment always contains at least one
+//     '.', so it is already rejected by the dot ban above -- no separate
+//     '..' check is needed.
+// Applied to every RAW segment (never to an already-'.'-joined string) and
+// to the oversized field's own name (both are untrusted -- a spec author
+// controls step/track/branch ids, and a dispatched agent's own return
+// value controls field names). Engine-generated segments (a map
+// iteration's numeric index, the literal "attempts" for scored-retry) are
+// passed through the SAME check as author-controlled ones rather than
+// being special-cased out of it -- they always pass, since neither a
+// digit string nor the literal "attempts" ever contains '.', '/', '\', or
+// is empty.
+function specEngineIsUnsafePathSegment(segment) {
+  return typeof segment !== 'string' || segment.length === 0 || segment.indexOf('/') !== -1 || segment.indexOf('\\') !== -1 || segment.indexOf('.') !== -1;
+}
 
 function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -1931,7 +1949,7 @@ function specEngineScrubOversizedFieldsForTrace(outcome) {
 }
 
 // specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir,
-// path, namespacedKey) -- backs producer-pointer recording (malformed-
+// path, namespacedSegments) -- backs producer-pointer recording (malformed-
 // receipt detection), the engine-side oversized-output guard and its writer
 // backstop, and the guard's own status/trace/receipt-sub-field scan-scope
 // exclusion, together forming the oversized-output carriage design. Called
@@ -1978,9 +1996,10 @@ function specEngineScrubOversizedFieldsForTrace(outcome) {
 // call. The writer dispatch is a special step envelope, DISCLOSED here:
 // `{ id: '<namespacedKey>.<field>.spill-writer', type: 'spill-writer', path:
 // '<spillDir>/<namespacedKey>.<field>', prompt: <the oversized string> }` --
-// `namespacedKey` is the step's own FULL namespaced result key (identical to
-// `stepId` at the top level; see SPEC_SCHEMA.md's own "Producer-side spill"
-// paragraph for what that means inside a container) -- the
+// `namespacedKey` here is `namespacedSegments.join('.')`, computed AFTER
+// the containment guard below validates every RAW segment (identical to
+// `[stepId]` at the top level; see SPEC_SCHEMA.md's own "Producer-side
+// spill" paragraph for what that means inside a container) -- the
 // content travels on the PROMPT/input side of this dispatch call, exactly
 // like every other agent/gate step's prompt in this file, never through
 // this function's own return value or through the engine's own output;
@@ -2022,7 +2041,7 @@ function specEngineScrubOversizedFieldsForTrace(outcome) {
 // writer dispatch, so a run with no oversized output never demands
 // spillDir at all -- under 'spill-guard-spilldir-unavailable', status
 // "failed", before any writer dispatch is attempted.
-async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path, namespacedKey) {
+async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path, namespacedSegments) {
   if (!specEngineIsPlainObject(outcome)) {
     return { halted: false, outcome: outcome, traceEntries: [] };
   }
@@ -2114,44 +2133,42 @@ async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spil
       };
     }
 
-    // The target path and the writer step's own id are built from
-    // `namespacedKey` -- the FULL namespaced result key this field's step
-    // will eventually be recorded under (identical to `stepId` at the top
-    // level, per specEngineApplySpillGuard's own header comment; the caller
-    // resolves it via namespaceKeyFor, see specEngineExecuteSequence below)
-    // -- NEVER the bare, possibly-repeated `stepId`. Two parallel tracks (or
-    // two map iterations) that both happen to declare a step called "inner"
-    // spill to "<spillDir>/t1.inner.<field>" and
-    // "<spillDir>/t2.inner.<field>" (or "<spillDir>/mp.0.inner.<field>" /
-    // "<spillDir>/mp.1.inner.<field>") respectively, never to the SAME path
-    // -- see SPEC_SCHEMA.md's own "Producer-side spill" paragraph.
+    // The target path and the writer step's own id are built by joining
+    // `namespacedSegments` -- the RAW (unjoined) segments that make up this
+    // field's step's own FULL namespaced result key (identical to
+    // `[stepId]` at the top level; the caller composes it via
+    // namespaceKeyFor, see specEngineExecuteSequence below) -- NEVER the
+    // bare, possibly-repeated `stepId`. Two parallel tracks (or two map
+    // iterations) that both happen to declare a step called "inner" spill
+    // to "<spillDir>/t1.inner.<field>" and "<spillDir>/t2.inner.<field>"
+    // (or "<spillDir>/mp.0.inner.<field>" / "<spillDir>/mp.1.inner.<field>")
+    // respectively, never to the SAME path -- see SPEC_SCHEMA.md's own
+    // "Producer-side spill" paragraph.
     //
-    // Containment guard: `namespacedKey` and `field` are both untrusted
-    // inputs by construction -- `field` comes from Object.keys of the
-    // dispatched agent's own return value (an untrusted producer, not
-    // engine-controlled data), and `namespacedKey` is built by composing
-    // step ids, which a spec author also controls. Neither is validated
-    // against a filesystem-safe charset anywhere upstream of this point.
-    // Without a check here, a field or step id carrying '/', '\', or a '..'
-    // path segment lets the constructed target path escape `spillDir`
-    // entirely (e.g. a step id of "../../../etc/evil" or a field name of
-    // "ok/../../escaped"), and this engine module both constructs that path
-    // and hands it to the writer dispatch -- so containment is this
-    // engine's own guarantee to make, not the writer-agent's. The exact
-    // rule enforced: every '.'-separated segment of `namespacedKey`, and
-    // `field` itself, must match /^[A-Za-z0-9_-]+$/ -- no '/', no '\', no
-    // '..', no empty segment. This is the tightest rule consistent with
-    // every legal step id already accepted elsewhere in this file (step ids
-    // are always plain identifiers; container namespacing only ever adds
-    // '.'-joined plain segments, digits for map indices, and the fixed
-    // literal "attempts" for scored-retry). A violation halts under
-    // 'spill-path-unsafe', scrubbed like every other spill-guard halt,
-    // before any writer dispatch.
-    const keySegments = namespacedKey.split('.');
-    const unsafeSegment = keySegments.concat([field]).find(function (segment) {
-      return !SPEC_ENGINE_SAFE_PATH_SEGMENT_RE.test(segment);
-    });
-    if (typeof unsafeSegment !== 'undefined') {
+    // Containment guard: `namespacedSegments` arrives as an ARRAY of RAW,
+    // pre-composition segments (never a single already-'.'-joined string)
+    // specifically so this check can tell an author-supplied dot apart
+    // from the engine's own namespace-separator dot. If this guard instead
+    // received one composed string and split it on '.', a step id of "a.b"
+    // would split into segments that look identical to a genuinely
+    // composed "track a, step b" key -- an unrelated legal spec would spill
+    // to the exact same file, and the per-segment check could not tell the
+    // two apart after the fact. Validating each RAW segment (and the field
+    // name) BEFORE any join happens is what makes that collision
+    // impossible. specEngineIsUnsafePathSegment above is the actual rule
+    // (a denylist, not an allowlist -- validator-legal characters like a
+    // space remain legal here); every element of
+    // `namespacedSegments.concat([field])` is checked against it. A
+    // violation halts under 'spill-path-unsafe', scrubbed like every other
+    // spill-guard halt, before any writer dispatch and before any join.
+    // findIndex(), not find(): find() returns undefined both when nothing
+    // matches AND when the matching element's own value is undefined (a
+    // missing/non-string step id produces exactly that element), so find()
+    // cannot signal "found" reliably here -- the index can.
+    const allSegments = namespacedSegments.concat([field]);
+    const unsafeIndex = allSegments.findIndex(specEngineIsUnsafePathSegment);
+    if (unsafeIndex !== -1) {
+      const unsafeSegment = allSegments[unsafeIndex];
       return {
         halted: true,
         status: 'failed',
@@ -2162,16 +2179,15 @@ async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spil
             stepId +
             '" field "' +
             field +
-            '" would spill to a path built from an unsafe segment ("' +
-            unsafeSegment +
-            '"); every namespaced-key segment and the field name must match ' +
-            SPEC_ENGINE_SAFE_PATH_SEGMENT_RE_SOURCE +
-            ' -- refusing to construct the target path.'
+            '" would spill to a path built from an unsafe segment (' +
+            JSON.stringify(unsafeSegment) +
+            '); every raw name that participates in the path (step/track/branch ids and the field name) must be a non-empty string containing no ".", "/", or "\\" -- refusing to construct the target path.'
         ),
         safeOutcomeForTrace: specEngineScrubOversizedFieldsForTrace(workingOutcome),
       };
     }
 
+    const namespacedKey = namespacedSegments.join('.');
     const targetPath = spillDir + '/' + namespacedKey + '.' + field;
     const writerStep = { id: namespacedKey + '.' + field + '.spill-writer', type: 'spill-writer', path: targetPath, prompt: value };
     const writerOutcome = await dispatch(writerStep, { results: {}, values: values });
@@ -2558,8 +2574,8 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
           };
         }
 
-        const namespacedKey = namespaceKeyFor(stepId);
-        const spillGuardOutcome = await specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path, namespacedKey);
+        const namespacedSegments = namespaceKeyFor([stepId]);
+        const spillGuardOutcome = await specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path, namespacedSegments);
         if (spillGuardOutcome.halted) {
           // Push the guard's own trace-safe scrub (see
           // specEngineScrubOversizedFieldsForTrace above), never the raw
@@ -2653,14 +2669,18 @@ async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseR
   const localTrace = [];
   const trackPath = parentPath + '.tracks[' + trackIndex + '].steps';
 
-  // Compose a namespaceKeyFor for this track's own steps --
-  // `<trackId>.<bareId>`, run through the OUTER namespaceKeyFor this
-  // function was handed (so a track nested inside further containers still
-  // gets the full composed key, e.g. "<outerPrefix>.<trackId>.<id>"). This
-  // is what makes two tracks that both declare a step called "inner" spill
-  // to two DIFFERENT paths instead of colliding on the same file.
-  const trackNamespaceKeyFor = function (bareId) {
-    return namespaceKeyFor(track.id + '.' + bareId);
+  // Compose a namespaceKeyFor for this track's own steps: prepend this
+  // track's own RAW id to whatever raw segments the inner call contributes
+  // -- never string-concatenated with the namespace-separator dot -- run
+  // through the OUTER namespaceKeyFor this function was handed (so a track
+  // nested inside further containers still gets the full composed segment
+  // array). This is what makes two tracks that both declare a step called
+  // "inner" spill to two DIFFERENT paths instead of colliding on the same
+  // file, and (per specEngineApplySpillGuard's own containment guard) what
+  // lets a raw track id containing '.' be caught as unsafe rather than
+  // silently merging with the namespace separator.
+  const trackNamespaceKeyFor = function (bareSegments) {
+    return namespaceKeyFor([track.id].concat(bareSegments));
   };
 
   const seqOutcome = await specEngineExecuteSequence(track.steps, dispatch, values, localResults, localTrace, trackPath, spillDir, trackNamespaceKeyFor);
@@ -3070,16 +3090,19 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
   const onlyStepId = bodyStepCount === 1 && specEngineIsPlainObject(step.steps[0]) ? step.steps[0].id : null;
 
   for (let index = 0; index < listValue.length; index += 1) {
-    // Compose this iteration's own namespaceKeyFor --
-    // "<mapId>.<index>.<bareId>", run through the OUTER namespaceKeyFor --
-    // so two iterations of the same map body, both declaring a step called
-    // "inner", spill to two DIFFERENT paths ("<spillDir>/mp.0.inner.<field>"
-    // vs "<spillDir>/mp.1.inner.<field>"), each embedding its own iteration
-    // index. `index` is a `let` binding scoped fresh per for-loop iteration,
-    // so this closure correctly captures THIS iteration's own value, not
-    // the loop's final one.
-    const iterationNamespaceKeyFor = function (bareId) {
-      return namespaceKeyFor(step.id + '.' + index + '.' + bareId);
+    // Compose this iteration's own namespaceKeyFor: prepend this map
+    // step's own RAW id and this iteration's own index (an ENGINE-
+    // GENERATED segment, safe by construction -- a digit string never
+    // contains '.', '/', or '\') to whatever raw segments the inner call
+    // contributes, run through the OUTER namespaceKeyFor -- so two
+    // iterations of the same map body, both declaring a step called
+    // "inner", spill to two DIFFERENT paths
+    // ("<spillDir>/mp.0.inner.<field>" vs "<spillDir>/mp.1.inner.<field>"),
+    // each embedding its own iteration index. `index` is a `let` binding
+    // scoped fresh per for-loop iteration, so this closure correctly
+    // captures THIS iteration's own value, not the loop's final one.
+    const iterationNamespaceKeyFor = function (bareSegments) {
+      return namespaceKeyFor([step.id, String(index)].concat(bareSegments));
     };
 
     const iterationOutcome = await specEngineExecuteMapIteration(
@@ -3425,9 +3448,10 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     // already-unreachable case this still avoids colliding with the
     // attempt's own winner key by appending the sub-key rather than
     // discarding it outright.
-    const attemptNamespaceKeyFor = function (bareId) {
-      const attemptKey = step.id + '.attempts.' + n;
-      return namespaceKeyFor(bareId === wrappedStepId ? attemptKey : attemptKey + '.' + bareId);
+    const attemptNamespaceKeyFor = function (bareSegments) {
+      const attemptSegments = [step.id, 'attempts', String(n)];
+      const isWrappedLeaf = bareSegments.length === 1 && bareSegments[0] === wrappedStepId;
+      return namespaceKeyFor(isWrappedLeaf ? attemptSegments : attemptSegments.concat(bareSegments));
     };
 
     const seqOutcome = await specEngineExecuteSequence([attemptStep], dispatch, values, seedResults, attemptLocalTrace, attemptPath, spillDir, attemptNamespaceKeyFor);
@@ -3814,12 +3838,13 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
   const localTrace = [];
   const selectedPath = path + '.' + selectedLabel + '.steps';
 
-  // Compose this branch's own namespaceKeyFor -- "<branchId>.<bareId>" --
-  // the same pattern a track's own composition uses, since a branch step's
-  // nested steps namespace identically (`<branchId>.<stepId>`, per the
-  // "Result-key namespacing grammar" section's own branch-step bullet).
-  const branchNamespaceKeyFor = function (bareId) {
-    return namespaceKeyFor(step.id + '.' + bareId);
+  // Compose this branch's own namespaceKeyFor -- prepend this branch
+  // step's own RAW id to the inner call's raw segments -- the same pattern
+  // a track's own composition uses, since a branch step's nested steps
+  // namespace identically (`<branchId>.<stepId>`, per the "Result-key
+  // namespacing grammar" section's own branch-step bullet).
+  const branchNamespaceKeyFor = function (bareSegments) {
+    return namespaceKeyFor([step.id].concat(bareSegments));
   };
 
   const seqOutcome = await specEngineExecuteSequence(selectedSteps, dispatch, values, seedResults, localTrace, selectedPath, spillDir, branchNamespaceKeyFor);
@@ -4031,11 +4056,12 @@ async function specEngineExecute(spec, dispatch) {
   const results = {};
   const trace = [];
 
-  // Top-level namespaceKeyFor is the identity function -- a top-level
-  // step's namespaced result key IS its own bare id, so a top-level step
-  // always spills to "<spillDir>/<stepId>.<field>".
-  const topLevelNamespaceKeyFor = function (bareId) {
-    return bareId;
+  // Top-level namespaceKeyFor is the identity function over the raw
+  // segments array -- a top-level step's namespaced result key IS its own
+  // bare id (a single-element segments array, `[stepId]`), so a top-level
+  // step always spills to "<spillDir>/<stepId>.<field>".
+  const topLevelNamespaceKeyFor = function (bareSegments) {
+    return bareSegments;
   };
 
   const outcome = await specEngineExecuteSequence(parsedSpec.steps, dispatch, values, results, trace, 'steps', spillDir, topLevelNamespaceKeyFor);

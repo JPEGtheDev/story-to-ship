@@ -627,6 +627,97 @@ async function main() {
     );
   }
 
+  // -- a validator-legal id containing a space is NOT rejected by the -----
+  // -- containment guard (a denylist, not an allowlist): it spills --------
+  // -- normally, reaching a real writer dispatch -----------------------------
+  {
+    const oversized = 'v'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const spec = { steps: [{ id: 'a b', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({
+      agent: async () => ({ content: oversized }),
+      'spill-writer': async (step) => ({ written: true, path: step.path, sha256: HEX64_A, bytes: oversized.length }),
+    });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a validator-legal id containing a space still completes', outcome.status === 'completed');
+    check(
+      'a validator-legal id containing a space reaches a real writer dispatch (agent then spill-writer)',
+      dispatch.calls.length === 2 && dispatch.calls[1].type === 'spill-writer'
+    );
+    check('a validator-legal id containing a space spills to a path that preserves the space', outcome.results['a b'].content.path === '/spill/a b.content');
+  }
+
+  // -- a dot inside a RAW step id must halt before path construction: -----
+  // -- composed, it is indistinguishable from the engine's own namespace --
+  // -- separator, so the same joined path could otherwise be reached by ---
+  // -- two unrelated specs -------------------------------------------------
+  {
+    const oversized = 'q'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const specDotted = { steps: [{ id: 'a.b', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatchDotted = makeDispatch({
+      agent: async () => ({ content: oversized }),
+      'spill-writer': async (step) => ({ written: true, path: step.path, sha256: HEX64_A, bytes: oversized.length }),
+    });
+    const outcomeDotted = await specEngineExecute(specDotted, dispatchDotted);
+    check('a top-level step id containing a dot halts with status "failed"', outcomeDotted.status === 'failed');
+    check(
+      'a top-level step id containing a dot uses the spill-path-unsafe diagnostic',
+      outcomeDotted.halt !== null && outcomeDotted.halt.diagnostic === 'spill-path-unsafe'
+    );
+    check('a top-level step id containing a dot never reaches a writer dispatch (dispatch called once, agent only)', dispatchDotted.calls.length === 1);
+
+    // The genuinely-composed pair (track "a" containing step "b") joins to
+    // the IDENTICAL path "/spill/a.b.content" -- and must still spill
+    // normally, proving the guard tells the two apart by validating RAW
+    // segments before any join, not the already-joined string.
+    const specComposed = {
+      steps: [{ id: 'par', type: 'parallel', tracks: [{ id: 'a', steps: [{ id: 'b', type: 'agent' }] }] }],
+      config: { spillDir: '/spill' },
+    };
+    const dispatchComposed = makeDispatch({
+      agent: async () => ({ content: oversized }),
+      'spill-writer': async (step) => ({ written: true, path: step.path, sha256: HEX64_A, bytes: oversized.length }),
+    });
+    const outcomeComposed = await specEngineExecute(specComposed, dispatchComposed);
+    check('track "a" containing step "b" still completes', outcomeComposed.status === 'completed');
+    check(
+      'track "a" containing step "b" spills to the SAME joined path a dotted top-level id would otherwise produce',
+      outcomeComposed.results['a.b'].content.path === '/spill/a.b.content'
+    );
+  }
+
+  // -- a dotted FIELD name (from a dispatched agent's own return value) ---
+  // -- halts the same way as a dotted step id, never leaking the payload --
+  {
+    const sentinel = 'PAYLOAD-SENTINEL-DOTTED-FIELD-';
+    const oversized = sentinel + 'x'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1 - sentinel.length);
+    const spec = { steps: [{ id: 'report', type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ 'a.b': oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a dotted field name halts with status "failed"', outcome.status === 'failed');
+    check('a dotted field name uses the spill-path-unsafe diagnostic', outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe');
+    check('a dotted field name never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+    check('a dotted field name never leaks the payload into the FULL returned outcome (sentinel scan)', JSON.stringify(outcome).indexOf(sentinel) === -1);
+  }
+
+  // ======================================================================
+  // Fail-closed on a missing/non-string step id: specEngineExecute() can
+  // be called directly, bypassing validateSpec's own non-empty-string
+  // requirement -- this guard must halt, never throw, when a namespaced
+  // segment is not a string.
+  // ======================================================================
+  {
+    const oversized = 'm'.repeat(SPEC_ENGINE_SPILL_THRESHOLD_BYTES + 1);
+    const spec = { steps: [{ type: 'agent' }], config: { spillDir: '/spill' } };
+    const dispatch = makeDispatch({ agent: async () => ({ content: oversized }) });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a step with a missing id and an oversized field halts rather than throwing', outcome.status === 'failed');
+    check(
+      'a step with a missing id and an oversized field uses the spill-path-unsafe diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'spill-path-unsafe'
+    );
+    check('a step with a missing id and an oversized field never reaches a writer dispatch (dispatch called once, agent only)', dispatch.calls.length === 1);
+  }
+
   // ======================================================================
   // Digest-verify halt trace safety: both digest-verify halt paths must
   // scrub an oversized sibling field before pushing into the trace, the

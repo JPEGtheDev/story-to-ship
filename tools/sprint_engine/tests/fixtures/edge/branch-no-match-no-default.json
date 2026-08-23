@@ -1,0 +1,54 @@
+{
+  "grade": "DETERMINISM-grade (deterministic replay, no live agents)",
+  "pins": "A branch step whose declared cases all fail to match, and which declares no default, halts with branch-no-match-no-default before any case or default step ever dispatches.",
+  "scriptedOutputsShape": "Ordered array of objects with fields stepId and output, consumed by dispatch call order (index 0 first). This spec's only case fails to match and no default is declared, so only the upstream step ever dispatches; the branch's own case step never dispatches and so contributes no entry. Same ordered {stepId, output} array contract used by all four edge fixtures (sentinel-halt.json, uncertain-gate.json, spill-guard-violation.json, branch-no-match-no-default.json).",
+  "spec": {
+    "steps": [
+      {
+        "id": "upstream_signal",
+        "type": "agent",
+        "prompt": "report a signal value"
+      },
+      {
+        "id": "route",
+        "type": "branch",
+        "cases": [
+          {
+            "when": {
+              "step": "upstream_signal",
+              "field": "x",
+              "operator": "equals",
+              "value": "expected"
+            },
+            "steps": [
+              {
+                "id": "never_taken",
+                "type": "agent",
+                "prompt": "should never dispatch"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "config": {
+      "spillDir": "/tmp/sprint-engine-fixture-spill"
+    }
+  },
+  "scriptedOutputs": [
+    {
+      "stepId": "upstream_signal",
+      "output": {
+        "x": "actual"
+      }
+    }
+  ],
+  "expected": {
+    "status": "failed",
+    "dispatchCount": 1,
+    "halt": {
+      "path": "steps[1]",
+      "diagnostic": "branch-no-match-no-default"
+    }
+  }
+}

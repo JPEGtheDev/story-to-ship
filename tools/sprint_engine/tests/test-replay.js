@@ -9,6 +9,8 @@
 // reuses that script's mock DESIGN (matching a live dispatch back to its
 // captured fixture record by stepKey) without re-running its five checks.
 
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const { specEngineExecute } = require('../engine-core.js');
@@ -21,7 +23,7 @@ function check(description, condition) {
     passCount += 1;
   } else {
     failCount += 1;
-    console.log('FAIL: ' + description);
+    console.error('FAIL: ' + description);
   }
 }
 
@@ -132,10 +134,12 @@ async function runPartA() {
   // dispatchIndex 15 is route_by_risk.log_auto_approval (the default arm's
   // step), never route_by_risk.flag_for_manual_review (the case arm's
   // step) -- so a faithful replay's own results land under the default
-  // arm's namespaced key and never under the case arm's.
+  // arm's namespaced key and never under the case arm's. Two separately
+  // named checks so a failure identifies which condition broke.
+  check('Part A: route_by_risk default-arm result key (log_auto_approval) is present', outcome.results['route_by_risk.log_auto_approval'] !== undefined);
   check(
-    'Part A: route_by_risk selected the default arm (log_auto_approval)',
-    outcome.results['route_by_risk.log_auto_approval'] !== undefined && outcome.results['route_by_risk.flag_for_manual_review'] === undefined
+    'Part A: route_by_risk case-arm result key (flag_for_manual_review) is absent',
+    outcome.results['route_by_risk.flag_for_manual_review'] === undefined
   );
 
   // keep-best winners per module, pinned as literals -- machine-verified
@@ -196,10 +200,23 @@ async function runPartB() {
 
     check(file + ': status matches expected', outcome.status === fixture.expected.status);
     check(file + ': dispatchCount matches expected', calls.length === fixture.expected.dispatchCount);
-    check(file + ': halt.path matches expected', !!outcome.halt && outcome.halt.path === fixture.expected.halt.path);
-    check(file + ': halt.diagnostic matches expected', !!outcome.halt && outcome.halt.diagnostic === fixture.expected.halt.diagnostic);
-    if (Object.prototype.hasOwnProperty.call(fixture.expected.halt, 'value')) {
-      check(file + ': halt.value matches expected', !!outcome.halt && outcome.halt.value === fixture.expected.halt.value);
+
+    // Guard the halt dereference: every committed edge fixture today
+    // halts (expected.status is "failed" or "uncertain", expected.halt is
+    // an object), but this loop discovers files by glob, so a future
+    // non-halting fixture must fail a named check here instead of
+    // throwing a TypeError on fixture.expected.halt.path/.diagnostic --
+    // preserving the auto-pickup promise instead of crashing the suite.
+    const expectedHasHaltObject =
+      Object.prototype.hasOwnProperty.call(fixture.expected, 'halt') && fixture.expected.halt !== null && typeof fixture.expected.halt === 'object';
+    if (!expectedHasHaltObject) {
+      check(file + ': expected block has halt object', false);
+    } else {
+      check(file + ': halt.path matches expected', !!outcome.halt && outcome.halt.path === fixture.expected.halt.path);
+      check(file + ': halt.diagnostic matches expected', !!outcome.halt && outcome.halt.diagnostic === fixture.expected.halt.diagnostic);
+      if (Object.prototype.hasOwnProperty.call(fixture.expected.halt, 'value')) {
+        check(file + ': halt.value matches expected', !!outcome.halt && outcome.halt.value === fixture.expected.halt.value);
+      }
     }
   }
 }

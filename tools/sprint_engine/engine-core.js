@@ -3378,10 +3378,17 @@ function specEngineSha256Rotr(x, n) {
 // (0xd800-0xdbff) is immediately followed by a low surrogate
 // (0xdc00-0xdfff), the pair is combined into the single code point above
 // U+FFFF it encodes before the UTF-8 byte-count table is applied, exactly
-// as UTF-16 requires -- an unpaired surrogate (a malformed input this
-// function does not reject) falls through and is encoded on its own as a
-// 3-byte sequence, the same as any other code point in the
-// U+0800..U+FFFF range.
+// as UTF-16 requires. An UNPAIRED surrogate -- a high surrogate not
+// immediately followed by a low surrogate, or a low surrogate encountered
+// on its own -- is substituted with U+FFFD (the replacement character)
+// before encoding, rather than encoded on its own numeric value. This is
+// not an arbitrary choice: it is exactly what node's own
+// Buffer.from(str, 'utf8') does (confirmed against node's "crypto" module
+// in this function's test suite), and what a UTF-8 file write performs on
+// the same malformed input. specEngineSha256 exists to verify spilled text
+// against digests of on-disk bytes, so matching that substitution -- not
+// encoding the lone surrogate's own value -- is the correct property for
+// this function to have.
 function specEngineUtf8Encode(str) {
   const bytes = [];
   for (let i = 0; i < str.length; i += 1) {
@@ -3392,6 +3399,15 @@ function specEngineUtf8Encode(str) {
         codePoint = (codePoint - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000;
         i += 1;
       }
+    }
+    if (codePoint >= 0xd800 && codePoint <= 0xdfff) {
+      // Still in the surrogate range after the pairing attempt above:
+      // either a high surrogate that found no valid low surrogate to pair
+      // with, or a low surrogate reached directly (never eligible for the
+      // pairing branch, which only fires when the CURRENT code unit is a
+      // high surrogate). Both are unpaired by definition -- substitute the
+      // replacement character.
+      codePoint = 0xfffd;
     }
     if (codePoint <= 0x7f) {
       bytes.push(codePoint);

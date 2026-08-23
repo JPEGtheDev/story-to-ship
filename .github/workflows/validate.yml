@@ -26,7 +26,7 @@ jobs:
           jq empty .claude-plugin/marketplace.json
           echo "[+] .claude-plugin/*.json are valid JSON"
 
-      - name: Shellcheck hook scripts
+      - name: Shellcheck shell scripts
         run: |
           shellcheck hooks/session-start.sh
           shellcheck hooks/pre-message-gates.sh
@@ -42,7 +42,10 @@ jobs:
           shellcheck hooks/tests/run-workflow-model-guard.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
-          echo "[+] All hook scripts pass shellcheck"
+          shellcheck tools/sprint_engine/tests/inline-copy-check.sh
+          shellcheck tools/sprint_engine/tests/run.sh
+          shellcheck tools/sprint_engine/tests/runner-syntax-check.sh
+          echo "[+] All shell scripts pass shellcheck"
 
       - name: Run all hook fixture suites
         run: |
@@ -288,3 +291,15 @@ jobs:
         run: |
           python3 -m unittest discover -s tools/evaluation_evidence_gate -p 'test_*.py'
           echo "[+] evaluation-evidence gate unit tests pass"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Report Node.js version
+        run: |
+          echo "node version: $(node --version)"
+
+      - name: Run sprint engine test suite
+        run: bash tools/sprint_engine/tests/run.sh

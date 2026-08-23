@@ -320,7 +320,16 @@ it creates the spill directory if needed (`mkdir -p`), writes the content to
 the field-optionality table above -- computes the file's sha256 checksum, and
 returns a receipt in place of the content: `{spilled: true, path, sha256,
 bytes}`. The engine stores that receipt in the results map; the oversized
-text itself never transits the agent's own output.
+text itself never transits the agent's own output. `<stepId>` here means the
+step's own FULL namespaced result key -- the same key the "Result-key
+namespacing grammar" section describes results being stored under (bare
+`stepId` at the top level, `<trackId>.<stepId>` inside a parallel track,
+`<mapId>.<index>.<stepId>` inside a map iteration, and so on for the other
+containers) -- never the step's bare local id alone. This keeps two
+same-named steps in different tracks or map iterations from spilling to the
+same file: a step called `inner` in track `t1` spills to
+`<spillDir>/t1.inner.<field>`, and the same-named step in track `t2` spills
+to `<spillDir>/t2.inner.<field>`.
 
 **Pointer sub-fields are first-class referents.** Once a field has spilled,
 its receipt's own sub-fields are legal things to reference in a later

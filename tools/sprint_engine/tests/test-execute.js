@@ -495,17 +495,31 @@ async function main() {
   // -- malformed-spec guard: a spec that is not a plain object halts ------
   // -- with status "failed" under the reused spec-not-object diagnostic ---
   // -- NOTE: this fixture must be a non-STRING, non-object value -- a bare
-  // -- string is now a legal spec INPUT FORM (specEngineExecute JSON.parses
-  // -- a string spec; see test-carriage.js's own B1 coverage), so a string
-  // -- fixture here would exercise the spec-json-unparseable diagnostic
-  // -- instead of this one. 42 is neither a string nor a plain object, so
-  // -- it still reaches (and still fails) the spec-not-object guard.
+  // -- string is now a legal spec input form (specEngineExecute JSON.parses
+  // -- a string spec; see test-carriage.js's own spec-input-forms coverage),
+  // -- so a string fixture here would exercise the spec-json-unparseable
+  // -- diagnostic instead of this one. 42 is neither a string nor a plain
+  // -- object, so it still reaches (and still fails) the spec-not-object
+  // -- guard.
   {
     const dispatch = makeRecordingDispatch({});
     const outcome = await specEngineExecute(42, dispatch);
-    check('a non-object, non-string spec halts with status "failed"', outcome.status === 'failed');
-    check('the halt uses the reused spec-not-object diagnostic', outcome.halt.diagnostic === 'spec-not-object');
-    check('a non-object, non-string spec never reaches dispatch', dispatch.calls.length === 0);
+    check('a non-object, non-string spec (number) halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the reused spec-not-object diagnostic (number)', outcome.halt.diagnostic === 'spec-not-object');
+    check('a non-object, non-string spec (number) never reaches dispatch', dispatch.calls.length === 0);
+  }
+
+  // -- malformed-spec guard, fold-in: null is a second, distinct
+  // -- non-object, non-string value that must reach the same spec-not-object
+  // -- guard as the number 42 above -- typeof null === 'object' in
+  // -- JavaScript, so this fixture also proves the guard's own plain-object
+  // -- check rejects null specifically, not just "typeof !== 'object'".
+  {
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(null, dispatch);
+    check('a null spec halts with status "failed"', outcome.status === 'failed');
+    check('the halt uses the reused spec-not-object diagnostic (null)', outcome.halt.diagnostic === 'spec-not-object');
+    check('a null spec never reaches dispatch', dispatch.calls.length === 0);
   }
 
   // -- malformed-spec guard: a spec whose "steps" is not an array halts ---

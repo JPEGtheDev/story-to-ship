@@ -1,0 +1,170 @@
+{
+  "steps": [
+    {
+      "id": "build",
+      "type": "agent",
+      "verifyDigest": {
+        "path": "/data/build-test-review/source-bundle.tar",
+        "sha256": "7694d9092c4589b26907a92fd1a5f15689776ce95a22c4848f15962747d0658e"
+      },
+      "prompt": "You are the build agent for the build-test-review pipeline. The engine has already verified the on-disk source bundle at the declared path against its expected sha256 digest via this step's verifyDigest check; proceed only because that check passed. Compile the project from the verified source bundle and report two fields on your result: `status` (the string \"success\" or \"failure\") and `content`, the complete, unabridged build log covering every compiler invocation, warning, and linker step. The `content` field is required to be at least 41628 characters long -- do not truncate, summarize, or abbreviate the log to fall under that size; emit the full text even if it must spill to a file under the configured spillDir. Also report `changedModules`, a list of the module names touched by this build, for the per-module review stage that follows.",
+      "outputSchema": {
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "changedModules": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    {
+      "id": "test_suites",
+      "type": "parallel",
+      "tracks": [
+        {
+          "id": "unit",
+          "steps": [
+            {
+              "id": "run_unit_tests",
+              "type": "agent",
+              "prompt": "Run the unit test suite against the build produced by {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
+              "outputSchema": {
+                "properties": {
+                  "passCount": {
+                    "type": "number"
+                  },
+                  "failCount": {
+                    "type": "number"
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "id": "unit_gate",
+              "type": "gate",
+              "prompt": "Given the unit test run at {{unit.run_unit_tests}}, report a JSON object with a `verdict` field: \"pass\" if failCount is 0, otherwise \"fail\"; include a `reason` field explaining the decision."
+            }
+          ]
+        },
+        {
+          "id": "integration",
+          "steps": [
+            {
+              "id": "run_integration_tests",
+              "type": "agent",
+              "prompt": "Run the integration test suite against the build produced by {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
+              "outputSchema": {
+                "properties": {
+                  "passCount": {
+                    "type": "number"
+                  },
+                  "failCount": {
+                    "type": "number"
+                  },
+                  "total": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            {
+              "id": "integration_gate",
+              "type": "gate",
+              "prompt": "Given the integration test run at {{integration.run_integration_tests}}, report a JSON object with a `verdict` field: \"pass\" if failCount is 0, otherwise \"fail\"; include a `reason` field explaining the decision."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "per_module_review",
+      "type": "map",
+      "list": {
+        "step": "build",
+        "field": "changedModules"
+      },
+      "steps": [
+        {
+          "id": "code_review_with_retry",
+          "type": "scored-retry",
+          "mode": "keep-best",
+          "maxAttempts": 2,
+          "step": {
+            "id": "review_module",
+            "type": "agent",
+            "prompt": "Review the module named by this map iteration's item for code quality, test coverage, and adherence to the build-test-review pipeline's conventions. Report `score`, a number from 0 to 1 where 1 is a flawless review, and `notes` summarizing findings.",
+            "outputSchema": {
+              "properties": {
+                "score": {
+                  "type": "number"
+                },
+                "notes": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "assemble_report",
+      "type": "shape",
+      "template": {
+        "pipeline": "build-test-review",
+        "buildStatus": "{{build.status}}",
+        "unitFailures": "{{unit.run_unit_tests.failCount}}",
+        "integrationFailures": "{{integration.run_integration_tests.failCount}}",
+        "totalTrackFailures": "{{test_suites.failures}}",
+        "totalTracksRun": "{{test_suites.total}}"
+      }
+    },
+    {
+      "id": "route_by_risk",
+      "type": "branch",
+      "cases": [
+        {
+          "when": {
+            "step": "test_suites",
+            "field": "failures",
+            "operator": "gte",
+            "value": 1
+          },
+          "steps": [
+            {
+              "id": "flag_for_manual_review",
+              "type": "agent",
+              "prompt": "The build-test-review pipeline detected at least one failing test track (see {{test_suites}} for the aggregate counts and {{assemble_report}} for the assembled report). Draft a manual-review escalation notice summarizing what failed and who should be paged."
+            }
+          ]
+        }
+      ],
+      "default": {
+        "steps": [
+          {
+            "id": "log_auto_approval",
+            "type": "agent",
+            "prompt": "All test tracks passed (see {{test_suites}} and {{assemble_report}}). Write a short audit-log entry recording automatic approval of this build for release-gate evaluation."
+          }
+        ]
+      }
+    },
+    {
+      "id": "final_release_gate",
+      "type": "gate",
+      "prompt": "This is the final release gate for the build-test-review pipeline. Regardless of the outcome of any prior step in this run -- build, tests, module reviews, or the risk-routing branch -- always report the verdict \"fail\": this worked example is deliberately engineered so the release gate halts the run after every other step kind has already executed, to demonstrate the pipeline's whole-run \"gated\" halt behavior. Report a JSON object with `verdict` set to the literal string \"fail\" and a `reason` field of \"engineered failure for release-gate example\"."
+    }
+  ],
+  "config": {
+    "spillDir": "/tmp/sprint-engine-examples/build-test-review-spill",
+    "expectedSha256": "c9ecab40c0657e93d54ada336d77d289c298544eb3a11de2ea595c5799848b95"
+  }
+}

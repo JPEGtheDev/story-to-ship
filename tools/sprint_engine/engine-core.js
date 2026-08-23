@@ -1437,30 +1437,40 @@ function specEngineRegexExtract(text, pattern) {
 }
 
 // specEngineExecute(spec, dispatch) runs the execute loop over spec.steps,
-// in order, for the three leaf step kinds (agent, gate, shape) plus three
-// container kinds: "parallel", "map", and "scored-retry", per the
-// "Container authoring syntax" and "Result-key namespacing grammar"
-// sections of SPEC_SCHEMA.md, and the PROBE_RESULTS.md observation that a
-// failing gate verdict inside one branch does not disrupt the other
-// branch's result delivery or the overall join. The one remaining
-// container kind ("branch") remains a later capability -- meeting it at
-// execute time, whether at the top level or inside a parallel step's own
-// track, a map step's own body, or a scored-retry step's own wrapped step,
-// is never a silent skip; the loop halts immediately with a named
+// in order, for the three leaf step kinds (agent, gate, shape) plus all
+// four container kinds: "parallel", "map", "scored-retry", and "branch",
+// per the "Container authoring syntax" and "Result-key namespacing
+// grammar" sections of SPEC_SCHEMA.md, and the PROBE_RESULTS.md
+// observation that a failing gate verdict inside one branch does not
+// disrupt the other branch's result delivery or the overall join ("branch"
+// there is a parallel step's own track, in PROBE_RESULTS.md's own
+// terminology -- see SPEC_SCHEMA.md's "Result-key namespacing grammar"
+// section for why this file otherwise reserves the word "branch" for the
+// if/else step kind). Meeting an UNRECOGNIZED container step kind at
+// execute time -- one absent from SPEC_ENGINE_CONTAINER_STEP_KINDS
+// entirely, or present there but without its own explicit handling below
+// -- is never a silent skip; the loop halts immediately with a named
 // 'container-step-not-supported' diagnostic, the same {path, diagnostic,
-// message} halt shape every other halt in this file uses. A parallel
-// step's own malformed shapes (a missing/non-array `tracks`, a track that
-// is not a plain object, or a track missing its own `id`/`steps`) are
-// guarded here too, under their own named diagnostics, since validateSpec
-// does not itself flag those defects (see specEngineExecuteParallelStep
-// below); a map step's own malformed shapes (a missing/non-array `steps`,
-// or a missing/unresolvable/non-array `list`) get the same treatment (see
+// message} halt shape every other halt in this file uses (today this is a
+// defensive guard only, unreachable in practice, since all four declared
+// container kinds now have their own explicit handling -- see the comment
+// on that guard's own branch below). A parallel step's own malformed
+// shapes (a missing/non-array `tracks`, a track that is not a plain
+// object, or a track missing its own `id`/`steps`) are guarded here too,
+// under their own named diagnostics, since validateSpec does not itself
+// flag those defects (see specEngineExecuteParallelStep below); a map
+// step's own malformed shapes (a missing/non-array `steps`, or a
+// missing/unresolvable/non-array `list`) get the same treatment (see
 // specEngineExecuteMapStep below); a scored-retry step's own malformed
 // shapes (mode/threshold -- reusing validateSpec's own diagnostics for the
 // same defects it already checks, duplicated here for an unvalidated spec
 // the same way spec-not-object/steps-not-array are -- plus `maxAttempts`
 // and a non-object wrapped `step`, neither of which validateSpec checks)
-// get the same treatment (see specEngineExecuteScoredRetryStep below).
+// get the same treatment (see specEngineExecuteScoredRetryStep below); a
+// branch step's own malformed shapes (a missing/non-array `cases`, a case
+// that is not a plain object or is missing its own `when`/`steps`, or a
+// present-but-malformed `default`) get the same treatment too (see
+// specEngineExecuteBranchStep below).
 //
 // A map step's own list-source field, `list: { step, field? }`, is this
 // implementation's own disclosed choice -- SPEC_SCHEMA.md's map bullet
@@ -1699,7 +1709,25 @@ function specEngineRegexExtract(text, pattern) {
 // combination semantics SPEC_SCHEMA.md explicitly declines to specify) is
 // a recognized-but-rejected form, mirroring the existing
 // gate-predicate-form-not-supported precedent: it halts immediately, under
-// 'map-merge-not-supported', before any iteration runs.
+// 'map-merge-not-supported', before any iteration runs. A malformed branch
+// step's own shape gets the analogous treatment under its own diagnostics
+// ('branch-cases-not-array', 'branch-case-not-object',
+// 'branch-case-when-missing', 'branch-case-steps-not-array',
+// 'branch-default-malformed'), since validateSpec's own `type === 'branch'`
+// branch only checks a present-and-plain-object case's `when` operator and
+// recurses into `case.steps`/`default.steps` when they already happen to
+// be arrays -- silently doing nothing otherwise, the same gap parallel's
+// own `tracks` and map's own `steps` have (see specEngineExecuteBranchStep
+// below). A branch step that matches no case and declares no `default`
+// halts too, under 'branch-no-match-no-default', naming every evaluated
+// case predicate in its message -- this one is a genuine RUNTIME outcome
+// (it depends on the actual values a run produced), not a malformed-shape
+// defect, so unlike the five diagnostics above it is not escalated as a
+// whole-run halt unconditionally; it becomes this branch step's own
+// returned status instead, contained or escalated exactly the way a
+// scored-retry step's own 'scored-retry-no-winner' halt already is (see
+// specEngineExecuteBranchStep's own header comment, gap-fill A, for the
+// full disclosure).
 
 function specEngineMakeExecuteResult(status, results, trace, halt) {
   return { status: status, results: results, trace: trace, halt: halt || null };
@@ -1832,8 +1860,13 @@ function specEngineResolveGateVerdict(step, outcome, path) {
 // delegates to specEngineExecuteParallelStep and, on success, merges that
 // parallel step's own aggregate and namespaced per-track results into
 // `results` before continuing this same sequence -- every other branch
-// (shape, agent, gate, the three still-unsupported container kinds, and
-// the malformed-step/unknown-kind guards) is unchanged from before.
+// (shape, agent, gate, and the malformed-step/unknown-kind guards) is
+// unchanged from before; the `type === 'map'`, `type === 'scored-retry'`,
+// and `type === 'branch'` cases below were added the same way, each
+// delegating to its own executor (specEngineExecuteMapStep,
+// specEngineExecuteScoredRetryStep, specEngineExecuteBranchStep) and
+// merging its own namespaced results back into `results` before
+// continuing this same sequence.
 async function specEngineExecuteSequence(steps, dispatch, values, results, trace, pathPrefix) {
   for (let i = 0; i < steps.length; i += 1) {
     const step = steps[i];
@@ -1921,11 +1954,59 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
       continue;
     }
 
+    if (type === 'branch') {
+      const branchOutcome = await specEngineExecuteBranchStep(step, dispatch, values, path, results);
+      if (branchOutcome.wholeRunHalt) {
+        return { status: 'failed', halt: branchOutcome.wholeRunHalt };
+      }
+      // Merged regardless of ok/fail, mirroring the existing "partial
+      // results collected before a failure are still returned" convention
+      // scored-retry's own attempts-merging already applies (see the
+      // `type === 'scored-retry'` branch just above) -- see
+      // specEngineExecuteBranchStep's own header comment above.
+      Object.keys(branchOutcome.namespacedResults).forEach(function (namespacedKey) {
+        results[namespacedKey] = branchOutcome.namespacedResults[namespacedKey];
+      });
+      if (!branchOutcome.ok) {
+        trace.push({
+          step: stepId,
+          kind: type,
+          status: branchOutcome.status,
+          outcome: null,
+          flags: [],
+          selected: branchOutcome.selectedLabel,
+          pathTrace: branchOutcome.trace,
+        });
+        // GAP-FILL A (propagation, not containment): this branch step's
+        // own status/halt becomes THIS sequence's own status/halt, exactly
+        // like a gate's own fail/uncertain or scored-retry's own failure
+        // already does -- see specEngineExecuteBranchStep's own header
+        // comment above for the full disclosure.
+        return { status: branchOutcome.status, halt: branchOutcome.halt };
+      }
+      // No plain `results[stepId]` is ever written for a branch step
+      // (GAP-FILL C, disclosed in specEngineExecuteBranchStep's own header
+      // comment above) -- only the namespaced `<branchId>.<stepId>` keys
+      // just merged above.
+      trace.push({
+        step: stepId,
+        kind: type,
+        status: 'completed',
+        outcome: null,
+        flags: [],
+        selected: branchOutcome.selectedLabel,
+        pathTrace: branchOutcome.trace,
+      });
+      continue;
+    }
+
     if (SPEC_ENGINE_CONTAINER_STEP_KINDS.indexOf(type) !== -1) {
-      // Loud failure, never a silent skip: the one remaining container
-      // kind ("branch") is a later capability this loop does not
-      // implement, whether met at the top level or inside a track's, a map
-      // iteration's, or a scored-retry attempt's own sequence.
+      // Unreachable in practice today: every container kind in
+      // SPEC_ENGINE_CONTAINER_STEP_KINDS ("parallel", "map",
+      // "scored-retry", "branch") now has its own explicit `type === ...`
+      // branch above. Kept as a defensive, fail-loud guard -- never a
+      // silent skip -- should a fifth container kind ever be added to that
+      // constant without its own explicit handling landing alongside it.
       return {
         status: 'failed',
         halt: specEngineMakeHalt(
@@ -1935,7 +2016,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
             stepId +
             '" is a container step kind ("' +
             type +
-            '"); this executor only runs agent, gate, shape, parallel, map, and scored-retry -- the remaining container kind is a later capability.'
+            '") not yet given its own explicit handling in this loop.'
         ),
       };
     }
@@ -2887,6 +2968,315 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     ),
     namespacedResults: namespacedResults,
     attemptsTrace: attemptsTrace,
+  };
+}
+
+// specEngineExecuteBranchStep(step, dispatch, values, path, baseResults)
+// runs one "branch" step's if/else path selection, per the "Container
+// authoring syntax", "Predicate operator vocabulary", and "Result-key
+// namespacing grammar" sections of SPEC_SCHEMA.md.
+//
+// Malformed-shape guards run first, before any predicate is evaluated or
+// any step dispatched, in this order: `cases` missing/not-an-array
+// ('branch-cases-not-array'); then, for EVERY entry in `cases` -- not just
+// the one selection will eventually reach -- not a plain object
+// ('branch-case-not-object'), a missing/non-object `when`
+// ('branch-case-when-missing'), or a missing/non-array `steps`
+// ('branch-case-steps-not-array'); and, only when `default` is present at
+// all, not a plain object or its own `steps` not an array
+// ('branch-default-malformed'). Scanning every case's shape upfront (even
+// ones selection would never reach) mirrors specEngineExecuteParallelStep's
+// own "check every track's shape, not just the one that will run"
+// convention: these are structural defects in the branch step's own
+// declaration, not a runtime selection outcome, so all five diagnostics
+// above always escalate as `wholeRunHalt`, the same unconditional tier
+// parallel's and map's own malformed-shape guards use, regardless of
+// whether this branch step sits at the top level or inside a track/
+// iteration/attempt/another branch's own path. validateSpec does not
+// itself catch any of these five: its own `type === 'branch'` handling
+// only checks a present-and-plain-object `when`'s operator (via
+// checkPredicateOperator) and recurses into `case.steps`/`default.steps`
+// when they already happen to be arrays -- silently doing nothing
+// otherwise, the exact same gap parallel's own `tracks`/map's own `steps`
+// handling has (see specEngineExecuteParallelStep's and
+// specEngineExecuteMapStep's own header comments above).
+//
+// `when.step`/`when.field` are deliberately NOT separately guarded here:
+// a missing or wrong-typed operand resolves through the existing
+// specEngineEvalPredicate's own undefined-sentinel rule (the same
+// evaluator this function reuses for every case, unmodified -- see below),
+// which already halts loudly on an unresolvable operand. Reinventing that
+// check here would duplicate, not reuse, the comparison semantics
+// specEngineEvalPredicate already owns.
+//
+// Once every guard passes, cases are evaluated in DECLARED ORDER via the
+// existing specEngineEvalPredicate(when, baseResults) -- no comparison
+// semantics of its own; this function only decides SELECTION from that
+// evaluator's boolean `result`. The first case whose predicate evaluates
+// to `true` is selected immediately; every later case is left completely
+// unevaluated (both its own `when` and its own `steps`), matching "later
+// cases are NOT evaluated... their steps never dispatch." If a case's
+// predicate HALTS instead of resolving to a clean true/false (an unknown
+// operator, an unresolved operand, a non-numeric lte/gte operand, or a
+// spilled-content reference -- all specEngineEvalPredicate's own existing
+// diagnostics), that halt is forwarded to this function's own caller
+// EXACTLY as specEngineEvalPredicate returned it, unmodified -- per the
+// instruction to propagate the evaluator's existing halts with their
+// existing diagnostics. Its `path` field is the OPERAND locator
+// (`<step>.<field>`) specEngineEvalPredicate always builds itself, not a
+// locator this function constructs -- unlike specEngineRenderTemplate,
+// specEngineEvalPredicate takes no `path` parameter to prefix, so there is
+// nothing here to rebuild without duplicating logic that already exists.
+// This halt path is spend-free: it can only occur before ANY case's own
+// `steps` has run, since predicate evaluation always precedes running the
+// selected path.
+//
+// If every case's predicate resolves cleanly (no halt) but none matches,
+// `default` is taken when declared (already guard-verified above); when it
+// is not declared, this function returns a loud 'branch-no-match-no-default'
+// halt whose message names EVERY evaluated case predicate -- its step,
+// field, operator, and declared "value", plus the ACTUAL value read off
+// that step's result (re-resolved via the existing
+// specEngineResolveFieldPath primitive, purely for the message; this
+// mirrors, not replaces, specEngineEvalPredicate's own internal resolution)
+// -- so a broken/unexpected spec is always diagnosable from the halt text
+// alone, never just a bare diagnostic name. An empty `cases` array
+// (GAP-FILL B, disclosed) reaches this same halt with zero evaluated
+// predicates, worded distinctly ("(none -- \"cases\" is empty)"): nothing
+// in SPEC_SCHEMA.md's "Container authoring syntax" section requires
+// `cases` to be non-empty, only that it "is an array" -- a zero-length
+// array is still a legal array, read here as "no case can ever match,"
+// falling straight through to `default` (or this halt) exactly like a
+// populated-but-all-non-matching `cases` would.
+//
+// GAP-FILL A (selected-path failure PROPAGATES, is never independently
+// contained): once a path (a case's own `steps`, or `default.steps`) is
+// selected, it runs via the shared specEngineExecuteSequence, seeded with
+// a private clone of `baseResults` (the exact same seeding contract
+// specEngineExecuteTrack/specEngineExecuteMapIteration already use: a
+// step inside the path resolves both everything that ran before the
+// branch step AND this same path's own earlier steps by bare name, while
+// this path's own mutations never leak into `baseResults` or into a
+// sibling case's clone -- there is no sibling clone here, since only ONE
+// path ever runs). Unlike parallel/map, a branch step has no fan-out of
+// independently-continuing siblings left to protect once one path is
+// selected -- the same "no sibling to contain" shape
+// specEngineExecuteScoredRetryStep's own header comment already cites for
+// why ITS return shape mirrors a gate step's own contract instead of
+// parallel/map's wholeRunHalt-vs-contained split ("one wrapped step is
+// retried, one winner (or none) comes out"). A branch step is the same
+// shape: one path is selected, one outcome comes out, so THIS function's
+// own `status`/`halt` -- whatever the selected path's own
+// specEngineExecuteSequence run produced -- becomes exactly what
+// specEngineExecuteSequence's own `type === 'branch'` branch below returns
+// as ITS sequence's status, precisely mirroring how a gate step's own
+// "fail"/"uncertain" verdict or a scored-retry step's own failure already
+// propagate. This means a branch step's own failure is contained only by
+// whatever ALREADY wraps the ENCLOSING specEngineExecuteSequence call (a
+// track, a map iteration, another branch's own selected path, or nothing
+// at all at the top level) -- never by this function itself. This choice
+// is owner-reversible: nothing in SPEC_SCHEMA.md rules out an alternative
+// reading where a branch step contains its own path's failure the way a
+// track contains its own steps' failure; this implementation reads
+// "if/else path selection" as choosing which steps run next in the SAME
+// sequence, not as spawning an independently-recoverable unit.
+//
+// GAP-FILL C (no plain `results[branchId]` key is ever written): mirrors
+// specEngineExecuteMapStep's own disclosed choice for the identical gap --
+// the "Result-key namespacing grammar" section only defines
+// `<branchId>.<stepId>` for a branch step's nested results; there is no
+// ratified plain `<branchId>` key the way parallel's own aggregate
+// ({failures, successes, total}) or scored-retry's own winner exist.
+// Inventing one here would put an unaddressed value at a key the contract
+// never names -- see specEngineExecuteMapStep's own header comment above
+// for the identical reasoning, applied there to map's own missing
+// aggregate.
+//
+// On success (wholeRunHalt: null, ok: true), returns
+// { wholeRunHalt: null, ok: true, status: 'completed', halt: null,
+// namespacedResults, selectedLabel, trace }: `namespacedResults` is the
+// selected path's own contribution, re-keyed as `<branchId>.<stepId>` (the
+// same diff-against-the-seed technique specEngineExecuteTrack and
+// specEngineExecuteMapIteration already use); `selectedLabel` is
+// `'cases[<ci>]'` or `'default'`, naming which path ran (used only for
+// this function's own path-locator construction and the caller's trace
+// entry, never written into `results` itself); `trace` is the selected
+// path's own ordered step-trace, exactly as specEngineExecuteSequence
+// produced it. On a selected-path failure (ok: false), the same shape
+// carries whatever non-"completed" `status`/`halt`
+// specEngineExecuteSequence's own run returned, plus `namespacedResults`
+// merged UNCONDITIONALLY regardless of ok/fail (mirroring the existing
+// "partial results collected so far are still returned" convention
+// scored-retry's own attempts merging already applies -- see the
+// `type === 'scored-retry'` branch in specEngineExecuteSequence below,
+// whose own comment states this precedent explicitly).
+async function specEngineExecuteBranchStep(step, dispatch, values, path, baseResults) {
+  if (!Array.isArray(step.cases)) {
+    return {
+      wholeRunHalt: specEngineMakeHalt(
+        path + '.cases',
+        'branch-cases-not-array',
+        'Branch step "' + step.id + '" must declare "cases" as an array of { when, steps }; none was found.'
+      ),
+    };
+  }
+
+  for (let ci = 0; ci < step.cases.length; ci += 1) {
+    const branchCase = step.cases[ci];
+    const casePath = path + '.cases[' + ci + ']';
+
+    if (!specEngineIsPlainObject(branchCase)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          casePath,
+          'branch-case-not-object',
+          'Branch step "' + step.id + '" case at "' + casePath + '" must be a JSON object with "when" and "steps".'
+        ),
+      };
+    }
+    if (!specEngineIsPlainObject(branchCase.when)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          casePath + '.when',
+          'branch-case-when-missing',
+          'Branch step "' + step.id + '" case at "' + casePath + '" is missing a "when" predicate object.'
+        ),
+      };
+    }
+    if (!Array.isArray(branchCase.steps)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          casePath + '.steps',
+          'branch-case-steps-not-array',
+          'Branch step "' + step.id + '" case at "' + casePath + '" must declare "steps" as an array of step objects.'
+        ),
+      };
+    }
+  }
+
+  if (typeof step.default !== 'undefined') {
+    if (!specEngineIsPlainObject(step.default) || !Array.isArray(step.default.steps)) {
+      return {
+        wholeRunHalt: specEngineMakeHalt(
+          path + '.default',
+          'branch-default-malformed',
+          'Branch step "' + step.id + '" declares "default", but it is not a { steps: [...] } object.'
+        ),
+      };
+    }
+  }
+
+  const evaluated = [];
+  let selectedSteps = null;
+  let selectedLabel = null;
+
+  for (let ci = 0; ci < step.cases.length; ci += 1) {
+    const branchCase = step.cases[ci];
+    const evalOutcome = specEngineEvalPredicate(branchCase.when, baseResults);
+
+    if (evalOutcome.halted) {
+      // Forwarded exactly as specEngineEvalPredicate returned it -- see
+      // this function's own header comment above for why its path is the
+      // operand locator, not a locator this function builds.
+      return {
+        wholeRunHalt: null,
+        ok: false,
+        status: 'failed',
+        halt: evalOutcome,
+        namespacedResults: {},
+        selectedLabel: null,
+        trace: [],
+      };
+    }
+
+    const readResolution = specEngineResolveFieldPath(baseResults[branchCase.when.step], branchCase.when.field);
+    evaluated.push({
+      caseIndex: ci,
+      when: branchCase.when,
+      readValue: readResolution.resolved ? readResolution.value : undefined,
+      matched: evalOutcome.result,
+    });
+
+    if (evalOutcome.result === true) {
+      selectedSteps = branchCase.steps;
+      selectedLabel = 'cases[' + ci + ']';
+      break;
+    }
+  }
+
+  if (selectedSteps === null) {
+    if (typeof step.default !== 'undefined') {
+      selectedSteps = step.default.steps;
+      selectedLabel = 'default';
+    } else {
+      const predicateSummaries = evaluated
+        .map(function (ep) {
+          return (
+            'cases[' +
+            ep.caseIndex +
+            '].when {step: "' +
+            ep.when.step +
+            '", field: "' +
+            ep.when.field +
+            '", operator: "' +
+            ep.when.operator +
+            '", value: ' +
+            JSON.stringify(ep.when.value) +
+            '} read ' +
+            JSON.stringify(ep.readValue) +
+            ' -> no match'
+          );
+        })
+        .join('; ');
+      return {
+        wholeRunHalt: null,
+        ok: false,
+        status: 'failed',
+        halt: specEngineMakeHalt(
+          path,
+          'branch-no-match-no-default',
+          'Branch step "' +
+            step.id +
+            '" matched none of its ' +
+            evaluated.length +
+            ' case predicate(s) and declares no "default"; evaluated predicates: ' +
+            (predicateSummaries.length > 0 ? predicateSummaries : '(none -- "cases" is empty)') +
+            '.'
+        ),
+        namespacedResults: {},
+        selectedLabel: null,
+        trace: [],
+      };
+    }
+  }
+
+  const seedResults = Object.assign({}, baseResults);
+  const seedKeys = Object.keys(seedResults);
+  const localTrace = [];
+  const selectedPath = path + '.' + selectedLabel + '.steps';
+
+  const seqOutcome = await specEngineExecuteSequence(selectedSteps, dispatch, values, seedResults, localTrace, selectedPath);
+
+  const ownResults = {};
+  Object.keys(seedResults).forEach(function (key) {
+    if (seedKeys.indexOf(key) === -1) {
+      ownResults[key] = seedResults[key];
+    }
+  });
+
+  const namespacedResults = {};
+  Object.keys(ownResults).forEach(function (key) {
+    namespacedResults[step.id + '.' + key] = ownResults[key];
+  });
+
+  return {
+    wholeRunHalt: null,
+    ok: seqOutcome.status === 'completed',
+    status: seqOutcome.status,
+    halt: seqOutcome.halt,
+    namespacedResults: namespacedResults,
+    selectedLabel: selectedLabel,
+    trace: localTrace,
   };
 }
 

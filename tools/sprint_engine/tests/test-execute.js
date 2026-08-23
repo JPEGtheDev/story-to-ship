@@ -11,19 +11,23 @@
 // instead of the fully-synchronous top-level style the sibling suites use.
 //
 // specEngineExecute's own contract: it walks spec.steps in order, running
-// each leaf step (agent, gate, shape) and, since parallel-step, map-step,
-// and scored-retry-step support landed, a "parallel", "map", or
-// "scored-retry" container step too -- halting loudly the moment it meets
-// the one still-unsupported container kind (branch), since its execution
-// is a later capability this suite does not build. Dispatch capability is
-// injected: the caller supplies an async dispatch(step, context) function;
-// specEngineExecute itself carries no dispatch primitive of its own. See
-// engine-core.js's own header comment above specEngineExecute for the full
-// return-shape contract; see test-parallel.js, test-map.js, and
-// test-scored-retry.js for the full "parallel", "map", and "scored-retry"
-// step-kind suites, this file's own container-kind blocks below only prove
-// that the one remaining container kind is still rejected, and that
-// "parallel", "map", and "scored-retry" no longer are.
+// each leaf step (agent, gate, shape) and, now that parallel-step,
+// map-step, scored-retry-step, and branch-step support have all landed,
+// every container step kind too -- "parallel", "map", "scored-retry", and
+// "branch". No container kind remains unsupported; the file's own
+// 'container-step-not-supported' diagnostic is now a defensive-only guard
+// for a kind that is declared in SPEC_ENGINE_CONTAINER_STEP_KINDS without
+// its own explicit handling (see engine-core.js's own header comment above
+// that guard). Dispatch capability is injected: the caller supplies an
+// async dispatch(step, context) function; specEngineExecute itself carries
+// no dispatch primitive of its own. See engine-core.js's own header
+// comment above specEngineExecute for the full return-shape contract; see
+// test-parallel.js, test-map.js, test-scored-retry.js, and test-branch.js
+// for the full "parallel", "map", "scored-retry", and "branch" step-kind
+// suites -- this file's own container-kind blocks below only prove that
+// each of the four is now executed rather than rejected, each failing (if
+// it fails at all) under its own execute-time malformed-shape guard
+// instead of the generic diagnostic.
 
 'use strict';
 
@@ -385,47 +389,28 @@ async function main() {
     }
   }
 
-  // -- encountering an UNSUPPORTED container step kind at execute time ----
-  // -- fails loudly, never a silent skip ("parallel", "map", and now -----
-  // -- "scored-retry" no longer belong here -- all three are now executed;
-  // -- see test-parallel.js, test-map.js, and test-scored-retry.js for ----
-  // -- their own suites, and the blocks below for the one still -----------
-  // -- unsupported kind and for what "map"/"scored-retry" get instead) ----
+  // -- "branch" is now executed too, not rejected: a bare malformed -------
+  // -- branch step (missing "cases") still halts, but under its OWN -------
+  // -- execute-time malformed-shape guard, not the generic --------------
+  // -- container-step-not-supported diagnostic -- spend-free, zero --------
+  // -- dispatches (full branch-execution coverage lives in test-branch.js)
   {
     const spec = {
       steps: [
         { id: 'before', type: 'agent' },
-        { id: 'branch1', type: 'branch', cases: [] },
+        { id: 'branch1', type: 'branch' },
         { id: 'after', type: 'agent' },
       ],
       config: {},
     };
     const dispatch = makeRecordingDispatch({ before: { ok: true }, after: { ok: true } });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('an unsupported container step kind halts the run with status "failed"', outcome.status === 'failed');
+    check('a bare branch step (missing "cases") fails at execute time', outcome.status === 'failed');
     check(
-      'the halt uses the container-step-not-supported diagnostic',
-      outcome.halt.diagnostic === 'container-step-not-supported'
+      'a branch step with no "cases" field instead fails under its own branch-cases-not-array diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'branch-cases-not-array'
     );
-    check('the step after the container step never dispatches', dispatch.calls.length === 1 && dispatch.calls[0].id === 'before');
-  }
-
-  // -- the one still-unsupported container kind is rejected the same ------
-  // -- way as before; "parallel", "map", and "scored-retry" are ------------
-  // -- deliberately no longer among them (see the blocks below for what ---
-  // -- happens to each instead) ---------------------------------------------
-  {
-    const kinds = ['branch'];
-    for (let i = 0; i < kinds.length; i += 1) {
-      const kind = kinds[i];
-      const spec = { steps: [{ id: 'c1', type: kind }], config: {} };
-      const dispatch = makeRecordingDispatch({});
-      const outcome = await specEngineExecute(spec, dispatch);
-      check(
-        'container kind "' + kind + '" is rejected with the container-step-not-supported diagnostic',
-        outcome.status === 'failed' && outcome.halt.diagnostic === 'container-step-not-supported'
-      );
-    }
+    check('the step after the malformed branch step never dispatches', dispatch.calls.length === 1 && dispatch.calls[0].id === 'before');
   }
 
   // -- "parallel" is now executed, not rejected: a bare parallel step with

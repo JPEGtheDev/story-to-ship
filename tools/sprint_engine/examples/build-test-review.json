@@ -32,7 +32,7 @@
             {
               "id": "run_unit_tests",
               "type": "agent",
-              "prompt": "Run the unit test suite against the build produced by {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
+              "prompt": "This is a worked-example pipeline step, not a real test run: there is no actual unit test suite to execute, so produce a self-labeled synthetic demo test report for the build at {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
               "outputSchema": {
                 "properties": {
                   "passCount": {
@@ -70,7 +70,7 @@
             {
               "id": "run_integration_tests",
               "type": "agent",
-              "prompt": "Run the integration test suite against the build produced by {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
+              "prompt": "This is a worked-example pipeline step, not a real test run: there is no actual integration test suite to execute, so produce a self-labeled synthetic demo test report for the build at {{build}}. Report `passCount`, `failCount`, and `total` as integers.",
               "outputSchema": {
                 "properties": {
                   "passCount": {
@@ -120,7 +120,7 @@
           "step": {
             "id": "review_module",
             "type": "agent",
-            "prompt": "Review the module named {{item}} for code quality and test coverage, and check whether that module's changes are reflected in a successful pipeline build (`{{build.status}}`). Report `score`, a number from 0 to 1 where 1 is a flawless review against those three criteria, and `notes` summarizing findings.",
+            "prompt": "This is a worked-example pipeline step, not a real code review: {{item}} is a placeholder module name from the demonstration manifest, not real code, so produce a self-labeled synthetic demo review rather than a real code-quality assessment. Review the module named {{item}} for code quality and test coverage, and check whether that module's changes are reflected in a successful pipeline build (`{{build.status}}`). Report `score`, a number from 0 to 1 where 1 is a flawless review against those three criteria, and `notes` summarizing findings.",
             "outputSchema": {
               "properties": {
                 "score": {
@@ -196,6 +196,6 @@
   "config": {
     "spillDir": "/tmp/sprint-engine-examples/build-test-review-spill",
     "model": "sonnet",
-    "expectedSha256": "c588c04b071874200fe5d534e0b90206e5d18b40db8d675c8ca8cc422bd6a505"
+    "expectedSha256": "5a4ec05c87cafe11fcfd065703b3b667856c078b556f43ba51e4fb75961aa8cb"
   }
 }

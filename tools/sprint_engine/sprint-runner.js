@@ -455,7 +455,7 @@ function resolveReferences(spec) {
 
   let visitOrderCounter = 0;
 
-  // declaredAtOrder is the DFS order at which the declaring step STARTS
+  // declaredAtOrder is the depth-first search (DFS) order at which the declaring step STARTS
   // (when the entry is created); availableAtOrder is the DFS order at
   // which the declared key's value actually becomes readable. For a leaf
   // step (agent/gate/shape) these are the same instant -- its result is

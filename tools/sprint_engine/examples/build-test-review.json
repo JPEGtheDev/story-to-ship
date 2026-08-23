@@ -7,7 +7,7 @@
         "path": "/tmp/sprint-engine-examples/build-test-review-input/source-bundle.txt",
         "sha256": "6b80a3503db824105da509eb60998bc9fe0111244d169937b07292097f98d50a"
       },
-      "prompt": "You are the build agent for the build-test-review pipeline. The engine has already verified the on-disk source bundle at the declared path against its expected sha256 digest via this step's verifyDigest check; proceed only because that check passed. Compile the project from the verified source bundle and report two fields on your result: `status` (the string \"success\" or \"failure\") and `content`, the complete, unabridged build log covering every compiler invocation, warning, and linker step. The `content` field is required to be at least 41628 characters long (this minimum is chosen to exceed this spec's configured spill threshold, so a compliant build log exercises the spillDir producer-spill path rather than returning inline) -- do not truncate, summarize, or abbreviate the log to fall under that size; emit the full text even if it must spill to a file under the configured spillDir. Also report `changedModules`, a list of the module names touched by this build, for the per-module review stage that follows.",
+      "prompt": "You are the build agent for the build-test-review pipeline. This pipeline is a worked example demonstrating the sprint engine's data-flow and oversized-output mechanics, not a real compilation: no actual project exists at the declared source path, so this step's task is to generate an explicitly synthetic, clearly-labeled demonstration build log, not to compile anything for real. The engine has already verified the on-disk source bundle at the declared path against its expected sha256 digest via this step's verifyDigest check; proceed only because that check passed. Report three fields on your result: `status` (the string \"success\" or \"failure\"), `content`, the demonstration build log, and `changedModules`, the list of module names this demonstration run affects. `changedModules` must be exactly the modules named in the verified manifest -- read them from the manifest itself rather than hardcoding a list, since the per-module review stage that follows maps over whatever this field reports (the manifest currently names four modules: auth, billing, search-index, notifications, so a compliant run reports exactly those four). `content` is fictional, clearly-labeled placeholder compiler and linker output: an invented sequence of compiler invocations, warnings, and linker steps standing in for a real build log, labeled at the top and before each stanza (for example, \"[DEMO BUILD LOG]\") so the text is self-describing as synthetic rather than presented as evidence of a real build -- invented content is the point of this field here, not a defect. The `content` field is required to be at least 41628 characters long (this minimum is chosen to exceed this spec's configured spill threshold, so a compliant build log exercises the spillDir producer-spill path rather than returning inline) -- do not truncate, summarize, or abbreviate the synthetic log to fall under that size; emit the full labeled demonstration text even if it must spill to a file under the configured spillDir.",
       "outputSchema": {
         "properties": {
           "status": {
@@ -50,7 +50,7 @@
             {
               "id": "unit_gate",
               "type": "gate",
-              "prompt": "Given the unit test run at {{unit.run_unit_tests}}, report a JSON object with a `verdict` field using the full three-value verdict domain: \"pass\" if failCount is 0, \"fail\" if failCount is greater than 0, and \"uncertain\" if the referenced test run's result is missing or its failCount cannot be read; include a `reason` field explaining the decision.",
+              "prompt": "Given the unit test run at {{run_unit_tests}}, report a JSON object with a `verdict` field using the full three-value verdict domain: \"pass\" if failCount is 0, \"fail\" if failCount is greater than 0, and \"uncertain\" if the referenced test run's result is missing or its failCount cannot be read; include a `reason` field explaining the decision.",
               "outputSchema": {
                 "properties": {
                   "verdict": {
@@ -88,7 +88,7 @@
             {
               "id": "integration_gate",
               "type": "gate",
-              "prompt": "Given the integration test run at {{integration.run_integration_tests}}, report a JSON object with a `verdict` field using the full three-value verdict domain: \"pass\" if failCount is 0, \"fail\" if failCount is greater than 0, and \"uncertain\" if the referenced test run's result is missing or its failCount cannot be read; include a `reason` field explaining the decision.",
+              "prompt": "Given the integration test run at {{run_integration_tests}}, report a JSON object with a `verdict` field using the full three-value verdict domain: \"pass\" if failCount is 0, \"fail\" if failCount is greater than 0, and \"uncertain\" if the referenced test run's result is missing or its failCount cannot be read; include a `reason` field explaining the decision.",
               "outputSchema": {
                 "properties": {
                   "verdict": {
@@ -196,6 +196,6 @@
   "config": {
     "spillDir": "/tmp/sprint-engine-examples/build-test-review-spill",
     "model": "sonnet",
-    "expectedSha256": "b5e36a765f9566c2584690176cbeb11245b8896ab3c723746e7126feb2ebb265"
+    "expectedSha256": "c588c04b071874200fe5d534e0b90206e5d18b40db8d675c8ca8cc422bd6a505"
   }
 }

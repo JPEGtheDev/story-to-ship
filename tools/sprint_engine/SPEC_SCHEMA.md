@@ -38,6 +38,7 @@ hold no nested steps.
 | `scored-retry.threshold` | REQUIRED for `first-passing` mode; OPTIONAL for `keep-best` mode | `first-passing` needs a threshold to know when to stop; `keep-best` runs to its bound regardless and does not need one. |
 | `branch.default` | OPTIONAL | If none of a branch step's conditions match and no `default` is declared, the run stops loudly with a diagnostic instead of guessing which path to take. |
 | `config.schemas` | OPTIONAL | An optional config field for declaring schemas. |
+| `config.expectedSha256` | OPTIONAL | When present, the engine verifies the spec's own integrity before any structural validation or dispatch: it computes a canonical form of the spec (a JSON serialization of the parsed spec with `expectedSha256` itself excluded -- this field cannot bind to a hash that would need to include its own value to be checked) and hashes that canonical form with the engine's own sha256 primitive, identically whether the spec was received as a string or as an already-parsed object. A mismatch halts the run with a named diagnostic before any dispatch occurs. |
 
 **A note on "schema."** This word names three different things in this
 contract: two resolved here, and a third, unrelated sense -- the shape of a

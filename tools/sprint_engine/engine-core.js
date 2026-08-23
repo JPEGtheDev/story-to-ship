@@ -120,6 +120,22 @@ const SPEC_ENGINE_UNDEFINED_SENTINEL = '<<undefined>>';
 const SPEC_ENGINE_IF_BLOCK_RE = /\{\{#if\s+([^}]+?)\s*\}\}([\s\S]*?)\{\{\/if\}\}/;
 const SPEC_ENGINE_PLACEHOLDER_RE = /\{\{\s*([^}]+?)\s*\}\}/;
 const SPEC_ENGINE_IF_TOKEN_RE = /\{\{\s*(#if\b[^}]*|\/if)\s*\}\}/g;
+// SPEC_ENGINE_SPILL_THRESHOLD_BYTES -- see the "Oversized-output spill
+// contract" section of SPEC_SCHEMA.md: "exactly 40,000 bytes." No config
+// knob overrides this; it is a module constant by design (the threshold is
+// part of the contract every producer agent is told to honor, not a
+// per-run tuning surface). Used by specEngineApplySpillGuard below as the
+// engine-side backstop boundary: a string outcome field's UTF-8 byte length
+// (via specEngineUtf8Encode, never str.length) strictly GREATER than this
+// constant is a producer-contract violation; a field at exactly this many
+// bytes is legal and never triggers the guard.
+const SPEC_ENGINE_SPILL_THRESHOLD_BYTES = 40000;
+// SPEC_ENGINE_SHA256_HEX_RE -- a 64-character lowercase hex string, the
+// shape both a spill receipt's own "sha256" field and a digest-verify
+// agent's returned digest must match. Shared by specEngineApplySpillGuard
+// and the by-path digest-verify guard below so both accept and reject the
+// identical shape.
+const SPEC_ENGINE_SHA256_HEX_RE = /^[0-9a-f]{64}$/;
 
 function specEngineIsPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -1855,6 +1871,226 @@ function specEngineResolveGateVerdict(step, outcome, path) {
   return { verdict: 'pass', halt: null, flags: [] };
 }
 
+// specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir,
+// path) -- backs B3 (producer-pointer recording), B4 (engine-side oversized-
+// output guard + writer backstop), and B5 (status/trace/receipt-sub-field
+// exclusion) of the oversized-output carriage design. Called ONLY for a
+// completed AGENT step's own dispatch outcome (never a gate's, never the
+// engine's own status/halt/trace bookkeeping) -- this scoping mirrors the
+// "Oversized-output spill contract" section's own scope ("An agent step's
+// result can contain a content field too large to return directly"), a
+// disclosed, owner-reversible reading. Scans only OUTCOME's own top-level
+// fields, never recursing into a nested object -- this is what makes B5's
+// "never receipt sub-fields" exclusion fall out for free: a receipt's own
+// `.path` string lives one level deeper than the top-level field that holds
+// the receipt object, so it is never visited by either pass below.
+//
+// Pass 1 (B3, malformed-receipt detection): every top-level field whose
+// value is a plain object carrying `spilled: true` must be a WELL-FORMED
+// receipt -- non-empty string `path`, a 64-char lowercase-hex `sha256`, a
+// finite-number `bytes`. A malformed one (spilled:true present but any of
+// those three missing or mistyped) halts immediately, naming the missing
+// piece, under 'spill-receipt-malformed' -- never silently accepted, and
+// never reached by pass 2 below (a receipt-shaped object is never a
+// string, so pass 2's own string-only scan would have skipped it anyway;
+// this pass exists to catch the PRODUCER's own malformed receipt, a defect
+// pass 2 cannot detect). A well-formed receipt is recorded as-is: this
+// function does nothing further to it (this is the "as the field value
+// as-is" behavior B3 calls for -- no code path below ever touches a
+// well-formed receipt field).
+//
+// Pass 2 (B4, engine-side oversized-output guard): every top-level STRING
+// field's UTF-8 byte length (via the existing specEngineUtf8Encode primitive
+// -- never str.length, which counts UTF-16 code units, not bytes) is
+// compared against SPEC_ENGINE_SPILL_THRESHOLD_BYTES. A field at OR UNDER
+// the threshold is untouched (boundary: exactly 40,000 bytes never
+// triggers). A field OVER the threshold is a producer-contract violation:
+// the agent should have spilled it per the contract but returned it inline
+// instead. For each such field (MULTIPLE oversized fields in one outcome
+// each get their OWN writer dispatch -- one writer per field, processed in
+// Object.keys(outcome) declaration order, a disclosed, owner-reversible
+// reading with no contract signal to do otherwise), this function dispatches
+// EXACTLY ONE writer agent via the SAME injected `dispatch` function used
+// for every other dispatch in this file -- never a second dispatcher, and
+// this engine module itself never opens a file handle anywhere in this
+// call. The writer dispatch is a special step envelope, DISCLOSED here:
+// `{ id: '<stepId>.<field>.spill-writer', type: 'spill-writer', path:
+// '<spillDir>/<stepId>.<field>', prompt: <the oversized string> }` -- the
+// content travels on the PROMPT/input side of this dispatch call, exactly
+// like every other agent/gate step's prompt in this file, never through
+// this function's own return value or through the engine's own output;
+// `type: 'spill-writer'` is a synthetic, engine-internal step kind that
+// never appears in an authored spec and is never routed through
+// specEngineExecuteSequence's own step-kind dispatch (it is dispatched
+// directly, right here, bypassing that loop entirely) -- so a caller's
+// dispatch function must recognize this one extra type alongside 'agent'/
+// 'gate' to serve as the writer backstop. Its contract: write `prompt`'s
+// text to `path` (creating spillDir if needed, exactly like the
+// contract's own producer-side spill paragraph describes for a producer
+// agent), and return `{ written: true, path, sha256, bytes }` -- the
+// FILE WRITE HAPPENS ON THE WRITER-AGENT SIDE, never inside this engine
+// module, matching the locked "the engine itself never writes files"
+// design (this function only ever RECEIVES a receipt-shaped return value;
+// it never touches a filesystem API).
+//
+// On a well-formed `{written: true, path, sha256, bytes}` return, the
+// oversized field is SWAPPED (a fresh object built via assign-never-mutate,
+// per this file's own convention elsewhere -- `outcome` itself, and any
+// object already assigned to `workingOutcome`, is never mutated in place)
+// for a normal spill receipt `{spilled: true, path, sha256, bytes}` --
+// indistinguishable, from this point on, from a receipt a well-behaved
+// producer returned directly per pass 1 above -- and a trace entry naming
+// the violation (the field, its byte count, and the writer's own outcome)
+// is queued in `traceEntries`, for the caller (specEngineExecuteSequence)
+// to push into the run's own trace array right after this step's own leaf
+// entry. On a null/undefined/malformed writer return (missing `written:
+// true`, or any of path/sha256/bytes missing or mistyped), this function
+// halts under 'spill-writer-outcome-malformed', status "failed" -- the
+// step surfaces as a failed halt, the oversized payload is NEVER folded
+// into `results` (this function's caller only writes `results[stepId]` on
+// this function's own non-halted return, so a halt here means that write
+// never happens at all -- "never the payload in results" holds by
+// construction, not by a separate scrub step). A missing/relative
+// `spillDir` (this function's own caller passes whatever specEngineExecute
+// resolved from config.spillDir, `null` when absent or invalid) is guarded
+// too, LAZILY -- only when an actual oversized field is found needing a
+// writer dispatch, so a run with no oversized output never demands
+// spillDir at all -- under 'spill-guard-spilldir-unavailable', status
+// "failed", before any writer dispatch is attempted.
+async function specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path) {
+  if (!specEngineIsPlainObject(outcome)) {
+    return { halted: false, outcome: outcome, traceEntries: [] };
+  }
+
+  const fieldNames = Object.keys(outcome);
+
+  // Pass 1 (B3): malformed-receipt detection, over every field, before any
+  // writer dispatch -- a malformed receipt is a producer bug that must
+  // never be silently accepted or papered over by pass 2 below.
+  for (let i = 0; i < fieldNames.length; i += 1) {
+    const field = fieldNames[i];
+    const value = outcome[field];
+    if (specEngineIsPlainObject(value) && value.spilled === true) {
+      const problems = [];
+      if (typeof value.path !== 'string' || value.path.length === 0) {
+        problems.push('path');
+      }
+      if (typeof value.sha256 !== 'string' || !SPEC_ENGINE_SHA256_HEX_RE.test(value.sha256)) {
+        problems.push('sha256');
+      }
+      if (!specEngineIsFiniteNumber(value.bytes)) {
+        problems.push('bytes');
+      }
+      if (problems.length > 0) {
+        return {
+          halted: true,
+          status: 'failed',
+          halt: specEngineMakeHalt(
+            path + '.' + field,
+            'spill-receipt-malformed',
+            'Agent step "' +
+              stepId +
+              '" field "' +
+              field +
+              '" declares a spilled receipt (spilled: true) but is missing or mistyped: ' +
+              problems.join(', ') +
+              '.'
+          ),
+        };
+      }
+    }
+  }
+
+  // Pass 2 (B4): engine-side oversized-output guard + writer backstop.
+  let workingOutcome = outcome;
+  const traceEntries = [];
+
+  for (let i = 0; i < fieldNames.length; i += 1) {
+    const field = fieldNames[i];
+    const value = workingOutcome[field];
+    if (typeof value !== 'string') {
+      continue;
+    }
+    const byteLength = specEngineUtf8Encode(value).length;
+    if (byteLength <= SPEC_ENGINE_SPILL_THRESHOLD_BYTES) {
+      continue;
+    }
+
+    if (typeof spillDir !== 'string' || spillDir.length === 0) {
+      return {
+        halted: true,
+        status: 'failed',
+        halt: specEngineMakeHalt(
+          path + '.' + field,
+          'spill-guard-spilldir-unavailable',
+          'Agent step "' +
+            stepId +
+            '" field "' +
+            field +
+            '" (' +
+            byteLength +
+            ' bytes) exceeded the ' +
+            SPEC_ENGINE_SPILL_THRESHOLD_BYTES +
+            '-byte inline threshold, but config.spillDir is missing or empty, so the writer-agent backstop has nowhere to write.'
+        ),
+      };
+    }
+
+    const targetPath = spillDir + '/' + stepId + '.' + field;
+    const writerStep = { id: stepId + '.' + field + '.spill-writer', type: 'spill-writer', path: targetPath, prompt: value };
+    const writerOutcome = await dispatch(writerStep, { results: {}, values: values });
+
+    const writerWellFormed =
+      specEngineIsPlainObject(writerOutcome) &&
+      writerOutcome.written === true &&
+      typeof writerOutcome.path === 'string' &&
+      writerOutcome.path.length > 0 &&
+      typeof writerOutcome.sha256 === 'string' &&
+      SPEC_ENGINE_SHA256_HEX_RE.test(writerOutcome.sha256) &&
+      specEngineIsFiniteNumber(writerOutcome.bytes);
+
+    if (!writerWellFormed) {
+      return {
+        halted: true,
+        status: 'failed',
+        halt: specEngineMakeHalt(
+          path + '.' + field,
+          'spill-writer-outcome-malformed',
+          'Agent step "' +
+            stepId +
+            '" field "' +
+            field +
+            '" (' +
+            byteLength +
+            ' bytes) exceeded the ' +
+            SPEC_ENGINE_SPILL_THRESHOLD_BYTES +
+            '-byte inline threshold; the writer-agent backstop dispatch did not return a well-formed {written: true, path, sha256, bytes} outcome.'
+        ),
+      };
+    }
+
+    const receipt = { spilled: true, path: writerOutcome.path, sha256: writerOutcome.sha256, bytes: writerOutcome.bytes };
+    const swapped = {};
+    Object.keys(workingOutcome).forEach(function (key) {
+      swapped[key] = key === field ? receipt : workingOutcome[key];
+    });
+    workingOutcome = swapped;
+
+    traceEntries.push({
+      step: stepId,
+      kind: 'spill-guard',
+      status: 'completed',
+      outcome: null,
+      flags: ['engine-side-spill'],
+      field: field,
+      bytes: byteLength,
+      writerOutcome: writerOutcome,
+    });
+  }
+
+  return { halted: false, outcome: workingOutcome, traceEntries: traceEntries };
+}
+
 // specEngineExecuteSequence(steps, dispatch, values, results, trace,
 // pathPrefix) runs one step-sequence loop -- the shared engine this file's
 // two callers (the top-level specEngineExecute wrapper below, and
@@ -1888,7 +2124,7 @@ function specEngineResolveGateVerdict(step, outcome, path) {
 // specEngineExecuteScoredRetryStep, specEngineExecuteBranchStep) and
 // merging its own namespaced results back into `results` before
 // continuing this same sequence.
-async function specEngineExecuteSequence(steps, dispatch, values, results, trace, pathPrefix) {
+async function specEngineExecuteSequence(steps, dispatch, values, results, trace, pathPrefix, spillDir) {
   for (let i = 0; i < steps.length; i += 1) {
     const step = steps[i];
     const path = pathPrefix + '[' + i + ']';
@@ -1901,7 +2137,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
     const type = step.type;
 
     if (type === 'parallel') {
-      const parallelOutcome = await specEngineExecuteParallelStep(step, dispatch, values, path, results);
+      const parallelOutcome = await specEngineExecuteParallelStep(step, dispatch, values, path, results, spillDir);
       if (parallelOutcome.wholeRunHalt) {
         return { status: 'failed', halt: parallelOutcome.wholeRunHalt };
       }
@@ -1921,7 +2157,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
     }
 
     if (type === 'map') {
-      const mapOutcome = await specEngineExecuteMapStep(step, dispatch, values, path, results);
+      const mapOutcome = await specEngineExecuteMapStep(step, dispatch, values, path, results, spillDir);
       if (mapOutcome.wholeRunHalt) {
         return { status: 'failed', halt: mapOutcome.wholeRunHalt };
       }
@@ -1944,7 +2180,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
     }
 
     if (type === 'scored-retry') {
-      const retryOutcome = await specEngineExecuteScoredRetryStep(step, dispatch, values, path, results);
+      const retryOutcome = await specEngineExecuteScoredRetryStep(step, dispatch, values, path, results, spillDir);
       // Attempts data is merged regardless of ok/fail, mirroring the
       // existing "partial results collected before a failure are still
       // returned" convention elsewhere in this file (a parallel step's own
@@ -1976,7 +2212,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
     }
 
     if (type === 'branch') {
-      const branchOutcome = await specEngineExecuteBranchStep(step, dispatch, values, path, results);
+      const branchOutcome = await specEngineExecuteBranchStep(step, dispatch, values, path, results, spillDir);
       if (branchOutcome.wholeRunHalt) {
         return { status: 'failed', halt: branchOutcome.wholeRunHalt };
       }
@@ -2070,6 +2306,93 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
         };
       }
 
+      // B6: by-path digest-verify guard. DISCLOSED, OWNER-REVERSIBLE
+      // (gap-fill): SPEC_SCHEMA.md names no field for a spec-declared
+      // "verify this on-disk file's digest before dispatching" input (grep
+      // confirmed silence), so this implementation invents `verifyDigest:
+      // { path, sha256 }` on an agent step, the same way `list: { step,
+      // field }` invents map's own list-source field above -- a real,
+      // execute-time-only-enforced field never folded into validateSpec,
+      // the same scope boundary map.list/scored-retry.maxAttempts already
+      // have. When present, a SEPARATE digest-verification dispatch runs
+      // BEFORE this step's own prompt render/dispatch: a synthetic
+      // `{ type: 'digest-verify', path }` step envelope goes through the
+      // SAME injected `dispatch` function (never a second dispatcher, never
+      // a filesystem read this engine performs itself -- the engine never
+      // writes OR reads files directly, per the locked design), and its
+      // contract is to return the file's digest in a structured `digest`
+      // field. The engine then compares IN-ENGINE against the declared
+      // sha256 -- fail CLOSED on either a mismatch or an unparseable
+      // return, in both cases dispatching zero further steps for this
+      // consuming step (the render/dispatch below never runs). A mismatch
+      // is a deterministic, already-known-bad result (status "failed",
+      // 'digest-verify-mismatch' -- mirroring gate-verdict-failed's own
+      // deterministic-failure status); an unparseable/null/malformed
+      // digest-agent return is the "broken reference must never masquerade
+      // as a legitimate result" class the undefined-sentinel rule already
+      // establishes elsewhere (status "uncertain",
+      // 'digest-verify-outcome-unparseable' -- mirroring
+      // gate-verdict-unparseable's own status). A malformed `verifyDigest`
+      // DECLARATION itself (present but not a well-formed { path, sha256 })
+      // is guarded too, spend-free, under 'digest-verify-declaration-
+      // malformed', before any dispatch for this step at all -- silently
+      // ignoring a malformed declaration would silently skip the safety
+      // check it was meant to add, the same silent-skip class this file
+      // forbids elsewhere.
+      if (type === 'agent' && typeof step.verifyDigest !== 'undefined') {
+        const declared = step.verifyDigest;
+        const declaredWellFormed =
+          specEngineIsPlainObject(declared) &&
+          typeof declared.path === 'string' &&
+          declared.path.length > 0 &&
+          typeof declared.sha256 === 'string' &&
+          SPEC_ENGINE_SHA256_HEX_RE.test(declared.sha256);
+
+        if (!declaredWellFormed) {
+          return {
+            status: 'failed',
+            halt: specEngineMakeHalt(
+              path + '.verifyDigest',
+              'digest-verify-declaration-malformed',
+              'Agent step "' + stepId + '" declares "verifyDigest", but it is not a well-formed { path, sha256 } object (a non-empty string path, a 64-character lowercase-hex sha256).'
+            ),
+          };
+        }
+
+        const digestStep = { id: stepId + '.verify-digest', type: 'digest-verify', path: declared.path };
+        const digestOutcome = await dispatch(digestStep, { results: results, values: values });
+        const digestWellFormed = specEngineIsPlainObject(digestOutcome) && typeof digestOutcome.digest === 'string' && SPEC_ENGINE_SHA256_HEX_RE.test(digestOutcome.digest);
+
+        if (!digestWellFormed) {
+          trace.push({ step: stepId, kind: type, status: 'uncertain', outcome: digestOutcome, flags: [] });
+          return {
+            status: 'uncertain',
+            halt: specEngineMakeHalt(
+              path + '.verifyDigest',
+              'digest-verify-outcome-unparseable',
+              'Agent step "' + stepId + '" digest-verify dispatch for path "' + declared.path + '" did not return a well-formed { digest } outcome (a 64-character lowercase-hex string); recording uncertain rather than guessing.'
+            ),
+          };
+        }
+
+        if (digestOutcome.digest !== declared.sha256) {
+          trace.push({ step: stepId, kind: type, status: 'failed', outcome: digestOutcome, flags: [] });
+          return {
+            status: 'failed',
+            halt: specEngineMakeHalt(
+              path + '.verifyDigest',
+              'digest-verify-mismatch',
+              'Agent step "' + stepId + '" digest-verify for path "' + declared.path + '" returned "' + digestOutcome.digest + '", which does not match the declared sha256 "' + declared.sha256 + '"; refusing to dispatch this step.'
+            ),
+          };
+        }
+        // Match: this step proceeds to its own normal render/dispatch
+        // below, exactly as if verifyDigest had never been declared -- the
+        // literal path string is already present in this step's own spec-
+        // authored fields (e.g. its prompt), so "the path available to the
+        // consuming agent's render" needs no further engine-side wiring.
+      }
+
       const dispatchPrep = specEngineRenderStepForDispatch(step, results, values, path);
       if (dispatchPrep.halted) {
         return { status: 'failed', halt: dispatchPrep };
@@ -2091,8 +2414,18 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
             ),
           };
         }
-        results[stepId] = outcome;
-        trace.push({ step: stepId, kind: type, status: 'completed', outcome: outcome, flags: [] });
+
+        const spillGuardOutcome = await specEngineApplySpillGuard(stepId, outcome, dispatch, values, spillDir, path);
+        if (spillGuardOutcome.halted) {
+          trace.push({ step: stepId, kind: type, status: spillGuardOutcome.status, outcome: outcome, flags: [] });
+          return { status: spillGuardOutcome.status, halt: spillGuardOutcome.halt };
+        }
+        spillGuardOutcome.traceEntries.forEach(function (entry) {
+          trace.push(entry);
+        });
+
+        results[stepId] = spillGuardOutcome.outcome;
+        trace.push({ step: stepId, kind: type, status: 'completed', outcome: spillGuardOutcome.outcome, flags: [] });
         continue;
       }
 
@@ -2157,7 +2490,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
 // container step, whatever namespaced sub-keys that container's own
 // execution already wrote into this track's local map) -- ready for the
 // caller to re-namespace under this track's own `<trackId>.` prefix.
-async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, parentPath) {
+async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, parentPath, spillDir) {
   // Object.assign only clones the KEY SET into a new top-level object; the
   // values it copies are the SAME result objects `baseResults` already
   // holds (shared references, not deep copies). Isolation across tracks
@@ -2171,7 +2504,7 @@ async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseR
   const localTrace = [];
   const trackPath = parentPath + '.tracks[' + trackIndex + '].steps';
 
-  const seqOutcome = await specEngineExecuteSequence(track.steps, dispatch, values, localResults, localTrace, trackPath);
+  const seqOutcome = await specEngineExecuteSequence(track.steps, dispatch, values, localResults, localTrace, trackPath, spillDir);
 
   const ownResults = {};
   Object.keys(localResults).forEach(function (key) {
@@ -2238,7 +2571,7 @@ async function specEngineExecuteTrack(track, trackIndex, dispatch, values, baseR
 // step's own trace entry (see specEngineExecuteSequence's `type ===
 // 'parallel'` branch above, which threads this array through as that
 // trace entry's own `tracks` field).
-async function specEngineExecuteParallelStep(step, dispatch, values, path, baseResults) {
+async function specEngineExecuteParallelStep(step, dispatch, values, path, baseResults, spillDir) {
   if (!Array.isArray(step.tracks)) {
     return {
       wholeRunHalt: specEngineMakeHalt(
@@ -2283,7 +2616,7 @@ async function specEngineExecuteParallelStep(step, dispatch, values, path, baseR
   }
 
   const trackPromises = step.tracks.map(function (track, trackIndex) {
-    return specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, path);
+    return specEngineExecuteTrack(track, trackIndex, dispatch, values, baseResults, path, spillDir);
   });
   const trackOutcomes = await Promise.all(trackPromises);
 
@@ -2365,14 +2698,14 @@ async function specEngineExecuteParallelStep(step, dispatch, values, path, baseR
 // Reserving `item` in SPEC_SCHEMA.md's own reserved-segments rule (the
 // contract-level counterpart to this engine-level guard) remains an open
 // item for owner ratification, out of this engine's own scope.
-async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, values, baseResults, parentPath) {
+async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, values, baseResults, parentPath, spillDir) {
   const seedResults = Object.assign({}, baseResults);
   seedResults.item = item;
   const seedKeys = Object.keys(seedResults);
   const localTrace = [];
   const itemPath = parentPath + '.items[' + index + '].steps';
 
-  const seqOutcome = await specEngineExecuteSequence(bodySteps, dispatch, values, seedResults, localTrace, itemPath);
+  const seqOutcome = await specEngineExecuteSequence(bodySteps, dispatch, values, seedResults, localTrace, itemPath, spillDir);
 
   const ownResults = {};
   Object.keys(seedResults).forEach(function (key) {
@@ -2453,7 +2786,7 @@ async function specEngineExecuteMapIteration(bodySteps, index, item, dispatch, v
 // step's own trace entry (see specEngineExecuteSequence's `type === 'map'`
 // branch above, which threads this array through as that trace entry's
 // own `iterations` field).
-async function specEngineExecuteMapStep(step, dispatch, values, path, baseResults) {
+async function specEngineExecuteMapStep(step, dispatch, values, path, baseResults, spillDir) {
   if (typeof step.merge !== 'undefined') {
     return {
       wholeRunHalt: specEngineMakeHalt(
@@ -2581,7 +2914,8 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
       dispatch,
       values,
       baseResults,
-      path
+      path,
+      spillDir
     );
 
     Object.keys(iterationOutcome.localResults).forEach(function (key) {
@@ -2769,7 +3103,7 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
 //    score-parse failure on one attempt ALWAYS halts (per gap-fill 1),
 //    regardless of how many attempts remain -- this distinction is never
 //    blurred by the attempt-failure containment described here.
-async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, baseResults) {
+async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, baseResults, spillDir) {
   const mode = step.mode;
   if (SPEC_ENGINE_SCORED_RETRY_MODES.indexOf(mode) === -1) {
     const diagnostic = typeof mode === 'undefined' ? 'scored-retry-mode-required' : 'scored-retry-mode-invalid';
@@ -2896,7 +3230,7 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
     const seedResults = Object.assign({}, baseResults);
     const seedKeys = Object.keys(seedResults);
     const attemptLocalTrace = [];
-    const seqOutcome = await specEngineExecuteSequence([attemptStep], dispatch, values, seedResults, attemptLocalTrace, attemptPath);
+    const seqOutcome = await specEngineExecuteSequence([attemptStep], dispatch, values, seedResults, attemptLocalTrace, attemptPath, spillDir);
 
     const ownResults = {};
     Object.keys(seedResults).forEach(function (key) {
@@ -3131,7 +3465,7 @@ async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, ba
 // scored-retry's own attempts merging already applies -- see the
 // `type === 'scored-retry'` branch in specEngineExecuteSequence below,
 // whose own comment states this precedent explicitly).
-async function specEngineExecuteBranchStep(step, dispatch, values, path, baseResults) {
+async function specEngineExecuteBranchStep(step, dispatch, values, path, baseResults, spillDir) {
   if (!Array.isArray(step.cases)) {
     return {
       wholeRunHalt: specEngineMakeHalt(
@@ -3280,7 +3614,7 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
   const localTrace = [];
   const selectedPath = path + '.' + selectedLabel + '.steps';
 
-  const seqOutcome = await specEngineExecuteSequence(selectedSteps, dispatch, values, seedResults, localTrace, selectedPath);
+  const seqOutcome = await specEngineExecuteSequence(selectedSteps, dispatch, values, seedResults, localTrace, selectedPath, spillDir);
 
   const ownResults = {};
   Object.keys(seedResults).forEach(function (key) {
@@ -3312,8 +3646,163 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
 // step-sequence loop to specEngineExecuteSequence, seeded with an empty
 // results object (the top level has no enclosing scope to inherit bare
 // names from) and the 'steps' path prefix.
+// specEngineParseSpecInput(spec) -- DISCLOSED, OWNER-REVERSIBLE (gap-fill,
+// B1): a measured platform fact is that the caller channel that hands a
+// spec to specEngineExecute can deliver either a plain object or the raw
+// JSON text of that same spec (a string). Neither validateSpec nor
+// resolveReferences takes this same string-or-object input today -- both
+// remain object-only, unchanged by this addition, because neither shares
+// an entry point with specEngineExecute (each is called directly by its
+// own caller elsewhere, never routed through this function) -- so this
+// parsing step lives here, at specEngineExecute's own entry, not as a
+// shared primitive the other two static passes also call through.
+// Returns { halted: false, spec: <object>, rawString: <string|null> } on
+// success (rawString is the exact string received, kept on the return
+// shape for a caller/test that wants to know which arrival form this was,
+// though specEngineExecute's own B2 integrity check below does NOT read it
+// -- see specEngineCheckSpecIntegrity's own header comment for why that
+// check canonicalizes via JSON.stringify instead, identically for both
+// arrival forms; rawString is null when the caller already passed an
+// object), or a halt object (see specEngineMakeHalt) under the
+// 'spec-json-unparseable' diagnostic when a string input is not valid
+// JSON. An object input passes through completely unchanged (not even
+// re-serialized), so this function never masks a downstream
+// spec-not-object diagnostic behind a parsing step that already assumed a
+// particular shape.
+function specEngineParseSpecInput(spec) {
+  if (typeof spec !== 'string') {
+    return { halted: false, spec: spec, rawString: null };
+  }
+  try {
+    return { halted: false, spec: JSON.parse(spec), rawString: spec };
+  } catch (err) {
+    return {
+      halted: true,
+      halt: specEngineMakeHalt(
+        '',
+        'spec-json-unparseable',
+        'The spec was received as a string and could not be parsed as JSON: ' +
+          (err && err.message ? err.message : String(err)) +
+          '.'
+      ),
+    };
+  }
+}
+
+// specEngineCanonicalizeSpecForIntegrity(parsedSpec) -- helper for
+// specEngineCheckSpecIntegrity below. Builds the string that gets hashed
+// for the expectedSha256 comparison: a JSON.stringify of `parsedSpec` with
+// `config.expectedSha256` itself REMOVED first (a shallow clone of the
+// top-level object and of `config`; every other field, and every other
+// object/array by reference, is untouched). Removing the field being
+// compared against is required, not optional -- see the header comment on
+// specEngineCheckSpecIntegrity below for why hashing it IN is a
+// self-referential check that can never honestly pass.
+function specEngineCanonicalizeSpecForIntegrity(parsedSpec) {
+  if (!specEngineIsPlainObject(parsedSpec)) {
+    return JSON.stringify(parsedSpec);
+  }
+  const clone = {};
+  Object.keys(parsedSpec).forEach(function (key) {
+    clone[key] = parsedSpec[key];
+  });
+  if (specEngineIsPlainObject(parsedSpec.config)) {
+    const configClone = {};
+    Object.keys(parsedSpec.config).forEach(function (key) {
+      if (key !== 'expectedSha256') {
+        configClone[key] = parsedSpec.config[key];
+      }
+    });
+    clone.config = configClone;
+  }
+  return JSON.stringify(clone);
+}
+
+// specEngineCheckSpecIntegrity(parsedSpec) -- DISCLOSED, OWNER-REVERSIBLE
+// (gap-fill, B2): config.expectedSha256 is OPTIONAL and named nowhere in
+// SPEC_SCHEMA.md before this todo (see the "Inline-spec integrity" addition
+// to that document's field-optionality table, landed alongside this
+// function). When present, it is checked BEFORE any structural validation
+// below -- an integrity mismatch is its own, distinct failure mode, never
+// masked by (or racing) a spec-not-object / steps-not-array diagnostic.
+//
+// CANONICAL-FORM RULING -- REVISED FROM THIS TODO'S OWN FIRST DRAFT,
+// disclosed here because the correction itself is load-bearing: the
+// literal reading "hash the exact raw string as received, including
+// config.expectedSha256's own text" was tried first and rejected once its
+// consequence became clear -- under that reading, the value written into
+// expectedSha256 is PART OF the very string being hashed to check it, so a
+// "match" requires expectedSha256 to equal the sha256 of a string that
+// contains that exact expectedSha256 value as a substring: a hash
+// preimage-of-itself. SHA-256's own preimage resistance (the property that
+// makes it a useful hash at all) makes that fixed point practically
+// unconstructible by any real caller or by this function's own test suite
+// -- the "matching digest runs" case this todo requires test coverage for
+// would be permanently unreachable, which fails the contract's own
+// "never-guess" idiom in a different way: a check that can never honestly
+// pass is not a meaningful gate, it is a decoration. This function instead
+// hashes a CANONICAL form that excludes expectedSha256 itself from what is
+// hashed (specEngineCanonicalizeSpecForIntegrity above), the same
+// self-exclusion idiom every other real content-addressed integrity format
+// uses for the same structural reason (a git tree object's own hash is
+// computed over its content, not over itself; a signed JWT's signature
+// covers the payload, not the signature field). This is computed
+// IDENTICALLY whether the spec arrived as a raw string (then parsed, per
+// B1) or as an already-parsed object -- the "object-form" fork this todo
+// asks to be decided and disclosed is resolved by NOT forking: both paths
+// canonicalize via JSON.stringify(parsedSpec-minus-expectedSha256) the same
+// way, rather than rejecting the object-form path outright, since once the
+// self-referential field is excluded there is no remaining reason the two
+// arrival forms should be checked differently. KNOWN LIMITATION, disclosed:
+// this canonical form is JSON.stringify's own key-insertion-order
+// serialization, not the caller's original raw bytes when the spec arrived
+// as a string -- a caller who wants a byte-stable expectedSha256 across
+// runs must compute it the same way (JSON.stringify a parsed copy of their
+// own spec with expectedSha256 stripped), not by hashing their own
+// pre-serialization source text directly.
+function specEngineCheckSpecIntegrity(parsedSpec) {
+  const expectedSha256 =
+    specEngineIsPlainObject(parsedSpec) && specEngineIsPlainObject(parsedSpec.config)
+      ? parsedSpec.config.expectedSha256
+      : undefined;
+
+  if (typeof expectedSha256 !== 'string' || expectedSha256.length === 0) {
+    return { halted: false };
+  }
+
+  const canonical = specEngineCanonicalizeSpecForIntegrity(parsedSpec);
+  const actualSha256 = specEngineSha256(canonical);
+  if (actualSha256 !== expectedSha256) {
+    return {
+      halted: true,
+      halt: specEngineMakeHalt(
+        'config.expectedSha256',
+        'spec-integrity-mismatch',
+        'config.expectedSha256 ("' +
+          expectedSha256 +
+          '") does not match the sha256 of the spec\'s own canonical form, computed with expectedSha256 itself excluded ("' +
+          actualSha256 +
+          '"); refusing to run.'
+      ),
+    };
+  }
+
+  return { halted: false };
+}
+
 async function specEngineExecute(spec, dispatch) {
-  if (!specEngineIsPlainObject(spec)) {
+  const parseOutcome = specEngineParseSpecInput(spec);
+  if (parseOutcome.halted) {
+    return specEngineMakeExecuteResult('failed', {}, [], parseOutcome.halt);
+  }
+  const parsedSpec = parseOutcome.spec;
+
+  const integrityOutcome = specEngineCheckSpecIntegrity(parsedSpec);
+  if (integrityOutcome.halted) {
+    return specEngineMakeExecuteResult('failed', {}, [], integrityOutcome.halt);
+  }
+
+  if (!specEngineIsPlainObject(parsedSpec)) {
     return specEngineMakeExecuteResult(
       'failed',
       {},
@@ -3321,7 +3810,7 @@ async function specEngineExecute(spec, dispatch) {
       specEngineMakeHalt('', 'spec-not-object', 'A spec must be a JSON object with "steps" and "config".')
     );
   }
-  if (!Array.isArray(spec.steps)) {
+  if (!Array.isArray(parsedSpec.steps)) {
     return specEngineMakeExecuteResult(
       'failed',
       {},
@@ -3330,11 +3819,15 @@ async function specEngineExecute(spec, dispatch) {
     );
   }
 
-  const values = specEngineIsPlainObject(spec.config) && specEngineIsPlainObject(spec.config.values) ? spec.config.values : {};
+  const values = specEngineIsPlainObject(parsedSpec.config) && specEngineIsPlainObject(parsedSpec.config.values) ? parsedSpec.config.values : {};
+  const spillDir =
+    specEngineIsPlainObject(parsedSpec.config) && typeof parsedSpec.config.spillDir === 'string' && parsedSpec.config.spillDir.length > 0
+      ? parsedSpec.config.spillDir
+      : null;
   const results = {};
   const trace = [];
 
-  const outcome = await specEngineExecuteSequence(spec.steps, dispatch, values, results, trace, 'steps');
+  const outcome = await specEngineExecuteSequence(parsedSpec.steps, dispatch, values, results, trace, 'steps', spillDir);
 
   return specEngineMakeExecuteResult(outcome.status, results, trace, outcome.halt);
 }
@@ -3558,5 +4051,7 @@ if (typeof module !== 'undefined' && module.exports) {
     specEngineRegexExtract: specEngineRegexExtract,
     specEngineExecute: specEngineExecute,
     specEngineSha256: specEngineSha256,
+    specEngineCanonicalizeSpecForIntegrity: specEngineCanonicalizeSpecForIntegrity,
+    SPEC_ENGINE_SPILL_THRESHOLD_BYTES: SPEC_ENGINE_SPILL_THRESHOLD_BYTES,
   };
 }

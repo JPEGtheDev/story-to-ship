@@ -24,7 +24,14 @@
 # failed" line reports M != 0 -- a combination not reachable with the
 # current process.exit(failCount === 0 ? 0 : 1) suites, but not something
 # this script should silently trust forever -- that mismatch is itself
-# reported as a failure, naming the inconsistency.
+# reported as a failure, naming the inconsistency. The match is ANCHORED
+# to the whole line (^...$), not a bare substring search: an unanchored
+# pattern would false-positive on any suite whose last line merely
+# CONTAINS "<N> passed, <M> failed" as a substring of a longer sentence
+# (e.g. a suite reporting something like "retried flaky case: 5 passed, 3
+# failed on first attempt, now clean" as its final line) even though the
+# suite's own summary format is exactly "<N> passed, <M> failed" and
+# nothing else.
 #
 # Usage: run.sh
 #   No arguments. Paths are derived from this script's own location (via
@@ -78,6 +85,19 @@ run_gate "node --check engine-core.js" node --check "$ENGINE_CORE"
 echo "=== step 3: runner-syntax-check.sh ==="
 run_gate "runner-syntax-check.sh" bash "$RUNNER_SYNTAX_CHECK"
 
+# record_suite_failure NAME MESSAGE -- prints a "[suite: NAME] FAIL
+# MESSAGE" line to stderr and performs the shared failure bookkeeping
+# (OVERALL_FAILED, FAILED_STEPS, SUITES_FAILED) once, so the two
+# suite-failure branches below (a nonzero exit, and the exit/reported-count
+# inconsistency check) do not each repeat the same four lines.
+record_suite_failure() {
+  local suite="$1" message="$2"
+  echo "[suite: $suite] FAIL $message" >&2
+  OVERALL_FAILED=1
+  FAILED_STEPS+=("test-suite:$suite")
+  SUITES_FAILED=$((SUITES_FAILED + 1))
+}
+
 echo "=== step 4: test-*.js suites ==="
 shopt -s nullglob
 TEST_FILES=("$SCRIPT_DIR"/test-*.js)
@@ -97,24 +117,26 @@ else
     last_line="$(printf '%s\n' "$suite_output" | tail -n 1)"
     printf '%s\n' "$suite_output"
 
+    # Anchored to the WHOLE line (^...$), not a bare substring search: an
+    # unanchored pattern would false-positive on a passing suite whose
+    # last line merely CONTAINS the text "<N> passed, <M> failed" inside
+    # a longer sentence (e.g. a suite narrating a retried flaky case)
+    # even though the suite's own summary format is exactly that string
+    # and nothing else. The spaces are not backslash-escaped: the
+    # pattern on the right of =~ is not word-split by bash, so escaping
+    # them was unnecessary noise, not a correctness requirement.
     inconsistent=0
-    if [[ "$suite_status" -eq 0 && "$last_line" =~ ([0-9]+)\ passed,\ ([0-9]+)\ failed ]]; then
-      reported_failed="${BASH_REMATCH[2]}"
+    if [[ "$suite_status" -eq 0 && "$last_line" =~ ^[0-9]+" passed, "([0-9]+)" failed"$ ]]; then
+      reported_failed="${BASH_REMATCH[1]}"
       if [[ "$reported_failed" -ne 0 ]]; then
         inconsistent=1
       fi
     fi
 
     if [[ "$suite_status" -ne 0 ]]; then
-      echo "[suite: $suite_name] FAIL (exit $suite_status)" >&2
-      OVERALL_FAILED=1
-      FAILED_STEPS+=("test-suite:$suite_name")
-      SUITES_FAILED=$((SUITES_FAILED + 1))
+      record_suite_failure "$suite_name" "(exit $suite_status)"
     elif [[ "$inconsistent" -eq 1 ]]; then
-      echo "[suite: $suite_name] FAIL -- exited 0 but its own summary line reports a nonzero failed count ($last_line); exit status and reported count disagree" >&2
-      OVERALL_FAILED=1
-      FAILED_STEPS+=("test-suite:$suite_name")
-      SUITES_FAILED=$((SUITES_FAILED + 1))
+      record_suite_failure "$suite_name" "-- exited 0 but its own summary line reports a nonzero failed count ($last_line); exit status and reported count disagree"
     else
       echo "[suite: $suite_name] PASS -- $last_line"
       SUITES_PASSED=$((SUITES_PASSED + 1))
@@ -132,5 +154,13 @@ if [[ "$OVERALL_FAILED" -eq 0 ]]; then
   exit 0
 fi
 
-echo "run.sh: FAIL -- failing step(s): ${FAILED_STEPS[*]}" >&2
+# Printed one per line, not joined with a plain space: FAILED_STEPS
+# entries are "test-suite:<basename>" or a fixed literal today, but a
+# space-joined list would be ambiguous if any step name ever contained a
+# space itself -- there would be no way to tell, from the joined line
+# alone, where one step name ends and the next begins.
+echo "run.sh: FAIL -- ${#FAILED_STEPS[@]} step(s) failed:" >&2
+for failed_step in "${FAILED_STEPS[@]}"; do
+  echo "  - $failed_step" >&2
+done
 exit 1

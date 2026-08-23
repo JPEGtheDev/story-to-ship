@@ -94,6 +94,13 @@ if [[ ! -f "$RUNNER" || ! -r "$RUNNER" ]]; then
   exit 1
 fi
 
+# Fail-safe edge, by design: this checks for the LITERAL line
+# 'export const meta = {' anywhere in the file, not specifically in
+# header position. A body that happens to contain that exact line for an
+# unrelated reason (e.g. inside a template string or a comment) is
+# over-rejected as "multiple header lines found" rather than silently
+# accepted -- the same false-positive-safe tradeoff the sibling
+# inline-copy-check.sh gate makes with its own marker-count checks.
 if ! check_exact_once "meta-export header line" "$HEADER_LINE" "$RUNNER"; then
   exit 1
 fi
@@ -155,4 +162,10 @@ fi
 
 echo "runner-syntax-check.sh: FAIL -- node --check rejected the transformed body of $(basename "$RUNNER")" >&2
 printf '%s\n' "$NODE_OUTPUT" >&2
+# The wrapped copy has one line ("(async () => {") prepended in place of
+# everything through '$BEGIN_MARKER' (BEGIN_LINE lines), so any line
+# number node reports above is relative to the WRAPPED COPY, not
+# $RUNNER: add the offset below to a wrapped-copy line number to get the
+# real line in $RUNNER.
+echo "runner-syntax-check.sh: note -- line numbers above are relative to the wrapped copy, not $(basename "$RUNNER"); add $((BEGIN_LINE - 1)) to a wrapped-copy line number to get the real line in $(basename "$RUNNER")" >&2
 exit "$NODE_STATUS"

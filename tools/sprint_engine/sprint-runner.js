@@ -11,13 +11,21 @@
 // engine's own dispatch(step, context) contract and returns the outcome).
 //
 // Dialect note: this file is loaded by the workflow runtime, not by node
-// directly -- `node --check` rejects the `export const meta` header and
-// the bare top-level `return` this dialect allows outside any function,
-// per tools/sprint_engine/RUNTIME_FACTS.md's "Runtime script dialect"
-// section. Loadability is verified by the runtime itself, a separate
-// later deliverable; the syntax evidence for the glue portion here is that
-// it stays small enough to read by eye, plus the marker-region byte-match
-// the inline-copy-check gate enforces on every run.
+// directly. `node --check` is NOT a valid way to test whether the runtime
+// will accept this file as loadable, in either direction: run-verified on
+// Node v24 (this file, no package "type" set), `node --check` exits 0 on
+// it -- ambiguous-module auto-detection accepts the `export const meta`
+// header and the bare top-level `return` this dialect allows outside any
+// function, so a passing `node --check` here is not evidence the runtime
+// will load this file, and (per tools/sprint_engine/RUNTIME_FACTS.md's
+// "Runtime script dialect" section) a FAILING one on some other Node
+// version or module-type configuration would not be evidence it won't,
+// either. This is a non-signal, not a rejection: `node --check`'s result
+// on this file must never be used as a gate either way. Runtime
+// loadability is verified by the runtime itself, a separate later
+// deliverable; the syntax evidence for the glue portion here is that it
+// stays small enough to read by eye, plus the marker-region byte-match the
+// inline-copy-check gate enforces on every run.
 
 export const meta = {
   name: 'sprint-runner',
@@ -4258,7 +4266,10 @@ async function sprintRunnerDispatch(step, context) {
     return agent(prompt, { label: step.id, phase: 'Run', schema: schema });
   }
 
-  const schema = step.outputSchema && step.outputSchema.properties ? { type: 'object', properties: step.outputSchema.properties } : undefined;
+  const schema =
+    specEngineIsPlainObject(step.outputSchema) && specEngineIsPlainObject(step.outputSchema.properties)
+      ? { type: 'object', properties: step.outputSchema.properties }
+      : undefined;
   return agent(step.prompt, { label: step.id, phase: 'Run', schema: schema });
 }
 

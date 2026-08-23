@@ -3194,7 +3194,6 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
       caseIndex: ci,
       when: branchCase.when,
       readValue: readResolution.resolved ? readResolution.value : undefined,
-      matched: evalOutcome.result,
     });
 
     if (evalOutcome.result === true) {
@@ -3209,6 +3208,11 @@ async function specEngineExecuteBranchStep(step, dispatch, values, path, baseRes
       selectedSteps = step.default.steps;
       selectedLabel = 'default';
     } else {
+      // JSON.stringify here assumes the declared "value" and the read
+      // operand are JSON-safe (a circular object throws) -- the same
+      // engine-wide assumption specEngineStringifyTemplateValue's own
+      // JSON.stringify branch already makes for rendered template values;
+      // not re-guarded here for the same reason.
       const predicateSummaries = evaluated
         .map(function (ep) {
           return (

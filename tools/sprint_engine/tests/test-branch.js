@@ -50,6 +50,17 @@
 //     not an object or missing `when`/`steps`, a present-but-malformed
 //     `default`) halt spend-free, before any predicate is evaluated or any
 //     step dispatched, under their own 'branch-*' diagnostics.
+//   - a matching case always wins over a declared `default` (the default
+//     is only ever a fallback, never a tiebreaker); a "skip" case (a
+//     non-matching predicate evaluated before the winning one) never
+//     dispatches; a case AFTER the winning one is never even EVALUATED
+//     (its own `when` is never touched, not just its `steps`) -- a
+//     nonexistent-step reference in a later case's `when`, which would
+//     halt if evaluated, must never surface once an earlier case already
+//     matched. A predicate's `when.step` also accepts a dotted key (an
+//     earlier branch step's own namespaced `<branchId>.<stepId>` result),
+//     since specEngineEvalPredicate looks `step` up as an exact key, not a
+//     dotted split.
 
 'use strict';
 
@@ -378,6 +389,113 @@ async function main() {
     const parallelTraceEntry = outcome.trace[outcome.trace.length - 1];
     const trackBSummary = parallelTraceEntry && parallelTraceEntry.tracks[1];
     check('trackB\'s own summary carries the contained branch-no-match-no-default halt', !!trackBSummary && trackBSummary.status === 'failed' && trackBSummary.halt.diagnostic === 'branch-no-match-no-default');
+  }
+
+  // -- a matching case coexists with a declared default: the matched ------
+  // -- case's path dispatches, the default's own steps never dispatch, ---
+  // -- and no default-step result key lands at all -------------------------
+  {
+    const spec = {
+      steps: [
+        { id: 'upstream', type: 'agent' },
+        {
+          id: 'br9',
+          type: 'branch',
+          cases: [{ when: { step: 'upstream', field: 'x', operator: 'equals', value: 'go' }, steps: [{ id: 'matchedStep', type: 'agent' }] }],
+          default: { steps: [{ id: 'defOnly', type: 'agent' }] },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ upstream: { x: 'go' }, matchedStep: { out: 'M' }, defOnly: { out: 'D' } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a matching case wins over a declared default -- the run completes', outcome.status === 'completed');
+    check('exactly two dispatches occur (upstream, then the matched case only)', dispatch.calls.length === 2 && dispatch.calls[1].id === 'matchedStep');
+    check("the matched case's path result lands at br9.matchedStep", outcome.results['br9.matchedStep'] && outcome.results['br9.matchedStep'].out === 'M');
+    check("the declared default's own step never dispatches, so br9.defOnly is absent", typeof outcome.results['br9.defOnly'] === 'undefined');
+  }
+
+  // -- skip-then-match: case 0's predicate is FALSE, case 1's is TRUE -- --
+  // -- case 1's path must dispatch, never case 0's -------------------------
+  {
+    const spec = {
+      steps: [
+        { id: 'upstream', type: 'agent' },
+        {
+          id: 'br10',
+          type: 'branch',
+          cases: [
+            { when: { step: 'upstream', field: 'x', operator: 'equals', value: 'no' }, steps: [{ id: 'skipStep', type: 'agent' }] },
+            { when: { step: 'upstream', field: 'x', operator: 'equals', value: 'go' }, steps: [{ id: 'hitStep', type: 'agent' }] },
+          ],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ upstream: { x: 'go' }, skipStep: { out: 'S' }, hitStep: { out: 'H' } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a skip-then-match run completes', outcome.status === 'completed');
+    check("exactly two dispatches occur (upstream, then case 1's path only)", dispatch.calls.length === 2 && dispatch.calls[1].id === 'hitStep');
+    check("case 1's path result lands at br10.hitStep", outcome.results['br10.hitStep'] && outcome.results['br10.hitStep'].out === 'H');
+    check("case 0's own non-matching path never dispatches, so br10.skipStep is absent", typeof outcome.results['br10.skipStep'] === 'undefined');
+  }
+
+  // -- later cases are never EVALUATED once a match is found, not merely --
+  // -- never dispatched -- case 1's own "when" references a nonexistent --
+  // -- step, which would halt (predicate-operand-unresolved) IF it were ---
+  // -- ever evaluated; the run must still complete, with no halt at all ---
+  {
+    const spec = {
+      steps: [
+        { id: 'upstream', type: 'agent' },
+        {
+          id: 'br11',
+          type: 'branch',
+          cases: [
+            { when: { step: 'upstream', field: 'x', operator: 'equals', value: 'go' }, steps: [{ id: 'firstStep', type: 'agent' }] },
+            { when: { step: 'doesNotExist', field: 'y', operator: 'equals', value: 'z' }, steps: [{ id: 'neverStep', type: 'agent' }] },
+          ],
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ upstream: { x: 'go' }, firstStep: { out: 'F' }, neverStep: { out: 'N' } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check("the run completes -- case 1's unresolvable predicate is never evaluated", outcome.status === 'completed');
+    check('no halt is recorded', outcome.halt === null);
+    check("exactly two dispatches occur (upstream, then case 0's path only)", dispatch.calls.length === 2 && dispatch.calls[1].id === 'firstStep');
+    check("case 0's path result lands at br11.firstStep", outcome.results['br11.firstStep'] && outcome.results['br11.firstStep'].out === 'F');
+  }
+
+  // -- a later top-level branch step's own "when.step" reads an EARLIER --
+  // -- branch step's namespaced result (a dotted key, ---------------------
+  // -- "earlierBranch.someStep") -- proving dotted keys work as predicate -
+  // -- operands against branch results, per specEngineEvalPredicate's own -
+  // -- exact-key lookup -----------------------------------------------------
+  {
+    const spec = {
+      steps: [
+        { id: 'upstream', type: 'agent' },
+        {
+          id: 'brEarlier',
+          type: 'branch',
+          cases: [{ when: { step: 'upstream', field: 'x', operator: 'equals', value: 'go' }, steps: [{ id: 'someStep', type: 'agent' }] }],
+        },
+        {
+          id: 'brLater',
+          type: 'branch',
+          cases: [{ when: { step: 'brEarlier.someStep', field: 'flag', operator: 'equals', value: true }, steps: [{ id: 'laterMatched', type: 'agent' }] }],
+          default: { steps: [{ id: 'laterDefault', type: 'agent' }] },
+        },
+      ],
+      config: {},
+    };
+    const dispatch = makeRecordingDispatch({ upstream: { x: 'go' }, someStep: { flag: true }, laterMatched: { out: 'LM' }, laterDefault: { out: 'LD' } });
+    const outcome = await specEngineExecute(spec, dispatch);
+    check("a later branch step reading an earlier branch step's dotted result completes", outcome.status === 'completed');
+    check('exactly three dispatches occur (upstream, someStep, then the matched later case)', dispatch.calls.length === 3 && dispatch.calls[2].id === 'laterMatched');
+    check("the later branch's matched case result lands at brLater.laterMatched", outcome.results['brLater.laterMatched'] && outcome.results['brLater.laterMatched'].out === 'LM');
+    check("the later branch's declared default never dispatches", typeof outcome.results['brLater.laterDefault'] === 'undefined');
   }
 
   console.log(passCount + ' passed, ' + failCount + ' failed');

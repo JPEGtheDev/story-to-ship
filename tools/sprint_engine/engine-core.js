@@ -1437,15 +1437,16 @@ function specEngineRegexExtract(text, pattern) {
 }
 
 // specEngineExecute(spec, dispatch) runs the execute loop over spec.steps,
-// in order, for the three leaf step kinds (agent, gate, shape) plus two
-// container kinds: "parallel" and "map", per the "Container authoring
-// syntax" and "Result-key namespacing grammar" sections of SPEC_SCHEMA.md,
-// and the PROBE_RESULTS.md observation that a failing gate verdict inside
-// one branch does not disrupt the other branch's result delivery or the
-// overall join. The other two container kinds (scored-retry, branch)
-// remain a later capability -- meeting one at execute time, whether at the
-// top level or inside a parallel step's own track or a map step's own
-// body, is never a silent skip; the loop halts immediately with a named
+// in order, for the three leaf step kinds (agent, gate, shape) plus three
+// container kinds: "parallel", "map", and "scored-retry", per the
+// "Container authoring syntax" and "Result-key namespacing grammar"
+// sections of SPEC_SCHEMA.md, and the PROBE_RESULTS.md observation that a
+// failing gate verdict inside one branch does not disrupt the other
+// branch's result delivery or the overall join. The one remaining
+// container kind ("branch") remains a later capability -- meeting it at
+// execute time, whether at the top level or inside a parallel step's own
+// track, a map step's own body, or a scored-retry step's own wrapped step,
+// is never a silent skip; the loop halts immediately with a named
 // 'container-step-not-supported' diagnostic, the same {path, diagnostic,
 // message} halt shape every other halt in this file uses. A parallel
 // step's own malformed shapes (a missing/non-array `tracks`, a track that
@@ -1454,7 +1455,12 @@ function specEngineRegexExtract(text, pattern) {
 // does not itself flag those defects (see specEngineExecuteParallelStep
 // below); a map step's own malformed shapes (a missing/non-array `steps`,
 // or a missing/unresolvable/non-array `list`) get the same treatment (see
-// specEngineExecuteMapStep below).
+// specEngineExecuteMapStep below); a scored-retry step's own malformed
+// shapes (mode/threshold -- reusing validateSpec's own diagnostics for the
+// same defects it already checks, duplicated here for an unvalidated spec
+// the same way spec-not-object/steps-not-array are -- plus `maxAttempts`
+// and a non-object wrapped `step`, neither of which validateSpec checks)
+// get the same treatment (see specEngineExecuteScoredRetryStep below).
 //
 // A map step's own list-source field, `list: { step, field? }`, is this
 // implementation's own disclosed choice -- SPEC_SCHEMA.md's map bullet
@@ -1883,11 +1889,43 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
       continue;
     }
 
+    if (type === 'scored-retry') {
+      const retryOutcome = await specEngineExecuteScoredRetryStep(step, dispatch, values, path, results);
+      // Attempts data is merged regardless of ok/fail, mirroring the
+      // existing "partial results collected before a failure are still
+      // returned" convention elsewhere in this file (a parallel step's own
+      // per-track localResults are merged the same way, unconditionally).
+      Object.keys(retryOutcome.namespacedResults).forEach(function (namespacedKey) {
+        results[namespacedKey] = retryOutcome.namespacedResults[namespacedKey];
+      });
+      if (!retryOutcome.ok) {
+        trace.push({
+          step: stepId,
+          kind: type,
+          status: retryOutcome.status,
+          outcome: typeof retryOutcome.rawOutcome !== 'undefined' ? retryOutcome.rawOutcome : null,
+          flags: [],
+          attempts: retryOutcome.attemptsTrace,
+        });
+        return { status: retryOutcome.status, halt: retryOutcome.halt };
+      }
+      results[stepId] = retryOutcome.winnerValue;
+      trace.push({
+        step: stepId,
+        kind: type,
+        status: 'completed',
+        outcome: retryOutcome.winnerValue,
+        flags: [],
+        attempts: retryOutcome.attemptsTrace,
+      });
+      continue;
+    }
+
     if (SPEC_ENGINE_CONTAINER_STEP_KINDS.indexOf(type) !== -1) {
-      // Loud failure, never a silent skip: the two remaining container
-      // kinds (scored-retry, branch) are a later capability this loop does
-      // not implement, whether met at the top level or inside a track's or
-      // a map iteration's own sequence.
+      // Loud failure, never a silent skip: the one remaining container
+      // kind ("branch") is a later capability this loop does not
+      // implement, whether met at the top level or inside a track's, a map
+      // iteration's, or a scored-retry attempt's own sequence.
       return {
         status: 'failed',
         halt: specEngineMakeHalt(
@@ -1897,7 +1935,7 @@ async function specEngineExecuteSequence(steps, dispatch, values, results, trace
             stepId +
             '" is a container step kind ("' +
             type +
-            '"); this executor only runs agent, gate, shape, parallel, and map -- the remaining container kinds are a later capability.'
+            '"); this executor only runs agent, gate, shape, parallel, map, and scored-retry -- the remaining container kind is a later capability.'
         ),
       };
     }
@@ -2468,6 +2506,347 @@ async function specEngineExecuteMapStep(step, dispatch, values, path, baseResult
     wholeRunHalt: null,
     namespacedResults: namespacedResults,
     iterations: iterations,
+  };
+}
+
+// specEngineExecuteScoredRetryStep(step, dispatch, values, path, baseResults)
+// runs one "scored-retry" step's own wrapped `step` repeatedly, up to a
+// bound, scoring each attempt and keeping a winner, per the "Container
+// authoring syntax" and "Result-key namespacing grammar" sections of
+// SPEC_SCHEMA.md. Unlike parallel/map, a scored-retry step has no fan-out of
+// independently-continuing siblings to contain -- one wrapped step is
+// retried, one winner (or none) comes out -- so this function's own return
+// shape and its caller's handling (the `type === 'scored-retry'` branch in
+// specEngineExecuteSequence below) mirror a GATE step's own contract, not
+// parallel/map's `wholeRunHalt`-vs-contained split: on success it reports a
+// single completed result to be written under the step's own id; on
+// failure it reports a `{status, halt}` pair that specEngineExecuteSequence
+// folds into ITS OWN status exactly the way a gate's own fail/uncertain
+// verdict is folded in -- contained when this scored-retry step sits inside
+// a track's or a map iteration's own sequence (specEngineExecuteTrack /
+// specEngineExecuteMapIteration only ever capture their own sequence's
+// status, never re-escalate it), escalated to the whole run when it sits at
+// the top level. This is also what makes the nested-in-a-track composite
+// key `<trackId>.<retryId>.attempts.<n>` fall out for free: this function
+// writes plain `<retryId>` / `<retryId>.attempts.<n>` keys into whatever
+// `results` object its caller passed as `baseResults` (the track's own
+// private results object when nested, the top-level results object
+// otherwise), and the enclosing track's own re-namespacing (already
+// written for parallel steps) prefixes every one of those keys with
+// `<trackId>.` the same way it prefixes any other step's key -- no
+// scored-retry-specific composite-key logic is needed here at all.
+//
+// SEVEN CONTRACT-GAP FILLS this function makes and discloses (SPEC_SCHEMA.md
+// is silent on all seven; each is this implementation's own choice,
+// consistent with the contract's own idioms elsewhere in this file, and
+// owner-reversible):
+//
+// 1. SCORE SOURCE: an attempt's numeric score is read from a field named
+//    `score` on the wrapped step's own completed result -- the same field
+//    name the contract's own predicate example reads off a step's result
+//    (SPEC_SCHEMA.md's `{ step: 'par', field: 'failures', operator: 'gte',
+//    value: 1 }` worked example). A scored-retry step may override the
+//    field name via an optional `scoreField` string; when absent, `score`
+//    is used. The resolved value is validated with the existing
+//    specEngineIsFiniteNumber (the same strict, no-coercion check
+//    specEngineEvalPredicate already applies to lte/gte operands) --
+//    missing, unresolvable, or non-numeric halts the whole scored-retry
+//    step under 'scored-retry-score-unparseable', status "uncertain" (the
+//    plan-pinned behavior), with the wrapped step's raw result recorded as
+//    this halt's own `outcome` in the trace, mirroring how a gate's own
+//    "uncertain" verdict records its raw dispatch outcome in the trace.
+// 2. ATTEMPT BOUND: `maxAttempts` is REQUIRED (a positive integer),
+//    consistent with `mode` and `threshold` (first-passing) already being
+//    REQUIRED fields on this step kind, and with the step-kind table's own
+//    one-clause definition of scored-retry as running "up to a BOUNDED
+//    number of times" -- the bound is intrinsic to what this step kind
+//    means, not an optional refinement with a sensible default (inventing a
+//    default here would invent contract surface SPEC_SCHEMA.md does not
+//    offer). Required-but-malformed is guarded here under
+//    'scored-retry-max-attempts-required' (missing) /
+//    'scored-retry-max-attempts-invalid' (present but not a positive
+//    integer) -- BUT, unlike `mode`/`threshold`, this check is NOT added to
+//    validateSpec: `maxAttempts` is this implementation's own invented
+//    field name (SPEC_SCHEMA.md's field-optionality table never names it),
+//    exactly the same status `map.list` already has in this file (see the
+//    specEngineExecuteMapStep header comment above) -- a real,
+//    execute-time-only-enforced field for a genuinely REQUIRED contract
+//    concept (the bound) whose exact field name and JSON shape SPEC_SCHEMA.md
+//    leaves to the implementation. Duplicating validateSpec's own
+//    mode/threshold checks here (guards 1-1b below) follows the existing
+//    'spec-not-object'/'steps-not-array' precedent instead: those two
+//    fields ARE named and required by the contract itself, so validateSpec
+//    already rejects a spec missing them, and this function re-checks them
+//    only so execute() still fails loudly (never throws) if ever called on
+//    a spec that skipped validateSpec.
+// 3. AUGMENT MECHANICS: `step.augment`, when a non-empty string, is
+//    concatenated onto the wrapped step's own `prompt` field (separated by
+//    a blank line) for RETRY attempts only -- attempt index 0 (the first
+//    attempt) always runs the wrapped step's `prompt` unchanged. This
+//    matches SPEC_SCHEMA.md's own field-optionality-table wording read
+//    literally: "if absent, a RETRY ATTEMPT runs without augmentation" --
+//    naming retry attempts specifically implies the first attempt (not yet
+//    a retry of anything) is never augmented. The augmented prompt is
+//    concatenated BEFORE this attempt's own sequence run, so it flows
+//    through the exact same specEngineRenderTemplate pipeline
+//    specEngineRenderStepForDispatch already applies to every agent/gate
+//    prompt -- augment text may itself carry `{{...}}` references, resolved
+//    the same way the rest of the prompt is, with no separate rendering
+//    path invented for it. Augmentation only ever applies to a wrapped step
+//    that declares a string `prompt` field; a wrapped gate/shape step with
+//    no `prompt` field is unaffected by `augment` on any attempt.
+// 4. THRESHOLD SEMANTICS (first-passing): an attempt clears the threshold
+//    when its score is greater than or EQUAL to it (`score >= threshold`),
+//    reusing the `gte` operator's own name and meaning from the "Predicate
+//    operator vocabulary" section, since first-passing's own one-clause
+//    definition ("stop and keep the first attempt that clears the
+//    threshold") is exactly the shape of a gte comparison already named
+//    elsewhere in this contract.
+// 5. KEEP-BEST TIE-BREAKING: when two or more attempts share the top score,
+//    the EARLIEST one (the lowest attempt index) wins -- the deterministic
+//    default with no further contract signal to prefer any other attempt,
+//    and the one that requires no extra bookkeeping beyond "replace the
+//    current best only on a STRICTLY greater score."
+// 6. WINNER STORAGE AND THE NO-WINNER RULING: every attempt whose wrapped
+//    step actually COMPLETED (produced a result, whether or not that
+//    result's score parsed) gets its own `<retryId>.attempts.<n>` key
+//    written -- "attempts that ran are recorded regardless" -- mirroring
+//    the existing convention elsewhere in this file that a track's or a
+//    map iteration's own completed-so-far results are still merged into
+//    the outer results map even when that track/iteration (or, here, the
+//    whole scored-retry step) ultimately fails as a whole ("partial results
+//    collected... are still returned"). An attempt whose wrapped step never
+//    completed at all (see gap-fill 7 below) contributes no attempts key,
+//    since there is no completed result to address. The plain `<retryId>`
+//    key is written ONLY when a winner was actually kept (a clearing
+//    first-passing attempt, or keep-best's own highest scorer) -- and its
+//    value is always IDENTICAL to that winning attempt's own
+//    `<retryId>.attempts.<n>` entry, the same object reference, per the
+//    "additionally recorded at the plain <retryId> key" wording. When
+//    EVERY attempt is exhausted with no winner -- first-passing never
+//    cleared its threshold, or keep-best ran to its bound with zero
+//    attempts that ever completed with a parseable score -- this function
+//    halts under 'scored-retry-no-winner', status "failed": a no-winner
+//    scored-retry step has no result for a later step to reference, and
+//    SPEC_SCHEMA.md's own field-optionality table already pins the sibling
+//    case of "branch, no case matches and no default" to the same loud-halt
+//    reading ("the run stops loudly with a diagnostic instead of guessing")
+//    rather than a silent skip -- this ruling applies that same reading to
+//    scored-retry's own no-winner case.
+// 7. ATTEMPT-FAILURE CONTAINMENT: an attempt whose wrapped step's own
+//    sub-sequence does not reach "completed" status (a nested gate fails or
+//    reports "uncertain", the wrapped step's dispatch resolves to
+//    null/undefined, or its own prompt-template render halts) is a
+//    SCORELESS ATTEMPT: it consumes one attempt slot, is recorded in this
+//    function's own attempts trace (not in the results map, since it
+//    produced no completed result), and the loop CONTINUES to the next
+//    attempt, subject to the same maxAttempts bound as every other attempt
+//    -- it never halts the scored-retry step by itself. This is
+//    deliberately distinct from gap-fill 1's score-PARSE failure (a wrapped
+//    step that DID complete but whose result carried no valid score field):
+//    a parse failure is the "broken reference must never masquerade as a
+//    legitimate result" class the undefined-sentinel rule already
+//    establishes elsewhere in this file (the engine genuinely cannot tell
+//    whether the attempt was good or bad, so it must halt loudly, not
+//    guess), whereas a wrapped step's own internal failure (a nested gate
+//    verdict, a dispatch outcome) IS a legitimate, already-meaningful
+//    "this attempt did not produce usable output" signal -- the same kind
+//    of per-unit runtime failure a track's own contained gate-fail or a map
+//    iteration's own contained halt already represents elsewhere in this
+//    file, and is handled the same contained-but-not-fatal way here. A
+//    score-parse failure on one attempt ALWAYS halts (per gap-fill 1),
+//    regardless of how many attempts remain -- this distinction is never
+//    blurred by the attempt-failure containment described here.
+async function specEngineExecuteScoredRetryStep(step, dispatch, values, path, baseResults) {
+  const mode = step.mode;
+  if (SPEC_ENGINE_SCORED_RETRY_MODES.indexOf(mode) === -1) {
+    const diagnostic = typeof mode === 'undefined' ? 'scored-retry-mode-required' : 'scored-retry-mode-invalid';
+    const message =
+      typeof mode === 'undefined'
+        ? 'scored-retry step "' + step.id + '" is missing the required "mode" field.'
+        : 'scored-retry step "' + step.id + '" has mode "' + mode + '", which is not "first-passing" or "keep-best".';
+    return { ok: false, status: 'failed', halt: specEngineMakeHalt(path + '.mode', diagnostic, message), namespacedResults: {}, attemptsTrace: [] };
+  }
+
+  if (mode === 'first-passing' && typeof step.threshold === 'undefined') {
+    return {
+      ok: false,
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.threshold',
+        'scored-retry-threshold-required',
+        'scored-retry step "' + step.id + '" uses mode "first-passing" and must declare "threshold".'
+      ),
+      namespacedResults: {},
+      attemptsTrace: [],
+    };
+  }
+
+  const maxAttempts = step.maxAttempts;
+  if (typeof maxAttempts === 'undefined') {
+    return {
+      ok: false,
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.maxAttempts',
+        'scored-retry-max-attempts-required',
+        'scored-retry step "' + step.id + '" is missing the required "maxAttempts" field.'
+      ),
+      namespacedResults: {},
+      attemptsTrace: [],
+    };
+  }
+  if (!Number.isInteger(maxAttempts) || maxAttempts < 1) {
+    return {
+      ok: false,
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.maxAttempts',
+        'scored-retry-max-attempts-invalid',
+        'scored-retry step "' + step.id + '" has "maxAttempts" ' + JSON.stringify(maxAttempts) + ', which is not a positive integer.'
+      ),
+      namespacedResults: {},
+      attemptsTrace: [],
+    };
+  }
+
+  if (!specEngineIsPlainObject(step.step)) {
+    return {
+      ok: false,
+      status: 'failed',
+      halt: specEngineMakeHalt(
+        path + '.step',
+        'scored-retry-step-not-object',
+        'scored-retry step "' + step.id + '" must declare "step" as a single nested step object.'
+      ),
+      namespacedResults: {},
+      attemptsTrace: [],
+    };
+  }
+
+  const wrappedStepId = step.step.id;
+  const scoreFieldName = typeof step.scoreField === 'string' && step.scoreField.length > 0 ? step.scoreField : 'score';
+  const augment = typeof step.augment === 'string' && step.augment.length > 0 ? step.augment : null;
+  const attemptPath = path + '.step';
+
+  const attemptsTrace = [];
+  const namespacedResults = {};
+  let bestIndex = -1;
+  let bestScore = null;
+  let bestValue = null;
+
+  for (let n = 0; n < maxAttempts; n += 1) {
+    // Gap-fill 3: augment is concatenated onto the wrapped step's own
+    // `prompt` field for retry attempts only (n >= 1); attempt 0 always
+    // runs the wrapped step unchanged.
+    let attemptStep = step.step;
+    if (n >= 1 && augment !== null && typeof step.step.prompt === 'string') {
+      attemptStep = Object.assign({}, step.step, { prompt: step.step.prompt + '\n\n' + augment });
+    }
+
+    // Isolated per-attempt scope, mirroring specEngineExecuteTrack /
+    // specEngineExecuteMapIteration: a fresh clone of baseResults per
+    // attempt (not accumulated attempt-to-attempt), so an attempt's own
+    // bare-name references resolve against the enclosing scope but never
+    // against a PRIOR attempt's own result.
+    const seedResults = Object.assign({}, baseResults);
+    const seedKeys = Object.keys(seedResults);
+    const attemptLocalTrace = [];
+    const seqOutcome = await specEngineExecuteSequence([attemptStep], dispatch, values, seedResults, attemptLocalTrace, attemptPath);
+
+    const ownResults = {};
+    Object.keys(seedResults).forEach(function (key) {
+      if (seedKeys.indexOf(key) === -1) {
+        ownResults[key] = seedResults[key];
+      }
+    });
+
+    if (seqOutcome.status !== 'completed') {
+      // Gap-fill 7: a scoreless attempt -- contained, recorded, the loop
+      // continues subject to the same maxAttempts bound.
+      attemptsTrace.push({ index: n, status: seqOutcome.status, halt: seqOutcome.halt, trace: attemptLocalTrace, score: null, result: null });
+      continue;
+    }
+
+    const attemptResult = ownResults[wrappedStepId];
+    namespacedResults[step.id + '.attempts.' + n] = attemptResult;
+
+    const scoreResolution = specEngineResolveFieldPath(attemptResult, scoreFieldName);
+    if (!scoreResolution.resolved || !specEngineIsFiniteNumber(scoreResolution.value)) {
+      // Gap-fill 1: a score-parse failure always halts the whole
+      // scored-retry step, "uncertain," regardless of attempts remaining.
+      attemptsTrace.push({ index: n, status: 'uncertain', halt: null, trace: attemptLocalTrace, score: null, result: attemptResult });
+      return {
+        ok: false,
+        status: 'uncertain',
+        halt: specEngineMakeHalt(
+          attemptPath,
+          'scored-retry-score-unparseable',
+          'scored-retry step "' +
+            step.id +
+            '" attempt ' +
+            n +
+            "'s wrapped step result does not carry a finite numeric \"" +
+            scoreFieldName +
+            '" field; recording uncertain rather than guessing.'
+        ),
+        namespacedResults: namespacedResults,
+        attemptsTrace: attemptsTrace,
+        rawOutcome: attemptResult,
+      };
+    }
+
+    const scoreValue = scoreResolution.value;
+    attemptsTrace.push({ index: n, status: 'completed', halt: null, trace: attemptLocalTrace, score: scoreValue, result: attemptResult });
+
+    if (bestIndex === -1 || scoreValue > bestScore) {
+      // Gap-fill 5: strictly-greater replacement means the EARLIEST
+      // top-scoring attempt wins any tie.
+      bestIndex = n;
+      bestScore = scoreValue;
+      bestValue = attemptResult;
+    }
+
+    if (mode === 'first-passing' && specEngineIsFiniteNumber(step.threshold) && scoreValue >= step.threshold) {
+      // Gap-fill 4: gte semantics -- clears at score >= threshold. Stops
+      // immediately: later attempts are never dispatched.
+      return {
+        ok: true,
+        status: 'completed',
+        halt: null,
+        namespacedResults: namespacedResults,
+        winnerValue: attemptResult,
+        attemptsTrace: attemptsTrace,
+      };
+    }
+  }
+
+  if (mode === 'keep-best' && bestIndex !== -1) {
+    return {
+      ok: true,
+      status: 'completed',
+      halt: null,
+      namespacedResults: namespacedResults,
+      winnerValue: bestValue,
+      attemptsTrace: attemptsTrace,
+    };
+  }
+
+  // Gap-fill 6: no winner -- every attempt exhausted (first-passing never
+  // cleared, or keep-best never completed a single parseable-score
+  // attempt) -- a loud halt, mirroring branch's own no-match-no-default
+  // pin, since a no-winner scored-retry has no result for a later step to
+  // reference.
+  return {
+    ok: false,
+    status: 'failed',
+    halt: specEngineMakeHalt(
+      path,
+      'scored-retry-no-winner',
+      'scored-retry step "' + step.id + '" exhausted all ' + maxAttempts + ' attempt(s) without keeping a winner.'
+    ),
+    namespacedResults: namespacedResults,
+    attemptsTrace: attemptsTrace,
   };
 }
 

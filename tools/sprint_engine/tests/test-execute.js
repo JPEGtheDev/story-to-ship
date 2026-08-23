@@ -11,18 +11,19 @@
 // instead of the fully-synchronous top-level style the sibling suites use.
 //
 // specEngineExecute's own contract: it walks spec.steps in order, running
-// each leaf step (agent, gate, shape) and, since parallel-step and
-// map-step support landed, a "parallel" or "map" container step too --
-// halting loudly the moment it meets one of the two still-unsupported
-// container kinds (scored-retry, branch), since their execution is a
-// later capability this suite does not build. Dispatch capability is
+// each leaf step (agent, gate, shape) and, since parallel-step, map-step,
+// and scored-retry-step support landed, a "parallel", "map", or
+// "scored-retry" container step too -- halting loudly the moment it meets
+// the one still-unsupported container kind (branch), since its execution
+// is a later capability this suite does not build. Dispatch capability is
 // injected: the caller supplies an async dispatch(step, context) function;
 // specEngineExecute itself carries no dispatch primitive of its own. See
 // engine-core.js's own header comment above specEngineExecute for the full
-// return-shape contract; see test-parallel.js and test-map.js for the full
-// "parallel" and "map" step-kind suites, this file's own container-kind
-// blocks below only prove that the two remaining container kinds are
-// still rejected, and that "parallel" and "map" no longer are.
+// return-shape contract; see test-parallel.js, test-map.js, and
+// test-scored-retry.js for the full "parallel", "map", and "scored-retry"
+// step-kind suites, this file's own container-kind blocks below only prove
+// that the one remaining container kind is still rejected, and that
+// "parallel", "map", and "scored-retry" no longer are.
 
 'use strict';
 
@@ -385,15 +386,16 @@ async function main() {
   }
 
   // -- encountering an UNSUPPORTED container step kind at execute time ----
-  // -- fails loudly, never a silent skip ("parallel" and "map" no longer --
-  // -- belong here -- they are now executed; see test-parallel.js and -----
-  // -- test-map.js for their own suites, and the blocks below for the -----
-  // -- still-unsupported kinds and for what "map" gets instead) -----------
+  // -- fails loudly, never a silent skip ("parallel", "map", and now -----
+  // -- "scored-retry" no longer belong here -- all three are now executed;
+  // -- see test-parallel.js, test-map.js, and test-scored-retry.js for ----
+  // -- their own suites, and the blocks below for the one still---------
+  // -- unsupported kind and for what "map"/"scored-retry" get instead) ----
   {
     const spec = {
       steps: [
         { id: 'before', type: 'agent' },
-        { id: 'retry1', type: 'scored-retry', mode: 'keep-best', step: { id: 'attempt', type: 'agent' } },
+        { id: 'branch1', type: 'branch', cases: [] },
         { id: 'after', type: 'agent' },
       ],
       config: {},
@@ -408,12 +410,12 @@ async function main() {
     check('the step after the container step never dispatches', dispatch.calls.length === 1 && dispatch.calls[0].id === 'before');
   }
 
-  // -- the two still-unsupported container kinds are rejected the same ----
-  // -- way as before; "parallel" and "map" are deliberately no longer -----
-  // -- among them (see the two blocks below for what happens to each ------
-  // -- instead) -------------------------------------------------------------
+  // -- the one still-unsupported container kind is rejected the same ------
+  // -- way as before; "parallel", "map", and "scored-retry" are ------------
+  // -- deliberately no longer among them (see the blocks below for what ---
+  // -- happens to each instead) ---------------------------------------------
   {
-    const kinds = ['scored-retry', 'branch'];
+    const kinds = ['branch'];
     for (let i = 0; i < kinds.length; i += 1) {
       const kind = kinds[i];
       const spec = { steps: [{ id: 'c1', type: kind }], config: {} };
@@ -457,6 +459,24 @@ async function main() {
       outcome.halt !== null && outcome.halt.diagnostic === 'map-steps-not-array'
     );
     check('a malformed map step never reaches dispatch', dispatch.calls.length === 0);
+  }
+
+  // -- "scored-retry" is now executed too, not rejected: a bare -----------
+  // -- scored-retry step with none of its own required fields still -------
+  // -- halts, but under its OWN execute-time malformed-shape guard, not ---
+  // -- the container-step-not-supported diagnostic the one still---------
+  // -- unsupported kind above gets (full scored-retry-execution coverage --
+  // -- lives in test-scored-retry.js) ---------------------------------------
+  {
+    const spec = { steps: [{ id: 'sr1', type: 'scored-retry' }], config: {} };
+    const dispatch = makeRecordingDispatch({});
+    const outcome = await specEngineExecute(spec, dispatch);
+    check('a bare scored-retry step (missing "mode") fails at execute time', outcome.status === 'failed');
+    check(
+      'a scored-retry step with no "mode" field instead fails under its own scored-retry-mode-required diagnostic',
+      outcome.halt !== null && outcome.halt.diagnostic === 'scored-retry-mode-required'
+    );
+    check('a malformed scored-retry step never reaches dispatch', dispatch.calls.length === 0);
   }
 
   // -- a gate step carrying a "predicate" field is a recognized-but------

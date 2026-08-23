@@ -323,17 +323,19 @@ async function main() {
   }
 
   // -- a container step nested inside a track (a scored-retry, here) is ---
-  // -- not yet an executable container kind: today, only "parallel" is ----
-  // -- executed by specEngineExecute; map/scored-retry/branch still halt --
-  // -- with container-step-not-supported wherever they are reached, ------
-  // -- including inside a track's own sequence. This asserts TODAY's -----
-  // -- actual behavior: the halt is CONTAINED as this track's own failure,
-  // -- matching the same containment rule a gate fail gets. Once ---------
-  // -- scored-retry execution lands, this same nested step will instead ---
-  // -- produce composite result keys of the shape ------------------------
-  // -- "<trackId>.<retryId>.attempts.<n>" per the result-key namespacing --
-  // -- grammar's "composites" rule -- that expectation is not yet --------
-  // -- verifiable and is recorded here only as a comment, not an assertion.
+  // -- now an executable container kind: scored-retry execution landed, ---
+  // -- so this nested step runs for real and its results land under -------
+  // -- composite keys of the shape "<trackId>.<retryId>.attempts.<n>" (and
+  // -- the plain "<trackId>.<retryId>" winner key) per the result-key -----
+  // -- namespacing grammar's "composites" rule -- no scored-retry-specific
+  // -- composite-key logic exists anywhere in the engine; this falls out --
+  // -- for free because specEngineExecuteScoredRetryStep writes its own ---
+  // -- plain/attempts keys into whatever results object it was handed -----
+  // -- (here, trackB's own private results object), and the SAME -------
+  // -- track-level re-namespacing every other track step's key already ----
+  // -- gets prefixes those keys with "trackB." too. The wrapped step's own
+  // -- outcome (score 7) clears the first-passing threshold (5) on its ----
+  // -- very first attempt, so both tracks now complete successfully.
   {
     const spec = {
       steps: [
@@ -348,7 +350,9 @@ async function main() {
                 {
                   id: 'retryB',
                   type: 'scored-retry',
-                  mode: 'keep-best',
+                  mode: 'first-passing',
+                  threshold: 5,
+                  maxAttempts: 2,
                   step: { id: 'attempt', type: 'agent' },
                 },
               ],
@@ -358,22 +362,30 @@ async function main() {
       ],
       config: {},
     };
-    const dispatch = makeRecordingDispatch({ okStep: { ok: true } });
+    const dispatch = makeRecordingDispatch({ okStep: { ok: true }, attempt: { score: 7 } });
     const outcome = await specEngineExecute(spec, dispatch);
-    check('a parallel step with a nested container in one track still completes overall', outcome.status === 'completed');
+    check('a parallel step with a now-executable nested container in one track completes overall', outcome.status === 'completed');
     check(
-      'the aggregate counts the nested-container track as a failure',
-      outcome.results.par1.failures === 1 && outcome.results.par1.successes === 1
+      'the aggregate counts both tracks as successes -- the nested scored-retry no longer fails its track',
+      outcome.results.par1.failures === 0 && outcome.results.par1.successes === 2
+    );
+    check(
+      "the nested scored-retry's winner lands at the composite plain key <trackId>.<retryId>",
+      !!outcome.results['trackB.retryB'] && outcome.results['trackB.retryB'].score === 7
+    );
+    check(
+      "the nested scored-retry's attempt lands at the composite attempts key <trackId>.<retryId>.attempts.<n>",
+      !!outcome.results['trackB.retryB.attempts.0'] && outcome.results['trackB.retryB.attempts.0'].score === 7
+    );
+    check(
+      'the composite plain key and the composite attempts key hold the identical value',
+      outcome.results['trackB.retryB'] === outcome.results['trackB.retryB.attempts.0']
     );
     const parallelTraceEntry = outcome.trace[outcome.trace.length - 1];
     const trackBSummary = parallelTraceEntry && parallelTraceEntry.tracks[1];
     check(
-      "the nested scored-retry halt is contained as this track's own failure",
-      !!trackBSummary && trackBSummary.trackId === 'trackB' && trackBSummary.status === 'failed'
-    );
-    check(
-      'the contained halt reuses the container-step-not-supported diagnostic',
-      !!trackBSummary && !!trackBSummary.halt && trackBSummary.halt.diagnostic === 'container-step-not-supported'
+      "the nested scored-retry track now completes instead of failing",
+      !!trackBSummary && trackBSummary.trackId === 'trackB' && trackBSummary.status === 'completed'
     );
   }
 

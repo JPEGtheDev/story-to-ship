@@ -35,7 +35,8 @@ Two files:
 SPEC_SCHEMA.md is the authoring contract -- read it before writing a spec.
 This section is an index into it, not a restatement.
 
-The smallest valid spec:
+The smallest valid spec (mirrors SPEC_SCHEMA.md's "Minimal valid spec"
+section verbatim -- keep the two in sync if either changes):
 
 ```json
 {
@@ -51,7 +52,7 @@ Verified against `validateSpec`:
 ```
 $ node -e "
 const { validateSpec } = require('./engine-core.js');
-console.log(validateSpec({
+console.log('violations:', validateSpec({
   steps: [{ id: 'pass_through', type: 'shape', template: {} }],
   config: {}
 }));

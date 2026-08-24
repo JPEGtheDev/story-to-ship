@@ -45,6 +45,10 @@ by the runtime itself.
 > and the ladder stopped because caller emission (F3) -- not the runtime --
 > bounded payload size.
 
+(The tag "F3" in that quote is the source measurement's own label for its
+caller-emission finding. It is quoted here exactly as measured and is not
+otherwise defined or used anywhere else in this file.)
+
 So 41,628 characters is the highest point this repo has confirmed works, not
 a discovered limit -- no failure was ever observed at any size tried, and no
 ceiling above that point has been located.

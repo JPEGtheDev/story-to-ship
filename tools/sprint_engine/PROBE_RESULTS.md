@@ -21,6 +21,19 @@ This document records the probe workflow script that was run, the run's
 structured result, the verification performed on that result, and the
 conclusions that can and cannot be drawn from it.
 
+> **Historical transcript notice.** Everything below through the "Verification"
+> section is a verbatim, one-time transcript: the exact script that was run,
+> the exact structured result it returned, and the exact shell commands and
+> output used to check that result. The workflow label
+> (`sprint-engine-t0-probe`), the write-probe's marker string (`sprint-engine
+> T0 write probe`), the `scratch/t0-probe` path, and the absolute worktree
+> path embedded in the script and its result are historical values from that
+> one run's environment. They are not current references: that path does not
+> exist in a fresh clone of this repo, nothing in the sprint engine reads it,
+> and a future re-run of this probe would use different paths. These values
+> are preserved byte-exact rather than genericized, so the record stays
+> faithful to what actually ran.
+
 ## Probe workflow script
 
 ```js

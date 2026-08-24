@@ -32,15 +32,18 @@ hold no nested steps.
 | Field | Optionality | Rule |
 |---|---|---|
 | `config.spillDir` | REQUIRED whenever the spec contains any agent step | Every agent step can produce an oversized result (see the spill contract below), and the oversized-output rule has nowhere to save its file without this folder. Requiring it whenever an agent step is present means the rule can never fire in a workflow that has nowhere to save. `spillDir` must be an absolute path; a relative path is rejected at validation with a named diagnostic. |
-| `map.merge` | OPTIONAL | A map step may declare how its per-item results are combined; if it does not, a default combination applies, but no sourced wording specifies what that default combination actually does -- this contract does not invent one. |
+| `map.list` | REQUIRED whenever a map step is used | Names the earlier step (and an optional dotted field path) whose resolved result is the array this map step iterates over: `{step, field}` -- `field` is optional; when absent, the named step's whole result is used as the list directly. A missing or malformed `list`, a `list.step`/`list.field` that does not resolve, or a resolved value that is not an array each halt the run once execution reaches this map step. Structural validation does not check for this field ahead of time -- a spec missing it passes validation and only halts when the run reaches this step. |
+| `map.merge` | RECOGNIZED, but declaring it halts the run | This contract names `map.merge` as a way to declare how per-item results are combined, but specifies no default combination for what happens when it is absent -- and the engine does not implement `merge` at all: declaring it on a map step, with any value, halts the run under `map-merge-not-supported` before any iteration dispatches. A map step must currently omit `merge` entirely; per-item results remain addressable only through the `<mapId>.<index>` keys the result-key namespacing grammar defines below. |
 | `scored-retry.augment` | OPTIONAL | A scored-retry step may declare extra instructions fed into a retry attempt; if absent, a retry attempt runs without augmentation. |
 | `scored-retry.mode` | REQUIRED | Two legal values: `first-passing` (stop and keep the first attempt that clears the threshold) and `keep-best` (run every attempt up to the bound and keep the highest-scoring one). |
-| `scored-retry.threshold` | REQUIRED for `first-passing` mode; OPTIONAL for `keep-best` mode | `first-passing` needs a threshold to know when to stop; `keep-best` runs to its bound regardless and does not need one. |
+| `scored-retry.maxAttempts` | REQUIRED | The bound on how many attempts this step runs: a positive integer. Missing, non-integer, or non-positive values halt the run under a named diagnostic once execution reaches this step -- like `map.list`, this field is not checked by structural validation ahead of time. |
+| `scored-retry.threshold` | REQUIRED for `first-passing` mode; OPTIONAL for `keep-best` mode | `first-passing` needs a threshold to know when to stop; `keep-best` runs to its bound regardless and does not need one. A `threshold` that is present but not a finite number is a separate defect from a missing one: structural validation does not check its type, so this only surfaces once execution reaches this step, before any attempt dispatches. |
 | `branch.default` | OPTIONAL | If none of a branch step's conditions match and no `default` is declared, the run stops loudly with a diagnostic instead of guessing which path to take. |
 | `config.schemas` | OPTIONAL | An optional config field for declaring schemas. |
-| `config.expectedSha256` | OPTIONAL | When present, the engine verifies the spec's own integrity before any structural validation or dispatch: it computes a canonical form of the spec (a JSON serialization of the parsed spec with `expectedSha256` itself excluded -- this field cannot bind to a hash that would need to include its own value to be checked) and hashes that canonical form with the engine's own sha256 primitive, identically whether the spec was received as a string or as an already-parsed object. A mismatch halts the run with a named diagnostic before any dispatch occurs. |
+| `config.expectedSha256` | OPTIONAL | When present, the engine verifies the spec's own integrity before any structural validation or dispatch: it computes a canonical form of the spec (a JSON serialization of the parsed spec with `expectedSha256` itself excluded -- this field cannot bind to a hash that would need to include its own value to be checked) and hashes that canonical form with the engine's own sha256 primitive, identically whether the spec was received as a string or as an already-parsed object. A mismatch halts the run with a named diagnostic before any dispatch occurs. Any textual edit to the spec changes its canonical form and invalidates a previously computed `expectedSha256`; it must be recomputed by this same canonicalize-then-hash procedure after every edit, not carried over from a prior version of the spec. |
 | `model` (on an agent or gate step) | OPTIONAL | Selects which model that step's agent call dispatches to. Pass-through only: the engine does not validate the value against any known-model list -- an unrecognized value causes a dispatch-time failure when the agent call is made, not a spec-validation error. When present, this step's own `model` overrides `config.model` for that one step. |
 | `config.model` | OPTIONAL | The run-wide default model, applied to every agent/gate step that does not declare its own `model`, and to every engine-synthesized dispatch (a spill-writer or digest-verify step; see the spill contract below) -- those never carry a step-level `model` of their own, so they always follow this default. Precedence is step overrides config; if neither a step's own `model` nor `config.model` is set, the step's dispatch omits a model selection entirely and inherits whatever model the invoking session is already running under. This is the same pass-through-only rule as the per-step `model` field: the engine does not validate the value. |
+| `verifyDigest` (on an agent step) | OPTIONAL | Declares a pre-dispatch integrity check on an on-disk file: `{path, sha256}`, both required once the field is present. Before this step's own prompt renders or dispatches, the engine issues a separate digest-verify dispatch for `path` and compares the digest it returns, in-engine, against the declared `sha256`. A match lets the step proceed to its own normal dispatch unchanged. A mismatch halts under `digest-verify-mismatch` before this step ever dispatches its own prompt. An unparseable or malformed digest-verify return halts as `uncertain` under `digest-verify-outcome-unparseable`. A malformed `verifyDigest` declaration itself (missing `path`, or a `sha256` that is not 64 lowercase hex characters) halts under `digest-verify-declaration-malformed`, spend-free, before any dispatch for this step at all. Applies to agent steps only; a gate step never carries `verifyDigest`. Not checked by structural validation -- only at execute time, when the run reaches this step. |
 
 **A note on "schema."** This word names three different things in this
 contract: two resolved here, and a third, unrelated sense -- the shape of a
@@ -122,7 +125,14 @@ An **output schema** (the per-step field the reserved-segments rule refers
 to, named in the schema-disambiguation paragraph above) is carried on a
 step as `outputSchema: { properties: { ... } }`, `properties` reusing this
 contract's own word for "its properties, which of them are required" from
-that same paragraph.
+that same paragraph. An outputSchema guides what the dispatched agent is
+asked to return; the engine itself never validates a dispatch outcome
+against it. A result that nominally conforms -- every declared property
+present -- but also carries that same structured content re-encoded as a
+JSON string in one of its fields passes through unchecked: nothing in this
+engine inspects a field's type against its schema beyond what a specific
+downstream check (a gate's verdict field, a scored-retry's score field, and
+so on) already requires on its own.
 
 A **predicate** (the gate-step and branch-case comparison the next section
 describes) is an object `{ step, field, operator, value }`: `step` and
@@ -249,6 +259,17 @@ step's entire result rather than to one field of it -- the empty-field-path
 case of the same rule. This is the mechanism a bare reference like
 `{{summarize}}` in the map-body addressing definition above relies on.
 
+**Static-checking scope.** The dangling-reference check above only runs
+over two places: a gate step's own `predicate` (or a branch case's `when`),
+and a shape step's own `template` field. It does not scan an agent or gate
+step's `prompt` field for `{{...}}` placeholders. A dangling reference
+inside a prompt is therefore never caught ahead of time -- it surfaces only
+when that step actually renders, at dispatch time, as the same
+undefined-sentinel halt described above, under the diagnostic
+`template-operand-unresolved`: the runtime counterpart of the
+`dangling-template-reference` diagnostic a shape step's template would get
+caught on statically.
+
 **Reserved segments.** The segment `attempts` and any bare-numeric segment
 (such as `0`, `1`, `2`) are illegal in two places: as a spec step ID anywhere
 in the spec, and as a top-level output-schema field name on a scored-retry
@@ -277,8 +298,14 @@ strand of a parallel step a **track**, and reserves **branch step** for the
 if/else step kind.
 
 - **parallel**: a nested step's key is `<trackId>.<stepId>`, one segment per
-  track that ran. A step positioned after the parallel step can reference
-  any track's namespaced results once the parallel step has completed;
+  track that ran -- but that composite key only exists in the SCOPE
+  ENCLOSING the parallel step, once its join has completed. While a track
+  is still running, a step inside that same track addresses an earlier
+  sibling step in its own track by bare step name, exactly the way a step
+  outside any track addresses an earlier top-level step -- not by the
+  `<trackId>.<stepId>` composite, which is not yet in scope from inside the
+  track that produced it. A step positioned after the parallel step can
+  reference any track's namespaced results once the parallel step has completed;
   referencing a track's step result from a step positioned BEFORE the
   parallel step's join (that is, from inside a different track, or from a
   step that runs concurrently rather than after) is invalid and is caught by
@@ -305,6 +332,77 @@ if/else step kind.
   concatenates -- for example, a scored-retry nested inside a parallel
   track produces keys like `<trackId>.<retryId>.attempts.<n>`.
 
+## Map step execution contract
+
+Inside one iteration of a map step's body, the current list item is
+available under the bare key `item` -- a synthetic reference the engine
+seeds into that iteration's own results, not one of the body's own declared
+steps. Because of this, a body step cannot itself declare the id `item`:
+doing so is rejected before any iteration dispatches, under
+`map-body-step-id-item-reserved`, so the collision this would otherwise
+cause (the body step's own result being silently excluded from the map
+step's results) can never reach a live dispatch.
+
+Iterations run sequentially, not concurrently: a later item's dispatches do
+not begin until the earlier item's own body has fully settled. An empty
+resolved list runs zero iterations and contributes no results at all -- the
+run continues past the map step as if it had never been declared, other
+than its own empty trace entry.
+
+A map step's own result carries no aggregate object -- nothing like a
+parallel step's `{failures, successes, total}` exists for map. A failed
+iteration is contained to its own entry and never escalates to a whole-run
+halt on its own; it stays inspectable through the run's trace, under that
+map step's `iterations` array -- one `{index, status, trace, halt}` entry
+per resolved list item, in list order.
+
+## Scored-retry execution contract
+
+A scored-retry step's score comes from one fixed field: the wrapped step's
+own result must carry a finite numeric `score` field. An attempt whose
+result has no parseable `score` halts the whole scored-retry step as
+`uncertain`, regardless of how many attempts remain.
+
+Threshold comparison is `gte`: an attempt clears the threshold when its
+score is greater than or equal to it, never strictly greater.
+
+When two or more attempts tie for the highest score, the earliest one
+wins -- a later attempt with an equal score never replaces it.
+
+The attempt kept as this step's result (by whichever mode was declared)
+lands on the plain `<retryId>` key, per the result-key namespacing grammar
+above; it is the wrapped step's own result value, not an object naming
+which attempt won.
+
+In `keep-best` mode, if every attempt is scoreless, there is no winner to
+keep: the step halts under `scored-retry-no-winner` once `maxAttempts` is
+exhausted. The same halt covers `first-passing` mode never clearing its
+threshold.
+
+## Branch step execution contract
+
+Once a branch step selects a path (a matching case, or `default`), that
+path's own failure is never independently contained: it propagates as this
+branch step's own status and halt, exactly as if the branch step itself had
+failed. Containment, when it exists, comes from an enclosing container (for
+example, a parallel track wrapped around the branch step), not from the
+branch step itself.
+
+An empty `cases` array is legal: nothing in this contract requires `cases`
+to be non-empty, so a branch step with zero cases falls straight through to
+`default` (or the no-match halt below) exactly as a populated-but-all-
+non-matching `cases` array would.
+
+A branch step writes no plain `results[branchId]` key of its own -- only
+the namespaced `<branchId>.<stepId>` keys for whichever path's steps
+actually ran, per the result-key namespacing grammar above.
+
+A predicate that halts instead of resolving to a clean pass/fail (an
+unresolved operand, for example) is forwarded to the run with the
+evaluator's own locator -- the same `<step>.<field>` operand path a gate
+step's own predicate failure would carry -- not a locator built fresh for
+the branch step.
+
 ## Oversized-output spill contract
 
 An agent step's result can contain a content field too large to return
@@ -322,7 +420,12 @@ it creates the spill directory if needed (`mkdir -p`), writes the content to
 the field-optionality table above -- computes the file's sha256 checksum, and
 returns a receipt in place of the content: `{spilled: true, path, sha256,
 bytes}`. The engine stores that receipt in the results map; the oversized
-text itself never transits the agent's own output. `<stepId>` here means the
+text itself never transits the agent's own output. This receipt attests to
+what the agent that computed it wrote and hashed -- the engine does not
+independently recompute that hash against the content the producer meant
+to write, so a transcription mismatch between the producer's own content
+and the bytes actually written to `path` is not detected by this contract.
+`<stepId>` here means the
 step's own FULL namespaced result key -- the same key the "Result-key
 namespacing grammar" section describes results being stored under (bare
 `stepId` at the top level, `<trackId>.<stepId>` inside a parallel track,
@@ -392,7 +495,12 @@ A gate step's verdict is one of three values: `pass`, `fail`, or
   `uncertain` in any of three cases: its verdict was reported as the
   `uncertain` schema member directly, its reported verdict text could not be
   parsed into a known verdict at all, or it tripped the say-vs-do check
-  below.
+  below. The unparseable case also covers an outcome that arrives as a
+  JSON-encoded STRING rather than an object: the engine does not parse or
+  unwrap a string result looking for an embedded verdict, so a gate agent
+  that returns `"{\"verdict\":\"pass\"}"` as a string, instead of the
+  object `{"verdict":"pass"}`, lands on `uncertain` the same as any other
+  unparseable outcome. The verdict must arrive as an object.
 
 **Worked example (pass and fail).** A probe run in this repo dispatched two
 gate agents. One evaluated an upstream answer of `"alpha"` and returned
@@ -429,6 +537,17 @@ replay comparison), each step's capture record has this shape:
   "output": "the step's captured output"
 }
 ```
+
+Two implemented conventions this shape relies on. `dispatchIndex` is
+0-based and contiguous over the whole run, in the order the engine's
+dispatch calls are issued -- not scoped per step, per track, or per
+container. And an engine-synthesized dispatch (one the engine itself
+issues, not an author-declared step) carries its own distinct `stepKey`:
+a digest-verify dispatch (see `verifyDigest` in the field-optionality table
+above) uses `<stepId>.verify-digest`, and a spill-writer dispatch (see the
+oversized-output spill contract above) uses `<stepId>.<field>.spill-writer`
+-- in both cases `<stepId>` is the consuming step's own full namespaced
+result key, not its bare local id alone.
 
 ## Minimal valid spec
 

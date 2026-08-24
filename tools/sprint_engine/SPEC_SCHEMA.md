@@ -43,7 +43,7 @@ hold no nested steps.
 | `config.expectedSha256` | OPTIONAL | When present, the engine verifies the spec's own integrity before any structural validation or dispatch: it computes a canonical form of the spec (a JSON serialization of the parsed spec with `expectedSha256` itself excluded -- this field cannot bind to a hash that would need to include its own value to be checked) and hashes that canonical form with the engine's own sha256 primitive, identically whether the spec was received as a string or as an already-parsed object. A mismatch halts the run with a named diagnostic before any dispatch occurs. Any textual edit to the spec changes its canonical form and invalidates a previously computed `expectedSha256`; it must be recomputed by this same canonicalize-then-hash procedure after every edit, not carried over from a prior version of the spec. |
 | `model` (on an agent or gate step) | OPTIONAL | Selects which model that step's agent call dispatches to. Pass-through only: the engine does not validate the value against any known-model list -- an unrecognized value causes a dispatch-time failure when the agent call is made, not a spec-validation error. When present, this step's own `model` overrides `config.model` for that one step. |
 | `config.model` | OPTIONAL | The run-wide default model, applied to every agent/gate step that does not declare its own `model`, and to every engine-synthesized dispatch (a spill-writer or digest-verify step; see the spill contract below) -- those never carry a step-level `model` of their own, so they always follow this default. Precedence is step overrides config; if neither a step's own `model` nor `config.model` is set, the step's dispatch omits a model selection entirely and inherits whatever model the invoking session is already running under. This is the same pass-through-only rule as the per-step `model` field: the engine does not validate the value. |
-| `verifyDigest` (on an agent step) | OPTIONAL | Declares a pre-dispatch integrity check on an on-disk file: `{path, sha256}`, both required once the field is present. Before this step's own prompt renders or dispatches, the engine issues a separate digest-verify dispatch for `path` and compares the digest it returns, in-engine, against the declared `sha256`. A match lets the step proceed to its own normal dispatch unchanged. A mismatch halts under `digest-verify-mismatch` before this step ever dispatches its own prompt. An unparseable or malformed digest-verify return halts as `uncertain` under `digest-verify-outcome-unparseable`. A malformed `verifyDigest` declaration itself (missing `path`, or a `sha256` that is not 64 lowercase hex characters) halts under `digest-verify-declaration-malformed`, spend-free, before any dispatch for this step at all. Applies to agent steps only; a gate step never carries `verifyDigest`. Not checked by structural validation -- only at execute time, when the run reaches this step. |
+| `verifyDigest` (on an agent step) | OPTIONAL | Declares a pre-dispatch integrity check on an on-disk file: `{path, sha256}`, both required once the field is present. Before this step's own prompt renders or dispatches, the engine issues a separate digest-verify dispatch for `path` and compares the digest it returns, in-engine, against the declared `sha256`. A match lets the step proceed to its own normal dispatch unchanged. A mismatch halts under `digest-verify-mismatch` before this step ever dispatches its own prompt. An unparseable or malformed digest-verify return halts as `uncertain` under `digest-verify-outcome-unparseable`. A malformed `verifyDigest` declaration itself (missing `path`, or a `sha256` that is not 64 lowercase hex characters) halts under `digest-verify-declaration-malformed` before any dispatch for this step at all, at no agent cost. Applies to agent steps only; a gate step never carries `verifyDigest`. Not checked by structural validation -- only at execute time, when the run reaches this step. |
 
 **A note on "schema."** This word names three different things in this
 contract: two resolved here, and a third, unrelated sense -- the shape of a
@@ -390,8 +390,8 @@ branch step itself.
 
 An empty `cases` array is legal: nothing in this contract requires `cases`
 to be non-empty, so a branch step with zero cases falls straight through to
-`default` (or the no-match halt below) exactly as a populated-but-all-
-non-matching `cases` array would.
+`default` (or the no-match halt the field-optionality table describes
+above) exactly as a populated-but-all-non-matching `cases` array would.
 
 A branch step writes no plain `results[branchId]` key of its own -- only
 the namespaced `<branchId>.<stepId>` keys for whichever path's steps
@@ -420,12 +420,7 @@ it creates the spill directory if needed (`mkdir -p`), writes the content to
 the field-optionality table above -- computes the file's sha256 checksum, and
 returns a receipt in place of the content: `{spilled: true, path, sha256,
 bytes}`. The engine stores that receipt in the results map; the oversized
-text itself never transits the agent's own output. This receipt attests to
-what the agent that computed it wrote and hashed -- the engine does not
-independently recompute that hash against the content the producer meant
-to write, so a transcription mismatch between the producer's own content
-and the bytes actually written to `path` is not detected by this contract.
-`<stepId>` here means the
+text itself never transits the agent's own output. `<stepId>` here means the
 step's own FULL namespaced result key -- the same key the "Result-key
 namespacing grammar" section describes results being stored under (bare
 `stepId` at the top level, `<trackId>.<stepId>` inside a parallel track,
@@ -435,6 +430,12 @@ same-named steps in different tracks or map iterations from spilling to the
 same file: a step called `inner` in track `t1` spills to
 `<spillDir>/t1.inner.<field>`, and the same-named step in track `t2` spills
 to `<spillDir>/t2.inner.<field>`.
+
+**Receipt fidelity caveat.** This receipt attests to what the agent that
+computed it wrote and hashed -- the engine does not independently
+recompute that hash against the content the producer meant to write, so a
+transcription mismatch between the producer's own content and the bytes
+actually written to `path` is not detected by this contract.
 
 **Spill-path containment.** Names that participate in a spill path -- every
 step id at any level (including a map, branch, or scored-retry step's own
@@ -500,7 +501,7 @@ A gate step's verdict is one of three values: `pass`, `fail`, or
   unwrap a string result looking for an embedded verdict, so a gate agent
   that returns `"{\"verdict\":\"pass\"}"` as a string, instead of the
   object `{"verdict":"pass"}`, lands on `uncertain` the same as any other
-  unparseable outcome. The verdict must arrive as an object.
+  unparseable outcome.
 
 **Worked example (pass and fail).** A probe run in this repo dispatched two
 gate agents. One evaluated an upstream answer of `"alpha"` and returned

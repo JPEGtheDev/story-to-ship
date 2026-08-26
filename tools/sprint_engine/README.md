@@ -92,6 +92,47 @@ running unit and integration test tracks, each gated; a map over per-module
 review wrapping a scored-retry around each review; a shape step assembling
 a report; a branch on risk; and a final gate).
 
+Its `build` step also carries the spec's only `verifyDigest` check, against
+`/tmp/sprint-engine-examples/build-test-review-input/source-bundle.txt`.
+`examples/source-bundle-input.txt` in this directory is the exact preimage
+of that check's declared sha256 -- it is staging material for a live run of
+the example, not a stray file. Before running the example live, copy it to
+the path the spec's `verifyDigest` declares; without that staging step the
+run halts at the first step on a digest mismatch (see "Gotchas" above for
+the general `verifyDigest`/`config.spillDir` rules this staging step exists
+to satisfy).
+
+## Running a spec
+
+`sprint-runner.js`'s own header states it is loaded by the workflow
+runtime, not run directly by node. A consumer invokes it by passing the
+spec as the workflow's `args` input; the runner glue reads `args`
+defensively, accepting either an already-parsed object or the spec's own
+raw JSON string (both shapes are handled -- see the `specInput` read near
+the end of `sprint-runner.js`). Where a consumer's client expresses "pass
+this as args" is that client's own concern, not something this repo's
+files pin down.
+
+Before a run starts, the invoker is responsible for two things the engine
+does not do on its own:
+
+- any `verifyDigest.path` named in the spec must already exist on disk with
+  content matching the declared sha256 -- the engine halts the step
+  otherwise (see the worked-example staging note above for a concrete
+  instance).
+- `config.spillDir`'s parent directory must be writable; the engine never
+  creates or writes to it itself (agent steps write there during producer
+  spill -- see "What it is" above).
+
+What a run returns is the `{status, results, trace, halt}` shape already
+described in "Reading a result map" above -- that section is the source of
+truth for it, not restated here.
+
+For tests and other tooling that need to call into the engine directly
+from node, `engine-core.js` is the node-`require`-able path: its guarded
+CommonJS footer exports `specEngineExecute` and the other core functions
+(see "What it is" above) without needing the workflow runtime at all.
+
 ## Running the tests
 
 `bash tests/run.sh` is the single entrypoint. Per its own header, it runs,

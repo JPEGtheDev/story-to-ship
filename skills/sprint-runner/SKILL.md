@@ -21,7 +21,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The sprint engine is a spec-driven multi-agent pipeline executor: a spec is a JSON document declaring an ordered list of steps -- agent, gate, shape, parallel, map, scored-retry, branch -- and the runner executes them through the Workflow tool runtime, dispatching subagents, enforcing gates, spilling oversized outputs, and verifying digests.
 
-Reach for it when multi-agent work must follow a declared, replayable pipeline instead of ad hoc orchestration; skip it for a single dispatch or an unordered task.
+Reach for it when multi-agent work must follow a declared, replayable pipeline instead of ad hoc orchestration; skip it for a single dispatch.
 
 ---
 
@@ -29,9 +29,9 @@ Reach for it when multi-agent work must follow a declared, replayable pipeline i
 
 Three ways to load it:
 
-1. **In this repository:** invoke the Workflow tool with `scriptPath: skills/sprint-runner/tools/sprint-runner.js` and the spec as `args`.
-2. **In a consumer install of the story-to-ship plugin:** invoke the Workflow tool with `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js` -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's documented mechanism (no shell expansion needed by the reader). Whether an install ships `tools/` isn't checked live yet -- step 3 covers it.
-3. **Universal fallback**, if `tools/` is missing: `curl -o sprint-runner.js https://raw.githubusercontent.com/JPEGtheDev/story-to-ship/main/skills/sprint-runner/tools/sprint-runner.js` (or equivalent), then invoke the Workflow tool with that path as `scriptPath`.
+1. **Default:** invoke the Workflow tool with `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js` and the spec as `args` -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's documented mechanism (no shell expansion needed). Whether an install ships `tools/` is unverified -- step 3 covers it.
+2. **Only if this checkout IS the story-to-ship source repo** (develops this plugin): invoke the Workflow tool with `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
+3. **Universal fallback**, if `tools/` is missing from the install: `curl -o sprint-runner.js https://raw.githubusercontent.com/JPEGtheDev/story-to-ship/main/skills/sprint-runner/tools/sprint-runner.js` (or equivalent), then invoke the Workflow tool with that path as `scriptPath`.
 
 ---
 

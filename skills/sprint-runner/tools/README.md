@@ -114,24 +114,25 @@ named plugin workflow that wraps it: the Workflow tool's `scriptPath`
 parameter is the invocation mechanism itself. Three ways to point
 `scriptPath` at it, in order:
 
-1. In this repository: `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
-2. In a consumer install of the story-to-ship plugin:
-   `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js`
+1. Default: `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js`
    -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's
    documented mechanism, so a reader of this file who is not inside skill
    text should get the resolved path from the skill itself, or substitute
    their own install's actual plugin root.
+2. Only if this checkout IS the story-to-ship source repo (develops this
+   plugin): `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
 3. Universal fallback, if `tools/` is missing from the install: curl the
-   raw `sprint-runner.js` from this repository's GitHub main branch to a
-   local path, then invoke the Workflow tool with that local file as
-   `scriptPath`.
+   raw `sprint-runner.js` from the story-to-ship repository's GitHub main
+   branch to a local path, then invoke the Workflow tool with that local
+   file as `scriptPath`.
 
 The invoker passes the spec as the workflow's `args` input; the runner
 glue reads `args` defensively, accepting either an already-parsed object
 or the spec's own raw JSON string (see the `specInput` read near the end
 of `sprint-runner.js`). How a specific calling client actually constructs
 and passes that args payload -- a CLI flag, an API call, a config file --
-is that client's own concern; this repo does not standardize it.
+is that client's own concern; the story-to-ship project does not
+standardize it.
 
 Before a run starts, the invoker is responsible for two things the engine
 does not do on its own:

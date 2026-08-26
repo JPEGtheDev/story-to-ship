@@ -105,13 +105,13 @@ to satisfy).
 ## Running a spec
 
 `sprint-runner.js`'s own header states it is loaded by the workflow
-runtime, not run directly by node. A consumer invokes it by passing the
-spec as the workflow's `args` input; the runner glue reads `args`
-defensively, accepting either an already-parsed object or the spec's own
-raw JSON string (both shapes are handled -- see the `specInput` read near
-the end of `sprint-runner.js`). Where a consumer's client expresses "pass
-this as args" is that client's own concern, not something this repo's
-files pin down.
+runtime, not run directly by node. The invoker passes the spec as the
+workflow's `args` input; the runner glue reads `args` defensively,
+accepting either an already-parsed object or the spec's own raw JSON
+string (see the `specInput` read near the end of `sprint-runner.js`). How
+a specific calling client actually constructs and passes that args
+payload -- a CLI flag, an API call, a config file -- is that client's own
+concern; this repo does not standardize it.
 
 Before a run starts, the invoker is responsible for two things the engine
 does not do on its own:
@@ -125,13 +125,14 @@ does not do on its own:
   spill -- see "What it is" above).
 
 What a run returns is the `{status, results, trace, halt}` shape already
-described in "Reading a result map" above -- that section is the source of
+described in "Reading a result map" below -- that section is the source of
 truth for it, not restated here.
 
 For tests and other tooling that need to call into the engine directly
-from node, `engine-core.js` is the node-`require`-able path: its guarded
-CommonJS footer exports `specEngineExecute` and the other core functions
-(see "What it is" above) without needing the workflow runtime at all.
+from node, `engine-core.js` is the path for loading the engine directly
+under node via `require()`: its guarded CommonJS footer exports
+`specEngineExecute` and the other core functions (see "What it is" above)
+without needing the workflow runtime at all.
 
 ## Running the tests
 

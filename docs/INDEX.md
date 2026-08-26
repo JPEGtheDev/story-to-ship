@@ -37,6 +37,14 @@ its canon-less default behavior. Once ratified, `docs/DOD.md` is catalogued
 in the table below; detail files are catalogued by the `docs/dod/` index
 chain (linked from the table), not listed here.
 
+## Sprint engine
+
+This repo carries a spec-driven multi-agent pipeline executor, packaged as
+the self-contained `sprint-runner` skill. That skill is the usage guide, and
+the engine's deeper documentation, schema, and tests live inside the
+skill's own tools directory. The skill ships whole as part of the
+story-to-ship plugin.
+
 ## Files
 
 | File | Domain | Subdomain | Description |

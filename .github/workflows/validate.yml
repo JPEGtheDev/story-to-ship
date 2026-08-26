@@ -42,9 +42,9 @@ jobs:
           shellcheck hooks/tests/run-workflow-model-guard.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
-          shellcheck tools/sprint_engine/tests/inline-copy-check.sh
-          shellcheck tools/sprint_engine/tests/run.sh
-          shellcheck tools/sprint_engine/tests/runner-syntax-check.sh
+          shellcheck skills/sprint-runner/tools/tests/inline-copy-check.sh
+          shellcheck skills/sprint-runner/tools/tests/run.sh
+          shellcheck skills/sprint-runner/tools/tests/runner-syntax-check.sh
           echo "[+] All shell scripts pass shellcheck"
 
       - name: Run all hook fixture suites
@@ -95,7 +95,7 @@ jobs:
                 echo "BROKEN: $f references $ref (not found at $target)"
                 broken=$((broken + 1))
               fi
-            done < <(grep -o 'references/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
+            done < <(grep -o '\(references\|tools\)/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
           done
           if [ "$broken" -gt 0 ]; then
             echo "Found $broken broken reference(s)"
@@ -302,4 +302,4 @@ jobs:
           echo "node version: $(node --version)"
 
       - name: Run sprint engine test suite
-        run: bash tools/sprint_engine/tests/run.sh
+        run: bash skills/sprint-runner/tools/tests/run.sh

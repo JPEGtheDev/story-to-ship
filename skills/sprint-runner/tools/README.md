@@ -104,14 +104,34 @@ to satisfy).
 
 ## Running a spec
 
-`sprint-runner.js`'s own header states it is loaded by the workflow
-runtime, not run directly by node. The invoker passes the spec as the
-workflow's `args` input; the runner glue reads `args` defensively,
-accepting either an already-parsed object or the spec's own raw JSON
-string (see the `specInput` read near the end of `sprint-runner.js`). How
-a specific calling client actually constructs and passes that args
-payload -- a CLI flag, an API call, a config file -- is that client's own
-concern; this repo does not standardize it.
+This engine's home is `skills/sprint-runner/tools/`, inside the
+sprint-runner skill; the skill is packaged to ship whole -- engine and
+docs together -- in the story-to-ship plugin, but that packaging has not
+been checked against a live install yet: see "Verifying a plugin install"
+below for the check. `sprint-runner.js`'s own header states it is
+loaded by the workflow runtime, not run directly by node. There is no
+named plugin workflow that wraps it: the Workflow tool's `scriptPath`
+parameter is the invocation mechanism itself. Three ways to point
+`scriptPath` at it, in order:
+
+1. In this repository: `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
+2. In a consumer install of the story-to-ship plugin:
+   `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js`
+   -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's
+   documented mechanism, so a reader of this file who is not inside skill
+   text should get the resolved path from the skill itself, or substitute
+   their own install's actual plugin root.
+3. Universal fallback, if `tools/` is missing from the install: curl the
+   raw `sprint-runner.js` from this repository's GitHub main branch to a
+   local path, then invoke the Workflow tool with that local file as
+   `scriptPath`.
+
+The invoker passes the spec as the workflow's `args` input; the runner
+glue reads `args` defensively, accepting either an already-parsed object
+or the spec's own raw JSON string (see the `specInput` read near the end
+of `sprint-runner.js`). How a specific calling client actually constructs
+and passes that args payload -- a CLI flag, an API call, a config file --
+is that client's own concern; this repo does not standardize it.
 
 Before a run starts, the invoker is responsible for two things the engine
 does not do on its own:
@@ -133,6 +153,28 @@ from node, `engine-core.js` is the path for loading the engine directly
 under node via `require()`: its guarded CommonJS footer exports
 `specEngineExecute` and the other core functions (see "What it is" above)
 without needing the workflow runtime at all.
+
+## Verifying a plugin install
+
+The check, in order: update or install the story-to-ship plugin; confirm
+the sprint-runner skill appears in the skill listing; list the installed
+skill's directory and confirm `tools/` is present with `sprint-runner.js`
+inside it; then invoke the runner by `scriptPath` with the minimal valid
+spec already shown in "Authoring a spec" above (one shape step, zero
+agent dispatches, so the invocation costs nothing in agent spend). A
+returned result map proves delivery end to end.
+
+What each outcome means:
+
+- the skill, or `tools/` inside it, is missing from the install -> the
+  install did not ship this subtree; use the universal fallback above and
+  report the observation on the repository's issue tracker.
+- the runner halts on a spec-missing diagnostic -> `args` did not arrive;
+  re-invoke, passing the spec as the `args` input.
+
+Whether a current plugin install actually ships this subtree on disk has
+not been verified by a live run yet -- that is stated plainly here, not
+as settled fact, matching the same open point in `SKILL.md`.
 
 ## Running the tests
 

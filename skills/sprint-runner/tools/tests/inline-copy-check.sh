@@ -3,8 +3,8 @@
 # engine-core.js marker region byte-for-byte, with nothing lost, added, or
 # reordered in the copy.
 #
-# tools/sprint_engine/sprint-runner.js is a workflow-runtime script that
-# embeds the dialect-neutral region of tools/sprint_engine/engine-core.js
+# skills/sprint-runner/tools/sprint-runner.js is a workflow-runtime script that
+# embeds the dialect-neutral region of skills/sprint-runner/tools/engine-core.js
 # (everything between the ===ENGINE-CORE-BEGIN=== and ===ENGINE-CORE-END===
 # marker lines, both lines included) so the engine's own logic can run
 # inside the runtime's own execution context. This script is the gate that

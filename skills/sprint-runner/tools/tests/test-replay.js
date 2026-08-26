@@ -28,8 +28,8 @@ function check(description, condition) {
 }
 
 // ---------------------------------------------------------------------
-// Part A: live-reference parity over tools/sprint_engine/examples/
-// build-test-review.json and tools/sprint_engine/tests/fixtures/live/
+// Part A: live-reference parity over skills/sprint-runner/tools/examples/
+// build-test-review.json and skills/sprint-runner/tools/tests/fixtures/live/
 // build-test-review.json (17 captured dispatch records).
 // ---------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ async function runPartA() {
 }
 
 // ---------------------------------------------------------------------
-// Part B: edge-fixture replay over every file in tools/sprint_engine/
+// Part B: edge-fixture replay over every file in skills/sprint-runner/tools/
 // tests/fixtures/edge/, discovered by glob rather than a hardcoded list
 // so a future fixture is picked up automatically.
 // ---------------------------------------------------------------------

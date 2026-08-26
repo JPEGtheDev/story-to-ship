@@ -2,7 +2,7 @@
 // "parallel" step kind, the only container kind specEngineExecute runs
 // today.
 //
-// Runs as: node tools/sprint_engine/tests/test-parallel.js
+// Runs as: node skills/sprint-runner/tools/tests/test-parallel.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test -- same house style as test-execute.js, including its own local

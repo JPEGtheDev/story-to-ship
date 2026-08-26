@@ -1,6 +1,6 @@
 // Structural validation suite for sprint engine specs.
 //
-// Runs as: node tools/sprint_engine/tests/test-validate.js
+// Runs as: node skills/sprint-runner/tools/tests/test-validate.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test. Each case below builds a spec object shaped per SPEC_SCHEMA.md,

@@ -1,6 +1,6 @@
 // Pure-JS SHA-256 suite for the sprint engine's dialect-neutral core.
 //
-// Runs as: node tools/sprint_engine/tests/test-sha256.js
+// Runs as: node skills/sprint-runner/tools/tests/test-sha256.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test. Covers one function: specEngineSha256(str), a from-scratch

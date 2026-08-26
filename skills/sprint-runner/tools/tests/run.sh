@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run.sh -- the single test entrypoint for tools/sprint_engine. Runs, in
+# run.sh -- the single test entrypoint for skills/sprint-runner/tools. Runs, in
 # order: (1) reports the node version in use, (2) node --check on
 # engine-core.js, (3) the runner-syntax-check.sh loadability proxy, (4)
 # every tests/test-*.js suite, discovered by glob rather than a

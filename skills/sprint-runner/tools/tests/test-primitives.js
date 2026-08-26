@@ -1,6 +1,6 @@
 // Text-extraction primitive suite for sprint engine specs.
 //
-// Runs as: node tools/sprint_engine/tests/test-primitives.js
+// Runs as: node skills/sprint-runner/tools/tests/test-primitives.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test. Covers five pure text functions: specEngineTokenOverlap,

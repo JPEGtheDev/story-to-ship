@@ -3,7 +3,7 @@
 // "Predicate operator vocabulary", and "Result-key namespacing grammar"
 // sections of SPEC_SCHEMA.md.
 //
-// Runs as: node tools/sprint_engine/tests/test-branch.js
+// Runs as: node skills/sprint-runner/tools/tests/test-branch.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test -- same house style as test-execute.js/test-parallel.js/

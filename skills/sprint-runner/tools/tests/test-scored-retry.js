@@ -2,7 +2,7 @@
 // "scored-retry" step kind, per the "Container authoring syntax" and
 // "Result-key namespacing grammar" sections of SPEC_SCHEMA.md.
 //
-// Runs as: node tools/sprint_engine/tests/test-scored-retry.js
+// Runs as: node skills/sprint-runner/tools/tests/test-scored-retry.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test -- same house style as test-execute.js/test-parallel.js/test-map.js,

@@ -1,7 +1,7 @@
 // Map-container suite for the sprint engine's execute loop: the "map" step
 // kind, the second container kind specEngineExecute runs (after "parallel").
 //
-// Runs as: node tools/sprint_engine/tests/test-map.js
+// Runs as: node skills/sprint-runner/tools/tests/test-map.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test -- same house style as test-execute.js/test-parallel.js, including

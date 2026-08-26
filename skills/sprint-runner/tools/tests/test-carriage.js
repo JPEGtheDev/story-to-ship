@@ -11,7 +11,7 @@
 // trace), and by-path digest verification (an agent step can gate its own
 // dispatch on an in-engine digest check against a declared file).
 //
-// Runs as: node tools/sprint_engine/tests/test-carriage.js
+// Runs as: node skills/sprint-runner/tools/tests/test-carriage.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test, mirroring test-execute.js's own style: each case calls

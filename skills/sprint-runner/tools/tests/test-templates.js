@@ -1,6 +1,6 @@
 // Runtime template-rendering suite for sprint engine specs.
 //
-// Runs as: node tools/sprint_engine/tests/test-templates.js
+// Runs as: node skills/sprint-runner/tools/tests/test-templates.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test. Each case below calls specEngineRenderTemplate(templateValue,

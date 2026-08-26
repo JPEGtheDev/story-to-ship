@@ -1,7 +1,7 @@
 // Execute-loop suite for the sprint engine's three leaf step kinds: agent,
 // gate, shape.
 //
-// Runs as: node tools/sprint_engine/tests/test-execute.js
+// Runs as: node skills/sprint-runner/tools/tests/test-execute.js
 //
 // Plain Node, no test framework, no dependencies beyond the module under
 // test. Each case below calls specEngineExecute(spec, dispatch) directly

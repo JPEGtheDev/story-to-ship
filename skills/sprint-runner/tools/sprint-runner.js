@@ -3,7 +3,7 @@
 // workflow runtime's own `export const meta` dialect, plain literal data
 // only), the engine-core region below (byte-identical to the region between
 // the ===ENGINE-CORE-BEGIN=== / ===ENGINE-CORE-END=== markers in
-// engine-core.js -- verified by tools/sprint_engine/tests/inline-copy-check.sh,
+// engine-core.js -- verified by skills/sprint-runner/tools/tests/inline-copy-check.sh,
 // never hand-edited here), and the runner glue after it (small on purpose:
 // the engine above owns all spec semantics: parsing, validation,
 // step-sequencing, namespacing, spill handling, digest verification; this
@@ -17,7 +17,7 @@
 // it -- ambiguous-module auto-detection accepts the `export const meta`
 // header and the bare top-level `return` this dialect allows outside any
 // function, so a passing `node --check` here is not evidence the runtime
-// will load this file, and (per tools/sprint_engine/RUNTIME_FACTS.md's
+// will load this file, and (per skills/sprint-runner/tools/RUNTIME_FACTS.md's
 // "Runtime script dialect" section) a FAILING one on some other Node
 // version or module-type configuration would not be evidence it won't,
 // either. This is a non-signal, not a rejection: `node --check`'s result

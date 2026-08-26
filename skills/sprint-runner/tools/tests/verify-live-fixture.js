@@ -1,15 +1,15 @@
 // Integrity checker for a captured live-run fixture under
-// tools/sprint_engine/tests/fixtures/live/ (see SPEC_SCHEMA.md's
+// skills/sprint-runner/tools/tests/fixtures/live/ (see SPEC_SCHEMA.md's
 // "Reference-fixture capture schema" section for the per-record shape this
 // checks: { stepKey, dispatchIndex, promptSha256, output }).
 //
 // Runs as:
-//   node tools/sprint_engine/tests/verify-live-fixture.js <specPath> <fixturePath> [--journal <journalPath>]
+//   node skills/sprint-runner/tools/tests/verify-live-fixture.js <specPath> <fixturePath> [--journal <journalPath>]
 //
 // Example (from the repo root):
-//   node tools/sprint_engine/tests/verify-live-fixture.js \
-//     tools/sprint_engine/examples/build-test-review.json \
-//     tools/sprint_engine/tests/fixtures/live/build-test-review.json
+//   node skills/sprint-runner/tools/tests/verify-live-fixture.js \
+//     skills/sprint-runner/tools/examples/build-test-review.json \
+//     skills/sprint-runner/tools/tests/fixtures/live/build-test-review.json
 //
 // This script takes no default journal path and carries no ephemeral
 // run-output location of its own -- the journal a fixture was captured

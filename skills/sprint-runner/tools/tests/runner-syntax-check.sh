@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # runner-syntax-check.sh -- a PROXY for whether the workflow runtime will
-# accept tools/sprint_engine/sprint-runner.js as loadable. It is NOT the
+# accept skills/sprint-runner/tools/sprint-runner.js as loadable. It is NOT the
 # real gate: the real gate is a live run through the runtime itself (a
 # separate, later deliverable). This script exists because a naive `node
 # --check` of sprint-runner.js as it sits on disk is a NON-SIGNAL, not a
 # gate -- measured fact, recorded in this file's own header and in
-# tools/sprint_engine/RUNTIME_FACTS.md's "Runtime script dialect" section:
+# skills/sprint-runner/tools/RUNTIME_FACTS.md's "Runtime script dialect" section:
 # on Node v24, with no package "type" set, `node --check` already exits 0
 # on sprint-runner.js UNCHANGED, because ambiguous-module auto-detection
 # accepts both the `export const meta` header syntax and the bare
@@ -31,7 +31,7 @@
 # Header-boundary rule: the runner-only header (the leading comment block
 # plus the `export const meta = {...}` literal) is stripped up to and
 # including the `// ===ENGINE-CORE-BEGIN===` marker line -- the same
-# marker tools/sprint_engine/tests/inline-copy-check.sh already treats as
+# marker skills/sprint-runner/tools/tests/inline-copy-check.sh already treats as
 # a checked-exactly-once anchor into this file. Reusing that marker avoids
 # re-implementing brace-matching over the meta object literal to find
 # where it closes; the marker line already sits immediately after that

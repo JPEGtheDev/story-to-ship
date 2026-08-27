@@ -111,20 +111,15 @@ been checked against a live install yet: see "Verifying a plugin install"
 below for the check. `sprint-runner.js`'s own header states it is
 loaded by the workflow runtime, not run directly by node. There is no
 named plugin workflow that wraps it: the Workflow tool's `scriptPath`
-parameter is the invocation mechanism itself. Three ways to point
-`scriptPath` at it, in order:
+parameter is the invocation mechanism itself.
 
-1. Default: `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js`
-   -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's
-   documented mechanism, so a reader of this file who is not inside skill
-   text should get the resolved path from the skill itself, or substitute
-   their own install's actual plugin root.
-2. Only if this checkout IS the story-to-ship source repo (develops this
-   plugin): `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
-3. Universal fallback, if `tools/` is missing from the install: curl the
-   raw `sprint-runner.js` from the story-to-ship repository's GitHub main
-   branch to a local path, then invoke the Workflow tool with that local
-   file as `scriptPath`.
+Invoke the Workflow tool with `scriptPath` set to this skill's base
+directory plus `/tools/sprint-runner.js`, and the spec as `args`. When
+loaded through a skill, that base directory is the absolute path shown on
+the "Base directory for this skill:" line printed at load time. A reader
+of this file who arrived here without a skill load should use the
+equivalent: the absolute path of the `skills/sprint-runner` directory that
+contains this `tools/` directory.
 
 The invoker passes the spec as the workflow's `args` input; the runner
 glue reads `args` defensively, accepting either an already-parsed object
@@ -168,8 +163,9 @@ returned result map proves delivery end to end.
 What each outcome means:
 
 - the skill, or `tools/` inside it, is missing from the install -> the
-  install did not ship this subtree; use the universal fallback above and
-  report the observation on the repository's issue tracker.
+  install did not ship this subtree; fetch the raw `sprint-runner.js` file
+  from the story-to-ship GitHub repository manually, and report the
+  observation on the project's issue tracker.
 - the runner halts on a spec-missing diagnostic -> `args` did not arrive;
   re-invoke, passing the spec as the `args` input.
 

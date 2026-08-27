@@ -27,11 +27,7 @@ Reach for it when multi-agent work must follow a declared, replayable pipeline i
 
 ## Invocation
 
-Three ways to load it:
-
-1. **Default:** invoke the Workflow tool with `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/sprint-runner/tools/sprint-runner.js` and the spec as `args` -- `${CLAUDE_PLUGIN_ROOT}` resolves inside skill text per the plugin's documented mechanism (no shell expansion needed). Whether an install ships `tools/` is unverified -- step 3 covers it.
-2. **Only if this checkout IS the story-to-ship source repo** (develops this plugin): invoke the Workflow tool with `scriptPath: skills/sprint-runner/tools/sprint-runner.js`.
-3. **Universal fallback**, if `tools/` is missing from the install: `curl -o sprint-runner.js https://raw.githubusercontent.com/JPEGtheDev/story-to-ship/main/skills/sprint-runner/tools/sprint-runner.js` (or equivalent), then invoke the Workflow tool with that path as `scriptPath`.
+Invoke the Workflow tool with `scriptPath` set to this skill's base directory plus `/tools/sprint-runner.js`, and the spec as `args`. This skill's base directory is the absolute path shown on the "Base directory for this skill:" line printed when this skill loads. Whether an install ships `tools/` on disk has not been verified by a live run yet -- if `tools/` is absent, report it on the story-to-ship issue tracker.
 
 ---
 
@@ -80,7 +76,7 @@ Self-contained: the whole engine ships inside `tools/`.
 
 | Excuse | Reality |
 |--------|---------|
-| "Same engine either way, scriptPath doesn't matter" | The in-repo path doesn't exist in a consumer install; the plugin-root path doesn't resolve here -- match invocation to the run's location |
+| "I already know the path from last time, no need to check the base directory again" | Each load's base directory reflects that install's actual location; a stale hand-typed path breaks the moment the install location differs |
 | "I wrote the spec carefully, I know it's valid" | Careful authoring still misses depth limits and reserved-segment rules; validate structurally regardless |
 | "A halted run with good partial results is basically a success" | `status: halted` means the pipeline did not complete; report it as a halt, not a caveated success |
 | "The digest check is just a formality" | `verifyDigest` stops the run before it processes wrong or stale content; skipping staging guarantees a halt |

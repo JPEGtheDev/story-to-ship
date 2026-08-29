@@ -27,7 +27,7 @@ Reach for it when multi-agent work must follow a declared, replayable pipeline i
 
 ## Invocation
 
-Invoke the Workflow tool with `scriptPath` set to this skill's base directory plus `/tools/sprint-runner.js`, and the spec as `args`. This skill's base directory is the absolute path shown on the "Base directory for this skill:" line printed when this skill loads. A live install probe (2026-08-29, recorded on the story-to-ship issue tracker) verified that an install ships `tools/` on disk; if `tools/` is ever absent, report it there.
+Invoke the Workflow tool with `scriptPath` set to this skill's base directory plus `/tools/sprint-runner.js`, and the spec as `args`. This skill's base directory is the absolute path shown on the "Base directory for this skill:" line printed when this skill loads. If `tools/` is absent from your install, report it on the story-to-ship issue tracker.
 
 ---
 

@@ -106,9 +106,9 @@ to satisfy).
 
 This engine's home is `skills/sprint-runner/tools/`, inside the
 sprint-runner skill; the skill is packaged to ship whole -- engine and
-docs together -- in the story-to-ship plugin, but that packaging has not
-been checked against a live install yet: see "Verifying a plugin install"
-below for the check. `sprint-runner.js`'s own header states it is
+docs together -- in the story-to-ship plugin; see "Verifying a plugin
+install" below to check your install. `sprint-runner.js`'s own header
+states it is
 loaded by the workflow runtime, not run directly by node. There is no
 named plugin workflow that wraps it: the Workflow tool's `scriptPath`
 parameter is the invocation mechanism itself.
@@ -169,9 +169,9 @@ What each outcome means:
 - the runner halts on a spec-missing diagnostic -> `args` did not arrive;
   re-invoke, passing the spec as the `args` input.
 
-Whether a current plugin install actually ships this subtree on disk has
-not been verified by a live run yet -- that is stated plainly here, not
-as settled fact, matching the same open point in `SKILL.md`.
+Re-run this check after any plugin packaging change or harness upgrade,
+consistent with the point-in-time doctrine in "Evidence pointers and
+re-probe trigger" below.
 
 ## Running the tests
 
@@ -183,16 +183,17 @@ the inline-copy-check.sh marker-region byte-match gate. Every step runs
 regardless of an earlier step's outcome, so one invocation reports every
 failure at once; the exit code is nonzero if any step failed.
 
-Current shape: 13 suites, 708 checks. Verified:
+Example output shape:
 
 ```
 $ bash tests/run.sh
 ...
-suites: 13 run, 13 passed, 0 failed
+suites: N run, N passed, 0 failed
 ...
 run.sh: PASS -- all steps succeeded
 ```
-(exit code 0)
+(exit code 0 means every step succeeded; suite and check counts change as
+tests are added or removed)
 
 `tests/verify-live-fixture.js` is a manually-run CLI verifier for the
 committed live-run capture. Per its own header, it runs five checks:

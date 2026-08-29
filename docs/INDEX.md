@@ -43,8 +43,7 @@ This repo carries a spec-driven multi-agent pipeline executor, packaged as
 the self-contained `sprint-runner` skill. That skill is the usage guide, and
 the engine's deeper documentation, schema, and tests live inside the
 skill's own tools directory. The skill is packaged to ship whole as part of
-the story-to-ship plugin, but that packaging has not been checked against a
-live install yet.
+the story-to-ship plugin.
 
 ## Files
 

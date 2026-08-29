@@ -106,9 +106,10 @@ to satisfy).
 
 This engine's home is `skills/sprint-runner/tools/`, inside the
 sprint-runner skill; the skill is packaged to ship whole -- engine and
-docs together -- in the story-to-ship plugin, but that packaging has not
-been checked against a live install yet: see "Verifying a plugin install"
-below for the check. `sprint-runner.js`'s own header states it is
+docs together -- in the story-to-ship plugin; a live install probe
+(2026-08-29, recorded on the story-to-ship issue tracker) verified that
+packaging -- see "Verifying a plugin install" below for the re-check
+procedure. `sprint-runner.js`'s own header states it is
 loaded by the workflow runtime, not run directly by node. There is no
 named plugin workflow that wraps it: the Workflow tool's `scriptPath`
 parameter is the invocation mechanism itself.
@@ -169,9 +170,12 @@ What each outcome means:
 - the runner halts on a spec-missing diagnostic -> `args` did not arrive;
   re-invoke, passing the spec as the `args` input.
 
-Whether a current plugin install actually ships this subtree on disk has
-not been verified by a live run yet -- that is stated plainly here, not
-as settled fact, matching the same open point in `SKILL.md`.
+This check has passed once: a live install probe (2026-08-29, recorded on
+the story-to-ship issue tracker) confirmed the full subtree shipped, the
+runner was byte-identical, and a minimal-spec invocation returned a result
+map. Re-run this check after any plugin packaging change or harness
+upgrade, consistent with the point-in-time doctrine in "Evidence pointers
+and re-probe trigger" below.
 
 ## Running the tests
 

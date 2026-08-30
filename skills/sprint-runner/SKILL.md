@@ -87,4 +87,4 @@ Self-contained: the whole engine ships inside `tools/`.
 ## Related Skills
 
 - `subagent-driven-development` -- the runner's agent steps are dispatched subagents; governs dispatch/review
-- `using-git-worktrees` -- engine runs have no coordinator to pre-create or verify isolation, so creation falls to the nearest layer; the run owner reviews after. A write-instructing step MUST create its worktree and work only there; a step orchestrating write-side subagents MUST pre-create a worktree per writer and pass its path in each prompt; the top-level run owner never pre-creates; read-only steps dispatch without one
+- `using-git-worktrees` -- engine runs have no coordinator to pre-create or verify isolation, so creation falls to the nearest layer; the run owner reviews after. A write-instructing step MUST create its worktree and work only there; a step orchestrating write-side subagents MUST pre-create a worktree per writer and pass its path in each prompt; the top-level run owner never pre-creates; read-only steps dispatch without one (no writes, nothing to isolate)

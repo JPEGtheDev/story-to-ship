@@ -14,7 +14,7 @@ Documentation splits into three layers with different lifetimes:
 2. **Decision records** (transient by medium, never the docs tree): a Design Decision Record or an Architecture Decision Record -- the rationale for a choice and the alternatives considered -- rides the pull request body only. The pull request body is inherently dated and tied to the implementation that motivated it, so its transience is knowable from where it lives; committing the same content into the docs tree strips that signal and lets stale rationale get read as current contract.
 3. **Verification state** (excluded from docs entirely): see "Verification State Is Not Documentation" below.
 
-Decision rationale explains why the current implementation looks the way it does; a rewrite supersedes it. Mixed into behavior docs, it teaches readers to trust stale rationale as if it were still the contract.
+Decision rationale explains why the current implementation looks the way it does; a rewrite supersedes it. Source: project convention.
 
 ## Verification State Is Not Documentation
 
@@ -22,7 +22,7 @@ Shipped docs never carry a claim about whether something has been verified, in e
 
 Test: if a sentence answers "has this been verified?" or "how many exist right now?", it is state, not documentation -- move it to the issue tracker or delete it. Docs keep design statements, mechanisms, instructions, and generic output shapes with placeholder counts instead of live ones.
 
-A mechanism that is genuinely unverified still needs an honesty marking while it stays unverified. This rule governs what happens after: once a check passes, delete the marking rather than flipping it to "verified."
+A mechanism that is genuinely unverified still needs an honesty marking while it stays unverified. This rule governs what happens after: once a check passes, delete the marking rather than flipping it to "verified." Source: project convention.
 
 ## Document Mode vs Thread Mode
 

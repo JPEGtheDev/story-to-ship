@@ -57,9 +57,7 @@ When applying this skill, before dispatching any agent, state this line in your 
 
 > `Worktree: [output of: git -C .worktrees/agent-<name> rev-parse --show-toplevel]`
 
-This is the observable signal that step 3 of BEFORE PROCEEDING was executed, not skipped. A less powerful model can produce it mechanically: run step 3, paste the output.
-
-**Note:** The canary raises the cost of skipping for compliant agents -- it is not cryptographically bound to execution.
+Canary rationale: references/SDD_RATIONALE.md.
 
 ---
 
@@ -89,6 +87,7 @@ These thoughts mean stop immediately:
 | "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
 | "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
 | "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
+| "Launching a spend-bearing child (claude -p, a workflow run) under a prior 'go'" | STOP. Consent is per invocation -- a prior approval covers neither retries nor new launches. Write the script; the user pulls the trigger. |
 
 ---
 
@@ -198,3 +197,4 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |
 | "The subagent hit a rate limit -- I'll do the review inline instead" | Rate limits are temporary. Inline review inherits your assumptions and blind spots. The whole point of a dispatched reviewer is independence from the author's context. Wait for the reset and dispatch. |
 | "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Documented failure mode (source postmortem): the agent adjudicating whether its own change is "covered enough" to skip re-review IS the failure -- not a valid exemption. YOU MUST re-review any change in review-covered territory. |
+| "The user approved the last run -- this retry is covered" | Spend-bearing launches need explicit consent PER INVOCATION. A failed launch returns to the user for a fresh go; a silent retry spends money without authorization. Ask before every launch. |

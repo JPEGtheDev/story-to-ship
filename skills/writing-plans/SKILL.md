@@ -61,6 +61,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
 7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
+8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates also include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
 
 ### No-Placeholder Rule
 
@@ -233,6 +234,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 - Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
+- A reviewer spec bans terms as a blanket exclusion list ("must NOT contain X, Y, Z") -- **STOP. Reviewers apply lists literally, so a term that can also appear as a valid generic example causes a false GAPS verdict. Scope the ban to the prescription or location instead: "must NOT prescribe X as the required taxonomy," not "must not contain the word X."**
 - Adversarial plan review is in round 4+, or plan length now exceeds the target file's length -- **STOP. Switch the review surface to the diff (implement, then review the diff). A finding located in text written answering the previous round is a manufactured defect, not evidence to keep reviewing.**
 - A plan claims two competing constraints are both satisfied, and no worked example carries one concrete case end-to-end -- **STOP. Demand one worked example carried end-to-end before any further abstract argument. The example either exposes the hidden cost or proves the design absorbs it; abstract debate does neither.**
 - A DoD behavioral branch has resolved untriggered across two fixture attempts and the next fixture is another small tweak -- **STOP. The next attempt must be a structural redesign (>=5 changed lines vs the baseline fixture, diff pasted), or the plan escalates to an explicit user ruling quoted in the PR body.**

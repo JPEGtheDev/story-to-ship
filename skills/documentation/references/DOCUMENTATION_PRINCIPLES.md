@@ -4,7 +4,25 @@ Derived from Ward Cunningham's C2 Wiki synthesis.
 
 ## Document Your Intentions
 
-Code shows what is done; it cannot show why. Documentation that restates what the code already shows is redundant and will drift. Documentation that records the intent -- the reason for a decision, the alternatives considered, the constraint that drove the design -- is irreplaceable. Write intention documentation at the decision point, not the implementation point. Source: C2 Wiki "DocumentYourAssumptions" / "IntentionRevealingNames".
+Code shows what is done; it cannot show why, and documentation that only restates what the code already shows is redundant and will drift. "Document your intentions" covers two different things that must not be conflated: behavior specification -- what the system does, durable, and owned by the docs tree -- and decision rationale -- why this implementation was chosen over the alternatives, which belongs in the pull request body, not in committed docs (see Documentation Durability Layers below). Write behavior specification into the docs tree; write decision rationale into the pull request body at the decision point. Source: C2 Wiki "DocumentYourAssumptions" / "IntentionRevealingNames".
+
+## Documentation Durability Layers
+
+Documentation splits into three layers with different lifetimes:
+
+1. **Behavior** (durable, lives in the docs tree): the contract the system honors, not how it happens to be implemented today. The completeness bar is the rewrite test: the docs must contain enough for someone to rewrite the application from scratch and reproduce the same behavior. Behavior docs change only when behavior changes; a ground-up reimplementation that preserves behavior leaves them untouched. Restating the implementation is redundant and drifts with the next refactor -- specifying the behavior is the point, and that distinction is what keeps a doc durable across a rewrite.
+2. **Decision records** (transient by medium, never the docs tree): a Design Decision Record or an Architecture Decision Record -- the rationale for a choice and the alternatives considered -- rides the pull request body only. The pull request body is inherently dated and tied to the implementation that motivated it, so its transience is knowable from where it lives; committing the same content into the docs tree strips that signal and lets stale rationale get read as current contract.
+3. **Verification state** (excluded from docs entirely): see "Verification State Is Not Documentation" below.
+
+Decision rationale explains why the current implementation looks the way it does; a rewrite supersedes it. Mixed into behavior docs, it teaches readers to trust stale rationale as if it were still the contract.
+
+## Verification State Is Not Documentation
+
+Shipped docs never carry a claim about whether something has been verified, in either direction: not the hedge form ("not yet verified by a live run"), not the affirmative form ("verified by a probe"), and not a snapshot count ("currently N suites, M checks"). Both directions rot silently the moment reality moves past the sentence.
+
+Test: if a sentence answers "has this been verified?" or "how many exist right now?", it is state, not documentation -- move it to the issue tracker or delete it. Docs keep design statements, mechanisms, instructions, and generic output shapes with placeholder counts instead of live ones.
+
+A mechanism that is genuinely unverified still needs an honesty marking while it stays unverified. This rule governs what happens after: once a check passes, delete the marking rather than flipping it to "verified."
 
 ## Document Mode vs Thread Mode
 

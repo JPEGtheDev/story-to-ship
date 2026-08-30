@@ -8,7 +8,7 @@ Use the `spec-compliance-reviewer.md` agent. Provide:
 - Full requirements / acceptance criteria for the todo
 - Full diff or file contents of the implementation
 
-If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceeding.
+If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceeding (see "Who re-checks a fix round" below).
 
 **False positive check for "no other lines should change" requirements:** Stage 1 reviewers reading `git diff base..HEAD` see ALL prior commits as context, and may misattribute pre-existing branch content as implementer changes. When Stage 1 returns GAPS on this class of requirement, verify with `git show <commit> -- <file>` (single commit view). If the single-commit diff shows only the intended change, the GAPS verdict is a false positive -- proceed to Stage 2.
 
@@ -25,4 +25,8 @@ Provide to the Stage 2 reviewer:
 
 Adversarial-scenario gate: if the diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, the Stage 2 dispatch prompt MUST also require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` naming one unscripted real-world case checked against the clause wording; a Stage 2 return without that line, when the trigger matched, is an incomplete review -- re-dispatch. The canonical statement of this gate (including the case-sensitivity rationale and the accepted over-firing) is the Stage 2 paragraph of SKILL.md; on any wording divergence, SKILL.md governs.
 
-If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding.
+If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding (see "Who re-checks a fix round" below).
+
+## Who Re-Checks a Fix Round
+
+When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground.

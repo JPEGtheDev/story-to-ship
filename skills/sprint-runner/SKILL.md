@@ -68,7 +68,7 @@ Self-contained: the whole engine ships inside `tools/`.
 - "It halted but the last step looked fine, call it done" -- STOP. A halt is not a completion; report `halt.diagnostic` and `halt.path`.
 - "Skip staging verifyDigest, it'll just halt cleanly if wrong" -- STOP. A predictable halt still wastes the run; stage it first.
 - "The engine will catch a bad `{{...}}` reference" -- STOP. Static validation never scans prompt fields; a bad reference only surfaces at render time, as a halt.
-- "The pipeline is simple, skip the minimal-spec smoke test" -- STOP. Run the spend-free smoke test from `tools/SPEC_SCHEMA.md`'s "Minimal valid spec" section first.
+- "The pipeline is simple, skip the minimal-spec smoke test" -- STOP. Run the spend-free smoke test from `tools/SPEC_SCHEMA.md`'s "Minimal valid spec" section first. The smoke test rides on the real run's launch consent -- one authorized launch sequence, no separate go needed.
 
 ---
 
@@ -87,4 +87,4 @@ Self-contained: the whole engine ships inside `tools/`.
 ## Related Skills
 
 - `subagent-driven-development` -- the runner's agent steps are dispatched subagents; governs dispatch/review
-- `using-git-worktrees` -- every dispatched agent step needs its own worktree per that skill's Iron Law; the engine never creates them
+- `using-git-worktrees` -- engine runs have no coordinator to pre-create or verify isolation, so creation falls to the nearest layer; the run owner reviews after. A write-instructing step MUST create its worktree and work only there; a step orchestrating write-side subagents MUST pre-create a worktree per writer and pass its path in each prompt; the top-level run owner never pre-creates; read-only steps dispatch without one (no writes, nothing to isolate)

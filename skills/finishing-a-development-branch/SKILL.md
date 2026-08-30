@@ -141,7 +141,7 @@ See `versioning` skill for conventional commit rules.
 - Open a PR against a failing CI
 - Open a PR with "WIP" in the title unless explicitly flagging for early review
 - Leave the PR description blank
-- Include the per-session claude.ai/code session link in the PR body -- end the body at the generic Claude Code attribution line instead; the commit-trailer Claude-Session line is a separate convention and stays
+- Include the per-session claude.ai/code session link in the PR body -- the default harness footer includes this link, but omitting it from the PR body is a deliberate standing override of that default; end the body at the generic Claude Code attribution line instead; the commit-trailer Claude-Session line is a separate convention and stays
 
 ---
 

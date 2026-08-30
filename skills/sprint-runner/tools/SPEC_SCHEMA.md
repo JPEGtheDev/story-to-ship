@@ -228,6 +228,18 @@ the run, so a broken reference is always visible as a broken reference, never
 disguised as a normal failing check. This sentinel-and-halt rule applies to
 `lte` and `gte` the same way it applies to `equals`.
 
+**Equals is strict equality.** The `equals` operator compares the resolved
+operand against the predicate's `value` with JavaScript's `===`, not a
+coercing comparison -- a string never equals a number under this operator,
+regardless of what the string looks like. This interacts with template
+value stringification above: a shape step's output field that came from a
+`{{reference}}` template leaf is always a string, even when the upstream
+value it came from was a number. A predicate comparing that field against a
+number literal with `equals` -- for example, checking a shaped field that
+holds `"0"` against the literal `0` -- fails the comparison, because `"0"
+=== 0` is `false` in JavaScript. Writing the expected `value` as the
+matching string (`"0"`, not `0`) is what makes such a comparison pass.
+
 ## Template forms and reference resolution
 
 A template is a `{{...}}` placeholder inside a step's configuration (most
@@ -275,6 +287,23 @@ step's entire result rather than to one field of it -- the empty-field-path
 case of the same rule. This is the mechanism a bare reference like
 `{{summarize}}` in the map-body addressing definition above relies on.
 
+**Template value stringification.** A resolved template value is always
+turned into a string before it is substituted into the rendered text, even
+when the entire template leaf is a single `{{reference}}` and the resolved
+value itself is not a string. A numeric upstream field such as `{"score":
+7}` referenced as `"{{upstream.score}}"` in a shape step's template
+produces the string `"7"` in that step's output, not the number `7` -- the
+shaped result carries a numeric-looking string, not a number. Any
+non-string primitive is converted this way, using JavaScript's own
+`String()`. Two cases fall outside that conversion: a resolved value that
+is `null`, and a resolved value that is JavaScript's `undefined` (a field
+whose key is present but whose value is `undefined`, not a field that is
+missing outright) -- both substitute as an empty string rather than the
+text "null" or "undefined". This is a different case from a reference that
+fails to resolve at all (the named step was never declared, or the field
+key is absent from its result): that case is the undefined-sentinel-and-halt
+rule above, and it halts the run rather than substituting anything.
+
 **Static-checking scope.** The dangling-reference check above only runs
 over two places: a gate step's own `predicate` (or a branch case's `when`),
 and a shape step's own `template` field. It does not scan an agent or gate
@@ -284,7 +313,11 @@ when that step actually renders, at dispatch time, as the same
 undefined-sentinel halt described above, under the diagnostic
 `template-operand-unresolved`: the runtime counterpart of the
 `dangling-template-reference` diagnostic a shape step's template would get
-caught on statically.
+caught on statically. A gate step's own `predicate` field is scanned by
+this same static check even though, per the predicate definition above, a
+gate step never evaluates that field at execution time -- the check runs
+over the field's declared shape regardless of whether execution ever
+reaches it.
 
 **Reserved segments.** The segment `attempts` and any bare-numeric segment
 (such as `0`, `1`, `2`) are illegal in two places: as a spec step ID anywhere
@@ -306,6 +339,16 @@ only 2 levels; the cap can be raised later if a real case demands it.
 Every step's result lands in the run's results map under a key. For a simple
 top-level step, the key is just its own step ID. Container steps namespace
 their nested steps' keys as dotted paths.
+
+**Gate steps only store a result when they pass.** A gate step that passes
+stores its outcome object -- the parsed verdict object the dispatched agent
+returned, `{verdict, reason}` and whatever else it carried -- at its own
+step key, the same as any other simple step; a downstream template or
+predicate can reference `{{gateId.verdict}}` or read `gateId`'s `verdict`
+field once that gate has passed. A gate step that does not pass halts the
+run instead (see the Gate verdict domain section for the fail and
+uncertain halt behavior), and in that case nothing is written at the gate's
+key at all -- not a partial object, not the reported verdict on its own.
 
 The word "branch" is used two ways elsewhere in this contract: a parallel
 step runs several branches (tracks) at once, and there is also a separate

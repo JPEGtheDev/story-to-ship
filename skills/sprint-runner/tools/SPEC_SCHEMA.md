@@ -154,8 +154,8 @@ dispatch mechanism an agent step uses (see the Gate verdict domain section
 below); a condition that needs to weigh two or more upstream values in one
 verdict has no predicate-shaped way to do it and needs this prompt-based
 form instead, since the prompt can reference as many `{{step.field}}`
-templates as it needs. This repo's earlier prototype evidence instead
-records predicates with the operator itself as the JSON key (`{ step,
+templates as it needs. Earlier prototype runs of this engine instead
+record predicates with the operator itself as the JSON key (`{ step,
 field, <operator>: <value> }`), consistently across the instances checked,
 but this section deliberately adopts the named-operator form above
 instead, since operator validation is then a single field lookup rather

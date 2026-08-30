@@ -48,6 +48,8 @@ Your FINAL reply message is the only text the dispatcher receives. Intermediate 
 
 Paste every verification command's actual output into your FINAL message -- not a summary of it, the actual output.
 
+Every demanded artifact counts as absent until it appears verbatim in the final reply. The phrase "pasted above" (or any equivalent pointer at earlier transcript output) without the artifact literally present in the same reply is an INCOMPLETE return -- the dispatcher will resubmit for the artifact.
+
 All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= != for math, [+] [-] for status marks. No Unicode characters.
 
 ---
@@ -65,6 +67,7 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 - Conventional commits: `<type>[scope]: <description>`
 - Do NOT push to main or the parent branch
 - Commit to your branch: `agent/{{AGENT_NAME}}`
+- NEVER use `git stash` -- the stash stack is repository-global, shared across the main checkout and every worktree, so a stash from one agent can be popped by another session, silently mixing changes. Sequencing a failing-test commit before its fix: commit the phases directly (test commit, then implementation commit), or set work aside with a temporary WIP commit. If a stash is ever unavoidable: push with a unique message tag, capture the entry SHA immediately, apply (never pop) by SHA, drop by re-found tag.
 
 ## Scope Estimate Gate -- Before Any Implementation
 

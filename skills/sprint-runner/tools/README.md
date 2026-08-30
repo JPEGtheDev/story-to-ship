@@ -249,6 +249,16 @@ each carrying at minimum `{ step, kind, status, outcome, flags }`. A map
 step's own trace additionally nests an `iterations` array, one
 `{ index, status, trace, halt }` entry per resolved list item.
 
+A parallel step's own trace entry likewise nests a `tracks` array, one
+`{ trackId, status, trace, halt }` entry per declared track, in
+declaration order. Each entry is that track's own leaf-style outcome: its
+own nested trace and, when that track halted, the same `halt` shape a
+whole-run halt carries, scoped to that one track. A track's halt is
+contained to that track -- it does not stop the other tracks or the
+overall run -- but it stays inspectable from the enclosing parallel
+step's `tracks` entry rather than being discarded once the join
+completes.
+
 ## Evidence pointers and re-probe trigger
 
 RUNTIME_FACTS.md holds verbatim-quoted facts, measured directly against the

@@ -113,7 +113,8 @@ holding one nested step, using the shapes above:
         {
           "id": "check",
           "type": "gate",
-          "predicate": { "step": "upstream", "field": "score", "operator": "gte", "value": 1 }
+          "prompt": "The upstream step's score is {{upstream.score}}. Return verdict \"pass\" if that score is at least 1, otherwise \"fail\".",
+          "outputSchema": { "properties": { "verdict": { "type": "string" } } }
         }
       ]
     }
@@ -134,18 +135,31 @@ engine inspects a field's type against its schema beyond what a specific
 downstream check (a gate's verdict field, a scored-retry's score field, and
 so on) already requires on its own.
 
-A **predicate** (the gate-step and branch-case comparison the next section
-describes) is an object `{ step, field, operator, value }`: `step` and
-`field` are the step ID and field name it reads, `operator` is one of the
-three operators named in that section, `value` is what it compares
-against. A branch case's predicate is carried under `when`; a gate step's
-predicate is carried under `predicate`. This repo's earlier prototype
-evidence instead records predicates with the operator itself as the JSON
-key (`{ step, field, <operator>: <value> }`), consistently across the
-instances checked, but this section deliberately adopts the
-named-operator form above instead, since operator validation is then a
-single field lookup rather than a check across whichever key happens to
-be present.
+A **predicate** (the branch-case comparison the next section describes) is
+an object `{ step, field, operator, value }`: `step` and `field` are the
+step ID and field name it reads, `operator` is one of the three operators
+named in that section, and `value` is a literal to compare the resolved
+operand against -- not a second step reference, so one predicate can only
+weigh the single `(step, field)` pair it names against a fixed literal,
+never two values that both come from earlier steps. A branch case's
+predicate is carried under `when`, and this is the only place a predicate
+is ever evaluated. The same `{ step, field, operator, value }` shape is
+also legal to write under a gate step's own `predicate` field --
+structural validation raises no violation for it -- but a gate step never
+evaluates a `predicate` it carries: execution halts before that step's own
+dispatch, under `gate-predicate-form-not-supported`, regardless of what
+the predicate names or whether it would have resolved. A gate step's only
+executable comparison is a `prompt` and `outputSchema` pair, the same
+dispatch mechanism an agent step uses (see the Gate verdict domain section
+below); a condition that needs to weigh two or more upstream values in one
+verdict has no predicate-shaped way to do it and needs this prompt-based
+form instead, since the prompt can reference as many `{{step.field}}`
+templates as it needs. This repo's earlier prototype evidence instead
+records predicates with the operator itself as the JSON key (`{ step,
+field, <operator>: <value> }`), consistently across the instances checked,
+but this section deliberately adopts the named-operator form above
+instead, since operator validation is then a single field lookup rather
+than a check across whichever key happens to be present.
 
 **Map-body addressing below the iteration boundary is ratified by owner
 ruling.** Call one run of the map's body over one item of the list an
@@ -192,9 +206,11 @@ this section's own inference, not carried from a ratified wording.
 
 ## Predicate operator vocabulary
 
-A predicate is how a gate step or a branch step's condition compares a value
-already produced by an earlier step against something expected. A predicate
-names the step and field it reads (for example, a step called `par` and its
+A predicate is how a branch step's condition compares a value already
+produced by an earlier step against something expected -- the predicate
+definition above covers why a gate step's own `predicate` field, though
+legal to write, never reaches this comparison. A predicate names the step
+and field it reads (for example, a step called `par` and its
 field `failures` -- one of the aggregate counts a parallel step's result
 carries, defined in the result-key namespacing grammar below) and an
 operator to apply. Three operators are defined: `equals`, `lte` (less than
@@ -206,7 +222,7 @@ that step's result. When that happens, the predicate does not silently
 evaluate the comparison against JavaScript's `undefined`. In plain
 JavaScript, a comparison like `undefined <= 1` evaluates to `false` -- so a
 naive implementation would misreport a broken spec as a legitimate failing
-gate, with no way to tell the two apart. Instead, the engine records the
+check, with no way to tell the two apart. Instead, the engine records the
 literal sentinel value `<<undefined>>` for the unresolved operand and halts
 the run, so a broken reference is always visible as a broken reference, never
 disguised as a normal failing check. This sentinel-and-halt rule applies to
@@ -399,8 +415,8 @@ actually ran, per the result-key namespacing grammar above.
 
 A predicate that halts instead of resolving to a clean pass/fail (an
 unresolved operand, for example) is forwarded to the run with the
-evaluator's own locator -- the same `<step>.<field>` operand path a gate
-step's own predicate failure would carry -- not a locator built fresh for
+evaluator's own locator -- the same `<step>.<field>` operand path the
+Undefined-sentinel rule above describes -- not a locator built fresh for
 the branch step.
 
 ## Oversized-output spill contract
@@ -485,8 +501,13 @@ the same way regardless of the payload's size on any given run.
 
 ## Gate verdict domain
 
-A gate step's verdict is one of three values: `pass`, `fail`, or
-`uncertain`. Each has different halt behavior:
+A gate step dispatches the same way an agent step does: it renders its own
+`prompt` and reads the dispatched agent's structured return against its
+`outputSchema`. This is a gate step's only executable comparison form --
+the container authoring syntax section above covers why a gate step's
+`predicate` field, though legal to write, halts execution instead of ever
+being evaluated. A gate step's verdict is one of three values: `pass`,
+`fail`, or `uncertain`. Each has different halt behavior:
 
 - **pass**: the run continues to the next step.
 - **fail**: the run halts with status `gated`, and the partial results

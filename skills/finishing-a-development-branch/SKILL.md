@@ -82,6 +82,9 @@ Before writing the PR, answer:
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern.
    A real hit -- a campaign or planning label, an issue-number tag, repo-internal jargon, an unexpanded acronym, a cross-tree file reference (a slash path, or a bare doc-file name cited by a skill or agent-template file, naming a file in a different skill tree), or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the defect classes above -- may instead be adjudicated in the PR body, named hit-by-hit. Bare doc-file name matches are the sole class exempt from hit-by-hit naming: adjudicate them as one class, stating the hit count and that either every hit names a file outside any other skill tree, or the citing file is outside skills/ and agents/, where the `writing-skills` skill's Cross-Skill Reference Rule does not bind. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
 
+6. **Does any changed file ship to an execution context other than this authoring repo -- a plugin install, a package, a published doc?**
+   If so, re-read that file from the consumer's seat before the PR opens: does every path, deictic phrase ("this repo", "here"), and invocation instruction still resolve where the reader actually sits? Cross-file consistency reviews do not check reader context -- this is a structural blind spot, so treat it as a standing audit dimension, not a per-incident fix.
+
 ---
 
 ## Step 3: Commit Cleanup
@@ -138,6 +141,7 @@ See `versioning` skill for conventional commit rules.
 - Open a PR against a failing CI
 - Open a PR with "WIP" in the title unless explicitly flagging for early review
 - Leave the PR description blank
+- Include the per-session claude.ai/code session link in the PR body -- end the body at the generic Claude Code attribution line instead; the commit-trailer Claude-Session line is a separate convention and stays
 
 ---
 

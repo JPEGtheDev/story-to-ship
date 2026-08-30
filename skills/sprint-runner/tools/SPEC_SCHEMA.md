@@ -232,7 +232,7 @@ disguised as a normal failing check. This sentinel-and-halt rule applies to
 operand against the predicate's `value` with JavaScript's `===`, not a
 coercing comparison -- a string never equals a number under this operator,
 regardless of what the string looks like. This interacts with template
-value stringification above: a shape step's output field that came from a
+value stringification below: a shape step's output field that came from a
 `{{reference}}` template leaf is always a string, even when the upstream
 value it came from was a number. A predicate comparing that field against a
 number literal with `equals` -- for example, checking a shaped field that

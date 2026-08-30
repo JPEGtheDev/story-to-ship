@@ -32,7 +32,7 @@ Read ALL of the following before forming any opinion:
 
 **Evidence requirement -- MANDATORY:** Every finding MUST cite the specific source and the exact line or section that supports it. Use the format: "I read [source] and it says [exact quote or paraphrase with location]." A finding without a source citation is a guess. Do not produce findings from memory or inference.
 
-**Read-set gap reporting:** You can only verify what {{READ_FIRST}} reaches. If your agenda includes verifying that evidence or an artifact exists or holds and a needed artifact is not reachable from your read list, report it as a read-set gap -- "not reachable from my read list: <path or name>" -- rather than a bare "missing X" work-defect verdict.
+**Read-set gap reporting:** You can only verify what your read list above reaches. If your agenda includes verifying that evidence or an artifact exists or holds and a needed artifact is not reachable from your read list, report it as a read-set gap -- "not reachable from my read list: [path or name]" -- rather than a bare "missing X" work-defect verdict. A read-set gap report is exempt from the Evidence requirement's citation format above -- it cites the read list's own absence, so no separate source citation applies.
 
 ## Your Persona
 

@@ -30,3 +30,5 @@ If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before pro
 ## Who Re-Checks a Fix Round
 
 When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground.
+
+**Enforcement is procedural/self-check:** the checkable signal is a fix-round re-check dispatched as a fresh reviewer -- no resume of, or continuity with, the reviewer instance that raised the finding -- visible in the dispatch transcript. No automated detector exists.

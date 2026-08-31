@@ -100,6 +100,8 @@ Before opening a PR, or declaring it ready for the user's merge:
 
 When implementation fills a gap the spec or contract is silent on, document the convention in the shipped doc and disclose it in the PR body, marked reversible. Once the PR merges, the decision is closed -- do not carry it forward as a pending obligation, queue it for later ratification, or re-raise it in a next-steps summary. The convention gets reversed by the user asking, not by a scheduled ratification pass. The PR body disclosure plus the shipped documentation together are the review surface read at merge time; a standing ratification queue re-asks a question the merge already answered.
 
+**Enforcement is procedural/self-check:** the checkable signal is a ratification or re-approval item for an already-merged, already-documented decision showing up in a later plan or task queue -- that re-raise is itself the violation. No automated detector exists.
+
 ---
 
 ## Step 3: Version Resolution

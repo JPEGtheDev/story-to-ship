@@ -67,7 +67,7 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 - Conventional commits: `<type>[scope]: <description>`
 - Do NOT push to main or the parent branch
 - Commit to your branch: `agent/{{AGENT_NAME}}`
-- NEVER use `git stash` -- the stash stack is repository-global, shared across the main checkout and every worktree, so a stash from one agent can be popped by another session, silently mixing changes. Sequencing a failing-test commit before its fix: commit the phases directly (test commit, then implementation commit), or set work aside with a temporary WIP commit. If a stash is ever unavoidable: push with a unique message tag, capture the entry SHA immediately, apply (never pop) by SHA, drop by re-found tag.
+- NEVER use `git stash` -- the stash stack is repository-global, shared across the main checkout and every worktree, so a stash from one agent can be popped by another session, silently mixing changes. Sequencing a failing-test commit before its fix: commit the phases directly (test commit, then implementation commit), or set work aside with a temporary WIP commit. If a stash is ever unavoidable: push with a unique message tag, capture the entry SHA immediately, apply (never pop) by SHA, drop by re-found tag. Any `git stash` invocation appearing in this agent's transcript or command log is a defect: the dispatcher treats it as a finding and returns the branch for a fix round.
 
 ## Scope Estimate Gate -- Before Any Implementation
 

@@ -62,6 +62,9 @@ Based on their answers, ask **one or two follow-up questions** to clarify:
 - "What's the impact? (crashes, incorrect behavior, performance)"
 - "Do we know the root cause, or is investigation needed?"
 
+### When priorities are contested, or you're relaying someone else's requirement:
+- "What's driving this for you--or for whoever asked, if you're relaying it?" (the requester's personal/underlying motivation, distinct from the value question above)
+
 **Keep questions natural and conversational.** Don't interrogate--ask what you genuinely need to know.
 
 ## Step 3: Confirm Understanding Before Generating

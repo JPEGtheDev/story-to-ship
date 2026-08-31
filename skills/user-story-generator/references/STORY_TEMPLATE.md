@@ -28,6 +28,8 @@ Only after the user confirms, generate the story using this template:
 **I want to** [action]  
 **So that** [outcome/business value]
 
+**Motivation:** [Optional -- the requester's underlying "why," if distinct from the outcome above]
+
 ---
 
 ## Acceptance Criteria
@@ -76,6 +78,8 @@ Only after the user confirms, generate the story using this template:
 
 **If the story seems too large (L-sized or epic)**, mention this after generating and suggest breaking it down:
 > "This is a larger effort that will take 2-3+ days. Would you like me to break it into 3-4 smaller, independent stories?"
+
+**When to fill in the optional Motivation line:** most useful when many items are competing for priority, or when you (the story writer) aren't the end user--your assumed motivation may not match theirs. Recording it separately from the "So that" outcome lets the requester refine their own thinking and lets implementers propose alternatives that still serve the real goal. This is an informally endorsed team practice, not a measured one--use judgment rather than treating it as mandatory, and never add it as a required field.
 
 ## Estimating Effort and Model Selection
 

@@ -81,7 +81,7 @@ The PR title **MUST** use conventional commits format:
 
 ## BEFORE PROCEEDING
 
-Before opening or merging a PR:
+Before opening a PR, or declaring it ready for the user's merge:
 
 1. PR title uses conventional commits format
 2. All commits use conventional commits format
@@ -89,8 +89,18 @@ Before opening or merging a PR:
 4. Tests pass
 5. CI checks pass
 
-[+] All met -> PR is ready to merge
-[-] Any unmet -> resolve before opening or merging the PR
+[+] All met -> PR is ready for the user's merge
+[-] Any unmet -> resolve before opening the PR or declaring it ready
+
+**Merging is the user's gate.** The agent's job ends at: build the branch, run the required reviews, open the PR, get CI green. Do not merge the PR yourself, even when CI is green, reviews have passed, and a plan step says "merge it" or "land this." An instruction that names merge as part of a sequence authorizes the sequence, not the agent performing the merge. When the checklist above is met, stop and hand off: report the PR number, CI state, and review verdicts, then let the user merge. Continue from the merged main afterward. Never offer to merge the PR as an agent action.
+
+---
+
+## Documented Decisions Close on Merge
+
+When implementation fills a gap the spec or contract is silent on, document the convention in the shipped doc and disclose it in the PR body, marked reversible. Once the PR merges, the decision is closed -- do not carry it forward as a pending obligation, queue it for later ratification, or re-raise it in a next-steps summary. The convention gets reversed by the user asking, not by a scheduled ratification pass. The PR body disclosure plus the shipped documentation together are the review surface read at merge time; a standing ratification queue re-asks a question the merge already answered.
+
+**Enforcement is procedural/self-check:** the checkable signal is a ratification or re-approval item for an already-merged, already-documented decision showing up in a later plan or task queue -- that re-raise is itself the violation. No automated detector exists.
 
 ---
 

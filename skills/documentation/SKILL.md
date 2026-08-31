@@ -12,6 +12,8 @@ EVERY DOC IS SMALL, TAGGED, AND LINKED -- ONE CONCEPT PER FILE
 YOU MUST keep every doc file under 800 tokens, include YAML frontmatter on every doc, and add a Related section at the bottom of every doc except `docs/DOD.md` (see the defining-done skill's canon template). No exceptions.
 ```
 
+Scope: the 800-token limit governs files in the `docs/` tree. Files under `skills/**` (a `SKILL.md` and its `references/`) follow the writing-skills skill's own token budgets instead.
+
 Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the documentation skill to [write/update/review] [description]."
@@ -71,6 +73,18 @@ All files in `docs/` MUST be **Document Mode** -- readable independently, with n
 
 ---
 
+## Documentation Durability
+
+Three layers, three lifetimes:
+
+1. **Behavior** -- durable, lives in the docs tree. Completeness bar: the rewrite test (the docs must be sufficient to rewrite the application from scratch). Specify behavior; do not restate implementation.
+2. **Decision records** -- a Design Decision Record or Architecture Decision Record (the rationale for a choice and the alternatives considered) rides the pull request body only, never the docs tree.
+3. **Verification state** -- excluded from docs entirely; see the Review Checklist and Red Flags below.
+
+Full prose: `references/DOCUMENTATION_PRINCIPLES.md`.
+
+---
+
 ## Step 3: Review Checklist
 
 Before presenting documentation, verify:
@@ -85,6 +99,7 @@ Before presenting documentation, verify:
 8. Documentation matches current code state
 9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
 10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
+11. No verification-state claims (hedge form, affirmative form, or a live snapshot count) -- that content belongs on the issue tracker, not in the doc
 
 [+] All pass -> documentation is ready to present
 [-] Any unmet -> resolve all failing items before presenting
@@ -102,6 +117,7 @@ Before presenting documentation, verify:
 | "A long comment will do for now" | Comments >5 lines belong in `docs/`. Move it. |
 | "I'll update the docs in a follow-up" | Follow-up docs never match the implementation. Update alongside the change. |
 | "The skill already covers this" | Check for duplication -- if both a skill and a doc cover it, consolidate. |
+| "I'll mark it verified now that the check passed" | Delete the unverified marking instead of flipping it. Verification state does not belong in a doc in either direction. |
 
 ---
 
@@ -112,12 +128,14 @@ Before presenting documentation, verify:
 - Missing `## Related` section -- **STOP. Add at least one annotated link.** (sole exception: `docs/DOD.md` -- see the defining-done skill's canon template)
 - Two files covering the same concept -- **STOP. Delete one; link from the other.**
 - Updating code without checking related docs -- **STOP. Update stale docs first.**
+- Verification-state claim in a doc (hedge, affirmative, or snapshot count) -- **STOP. Delete it; that content belongs on the issue tracker.**
 
 ---
 
 ## Related Skills
 
 - `writing-skills` -- skill authoring standards, anatomy gate, and skill-reviewer dispatch pattern for validating completed skills
+- `honesty` -- a behavioral claim about a command or tool written into a doc ("command X does Y") must be run-verified, not reasoned; see the honesty skill's evidence discipline
 
 ## Reference
 

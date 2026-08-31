@@ -50,6 +50,14 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] INDEX.md exists and lists this file -> proceed
    - [-] INDEX.md missing or stale -> create or update it before committing
 
+8. **Editing a permissive or exception clause?** Write down the concrete evasion sentence the clause could admit, then check the new wording against that sentence verbatim -- not against whether it merely reads as clearer. Ask whether the clause grants any permission the surrounding rule withholds; if no, delete the clause instead of rewording it. Apply the same evasion-sentence check to a reviewer's proposed replacement wording before folding it in.
+   - [+] New wording fails the evasion sentence (does not admit it) -> proceed
+   - [-] New wording admits the evasion sentence, or the clause grants no permission the rule needs -> delete the clause, or rewrite until it fails the evasion sentence
+
+9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after -- inline relocation can increase the scoped footprint instead of shrinking it.
+   - [+] Source section still meets its floor, and extraction (not inline sectioning) was used -> proceed
+   - [-] Source section is now below its floor, or the scoped-term footprint increased -> backfill the source section, or move content to a reference file instead
+
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above
 
@@ -67,6 +75,8 @@ Before creating, editing, or shipping any skill or agent template:
 - No rationalization table -- **STOP. Add >=5 rows now. A skill without one is a suggestion.**
 - Skill contains "should", "prefer", "consider" -- **STOP. Replace every instance with MUST, DO NOT, or an explicit imperative.**
 - Skill or reference file contains non-ASCII characters -- **STOP. Replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +) before committing.**
+- Skill frontmatter contains a `version:` field -- **STOP. Remove it. Skills carry no version field; git history is the version record. Never write a bump-the-skill-version step into a Definition of Done or checklist.**
+- Skill or reference file states a behavioral claim about a command or tool ("command X does Y") that was reasoned about rather than run -- **STOP. Verify it by running the command, per the honesty skill's evidence rules; a reasoned-not-run claim is an unverified claim.**
 
 ---
 
@@ -80,6 +90,8 @@ Before creating, editing, or shipping any skill or agent template:
 | "This pattern only comes up occasionally" | Occasional patterns belong in a reference doc, not a skill. Skills loaded in every session cost context budget and dilute signal value. |
 | "I'll add the gate function later" | A skill without a gate is a suggestion, not a constraint |
 | "Context and Forces are extra writing overhead" | Rules without context misfire in edge cases. The overhead forces clarity about when the rule applies. |
+| "This rule could just live in the hook or per-turn context instead of a skill" | Identical content enforces worse as ambient per-turn text -- it habituates into wallpaper with no auditable loaded state. Keep hot-path text a minimal tripwire that forces a `Skill` call; keep rule bodies in the skill itself; keep rationale and why-text in the skill's own references/ files; recovery from mid-session drift is re-invoking the skill, not re-injecting text. |
+| "We can dedup this by pointing to another skill's table instead of duplicating it" | Never replace a skill's enforcement content (ban tables, gates, Red Flags, rationalization rows) with a pointer to another skill's material -- a dangling pointer enforces nothing, a drifted duplicate still enforces. Accept the duplication and align copies at review time; peer listings in a Related Skills section are still fine. |
 
 ---
 

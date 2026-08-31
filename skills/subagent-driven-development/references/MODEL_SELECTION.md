@@ -20,16 +20,18 @@ If the user states a model preference in the current session, store it as a memo
 
 ## Tier Assignments
 
-Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku) for mechanical, single-focus tasks with no design judgment. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for the Premium row.
+Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku), for tasks that clear the content-touching floor below; no row in the table currently uses it. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for the Premium row.
 
-Tier assignments for named agents and ceremonies. Economy rows override the Standard default; the Standard rows match the default and are listed so the full ceremony mapping lives in this one table:
+**Content-touching work floor:** Classification, extraction, distillation, and summarization tasks -- any task that exercises judgment over source content -- run at Standard tier or above, no matter how narrow or mechanical the task otherwise looks. Economy is acceptable only for tasks whose output is mechanically verifiable (for example, a file-listing roll-up), never for judgment over source content. Verbatim copying from large content embedded in a prompt counts as content extraction for the purpose of this floor; verify bytes by hash or pass the content by file path instead of copying it inline.
+
+Tier assignments for named agents and ceremonies, listed here so the full mapping lives in one place. Every current row is Standard, the default tier and the floor for content-touching work described above:
 
 | Agent or ceremony | Tier | Why |
 |-------------------|------|-----|
-| explorer template (read-only multi-file lookup) | Economy | Answers narrow factual questions; no judgment calls |
-| Three Amigos Ceremony 1 (Discovery) | Economy | Structured interview following a fixed agenda |
-| Three Amigos Ceremony 3 (Progress Check) | Economy | Status roll-up against an existing plan |
-| Three Amigos Ceremony 6 (Retrospective) | Economy | Pattern collection, no gating decision |
+| Three Amigos Ceremony 1 (Discovery) | Standard | Each amigo reads source documents (issues, specs, architecture docs, tests) and synthesizes them into acceptance criteria and a Feature Specification -- content-touching under the floor above |
+| explorer template (read-only multi-file lookup) | Standard | Reads and summarizes source content across files -- content-touching under the floor above |
+| Three Amigos Ceremony 3 (Progress Check) | Standard | Status roll-up against an existing plan is summarization of source content -- content-touching under the floor above |
+| Three Amigos Ceremony 6 (Retrospective) | Standard | Pattern collection distills prior session content -- content-touching under the floor above |
 | Three Amigos Ceremony 2 (Refinement) | Standard | Gate decision: APPROVE / CONDITIONS / REJECT |
 | Three Amigos Ceremony 4 (Pivot Assessment) | Standard | Gate decision on scope and correctness risk |
 | Three Amigos Ceremony 5 (Signoff) | Standard | Pre-merge acceptance decision |
@@ -37,6 +39,10 @@ Tier assignments for named agents and ceremonies. Economy rows override the Stan
 This table is the single source of truth for agent and ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs in prose; agent template frontmatter model fields implement these assignments and MUST stay consistent with this table.
 
 **Using Premium for non-architecture tasks:** State the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
+
+**Comparing tiers by cost:** When comparing model tiers (for example Economy vs. Standard) for cost, report dollar cost priced from current per-million-token pricing fetched from the platform docs at analysis time -- never compare raw token counts. Tokenizers differ across model families, so token counts from different models are not unit-compatible; a model that consumes more tokens for the same text is not necessarily the more expensive one. The harness's own token-usage figure for a subagent is not a billing-grade metric -- billing-grade truth comes from the per-message usage events recorded in the session and subagent transcript JSONL files (input tokens, output tokens, cache creation, cache read); sum those when a dollar comparison matters. A resumed subagent can silently revert to its template's default model instead of the model used for its earlier dispatch -- re-verify the per-call model field before attributing any result to a tier.
+
+**Enforcement is procedural/self-check:** the checkable signal is a tier-cost comparison reported in raw token counts without fetched per-million-token pricing, or a resume dispatch whose report does not restate the per-call model field. No automated detector exists.
 
 **Concurrency:** Verify your account's agent concurrency limit before dispatching parallel agents. See `dispatching-parallel-agents` skill for concurrency rules.
 

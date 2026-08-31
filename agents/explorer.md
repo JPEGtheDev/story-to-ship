@@ -1,6 +1,6 @@
 ---
 name: explorer
-model: haiku
+model: sonnet
 description: Use for read-only multi-file research to answer specific questions.
 ---
 

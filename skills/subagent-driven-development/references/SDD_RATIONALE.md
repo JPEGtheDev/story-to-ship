@@ -53,3 +53,9 @@ See the canonical Red Flags table in `../SKILL.md`.
 | Dispatching without a clear return format | Agent returns noise |
 | Sharing full session history as context | Contaminates search; subagent inherits your assumptions |
 | Reporting DONE before 2-stage review | Code exists; correctness unverified |
+
+## Canary Rationale
+
+This is the observable signal that step 3 of BEFORE PROCEEDING was executed, not skipped. A less powerful model can produce it mechanically: run step 3, paste the output.
+
+**Note:** The canary raises the cost of skipping for compliant agents -- it is not cryptographically bound to execution.

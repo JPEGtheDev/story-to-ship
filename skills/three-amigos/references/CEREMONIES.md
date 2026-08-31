@@ -52,6 +52,13 @@ After all three Discovery amigos return:
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
 
+### Non-UI Adaptation of the Mandatory Questions
+
+`SKILL.md` mandates two extra Discovery agenda questions on top of the five above: field optionality, and UI dialog entry paths (menu paths and keyboard shortcuts that open a dialog). Both are written assuming a UI feature. For a non-UI or developer-facing feature (skills, tooling, engines, plugins), adapt the two mandatory questions instead of dropping them -- dropping a mandatory question because "there is no UI" silently loses its intent, which generalizes to: enumerate every entry path and flag any not covered.
+
+- Field optionality -> optionality of each field in the feature's data contract (spec or config schema): required, optional, or conditional. Label ambiguous fields `[UNCLEAR: optional?]`.
+- UI dialog entry paths -> every invocation or API entry path (namespaced skill invocation, description-match auto-invocation, direct script or command-line launch, allowed-tools surface). Flag any entry path the design does not cover as `[UNPLANNED: entry-path]`.
+
 ---
 
 ## Ceremony 2: Refinement
@@ -127,13 +134,17 @@ After all three Discovery amigos return:
 **Output:** ACCEPTED / REVISIONS NEEDED per amigo. REVISIONS NEEDED from any amigo blocks merge.  
 **Required:** YES for any feature that went through Discovery.
 
+**Frequency:** One Signoff ceremony per branch is the norm. Repeating the full ceremony is a defect-driven exception -- something went wrong -- not standard practice to budget for; full-ceremony re-runs multiply cost without adding independence. Fix rounds are re-checked by the reviewer that raised the finding (see the `subagent-driven-development` review protocol).
+
+**Enforcement is procedural/self-check:** the checkable signal is a second Signoff ceremony dispatched on the same branch with no defect-driven reason stated for repeating it. No automated detector exists.
+
 ### Read First
 
 - Business Amigo: Feature Specification, implemented behavior (demo or code review).
 - Developer Amigo: Final code diff, test results, architecture impact.
 - Tester Amigo: Test coverage report, AC list, edge case list from Discovery.
 
-Read-set completeness gate: before dispatching any Signoff amigo, extract every artifact path the PR body, DoD, or todo evidence cites (scratchpad/, /tmp/claude-*, session directories); confirm each appears in that amigo's Read First; paste the path-diff in the dispatch turn. An empty diff is the dispatch precondition. A 'missing X' blocker from a dispatched amigo = first check the dispatch prompt for read-set omission before treating it as a work gap.
+Read-set completeness gate: before dispatching any amigo whose agenda includes verifying that evidence or an artifact exists or holds -- Signoff always qualifies; Progress Check, Pivot Assessment, and Retrospective qualify whenever their agenda cites specific evidence -- extract every artifact path the PR body, DoD, or todo evidence cites (scratchpad/, /tmp/claude-*, session directories); confirm each appears in that amigo's Read First; paste the path-diff in the dispatch turn. An empty diff is the dispatch precondition. A 'missing X' blocker from a dispatched amigo = first check the dispatch prompt for read-set omission before treating it as a work gap.
 
 ### Agenda -- Questions
 

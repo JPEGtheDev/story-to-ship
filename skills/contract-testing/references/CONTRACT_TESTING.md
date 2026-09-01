@@ -111,6 +111,10 @@ Unit tests are not just regression guards -- they are programmer-defined compile
 
 Acceptance tests verify behavior from the outside (user-visible outcomes, system boundaries). Unit tests verify behavior from the inside (individual unit contracts). Never use an acceptance test where a unit test suffices -- acceptance tests are slower and hide the specific locus of failure. Never use a unit test to verify acceptance criteria -- the test may pass while the user-visible behavior is broken. The boundary is: does this test require the full system? If yes, it is an acceptance test. Source: C2 Wiki "AcceptanceTests".
 
+## Fixture-Backed Tools for Customer-Authored Acceptance Tests
+
+The boundary above still leaves open who writes the acceptance test. A fixture-backed tool answers that: the customer authors the check as a plain document (for example, HTML editable in any standard editor), while the developer supplies the fixture on the other side -- the glue code that turns that document into something the runner can execute automatically. Once a fixture exists for a given kind of check, the customer can compose further tests against it, or assemble several into one larger document, with no developer reprogramming anything underneath. This is a direct answer to "customers can't write test code": developer effort is not removed, it shifts from authoring individual tests toward building and maintaining the fixture layer those tests plug into. `systematic-debugging/references/DEBUGGING_TACTICS.md` names a fixture-backed tool (FIT) as one example under its "suspect the requirement first" heuristic. Source: C2 Wiki "AcceptanceTest".
+
 ## Code So Simple It Has To Work
 
 Before adding a test for a trivial function, ask: "Is this code so simple that it visibly has to work?" If yes, the test adds maintenance cost without adding verification value. Apply this test to rule out tautological tests. The criteria: (a) zero branching, (b) no external dependencies, (c) behavior is visible from the name and signature alone. If all three hold, a test is optional. Source: C2 Wiki "CodeSmells" / "DoTheSimplestThingThatCouldPossiblyWork".

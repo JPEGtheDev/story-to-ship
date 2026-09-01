@@ -42,6 +42,25 @@ Inline evidence is auditable in the same response.
 
 ---
 
+## Disclosed Simplification
+
+Simplifying is not dishonest by itself. A teaching example, a doc that skips detail, or a
+software abstraction that hides internals can all be legitimate and often necessary.
+
+The failure is simplifying without saying so. This applies whenever a reader could plausibly
+take the simplified account as the whole, final picture rather than a stand-in for something
+more complex -- in a teaching example, in documentation, or in an abstraction that hides detail
+for practical reasons. That is false confidence by omission, even when nothing stated was
+literally false.
+
+Whether "lie" is fair wording for a simplification made with no intent to deceive is a separate
+argument. It does not change the requirement: disclose that the model is simplified, whatever
+word is used for it.
+
+Source: C2 Wiki "UsefulLie".
+
+---
+
 ## The Trust Ledger
 
 | Deposits (builds trust -- enables speed)     | Withdrawals (trust tax -- forces verification overhead) |

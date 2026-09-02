@@ -105,6 +105,9 @@ If `{{OUTPUT_PATH}}` is `ASK_USER`: do not attempt to write the final file. Repo
 4. Notable Passages must be verbatim from the extractive summary -- do not paraphrase them here.
 5. Actions and Lessons must be specific and verifiable -- not "think about this" or "consider applying."
 6. The Synthesis section is your analysis, not a fourth summary. It adds perspective, not repetition.
+7. Never name the pipeline's methods or machinery in reader-facing prose -- not "abstractive", "extractive", "SAAC", "the three summaries/methods/lenses/passes", "synthesizer", "enrichment", "quality evaluator", "checkpoint", or "pipeline" (the list is illustrative, not exhaustive).
+8. Never phrase a claim as agreement or divergence among methods or summaries; the Synthesis question about what the three methods agree on is answered in the reader's terms -- what the source establishes.
+9. A quantified claim about the source ("all N pages", "every contributor", "the five pages agree", "throughout the thread") must be true of the pages or passages the article itself draws on and cites; when the article covers a subset, state the count it covers instead of the universal.
 
 ## Quality Signals
 

@@ -31,6 +31,9 @@ Does the article make any claims, statements, or characterizations that are NOT 
 - Read the article's Overview, Key Concepts, and Synthesis sections against the source.
 - Flag any sentence that introduces a claim not traceable to the source.
 - Paraphrase is acceptable if accurate. Fabrication is not.
+- Quotation-mark fidelity: every quotation-marked span in Overview, Key Concepts, and Synthesis prose -- not only Notable Passages -- must match the source verbatim. A span that stitches two separate source sentences, or a composite assembled from non-adjacent passages, is a finding even when each fragment is real.
+- Quantifier check: flag any quantified claim about the source ("all N pages", "every contributor", "the five pages agree", "throughout the thread") -- the list is illustrative, not exhaustive -- that the article's own citations and drawn-on passages do not support; the finding names the count the article actually covers.
+- Limitations self-claim check (ADVISORY -- judgment-layer backup only): if the article carries a Limitations paragraph, any name or entity it asserts about the article ("references authors A, B and C", "quotes the maintainer") must appear in the article body; report a mismatch as a finding. The load-bearing gate for this defect is the deterministic post-run entity check the pipeline runs after the final file is written, not this evaluation.
 
 ### 2. Completeness
 Does the article omit key topics, concepts, or ideas that a reader of the source would consider important?
@@ -101,6 +104,7 @@ Unresolved issues: [list]
 2. Do not penalize the article for being shorter than the source -- compression is intentional.
 3. Do not add new content during revision. Return only a list of corrections for the synthesizer to apply.
 4. Always write to `{{OUTPUT_PATH}}` at the end of the process -- either clean or with warnings.
+5. Quote-substitution standing policy: a double-quote to single-quote substitution (or the reverse) inside quoted matter is a fix-or-justify finding -- report it, and either the synthesizer restores the source's marks or states why the substitution is required. It is neither a fabrication verdict nor silently accepted.
 
 ## Keep Reasoning Terse
 

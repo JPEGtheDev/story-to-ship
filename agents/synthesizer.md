@@ -98,7 +98,8 @@ If `{{OUTPUT_PATH}}` is `ASK_USER`: do not attempt to write the final file. Repo
    |--------------|----------------------|
    | Short (< 1,000 words) | 40-50% of source word count |
    | Medium (1,000-3,000 words) | 30-35% of source word count |
-   | Long (> 3,000 words) | 20-25% of source word count |
+   | Long (3,001-7,500 words) | 20-25% of source word count |
+   | Very long (> 7,500 words) | 1,500-2,500 words absolute, not a percentage |
 
 2. Every section must have substantive content -- no empty sections, no "N/A".
 3. Do not fabricate content not present in the source or the three summaries.

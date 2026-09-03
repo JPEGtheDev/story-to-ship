@@ -98,13 +98,17 @@ If `{{OUTPUT_PATH}}` is `ASK_USER`: do not attempt to write the final file. Repo
    |--------------|----------------------|
    | Short (< 1,000 words) | 40-50% of source word count |
    | Medium (1,000-3,000 words) | 30-35% of source word count |
-   | Long (> 3,000 words) | 20-25% of source word count |
+   | Long (3,001-7,500 words) | 20-25% of source word count |
+   | Very long (> 7,500 words) | 1,500-2,500 words absolute, not a percentage |
 
 2. Every section must have substantive content -- no empty sections, no "N/A".
 3. Do not fabricate content not present in the source or the three summaries.
 4. Notable Passages must be verbatim from the extractive summary -- do not paraphrase them here.
 5. Actions and Lessons must be specific and verifiable -- not "think about this" or "consider applying."
 6. The Synthesis section is your analysis, not a fourth summary. It adds perspective, not repetition.
+7. Never name the pipeline's methods or machinery in reader-facing prose -- not "abstractive", "extractive", "SAAC", "the three summaries/methods/lenses/passes", "synthesizer", "enrichment", "quality evaluator", "checkpoint", or "pipeline" (the list is illustrative, not exhaustive).
+8. Never phrase a claim as agreement or divergence among methods or summaries; the Synthesis question about what the three methods agree on is answered in the reader's terms -- what the source establishes.
+9. A quantified claim about the source ("all N pages", "every contributor", "the five pages agree", "throughout the thread") must be true of the pages or passages the article itself draws on and cites; when the article covers a subset, state the count it covers instead of the universal.
 
 ## Quality Signals
 

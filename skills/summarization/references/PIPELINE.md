@@ -76,6 +76,10 @@ Fill every `{{VARIABLE}}` slot:
 
 **If `{{OUTPUT_PATH}}` is `ASK_USER`:** Ask the user for the directory before dispatching the quality agent. Auto-derive the filename from `{{SOURCE_TITLE}}` (kebab-case + `.md`).
 
+**Revision cycle.** When the quality agent returns `NEEDS REVISION`, run these four steps in order before writing the final output. (1) Snapshot the enriched temp file before anything overwrites it: copy `{{TEMP_PATH}}` to `{{TEMP_PATH}}.prerevision-snapshot`. (2) Dispatch the `synthesizer` agent with the quality findings; it revises the article in place at `{{TEMP_PATH}}`. (3) Dispatch the `claim-enrichment` agent again with its standard prompt prefixed by a binding scope instruction: name the snapshot path and `{{TEMP_PATH}}`, tell it to diff the two files, and restrict it to the sentences the revision changed; sentences the revision did not touch stay out of scope even inside a changed paragraph, and the rest of the article is not re-evaluated. The agent template has no scoped mode of its own; the prefix supplies it. (4) Dispatch the `summarization-quality` agent a second time on the re-enriched article; its verdict decides between `PASS` and `WRITTEN WITH WARNINGS`. Skipping step (3) lets revision-introduced claims reach the second quality check without ever passing the enrichment gate.
+
+**Post-run Limitations check (deterministic).** After the final file is written, if the article carries a Limitations paragraph, take every proper name or entity that paragraph asserts about the article and confirm each one appears in the article body with a literal text search; report any miss to the user with the output path. This mechanical check is the load-bearing gate for a Limitations paragraph that names entities absent from the body; the quality agent's own Limitations bullet is advisory and does not replace it.
+
 ---
 
 ## Output Path Resolution

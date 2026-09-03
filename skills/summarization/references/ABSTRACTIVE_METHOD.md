@@ -21,6 +21,7 @@ Output length is a soft target. Prioritize retaining key concepts over brevity.
 | Short (< 1,000 words) | 20-25% of source word count |
 | Medium (1,000-3,000 words) | 15-20% of source word count |
 | Long (> 3,000 words) | 10-15% of source word count |
+| Very long (> 7,500 words) | Unchanged for this method; the synthesized article targets 1,500-2,500 words absolute, not a percentage |
 
 ## Output Format
 

@@ -17,7 +17,8 @@ Extractive summarization identifies and **lifts the most important passages verb
 | Short (< 1,000 words) | 3-5 passages |
 | Medium (1,000-3,000 words) | 5-8 passages |
 | Long (> 3,000 words) | 7-10 passages |
-| Very long (> 7,500 words) | 7-10 passages (unchanged); the synthesized article targets 1,500-2,500 words absolute, not a percentage |
+| Very long (7,501-25,000 words) | 7-10 passages (unchanged); the synthesized article targets 1,500-2,500 words absolute, not a percentage |
+| Very long (> 25,000 words) | 7-10 passages (unchanged); the synthesized article targets 2,500-4,000 words absolute, not a percentage |
 
 ## Output Format
 

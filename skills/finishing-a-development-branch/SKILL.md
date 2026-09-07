@@ -77,10 +77,11 @@ Before writing the PR, answer:
      grep -nP '[^\x00-\x7F]' "$f"         # non-ASCII characters
      grep -nE '(\.\./\.\./skills/|skills/[A-Za-z0-9_-]+/references/)' "$f"   # cross-tree file references in non-machine contexts
      grep -nE '\b[A-Z][A-Z0-9_]{2,}\.md\b' "$f"   # bare doc-file names -- real only when the scanning file is a skill or agent-template file AND the named file lives in a different skill tree
-     case "$f" in docs/*|*README.md)                  # documentation files only
-       grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"         # test identifiers named in documentation
-       ;;
-     esac
+   done
+
+   for f in $(git diff --name-only main...HEAD -- 'docs/*' '*README.md'); do
+     [ -f "$f" ] || continue
+     grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation
    done
    ```
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern. For a file under docs/ or named README, also read for wording that picks out one specific test without naming an identifier a grep could catch -- for example a phrase like "the dependency rule test asserts ...".

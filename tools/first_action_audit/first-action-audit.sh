@@ -123,10 +123,11 @@ readonly REPORT_PROG='
     else
       ($cands[0]) as $first
       | ($first.tools) as $tools
-      | if ($tools|length)==1 and $tools[0].name=="Skill" and $tools[0].skill=="session-bootstrap" then
+      # Plugin skills are listed as "<plugin>:<skill>"; compare the bare name (strip through the last colon).
+      | if ($tools|length)==1 and $tools[0].name=="Skill" and ($tools[0].skill // "" | sub("^.*:"; ""))=="session-bootstrap" then
           {verdict_line: "VERDICT=CLEAN", exit: 0}
         else
-          ( [$tools[] | select(.name!="Skill" or .skill!="session-bootstrap")] | .[0] ) as $miss
+          ( [$tools[] | select(.name!="Skill" or (.skill // "" | sub("^.*:"; ""))!="session-bootstrap")] | .[0] ) as $miss
           | {verdict_line: "VERDICT=MISS \($miss.name // "unknown") at \($first.ts)", exit: 1}
         end
     end

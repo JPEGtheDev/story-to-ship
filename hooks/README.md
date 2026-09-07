@@ -54,7 +54,7 @@ State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: th
 
 Subagents identify themselves via an `agent_id` field on the hook payload; `bootstrap-gate-pre.sh` exempts any call carrying one, so the gate only ever applies to the main-thread session.
 
-Accepted bootstrap skill names: both hooks strip everything through the last colon of `tool_input.skill` before comparing it to `session-bootstrap`, because the harness lists plugin skills as `<plugin>:<skill>`. So `session-bootstrap`, `story-to-ship:session-bootstrap`, and any other `<plugin>:session-bootstrap` satisfy the gate; `session-bootstrap:` (trailing colon) and `<plugin>:honesty` do not. `tools/first_action_audit/first-action-audit.sh` applies the same rule when it judges a transcript's first post-boundary call.
+Accepted bootstrap skill names: both hooks strip everything through the last colon of `tool_input.skill` before comparing it to `session-bootstrap`, because the harness lists plugin skills as `<plugin>:<skill>`. So `session-bootstrap`, `story-to-ship:session-bootstrap`, and any other `<plugin>:session-bootstrap` satisfy the gate; `session-bootstrap:` (trailing colon) and `<plugin>:honesty` do not. `tools/first_action_audit/first-action-audit.sh` applies the same rule when it judges the first tool call after a transcript's last `compact_boundary` record.
 
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
 

@@ -30,6 +30,14 @@ Two files:
   `dispatch(step, context)` contract. `tests/inline-copy-check.sh` enforces
   the byte-match between the two copies on every test run.
 
+`package.json` in this directory declares `"type": "commonjs"` so that
+`engine-core.js` and the `require()` calls in `tests/` resolve as CommonJS
+under the repository's root package, which declares `"type": "module"` for
+the OpenCode plugin. The workflow runtime evaluates `sprint-runner.js` from
+its text and does not consult this file; `node --check` on
+`sprint-runner.js` is a non-signal either way (see the dialect note in its
+header).
+
 ## Authoring a spec
 
 SPEC_SCHEMA.md is the authoring contract -- read it before writing a spec.

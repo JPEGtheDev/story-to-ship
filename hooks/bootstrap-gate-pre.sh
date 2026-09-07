@@ -54,6 +54,10 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 
 TOOL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_name // empty' 2>/dev/null)"
 SKILL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_input.skill // empty' 2>/dev/null)"
+# The harness lists plugin skills as "<plugin>:<skill>". Strip everything
+# through the last colon so both "session-bootstrap" and
+# "<plugin>:session-bootstrap" satisfy the gate; "session-bootstrap:" does not.
+SKILL_NAME="${SKILL_NAME##*:}"
 
 FLAG_FILE="$STATE_DIR/.bootstrap-pending-$SESSION_ID"
 

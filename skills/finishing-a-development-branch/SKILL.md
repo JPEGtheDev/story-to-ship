@@ -78,7 +78,7 @@ Before writing the PR, answer:
      grep -nE '(\.\./\.\./skills/|skills/[A-Za-z0-9_-]+/references/)' "$f"   # cross-tree file references in non-machine contexts
      grep -nE '\b[A-Z][A-Z0-9_]{2,}\.md\b' "$f"   # bare doc-file names -- real only when the scanning file is a skill or agent-template file AND the named file lives in a different skill tree
      case "$f" in docs/*|*README.md)                  # documentation files only
-       grep -nE '[A-Za-z0-9_]*Tests?\b' "$f"          # test identifiers named in documentation
+       grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"         # test identifiers named in documentation
        ;;
      esac
    done

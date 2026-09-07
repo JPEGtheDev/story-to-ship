@@ -26,7 +26,9 @@ A mechanism that is genuinely unverified still needs an honesty marking while it
 
 ## Documentation Does Not Name Tests
 
-A doc under the docs tree or a README does not name a test file, test project, test class, or test method, whether by identifier or by wording that singles out one specific test. Naming a test couples the doc to an identifier that nothing checks: renaming, splitting, or moving that test leaves the doc describing something that no longer exists, and no build step catches the drift. The test runner's own output is the authoritative record of which tests exist; a doc that restates it is a second, weaker copy of that record, kept only by hand. A doc may state that a build-time or continuous-integration test enforces a rule without naming the test, and it may name a configuration location, such as the project file that holds a coverage threshold. The relationship runs one way: code may point at a doc section that explains it, but a doc does not point at a test identifier. Source: project convention.
+A doc under the docs tree or a README does not name a test file, test project, test class, or test method, whether by identifier or by wording that singles out one specific test. Definiteness is the test: a phrase that individuates one particular test ("the layering test asserts ...") names it, while a statement that some unnamed test enforces a rule ("a build-time test enforces this") does not.
+
+A rename or move breaks a named test since nothing checks the identifier, and no build step catches the drift; the runner's own output is the authoritative record, so a doc that restates it is a weaker, hand-kept copy. A doc may say a test enforces a rule without naming it, or name a configuration location like a coverage-threshold file; code may point at a doc section, but never the reverse. Source: project convention.
 
 ## Document Mode vs Thread Mode
 

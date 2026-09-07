@@ -82,8 +82,11 @@ Check every tracked file in the diff for:
       a test file, test project, test class, or test method, as an identifier or in words
       that pick out one specific test; it may say a build-time or continuous-integration
       test enforces a rule without naming it, and may name a configuration location (for
-      example the project file that holds a coverage threshold); a grep for test-file
-      suffixes is a floor, so read for names in words
+      example the project file that holds a coverage threshold); definiteness is the test,
+      so a phrase that individuates one particular test ("the layering test asserts ...")
+      names it while a statement that some unnamed test enforces the rule ("a build-time
+      test enforces this") does not; a grep for test-file suffixes is a floor, so read for
+      names in words
 
 A hygiene hit in the changed files is a REQUEST CHANGES verdict regardless of any other findings.
 

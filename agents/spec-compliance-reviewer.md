@@ -86,8 +86,10 @@ In addition to requirements coverage, check every tracked file changed in the di
    test file, test project, test class, or test method, as an identifier or in words that
    pick out one specific test. It may say a build-time or continuous-integration test
    enforces a rule without naming it, and may name a configuration location (for example
-   the project file that holds a coverage threshold). A grep for test-file suffixes is a
-   floor; read for names in words.
+   the project file that holds a coverage threshold). Definiteness is the test: a phrase
+   that individuates one particular test ("the layering test asserts ...") names it; a
+   statement that some unnamed test enforces the rule ("a build-time test enforces this")
+   does not. A grep for test-file suffixes is a floor; read for names in words.
 
 Report each hit with file and line under "Shipped-file hygiene" in your verdict, or state NONE. This check applies regardless of whether the hygiene issue contradicts a requirement.
 

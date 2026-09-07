@@ -29,6 +29,10 @@ printf '%s' "$RAW" | jq empty 2>/dev/null || exit 0
 
 TOOL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_name // empty' 2>/dev/null)"
 SKILL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_input.skill // empty' 2>/dev/null)"
+# The harness lists plugin skills as "<plugin>:<skill>". Strip everything
+# through the last colon so both "session-bootstrap" and
+# "<plugin>:session-bootstrap" satisfy the gate; "session-bootstrap:" does not.
+SKILL_NAME="${SKILL_NAME##*:}"
 
 if [[ "$TOOL_NAME" != "Skill" || "$SKILL_NAME" != "session-bootstrap" ]]; then
   exit 0

@@ -78,11 +78,12 @@ Check every tracked file in the diff for:
 - [ ] Every acronym expanded on first use, except a recognized exempt category (for example CI, PR, API, or a file format name like YAML or JSON)
 - [ ] No cross-skill or cross-tree file references cited as a path or bare filename -- another skill's internals are named in prose (for example "the documentation skill"), never as a path
 - [ ] No non-ASCII characters (curly quotes, em-dashes, Unicode arrows, or other non-ASCII characters)
-- [ ] No test identifiers in documentation -- a file under docs/ or a README must not name a
-      test file, test project, test class, or test method, as an identifier or in words that
-      pick out one specific test; it may say a build-time or continuous-integration test
-      enforces a rule without naming it, and may name a configuration location; a grep for
-      test-file suffixes is a floor, so read for names in words
+- [ ] No test identifiers in documentation under docs/ or a README -- the file must not name
+      a test file, test project, test class, or test method, as an identifier or in words
+      that pick out one specific test; it may say a build-time or continuous-integration
+      test enforces a rule without naming it, and may name a configuration location (for
+      example the project file that holds a coverage threshold); a grep for test-file
+      suffixes is a floor, so read for names in words
 
 A hygiene hit in the changed files is a REQUEST CHANGES verdict regardless of any other findings.
 

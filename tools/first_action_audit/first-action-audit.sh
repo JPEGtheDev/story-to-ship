@@ -111,6 +111,7 @@ check_rc "$?"
 # jq program: $-identifiers are jq variables, not shell expansions
 # shellcheck disable=SC2016
 readonly REPORT_PROG='
+# Plugin skills are listed as "<plugin>:<skill>"; compare the bare name (strip through the last colon).
 def bare_skill: if type=="string" then sub("^.*:"; "") else "" end;
 . as $in
 | ($in.boundary) as $boundary
@@ -124,7 +125,6 @@ def bare_skill: if type=="string" then sub("^.*:"; "") else "" end;
     else
       ($cands[0]) as $first
       | ($first.tools) as $tools
-      # Plugin skills are listed as "<plugin>:<skill>"; compare the bare name (strip through the last colon).
       | if ($tools|length)==1 and $tools[0].name=="Skill" and ($tools[0].skill | bare_skill)=="session-bootstrap" then
           {verdict_line: "VERDICT=CLEAN", exit: 0}
         else

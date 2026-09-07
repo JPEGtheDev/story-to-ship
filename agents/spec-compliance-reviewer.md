@@ -82,6 +82,11 @@ In addition to requirements coverage, check every tracked file changed in the di
 3. **Unexpanded acronyms.** Every acronym must be spelled out on first use, except a recognized exempt category (for example CI, PR, API, or a file format name like YAML or JSON).
 4. **Cross-skill or cross-tree file references.** Another skill's internal file must be named in prose (for example "the documentation skill"), never cited as a file path or bare filename.
 5. **Non-ASCII characters.** Curly quotes, em-dashes, Unicode arrows, and other non-ASCII characters must not appear in a shipped file.
+6. **Test identifiers in documentation.** A file under docs/ or a README must not name a
+   test file, test project, test class, or test method, as an identifier or in words that
+   pick out one specific test. It may say a build-time or continuous-integration test
+   enforces a rule without naming it, and may name a configuration location. A grep for
+   test-file suffixes is a floor; read for names in words.
 
 Report each hit with file and line under "Shipped-file hygiene" in your verdict, or state NONE. This check applies regardless of whether the hygiene issue contradicts a requirement.
 

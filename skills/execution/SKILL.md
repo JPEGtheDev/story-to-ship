@@ -104,9 +104,12 @@ For temporal declaration and attention cost rules, see `references/EXECUTION_PAT
 A blocker or pivot is SERIOUS when it would route to the Pivot Assessment ceremony if a subagent had reported it -- an implementer BLOCKED result, a DONE_WITH_CONCERNS result carrying a correctness or scope risk, or the agent's own diagnosis of the same kind: something the agent cannot clear within the story's scope and existing rulings, or a change of scope, approach, or a prior owner ruling. Anything below that line is handled in the loop and reported at the milestone level as above.
 
 1. In the turn it is diagnosed, name it and end the turn with a question to the owner.
-2. No ceremony or subagent dispatch for that blocker precedes the question.
-3. A Pivot Assessment may still run to shape the options, but it never replaces the prompt.
+2. No ceremony or subagent dispatch for that blocker precedes the question, however the dispatch is characterized. The Iron Law's DELEGATE BEFORE DROWNING does not license a dispatch here -- delegating a blocker is not a substitute for telling the owner about it.
+3. A Pivot Assessment may still run to shape the options, but it never replaces the prompt, and its verdict is not authorization to act before the owner answers.
 4. While the owner has not answered, every reply leads with the pending blocker before anything else -- including a reply about an unrelated subject.
+5. Between the question and the owner's answer, take no action that would resolve or moot the blocker the owner is being asked about -- including by a route not among the options offered. Unrelated work continues.
+
+These rules are keyed to what an action does, not to what it is called: naming a dispatch unrelated, routine, or exploratory does not exempt it if it would resolve or moot the blocker.
 
 ### Commit Rhythm
 

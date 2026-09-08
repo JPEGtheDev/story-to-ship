@@ -56,7 +56,8 @@ This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Wo
 - **Keep It Simple:** Straightforward approach first. Introduce abstraction only when it pays for itself.
 - **Senior-Level Standards:** Diagnose root causes. Refuse temporary workarounds.
 - **Surgical Precision:** Touch only what the task requires. A smaller diff is always better.
-- **Drive to Completion:** Act on what you know. Resolve blockers yourself.
+- **Drive to Completion:** Act on what you know. Resolve blockers below the serious line
+  yourself; a serious blocker prompts the owner (Serious blockers and pivots).
 
 ---
 
@@ -98,6 +99,20 @@ For every planned item, before writing code:
 
 For temporal declaration and attention cost rules, see `references/EXECUTION_PATTERNS.md`.
 
+### Serious blockers and pivots
+
+A blocker or pivot is SERIOUS when it would route to the Pivot Assessment ceremony (see the `three-amigos` skill) if a subagent had reported it -- an implementer BLOCKED result, a DONE_WITH_CONCERNS result carrying a correctness or scope risk, or the agent's own diagnosis of the same kind: something the agent cannot clear within the story's scope and existing rulings, or a change of scope, approach, or a prior owner ruling. Anything below that line is handled in the loop and reported at the milestone level as above.
+
+1. In the turn it is diagnosed, name it and end the turn with a question to the owner.
+2. Do not run any ceremony or subagent dispatch for that blocker before the question, however the dispatch is characterized. The Iron Law's DELEGATE BEFORE DROWNING does not license a dispatch here -- delegating a blocker is not a substitute for telling the owner about it.
+3. A Pivot Assessment may still run to shape the options, but it never replaces the prompt, and its verdict is not authorization to act before the owner answers.
+4. While the owner has not answered, lead every reply with the pending blocker before anything else -- including a reply about an unrelated subject.
+5. Between the question and the owner's answer, take no action that would resolve or moot the blocker the owner is being asked about -- including by a route not among the options offered. Unrelated work continues.
+
+These rules are keyed to what an action does, not to what it is called: naming a dispatch unrelated, routine, or exploratory does not exempt it if it would resolve or moot the blocker.
+
+**Enforcement is procedural/self-check:** the checkable signal is a transcript showing a diagnosed serious blocker with no question to the owner in that same turn. No automated detector exists.
+
 ### Commit Rhythm
 
 - One commit per logical unit -- not per file, not per session
@@ -118,6 +133,7 @@ If you catch yourself thinking any of these:
 - "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
 - About to write a file while `git branch --show-current` returns `main` or `master` -- **STOP. Return to BEFORE PROCEEDING item 1. Create a new branch before writing any file.**
 - "The user said 'merge first', so I'm authorized to click merge" -- **STOP. Sequence authorization is not actor authorization. Hand off the PR unmerged and ask -- see `User-Reserved Decisions` below for the full rule.**
+- "Serious blocker diagnosed and the turn is about to continue with a dispatch" -- **STOP. Name it and end the turn with the question.**
 
 **All of these mean: Stop. Run the full verification gate before advancing. See `verification-before-completion` skill.**
 
@@ -216,6 +232,8 @@ Some decisions belong to the user, not the agent, no matter how strongly the wor
 
 When in doubt, hand off and ask -- do not infer authorization from context.
 
+When the decision surfaces mid-task as a diagnosed blocker rather than a pre-existing reserved category, follow `Serious blockers and pivots` above instead.
+
 **Enforcement is procedural/self-check:** the checkable signal is a transcript showing a reserved action (e.g. `gh pr merge`) executed with no same-turn explicit user instruction naming that action. No automated detector exists.
 
 ---
@@ -258,6 +276,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
 | "I'm just investigating -- I'll create the branch before I actually start coding" | Investigation shapes the fix before you notice it is shaping it. By the time you "start coding," the investigation has already informed the edit. Run BEFORE PROCEEDING item 1 at skill load, not at first edit. |
 | "The user said 'merge first', so I am authorized to merge" | Sequence authorization is not actor authorization. Hand off and ask -- see `User-Reserved Decisions` above for the full rule. |
+| "The Pivot Assessment will decide; I will report after it returns" | The ceremony shapes the options; the owner rules. Holding the blocker until it returns is the multi-hour hold this rule exists to prevent. Prompt the owner now and run the ceremony after the owner answers, or before the prompt only if it finishes in the same turn. |
 
 ---
 

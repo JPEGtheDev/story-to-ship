@@ -25,9 +25,11 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md |
 | 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT |
 | 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED |
-| 4 | BLOCKED or DONE_WITH_CONCERNS | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
+| 4 | BLOCKED or DONE_WITH_CONCERNS (owner prompted first) | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
 | 6 | Feature merged and closed | Retrospective | Process improvement items |
+
+For row 4, the owner is prompted in this turn, in the same turn the blocker is diagnosed, before this ceremony runs. This ceremony's verdict is not authorization to act before the owner answers. Full requirement: `execution` skill, "Serious blockers and pivots".
 
 Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 

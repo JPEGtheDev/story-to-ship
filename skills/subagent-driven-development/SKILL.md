@@ -117,10 +117,10 @@ Every subagent doing implementation work must report one of these five codes. Re
 | Code | Meaning | Your response |
 |------|---------|---------------|
 | `DONE` | Task complete, all verification passed, no concerns | Proceed to Stage 1 review |
-| `DONE_WITH_CONCERNS` | Complete but flagged issues for dispatcher review | Read concerns. If concerns indicate a correctness or scope risk: Invoke Three Amigos Pivot Assessment (Ceremony 4). Otherwise proceed to canary + Stage 1. |
+| `DONE_WITH_CONCERNS` | Complete but flagged issues for dispatcher review | Read concerns. Correctness or scope risk: prompt the owner in this turn, then Pivot Assessment (Ceremony 4). Otherwise canary + Stage 1. |
 | `PARTIAL` | Partially complete -- some items done and verified, rest not done | Verify completed portion. Create new todo(s) for remaining work. Proceed to Stage 1 for completed portion only. |
 | `NEEDS_CONTEXT` | Cannot proceed -- specific missing information listed | Provide the missing information. Re-dispatch. |
-| `BLOCKED` | Cannot proceed -- external dependency or environment issue described | Invoke Three Amigos Pivot Assessment (Ceremony 4). If unavailable: assess blocker, provide context if possible, otherwise escalate to user. |
+| `BLOCKED` | Cannot proceed -- external dependency or environment issue described | Prompt the owner in this turn (execution skill, serious blockers), then Pivot Assessment (Ceremony 4); if the ceremony is unavailable the prompt is the escalation. |
 
 ---
 

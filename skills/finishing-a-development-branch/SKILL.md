@@ -81,7 +81,7 @@ Before writing the PR, answer:
 
    for f in $(git diff --name-only main...HEAD -- 'docs/*' '*README.md'); do
      [ -f "$f" ] || continue
-     grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation -- scoped to docs/README only because source files legitimately contain genuine *Tests identifiers, and an unscoped run would flood on expected matches
+     grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation -- docs/README only: source has real *Tests identifiers; unscoped run floods on matches
    done
    ```
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern. For a file under docs/ or named README, also read for wording that picks out one specific test without naming an identifier a grep could catch -- for example a phrase like "the layering test asserts ...".

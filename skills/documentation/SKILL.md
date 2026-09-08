@@ -100,6 +100,7 @@ Before presenting documentation, verify:
 9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
 10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
 11. No verification-state claims (hedge form, affirmative form, or a live snapshot count) -- that content belongs on the issue tracker, not in the doc
+12. No test file, test project, test class, or test method named as an identifier or picked out in words -- it may state that a build-time or continuous-integration test enforces a rule without naming the test, and it may name a configuration location (for example the project file holding a coverage threshold); a phrase that individuates one test ("the layering test asserts ...") names it, an indefinite statement that a test enforces the rule does not; code may point at a doc section, a doc does not point at a test identifier
 
 [+] All pass -> documentation is ready to present
 [-] Any unmet -> resolve all failing items before presenting
@@ -118,6 +119,7 @@ Before presenting documentation, verify:
 | "I'll update the docs in a follow-up" | Follow-up docs never match the implementation. Update alongside the change. |
 | "The skill already covers this" | Check for duplication -- if both a skill and a doc cover it, consolidate. |
 | "I'll mark it verified now that the check passed" | Delete the unverified marking instead of flipping it. Verification state does not belong in a doc in either direction. |
+| "The test name helps the reader find the check" | A doc coupled to a test name drifts silently the first time the test is renamed or split; the test runner's output is the record of what tests exist. Name the mechanism, not the test. |
 
 ---
 
@@ -129,6 +131,7 @@ Before presenting documentation, verify:
 - Two files covering the same concept -- **STOP. Delete one; link from the other.**
 - Updating code without checking related docs -- **STOP. Update stale docs first.**
 - Verification-state claim in a doc (hedge, affirmative, or snapshot count) -- **STOP. Delete it; that content belongs on the issue tracker.**
+- A doc names a test file, test project, test class, or test method -- **STOP. State that a test enforces the rule; do not name the test.**
 
 ---
 

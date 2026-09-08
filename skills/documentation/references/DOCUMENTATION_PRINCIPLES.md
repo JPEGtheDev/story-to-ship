@@ -24,6 +24,12 @@ Test: if a sentence answers "has this been verified?" or "how many exist right n
 
 A mechanism that is genuinely unverified still needs an honesty marking while it stays unverified. This rule governs what happens after: once a check passes, delete the marking rather than flipping it to "verified." Source: project convention.
 
+## Documentation Does Not Name Tests
+
+A doc under the docs tree or a README does not name a test file, test project, test class, or test method, whether by identifier or by wording that singles out one specific test. Definiteness is the test: a phrase that individuates one particular test ("the layering test asserts ...") names it, while a statement that some unnamed test enforces a rule ("a build-time test enforces this") does not.
+
+A rename, split, or move breaks a named test since nothing checks the identifier, and no build step catches the drift; the runner's output is authoritative, so a restating doc is a weaker, hand-kept copy. A doc may say a test enforces a rule without naming it, or name a configuration location like a coverage-threshold file; code may point at a doc section, but a doc must never point at a test identifier. Source: project convention.
+
 ## Document Mode vs Thread Mode
 
 Two distinct modes exist for collaborative knowledge capture. Document mode: a single author produces a coherent, stable artifact that is meant to be read end-to-end. Thread mode: multiple contributors respond to each other incrementally, producing a conversation. Mixing modes produces artifacts that are neither coherent documents nor useful conversations. Choose the mode explicitly before starting. Refactor thread mode into document mode when the conversation has converged. Source: C2 Wiki "DocumentMode" / "ThreadMode".

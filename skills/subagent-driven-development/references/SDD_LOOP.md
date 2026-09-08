@@ -14,8 +14,8 @@ Implementer returns status code
     +-- NEEDS_CONTEXT --> Provide the missing information. Re-dispatch.
     |
     +-- BLOCKED --> Prompt the owner in this turn (execution skill, serious blockers), then invoke `three-amigos` Pivot Assessment (Ceremony 4) to shape the options: CONTINUE/REVISE Acceptance Criteria (AC)/REVISE PLAN/ABANDON.
-                    The verdict shapes the options; it is not authorization to act before the owner answers.
-                    If no Three Amigos available: the prompt is the escalation.
+    |               The verdict shapes the options; it is not authorization to act before the owner answers.
+    |               If no Three Amigos available: the prompt is the escalation.
     |
     +-- PARTIAL --> Read completed/remaining split.
     |                Verify what was completed (build + tests).
@@ -24,6 +24,7 @@ Implementer returns status code
     |
     +-- DONE_WITH_CONCERNS --> Read concerns. Correctness or scope risk: prompt the owner in this turn,
     |                          then invoke `three-amigos` Pivot Assessment (Ceremony 4).
+    |                          The verdict shapes the options; it is not authorization to act before the owner answers.
     |                          Otherwise proceed to canary + Stage 1 review.
     |
     +-- DONE
@@ -59,8 +60,9 @@ Pick up next todo.
 ## Why These Three Gates Exist
 
 - **BLOCKED -> owner prompt -> Ceremony 4:** A blocker is a fork in the feature, not a delay. The owner hears about the fork in their own feature before the agent spends further budget on it; Ceremony 4 then checks for silent scope changes with Business and Tester perspectives.
-- **DONE_WITH_CONCERNS -> owner prompt -> Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. The owner hears about the risk before rework or Ceremony 4 compounds the cost of being wrong.
+- **DONE_WITH_CONCERNS -> owner prompt -> Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. The owner hears about the risk before rework or Ceremony 4 compounds the cost of being wrong. The verdict shapes the options; it is not authorization to act before the owner answers.
 - **After all todos -> Ceremony 5 (Discovery ran) / final code reviewer (Discovery absent):** Merging without Signoff means Business and Tester have not confirmed delivered behavior matches the Feature Specification.
+- **Enforcement is procedural/self-check:** the checkable signal is a transcript showing a BLOCKED or risk-carrying DONE_WITH_CONCERNS result followed by a ceremony dispatch or continued work with no owner prompt in that same turn. No automated detector exists.
 
 ## Quick Reference Flowchart
 
@@ -83,7 +85,7 @@ Task to delegate
          +-- NEEDS_CONTEXT -> provide info, re-dispatch
          +-- BLOCKED -> prompt the owner in this turn, then Pivot Assessment (Ceremony 4); if unavailable, the prompt is the escalation
          +-- PARTIAL -> verify completed, create todos for remaining, proceed to canary + Stage 1
-         +-- DONE_WITH_CONCERNS -> read concerns; correctness/scope risk? -> prompt the owner, then Pivot Assessment (Ceremony 4); else proceed to canary + Stage 1
+         +-- DONE_WITH_CONCERNS -> read concerns; correctness/scope risk? -> prompt the owner, then Pivot Assessment (Ceremony 4; not authorization to act); else proceed to canary + Stage 1
          +-- DONE
               |
               v

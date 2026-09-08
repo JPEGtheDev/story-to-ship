@@ -13,7 +13,8 @@ Implementer returns status code
     |
     +-- NEEDS_CONTEXT --> Provide the missing information. Re-dispatch.
     |
-    +-- BLOCKED --> Prompt the owner in this turn (execution skill, serious blockers), then invoke `three-amigos` Pivot Assessment (Ceremony 4). CONTINUE/REVISE Acceptance Criteria (AC)/REVISE PLAN/ABANDON.
+    +-- BLOCKED --> Prompt the owner in this turn (execution skill, serious blockers), then invoke `three-amigos` Pivot Assessment (Ceremony 4) to shape the options: CONTINUE/REVISE Acceptance Criteria (AC)/REVISE PLAN/ABANDON.
+                    The verdict shapes the options; it is not authorization to act before the owner answers.
                     If no Three Amigos available: the prompt is the escalation.
     |
     +-- PARTIAL --> Read completed/remaining split.

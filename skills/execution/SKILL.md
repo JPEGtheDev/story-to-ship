@@ -57,7 +57,7 @@ This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Wo
 - **Senior-Level Standards:** Diagnose root causes. Refuse temporary workarounds.
 - **Surgical Precision:** Touch only what the task requires. A smaller diff is always better.
 - **Drive to Completion:** Act on what you know. Resolve blockers below the serious line
-  yourself; a serious blocker prompts the owner (Communicating Progress).
+  yourself; a serious blocker prompts the owner (Serious blockers and pivots).
 
 ---
 
@@ -101,15 +101,17 @@ For temporal declaration and attention cost rules, see `references/EXECUTION_PAT
 
 ### Serious blockers and pivots
 
-A blocker or pivot is SERIOUS when it would route to the Pivot Assessment ceremony if a subagent had reported it -- an implementer BLOCKED result, a DONE_WITH_CONCERNS result carrying a correctness or scope risk, or the agent's own diagnosis of the same kind: something the agent cannot clear within the story's scope and existing rulings, or a change of scope, approach, or a prior owner ruling. Anything below that line is handled in the loop and reported at the milestone level as above.
+A blocker or pivot is SERIOUS when it would route to the Pivot Assessment ceremony (see the `three-amigos` skill) if a subagent had reported it -- an implementer BLOCKED result, a DONE_WITH_CONCERNS result carrying a correctness or scope risk, or the agent's own diagnosis of the same kind: something the agent cannot clear within the story's scope and existing rulings, or a change of scope, approach, or a prior owner ruling. Anything below that line is handled in the loop and reported at the milestone level as above.
 
 1. In the turn it is diagnosed, name it and end the turn with a question to the owner.
-2. No ceremony or subagent dispatch for that blocker precedes the question, however the dispatch is characterized. The Iron Law's DELEGATE BEFORE DROWNING does not license a dispatch here -- delegating a blocker is not a substitute for telling the owner about it.
+2. Do not run any ceremony or subagent dispatch for that blocker before the question, however the dispatch is characterized. The Iron Law's DELEGATE BEFORE DROWNING does not license a dispatch here -- delegating a blocker is not a substitute for telling the owner about it.
 3. A Pivot Assessment may still run to shape the options, but it never replaces the prompt, and its verdict is not authorization to act before the owner answers.
-4. While the owner has not answered, every reply leads with the pending blocker before anything else -- including a reply about an unrelated subject.
+4. While the owner has not answered, lead every reply with the pending blocker before anything else -- including a reply about an unrelated subject.
 5. Between the question and the owner's answer, take no action that would resolve or moot the blocker the owner is being asked about -- including by a route not among the options offered. Unrelated work continues.
 
 These rules are keyed to what an action does, not to what it is called: naming a dispatch unrelated, routine, or exploratory does not exempt it if it would resolve or moot the blocker.
+
+**Enforcement is procedural/self-check:** the checkable signal is a transcript showing a diagnosed serious blocker with no question to the owner in that same turn. No automated detector exists.
 
 ### Commit Rhythm
 
@@ -229,6 +231,8 @@ Some decisions belong to the user, not the agent, no matter how strongly the wor
 - **Reserved-by-doc:** Any decision a project document explicitly reserves to the user follows the same rule.
 
 When in doubt, hand off and ask -- do not infer authorization from context.
+
+When the decision surfaces mid-task as a diagnosed blocker rather than a pre-existing reserved category, follow `Serious blockers and pivots` above instead.
 
 **Enforcement is procedural/self-check:** the checkable signal is a transcript showing a reserved action (e.g. `gh pr merge`) executed with no same-turn explicit user instruction naming that action. No automated detector exists.
 

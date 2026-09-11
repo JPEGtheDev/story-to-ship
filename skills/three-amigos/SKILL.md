@@ -1,7 +1,7 @@
 ---
 name: three-amigos
 license: MIT
-description: Use when a feature has new or unclear acceptance criteria, a plan has 2+ todos and Discovery ran, or an implementer signals BLOCKED or DONE_WITH_CONCERNS.
+description: Use when a feature has new or unclear acceptance criteria, a plan has 2+ todos and Discovery ran, or an implementer signals BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk.
 ---
 
 
@@ -25,11 +25,11 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md |
 | 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT |
 | 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED |
-| 4 | BLOCKED or DONE_WITH_CONCERNS (owner prompted first) | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
+| 4 | BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk (owner prompted first) | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
 | 6 | Feature merged and closed | Retrospective | Process improvement items |
 
-For row 4, the owner is prompted in this turn, in the same turn the blocker is diagnosed, before this ceremony runs. This ceremony's verdict is not authorization to act before the owner answers. Full requirement: `execution` skill, "Serious blockers and pivots".
+For row 4 (BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk), the owner is prompted in this turn, in the same turn the blocker is diagnosed, before this ceremony runs. This ceremony's verdict is not authorization to act before the owner answers. Full requirement: `execution` skill, "Serious blockers and pivots".
 
 Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 
@@ -124,7 +124,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 | "Two approved -- majority rules" | Any REJECT blocks. Majority is irrelevant. |
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |
 | "Retrospective is optional" | Process debt accumulates. Expected, not optional. |
-| "Not fully blocked, skip Pivot Assessment" | DONE_WITH_CONCERNS also triggers Pivot Assessment. |
+| "Not fully blocked, skip Pivot Assessment" | A DONE_WITH_CONCERNS result carrying a correctness or scope risk also triggers the owner prompt, then Pivot Assessment. |
 
 ---
 

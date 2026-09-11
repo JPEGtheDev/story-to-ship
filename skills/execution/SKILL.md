@@ -111,7 +111,7 @@ A blocker or pivot is SERIOUS when it would route to the Pivot Assessment ceremo
 
 These rules are keyed to what an action does, not to what it is called: naming a dispatch unrelated, routine, or exploratory does not exempt it if it would resolve or moot the blocker.
 
-**Enforcement is procedural/self-check:** the checkable signal is a transcript showing a diagnosed serious blocker with no question to the owner in that same turn. No automated detector exists.
+**Enforcement is procedural/self-check:** the checkable signal is a transcript showing a diagnosed serious blocker with no question to the owner in that same turn. The postmortem-reviewer template's Blocker-disclosure audit row checks this after the fact; no live detector exists.
 
 ### Commit Rhythm
 

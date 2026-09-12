@@ -62,7 +62,7 @@ Pick up next todo.
 - **BLOCKED -> owner prompt -> Ceremony 4:** A blocker is a fork in the feature, not a delay. The owner hears about the fork in their own feature before the agent spends further budget on it; Ceremony 4 then checks for silent scope changes with Business and Tester perspectives.
 - **DONE_WITH_CONCERNS -> owner prompt -> Ceremony 4:** Correctness or scope risk means delivered work may not match accepted criteria. The owner hears about the risk before rework or Ceremony 4 compounds the cost of being wrong. The verdict shapes the options; it is not authorization to act before the owner answers.
 - **After all todos -> Ceremony 5 (Discovery ran) / final code reviewer (Discovery absent):** Merging without Signoff means Business and Tester have not confirmed delivered behavior matches the Feature Specification.
-- **Enforcement is procedural/self-check:** the checkable signal is a transcript showing a BLOCKED or risk-carrying DONE_WITH_CONCERNS result followed by a ceremony dispatch or continued work with no owner prompt in that same turn. No automated detector exists.
+- **Enforcement is procedural/self-check:** the checkable signal is a transcript showing a BLOCKED or risk-carrying DONE_WITH_CONCERNS result followed by a ceremony dispatch or continued work with no owner prompt in that same turn. The postmortem-reviewer template's Blocker-disclosure audit row checks this after the fact; no live detector exists.
 
 ## Quick Reference Flowchart
 

@@ -108,9 +108,9 @@ After all three Discovery amigos return:
 
 ## Ceremony 4: Pivot Assessment
 
-**Trigger:** Implementer signals BLOCKED or DONE_WITH_CONCERNS; the owner is prompted first, in the diagnosing turn, before this ceremony runs -- the ceremony shapes the options, it does not replace the prompt.  
+**Trigger:** Implementer signals BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk; the owner is prompted first, in the diagnosing turn, before this ceremony runs -- the ceremony shapes the options, it does not replace the prompt.  
 **Output:** CONTINUE / REVISE AC / REVISE PLAN / ABANDON per amigo. This verdict is not authorization to act before the owner answers.  
-**Required:** Trigger-based -- fires on any BLOCKED or DONE_WITH_CONCERNS signal, after the owner prompt.
+**Required:** Trigger-based -- fires on any BLOCKED signal, and on a DONE_WITH_CONCERNS signal carrying a correctness or scope risk, after the owner prompt.
 
 ### Read First
 

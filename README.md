@@ -139,6 +139,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `postmortem-reviewer` | Session retrospective analysis |
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
+| `rehearsal-subject` | Coordinator under test in a behavioral rehearsal of skill or agent text |
 | `summarization-method` | One of three parallel summarization methods (Abstractive, Extractive, or SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |
@@ -148,7 +149,7 @@ without an OpenCode equivalent remain Claude Code-only.
 
 Installing this plugin adds:
 - 35 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
-- 16 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
+- 17 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.

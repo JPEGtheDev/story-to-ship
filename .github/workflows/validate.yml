@@ -140,6 +140,7 @@ jobs:
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
           check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit" "Blocker-disclosure audit"
           check agents/architecture-reviewer.md "git -C {{WORKTREE_PATH}} rev-parse --show-toplevel" "{{DIFF_OR_EMPTY}}" "VERDICT: APPROVE | REQUEST CHANGES"
+          check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/execution/SKILL.md "## Canary"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
           check skills/honesty/SKILL.md "buried caveat"

@@ -47,3 +47,17 @@ This table is the single source of truth for agent and ceremony tiers. Skills an
 **Concurrency:** Verify your account's agent concurrency limit before dispatching parallel agents. See `dispatching-parallel-agents` skill for concurrency rules.
 
 **For parallel read-only research:** Use `dispatching-parallel-agents` skill.
+
+## General-purpose dispatch
+
+The general-purpose agent has no template file and no frontmatter model pin: it inherits the
+dispatcher's model. Dispatch it only when no template in `agents/` plays the role, and state in
+the dispatch message, before the call: (1) the closest template considered and why it does not
+fit, (2) the tier from the table above with its reasoning. Pass `model` explicitly on the call.
+Roles with no template today: an agent that must BE a modified reviewer prompt (a template A/B
+run), and independent raters.
+
+**Enforcement is procedural/self-check:** the checkable signal is a general-purpose dispatch with
+no template-considered sentence, no tier reasoning, or no explicit `model` in the call. The
+postmortem-reviewer template's Dispatch-routing audit row checks this after the fact; no live
+detector exists.

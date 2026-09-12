@@ -332,6 +332,11 @@ jobs:
           python3 -m unittest discover -s tools/evaluation_evidence_gate -p 'test_*.py'
           echo "[+] evaluation-evidence gate unit tests pass"
 
+      - name: Run session-events converter unit tests
+        run: |
+          python3 -m unittest discover -s tools/session_events -p 'test_*.py'
+          echo "[+] session-events converter unit tests pass"
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:

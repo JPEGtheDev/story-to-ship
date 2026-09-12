@@ -126,10 +126,11 @@ The Speed of Trust names 13 behaviors of high-trust actors. This repo practices 
 
 ## Session-fact queries
 
-A claim about what ran in this session -- which model produced a message, which agent type was
-dispatched at which tier (the model passed to the dispatch), who authored or merged a PR -- is answered by a field in the session
-transcript or by `gh`, never by recall. `$T` is the session JSON Lines (JSONL) file path
-(`~/.claude/projects/<project>/<session-id>.jsonl`).
+A claim about what ran in this session -- which model produced a message, which tool was called,
+which agent type was dispatched at which tier (the model passed to the dispatch), how many
+dispatches ran, when a message was sent, who authored or merged a PR -- is answered by a field in
+the session transcript or by `gh`, never by recall. `$T` is the session JSON Lines (JSONL) file
+path (`~/.claude/projects/<project>/<session-id>.jsonl`).
 
 Assistant messages by model:
 
@@ -137,10 +138,25 @@ Assistant messages by model:
 jq -r 'select(.type=="assistant") | .message.model' "$T" | sort | uniq -c
 ```
 
+Tool calls by tool name:
+
+```bash
+jq -r 'select(.type=="assistant") | .message.content[]? | select(.type=="tool_use") | .name' "$T" | sort | uniq -c
+```
+
 Every Agent dispatch with its agent type and the model passed (`inherit` when none was passed):
 
 ```bash
 jq -r 'select(.type=="assistant") | .timestamp as $t | .message.content[]? | select(.type=="tool_use" and .name=="Agent") | "\($t) \(.input.subagent_type // "general-purpose") model=\(.input.model // "inherit")"' "$T"
+```
+
+The dispatch count is that command's line count (append `| wc -l`); the timestamp of a dispatch is
+the `.timestamp` field, which that command prints as the first token of each line.
+
+Any assistant message with its timestamp and model:
+
+```bash
+jq -r 'select(.type=="assistant") | "\(.timestamp) \(.message.model)"' "$T"
 ```
 
 PR author and merger:
@@ -152,7 +168,7 @@ gh pr view <number> --json author,mergedBy --jq '"author=\(.author.login) merged
 Quote the field the query returns; do not paraphrase it. A message whose model is the literal
 `<synthetic>` is harness-generated, not a model turn.
 
-(All three commands were run against a real session on 2026-09-12 and returned data; do not alter
+(All five commands were run against a real session on 2026-09-12 and returned data; do not alter
 the jq expressions.)
 
 ## Quick Reference

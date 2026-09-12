@@ -138,7 +138,7 @@ jobs:
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
-          check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit" "Blocker-disclosure audit" "Dispatch-routing audit"
+          check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit" "Blocker-disclosure audit" "Dispatch-routing audit" "Correction-source audit" "Correction-source itemization"
           check agents/architecture-reviewer.md "git -C {{WORKTREE_PATH}} rev-parse --show-toplevel" "{{DIFF_OR_EMPTY}}" "VERDICT: APPROVE | REQUEST CHANGES"
           check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/execution/SKILL.md "## Canary"

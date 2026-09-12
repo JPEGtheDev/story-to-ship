@@ -54,9 +54,9 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 | Read-only research across 3+ files -- patterns, symbols, hypotheses | `explore` | `general-purpose` |
 | Skill review (skill `.md` files) | `skill-reviewer` | `general-purpose` |
 | Code review (code/config files) | `code-quality-reviewer` | `general-purpose` |
-| Multi-step implementation with file modifications | `general-purpose` + worktree | `explore` |
+| Multi-step implementation with file modifications | `implementer` + worktree | `explore` or `general-purpose` |
 | Build, test, or lint execution -- success/failure result only | `task` | `general-purpose` |
-| Any read-only + write combination | Separate explore and general-purpose agents | One general-purpose for everything |
+| Any read-only + write combination | Separate explore and implementer agents | One general-purpose for everything |
 
 **Routing rule:** Use the most constrained agent type that can complete the job. `general-purpose` can do everything -- which means it accumulates context, produces serial output, and contaminates findings with session assumptions for work that a constrained agent would complete faster and cleaner.
 

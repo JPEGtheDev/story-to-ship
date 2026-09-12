@@ -41,8 +41,8 @@ Before dispatching any subagent:
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
-4. If a pre-built template exists in `.claude/agents/` for this task type: use it instead of injecting rules inline. Available templates: `implementer.md`, `skeptic.md`, `plan-reviewer.md`, `spec-compliance-reviewer.md`, `code-quality-reviewer.md`, `skill-reviewer.md`, `researcher.md`, `postmortem-reviewer.md`, `explorer.md`, `infrastructure-reviewer.md`, `architecture-reviewer.md`.
-5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), general-purpose+worktree for file modifications, task for build/test/lint.
+4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
+5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), `implementer.md`+worktree for file modifications, task for build/test/lint.
 
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
@@ -88,6 +88,7 @@ These thoughts mean stop immediately:
 | "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
 | "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
 | "Launching a spend-bearing child (claude -p, a workflow run) under a prior 'go'" | STOP. Consent is per invocation -- a prior approval covers neither retries nor new launches. Write the script; the user pulls the trigger. |
+| "Dispatching general-purpose without naming the template considered and passing `model`" | STOP. It inherits your model. Name the template that does not fit, state the tier reasoning, and pass `model` explicitly (`references/MODEL_SELECTION.md`). |
 
 ---
 
@@ -102,7 +103,7 @@ These thoughts mean stop immediately:
 | Code review (per-file) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- 1 per file |
 | Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
-| Multi-file implementation with file isolation | Yes | general-purpose + git worktree |
+| Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
 | Reading one known file | No | do inline |

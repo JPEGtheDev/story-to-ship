@@ -35,6 +35,7 @@ Tier assignments for named agents and ceremonies, listed here so the full mappin
 | Three Amigos Ceremony 2 (Refinement) | Standard | Gate decision: APPROVE / CONDITIONS / REJECT |
 | Three Amigos Ceremony 4 (Pivot Assessment) | Standard | Gate decision on scope and correctness risk |
 | Three Amigos Ceremony 5 (Signoff) | Standard | Pre-merge acceptance decision |
+| rehearsal-subject template (coordinator under test) | Standard | Plays the coordinator in a behavioral rehearsal of skill text; the behavior under test is Standard-tier behavior, and a Premium subject would measure the wrong tier |
 
 This table is the single source of truth for agent and ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs in prose; agent template frontmatter model fields implement these assignments and MUST stay consistent with this table.
 
@@ -47,3 +48,20 @@ This table is the single source of truth for agent and ceremony tiers. Skills an
 **Concurrency:** Verify your account's agent concurrency limit before dispatching parallel agents. See `dispatching-parallel-agents` skill for concurrency rules.
 
 **For parallel read-only research:** Use `dispatching-parallel-agents` skill.
+
+## General-purpose dispatch
+
+The general-purpose agent has no template file and no frontmatter model pin: it inherits the
+dispatcher's model, so an unstated tier silently carries the dispatcher's tier onto work
+the table above assigns elsewhere. Dispatch it only when no template in `.claude/agents/`
+plays the role, and state in the dispatch message, before the call: (1) the closest template
+considered and why it does not fit, (2) the tier from the table above with its reasoning. Pass
+`model` explicitly on the call. Roles with no template today: an agent that must BE a modified
+reviewer prompt (a template A/B run), and independent raters. The coordinator-under-test
+role uses `.claude/agents/rehearsal-subject.md`; its dispatch prompt names the inputs only
+and never the behavior under test.
+
+**Enforcement is procedural/self-check:** the checkable signal is a general-purpose dispatch with
+no template-considered sentence, no tier reasoning, or no explicit `model` in the call. The
+postmortem-reviewer template's Dispatch-routing audit row checks this after the fact; no live
+detector exists.

@@ -138,8 +138,9 @@ jobs:
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
-          check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit" "Blocker-disclosure audit"
+          check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Intent-canary audit" "Buried-caveat audit" "Blocker-disclosure audit" "Dispatch-routing audit"
           check agents/architecture-reviewer.md "git -C {{WORKTREE_PATH}} rev-parse --show-toplevel" "{{DIFF_OR_EMPTY}}" "VERDICT: APPROVE | REQUEST CHANGES"
+          check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/execution/SKILL.md "## Canary"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
           check skills/honesty/SKILL.md "buried caveat"
@@ -157,6 +158,42 @@ jobs:
             exit 1
           fi
           echo "[+] All agent template contracts present"
+
+      - name: Check agent templates index matches agents/
+        run: |
+          set -e
+          # IDX_PATH/AGENTS_DIR overrides exist only so the gate-can-fail proofs can
+          # point this step at temp copies; CI never sets them.
+          idx="${IDX_PATH:-skills/subagent-driven-development/references/AGENT_TEMPLATES.md}"
+          agents_dir="${AGENTS_DIR:-agents}"
+          missing=0
+          for f in "$agents_dir"/*.md; do
+            fm=$(sed -n '2,/^---$/p' "$f")
+            desc=$(printf '%s\n' "$fm" | grep '^description: ' | sed 's/^description: //')
+            model=$(printf '%s\n' "$fm" | grep '^model: ' | sed 's/^model: //')
+            if printf '%s' "$desc" | grep -qF '|'; then
+              printf 'FAILED: %s description contains a pipe, which breaks the index table row\n' "$f"
+              missing=$((missing + 1))
+              continue
+            fi
+            row="| \`$(basename "$f")\` | $desc | $model |"
+            if ! grep -qF -- "$row" "$idx"; then
+              printf 'FAILED: index missing or stale row for %s\n' "$f"
+              missing=$((missing + 1))
+            fi
+          done
+          while IFS= read -r line; do
+            file=$(printf '%s\n' "$line" | sed -n 's/^| `\([^`]*\)`.*/\1/p')
+            if [ -n "$file" ] && [ ! -f "$agents_dir/$file" ]; then
+              printf 'FAILED: index lists %s which does not exist in agents/\n' "$file"
+              missing=$((missing + 1))
+            fi
+          done < <(grep '^| `' "$idx")
+          if [ "$missing" -gt 0 ]; then
+            printf 'Found %s issue(s) in the agent templates index\n' "$missing"
+            exit 1
+          fi
+          echo "[+] agent templates index matches agents/"
 
       # This 20,000-character cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for skills/honesty/SKILL.md

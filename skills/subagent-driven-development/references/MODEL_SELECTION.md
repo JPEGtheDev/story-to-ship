@@ -75,9 +75,10 @@ The coordinator runs at the tier the stored model preference names (the same sou
 list at the top of this file checks first). Moving coordination to a different tier, in either
 direction, requires one full multi-todo session at the candidate tier scoring at or under the
 threshold on the postmortem-reviewer template's Correction-source audit row: the ratio
-externally-caught / (self-caught + externally-caught). The threshold is 0.25 unless a stored
-preference for this threshold sets another value. The postmortem of each scored session records the
-session id, the coordinator model, and the two counts; that record is the evidence for the move.
+externally-caught / (self-caught + externally-caught). The threshold is 0.75, the ratio the Standard
+tier scored on its own multi-todo session, unless a stored preference for this threshold sets
+another value. The postmortem of each scored session records the session id, the coordinator model,
+and the two counts; that record is the evidence for the move.
 
 **Enforcement is procedural/self-check:** the checkable signal is a multi-todo session whose
 transcript model field (the per-message model value on assistant messages) is a tier with no

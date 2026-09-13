@@ -42,7 +42,7 @@ Before dispatching any subagent:
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
-5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), `implementer.md`+worktree for file modifications, task for build/test/lint.
+5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
 
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching

@@ -54,17 +54,46 @@ For every comment, before responding:
 2. **Reproduce the concern** -- can you see what they see? If not, ask a clarifying question before defending
 3. **Categorize it honestly:**
 
+For a comment from the user, the action in every row below is proposed on the thread,
+not applied, in that turn (User Review Comments below).
+
 | Category | Action |
 |----------|--------|
 | Correct -- I missed this | Acknowledge, fix, thank them specifically for the catch |
 | Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
 | I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
 | Inquiry -- reviewer asks "why did X change?" | An inquiry wants the rationale, not a change. Answer on the thread with the reasoning and the evidence that drove the decision (cite the source file, rule, or data). Modify code only if writing the answer reveals the rationale was wrong. Distinct from "I don't understand" below: there the REVIEWER's comment is unclear to you; here the reviewer is asking for YOUR rationale. |
-| Bug report phrased as a question (e.g. "why is this not null-checked?") | Not an inquiry -- a change request wearing a question mark. The test is what the reviewer wants: rationale (inquiry) or a code change (bug report), not whether the comment contains the word "why". Categorize and fix like any other correctness finding. |
+| Bug report phrased as a question (e.g. "why is this not null-checked?") | Not an inquiry -- a change request wearing a question mark. The test is what the reviewer wants: rationale (inquiry) or a code change (bug report), not whether the comment contains the word "why". Categorize and fix like any other correctness finding. For the user's comments, see User Review Comments below: the fix is proposed, not applied, in that turn. |
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
 
 **When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content genuinely belongs here, first determine whether the file's scope is correctly stated before deciding to relocate.
+
+### User Review Comments: Propose, Then Stop
+
+**Context:** A review comment from the user on the agent's own PR, whether phrased as a question or
+as a statement.
+
+**Forces:** The category table above routes a comment that identifies a defect to an immediate
+fix. A fix committed in the same turn removes the user's chance to weigh in on the direction,
+and it hides any comment the agent disagrees with behind a diff. The communication skill already
+treats a why-question as a request for rationale, not a change; the user's declarative comments
+deserve the same pause.
+
+Rules:
+- Reply on each thread with the check that was run, whether the comment identifies a problem, and
+  the concrete change proposed -- or the reason no change is proposed.
+- End the turn with those replies. No fix commit and no implementer dispatch (handing the fix to a
+  subagent) for the fix in that turn.
+- The fix lands after the user answers, and is then addressed per the Definition of "Addressed"
+  below.
+- Comments from anyone other than the user keep the category table above.
+
+**Consequences:** A confirmed defect stays unfixed until the user replies; the rule trades that
+latency for the user's chance to redirect before a diff exists.
+
+**Enforcement is procedural/self-check:** the checkable signal is a fix commit or an implementer
+dispatch in the same turn as the reply to a user review comment. No live detector exists.
 
 ---
 
@@ -92,6 +121,9 @@ For must-fix comments, "addressed" requires two things:
 
 For comments resolved without a code change -- an inquiry answered with rationale, a disagreement stated with reasoning, or a valid-but-deferred item -- "addressed" means the complete PR thread reply, plus the tracking issue link for deferrals. Do not make a code edit just to close a comment; an unnecessary edit dodges the question the reviewer actually asked.
 
+For the user's comments, the deliverable of the reply turn is the per-thread proposal
+(User Review Comments above); the commit and the closing reply follow the user's answer.
+
 Declaring a comment "addressed" before the applicable requirements are complete is an Iron Law violation.
 
 ---
@@ -108,7 +140,8 @@ Not all review comments carry equal weight. Before acting:
 | Low | Preference that differs from documented standards |
 | Noise | Vague comment with no specific claim ("this seems off") |
 
-For **high signal** comments: address them in this PR before merge. No exceptions.
+For **high signal** comments: address them in this PR before merge. No exceptions; a user's
+comment is still proposed first (User Review Comments above).
 For **medium signal**: follow documented standards. If standards conflict, escalate.
 For **low signal / noise**: ask for specifics. If no specifics come, treat as resolved.
 
@@ -149,6 +182,9 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 - Closing a comment without addressing it or explicitly deferring it with a tracking issue
 - Treating approval as permission to skip the fix list
 - Implementing a fix without re-running tests
+- User review comment read, and a fix commit or an implementer dispatch is about to land in this
+  same turn -- **STOP. Reply with the check, the assessment, and the proposal; end the turn; fix
+  after the user answers.**
 
 ---
 
@@ -163,4 +199,5 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "The reviewer doesn't understand the full context" | Context is your job to provide. If the reviewer is confused, add context -- do not dismiss the feedback. |
 | "I'll expand the scope to cover it" | Maybe the scope genuinely needs expanding. But if the content is out of scope, expanding the scope statement to justify keeping it creates ambiguity. Determine whether the content is truly in scope first. If it is not: remove it and relocate it. |
 | "The reviewer asked why -- I need to change something" | A why-question is a request for rationale, not a change request. Answering with a defensive edit or revert destroys correct work and dodges the actual question. Reply with the reasoning and evidence; edit only if the rationale fails re-examination. |
+| "The comment names a real defect, so fixing it now is the responsive thing" | The user's comment opens a discussion; a same-turn commit closes it before the user has spoken and hides disagreement behind a diff. Reply with the check, the assessment, and the proposal; end the turn; fix after the answer. |
 **Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

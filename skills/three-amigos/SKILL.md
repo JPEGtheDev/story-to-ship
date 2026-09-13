@@ -29,7 +29,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 5 | All todos done, pre-merge | Signoff | ACCEPTED / REVISIONS NEEDED |
 | 6 | Feature merged and closed | Retrospective | Process improvement items |
 
-For row 4 (BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk), the owner is prompted in this turn, in the same turn the blocker is diagnosed, before this ceremony runs. This ceremony's verdict is not authorization to act before the owner answers. Full requirement: `execution` skill, "Serious blockers and pivots".
+For row 4 (BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk -- it affects behavior, API surface, or stated requirements), the owner is prompted in this turn, in the same turn the blocker is diagnosed, before this ceremony runs. This ceremony's verdict is not authorization to act before the owner answers. Full requirement: `execution` skill, "Serious blockers and pivots".
 
 Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 

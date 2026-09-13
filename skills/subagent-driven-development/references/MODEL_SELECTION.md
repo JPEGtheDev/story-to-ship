@@ -65,3 +65,21 @@ and never the behavior under test.
 no template-considered sentence, no tier reasoning, or no explicit `model` in the call. The
 postmortem-reviewer template's Dispatch-routing audit row checks this after the fact; no live
 detector exists.
+
+## Coordinator tier
+
+This section is a separate axis from the tier table above, which governs dispatched subagents. It
+governs the tier of the main agent coordinating a multi-todo plan.
+
+The coordinator runs at the tier the stored model preference names (the same source the priority
+list at the top of this file checks first). Moving coordination to a different tier, in either
+direction, requires one full multi-todo session at the candidate tier scoring at or under the
+threshold on the postmortem-reviewer template's Correction-source audit row: the ratio
+externally-caught / (self-caught + externally-caught). The threshold is 0.25 unless a stored
+preference for this threshold sets another value. The postmortem of each scored session records the
+session id, the coordinator model, and the two counts; that record is the evidence for the move.
+
+**Enforcement is procedural/self-check:** the checkable signal is a multi-todo session whose
+transcript model field (the per-message model value on assistant messages) is a tier with no
+recorded passing session; the Correction-source audit row produces the score after the fact. No
+live detector exists.

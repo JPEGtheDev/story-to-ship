@@ -15,7 +15,7 @@ behind the confidence vocabulary and trust rules.
 
 | File | Covers |
 |------|--------|
-| `HONESTY_PRINCIPLES.md` | Trust rationale, Show Your Work, Trust Ledger, Show Loyalty, and the honesty quick reference. |
+| `HONESTY_PRINCIPLES.md` | Trust rationale, Show Your Work, Trust Ledger, Show Loyalty, Session-fact queries, and the honesty quick reference. |
 
 ## Related
 

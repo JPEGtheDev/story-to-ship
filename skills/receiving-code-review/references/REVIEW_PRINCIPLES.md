@@ -4,6 +4,17 @@ Source: Ward Cunningham's C2 wiki audit -- principles for giving and receiving c
 
 ---
 
+## The Core Problem
+
+Code review feedback is often treated as a bureaucratic step rather than a signal. The two failure modes are:
+
+1. **Performative agreement** -- saying "good point, fixed!" without engaging with the substance
+2. **Defensive rejection** -- dismissing feedback without genuinely considering whether it is correct
+
+Both erode trust. The first produces code that hasn't actually improved. The second produces friction that makes reviewers stop giving honest feedback.
+
+---
+
 ## Egoless Programming
 
 Code review works when authors treat their code as an independent object -- not an extension of themselves. When identity is fused with code, criticism of the code registers as criticism of the person, and defensiveness blocks signal.
@@ -55,6 +66,6 @@ The test: could this comment appear in a review of anonymous code? If not, rewri
 ## Related Skills
 
 - `receiving-code-review` -- processing review feedback without performative agreement
-- `requesting-code-review` -- targeted review requests, SHA-based dispatch, agent pre-review
+- `requesting-code-review` -- targeted review requests, commit-hash-based dispatch, agent pre-review
 - `self-evaluation` -- structural objectivity mechanisms to bypass the self-evaluation block
 - `execution` -- commit rhythm and work loop; review is a gate before committing

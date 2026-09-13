@@ -8,7 +8,7 @@ description: Use when receiving code review feedback on a PR or code change.
 ## Iron Law
 
 ```
-EVERY COMMENT GETS A GENUINE RESPONSE. YOU MUST CATEGORIZE AND ADDRESS EVERY COMMENT. "LGTM THANKS" IS NOT A RESPONSE.
+EVERY COMMENT GETS A GENUINE RESPONSE. YOU MUST CATEGORIZE AND ADDRESS EVERY COMMENT. "LGTM (LOOKS GOOD TO ME) THANKS" IS NOT A RESPONSE.
 No exceptions.
 ```
 
@@ -32,17 +32,6 @@ Each new round of PR review comments requires a fresh skill invocation. A load f
 
 [+] All met -> proceed to address comments
 [-] Any unmet -> complete the triage and reload the skill for the current review round before taking action
-
----
-
-## The Core Problem
-
-Code review feedback is often treated as a bureaucratic step rather than a signal. The two failure modes are:
-
-1. **Performative agreement** -- saying "good point, fixed!" without engaging with the substance
-2. **Defensive rejection** -- dismissing feedback without genuinely considering whether it is correct
-
-Both erode trust. The first produces code that hasn't actually improved. The second produces friction that makes reviewers stop giving honest feedback.
 
 ---
 
@@ -162,15 +151,9 @@ When you genuinely believe a reviewer is wrong:
 
 ## Right Wrongs in Review
 
-If a reviewer finds something you missed that you were responsible for catching:
-
-```
-1. ACKNOWLEDGE: "This is correct -- I missed it."
-2. FIX: Make the change.
-3. DO NOT MINIMIZE: Do not frame the reviewer's finding as a preference if it is a defect.
-```
-
-The Right Wrongs protocol from the `execution` skill applies here directly. A reviewer finding a real bug is the same as discovering a mistake yourself -- it must be acknowledged cleanly, not glossed over.
+A reviewer finding a real defect is the same as discovering the mistake yourself: apply the Right
+Wrongs protocol from the `execution` skill. DO NOT MINIMIZE -- never frame the reviewer's finding as a
+preference if it is a defect.
 
 ---
 
@@ -200,4 +183,4 @@ The Right Wrongs protocol from the `execution` skill applies here directly. A re
 | "I'll expand the scope to cover it" | Maybe the scope genuinely needs expanding. But if the content is out of scope, expanding the scope statement to justify keeping it creates ambiguity. Determine whether the content is truly in scope first. If it is not: remove it and relocate it. |
 | "The reviewer asked why -- I need to change something" | A why-question is a request for rationale, not a change request. Answering with a defensive edit or revert destroys correct work and dodges the actual question. Reply with the reasoning and evidence; edit only if the rationale fails re-examination. |
 | "The comment names a real defect, so fixing it now is the responsive thing" | The user's comment opens a discussion; a same-turn commit closes it before the user has spoken and hides disagreement behind a diff. Reply with the check, the assessment, and the proposal; end the turn; fix after the answer. |
-**Review principles (EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`
+**Review principles (The Core Problem, EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`

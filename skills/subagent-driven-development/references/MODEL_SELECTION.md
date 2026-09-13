@@ -68,18 +68,16 @@ detector exists.
 
 ## Coordinator tier
 
-This section is a separate axis from the tier table above, which governs dispatched subagents.
-The coordinator is named by its specific model rather than by tier class: as of this writing the
-candidates are Fable (the top class above Opus), Opus (Premium), and Sonnet (Standard).
+This section is a separate axis from the tier table above, which governs dispatched subagents. It
+governs the tier of the main agent coordinating a multi-todo plan.
 
-The main agent coordinating a multi-todo plan runs at the tier the owner has set. The owner's
-stored memory names the current coordinator model; as of 2026-09-11 it is Fable, after the owner
-moved coordination from Opus back to Fable on that date. Moving coordination to another tier, in
-either direction (Fable -> Opus, Opus -> Sonnet, or back), requires one full multi-todo session at
-the candidate tier scoring at or under the owner-set threshold on the postmortem-reviewer
-template's Correction-source audit row: the ratio externally-caught / (self-caught +
-externally-caught) at or under 0.25 (owner-set 2026-09-12). Each scored session is recorded in the
-owner's memory with the session id, the coordinator model, and the two counts.
+The coordinator runs at the tier the stored model preference names (the same source the priority
+list at the top of this file checks first). Moving coordination to a different tier, in either
+direction, requires one full multi-todo session at the candidate tier scoring at or under the
+threshold on the postmortem-reviewer template's Correction-source audit row: the ratio
+externally-caught / (self-caught + externally-caught). The threshold is 0.25 unless a stored
+preference for this threshold sets another value. The postmortem of each scored session records the
+session id, the coordinator model, and the two counts; that record is the evidence for the move.
 
 **Enforcement is procedural/self-check:** the checkable signal is a multi-todo session whose
 transcript model field (the per-message model value on assistant messages) is a tier with no

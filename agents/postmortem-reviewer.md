@@ -125,7 +125,7 @@ For every claim in that candidate set, classify it into exactly one of these thr
 
 Report this as TRIAGE, not as a defect tally: report precision = (evidence-absent count) / (total flagged). Counts of flagged claims are NOT defect counts until precision is measured.
 
-Do NOT add or apply a compaction-specific mechanism -- the compaction-as-driver hypothesis (C3) was REFUTED; treat post-compaction instances by the same rubric, not a special case.
+Do NOT add or apply a compaction-specific mechanism -- the compaction-as-driver hypothesis was REFUTED; treat post-compaction instances by the same rubric, not a special case.
 
 ---
 

@@ -5,29 +5,28 @@ description: Use when delegating implementation tasks, confirming theories, runn
 ---
 
 
-## Iron Laws
+## Iron Law
 
 ```
 YOU MUST DISPATCH BEFORE GUESSING -- SUBAGENTS ARE CHEAP, WRONG ASSUMPTIONS ARE EXPENSIVE.
-YOU MUST DISPATCH REVIEWERS AFTER EVERY TODO -- SPEC COMPLIANCE FIRST, THEN CODE QUALITY.
 No exceptions.
 ```
 
-Violating the letter of these rules is violating the spirit of these rules.
+Violating the letter of this rule is violating the spirit of this rule.
 
-**Announce at start:** "I am using the subagent-driven-development skill to [dispatch/review/confirm] [brief description]."
+**Announce at start:** "I am using the subagent-driven-development skill to [dispatch/confirm] [brief description]."
 
 ---
 
 ## Workflow
 
-Pick up todo -> Dispatch implementer -> Handle status code -> Stage 1 spec review -> Stage 2 quality review -> Mark done.
+Pick up todo -> Dispatch implementer -> Load `two-stage-review` for the status code and both review stages -> Mark done.
 
-**Status code branches:** See `## Implementer Status Codes` below for all five codes and their required actions.
+**Status code branches:** See the `two-stage-review` skill for all five codes and their required actions.
 
 **After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
-**Do not advance past any todo until both Stage 1 and Stage 2 are PASS/APPROVE.**
+**Do not advance past any todo until both Stage 1 (spec review) and Stage 2 (quality review) are PASS/APPROVE -- both are run under the `two-stage-review` skill.**
 
 See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow.
 
@@ -42,7 +41,7 @@ Before dispatching any subagent:
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
-5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the file-type rule below), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
+5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the `two-stage-review` skill), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
 
 [+] All 5 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
@@ -77,18 +76,16 @@ These thoughts mean stop immediately:
 | "Dispatching a file-modifying agent without creating a worktree first" | STOP. Create the worktree and load `using-git-worktrees` before dispatch. |
 | "About to create a worktree without `using-git-worktrees` loaded" | STOP. Load `using-git-worktrees` first -- every time, without exception. The session-bootstrap On Start table maps "Parallel agent work / A/B testing" to this skill. Creating worktrees without it is a retroactive-load violation. |
 | "A template exists but I'll build the prompt manually" | STOP. Use the pre-built template from `.claude/agents/`. Do not reinvent it. |
-| "About to relay a skeptic or reviewer verdict to the user" | STOP. State the base branch of the worktree that agent ran in. If the base is not `main` (or the user-approved feature branch), flag it explicitly: any finding about absent files or missing features may be a stale-branch artifact, not an actual gap. |
 | "About to investigate a runtime behavior bug by reading source code inline" | STOP. Dispatch a researcher agent. "Build + observe" is a required method for runtime behavior bug hypotheses (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1). Inline code reading produces a theory, not an observation artifact. |
 | "These two todos form a 'Phase N' -- I'll dispatch them together" | STOP. Phase is a planning concept, not a dispatch unit. Bundling todos as a phase bypasses the one-clear-objective gate (BEFORE PROCEEDING item 1). Split unconditionally before dispatch. |
 | "Dispatching a post-merge verification agent to check files" | STOP. Provide explicit paths from the MAIN repo root (e.g. `[REPO_ROOT]/skills/...`) in the agent prompt. Without explicit paths, agents discover worktree copies and produce false REJECT verdicts on changes that are correctly merged. |
-| "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
 | "Reporting the number of files changed on a branch (`git diff base..HEAD --name-only \| wc -l`)" | STOP. First inspect `git log --oneline base..HEAD`. If any commits appear to predate this feature's work (PR-numbered commits, prior-session commits), identify the correct base before running the count. Presenting a count from an unverified range is a confidence-without-evidence claim. |
 | "Writing a task that targets a specific line in a file" | STOP. Read the full file and grep for all instances of the pattern before writing the task scope. A task scoped to one line that misses two others creates an incomplete implementer dispatch that the Skeptic catches at extra cost. |
 | "I broadened a section's intro or heading to a wider scope" | STOP. Re-read every child item under that section for narrower-scope language before committing. A widened heading over unchanged child items creates a contradiction the next reader inherits. |
-| "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
 | "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
 | "Launching a spend-bearing child (claude -p, a workflow run) under a prior 'go'" | STOP. Consent is per invocation -- a prior approval covers neither retries nor new launches. Write the script; the user pulls the trigger. |
 | "Dispatching general-purpose without naming the template considered and passing `model`" | STOP. It inherits your model. Name the template that does not fit, state the tier reasoning, and pass `model` explicitly (`references/MODEL_SELECTION.md`). |
+| "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and both review stages live there. |
 
 ---
 
@@ -111,54 +108,6 @@ These thoughts mean stop immediately:
 
 ---
 
-## Implementer Status Codes
-
-Every subagent doing implementation work must report one of these five codes. Require it in every implementer prompt. Do not accept a response that does not include one.
-
-| Code | Meaning | Your response |
-|------|---------|---------------|
-| `DONE` | Task complete, all verification passed, no concerns | Proceed to Stage 1 review |
-| `DONE_WITH_CONCERNS` | Complete but flagged issues for dispatcher review | Read concerns. Correctness or scope risk: prompt the owner in this turn, then Pivot Assessment (Ceremony 4). Otherwise canary + Stage 1; the verdict is not authorization to act. |
-| `PARTIAL` | Partially complete -- some items done and verified, rest not done | Verify completed portion. Create new todo(s) for remaining work. Proceed to Stage 1 for completed portion only. |
-| `NEEDS_CONTEXT` | Cannot proceed -- specific missing information listed | Provide the missing information. Re-dispatch. |
-| `BLOCKED` | Cannot proceed -- external dependency or environment issue described | Prompt the owner in this turn (execution skill, serious blockers), then Pivot Assessment (Ceremony 4); if the ceremony is unavailable the prompt is the escalation. |
-
----
-
-## 2-Stage Review Protocol
-
-Every completed implementation task requires two reviews in this order. This is mandatory -- not optional -- after every single todo.
-
-```
-Stage 1: Spec Compliance Review     <- ALWAYS FIRST (spec-compliance-reviewer.md)
-Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer.md or code-quality-reviewer.md -- see Stage 2 below)
-```
-
-**Canary confirmation (before Stage 1):** Before proceeding to Stage 1 from any implementer result (DONE, DONE_WITH_CONCERNS, or PARTIAL), state: `Canary confirmed: [paste the Worktree: line from implementer output]`. If the canary line is absent from the implementer's output, the implementer did not follow BEFORE PROCEEDING -- require skill reload and resubmit before dispatching Stage 1.
-
-**Limitations-field check (before Stage 1):** The implementer output contract requires a `Limitations:` field. If the implementer result contains no `Limitations:` line, the result is incomplete -- resubmit for it before dispatching Stage 1. DO NOT infer "no limitations" from its absence: absence means the contract was not followed, not that there were none.
-
-**Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-
-**Re-review required for review-covered territory:** The GAPS/REQUEST CHANGES re-run rules above are one instance of a general rule: any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances. A prior PASS/APPROVE does not extend to the new change, even one the agent itself initiates. The sole exemption is an explicit user waiver given in the same turn -- not an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial or already covered. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch visible in the transcript is the checkable signal; no automated detector exists.
-
-**Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
-
-**Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
-
-**Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files -- one agent per file changed. If REQUEST CHANGES: implementer fixes, Stage 2 re-runs before proceeding. When dispatching Stage 2, pass the implementer's pasted verification output to the reviewer as the {{IMPLEMENTER_EVIDENCE}} value so the reviewer re-runs at least one command and reports MATCH or MISMATCH. A Stage 2 dispatch that omits {{IMPLEMENTER_EVIDENCE}} disables the spot-check and is incomplete. If the diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/: the Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` naming one unscripted real-world case checked against the clause wording. A Stage 2 return without that line, when the trigger matched, is an incomplete review -- re-dispatch. (Trigger is deliberately case-sensitive: uppercase EXCEPTION is the template convention; lowercase 'No exceptions.' boilerplate does not match. Residual false positives are accepted -- the gate favors over-firing.)
-
-BEFORE invoking any reviewer skill:
-1. Identify the file type: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`.
-2. Never invoke `/code-review` (the slash command) for skill `.md` files.
-
-[+] File type identified and correct reviewer selected -> dispatch
-[-] File type unclear -> read the file path before dispatching
-
-See `references/REVIEW_PROTOCOL.md` for full protocol details.
-
----
-
 ## Git Worktrees for Parallel Work
 
 See the `using-git-worktrees` skill for full worktree lifecycle, commands, and safety gates.
@@ -177,25 +126,24 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 
 ---
 
+## Related Skills
+
+- `two-stage-review` -- handles every implementer result: status code, canary confirmation, Stage 1 spec review, Stage 2 quality review
+- `using-git-worktrees` -- isolation for every dispatched agent
+- `dispatching-parallel-agents` -- parallel dispatch patterns; one worktree per agent
+
+---
+
 ## Rationalization Prevention
 
 | Excuse | Reality |
 |--------|---------|
-| "The subagent's description sounds right, I'll skip review" | Descriptions are summaries -- they omit bugs. YOU MUST read the actual diff and dispatch the 2-stage review every time. |
-| "This is just docs, no code review needed" | Documentation errors ship as silently as code bugs. Stage 1 spec compliance applies to every todo without exception. |
-| "I verified one file, the rest are probably fine" | Each file requires its own code-quality reviewer. One agent per file is the rule -- no extrapolation across files. |
-| "The subagent said PASS, that's good enough" | A subagent's self-assessment is not a review. PASS from an implementer means dispatch Stage 1 -- not skip it. |
-| "I'll do a quick scan instead of dispatching a reviewer agent" | A quick scan inherits your assumptions. A dispatched `skill-reviewer.md` or `code-quality-reviewer.md` agent does not. Dispatch the agent. |
-| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step verification above first. |
+| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step worktree creation check in the `using-git-worktrees` skill first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
 | "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one dispatch, always. |
 | "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
-| "The two stages of review are redundant -- I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then code-quality-reviewer.md. Writing carefully is not a substitute for independent review. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
-| "The concerns are nits -- not a correctness or scope risk, so I'll skip Ceremony 4" | "Correctness or scope risk" is objective: does it affect behavior, API surface, or stated requirements? If yes, prompt the owner, then Ceremony 4. "Feels minor" is not a valid exemption. |
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |
-| "The subagent hit a rate limit -- I'll do the review inline instead" | Rate limits are temporary. Inline review inherits your assumptions and blind spots. The whole point of a dispatched reviewer is independence from the author's context. Wait for the reset and dispatch. |
-| "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Documented failure mode (source postmortem): the agent adjudicating whether its own change is "covered enough" to skip re-review IS the failure -- not a valid exemption. YOU MUST re-review any change in review-covered territory. |
 | "The user approved the last run -- this retry is covered" | Spend-bearing launches need explicit consent PER INVOCATION. A failed launch returns to the user for a fresh go; a silent retry spends money without authorization. Ask before every launch. |

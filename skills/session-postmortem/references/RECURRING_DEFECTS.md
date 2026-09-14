@@ -125,7 +125,7 @@ Each entry has:
 ### RD-14: unreviewed-direct-edit
 - signature: Edited a file inline without the 2-stage subagent review.
 - count: 3 (mined 2026-07-19)   domain: general
-- maps-to: skill: subagent-driven-development
+- maps-to: skill: two-stage-review
 
 ### RD-15: wrong-artifact-location
 - signature: Wrote a session artifact into the repo/docs instead of the session folder.
@@ -162,7 +162,7 @@ Each entry has:
 ### RD-21: wrong-reviewer-type-dispatched
 - signature: Used code-review for skill .md files instead of skill-reviewer.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: skill: subagent-driven-development
+- maps-to: skill: two-stage-review
 
 ### RD-22: wrong-worktree-dispatch
 - signature: Dispatched an agent with main-context paths instead of the worktree path.

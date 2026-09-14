@@ -88,7 +88,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 **Mitigation:** Announce + numbered steps + STOP language. Verify model actually waits for clarification responses.
 
 ### 2. "After every todo" rules
-**Skill:** `subagent-driven-development` (2-stage review), `execution` (work loop step 6)
+**Skill:** `two-stage-review` (2-stage review), `execution` (work loop step 6)
 **Risk:** Model completes todos and skips reviewer dispatch -- moves to next item silently
 **Mitigation:** Iron Law 10 in AGENTS.md + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
 

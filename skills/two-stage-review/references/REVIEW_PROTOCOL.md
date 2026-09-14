@@ -32,3 +32,11 @@ If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before pro
 When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground.
 
 **Enforcement is procedural/self-check:** the checkable signal is a fix-round re-check dispatched as a fresh reviewer -- no resume of, or continuity with, the reviewer instance that raised the finding -- visible in the dispatch transcript. No automated detector exists.
+
+---
+
+## Canary Rationale
+
+`Canary confirmed: [Worktree: line from implementer output]` is the observable signal that BEFORE PROCEEDING items 1-3 of SKILL.md were executed before any reviewer dispatch, not skipped: the status code was read, the worktree line was found in the implementer's result, and the Limitations field was present. A less powerful model can produce it mechanically: copy the Worktree line, paste it.
+
+**Note:** The canary raises the cost of skipping for compliant agents -- it is not cryptographically bound to execution, and it does not prove the reviewer read the line or that Stage 1 will catch every defect.

@@ -18,6 +18,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 For planning a multi-step task -> invoke **writing-plans** skill first.
 For subagent dispatch or delegation -> invoke **subagent-driven-development** skill.
+For handling an implementer result -> invoke **two-stage-review** skill.
 For debugging -> invoke **systematic-debugging** skill.
 For completion claims -> invoke **verification-before-completion** skill.
 
@@ -85,7 +86,7 @@ For every planned item, before writing code:
 3. Make the change
 4. Prove it works (compile, test, inspect diff)
 5. Flag it as done
-6. DISPATCH REVIEWERS -- Stage 1: spec-compliance-reviewer.md, then Stage 2: code-quality-reviewer.md
+6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md, then Stage 2: skill-reviewer.md or code-quality-reviewer.md by file type
    Do NOT pick up the next todo until both stages pass.
 7. Commit when you reach a logical boundary
 8. Advance to the next item
@@ -270,7 +271,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "I'll review the spec compliance myself, no need to dispatch" | You wrote the code -- you will rationalize away the gaps. Dispatch spec-compliance-reviewer.md every time. |
 | "The previous todo had no issues, this one is probably fine too" | Each todo is independent. Prior clean reviews do not carry over. Dispatch reviewers after this todo. |
 | "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
-| "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (see "Re-review required for review-covered territory" in the `subagent-driven-development` skill; exemption is only an explicit same-turn user waiver). |
+| "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (see "Re-review required for review-covered territory" in the `two-stage-review` skill; exemption is only an explicit same-turn user waiver). |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |

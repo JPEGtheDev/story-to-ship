@@ -1,0 +1,1 @@
+Pins that a redirect whose target exists but sits outside any git repository is allowed -- the guard's protection is scoped to files inside a git repo (the dump-target rule), so a path with no enclosing repo is never protected regardless of whether it already exists.

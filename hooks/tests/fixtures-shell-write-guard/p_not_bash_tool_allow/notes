@@ -1,0 +1,1 @@
+Pins that the hook only evaluates the Bash tool -- a PreToolUse call for the Read tool, even naming a protected file in its tool_input, is allowed because the guard does not inspect non-Bash tool calls at all.

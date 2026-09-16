@@ -1,0 +1,1 @@
+Pins fail-open behavior: when stdin is not valid JSON, the hook cannot evaluate the call at all and must allow it (empty stdout) rather than deny or crash -- fail-open on malformed input, not fail-closed.

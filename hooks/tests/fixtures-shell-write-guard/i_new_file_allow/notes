@@ -1,0 +1,1 @@
+Pins that a bare > redirect to a path that does not yet exist in the sandbox is allowed -- there is nothing to overwrite, so the guard only protects existing files.

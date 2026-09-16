@@ -1,0 +1,1 @@
+Pins that tee -a (append mode) against an existing tracked file is allowed, exercising the tee-command recognition path with an append flag rather than the truncating default.

@@ -1,0 +1,1 @@
+Pins fail-open behavior: when stdin is completely empty, the hook cannot evaluate the call and must allow it (empty stdout) -- an empty pipe is a distinct fail-open shape from malformed JSON but the guard must behave the same way for both.

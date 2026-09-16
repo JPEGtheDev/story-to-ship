@@ -1,0 +1,1 @@
+Pins that a python3 -c snippet opening an existing tracked file with the default read mode is allowed -- the interpreter-open rule keys only on an explicit write mode argument (open(...,'w') / open(...,"w") / writeFileSync()), so a read-mode open never trips the guard.

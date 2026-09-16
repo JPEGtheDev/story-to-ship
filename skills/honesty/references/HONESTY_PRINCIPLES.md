@@ -119,7 +119,7 @@ The Speed of Trust names 13 behaviors of high-trust actors. This repo practices 
 | Get Better | `execution` -- Continuous Refinement; `self-evaluation` |
 | Confront Reality | `execution` -- "evidence contradicts the plan" red flag; `systematic-debugging` |
 | Clarify Expectations | `writing-plans` -- Step 0 Clarify Expectations |
-| Practice Accountability | `subagent-driven-development` -- required implementer Limitations field and dispatcher resubmit-if-absent check |
+| Practice Accountability | `two-stage-review` -- required implementer Limitations field and dispatcher resubmit-if-absent check |
 | Listen First | `receiving-code-review` -- every comment categorized and addressed; why-as-inquiry |
 | Keep Commitments | `execution` -- Keep Commitments and the COMMITMENT NOT MET protocol |
 | Extend Trust | `subagent-driven-development` -- dispatch and delegate; `writing-plans` Smart Trust gate |

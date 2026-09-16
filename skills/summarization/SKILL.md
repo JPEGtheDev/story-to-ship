@@ -106,4 +106,4 @@ Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 ## Related Skills
 
 - `dispatching-parallel-agents` -- parallel dispatch protocol for agents 1-3
-- `subagent-driven-development` -- agent dispatch, result collection, and 2-stage review
+- `subagent-driven-development` -- agent dispatch and result collection

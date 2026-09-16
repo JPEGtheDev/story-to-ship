@@ -27,7 +27,7 @@ For full reload rules and examples, see the skill.
 
 Invoke `honesty` and `communication` immediately after `session-bootstrap` returns, before any task skill.
 
-Process combos: before any completion claim, commit, or PR, load `verification-before-completion`. For any plan with 2+ todos, dispatch the Skeptic + plan-reviewer pair; if plan.md contains a `## Feature Specification`, dispatch `three-amigos` Refinement instead. For multi-step planning, load `writing-plans` first. Before dispatching any subagent, load `subagent-driven-development` and `using-git-worktrees` together.
+Process combos: before any completion claim, commit, or PR, load `verification-before-completion`. For any plan with 2+ todos, dispatch the Skeptic + plan-reviewer pair; if plan.md contains a `## Feature Specification`, dispatch `three-amigos` Refinement instead. For multi-step planning, load `writing-plans` first. Before dispatching any subagent, load `subagent-driven-development` and `using-git-worktrees` together; when the subagent's result arrives, load `two-stage-review`.
 
 Domain skills keep their own dispatch rows -- not here.
 </IMPORTANT>

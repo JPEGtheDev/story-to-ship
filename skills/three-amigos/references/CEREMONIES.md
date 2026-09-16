@@ -134,7 +134,7 @@ After all three Discovery amigos return:
 **Output:** ACCEPTED / REVISIONS NEEDED per amigo. REVISIONS NEEDED from any amigo blocks merge.  
 **Required:** YES for any feature that went through Discovery.
 
-**Frequency:** One Signoff ceremony per branch is the norm. Repeating the full ceremony is a defect-driven exception -- something went wrong -- not standard practice to budget for; full-ceremony re-runs multiply cost without adding independence. Fix rounds are re-checked by the reviewer that raised the finding (see the `subagent-driven-development` review protocol).
+**Frequency:** One Signoff ceremony per branch is the norm. Repeating the full ceremony is a defect-driven exception -- something went wrong -- not standard practice to budget for; full-ceremony re-runs multiply cost without adding independence. Fix rounds are re-checked by the reviewer that raised the finding (see the `two-stage-review` skill).
 
 **Enforcement is procedural/self-check:** the checkable signal is a second Signoff ceremony dispatched on the same branch with no defect-driven reason stated for repeating it. No automated detector exists.
 

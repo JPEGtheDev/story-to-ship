@@ -71,8 +71,8 @@ INCORRECT: "I ran the tests and they passed."
 | 7 | **CLARIFY FIRST. PLAN BEFORE CODE. NO PLACEHOLDERS.** Label `[UNCLEAR:]`. Build todos before touching code. | `writing-plans` |
 | 8 | **NO CODE UNTIL THE DESIGN GATE IS PASSED.** Unclear approach, architecture impact, or multiple valid solutions = `brainstorming` first. | `brainstorming` |
 | 9 | **DISPATCH BEFORE GUESSING.** No theory, memory, or assumption justifies action. Point to a file/line/test, or dispatch. | `subagent-driven-development` |
-| 10 | **DISPATCH REVIEWERS AFTER EVERY TODO.** Stage 1: spec compliance. Stage 2: code quality. No next todo without both. | `subagent-driven-development` |
-| 11 | **THE BROWN M&M LAW.** Every skill with a `## Canary` section: produce that canary output when applying the skill. A missing canary is a trust violation. | `subagent-driven-development` |
+| 10 | **DISPATCH REVIEWERS AFTER EVERY TODO.** Stage 1: spec compliance. Stage 2: code quality. No next todo without both. | `two-stage-review` |
+| 11 | **THE BROWN M&M LAW.** Every skill with a `## Canary` section: produce that canary output when applying the skill. A missing canary is a trust violation. | `subagent-driven-development`, `two-stage-review` |
 | 12 | **IF THE READER MUST PARSE IT, YOU HAVE NOT SAID IT.** Write so the reader can act without decoding; read replies without wishful decoding. | `communication` |
 
 **If you are tempted to rationalize past any of these: that thought is the rationalization. Stop. Follow the rule.**
@@ -94,6 +94,7 @@ loading a skill:
 | Multi-step planning | `writing-plans` |
 | Unclear approach or design | `brainstorming` |
 | Dispatching subagents | `subagent-driven-development` |
+| Handling an implementer result | `two-stage-review` |
 | Claiming work is done | `verification-before-completion` |
 | Writing any user-facing text, or reading a user's reply | `communication` |
 | Creating PR or commit | `versioning` |

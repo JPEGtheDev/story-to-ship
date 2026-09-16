@@ -67,6 +67,7 @@ added here or to the per-turn block -- they keep their own dispatch rows.
 | `communication` | core | Immediately after `session-bootstrap` returns, alongside `honesty`, before any task skill (session-bootstrap SKILL.md, co-equal peer section) |
 | `verification-before-completion` | core | Before any completion claim, commit, or PR (session-bootstrap "On Start" table) |
 | `subagent-driven-development` | core | Before dispatching the first subagent for any plan/todo (session-bootstrap "On Start" table) |
+| `two-stage-review` | core | When an implementer subagent has returned a result, before reading its status code -- DONE, DONE_WITH_CONCERNS, PARTIAL, NEEDS_CONTEXT, or BLOCKED (session-bootstrap "On Start" table) |
 | `using-git-worktrees` | core | Before creating any worktree or dispatching any subagent -- attributed to `subagent-driven-development` SKILL.md's BEFORE PROCEEDING item 3 and its worktree-before-dispatch Red Flag, NOT the "On Start" table (that table lists it only under "Parallel agent work / A/B testing") |
 | `writing-plans` | core | Any new plan with 2+ todos, or any multi-step task/feature work (session-bootstrap "On Start" table) |
 

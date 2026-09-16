@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## What it is
 
-The sprint engine is a spec-driven multi-agent pipeline executor: a spec is a JSON document declaring an ordered list of steps -- agent, gate, shape, parallel, map, scored-retry, branch -- and the runner executes them through the Workflow tool runtime, dispatching subagents, enforcing gates, spilling oversized outputs, and verifying digests.
+A spec (JSON) declares an ordered list of steps -- agent, gate, shape, parallel, map, scored-retry, branch -- that the runner executes through the Workflow tool runtime, dispatching subagents, enforcing gates, spilling oversized outputs, and verifying digests.
 
 Reach for it when multi-agent work must follow a declared, replayable pipeline instead of ad hoc orchestration; skip it for a single dispatch.
 
@@ -86,5 +86,6 @@ Self-contained: the whole engine ships inside `tools/`.
 
 ## Related Skills
 
-- `subagent-driven-development` -- the runner's agent steps are dispatched subagents; governs dispatch/review
+- `subagent-driven-development` -- the runner's agent steps are dispatched subagents; governs dispatch
+- `two-stage-review` -- governs the review of each dispatched step's result
 - `using-git-worktrees` -- engine runs have no coordinator to pre-create or verify isolation, so creation falls to the nearest layer; the run owner reviews after. A write-instructing step MUST create its worktree and work only there; a step orchestrating write-side subagents MUST pre-create a worktree per writer and pass its path in each prompt; the top-level run owner never pre-creates; read-only steps dispatch without one (no writes, nothing to isolate)

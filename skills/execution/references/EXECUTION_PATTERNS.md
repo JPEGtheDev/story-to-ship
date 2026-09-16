@@ -149,6 +149,7 @@ After any mistake or user correction:
 |--------|-------|
 | Planning a multi-step task | `writing-plans` |
 | Subagent dispatch or delegation | `subagent-driven-development` |
+| Handling an implementer result | `two-stage-review` |
 | Bug or failure | `systematic-debugging` |
 | Completion claim | `verification-before-completion` |
 | Writing tests | `testing` |

@@ -66,6 +66,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Any failure or unexpected behavior           | `systematic-debugging`, `verification-before-completion` |
 | Dispatching subagents                        | `subagent-driven-development`                      |
 | Executing any plan that has pending todos (picking up plan.md or a todo list) | `subagent-driven-development` -- load BEFORE dispatching the first implementer, not after |
+| An implementer subagent has returned a result | `two-stage-review` -- load before reading its status code (DONE, DONE_WITH_CONCERNS, PARTIAL, NEEDS_CONTEXT, or BLOCKED) |
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`                                   |
@@ -135,7 +136,8 @@ If you have nothing to report, still include the block with zeroes.
 
 - A task just completed and no new user message has arrived -- **STOP. Is this the session's last task? If so, treat it as session end. Load self-evaluation NOW before responding.**
 - Starting implementation when prior session tasks are pending without dispatching the Skeptic + plan-reviewer pair -- **STOP. Dispatch the Skeptic + plan-reviewer pair (per `writing-plans`) before the first implementation step.**
-- Picking up plan todos without `subagent-driven-development` loaded -- **STOP. Load `subagent-driven-development` before dispatching the first implementer. The skill contains the review protocol that every todo requires.**
+- Picking up plan todos without `subagent-driven-development` loaded -- **STOP. Load `subagent-driven-development` before dispatching the first implementer.**
+- Handling an implementer result without `two-stage-review` loaded -- **STOP. Load `two-stage-review` before reading the status code. The review protocol every todo requires lives there.**
 - Starting to code before invoking the required skill -- **STOP. Invoke the skill now. Do not write one line first.**
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**

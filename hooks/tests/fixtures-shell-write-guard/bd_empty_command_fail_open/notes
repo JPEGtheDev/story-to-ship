@@ -1,0 +1,1 @@
+Pins fail-open behavior for an empty tool_input.command: a blank command string cannot be scanned for a write target, so the hook allows the call (empty stdout) rather than denying or erroring on a command with nothing to parse.

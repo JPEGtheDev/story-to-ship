@@ -27,13 +27,19 @@
 # stay portable across machines/runs.
 #
 # Sandbox layout (see setup_sandbox):
-#   $SANDBOX/target.txt        tracked, protected
-#   $SANDBOX/other.txt         tracked, protected
-#   $SANDBOX/sub/target.txt    tracked, protected (nested)
-#   $SANDBOX/.gitignore        tracked (contents: "scratch/")
-#   $SANDBOX/scratch/dump.txt  gitignored, NOT protected
-#   $SANDBOX/plan.md           untracked, NOT gitignored, protected
-#   $OUTSIDE/outside.txt       not inside any git repo, NOT protected
+#   $SANDBOX/target.txt           tracked, protected
+#   $SANDBOX/other.txt            tracked, protected
+#   $SANDBOX/sub/target.txt       tracked, protected (nested)
+#   $SANDBOX/link-to-target.txt   tracked symlink to target.txt, protected
+#                                  (resolves to target.txt)
+#   $SANDBOX/.gitignore           tracked (contents: "scratch/", "inner/")
+#   $SANDBOX/scratch/dump.txt     gitignored, NOT protected
+#   $SANDBOX/inner/               a separate git repo nested under $SANDBOX;
+#                                  ignored by the OUTER .gitignore, but its
+#                                  own repo decides its own targets
+#   $SANDBOX/inner/nested.txt     tracked in the inner repo, protected
+#   $SANDBOX/plan.md              untracked, NOT gitignored, protected
+#   $OUTSIDE/outside.txt          not inside any git repo, NOT protected
 #
 # Case directory contract (all files optional except "input"):
 #   input                  - stdin JSON fed to the hook (required). May
@@ -93,6 +99,19 @@ setup_sandbox() {
     cp target.txt sub/target.txt
     git add -A
     git -c user.name=t -c user.email=t@t commit -qm sub
+
+    ln -s target.txt link-to-target.txt
+    git add -A
+    git -c user.name=t -c user.email=t@t commit -qm symlink
+
+    mkdir inner
+    git -C inner init -q
+    echo n >inner/nested.txt
+    git -C inner add -A
+    git -C inner -c user.name=t -c user.email=t@t commit -qm init
+    printf 'inner/\n' >>.gitignore
+    git add .gitignore
+    git -c user.name=t -c user.email=t@t commit -qm ignore-inner
 
     cat >plan.md <<'PLANEOF'
 plan

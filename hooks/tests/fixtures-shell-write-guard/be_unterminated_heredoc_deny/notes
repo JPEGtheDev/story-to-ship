@@ -1,0 +1,1 @@
+Pins that a heredoc missing its terminator line is denied outright as unparseable, rather than the guard attempting a best-effort scan of a malformed command and risking a false allow on the redirect that precedes the broken heredoc body.

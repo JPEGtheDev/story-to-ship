@@ -1,0 +1,1 @@
+Pins that exec > target.txt (redirecting the whole shell's stdout, not a single command's) is recognized as a truncating redirect onto an existing tracked file and denied, not treated as an opaque builtin invocation the scanner skips.

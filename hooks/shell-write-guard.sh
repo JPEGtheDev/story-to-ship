@@ -35,6 +35,13 @@
 # files, language-level file-write APIs this scanner does not pattern-match
 # (e.g. pathlib's Path().write_text in Python), and shell functions/aliases
 # that wrap a write are none of them checked -- they fall through as allow.
+# If git is not on PATH or a git call times out, the candidate target is
+# denied (the guard fails closed on those two errors, unlike the jq/python3
+# fail-open cases). A nonzero exit from the repository lookup (git
+# rev-parse) means "not a repository" and the write is allowed; once the
+# target is known to be inside a repository, only a successful git
+# check-ignore match frees it, and any other check-ignore result or error
+# leaves it protected.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors

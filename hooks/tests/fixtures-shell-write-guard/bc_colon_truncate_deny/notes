@@ -1,0 +1,1 @@
+Pins that : > target.txt (the no-op builtin used purely to truncate a file via redirection) is recognized as a truncating redirect onto an existing tracked file and denied, not skipped because the command word is the : no-op rather than a familiar write utility.

@@ -74,7 +74,8 @@ without an OpenCode equivalent remain Claude Code-only.
 | `execution` | Commitment and right-wrongs protocol (acknowledge the mistake, state what was wrong and the correct answer, state its impact, and fix it without minimizing) for any non-trivial implementation |
 | `code-quality` | Formatting, naming, and static analysis gates |
 | `session-bootstrap` | Session initialization -- loads context and routing table |
-| `subagent-driven-development` | Delegation protocol with mandatory post-todo review |
+| `subagent-driven-development` | Delegation protocol for dispatching subagents |
+| `two-stage-review` | Mandatory 2-stage post-todo review (spec compliance, then quality) |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
 | `using-git-worktrees` | Parallel agent isolation via git worktrees |
 
@@ -148,7 +149,7 @@ without an OpenCode equivalent remain Claude Code-only.
 ## How It Works
 
 Installing this plugin adds:
-- 35 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 37 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 17 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
 

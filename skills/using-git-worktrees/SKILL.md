@@ -122,6 +122,7 @@ Dispatch two agents, one per worktree, with an identical test harness. Compare r
 
 ## Related Skills
 
-- `subagent-driven-development` -- governs how to dispatch subagents and review their work; worktrees are the isolation mechanism for every subagent dispatch
+- `subagent-driven-development` -- governs how to dispatch subagents; worktrees are the isolation mechanism for every subagent dispatch
+- `two-stage-review` -- governs how each subagent's work is reviewed
 - `dispatching-parallel-agents` -- governs parallel agent dispatch patterns; every parallel agent MUST have its own dedicated worktree
 - `execution` -- governs the overall work loop; worktrees support the commit rhythm and behavior preservation required by the execution skill

@@ -1,0 +1,1 @@
+{"session_id":"sess-al","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"node -e \"require('fs').writeFileSync('target.txt','x')\""}}

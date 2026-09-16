@@ -1,0 +1,1 @@
+Pins that cd to a non-literal argument (a variable reference, "$D") sets base to None per rule B, and a subsequent relative candidate target (target.txt in the following echo x > target.txt segment) then denies with the "unresolvable working directory after cd" parse reason rather than silently resolving against the wrong base or crashing.

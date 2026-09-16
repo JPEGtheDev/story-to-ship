@@ -1,0 +1,1 @@
+Pins that eval recursively scans the joined text of its following tokens for a hidden write -- eval "echo x > target.txt" must be denied the same way the direct redirect would be, exercising check_nested_shells' eval branch.

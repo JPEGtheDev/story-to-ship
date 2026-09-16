@@ -1,0 +1,1 @@
+Pins that rsync onto an existing tracked destination is denied, exercising rsync's membership in the cp-family rule.

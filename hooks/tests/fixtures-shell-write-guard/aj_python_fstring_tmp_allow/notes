@@ -1,0 +1,1 @@
+Pins that an f-string open() target whose literal text before the first { expansion starts with /tmp/ is allowed -- the same literal-prefix-before-first-expansion rule shell targets get (e.g. echo x > \"/tmp/$RUN.md\"), applied to Python f-string path arguments.

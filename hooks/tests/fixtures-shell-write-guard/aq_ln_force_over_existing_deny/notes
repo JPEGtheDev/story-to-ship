@@ -1,0 +1,1 @@
+Pins that ln with an explicit force flag (-sf) onto an existing tracked destination is denied -- ln is the one member of the cp-family rule that only becomes active when a force flag (-f/-sf/-fs/--force) is present, unlike cp/mv/install/rsync which are always active.

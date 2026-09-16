@@ -1,0 +1,1 @@
+Pins that sh -c '...' (not just bash -c, exercised by the earlier x_bash_dash_c_nested_deny case) is recognized by the NESTED_SHELLS set and recursively scanned, denying the hidden write inside the -c string.

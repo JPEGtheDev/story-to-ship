@@ -1,0 +1,1 @@
+Pins that cp -t DIR SRC resolves DIR as the destination directory and every remaining non-flag argument as a source -- cp -t sub target.txt must resolve the candidate to sub/target.txt (an existing tracked file), the -t DIR carve-out in the cp-family rule, distinct from the trailing-argument-is-destination default shape exercised by t_cp_into_dir_existing_deny.

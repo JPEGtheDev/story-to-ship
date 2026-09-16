@@ -1,0 +1,1 @@
+Pins that ruby with a plain -i in-place flag editing an existing tracked file is denied, exercising ruby's membership in the same perl/ruby -i rule as ar (perl).

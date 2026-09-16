@@ -1,0 +1,1 @@
+{"session_id":"sess-av","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"sh -c 'echo x > target.txt'"}}

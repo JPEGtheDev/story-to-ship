@@ -1,0 +1,1 @@
+../../hooks/shell-write-guard.sh

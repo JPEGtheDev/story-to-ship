@@ -70,7 +70,7 @@ FIXTURES_DIR="$SCRIPT_DIR/fixtures-shell-write-guard"
 SANDBOX=""
 OUTSIDE=""
 
-# shellcheck disable=SC2329 # invoked indirectly via `trap cleanup EXIT` below
+# shellcheck disable=SC2317,SC2329 # invoked indirectly via `trap cleanup EXIT` below
 cleanup() {
   [[ -n "$SANDBOX" && -d "$SANDBOX" ]] && rm -rf "$SANDBOX"
   [[ -n "$OUTSIDE" && -d "$OUTSIDE" ]] && rm -rf "$OUTSIDE"

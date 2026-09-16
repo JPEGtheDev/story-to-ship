@@ -1,0 +1,1 @@
+Pins that a 2> stderr redirect targeting an existing tracked file is denied, not just the more common > stdout redirect.

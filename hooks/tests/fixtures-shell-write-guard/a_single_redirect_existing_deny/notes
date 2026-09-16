@@ -1,0 +1,1 @@
+Pins the baseline case: a bare > redirect targeting an existing, git-tracked, non-ignored file in the cwd is denied. This is the simplest protected-overwrite shape every other case builds on.

@@ -1,0 +1,1 @@
+Pins that cp overwriting an existing tracked destination file is denied; the source file (other.txt) is untouched and must not itself trigger the guard.

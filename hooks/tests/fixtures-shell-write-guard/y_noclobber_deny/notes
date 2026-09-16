@@ -1,0 +1,1 @@
+Pins that the noclobber-override redirect >| targeting an existing tracked file is denied, same as a bare > -- >| explicitly forces overwrite through set -o noclobber.

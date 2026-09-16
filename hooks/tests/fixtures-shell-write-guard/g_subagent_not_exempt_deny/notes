@@ -1,0 +1,1 @@
+Pins that a subagent-originated call (top-level agent_id field present) receives the exact same deny verdict as a top-level call -- subagents are not exempt from the guard.

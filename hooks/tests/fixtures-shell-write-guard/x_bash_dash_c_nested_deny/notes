@@ -1,0 +1,1 @@
+Pins that a bash -c '...' wrapper is scanned one level deep: the nested echo x > target.txt inside the -c string is still caught and denied, not treated as an opaque, unscannable string.

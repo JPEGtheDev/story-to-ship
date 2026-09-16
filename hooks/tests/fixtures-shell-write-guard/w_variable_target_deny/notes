@@ -1,0 +1,1 @@
+Pins that a redirect whose target is a shell variable reference ($OUT), not a literal path, is denied outright -- the guard cannot verify what a non-literal target resolves to, so it denies rather than guessing.

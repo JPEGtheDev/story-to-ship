@@ -1,0 +1,1 @@
+Pins that a python3 -c snippet opening an existing tracked file in write mode ('w') is denied, exercising the 'python/node snippet opens a protected file for writing' mechanism rather than a shell redirect.

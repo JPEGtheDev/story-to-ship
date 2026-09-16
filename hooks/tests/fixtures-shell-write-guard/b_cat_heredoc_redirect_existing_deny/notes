@@ -1,0 +1,1 @@
+Pins that a heredoc-fed cat with a > redirect to an existing tracked file is denied -- the redirect target, not the heredoc body, is what makes the file protected.

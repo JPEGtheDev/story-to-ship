@@ -143,6 +143,7 @@ jobs:
           check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/execution/SKILL.md "## Canary"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
+          check skills/two-stage-review/SKILL.md "SPEC COMPLIANCE FIRST, THEN CODE QUALITY" "{{IMPLEMENTER_EVIDENCE}}" "Adversarial scenario tested" "Canary confirmed"
           check skills/honesty/SKILL.md "buried caveat"
           check skills/honesty/SKILL.md "Self-blame needs the same evidence bar"
           check skills/honesty/SKILL.md "consent-class action"
@@ -196,17 +197,17 @@ jobs:
           echo "[+] agent templates index matches agents/"
 
       # This 20,000-character cap (roughly 5,000 tokens at the documented
-      # chars/4 estimate) is enforced here only for skills/honesty/SKILL.md
-      # and skills/communication/SKILL.md: this pair was measured and brought
-      # under the cap when the honesty skill was split into these two files.
-      # No repo-wide skill-size cap is CI-enforced; other skills have not
-      # been measured or adjudicated against this limit.
-      - name: Enforce size cap on honesty and communication skills
+      # chars/4 estimate) is enforced here only for the core skills listed in
+      # the loop below: each was measured and brought under the cap when it
+      # was split (honesty from communication; two-stage-review from
+      # subagent-driven-development). No repo-wide skill-size cap is
+      # CI-enforced; other skills have not been measured against this limit.
+      - name: Enforce size cap on core skills
         run: |
           set -e
           limit=20000
           over=0
-          for f in skills/honesty/SKILL.md skills/communication/SKILL.md; do
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md; do
             size=$(wc -c < "$f")
             if [ "$size" -gt "$limit" ]; then
               echo "FAILED: $f is $size characters, exceeding the $limit-character limit"
@@ -216,7 +217,7 @@ jobs:
           if [ "$over" -gt 0 ]; then
             exit 1
           fi
-          echo "[+] honesty and communication skill files are within the $limit-character cap"
+          echo "[+] core skill files are within the $limit-character cap"
 
       - name: Hook script smoke test
         run: |

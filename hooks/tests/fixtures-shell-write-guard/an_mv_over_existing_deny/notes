@@ -1,0 +1,1 @@
+Pins that mv onto an existing tracked destination is denied -- mv is in the same cp/mv/install/rsync/ln force-family rule as cp, but unlike ln it is active unconditionally (no -f flag required), so a plain mv over target.txt must deny.

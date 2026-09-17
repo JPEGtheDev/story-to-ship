@@ -1,0 +1,1 @@
+{"session_id":"sess-au","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"eval \"echo x > target.txt\""}}

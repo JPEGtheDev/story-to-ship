@@ -1,0 +1,1 @@
+Pins that an untracked-but-not-gitignored file (plan.md) inside a git repo is still PROTECTED -- protection depends on 'not gitignored', not on 'already tracked by git'.

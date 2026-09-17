@@ -1,0 +1,1 @@
+Pins that perl with a bundled in-place flag group (-pi, matching ^-[A-Za-z]*i) editing an existing tracked file is denied, with the -e script argument correctly skipped so it is not itself treated as a file candidate.

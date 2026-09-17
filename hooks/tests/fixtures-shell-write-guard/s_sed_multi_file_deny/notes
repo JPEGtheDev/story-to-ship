@@ -1,0 +1,1 @@
+Pins that sed -i given multiple file arguments is denied when ANY of them is a protected existing file, even though the second argument (/tmp/does-not-exist.txt) does not exist and would not itself be protected.

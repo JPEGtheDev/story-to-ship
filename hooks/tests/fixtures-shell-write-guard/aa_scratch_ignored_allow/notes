@@ -1,0 +1,1 @@
+Pins that a target inside the git repo but covered by a committed .gitignore rule (scratch/) is allowed -- protection depends on not being gitignored, so a gitignored path is a free dump target even though it physically exists inside a repo.

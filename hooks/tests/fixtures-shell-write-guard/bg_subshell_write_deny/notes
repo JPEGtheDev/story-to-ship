@@ -1,0 +1,1 @@
+Pins that a write redirect inside a parenthesized subshell is followed and scanned the same as a top-level redirect: (echo x > target.txt) onto the existing tracked target.txt is denied, not skipped because the redirect is nested one level inside subshell parentheses.

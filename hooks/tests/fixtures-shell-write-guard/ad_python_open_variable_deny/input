@@ -1,0 +1,1 @@
+{"session_id":"sess-ad","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"python3 -c \"open(p,'w').write('x')\""}}

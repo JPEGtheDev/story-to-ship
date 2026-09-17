@@ -1,0 +1,1 @@
+Pins that a >> append redirect to an existing tracked file is allowed -- append never truncates or destroys existing content, so it does not trigger the overwrite guard even though the target is protected under the deny rules.

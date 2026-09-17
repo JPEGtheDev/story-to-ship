@@ -1,0 +1,1 @@
+{"session_id":"sess-z","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"dd if=/dev/zero of=target.txt bs=1 count=1"}}

@@ -1,0 +1,1 @@
+Pins that cp into an existing directory (destination resolves to sub/target.txt, an existing tracked file) is denied -- the guard must resolve a directory destination to its implied file path, not just check the literal argument for an existing plain file.

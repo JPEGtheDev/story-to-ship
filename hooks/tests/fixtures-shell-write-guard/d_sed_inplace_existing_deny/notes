@@ -1,0 +1,1 @@
+Pins that sed -i in-place editing an existing tracked file is denied, since -i overwrites the file's contents on disk without going through a shell redirect.

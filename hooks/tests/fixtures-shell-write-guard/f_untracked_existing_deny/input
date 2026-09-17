@@ -1,0 +1,1 @@
+{"session_id":"sess-f","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"echo x > plan.md"}}

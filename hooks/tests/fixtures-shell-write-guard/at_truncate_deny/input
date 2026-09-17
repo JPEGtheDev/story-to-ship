@@ -1,0 +1,1 @@
+{"session_id":"sess-at","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"truncate -s 0 target.txt"}}

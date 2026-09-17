@@ -1,0 +1,1 @@
+Pins that redirecting to /dev/null is allowed -- /dev/ targets are never files the guard protects -- and that the 2>&1 descriptor duplication is not itself treated as a file-write target.

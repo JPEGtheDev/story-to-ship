@@ -1,0 +1,1 @@
+Pins that a write redirect hidden inside a $( ) command substitution -- even one embedded inside a double-quoted string -- is still scanned and denied: the guard must recurse into $( ) spans (per "treat $( as (") and evaluate their contents for candidate writes, not just skip past them as opaque text.

@@ -1,0 +1,1 @@
+{"session_id":"sess-ae","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"echo \"RF=$(awk '/x/' target.txt | grep -c '^- ')\""}}

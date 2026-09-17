@@ -1,0 +1,1 @@
+Pins that a command with an unterminated double quote is denied outright as unparseable, rather than the guard attempting a best-effort scan of a malformed command and risking a false allow.

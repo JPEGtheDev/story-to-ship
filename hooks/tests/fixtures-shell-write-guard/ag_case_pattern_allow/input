@@ -1,0 +1,1 @@
+{"session_id":"sess-ag","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"case x in 1) echo a ;; *) echo b ;; esac"}}

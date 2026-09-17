@@ -1,0 +1,1 @@
+Pins that a command with an unterminated backtick span is denied outright as unparseable, the same way an unterminated double quote is (see ac_unterminated_quote_deny) -- the scanner cannot locate the matching close-backtick to safely delimit and recurse into the substitution, so it refuses to guess rather than risking a false allow.

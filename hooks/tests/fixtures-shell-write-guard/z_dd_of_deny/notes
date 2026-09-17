@@ -1,0 +1,1 @@
+Pins that dd of=target.txt targeting an existing tracked file is denied, exercising the dd-specific of= write-target syntax distinct from a shell redirect.

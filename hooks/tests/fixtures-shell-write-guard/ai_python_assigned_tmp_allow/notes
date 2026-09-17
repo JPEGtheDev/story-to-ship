@@ -1,0 +1,1 @@
+Pins the /tmp allow-prefix side of the same identifier-resolution rule as ah: p is assigned '/tmp/swg-out.txt' earlier in the snippet, so once resolved the target's literal text starts with /tmp/ and is allowed -- same non-literal-target prefix exemption a shell redirect to a literal /tmp/ path gets.

@@ -1,0 +1,1 @@
+Pins that an interpreter write-mode open() whose path argument is not a quoted string literal (here, the bare variable p) cannot be checked against the filesystem, and is denied for the same reason a `> "$OUT"` redirect to a non-literal target is denied (case w) -- the guard cannot verify what a non-literal target resolves to, so it denies rather than guessing.

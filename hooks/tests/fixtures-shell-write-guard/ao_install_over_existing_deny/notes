@@ -1,0 +1,1 @@
+Pins that install onto an existing tracked destination is denied, exercising install's membership in the cp-family rule alongside cp/mv/rsync/ln.

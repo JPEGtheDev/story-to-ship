@@ -1,0 +1,1 @@
+Pins that truncate targeting an existing tracked file is denied, with the -s size argument correctly skipped so "0" is not itself treated as a file candidate.

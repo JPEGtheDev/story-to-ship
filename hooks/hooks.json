@@ -45,6 +45,15 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-model-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/shell-write-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

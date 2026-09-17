@@ -1,0 +1,1 @@
+Pins that the &> combined stdout+stderr redirect form is recognized as a truncating redirect onto its target the same as a bare >, so ls &> target.txt onto the existing tracked target.txt is denied.

@@ -1,0 +1,1 @@
+Pins that >&2 (duplicating stdout onto the stderr file descriptor) is not treated as a write to a file named 2 or as any other candidate target -- a bare descriptor duplication has no path target at all, so ls >&2 is allowed.

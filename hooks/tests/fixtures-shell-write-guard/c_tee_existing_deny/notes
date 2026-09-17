@@ -1,0 +1,1 @@
+Pins that tee (without -a) writing to an existing tracked file is denied, since tee without -a truncates its target exactly like a bare > redirect.

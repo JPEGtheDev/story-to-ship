@@ -1,0 +1,1 @@
+Pins that a node inline snippet passed via -e (not -c, which node does not accept for inline code) is still inspected by the interpreter rule: writeFileSync('target.txt', ...) inside a -e argument must be found and denied the same way a python3 -c open(...,'w') snippet is, exercising the -e/--eval/-p/--print token-selection amendment rather than the python-only -c path.

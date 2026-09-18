@@ -42,9 +42,12 @@ Before dispatching any subagent:
    See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
 5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the `two-stage-review` skill), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
+6. Dispatch text is shipped text: the implementer builds on it and the reviewers review the result as the implementer's own, so a label, tag, or wrong tool claim in the prompt ships as a defect. The prompt for this dispatch -- research or implementation alike -- was written to a file before sending, and the dispatch message points the agent at that file.
+7. That prompt file passed the pre-PR hygiene sweep of the `finishing-a-development-branch` skill plus one more grep for spelled-out issue references (`\bissues?[ ]+#?[0-9]+\b`), and the sweep output (or "0 hits") is pasted in the dispatch turn.
+8. Every claim in the prompt file about a tool, SDK (software development kit), library, or command-line interface (CLI) flag was verified by running the command or reading the target repo's config (package manifest, CI file), or is labeled `unverified` in the prompt. Enforcement for items 6-8 is procedural self-check with no detector; the checkable signal is the sent prompt file -- a label, tag, or unlabeled tool claim in it is the violation.
 
-[+] All 5 met -> dispatch the agent
-[-] Any unmet -> refine the todo, complete the prompt, create the worktree, or select the correct agent type before dispatching
+[+] All 8 met -> dispatch the agent
+[-] Any unmet -> refine the todo, complete the prompt, create the worktree, select the correct agent type, or sweep and verify the prompt file before dispatching
 
 **Unscoped-sweep rule for stale-reference todos:** any todo whose objective is 'fix the remaining/stale X' MUST begin with an unscoped repo-wide sweep; the implementer pastes the sweep command and its full output, and the todo's scope is the adjudicated sweep output -- never a pre-listed file set. Such dispatch prompts MUST NOT contain a 'do not touch any other file' constraint. Stage 1 treats an implementer report lacking the sweep command and its literal output as GAPS. Splitting a 'fix the remaining X' objective into per-site todos with pre-listed files is the same violation -- the sweep still comes first, and the todo set is derived from its adjudicated output.
 
@@ -86,6 +89,7 @@ These thoughts mean stop immediately:
 | "Launching a spend-bearing child (claude -p, a workflow run) under a prior 'go'" | STOP. Consent is per invocation -- a prior approval covers neither retries nor new launches. Write the script; the user pulls the trigger. |
 | "Dispatching general-purpose without naming the template considered and passing `model`" | STOP. It inherits your model. Name the template that does not fit, state the tier reasoning, and pass `model` explicitly (`references/MODEL_SELECTION.md`). |
 | "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and both review stages live there. |
+| "About to send a dispatch prompt containing a task tag, an issue number, or a tool/CLI claim I have not run" | STOP. Dispatch text is shipped text (BEFORE PROCEEDING items 6-8). Write the prompt to a file, run the sweep on that file and paste its output, run or read the source for every tool claim, and label what you cannot verify. |
 
 ---
 
@@ -147,3 +151,4 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |
 | "The user approved the last run -- this retry is covered" | Spend-bearing launches need explicit consent PER INVOCATION. A failed launch returns to the user for a fresh go; a silent retry spends money without authorization. Ask before every launch. |
+| "The dispatch prompt is scratch text -- hygiene applies to shipped files, not to what I dictate to an implementer" | The prompt IS shipped text: the implementer builds on it and the reviewers review the result as the implementer's own. Three measured defects (a dictated issue tag, a wrong SDK line, a wrong CLI flag) each cost a full dispatch round trip. Check before sending. |

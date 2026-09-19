@@ -1,7 +1,7 @@
 # Two-Stage Review Loop
 
 This tree begins where the subagent-driven-development loop hands off an implementer result -- the DONE arrow,
-the PARTIAL arrow, or a DONE_WITH_CONCERNS result without a correctness or scope risk -- to canary confirmation and the two review stages.
+the PARTIAL arrow, or a DONE_WITH_CONCERNS result without a correctness or scope risk -- to canary confirmation (the canary is the `Worktree:` line the implementer prints to prove it read its worktree path) and the two review stages.
 
 ```
 Confirm canary: state "Canary confirmed: [Worktree: line from implementer output]"

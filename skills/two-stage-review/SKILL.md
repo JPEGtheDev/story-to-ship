@@ -35,6 +35,8 @@ Before dispatching Stage 1 for any implementer result:
 2. `Canary confirmed: [Worktree: line from implementer output]` is stated in your response.
 3. The implementer result contains a `Limitations:` line. Absent -> resubmit for it; never infer "none".
 4. File type identified: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`. Never invoke `/code-review` (the slash command) for skill `.md` files.
+   **Context:** Choosing the Stage 2 reviewer for a changed file.
+   **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
 
 [+] All 4 met -> dispatch Stage 1
 [-] Any unmet -> resolve it before any reviewer dispatch
@@ -59,6 +61,9 @@ Canary rationale: references/REVIEW_PROTOCOL.md.
 
 Every subagent doing implementation work must report one of these five codes. Require it in every implementer prompt. Do not accept a response that does not include one.
 
+**Context:** Reading any implementer result before deciding what to do with it.
+**Forces:** A free-form result reads as finished whether the work is finished, partial, or blocked, and the dispatcher fills the gap with the optimistic reading. A fixed set of five codes makes the implementer commit to one state, and each state has one required response in the table below, so the routing is a lookup instead of a judgment call.
+
 | Code | Meaning | Your response |
 |------|---------|---------------|
 | `DONE` | Task complete, all verification passed, no concerns | Proceed to Stage 1 review |
@@ -79,10 +84,14 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
+**Context:** An implementer result is in hand and the quality review looks like the faster path.
+**Forces:** Stage 2 checks how the change is written, not whether it is the change that was asked for, so a well-written wrong change passes it. Stage 1 checks the diff against the requirements; running it first means Stage 2 spends its review only on work already known to match the spec.
 
 **Re-review required for review-covered territory:** The GAPS/REQUEST CHANGES re-run rules below are one instance of a general rule: any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances. A prior PASS/APPROVE does not extend to the new change, even one the agent itself initiates. The sole exemption is an explicit user waiver given in the same turn -- not an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial or already covered. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch visible in the transcript is the checkable signal; no automated detector exists.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
+**Context:** Dispatching any implementer subagent.
+**Forces:** The main working tree is where the coordinator commits and reviews; an implementer writing there mixes its edits into the coordinator's uncommitted state, so the diff under review no longer isolates the todo. A worktree gives the implementer its own branch and directory, so the review diff is exactly the todo.
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before proceeding to Stage 2.
 

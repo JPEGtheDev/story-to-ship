@@ -1,27 +1,8 @@
 # Worktree Setup for Subagent Dispatch
 
-Run these checks before dispatching any agent (read-only or write-side):
+Run the four Create steps of the `using-git-worktrees` skill (Worktree Lifecycle -> Create: gitignore check, `git worktree add`, path verification, branch-isolation verification) before dispatching any agent, read-only or write-side. The commands live there and are not repeated here.
 
-```bash
-# 1. Ensure .worktrees/ is gitignored before first use
-git check-ignore -q .worktrees || echo "ADD .worktrees TO .gitignore FIRST -- stop here"
-
-# 2. Create the worktree
-git worktree add .worktrees/agent-<name> -b agent/<name>
-# If nonzero exit: log error, do NOT dispatch, surface to user. Common causes:
-# - stale lock file: git worktree prune; then retry
-# - path already exists: remove it or rename
-# - branch name already registered: choose a different branch name
-
-# 3. Verify path is a worktree (not the main repo root)
-git -C .worktrees/agent-<name> rev-parse --show-toplevel
-# Output must be the absolute path of .worktrees/agent-<name> -- NOT the main repo root
-
-# 4. Write-side agents only -- verify branch isolation
-git -C .worktrees/agent-<name> branch --show-current
-# Output must NOT equal the current development branch (e.g. feat/my-branch or main)
-# Read-only agents (explorer, researcher, reviewers, skeptic, postmortem) skip step 4.
-```
+Read-only agents (explorer, researcher, reviewers, skeptic, postmortem) skip step 4 (branch isolation); write-side agents run all four.
 
 The worktree path confirmed in step 3 is the value to pass as `{{WORKTREE_PATH}}` in the agent prompt. The dispatched agent verifies its own side of this contract at start via the Worktree Self-Check block -- `references/WORKTREE_SELF_CHECK.md` is the canonical source that agent templates copy verbatim.
 

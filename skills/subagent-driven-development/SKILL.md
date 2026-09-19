@@ -95,6 +95,9 @@ These thoughts mean stop immediately:
 
 ## Dispatch Decision Table
 
+**Context:** Deciding, for one step of a todo, whether to dispatch an agent or do the step inline in the coordinator's own context.
+**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit: anything that writes a file, or reads more than a couple of files, is dispatched.
+
 | Task | Dispatch? | Type |
 |------|-----------|------|
 | Exploring unfamiliar APIs or libraries | Yes | explore agent |

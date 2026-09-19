@@ -10,7 +10,7 @@ Use the `spec-compliance-reviewer.md` agent. Provide:
 
 If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceeding (see "Who re-checks a fix round" below).
 
-**False positive check for "no other lines should change" requirements:** Stage 1 reviewers reading `git diff base..HEAD` see ALL prior commits as context, and may misattribute pre-existing branch content as implementer changes. When Stage 1 returns GAPS on this class of requirement, verify with `git show <commit> -- <file>` (single commit view). If the single-commit diff shows only the intended change, the GAPS verdict is a false positive -- proceed to Stage 2.
+**False positive check for "no other lines should change" requirements:** Stage 1 reviewers reading `git diff base..HEAD` see ALL prior commits as context, and may misattribute pre-existing branch content as implementer changes. When Stage 1 returns GAPS on this class of requirement, verify with `git show <commit> -- <file>` (single commit view). If the single-commit diff shows only the intended change, the GAPS verdict is a false positive -- proceed to Stage 2. **Consequences:** Skipping the single-commit view turns a reviewer's context artifact into a fix round: the implementer is dispatched to "fix" lines the todo never touched, and the round costs an implementer dispatch plus a Stage 1 re-run for a change that was never wrong. The check itself costs one `git show`.
 
 ## Stage 2: Code Quality Review
 
@@ -29,9 +29,9 @@ If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before pro
 
 ## Who Re-Checks a Fix Round
 
-When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground.
+When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground. If the original instance cannot be resumed -- the resume call fails or the instance is gone -- dispatch a fresh reviewer from the same template with the original requirements file and the fix-round diff, and state in the dispatch that it is a re-check of a named finding, quoting the finding verbatim, so the new instance starts from the finding instead of from a blank review.
 
-**Enforcement is procedural/self-check:** the checkable signal is a fix-round re-check dispatched as a fresh reviewer -- no resume of, or continuity with, the reviewer instance that raised the finding -- visible in the dispatch transcript. No automated detector exists.
+**Enforcement is procedural/self-check:** the checkable signal is a fix-round re-check dispatched as a fresh reviewer -- no resume of, or continuity with, the reviewer instance that raised the finding, and no stated resume failure with the finding quoted in the dispatch -- visible in the dispatch transcript. No automated detector exists.
 
 ---
 

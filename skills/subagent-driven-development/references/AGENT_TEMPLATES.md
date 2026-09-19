@@ -11,7 +11,7 @@ mirrored in the row.
 | Template | Use when | Model |
 |----------|----------|-------|
 | `amigo.md` | Use when dispatching a Three Amigos ceremony participant. | sonnet |
-| `architecture-reviewer.md` | Use when reviewing a changed file against architecture and design principles (YAGNI, Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer). | sonnet |
+| `architecture-reviewer.md` | Use when reviewing a changed file against architecture and design principles: You Ain't Gonna Need It (YAGNI), Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer. | sonnet |
 | `claim-enrichment.md` | Use when evaluating and enriching analytical claims in a synthesized summary article before quality validation. | sonnet |
 | `code-quality-reviewer.md` | Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards. | sonnet |
 | `explorer.md` | Use for read-only multi-file research to answer specific questions. | sonnet |
@@ -24,9 +24,9 @@ mirrored in the row.
 | `skeptic.md` | Use when reviewing a plan for gaps before implementation begins. | sonnet |
 | `skill-reviewer.md` | Use when auditing a single skill file against writing-skills criteria. | sonnet |
 | `spec-compliance-reviewer.md` | Use for Stage 1 post-todo review to verify implementation matches spec. | sonnet |
-| `summarization-method.md` | Use when running one summarization method (Abstractive, Extractive, or SAAC) over an injected source. | sonnet |
+| `summarization-method.md` | Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source. | sonnet |
 | `summarization-quality.md` | Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability. | sonnet |
-| `synthesizer.md` | Use when synthesizing three parallel method summaries (Abstractive, Extractive, SAAC) into a final Markdown article. | sonnet |
+| `synthesizer.md` | Use when synthesizing three parallel method summaries -- Abstractive, Extractive, State/Assign/Action/Complete (SAAC) -- into a final Markdown article. | sonnet |
 
 ## Related
 

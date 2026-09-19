@@ -23,7 +23,7 @@ These files back the Subagent-Driven Development (SDD) loop enforced by `../SKIL
 | `SDD_LOOP.md` | Decision tree from picking up a todo through implementer status codes (NEEDS_CONTEXT, BLOCKED, PARTIAL, DONE_WITH_CONCERNS, DONE) to the hand-off into the two-stage-review skill at the DONE arrow, the after-all-todos Ceremony 5 branch, rationale for the three gates, and a condensed quick-reference flowchart |
 | `SDD_RATIONALE.md` | Why subagents are mandatory, the empirical evidence mandate with acceptable/not-acceptable evidence lists, delegation quality rules, an anti-patterns table, and the canary rationale |
 | `WORKTREE_SELF_CHECK.md` | Canonical Worktree Self-Check block text -- Variant A (read-only templates) and Variant B (write templates with branch-isolation step) for agent templates to copy verbatim |
-| `WORKTREE_SETUP.md` | Pre-dispatch worktree checks (gitignore, create, verify path, branch isolation for write-side agents) and why read-only agents also need worktrees |
+| `WORKTREE_SETUP.md` | Pointer to the four Create steps of the `using-git-worktrees` skill (the commands are not repeated), the read-only exemption (skip step 4), the `{{WORKTREE_PATH}}` hand-off, and why read-only agents also need worktrees |
 
 ---
 

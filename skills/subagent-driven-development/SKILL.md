@@ -24,7 +24,7 @@ Pick up todo -> Dispatch implementer -> Load `two-stage-review` for the status c
 
 **Status code branches:** See the `two-stage-review` skill for all five codes and their required actions.
 
-**After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
+**After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5 of the `three-amigos` skill: the pre-merge whole-feature review that returns ACCEPTED or REVISIONS NEEDED)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
 **Do not advance past any todo until both Stage 1 (spec review) and Stage 2 (quality review) are PASS/APPROVE -- both are run under the `two-stage-review` skill.**
 
@@ -39,7 +39,7 @@ Before dispatching any subagent:
 1. The todo has a single, clear objective -- no compound tasks bundled together. Any specific limits, counts, or numbers in the task description are verified from source files, not from memory.
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
-   See `references/WORKTREE_SETUP.md` for setup commands, verification steps, and the `{{WORKTREE_PATH}}` value. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
+   See `references/WORKTREE_SETUP.md` for the `{{WORKTREE_PATH}}` value and the read-only exemption; the setup commands are in the `using-git-worktrees` skill. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
 5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the `two-stage-review` skill), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
 6. Dispatch text is shipped text: the implementer builds on it and the reviewers review the result as the implementer's own, so a label, tag, or wrong tool claim in the prompt ships as a defect. The prompt for this dispatch -- research or implementation alike -- was written to a file before sending, and the dispatch message points the agent at that file.
@@ -94,6 +94,9 @@ These thoughts mean stop immediately:
 ---
 
 ## Dispatch Decision Table
+
+**Context:** Deciding, for one step of a todo, whether to dispatch an agent or do the step inline in the coordinator's own context.
+**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit: anything that writes a file, or reads more than a couple of files, is dispatched.
 
 | Task | Dispatch? | Type |
 |------|-----------|------|

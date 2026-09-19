@@ -1,7 +1,7 @@
 ---
 name: synthesizer
 model: sonnet
-description: Use when synthesizing three parallel method summaries (Abstractive, Extractive, SAAC) into a final Markdown article.
+description: Use when synthesizing three parallel method summaries -- Abstractive, Extractive, State/Assign/Action/Complete (SAAC) -- into a final Markdown article.
 ---
 
 # Synthesizer Agent

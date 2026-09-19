@@ -1,7 +1,7 @@
 ---
 name: summarization-method
 model: sonnet
-description: Use when running one summarization method (Abstractive, Extractive, or SAAC) over an injected source.
+description: Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source.
 ---
 
 # Summarization Method Agent

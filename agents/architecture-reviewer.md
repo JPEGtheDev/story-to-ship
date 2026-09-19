@@ -1,7 +1,7 @@
 ---
 name: architecture-reviewer
 model: sonnet
-description: Use when reviewing a changed file against architecture and design principles (YAGNI, Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer).
+description: Use when reviewing a changed file against architecture and design principles: You Ain't Gonna Need It (YAGNI), Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer.
 ---
 
 # Architecture Reviewer Agent

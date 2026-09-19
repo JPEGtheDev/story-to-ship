@@ -24,7 +24,7 @@ mirrored in the row.
 | `skeptic.md` | Use when reviewing a plan for gaps before implementation begins. | sonnet |
 | `skill-reviewer.md` | Use when auditing a single skill file against writing-skills criteria. | sonnet |
 | `spec-compliance-reviewer.md` | Use for Stage 1 post-todo review to verify implementation matches spec. | sonnet |
-| `summarization-method.md` | Use when running one summarization method (Abstractive, Extractive, or SAAC) over an injected source. | sonnet |
+| `summarization-method.md` | Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source. | sonnet |
 | `summarization-quality.md` | Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability. | sonnet |
 | `synthesizer.md` | Use when synthesizing three parallel method summaries (Abstractive, Extractive, SAAC) into a final Markdown article. | sonnet |
 

@@ -26,7 +26,7 @@ mirrored in the row.
 | `spec-compliance-reviewer.md` | Use for Stage 1 post-todo review to verify implementation matches spec. | sonnet |
 | `summarization-method.md` | Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source. | sonnet |
 | `summarization-quality.md` | Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability. | sonnet |
-| `synthesizer.md` | Use when synthesizing three parallel method summaries (Abstractive, Extractive, SAAC) into a final Markdown article. | sonnet |
+| `synthesizer.md` | Use when synthesizing three parallel method summaries -- Abstractive, Extractive, State/Assign/Action/Complete (SAAC) -- into a final Markdown article. | sonnet |
 
 ## Related
 

@@ -30,7 +30,7 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 1. Working branch confirmed: run `git branch --show-current`. Output must NOT be `main` or `master`. If it is: run `git checkout main && git pull && git checkout -b <new-branch>` now. Do not advance past this item until on a non-main branch.
 2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
-3. For multi-step tasks (3+ steps): tasks for this work exist in the task tool (TaskList)
+3. For multi-step tasks (3+ steps): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
 4. Required skills for this domain are loaded (check session-bootstrap On Start table)
 5. No placeholders in any todo -- every item is concrete and executable
 6. Verification method is identified -- know what command proves success before starting
@@ -273,7 +273,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
 | "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (see "Re-review required for review-covered territory" in the `two-stage-review` skill; exemption is only an explicit same-turn user waiver). |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
-| "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a task via TaskCreate or as a session note. "I'll remember" is not a commitment mechanism. |
+| "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a todo in the plan file or as a session note. "I'll remember" is not a commitment mechanism. |
 | "This is just a position/ordering/default value change - not real behavior" | If the change is observable (rendering differs, field value differs, control flow path changes), it requires a failing test first. Observable = testable. No exceptions. |
 | "I'm just investigating -- I'll create the branch before I actually start coding" | Investigation shapes the fix before you notice it is shaping it. By the time you "start coding," the investigation has already informed the edit. Run BEFORE PROCEEDING item 1 at skill load, not at first edit. |
 | "The user said 'merge first', so I am authorized to merge" | Sequence authorization is not actor authorization. Hand off and ask -- see `User-Reserved Decisions` above for the full rule. |

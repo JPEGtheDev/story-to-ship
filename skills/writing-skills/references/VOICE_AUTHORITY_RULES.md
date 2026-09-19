@@ -80,7 +80,7 @@ Exempt categories (scoped narrowly):
 - Skill names in backticks (`verification-before-completion`) -- the name is the pointer.
 - Terms used in their ordinary general-programming sense (function, commit, branch). The exemption fails -- and the rule applies -- the moment the skill assigns the term a narrower or shifted meaning ("class" as defect-class, "register" as prose style, "canary" as proof-of-execution line).
 - A term that appears only inside a pointer sentence naming its defining location (`See references/X.md for A, B, C`) is exempt. The exemption fails -- and the rule applies -- when the named file does not actually define the term; a pointer to a file that does not define it is not a definition.
-- Tool and mechanism names of the agent platform that are self-identifying in context (TaskList, TaskCreate -- the name states what it is), and platform-runtime concepts every reading agent directly experiences (context compaction). The exemption fails -- and the rule applies -- when the name is a project-local abstraction that an agent with no project context cannot resolve compositionally from the words alone; that name needs a gloss on first use.
+- Tool and mechanism names of the agent platform that are self-identifying in context (Skill, SendMessage -- the name states what it is), and platform-runtime concepts every reading agent directly experiences (context compaction). The exemption fails -- and the rule applies -- when the name is a project-local abstraction that an agent with no project context cannot resolve compositionally from the words alone; that name needs a gloss on first use.
 
 Examples:
 - WRONG: "An instance fixed is not evidence the class is gone." ("class" undefined)

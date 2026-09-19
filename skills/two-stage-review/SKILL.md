@@ -71,7 +71,7 @@ Every subagent doing implementation work must report one of these five codes. Re
 
 ## 2-Stage Review Protocol
 
-Every completed implementation task requires two reviews in this order. This is mandatory -- not optional -- after every single todo.
+Every completed implementation task requires two reviews in this order. This is mandatory -- not optional -- after every single todo (a todo is defined in the `writing-plans` skill, Building the Plan step 1).
 
 ```
 Stage 1: Spec Compliance Review     <- ALWAYS FIRST (spec-compliance-reviewer.md)

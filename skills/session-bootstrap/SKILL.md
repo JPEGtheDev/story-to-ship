@@ -96,7 +96,7 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 3. All required skills for this task type loaded (in parallel if multiple domains)
 4. Skill load announcement made for each loaded skill
 5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work.
-6. If resuming a prior session: pending tasks checked (via TaskList); Skeptic + plan-reviewer pair dispatched (per `writing-plans`) before first implementation step
+6. If resuming a prior session: pending todos read from the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1); Skeptic + plan-reviewer pair dispatched (per `writing-plans`) before first implementation step
 7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) is dispatched -- NOT done inline

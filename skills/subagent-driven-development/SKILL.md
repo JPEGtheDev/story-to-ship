@@ -24,7 +24,7 @@ Pick up todo -> Dispatch implementer -> Load `two-stage-review` for the status c
 
 **Status code branches:** See the `two-stage-review` skill for all five codes and their required actions.
 
-**After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
+**After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5 of the `three-amigos` skill: the pre-merge whole-feature review that returns ACCEPTED or REVISIONS NEEDED)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
 **Do not advance past any todo until both Stage 1 (spec review) and Stage 2 (quality review) are PASS/APPROVE -- both are run under the `two-stage-review` skill.**
 

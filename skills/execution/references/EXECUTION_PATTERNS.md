@@ -90,7 +90,7 @@ Address the source of friction rather than working around it. A system that is h
 ## Related Skills
 
 - `execution` -- work loop, commit rhythm, mode declaration
-- `writing-plans` -- SIMPLICITY_PRINCIPLES.md for Assign Problems Not Tasks; YAGNI (You Ain't Gonna Need It) gate
+- `writing-plans` -- its simplicity-principles reference, "Assign Problems, Not Tasks" section; YAGNI (You Ain't Gonna Need It) gate
 - `systematic-debugging` -- Profile Before Optimizing applies equally to debugging: measure before concluding
 
 ---
@@ -156,10 +156,10 @@ After any mistake or user correction:
 | Writing/editing C++ | `code-quality` |
 | Commits or PRs | `versioning` |
 | CI/CD (Continuous Delivery) work | `workflow` |
-| Code review (code/config files) | `code-quality-reviewer` agent template, 1 per file |
+| Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule |
 | Skill review (skill `.md` files) | `writing-skills` + `skill-reviewer` agent template |
 
-Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-reference todos in `subagent-driven-development` (SKILL.md); scope from sweeps, never from known-site lists.
+Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-reference todos in `subagent-driven-development`; scope from sweeps, never from known-site lists.
 
 ---
 

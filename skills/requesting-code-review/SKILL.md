@@ -59,22 +59,22 @@ Not all review is equal. State explicitly in the review request:
 
 For non-trivial PRs, dispatch code review agents before requesting human review:
 
-**Rule: one agent per file changed. Identify the file type first, then dispatch the matching template:**
+**Rule: every changed file is listed in a review dispatch, at most two files per dispatch, grouped so files that implement one change go together. Each dispatch returns one verdict block per file (the Stage 2 rule of the `two-stage-review` skill). Identify the file type first, then dispatch the matching template:**
 
 - Skill `.md` files (in `skills/`) -> `skill-reviewer.md`
 - Code/config files -> `code-quality-reviewer.md`
-- Architecture-relevant changes (available on request, not a mandatory per-file dispatch) -> `architecture-reviewer.md`
+- Architecture-relevant changes (available on request, not required for every changed file) -> `architecture-reviewer.md`
 
 ```
-# For each changed file, dispatch the matching template, e.g.:
+# For each group of at most two files that implement one change, dispatch the matching template, e.g.:
 task agent_type="code-quality-reviewer" prompt="
-Review [file path] changed in this PR.
+Review [file path(s), one per line] changed in this PR; return one verdict block per file.
 SHA: [commit SHA]
-Focus: [specific concern for this file]
+Focus: [specific concern for these files]
 "
 ```
 
-**Each template defines its own return format** -- do not impose a generic severity vocabulary on the dispatch prompt. `code-quality-reviewer.md` returns `VERDICT: APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT`. `skill-reviewer.md` returns `Verdict: PASS | PASS (size advisory) | NEEDS WORK`. `architecture-reviewer.md` returns `VERDICT: APPROVE | REQUEST CHANGES`.
+**Each template defines its own input and return format** -- `code-quality-reviewer.md` takes a path list; `skill-reviewer.md` takes two named path slots. Do not impose a generic severity vocabulary on the dispatch prompt. `code-quality-reviewer.md` returns `VERDICT: APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT`. `skill-reviewer.md` returns `Verdict: PASS | PASS (size advisory) | NEEDS WORK`. `architecture-reviewer.md` returns `VERDICT: APPROVE | REQUEST CHANGES`.
 
 **Collect all agent results before acting on any of them.** A REQUEST CHANGES, REJECT, or NEEDS WORK verdict from any agent must be resolved before requesting human review.
 

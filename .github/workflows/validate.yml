@@ -122,6 +122,30 @@ jobs:
           done
           echo "[+] All SKILL.md files have required frontmatter (name, description)"
 
+      - name: Reject unquoted colon-space in agents/ and SKILL.md frontmatter values
+        # AGENTS_DIR and SKILLS_DIR exist so the gate-can-fail proofs can point this
+        # step at temp copies; CI never sets them.
+        run: |
+          set -e
+          # A frontmatter value that is unquoted and contains a colon followed by a
+          # space (or ends with a colon) is not valid YAML: a parser reads the colon
+          # as a second mapping. Quoted, bracketed, and braced values are skipped.
+          pat="^ *[A-Za-z_-]+: [^\"'[{].*(: |:\$)"
+          fail=0
+          for f in "${AGENTS_DIR:-agents}"/*.md "${SKILLS_DIR:-skills}"/*/SKILL.md; do
+            hits=$(sed -n '2,/^---$/p' "$f" | grep -nE "$pat" || true)
+            if [ -n "$hits" ]; then
+              printf 'INVALID FRONTMATTER VALUE: %s -- %s\n' "$f" "$hits"
+              fail=$((fail + 1))
+            fi
+          done
+          if [ "$fail" -gt 0 ]; then
+            echo "Found $fail frontmatter block(s) with a colon-space inside an unquoted value"
+            echo "Hint: use ' -- ' instead of ': ' inside the value, or quote the whole value"
+            exit 1
+          fi
+          echo "[+] No agents/ or skills/*/SKILL.md frontmatter value contains an unquoted colon-space"
+
       - name: Check agent template contracts
         run: |
           set -e

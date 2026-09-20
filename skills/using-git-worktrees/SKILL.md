@@ -34,7 +34,7 @@ git check-ignore -q .worktrees || echo "ADD .worktrees TO .gitignore FIRST"
 
 # Step 2: Create the worktree on a new branch
 git worktree add .worktrees/agent-<name> -b agent/<name>
-# If nonzero exit: log the error, do NOT dispatch
+# If nonzero exit: log the error, do NOT dispatch, surface the error to the user
 #   stale lock:    git worktree prune; then retry
 #   path exists:   remove or rename
 #   branch in use: choose a different name

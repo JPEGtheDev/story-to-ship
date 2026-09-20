@@ -14,14 +14,14 @@ Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
     +-- PASS
          |
          v
-Stage 2: Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one per file
+Stage 2: Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one dispatch per group of at most two files that implement one change; one verdict block per file listed
     |
-    +-- REQUEST CHANGES --> Implementer fixes. Re-dispatch Stage 2.
+    +-- Any block REQUEST CHANGES, REJECT, or NEEDS WORK --> Implementer fixes. Re-dispatch Stage 2.
     |
-    +-- APPROVE or APPROVE WITH NITS
+    +-- Every block APPROVE, APPROVE WITH NITS, PASS, or PASS (size advisory)
          |
          v
-Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
+Mark todo done once each nit from an APPROVE WITH NITS block is fixed, or declined with the reason recorded in the todo's status, and the size report from any PASS (size advisory) block is recorded there for the user's decision. Reload relevant skills (session-bootstrap refresh rule).
 ```
 
 ## Compact form
@@ -33,8 +33,8 @@ Mark todo done. Reload relevant skills (session-bootstrap refresh rule).
     Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1
               |
               v
-    Stage 2: `code-quality-reviewer.md` (code/config) or `skill-reviewer.md` (skill .md files) -- 1 per file -> REQUEST CHANGES? -> implementer fixes -> re-run Stage 2
+    Stage 2: `code-quality-reviewer.md` or `skill-reviewer.md` by file type -- at most two files that implement one change per dispatch, one block per file -> any block REQUEST CHANGES / REJECT / NEEDS WORK? -> implementer fixes -> re-run Stage 2
               |
               v
-    Mark todo done. Reload skills (session-bootstrap refresh rule).
+    Mark todo done once each nit is fixed or declined with a recorded reason, and any size report is recorded for the user's decision. Reload skills (session-bootstrap refresh rule).
 ```

@@ -1,6 +1,6 @@
 ---
 name: code-quality-reviewer
-model: sonnet
+model: opus
 description: Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards.
 ---
 
@@ -10,6 +10,8 @@ You are reviewing code for quality, correctness, and standards compliance.
 
 ## Files under review
 {{FILES}}
+
+The files under review, one path per line. Review each file in full and end with one summary block per file (Output Contract below).
 
 ## Worktree Self-Check -- Run BEFORE starting
 
@@ -28,7 +30,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 ## Review Protocol
 
-**Step 1 -- Full file read:** Read every file listed above in full. Do not limit your review to changed lines.
+**Step 1 -- Full file read:** Read every file listed above in full. Do not limit your review to changed lines. A listed path that no longer exists is a deletion only when the diff Step 3 derives shows a delete hunk for it: then skip the read and follow the deleted-path rules in the Output Contract. A listed path with no delete hunk was never created, which is a missing-deliverable finding, not a deletion.
 
 **Step 2 -- Run the full checklist** against the complete content of each file.
 
@@ -115,6 +117,25 @@ Shipped-file hygiene: [list file:line hits, or NONE]
 ```
 
 Do NOT comment on style issues already handled by clang-format. Only flag things clang-format cannot catch.
+
+## Output Contract (per-file blocks)
+
+After the return format above, end with ONE summary block per file listed under Files under review, in the exact shape below, nothing merged across files.
+
+- The Return format VERDICT is the most severe verdict across the per-file blocks (APPROVE < APPROVE WITH NITS < REQUEST CHANGES < REJECT).
+- A dispatch-wide finding, such as an evidence spot-check mismatch or a finding spanning files, sets the Return format VERDICT directly, overriding the roll-up, and is repeated in the block of every file it implicates; a finding that implicates no single file appears only in the Return format block.
+- Omitting a listed file's block for any reason, or merging two files into one block, is an incomplete return and is re-dispatched.
+- For a listed path that no longer exists in the worktree, confirm a delete hunk for it in the Step 3 diff; a listed path with no delete hunk was never created and is a missing-deliverable finding, not a deletion. Before calling a deletion clean, grep the tree for the deleted path and its bare filename.
+- For a confirmed deletion, emit the block with QUOTED LINE reading exactly `file deleted by this todo`, and VERDICT APPROVE when the deletion is clean. If the deletion leaves a dangling reference or removes content still required elsewhere, list it on the FINDINGS line and set that block's VERDICT to REQUEST CHANGES.
+- Include the `Adversarial scenario tested:` line in every block: fill it with one unscripted real-world case checked against the clause wording when the diff for THIS file adds or edits a line matching the case-sensitive pattern `EXCEPTION|carve-out`; otherwise fill it with exactly `trigger not matched`.
+
+```
+FILE: <path>
+QUOTED LINE: <the changed line most at issue, quoted verbatim, with its line number>
+VERDICT: APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT
+FINDINGS: <numbered list with file:line, or "none">
+Adversarial scenario tested: <case, or "trigger not matched">
+```
 
 ## Keep Reasoning Terse
 

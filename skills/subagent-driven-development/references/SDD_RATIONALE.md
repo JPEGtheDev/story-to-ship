@@ -48,7 +48,7 @@ See the canonical Red Flags table in `../SKILL.md`.
 |---|---|
 | "I'll check this myself" (for 5+ files) | Fills context, biased by assumptions |
 | Skipping Stage 1 review because "it looks right" | Spec gaps ship; quality review doesn't catch them |
-| One agent reviewing multiple large files | Coverage is shallow; 1 per file is the rule |
+| One agent reviewing more than two files, or two unrelated ones | Coverage is shallow; the cap is two files that implement one change, each with its own verdict block |
 | Acting on subagent findings without verifying | Subagents can be wrong -- findings are hypotheses |
 | Dispatching without a clear return format | Agent returns noise |
 | Sharing full session history as context | Contaminates search; subagent inherits your assumptions |

@@ -26,7 +26,7 @@ Pick up todo -> Dispatch implementer -> Load `two-stage-review` for the status c
 
 **After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5 of the `three-amigos` skill: the pre-merge whole-feature review that returns ACCEPTED or REVISIONS NEEDED)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
-**Do not advance past any todo until both Stage 1 (spec review) and Stage 2 (quality review) are PASS/APPROVE -- both are run under the `two-stage-review` skill.**
+**Do not advance past any todo until Stage 1 (spec review) returns PASS and every file the todo changed has a Stage 2 (quality review) verdict block that advances under the `two-stage-review` skill's Stage 2 rule -- both stages are run under that skill.**
 
 See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow.
 
@@ -41,7 +41,7 @@ Before dispatching any subagent:
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
    See `references/WORKTREE_SETUP.md` for the `{{WORKTREE_PATH}}` value and the read-only exemption; the setup commands are in the `using-git-worktrees` skill. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
-5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for per-file review analysis (per the `two-stage-review` skill), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
+5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for Stage 2 review (grouped as the `two-stage-review` skill's Stage 2 rule says), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
 6. Dispatch text is shipped text: the implementer builds on it and the reviewers review the result as the implementer's own, so a label, tag, or wrong tool claim in the prompt ships as a defect. The prompt for this dispatch -- research or implementation alike -- was written to a file before sending, and the dispatch message points the agent at that file.
 7. That prompt file passed the pre-PR hygiene sweep of the `finishing-a-development-branch` skill plus one more grep for spelled-out issue references (`\b[Ii]ssues?[ ]+#?[0-9]+\b`), and the sweep output (or "0 hits") is pasted in the dispatch turn.
 8. Every claim in the prompt file about a tool, SDK (software development kit), library, or command-line interface (CLI) flag was verified by running the command or reading the target repo's config (package manifest, CI file), or is labeled `unverified` in the prompt. Enforcement for items 6-8 is procedural self-check with no detector; the checkable signal is the sent prompt file -- a label, tag, or unlabeled tool claim in it is the violation.
@@ -104,8 +104,8 @@ These thoughts mean stop immediately:
 | Scanning 5+ files for patterns | Yes | explore agent |
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic + plan-reviewer pair (see writing-plans skill) |
-| Code review (per-file) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- 1 per file |
-| Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file |
+| Code review (Stage 2) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- one dispatch per group of at most two files that implement one change, one verdict block per file (the `two-stage-review` skill, Stage 2) |
+| Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file -- the template takes one file path, so no grouping |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
@@ -148,7 +148,7 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step worktree creation check in the `using-git-worktrees` skill first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
-| "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one dispatch, always. |
+| "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one implementer dispatch, always. |
 | "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |

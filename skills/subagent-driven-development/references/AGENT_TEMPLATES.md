@@ -11,7 +11,7 @@ mirrored in the row.
 | Template | Use when | Model |
 |----------|----------|-------|
 | `amigo.md` | Use when dispatching a Three Amigos ceremony participant. | sonnet |
-| `architecture-reviewer.md` | Use when reviewing a changed file against architecture and design principles: You Ain't Gonna Need It (YAGNI), Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer. | sonnet |
+| `architecture-reviewer.md` | Use when reviewing a changed file against architecture and design principles -- You Ain't Gonna Need It (YAGNI), Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer. | sonnet |
 | `claim-enrichment.md` | Use when evaluating and enriching analytical claims in a synthesized summary article before quality validation. | sonnet |
 | `code-quality-reviewer.md` | Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards. | sonnet |
 | `explorer.md` | Use for read-only multi-file research to answer specific questions. | sonnet |

@@ -3,8 +3,8 @@
 Find the row whose Use-when matches the todo and dispatch that template (per BEFORE
 PROCEEDING item 4 in `../SKILL.md`); if no row matches, the General-purpose dispatch rule
 in `MODEL_SELECTION.md` applies. The Model column is each template's frontmatter `model:`
-pin, which is the value the dispatch actually uses (all 17 are `sonnet` today; a future
-non-sonnet pin shows here). CI checks every row against `agents/` by exact string match, so
+pin, which is the value the dispatch actually uses (a pin other than `sonnet` shows here and
+follows `MODEL_SELECTION.md`). CI checks every row against `agents/` by exact string match, so
 a template description or model change is made in the template frontmatter first and then
 mirrored in the row.
 
@@ -22,7 +22,7 @@ mirrored in the row.
 | `rehearsal-subject.md` | Use when an agent must act as the coordinator under test in a behavioral rehearsal of skill or agent text. | sonnet |
 | `researcher.md` | Use when empirically confirming or denying a hypothesis. | sonnet |
 | `skeptic.md` | Use when reviewing a plan for gaps before implementation begins. | sonnet |
-| `skill-reviewer.md` | Use when auditing a single skill file against writing-skills criteria. | sonnet |
+| `skill-reviewer.md` | Use when auditing skill files against writing-skills criteria. | opus |
 | `spec-compliance-reviewer.md` | Use for Stage 1 post-todo review to verify implementation matches spec. | sonnet |
 | `summarization-method.md` | Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source. | sonnet |
 | `summarization-quality.md` | Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability. | sonnet |

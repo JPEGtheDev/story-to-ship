@@ -12,14 +12,19 @@ One agent per skill directory -- the agent reviews `SKILL.md` and every file in 
    - `VOICE_AUTHORITY_RULES.md` -> `{{VOICE_AUTHORITY_RULES}}`
    - `SIZE_AND_COMPRESSION.md` -> `{{SIZE_AND_COMPRESSION}}`
    - `REVIEW_INSTRUCTIONS.md` -> `{{REVIEW_INSTRUCTIONS}}`
-2. For each skill: substitute all four placeholders for the `skill-reviewer` agent, set `{{SKILL_PATH}}` (absolute path to the skill's `SKILL.md` inside the worktree), `{{RECENT_CHANGES}}`, and `{{WORKTREE_PATH}}` (the pre-created worktree path, e.g. `<repo_root>/.worktrees/<agent-name>`), dispatch. The agent derives `references/` from `dirname({{SKILL_PATH}})` at runtime.
-3. For each modified reference file listed in `{{RECENT_CHANGES}}`: dispatch a SEPARATE skill-reviewer agent with that file as the primary focus. Include the file path explicitly in the prompt. The agent applies the full Step 2 quality checklist (weak language, acronym rule, jargon rule, absolute paths, cross-skill refs, enforcement co-location) adapted for a reference file -- skip anatomy element checks (Iron Law, Announcement, Gate Function, Rationalization Table) since those only apply to SKILL.md.
+2. For each skill: substitute all four reference placeholders for the `skill-reviewer` agent, set the five dispatch placeholders, then dispatch. The agent derives `references/` from `dirname({{SKILL_PATH}})` at runtime.
+   - `{{SKILL_PATH}}` -- absolute path to the skill's `SKILL.md` inside the worktree
+   - `{{RECENT_CHANGES}}` -- the changes that prompted the audit
+   - `{{WORKTREE_PATH}}` -- the pre-created worktree path, e.g. `<repo_root>/.worktrees/<agent-name>`
+   - `{{SECOND_PATH}}` -- `none` in this flow; pairing two files that implement one change into one dispatch is the Stage 2 change review the `two-stage-review` skill defines, not an audit
+   - `{{IMPLEMENTER_EVIDENCE}}` -- the implementer's pasted verification output, or a statement that no implementer ran for this audit
+3. For each modified reference file listed in `{{RECENT_CHANGES}}`: dispatch a SEPARATE skill-reviewer agent with that file as `{{SKILL_PATH}}` and `{{SECOND_PATH}}` again `none`. Include the file path explicitly in the prompt. The agent applies the full Step 2 quality checklist (weak language, acronym rule, jargon rule, absolute paths, cross-skill refs, enforcement co-location) adapted for a reference file -- skip anatomy element checks (Iron Law, Announcement, Gate Function, Rationalization Table) since those only apply to SKILL.md.
 4. Collect all reports before acting on any result.
 5. For each NEEDS WORK verdict: update the skill and re-dispatch a review of that file.
 
 ---
 
-## Why 4 Placeholders
+## Why 4 Reference Placeholders
 
 | Placeholder | Source file | What it provides |
 |-------------|-------------|------------------|

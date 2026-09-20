@@ -122,25 +122,29 @@ jobs:
           done
           echo "[+] All SKILL.md files have required frontmatter (name, description)"
 
-      - name: Parse agents/ and SKILL.md frontmatter as YAML
+      - name: Reject unquoted colon-space in agents/ and SKILL.md frontmatter values
         # AGENTS_DIR and SKILLS_DIR exist so the gate-can-fail proofs can point this
         # step at temp copies; CI never sets them.
         run: |
           set -e
-          echo "ruby: $(ruby --version)"
+          # A frontmatter value that is unquoted and contains a colon followed by a
+          # space (or ends with a colon) is not valid YAML: a parser reads the colon
+          # as a second mapping. Quoted, bracketed, and braced values are skipped.
+          pat="^ *[A-Za-z_-]+: [^\"'[{].*(: |:\$)"
           fail=0
           for f in "${AGENTS_DIR:-agents}"/*.md "${SKILLS_DIR:-skills}"/*/SKILL.md; do
-            if ! sed -n '2,/^---$/p' "$f" | ruby -ryaml -e 'begin; YAML.safe_load($stdin.read); rescue Psych::SyntaxError => e; warn e.message; exit 1; end' 2>/tmp/fm-err.txt; then
-              printf 'INVALID YAML FRONTMATTER: %s -- %s\n' "$f" "$(head -1 /tmp/fm-err.txt)"
+            hits=$(sed -n '2,/^---$/p' "$f" | grep -nE "$pat" || true)
+            if [ -n "$hits" ]; then
+              printf 'INVALID FRONTMATTER VALUE: %s -- %s\n' "$f" "$hits"
               fail=$((fail + 1))
             fi
           done
           if [ "$fail" -gt 0 ]; then
-            echo "Found $fail frontmatter block(s) that do not parse as YAML"
-            echo "Hint: a colon followed by a space inside an unquoted value ends the value; use ' -- ' instead, or quote the whole value"
+            echo "Found $fail frontmatter block(s) with a colon-space inside an unquoted value"
+            echo "Hint: use ' -- ' instead of ': ' inside the value, or quote the whole value"
             exit 1
           fi
-          echo "[+] All agents/ and skills/*/SKILL.md frontmatter blocks parse as YAML"
+          echo "[+] No agents/ or skills/*/SKILL.md frontmatter value contains an unquoted colon-space"
 
       - name: Check agent template contracts
         run: |

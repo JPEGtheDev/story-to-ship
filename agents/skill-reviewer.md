@@ -82,14 +82,18 @@ This governs reasoning only, never the deliverable text.
 
 ## Output Contract (per-file blocks)
 
-In addition to the Return Format in the Review Process, end with ONE summary block for
-`{{SKILL_PATH}}` and, when `{{SECOND_PATH}}` names an existing file, ONE more for
+In addition to the Return Format in the Review Process, end with ONE summary block
+for `{{SKILL_PATH}}` and, when `{{SECOND_PATH}}` names an existing file, ONE more for
 `{{SECOND_PATH}}`, each in this exact shape. Two files named means two blocks. Merging two
 files into one block, or omitting a named file's block for any reason, is an incomplete
-return and is re-dispatched. Include the `Adversarial scenario tested:` line in every block:
-fill it with one unscripted real-world case when the diff for THIS file adds or edits a line
-matching the case-sensitive pattern `EXCEPTION|carve-out`; otherwise fill it with exactly
-`trigger not matched`.
+return and is re-dispatched. Each block's VERDICT repeats the Verdict the Review Process
+returned for that file. The Implementer Evidence spot-check does not feed the per-file
+Verdicts: the Review Process's regardless-of-other-findings rule for a material spot-check
+mismatch applies once, at dispatch level, on the line described below, and never inside
+a file's run. Include the `Adversarial scenario tested:` line in every block: fill it
+with one unscripted real-world case checked against the clause wording when the diff for
+THIS file adds or edits a line matching the case-sensitive pattern `EXCEPTION|carve-out`;
+otherwise fill it with exactly `trigger not matched`.
 
 ```
 FILE: <path>
@@ -98,3 +102,7 @@ VERDICT: PASS | PASS (size advisory) | NEEDS WORK
 FINDINGS: <numbered list with file:line, or "none">
 Adversarial scenario tested: <case, or "trigger not matched">
 ```
+
+End with one dispatch-level line after the blocks, in this exact shape, followed on a
+MISMATCH by both outputs verbatim: `Spot-check: <command> -> MATCH | MISMATCH`. A MISMATCH
+makes the dispatch NEEDS WORK and changes no per-file VERDICT.

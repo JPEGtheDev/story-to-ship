@@ -18,7 +18,7 @@ These files back the Subagent-Driven Development (SDD) loop enforced by `../SKIL
 
 | File | Covers |
 |------|--------|
-| `AGENT_TEMPLATES.md` | Table of all 17 agent templates in `agents/` with Use-when match text and Model column (all sonnet today); dispatch rule when no row matches; CI checks each row against the template frontmatter |
+| `AGENT_TEMPLATES.md` | Table of all 17 agent templates in `agents/` with Use-when match text and Model column (mirrors each template's frontmatter pin); dispatch rule when no row matches; CI checks each row against the template frontmatter |
 | `MODEL_SELECTION.md` | Model preference priority order, task-type tier table, Economy/Standard/Premium tier definitions and the content-touching work floor, named agent/ceremony tier assignments, Premium justification rule, tier-cost comparison rule, and the general-purpose dispatch rule (state closest template considered, tier reasoning, pass `model` explicitly) |
 | `SDD_LOOP.md` | Decision tree from picking up a todo through implementer status codes (NEEDS_CONTEXT, BLOCKED, PARTIAL, DONE_WITH_CONCERNS, DONE) to the hand-off into the two-stage-review skill at the DONE arrow, the after-all-todos Ceremony 5 branch, rationale for the three gates, and a condensed quick-reference flowchart |
 | `SDD_RATIONALE.md` | Why subagents are mandatory, the empirical evidence mandate with acceptable/not-acceptable evidence lists, delegation quality rules, an anti-patterns table, and the canary rationale |

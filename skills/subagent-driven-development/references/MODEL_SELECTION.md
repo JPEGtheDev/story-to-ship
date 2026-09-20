@@ -15,16 +15,18 @@ If the user states a model preference in the current session, store it as a memo
 | Mechanical: grep, rename, format, one-function change | Standard |
 | Research: read files, summarize patterns, compare approaches | Standard |
 | Implementation: multi-file, design judgment | Standard |
-| Review: spec compliance, code quality, architecture | Standard |
+| Review: spec compliance (Stage 1 of the `two-stage-review` skill) | Standard |
+| Review: quality (Stage 2 of the `two-stage-review` skill; template rows in the assignments table below) | Premium |
+| Review: architecture | Standard |
 | Architecture design, security, final review (NOT compliance review) | Premium |
 
 ## Tier Assignments
 
-Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku), for tasks that clear the content-touching floor below; no row in the table currently uses it. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for the Premium row.
+Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku), for tasks that clear the content-touching floor below; no row in either table currently uses it. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for rows marked Premium.
 
 **Content-touching work floor:** Classification, extraction, distillation, and summarization tasks -- any task that exercises judgment over source content -- run at Standard tier or above, no matter how narrow or mechanical the task otherwise looks. Economy is acceptable only for tasks whose output is mechanically verifiable (for example, a file-listing roll-up), never for judgment over source content. Verbatim copying from large content embedded in a prompt counts as content extraction for the purpose of this floor; verify bytes by hash or pass the content by file path instead of copying it inline.
 
-Tier assignments for named agents and ceremonies, listed here so the full mapping lives in one place. Every current row is Standard, the default tier and the floor for content-touching work described above:
+Tier assignments for named agents and ceremonies, listed here so the full mapping lives in one place. Rows are Standard, the default tier and the floor for content-touching work described above, unless the row says Premium:
 
 | Agent or ceremony | Tier | Why |
 |-------------------|------|-----|
@@ -36,10 +38,12 @@ Tier assignments for named agents and ceremonies, listed here so the full mappin
 | Three Amigos Ceremony 4 (Pivot Assessment) | Standard | Gate decision on scope and correctness risk |
 | Three Amigos Ceremony 5 (Signoff) | Standard | Pre-merge acceptance decision |
 | rehearsal-subject template (coordinator under test) | Standard | Plays the coordinator in a behavioral rehearsal of skill text; the behavior under test is Standard-tier behavior, and a Premium subject would measure the wrong tier |
+| skill-reviewer template (Stage 2 quality review of skill files) | Premium | Measured on this repo: a Standard-tier Stage 2 let two defects ship that a Premium-tier reviewer caught on the same diffs (record: the research issue titled "Stage 2 review: evaluate per-todo batching as an alternative to one-reviewer-per-file" on the repo's issue tracker); one dispatch per todo, per-file verdict blocks |
+| code-quality-reviewer template (Stage 2 quality review of code and config files) | Premium | No separate measurement for code and config files; assigned Premium by the same argument and the same dispatch shape as the skill-reviewer row |
 
 This table is the single source of truth for agent and ceremony tiers. Skills and agent templates MUST point here rather than restating model IDs in prose; agent template frontmatter model fields implement these assignments and MUST stay consistent with this table.
 
-**Using Premium for non-architecture tasks:** State the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
+**Using Premium for non-architecture tasks:** A template row in the assignments table above that says Premium needs no per-dispatch reasoning. For anything else, state the reasoning before dispatching. Example: "Dispatching Premium for this review because the change touches 3 layer boundaries." Do not dispatch Premium silently for mechanical work.
 
 **Comparing tiers by cost:** When comparing model tiers (for example Economy vs. Standard) for cost, report dollar cost priced from current per-million-token pricing fetched from the platform docs at analysis time -- never compare raw token counts. Tokenizers differ across model families, so token counts from different models are not unit-compatible; a model that consumes more tokens for the same text is not necessarily the more expensive one. The harness's own token-usage figure for a subagent is not a billing-grade metric -- billing-grade truth comes from the per-message usage events recorded in the session and subagent transcript JSONL (JSON Lines) files (input tokens, output tokens, cache creation, cache read); sum those when a dollar comparison matters. A resumed subagent can silently revert to its template's default model instead of the model used for its earlier dispatch -- re-verify the per-call model field before attributing any result to a tier.
 

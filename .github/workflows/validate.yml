@@ -122,6 +122,26 @@ jobs:
           done
           echo "[+] All SKILL.md files have required frontmatter (name, description)"
 
+      - name: Parse agents/ and SKILL.md frontmatter as YAML
+        # AGENTS_DIR and SKILLS_DIR exist so the gate-can-fail proofs can point this
+        # step at temp copies; CI never sets them.
+        run: |
+          set -e
+          echo "ruby: $(ruby --version)"
+          fail=0
+          for f in "${AGENTS_DIR:-agents}"/*.md "${SKILLS_DIR:-skills}"/*/SKILL.md; do
+            if ! sed -n '2,/^---$/p' "$f" | ruby -ryaml -e 'begin; YAML.safe_load($stdin.read); rescue Psych::SyntaxError => e; warn e.message; exit 1; end' 2>/tmp/fm-err.txt; then
+              printf 'INVALID YAML FRONTMATTER: %s -- %s\n' "$f" "$(head -1 /tmp/fm-err.txt)"
+              fail=$((fail + 1))
+            fi
+          done
+          if [ "$fail" -gt 0 ]; then
+            echo "Found $fail frontmatter block(s) that do not parse as YAML"
+            echo "Hint: a colon followed by a space inside an unquoted value ends the value; use ' -- ' instead, or quote the whole value"
+            exit 1
+          fi
+          echo "[+] All agents/ and skills/*/SKILL.md frontmatter blocks parse as YAML"
+
       - name: Check agent template contracts
         run: |
           set -e

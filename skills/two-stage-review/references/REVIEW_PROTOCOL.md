@@ -16,16 +16,19 @@ If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceedin
 
 **Question:** Is the implementation clean, maintainable, and correct?
 
-For skill `.md` files (in `skills/`): use the `skill-reviewer.md` agent -- 1 agent per file.
-For all other code and config files: use the `code-quality-reviewer.md` agent -- 1 agent per file.
+For skill `.md` files (in `skills/`): use the `skill-reviewer.md` agent.
+For all other code and config files: use the `code-quality-reviewer.md` agent.
+For each template, one dispatch per group of at most two files that implement one change (a todo with more files gets more dispatches) -- two files share a dispatch only when a changed line in one names the other by path or filename, or a changed line in each names the same skill or file, and files that share only the todo get separate dispatches; the reviewer returns one verdict block per file listed in the dispatch, and a return with fewer blocks than the dispatch listed is re-dispatched.
 
 Provide to the Stage 2 reviewer:
 - Full diff or file contents of the implementation
 - The implementer's pasted verification output as the {{IMPLEMENTER_EVIDENCE}} value. The reviewer re-runs at least one command from it and reports MATCH or MISMATCH. If the implementer pasted no runnable command, state that explicitly so the reviewer records the spot-check as not possible.
 
-Adversarial-scenario gate: if the diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, the Stage 2 dispatch prompt MUST also require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` naming one unscripted real-world case checked against the clause wording; a Stage 2 return without that line, when the trigger matched, is an incomplete review -- re-dispatch. The canonical statement of this gate (including the case-sensitivity rationale and the accepted over-firing) is the Stage 2 paragraph of SKILL.md; on any wording divergence, SKILL.md governs.
+Adversarial-scenario gate: the Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` in every verdict block: filled with one unscripted real-world case checked against the clause wording for each file whose diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, and with exactly `trigger not matched` otherwise; a block without that line is an incomplete review -- re-dispatch. The canonical statement of this gate (including the case-sensitivity rationale and the accepted over-firing) is the Stage 2 paragraph of SKILL.md; on any wording divergence, SKILL.md governs.
 
-If Stage 2 returns REQUEST CHANGES: implementer fixes. Re-run Stage 2 before proceeding (see "Who re-checks a fix round" below).
+If any per-file block returns REQUEST CHANGES, REJECT, or NEEDS WORK: implementer fixes. Re-run Stage 2 before proceeding (see "Who re-checks a fix round" below).
+
+**Why one dispatch per change, on the Premium tier:** a reviewer that sees only one of a todo's files cannot see a contradiction between two of them, a reference one file leaves dangling in another, or a rule stated in one file and broken in the next; those findings fall between per-file dispatches. Grouping the files that implement one change into one dispatch keeps those findings inside a single review, and the per-file verdict blocks keep the per-file accountability that one-agent-per-file provided. The two-file cap follows the skill-reviewer template, which takes exactly two path slots, and binds the code-quality-reviewer template as well so both templates return the same dispatch shape; above it, the grouping rule, not the cap, is what keeps a contradiction visible. The two Stage 2 templates are pinned to the Premium tier; the tier table, the reason, and the measurement record are in the model-selection reference of the subagent-driven-development skill.
 
 ## Who Re-Checks a Fix Round
 

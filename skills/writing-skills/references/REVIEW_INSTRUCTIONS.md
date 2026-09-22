@@ -10,15 +10,24 @@ sections injected above this document. Apply them exactly.
 Run before any element checks:
 
 ```bash
-wc -l "{{SKILL_PATH}}"
-wc -c "{{SKILL_PATH}}"
-head -6 "{{SKILL_PATH}}"
-ls "$(dirname "{{SKILL_PATH}}")/references/" 2>/dev/null || echo "No references/ directory"
+SKILL_MD="{{SKILL_PATH}}"
+SKILL_MD="${SKILL_MD%/}"
+if [ -d "$SKILL_MD" ]; then SKILL_MD="$SKILL_MD/SKILL.md"; fi
+echo "Resolved SKILL.md path: $SKILL_MD"
+wc -l "$SKILL_MD"
+wc -c "$SKILL_MD"
+head -6 "$SKILL_MD"
+ls "$(dirname "$SKILL_MD")/references/" 2>/dev/null || echo "No references/ directory"
 ```
 
 Record all output. Apply size limits from SIZE_AND_COMPRESSION. Apply frontmatter rules
 from SKILL_ANATOMY_ELEMENTS Element 1. Note every file found in `references/` -- each will
 be reviewed in Step 4.
+
+The resolved path printed above is what every later command in this document means by
+`<resolved SKILL.md path>`. Substitute it literally; do not reuse `{{SKILL_PATH}}`, and
+do not expect the `SKILL_MD` variable to still be set, because each command block may
+run in a separate shell.
 
 ---
 
@@ -35,7 +44,7 @@ item are in the reference sections above.
 - [ ] **Gate Function** -- `## BEFORE PROCEEDING` with numbered conditions and [+]/[-] branches?
 - [ ] **Rationalization Prevention** -- table with >=5 rows, specific excuses and specific counters?
 - [ ] **Red Flags->STOP** -- section with >=5 trigger thoughts, each with a concrete action?
-- [ ] **No weak language** -- run: `grep -n "should\|prefer\|consider\|try to\|might be worth\|could potentially" "{{SKILL_PATH}}"` -- any hit in a rule body is a FAIL?
+- [ ] **No weak language** -- run: `grep -n "should\|prefer\|consider\|try to\|might be worth\|could potentially" "<resolved SKILL.md path>"` -- any hit in a rule body is a FAIL?
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use per VOICE_AUTHORITY_RULES?
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?

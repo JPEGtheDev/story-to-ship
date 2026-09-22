@@ -19,7 +19,7 @@ wc -c "$SKILL_MD"
 head -6 "$SKILL_MD"
 case "$(basename "$SKILL_MD")" in
   SKILL.md)
-    REFS="$(find "$(dirname "$SKILL_MD")/references" -type f 2>/dev/null | sort)"
+    REFS="$(find -L "$(dirname "$SKILL_MD")/references" -type f ! -name '.*' 2>/dev/null | sort)"
     if [ -n "$REFS" ]; then echo "$REFS"; else echo "No references/ directory"; fi ;;
   *) echo "Target is not a SKILL.md -- no reference listing needed" ;;
 esac

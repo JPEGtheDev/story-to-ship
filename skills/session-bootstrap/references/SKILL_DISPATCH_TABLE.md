@@ -74,16 +74,12 @@ added here or to the per-turn block -- they keep their own dispatch rows.
 DISCLOSED DEVIATION: `writing-plans` is tagged `core` here because it is routed as
 core by the per-turn injection block -- `hooks/pre-message-gates.md`'s "Core Skill
 Routing" section states "For multi-step planning, load `writing-plans` first." This
-conflicts with the plugin-split core manifest per a 2026-07-26 user ruling: honesty,
+conflicts with the plugin-split core manifest, which contains six skills -- honesty,
 session-bootstrap, verification-before-completion, subagent-driven-development,
-using-git-worktrees (amended 2026-08-16 by owner ruling to include `communication`
--- six skills), plus the 5 generic agent templates -- `writing-plans` is omitted
-from that manifest. The ruling is recorded in this session's corrections plan, an
-UNTRACKED scratch artifact (not in git history, not searchable via `git log` or issue
-tracker) -- it will be formalized in the future plugin-split tracking issue. This
-tagging follows the injection block as it currently stands; the discrepancy with the
-manifest ruling is not resolved by this change and is called out here for reviewer
-attention.
+using-git-worktrees, communication -- plus the 5 generic agent templates;
+`writing-plans` is omitted from that manifest. This tagging follows the injection
+block as it currently stands; the discrepancy with the manifest is not resolved by
+this change and is called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 

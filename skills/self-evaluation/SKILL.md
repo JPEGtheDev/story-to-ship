@@ -176,12 +176,13 @@ Before generating the session summary block, write the full findings to `[SESSIO
 A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
 
 **Write Gate:**
-1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
-2. Write it to `[SESSION_DIR]/self-assessment.md`:
+1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments the session contained. The assessment covers that whole span. A scope narrower than the span names every excluded segment and why; an assessment that covers only the final task of a multi-task session is incomplete, not a segment.
+2. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
+3. Write it to `[SESSION_DIR]/self-assessment.md`:
    - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.
    - Each session has its own directory -- write directly (Write tool). Do NOT read any prior session's self-assessment before writing.
-3. [+] File written -> proceed to Step 8
-4. [-] File not written -> STOP. Write the file before sending any final message.
+4. [+] File written -> proceed to Step 8
+5. [-] File not written -> STOP. Write the file before sending any final message.
 
 **Lifecycle:** `self-assessment.md` lives in the session directory, outside the repo. It is never committed.
 

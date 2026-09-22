@@ -24,6 +24,6 @@ reserved to the product owner -- a human gate that closes every change.
 
 ## Related
 
-- [DOD.md](../../DOD.md) -- the Definition of Done (DoD) canon index this
-  detail file elaborates.
+- [DOD.md](../../DOD.md) -- the Definition of Done canon index
+  this detail file elaborates.
 - The defining-done skill's taxonomy defines this layer.

@@ -173,3 +173,10 @@ If you have nothing to report, still include the block with zeroes.
 - `honesty` -- MUST be explicitly invoked at session start; hooks fail silently; full rule body is not in context until invoked
 - `communication` -- always-active peer of `honesty`; register rules for user-facing text; invoke immediately after `session-bootstrap` returns
 - `writing-skills` -- governs skill authoring; load when creating or editing a skill
+
+## References
+
+- `references/RATIONALE.md` -- why the SKILL.md rules exist:
+  invoke-before-acting, skill refresh, the git status check, and the
+  unconditional self-evaluation block.
+- `references/INDEX.md` -- index of this skill's reference files.

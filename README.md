@@ -59,6 +59,7 @@ without an OpenCode equivalent remain Claude Code-only.
 |-------|---------|
 | `brainstorming` | Design gate -- required before committing to any approach |
 | `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
+| `defining-done` | Definition of Done ratification interview -- elicits the owner's ruling on each verification layer: always, conditional, or not applicable |
 | `greenfield-discovery` | Domain model interview for new projects -- blocks code decisions until the domain is documented |
 | `user-story-generator` | INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)-aligned story authoring |
 | `user-story-estimation` | T-shirt sizing and effort estimation |
@@ -77,6 +78,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `subagent-driven-development` | Delegation protocol for dispatching subagents |
 | `two-stage-review` | Mandatory 2-stage post-todo review (spec compliance, then quality) |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
+| `sprint-runner` | Multi-agent pipeline run from a declared, replayable JSON spec |
 | `using-git-worktrees` | Parallel agent isolation via git worktrees |
 
 ### Testing and Verification
@@ -118,7 +120,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `architecture-review` | Layer boundary compliance and class hierarchy review |
 | `infrastructure-review` | CI, build configuration, and packaging manifest compliance review |
 | `oop-principles` | Is-A/Has-A (inheritance vs. composition) and SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) gate before any class hierarchy change |
-| `cpp-patterns` | GL resource management and public interface documentation patterns |
+| `cpp-patterns` | OpenGL resource management and public interface documentation patterns |
 | `cpp-safety` | RAII (Resource Acquisition Is Initialization) and destructor safety for resource-owning classes |
 | `visual-regression-testing` | Visual baseline management and render regression testing |
 
@@ -141,7 +143,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
 | `rehearsal-subject` | Coordinator under test in a behavioral rehearsal of skill or agent text |
-| `summarization-method` | One of three parallel summarization methods (Abstractive, Extractive, or SAAC) |
+| `summarization-method` | One of three parallel summarization methods -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |
 | `claim-enrichment` | Analytical claim enrichment |

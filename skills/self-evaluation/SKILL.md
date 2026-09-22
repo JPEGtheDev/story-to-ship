@@ -181,9 +181,9 @@ A self-evaluation that exists only in the message stream is not a self-evaluatio
 3. Write it to `[SESSION_DIR]/self-assessment.md`:
    - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.
    - Each session has its own directory -- write directly (Write tool). Do NOT read any prior session's self-assessment before writing.
-4. [+] File written -> proceed to Step 8
+4. [+] File written with a complete `**Span:**` line -> proceed to Step 8
 5. [-] File not written -> STOP. Write the file before sending any final message.
-6. [-] `**Span:**` line missing, or a narrower scope with an excluded segment unnamed or a shipped todo excluded -> STOP. Fix the `**Span:**` line before proceeding to Step 8.
+6. [-] `**Span:**` line missing, or a narrower scope with an excluded segment unnamed or a shipped todo excluded -> STOP. Fix the `**Span:**` line and rewrite `[SESSION_DIR]/self-assessment.md` before proceeding to Step 8.
 
 **Lifecycle:** `self-assessment.md` lives in the session directory, outside the repo. It is never committed.
 

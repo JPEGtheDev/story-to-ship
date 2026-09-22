@@ -78,9 +78,9 @@ This conflicts with the plugin-split core manifest, which is not recorded in
 this repository, so its contents are enumerated here instead of linked: it
 names six skills -- `honesty`, `session-bootstrap`,
 `verification-before-completion`, `subagent-driven-development`,
-`using-git-worktrees`, and `communication`. Two of the eight skills tagged
-`core` above are omitted from that manifest: `writing-plans` and
-`two-stage-review`. This tagging follows the injection block as it stands.
+`using-git-worktrees`, and `communication`. The skills tagged `core` above that are
+omitted from that manifest are `writing-plans` and `two-stage-review`. This tagging
+follows the injection block as it stands.
 The discrepancy with the manifest is not resolved by this change and is
 called out here for reviewer attention.
 

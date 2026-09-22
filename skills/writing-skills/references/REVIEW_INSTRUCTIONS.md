@@ -17,9 +17,11 @@ echo "Resolved review target: $SKILL_MD"
 wc -l "$SKILL_MD"
 wc -c "$SKILL_MD"
 head -6 "$SKILL_MD"
-case "$SKILL_MD" in
-  */references/*) echo "Target is a references file -- no reference listing needed" ;;
-  *) ls -1 "$(dirname "$SKILL_MD")"/references/* 2>/dev/null || echo "No references/ directory" ;;
+case "$(basename "$SKILL_MD")" in
+  SKILL.md)
+    REFS="$(find "$(dirname "$SKILL_MD")/references" -type f 2>/dev/null | sort)"
+    if [ -n "$REFS" ]; then echo "$REFS"; else echo "No references/ directory"; fi ;;
+  *) echo "Target is not a SKILL.md -- no reference listing needed" ;;
 esac
 ```
 
@@ -28,11 +30,11 @@ from SKILL_ANATOMY_ELEMENTS Element 1. Note every file found in `references/` --
 be reviewed in Step 4.
 
 The resolved path printed above is what every later command in this document means by
-`<resolved review target>`. Substitute it literally; do not reuse `{{SKILL_PATH}}`, and
-do not reuse the `SKILL_MD` variable -- treat it as unset in every later command block, which
-runs in a separate shell. The listing above prints each reference file as a full path from
-the repository root; those paths are what Step 4 means by `<file>`, and they substitute
-literally too.
+`<resolved review target>`. Substitute it literally; do not reuse `{{SKILL_PATH}}`, and do
+not reuse the `SKILL_MD` variable -- treat it as unset in every later command block, which
+runs in a separate shell. The listing above prints every reference file, including any in
+subdirectories, as a complete path; those paths are what Step 4 means by `<file>`, and they
+substitute exactly as printed.
 
 ---
 

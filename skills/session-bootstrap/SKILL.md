@@ -37,7 +37,7 @@ Do NOT say "I remember the skill content." A remembered skill is an unverified s
 
 ### `honesty` and `communication` -- Co-Equal Peer Skills
 
-`honesty` and `communication` are NOT managed by `session-bootstrap`. They are co-equal peer skills. The hooks inject reminders of both gates on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
+The hooks inject reminders of the `honesty` and `communication` gates on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
 
 Invoke the `Skill` tool with `skill: honesty` and `skill: communication` once per session each, immediately after `session-bootstrap` returns and before any task-specific skill. Do NOT proceed with a task-specific skill until the completed `Skill` calls for BOTH `honesty` and `communication` are visible in this session's context.
 
@@ -101,7 +101,7 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) is dispatched -- NOT done inline
 10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty`, `communication`, and every skill in the On Start table
-11. If a hook script or hook registration fix was committed (or edited) during this session: hook script content is executed fresh on every invocation, and hook registration in settings files hot-reloads mid-session -- neither requires a restart (verified on CLI 2.1.220). Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
+11. If a hook script or hook registration fix was committed (or edited) during this session: Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
 [+] All met -> proceed with session work
@@ -177,6 +177,7 @@ If you have nothing to report, still include the block with zeroes.
 ## References
 
 - `references/RATIONALE.md` -- why the SKILL.md rules exist:
-  invoke-before-acting, skill refresh, the git status check, and the
-  unconditional self-evaluation block.
+  invoke-before-acting, skill refresh, why honesty and communication are
+  peers, the git status check, why hook fixes need an observed firing, and
+  the unconditional self-evaluation block.
 - `references/INDEX.md` -- index of this skill's reference files.

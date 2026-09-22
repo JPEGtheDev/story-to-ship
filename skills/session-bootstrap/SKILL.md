@@ -37,7 +37,7 @@ Do NOT say "I remember the skill content." A remembered skill is an unverified s
 
 ### `honesty` and `communication` -- Co-Equal Peer Skills
 
-`honesty` and `communication` are NOT managed by `session-bootstrap`. They are co-equal peer skills. The hooks inject reminders of both gates on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
+The hooks inject reminders of the `honesty` and `communication` gates on every turn, but injected hook text is NOT the skill and does NOT satisfy the invocation requirement.
 
 Invoke the `Skill` tool with `skill: honesty` and `skill: communication` once per session each, immediately after `session-bootstrap` returns and before any task-specific skill. Do NOT proceed with a task-specific skill until the completed `Skill` calls for BOTH `honesty` and `communication` are visible in this session's context.
 
@@ -60,7 +60,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Finishing / closing a branch                 | `finishing-a-development-branch`                   |
 | Requesting code review                       | `requesting-code-review`                           |
 | Receiving code review feedback               | `receiving-code-review`                            |
-| CI/CD or workflow changes                    | `workflow`                                         |
+| CI/CD (Continuous Delivery) or workflow changes | `workflow`                                         |
 | Writing or editing documentation             | `documentation`                                    |
 | Bug fixes or error resolution                | `execution`, `systematic-debugging`                |
 | Any failure or unexpected behavior           | `systematic-debugging`, `verification-before-completion` |
@@ -101,7 +101,7 @@ Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.m
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) is dispatched -- NOT done inline
 10. Session hooks checked: if sessionStart or userPromptSubmitted hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty`, `communication`, and every skill in the On Start table
-11. If a hook script or hook registration fix was committed (or edited) during this session: hook script content is executed fresh on every invocation, and hook registration in settings files hot-reloads mid-session -- neither requires a restart (verified on CLI 2.1.220). Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
+11. If a hook script or hook registration fix was committed (or edited) during this session: Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
 [+] All met -> proceed with session work
@@ -162,7 +162,7 @@ If you have nothing to report, still include the block with zeroes.
 | "Skipping announcement to save space"              | Announcement is the commitment mechanism           | State it. No skip.                         |
 | "I'll skim the skill -- I know the gist"            | Skimming misses updates and specific gate conditions | Read fully. The gate conditions are the point. |
 | "'Always active' means I don't need to invoke honesty or communication" | The declaration activates the rule reference, not the rule body. Without invocation, the confidence vocabulary, process language, and register rules are absent. | Invoke `honesty` and `communication` explicitly. Every session. |
-| "I ran the hook script and it exited 0 -- hooks are working" | Running the script by hand and getting exit 0 tests the script, not whether the hook system fires it. Hook script content and settings-file registration both take effect within the current session -- no restart needed (verified on CLI 2.1.220) -- but that only means the fix CAN fire, not that it DID. | Confirm an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming hooks are working. |
+| "I ran the hook script and it exited 0 -- hooks are working" | Running the script by hand and getting exit 0 tests the script, not whether the hook system fires it. Hook script content and settings-file registration both take effect within the current session -- no restart needed (verified on command-line interface version 2.1.220) -- but that only means the fix CAN fire, not that it DID. | Confirm an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming hooks are working. |
 | "I'm just gathering context, not reviewing"        | Research reading to inform a plan is still review. Inline review is biased by your assumptions. | Dispatch an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) for any 3+ file research task. |
 | "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. | Run `git checkout main && git pull && git checkout -b <new-branch>`. |
 | "The continuation summary said resume directly, so I can skip the reload" | "Resume directly" governs message etiquette (do not re-narrate the summary), not the skill-load gate. Compaction/resume wiped the completed-call evidence; the rule still binds. | Re-invoke `session-bootstrap` + `honesty` + `communication` first, then resume. |
@@ -173,3 +173,11 @@ If you have nothing to report, still include the block with zeroes.
 - `honesty` -- MUST be explicitly invoked at session start; hooks fail silently; full rule body is not in context until invoked
 - `communication` -- always-active peer of `honesty`; register rules for user-facing text; invoke immediately after `session-bootstrap` returns
 - `writing-skills` -- governs skill authoring; load when creating or editing a skill
+
+## References
+
+- `references/RATIONALE.md` -- why the SKILL.md rules exist:
+  invoke-before-acting, skill refresh, why honesty and communication are
+  peers, the git status check, why hook fixes need an observed firing, and
+  the unconditional self-evaluation block.
+- `references/INDEX.md` -- index of this skill's reference files.

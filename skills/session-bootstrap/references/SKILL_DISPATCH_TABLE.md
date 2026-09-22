@@ -68,22 +68,21 @@ added here or to the per-turn block -- they keep their own dispatch rows.
 | `verification-before-completion` | core | Before any completion claim, commit, or PR (session-bootstrap "On Start" table) |
 | `subagent-driven-development` | core | Before dispatching the first subagent for any plan/todo (session-bootstrap "On Start" table) |
 | `two-stage-review` | core | When an implementer subagent has returned a result, before reading its status code -- DONE, DONE_WITH_CONCERNS, PARTIAL, NEEDS_CONTEXT, or BLOCKED (session-bootstrap "On Start" table) |
-| `using-git-worktrees` | core | Before creating any worktree or dispatching any subagent -- attributed to `subagent-driven-development` SKILL.md's BEFORE PROCEEDING item 3 and its worktree-before-dispatch Red Flag, NOT the "On Start" table (that table lists it only under "Parallel agent work / A/B testing") |
+| `using-git-worktrees` | core | Before creating any worktree or dispatching any subagent -- attributed to the `subagent-driven-development` skill's BEFORE PROCEEDING item 3 and its worktree-before-dispatch Red Flag, NOT the "On Start" table (that table lists it only under "Parallel agent work / A/B testing") |
 | `writing-plans` | core | Any new plan with 2+ todos, or any multi-step task/feature work (session-bootstrap "On Start" table) |
 
-DISCLOSED DEVIATION: `writing-plans` is tagged `core` here because it is routed as
-core by the per-turn injection block -- `hooks/pre-message-gates.md`'s "Core Skill
-Routing" section states "For multi-step planning, load `writing-plans` first." This
-conflicts with the plugin-split core manifest per a 2026-07-26 user ruling: honesty,
-session-bootstrap, verification-before-completion, subagent-driven-development,
-using-git-worktrees (amended 2026-08-16 by owner ruling to include `communication`
--- six skills), plus the 5 generic agent templates -- `writing-plans` is omitted
-from that manifest. The ruling is recorded in this session's corrections plan, an
-UNTRACKED scratch artifact (not in git history, not searchable via `git log` or issue
-tracker) -- it will be formalized in the future plugin-split tracking issue. This
-tagging follows the injection block as it currently stands; the discrepancy with the
-manifest ruling is not resolved by this change and is called out here for reviewer
-attention.
+DISCLOSED DEVIATION: `writing-plans` is tagged `core` here because the per-turn
+injection block routes it as core -- `hooks/pre-message-gates.md`'s "Core Skill
+Routing" section states "For multi-step planning, load `writing-plans` first."
+This conflicts with the plugin-split core manifest, which is not recorded in
+this repository, so its contents are enumerated here instead of linked: it
+names six skills -- `honesty`, `session-bootstrap`,
+`verification-before-completion`, `subagent-driven-development`,
+`using-git-worktrees`, and `communication`. The skills tagged `core` above that are
+omitted from that manifest are `writing-plans` and `two-stage-review`. This tagging
+follows the injection block as it stands.
+The discrepancy with the manifest is not resolved by this change and is
+called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 

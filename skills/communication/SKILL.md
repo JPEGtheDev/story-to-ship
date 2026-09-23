@@ -51,7 +51,7 @@ Rules:
 ### Plain Language for the Human Reader
 
 **Context:** Any text addressed to the human -- chat updates, plan presentations, decision questions, PR bodies, issue comments -- from the main agent or any dispatched agent.
-**Forces:** Long-running projects breed internal vocabulary -- coined terms, todo IDs, decision labels -- and agents layer engineering slang and metaphor on top of it. To the author this vocabulary is shared knowledge; to the reader -- including an expert reader -- it is opaque. Opaque updates still "somewhat make sense," so the reader assents without full understanding, and the human review gate silently stops gating. No error fires at send time when the reader cannot tell what was decided.
+**Forces:** Long-running projects breed internal vocabulary -- coined terms, todo IDs, decision labels -- and agents layer engineering slang and metaphor on top of it. To the author this vocabulary is shared knowledge; to the reader -- including an expert reader -- it is opaque. Opaque updates still "somewhat make sense," so the reader assents without full understanding, and the human review gate silently stops gating.
 
 Rules:
 - Define every term of art in one plain clause at its first use in each conversation (e.g. "spillDir -- the folder oversized outputs are saved into"). This covers engineering slang and metaphor as well as anything coined in this repo or this session: prefer the plain phrase outright; a term that genuinely earns its place gets the same first-use definition. A term the reader has actually had to look up already failed that test -- sounding like standard field shorthand does not earn it a place; drop it for the plain phrase instead of defining it.
@@ -64,7 +64,7 @@ Rules:
 ### Asking for Decisions
 
 **Context:** Any request to the owner for a decision -- approving a change, choosing between options, signing off a step -- and any later reference to a decision the owner already made.
-**Forces:** A request phrased by label ("approve item 4", "sign off on the extension") keeps momentum but hands the reader nothing to evaluate: they cannot tell what would change or what it would do. And a recorded decision reads as permanent: later work defers to it after the evidence that produced it has changed, so the plan cannot pivot when the work says it must. The Definition of Done and the Definition of Ready are the deliberate exception: they are meant to be stable and to change seldom, so treating them as revisable defaults would erode the gates they exist to be.
+**Forces:** A request phrased by label ("approve item 4", "sign off on the extension") keeps momentum but hands the reader nothing to evaluate: they cannot tell what would change or what it would do. And a recorded decision reads as permanent: later work defers to it after the evidence that produced it has changed, so the plan cannot pivot when the work says it must.
 
 Rules:
 - Ask for a decision by naming the concrete change and its effect: "I need your sign-off to raise the retry limit from 3 to 5 so that transient network failures stop aborting the nightly job." Never by label alone, and never with "ratify".
@@ -101,7 +101,7 @@ Rules:
 - State fact, options, decision, next action. One line for a mechanical step; a paragraph only at a genuine fork, and it weighs the choice.
 - Delete any reasoning sentence that neither changes the next action nor records a fact needed later. The class is performative prose -- broader than any listed example.
 - This rule never licenses skipping a required check, hypothesis statement, Intent line, or tripwire question: those sentences change the next action and are always earned.
-- Self-check at generation time (the Red Flags entry below) is the enforcement mechanism, not a downstream gate -- no automated detector inspects reasoning before it is sent. Checkable surfaces: the postmortem reviewer's register-sampling row and the token trend against the recorded baseline; promotion to a blocking check follows the writing-skills Jargon Rule precedent.
+- Self-check at generation time (the Red Flags entry below) is the enforcement mechanism, not a downstream gate -- no automated detector inspects reasoning before it is sent. Checkable surfaces: the postmortem reviewer's register-sampling row and the token trend against the recorded baseline.
 
 | Forbidden in reasoning | Replace with |
 |------------------------|--------------|

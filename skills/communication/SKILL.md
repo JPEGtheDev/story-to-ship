@@ -59,7 +59,7 @@ Rules:
 - Lead with decisions, not research: the first sentences of any update state what was decided or what changed, in plain sentences. Evidence and process follow for readers who want them.
 - Never use an internal label (todo ID, finding number, plan revision) as the only name for a thing in user-facing text. Call the thing what it is; the label is at most a parenthetical.
 - Self-test before sending: could a reader who never opened the plan file or the skill files act on this text? If not, rewrite it before sending.
-- A message that carries no decision, result, or question for the reader, and is not a one-sentence status or waiting message, is not sent. A status or waiting message is one sentence. A background or monitor event that turns out to need nothing from the reader gets no message at all -- if a monitor or filter you set up fired, tighten it; a harness notification needs nothing beyond reading it.
+- Send a message only if it carries a decision, result, or question for the reader, or is a one-sentence status or waiting message. A background or monitor event that needs nothing from the reader is not a status message and gets no message at all -- if a monitor or filter you set up fired, tighten it; a harness notification needs nothing beyond reading it.
 
 ### Asking for Decisions
 

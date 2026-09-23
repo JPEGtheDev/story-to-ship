@@ -176,12 +176,14 @@ Before generating the session summary block, write the full findings to `[SESSIO
 A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
 
 **Write Gate:**
-1. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
-2. Write it to `[SESSION_DIR]/self-assessment.md`:
+1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments (stretches of the session split by a compaction boundary or a task switch) it contained, and record both in the block's `**Span:**` line. The assessment covers that whole span. A narrower scope names every excluded segment and why; excluding a todo that shipped work this session is not a valid narrowing, so an assessment of only the final task of a multi-task session is incomplete.
+2. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
+3. Write it to `[SESSION_DIR]/self-assessment.md`:
    - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.
    - Each session has its own directory -- write directly (Write tool). Do NOT read any prior session's self-assessment before writing.
-3. [+] File written -> proceed to Step 8
-4. [-] File not written -> STOP. Write the file before sending any final message.
+4. [+] File written with a complete `**Span:**` line -> proceed to Step 8
+5. [-] File not written -> STOP. Write the file before sending any final message.
+6. [-] `**Span:**` line missing, or a narrower scope with an excluded segment unnamed or a shipped todo excluded -> STOP. Fix the `**Span:**` line and rewrite `[SESSION_DIR]/self-assessment.md` before proceeding to Step 8.
 
 **Lifecycle:** `self-assessment.md` lives in the session directory, outside the repo. It is never committed.
 
@@ -196,6 +198,7 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 ```markdown
 ### Session Self-Evaluation
 
+**Span:** [first timestamp] -- [last timestamp]; [N] todos/segments; excluded: [segment -- reason, or "none"]
 **Lessons Captured:** [count]
 **Skills Updated:** [list of skills modified, or "None"]
 **Key Patterns Added:**

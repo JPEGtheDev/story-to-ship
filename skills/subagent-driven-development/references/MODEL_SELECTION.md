@@ -84,6 +84,10 @@ tier scored on its own multi-todo session, unless a stored preference for this t
 another value. The postmortem of each scored session records the session id, the coordinator model,
 and the two counts; that record is the evidence for the move.
 
+Scored sessions, one line each, appended as each session is scored (never replaced, so the section is the record of every scored session):
+- Standard tier, multi-todo session: 0.75 -- the threshold.
+- Premium tier, six-item plan of skill-file edits: 0.47 (7 externally-caught of 15), zero corrections raised by the user, every external catch a dispatch-prompt verification command that could not fire as claimed. At or under the threshold, so the tier is eligible to coordinate; the coordinator still runs at the tier the stored preference names until the user changes that preference.
+
 **Enforcement is procedural/self-check:** the checkable signal is a multi-todo session whose
 transcript model field (the per-message model value on assistant messages) is a tier with no
 recorded passing session; the Correction-source audit row produces the score after the fact. No

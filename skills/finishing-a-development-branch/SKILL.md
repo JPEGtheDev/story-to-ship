@@ -85,7 +85,7 @@ Before writing the PR, answer:
      grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation -- docs/README only: source has real *Tests identifiers; unscoped run floods on matches
    done
    ```
-   The PR body is drafted to a file and passed with `gh pr create --body-file <file>` (Step 4). Run the non-ASCII grep over that file as well; issue references in the body (`Closes #N`) are expected there and the other patterns do not apply to it:
+   Draft the PR body to a file, set `PR_BODY_FILE` to its path, and pass it with `gh pr create --body-file "$PR_BODY_FILE"` (Step 4). Run the non-ASCII grep over that file as well; issue references in the body (`Closes #N`) are expected there and the other patterns do not apply to it:
    ```
    grep -nP '[^\x00-\x7F]' "$PR_BODY_FILE"   # the drafted PR body: non-ASCII only
    ```
@@ -127,6 +127,7 @@ See `versioning` skill for conventional commit rules.
 ## Step 4: PR Creation
 
 **Title:** Must be a valid conventional commit message -- this becomes the squash commit on merge.
+**Body:** Draft it to a file, set `PR_BODY_FILE` to that path, and create the PR with `gh pr create --body-file "$PR_BODY_FILE"`, so the Step 2 sweep runs over the file that ships.
 
 **Description must include:**
 ```

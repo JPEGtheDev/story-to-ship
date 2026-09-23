@@ -28,7 +28,7 @@ For completion claims -> invoke **verification-before-completion** skill.
 
 Before modifying or creating any file in the repo or claiming any task done:
 
-1. Working branch confirmed: run `git branch --show-current`. Output must NOT be `main` or `master`. If it is: run `git checkout main && git pull && git checkout -b <new-branch>` now. Do not advance past this item until on a non-main branch.
+1. Working branch confirmed: the feature branch lives in a worktree under `.worktrees/`, and the main checkout stays on `main` (the `using-git-worktrees` skill, Feature branch). Run `git -C <repo-root>/.worktrees/<feature> branch --show-current`; output must NOT be `main` or `master`. If no feature worktree exists: run `git -C <repo-root> fetch origin main`, then `git -C <repo-root> worktree add .worktrees/<feature> -b <new-branch> origin/main` now. Do not advance past this item until the feature worktree is on a non-main branch.
 2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
 3. For multi-step tasks (3+ steps): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
 4. Required skills for this domain are loaded (check session-bootstrap On Start table)
@@ -134,7 +134,7 @@ If you catch yourself thinking any of these:
 - "Evidence contradicts the plan but I'll finish this step first" -- **Stop. Confront reality immediately.** State what the plan assumed, what evidence shows, and what that means for remaining todos. Revise the plan before proceeding, even if it voids completed work. Continuing on a plan you know is wrong is not progress.
 - "I just inserted an item into a numbered list" -- **Stop. Re-read the full list from top to bottom to verify sequential numbering. Duplicate or out-of-sequence numbers must be fixed before the next edit call or commit.**
 - "I see a Don't Repeat Yourself (DRY) violation in code I am currently modifying" -- **STOP. Fix it in this commit or open a tracking issue now. Walking past it makes you the author.**
-- About to write a file while `git branch --show-current` returns `main` or `master` -- **STOP. Return to BEFORE PROCEEDING item 1. Create a new branch before writing any file.**
+- About to create or modify a file in the main checkout other than the plan file -- **STOP. Return to BEFORE PROCEEDING item 1. Create the feature worktree before writing any file, and write there.**
 - "The user said 'merge first', so I'm authorized to click merge" -- **STOP. Sequence authorization is not actor authorization. Hand off the PR unmerged and ask -- see `User-Reserved Decisions` below for the full rule.**
 - "Serious blocker diagnosed and the turn is about to continue with a dispatch" -- **STOP. Name it and end the turn with the question.**
 

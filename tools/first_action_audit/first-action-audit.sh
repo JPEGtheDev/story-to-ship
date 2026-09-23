@@ -64,11 +64,16 @@ check_rc() {
 }
 
 # Pass 1: parse each line as JSON, skipping (and counting) lines that fail
-# to parse. Also drops candidate assistant messages missing .timestamp
-# (they cannot be ordered against the boundary) into the same bad count.
-# Boundary is the LAST system/compact_boundary line's .timestamp, or the
-# literal string "none". Candidates are main-thread assistant messages
-# containing at least one tool_use item, strictly after the boundary.
+# to parse. It also drops candidate assistant messages missing a string
+# .timestamp into the same bad count. It collects every
+# system/compact_boundary .timestamp in file order (boundaries are assumed
+# to increase in file order; a boundary without a string timestamp is
+# skipped). Candidates are main-thread assistant messages containing at
+# least one tool_use item. Each candidate is assigned to the window of the
+# last boundary whose timestamp is strictly less than the candidate's;
+# candidates not strictly after the first boundary belong to no window.
+# With no boundary there is one window, tagged "none", holding every
+# candidate.
 # jq program: $-identifiers are jq variables, not shell expansions
 # shellcheck disable=SC2016
 readonly PARSE_PROG='
@@ -102,17 +107,18 @@ readonly PARSE_PROG='
     end
   )) as $r
 | ($r.cands) as $all_cands
+| ($boundaries|length) as $nb
 | (
-    if ($boundaries|length) == 0 then
+    if $nb == 0 then
       [ {boundary: "none", candidates: $all_cands} ]
     else
       ( $all_cands | map(
           . as $c
-          | ( [ range(0; ($boundaries|length)) as $i
+          | ( [ range(0; $nb) as $i
                 | select($boundaries[$i] < $c.ts) | $i ] ) as $idxs
-          | $c + {widx: (if ($idxs|length)==0 then null else $idxs[-1] end)}
+          | $c + {widx: $idxs[-1]}
         ) ) as $cands_with_widx
-      | [ range(0; ($boundaries|length)) as $i
+      | [ range(0; $nb) as $i
           | { boundary: $boundaries[$i],
               candidates: [ $cands_with_widx[] | select(.widx == $i) | {ts, tools} ] } ]
     end

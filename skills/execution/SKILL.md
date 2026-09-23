@@ -42,13 +42,13 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 ## Canary
 
-When applying this skill, state this line in your response before each work-loop iteration's change -- before the implementer dispatch for that todo, or before your own first file modification when no dispatch applies:
+When applying this skill, state this line in your response before each work-loop iteration's change -- before the implementer dispatch for that todo, or before your own first edit to a repo file when no dispatch applies:
 
 > `Intent: [what this change does in one sentence] -- proven by [the command or check that will verify it]`
 
 This canary is the coordinator's (the agent running the work loop). Implementer dispatch prompts and `agents/implementer.md` do not carry it; the implementer's canary is its `Worktree:` line, checked by the `two-stage-review` skill.
 
-This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer checks the raw transcript for this line: an implementer dispatch or a coordinator file edit with no `Intent:` line earlier in the same turn is a skipped gate, reported as a finding.
+This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer checks the raw transcript (the session's JSONL file, not the converted events log) for this line: an implementer dispatch without its own `Intent:` line earlier in the same reply, or a coordinator edit to a repo file with no `Intent:` line earlier in that reply, is a skipped gate, reported as a finding. A reply is everything the agent outputs from one incoming message (a user prompt, a subagent hand-back, or a notification) to the next.
 
 **Note:** The canary raises the cost of skipping for a compliant agent -- it is not cryptographically bound to execution.
 
@@ -85,7 +85,7 @@ For every planned item, before writing code:
 ```
 1. Flag it as in-progress. Reload the relevant skill (session-bootstrap refresh rule).
 2. PPP: State the purpose of the code you're about to write (one sentence)
-3. Make the change
+3. Make the change, or dispatch the implementer for it
 4. Prove it works (compile, test, inspect diff)
 5. Flag it as done
 6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md, then Stage 2: skill-reviewer.md or code-quality-reviewer.md by file type

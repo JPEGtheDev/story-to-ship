@@ -42,11 +42,13 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 ## Canary
 
-When applying this skill, before the first file modification in any work-loop iteration, state this line in your response:
+When applying this skill, state this line in your response before each work-loop iteration's change -- before the implementer dispatch for that todo, or before your own first file modification when no dispatch applies:
 
 > `Intent: [what this change does in one sentence] -- proven by [the command or check that will verify it]`
 
-This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer reads the event log for this line: a work-loop iteration that modified a file with no preceding `Intent:` line is a skipped gate, reported as a finding.
+This canary is the coordinator's (the agent running the work loop). Implementer dispatch prompts and `agents/implementer.md` do not carry it; the implementer's canary is its `Worktree:` line, checked by the `two-stage-review` skill.
+
+This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer checks the raw transcript for this line: an implementer dispatch or a coordinator file edit with no `Intent:` line earlier in the same turn is a skipped gate, reported as a finding.
 
 **Note:** The canary raises the cost of skipping for a compliant agent -- it is not cryptographically bound to execution.
 

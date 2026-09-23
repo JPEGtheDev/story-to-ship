@@ -107,7 +107,7 @@ These thoughts mean stop immediately:
 
 | Thought | Required action |
 |---------|----------------|
-| "About to relay a skeptic or reviewer verdict to the user" | STOP. State the base branch of the worktree that agent ran in. If the base is not `main` (or the user-approved feature branch), flag it explicitly: any finding about absent files or missing features may be a stale-branch artifact, not an actual gap. |
+| "About to relay a skeptic or reviewer verdict to the user" | STOP. State the base branch of the worktree that agent ran in. If the base is not `main`, the user-approved feature branch, or, for a reviewer, the branch that reviewer inspects, flag it explicitly: any finding about absent files or missing features may be a stale-branch artifact, not an actual gap. |
 | "I'm about to invoke /code-review or dispatch a code-quality reviewer" | STOP. Identify the file types in scope FIRST. If any files are skill `.md` files (in `skills/`): use `skill-reviewer.md`, not `code-review` or `code-quality-reviewer.md`. Invoking `code-review` for skill `.md` files is always wrong. |
 | "I've already verified this change through [testing/analysis] -- that's more rigorous than a re-review, I'll proceed without dispatching one" | STOP. Self-judged rigor is not a re-review. Any change touching review-covered territory requires Stage 1 or Stage 2 to re-run. The sole exemption is an explicit user waiver given in the same turn. |
 | "Dispatching Stage 2 without passing {{IMPLEMENTER_EVIDENCE}}" | STOP. Paste the implementer's verification output into the reviewer prompt; a Stage 2 dispatch without it disables the spot-check and is incomplete. |

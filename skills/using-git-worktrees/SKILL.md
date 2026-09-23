@@ -40,7 +40,7 @@ git -C <repo-root> fetch origin main
 git -C <repo-root> worktree add .worktrees/<feature> -b <feature-branch> origin/main
 ```
 
-The main context's edits, commits, and pushes for the feature happen in `.worktrees/<feature>`. Enforcement: the postmortem-reviewer template's Branch-location audit row (branch commands and file writes in the main checkout).
+The main context's edits, commits, and pushes for the feature happen in `.worktrees/<feature>`; in the main checkout, write only the plan file (`plan.md`) and gitignored files. Enforcement: the postmortem-reviewer template's Branch-location audit row (branch commands and file writes in the main checkout).
 
 ### Create
 

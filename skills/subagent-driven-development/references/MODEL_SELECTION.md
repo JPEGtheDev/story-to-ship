@@ -1,6 +1,6 @@
 # Model Selection
 
-Match model tier to task complexity. Instructions must be written for GPT-4.1 baseline regardless of selected tier.
+Match model tier to task complexity. Write instructions that the least capable model tier able to run them can follow, regardless of selected tier (the `writing-skills` skill's model-compatibility guidance).
 
 **Model preference priority -- check in this order before every agent dispatch:**
 
@@ -22,7 +22,7 @@ If the user states a model preference in the current session, store it as a memo
 
 ## Tier Assignments
 
-Three tiers exist. **Economy** = smallest/cheapest model class (e.g. Haiku), for tasks that clear the content-touching floor below; no row in either table currently uses it. **Standard** = mid class (e.g. Sonnet), the default tier for any task no row assigns otherwise. **Premium** = top class (e.g. Opus), reserved for rows marked Premium.
+Three tiers exist. **Economy** = smallest/cheapest model class, for tasks that clear the content-touching floor below; no row in either table currently uses it. **Standard** = mid class, the default tier for any task no row assigns otherwise. **Premium** = top class, reserved for rows marked Premium.
 
 **Content-touching work floor:** Classification, extraction, distillation, and summarization tasks -- any task that exercises judgment over source content -- run at Standard tier or above, no matter how narrow or mechanical the task otherwise looks. Economy is acceptable only for tasks whose output is mechanically verifiable (for example, a file-listing roll-up), never for judgment over source content. Verbatim copying from large content embedded in a prompt counts as content extraction for the purpose of this floor; verify bytes by hash or pass the content by file path instead of copying it inline.
 

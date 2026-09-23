@@ -43,7 +43,7 @@ This skill is **mandatory** -- `AGENTS.md` sec. Session Lifecycle requires it be
 
 Every session produces insights that can improve future agent effectiveness. Capture these systematically.
 
-**Objectivity block:** Agents are poor judges of their own work; skipping a step because "it went well" is that bias asserting itself.
+**Objectivity block:** Agents are biased judges of their own work; skipping a step because "it went well" is that bias asserting itself.
 
 ---
 
@@ -77,7 +77,7 @@ Classify each lesson into one of these categories:
 Before proposing updates, verify the lesson is not already documented:
 
 1. Check `AGENTS.md` -- Is this pattern already listed?
-2. Check the governing skill's file (`skills/<skill-name>/SKILL.md`) -- is this rule already stated?
+2. Check the skill the Step 2 table names for this lesson's category -- is this rule already stated?
 3. Check `references/LESSONS_LEARNED_PATTERNS.md` -- Is this category or pattern already documented?
 
 **Only propose additions for genuinely new or underemphasized patterns.**
@@ -176,7 +176,7 @@ Before generating the session summary block, write the full findings to `[SESSIO
 The postmortem reviewer cross-checks the self-assessment from disk, not from the message stream, so a self-evaluation that exists only in chat cannot be checked.
 
 **Write Gate:**
-1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments (stretches of the session split by a compaction boundary or a task switch) it contained, and carry both into the `**Span:**` line of the block item 2 produces. The assessment covers that whole span. A narrower scope names every excluded segment and why; excluding a todo that shipped work this session is not a valid narrowing, so an assessment of only the final task of a multi-task session is incomplete.
+1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments (stretches of the session split by a compaction boundary or a task switch) it contained, and carry both into the `**Span:**` line of the Step 8 block, which item 2 produces. The assessment covers that whole span. A narrower scope names every excluded segment and why; excluding a todo that shipped work this session is not a valid narrowing, so an assessment of only the final task of a multi-task session is incomplete.
 2. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
 3. Write it to `[SESSION_DIR]/self-assessment.md`:
    - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.

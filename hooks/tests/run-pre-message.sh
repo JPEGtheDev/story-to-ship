@@ -18,6 +18,11 @@
 #                              .bootstrap-pending-sess-1); each is touched
 #                              (created empty) in the state dir BEFORE the
 #                              hook runs
+#   state_dir_missing        - if present (contents ignored), the hook is
+#                              pointed at a path inside the per-case temp
+#                              dir that does not exist, instead of the temp
+#                              dir itself, so it still gets swept by the
+#                              unconditional cleanup at the end of the case
 #   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
@@ -42,6 +47,7 @@ run_case() {
   local hook_file="$case_dir/hook"
   local input_file="$case_dir/input"
   local pre_flags_file="$case_dir/pre_flags"
+  local state_dir_missing_file="$case_dir/state_dir_missing"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
   local expect_stdout_not_grep_file="$case_dir/expect_stdout_not_grep"
 
@@ -86,9 +92,14 @@ run_case() {
     done <"$pre_flags_file"
   fi
 
+  local hook_state_dir="$state_dir"
+  if [[ -f "$state_dir_missing_file" ]]; then
+    hook_state_dir="$state_dir/absent"
+  fi
+
   local actual_stdout actual_exit
   actual_stdout="$(
-    export BOOTSTRAP_GATE_STATE_DIR="$state_dir"
+    export BOOTSTRAP_GATE_STATE_DIR="$hook_state_dir"
     unset CLAUDE_PROJECT_DIR
     bash "$hook_bin" <"$input_file"
   )"

@@ -8,7 +8,10 @@
 # ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}. Any ambiguity --
 # jq missing, empty or invalid stdin JSON, a missing or malformed
 # session_id, an unresolved state dir, a state dir that does not exist, or
-# a missing loaded file -- falls back to the full text.
+# a missing loaded file -- falls back to the full text. One case goes the
+# other way: a state dir that exists but cannot be written gets no flags
+# from session-start.sh, so this hook emits the loaded text from the first
+# turn.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MD_FILE="$SCRIPT_DIR/pre-message.md"
 LOADED_FILE="$SCRIPT_DIR/pre-message-loaded.md"

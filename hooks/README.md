@@ -8,7 +8,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 
 | File | Event | Injected |
 |------|-------|----------|
-| `session-start.sh` + `session-start.md` | SessionStart | Once per session |
+| `session-start.sh` + `session-start.md` | SessionStart | On every SessionStart event, whatever its source |
 | `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | On turns where the bootstrap flag exists, or its state cannot be read |
 | `pre-message-gates.sh` + `pre-message-gates-loaded.md` | UserPromptSubmit | On turns where the bootstrap flag is clear |
 | `pre-message.sh` + `pre-message.md` | UserPromptSubmit | On turns where the honesty or communication flag exists, or their state cannot be read |
@@ -62,6 +62,8 @@ Accepted bootstrap skill names: both hooks strip everything through the last col
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
 
 Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` hooks (`pre-message-gates.sh`, `pre-message.sh`) do not close this gap: if they run in that window they find no flag file and, when the state directory exists, inject the `-loaded` variants, which leave out the gate sections.
+
+Documented limitation: when the state directory exists but cannot be written, `session-start.sh` stamps no flags and reports nothing, so the gate allows every call and the `UserPromptSubmit` hooks inject the `-loaded` variants from the first turn of the session.
 
 ## workflow-model-guard.sh
 

@@ -23,7 +23,11 @@
 #                              dir that does not exist, instead of the temp
 #                              dir itself, so it still gets swept by the
 #                              unconditional cleanup at the end of the case
-#   expect_stdout_grep       - newline list; every line must appear
+#   loaded_file_missing      - if present (contents ignored), the hook runs
+#                              from a copy of its script and its full .md
+#                              file in the per-case temp dir, with no
+#                              -loaded .md file beside them
+#   expect_stdout_grep      - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
 #                              additionalContext value
@@ -50,6 +54,7 @@ run_case() {
   local input_file="$case_dir/input"
   local pre_flags_file="$case_dir/pre_flags"
   local state_dir_missing_file="$case_dir/state_dir_missing"
+  local loaded_file_missing_file="$case_dir/loaded_file_missing"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
   local expect_stdout_not_grep_file="$case_dir/expect_stdout_not_grep"
 
@@ -97,6 +102,13 @@ run_case() {
   local hook_state_dir="$state_dir"
   if [[ -f "$state_dir_missing_file" ]]; then
     hook_state_dir="$state_dir/absent"
+  fi
+
+  if [[ -f "$loaded_file_missing_file" ]]; then
+    local hook_copy_dir="$state_dir/hook-copy"
+    mkdir "$hook_copy_dir"
+    cp "$hook_bin" "${hook_bin%.sh}.md" "$hook_copy_dir/"
+    hook_bin="$hook_copy_dir/$(basename "$hook_bin")"
   fi
 
   local actual_stdout actual_exit

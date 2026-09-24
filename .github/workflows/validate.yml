@@ -103,8 +103,10 @@ jobs:
       # The gate section is the first "## " section of the full file, so the
       # expected loaded file is line 1 of the full file (the opening tag)
       # followed by the full file from its second "## " heading to the end.
-      # Changing a shared section in one file but not the other fails here;
-      # an edit inside the gate section alone does not.
+      # Line 2 of the full file must be the gate heading, so no text can sit
+      # above the gate section unchecked. Changing a shared section in one
+      # file but not the other fails here; an edit inside the gate section
+      # alone does not.
       - name: Check loaded pre-message variants match their full files
         run: |
           set -e
@@ -112,7 +114,7 @@ jobs:
           for pair in pre-message-gates pre-message; do
             full="hooks/$pair.md"
             loaded="hooks/$pair-loaded.md"
-            if ! diff -u "$loaded" <(awk 'FNR == 1 { print; next } /^## / { headings++ } headings >= 2' "$full"); then
+            if ! diff -u "$loaded" <(awk 'FNR == 1 { print; next } FNR == 2 && !/^## / { print "(line 2 of the full file is not a ## heading)" } /^## / { headings++ } headings >= 2' "$full"); then
               echo "DRIFT: $loaded is not line 1 of $full followed by $full from its second '## ' heading (diff above: - is the loaded file, + is the expected text)"
               drift=$((drift + 1))
             fi

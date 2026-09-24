@@ -70,9 +70,9 @@ jobs:
       # "Core Skill Routing (per turn)" block in hooks/pre-message-gates.md
       # and the Skill-call check in hooks/pre-message.md (both now name
       # honesty and communication); slack kept <=20 words above the actual
-      # combined total (gates + message, 477 when the cap was set) to preserve the
-      # budget's anti-creep function (a large buffer defeats the point of
-      # the gate).
+      # combined total (gates + message, 477 when the cap was set) to
+      # preserve the budget's anti-creep function (a large buffer defeats
+      # the point of the gate).
       - name: Enforce pre-message hook word budget
         run: |
           gates=$(wc -w < hooks/pre-message-gates.md)
@@ -84,21 +84,27 @@ jobs:
             exit 1
           fi
           echo "[+] Combined pre-message hook injection is within the 495-word budget"
+          oversize=0
           for pair in pre-message-gates pre-message; do
             full_words=$(wc -w < "hooks/$pair.md")
             loaded_words=$(wc -w < "hooks/$pair-loaded.md")
             echo "$pair-loaded.md: $loaded_words words; $pair.md: $full_words words"
             if [ "$loaded_words" -ge "$full_words" ]; then
               echo "FAILED: hooks/$pair-loaded.md ($loaded_words words) is not smaller than hooks/$pair.md ($full_words words)"
-              exit 1
+              oversize=$((oversize + 1))
             fi
           done
+          if [ "$oversize" -gt 0 ]; then
+            exit 1
+          fi
           echo "[+] Each loaded pre-message variant is smaller than its full file"
 
-      # Each loaded variant is the full file with the gate section removed:
-      # line 1 of the full file, then the full file from the heading that is
-      # line 2 of the loaded file to the end. Editing one without the other
-      # fails here.
+      # Each loaded variant is its full file with the gate section removed.
+      # The gate section is the first "## " section of the full file, so the
+      # expected loaded file is line 1 of the full file (the opening tag)
+      # followed by the full file from its second "## " heading to the end.
+      # Changing a shared section in one file but not the other fails here;
+      # an edit inside the gate section alone does not.
       - name: Check loaded pre-message variants match their full files
         run: |
           set -e
@@ -106,10 +112,8 @@ jobs:
           for pair in pre-message-gates pre-message; do
             full="hooks/$pair.md"
             loaded="hooks/$pair-loaded.md"
-            heading=$(sed -n 2p "$loaded")
-            expected=$(head -n 1 "$full"; HEADING="$heading" awk '$0 == ENVIRON["HEADING"] { keep = 1 } keep' "$full")
-            if [ "$expected" != "$(cat "$loaded")" ]; then
-              echo "DRIFT: $loaded is not line 1 of $full followed by $full from the heading '$heading'"
+            if ! diff -u "$loaded" <(awk 'FNR == 1 { print; next } /^## / { headings++ } headings >= 2' "$full"); then
+              echo "DRIFT: $loaded is not line 1 of $full followed by $full from its second '## ' heading (diff above: - is the loaded file, + is the expected text)"
               drift=$((drift + 1))
             fi
           done

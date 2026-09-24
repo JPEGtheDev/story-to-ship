@@ -32,7 +32,7 @@ The full rules live in `skills/session-bootstrap/SKILL.md`, `skills/honesty/SKIL
 
 ## Word budget
 
-The per-turn files are injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 495 words for `pre-message-gates.md` + `pre-message.md`: the full pair is the worst-case turn, injected while the pending flags exist. CI also requires each `-loaded` variant to have fewer words than its full file, and to match its full file with the gate section removed, so the two cannot drift apart. `session-start.md` fires once per session and is outside the budget.
+One file from each per-turn pair is injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 495 words for `pre-message-gates.md` + `pre-message.md`: the full pair is the worst-case turn, injected while the pending flags exist. CI also requires each `-loaded` variant to have fewer words than its full file, and to match its full file with the gate section removed, so changing a shared section in one file but not the other fails CI. `session-start.md` fires once per session and is outside the budget.
 
 ## Mirror in .claude/hooks
 
@@ -61,7 +61,7 @@ Accepted bootstrap skill names: both hooks strip everything through the last col
 
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
 
-Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` hooks (`pre-message-gates.sh`, `pre-message.sh`) do not close this gap: if they run in that window they find no flag file and inject the `-loaded` variants, which keep the reload triggers but not the gate sections.
+Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` hooks (`pre-message-gates.sh`, `pre-message.sh`) do not close this gap: if they run in that window they find no flag file and, when the state directory exists, inject the `-loaded` variants, which leave out the gate sections.
 
 ## workflow-model-guard.sh
 

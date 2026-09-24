@@ -28,8 +28,10 @@
 #   expect_stdout_not_grep   - newline list; no line may appear in the
 #                              additionalContext value
 #
-# Each case gets a fresh temp dir exported as BOOTSTRAP_GATE_STATE_DIR for
-# the hook run, removed unconditionally at the end of the case.
+# Each case gets a fresh temp dir; BOOTSTRAP_GATE_STATE_DIR is exported as
+# that temp dir for the hook run (or, for a state_dir_missing case, a
+# non-existent path inside it), and the temp dir is removed unconditionally
+# at the end of the case.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GATES_HOOK="$SCRIPT_DIR/../pre-message-gates.sh"

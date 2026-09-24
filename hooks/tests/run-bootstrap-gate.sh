@@ -48,6 +48,9 @@
 #                             as pre_dirs/pre_files -- used to assert a
 #                             traversal-target "canary" file survived a hook
 #                             invocation that carried a hostile session_id.
+#   expect_file_absent      - newline list of file path templates that must
+#                             NOT exist AFTER the hook runs. Same token
+#                             support as pre_dirs/pre_files/expect_file_exists.
 #
 # State dir layout matches the bootstrap-gate contract:
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-pending-<session_id>
@@ -60,7 +63,8 @@
 # is designed to traverse out of the state dir (e.g. "a/../../CANARY") --
 # the traversal target lands in the sandbox, never a shared path, and
 # `rm -rf "$sandbox"` cleans it up unconditionally at the end of the case.
-# pre_dirs/pre_files/expect_file_exists templates may reference:
+# pre_dirs/pre_files/expect_file_exists/expect_file_absent templates may
+# reference:
 #   STATE_DIR         - the state subdirectory itself
 #   STATE_DIR_PARENT  - the sandbox root (one level above STATE_DIR)
 
@@ -118,6 +122,7 @@ run_case() {
   local expect_flag_exists_file="$case_dir/expect_flag_exists"
   local expect_flag_absent_file="$case_dir/expect_flag_absent"
   local expect_file_exists_file="$case_dir/expect_file_exists"
+  local expect_file_absent_file="$case_dir/expect_file_absent"
 
   if [[ ! -f "$hook_file" ]]; then
     echo "FAIL: $name"
@@ -309,6 +314,18 @@ run_case() {
         reasons+=("expected file to exist: $resolved")
       fi
     done <"$expect_file_exists_file"
+  fi
+
+  if [[ -f "$expect_file_absent_file" ]]; then
+    while IFS= read -r template; do
+      [[ -z "$template" ]] && continue
+      local resolved
+      resolved="$(resolve_token_path "$state_dir" "$template")"
+      if [[ -e "$resolved" ]]; then
+        ok=0
+        reasons+=("expected file to be absent: $resolved")
+      fi
+    done <"$expect_file_absent_file"
   fi
 
   if [[ "$ok" -eq 1 ]]; then

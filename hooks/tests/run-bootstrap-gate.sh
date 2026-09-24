@@ -49,7 +49,9 @@
 #                             exist AFTER the hook runs. Same token support
 #                             as pre_dirs/pre_files -- used to assert a
 #                             traversal-target "canary" file survived a hook
-#                             invocation that carried a hostile session_id.
+#                             invocation that carried a hostile session_id,
+#                             or that a flag file the hook must leave in
+#                             place survived.
 #   expect_file_absent      - newline list of file path templates that must
 #                             NOT exist AFTER the hook runs. Same token
 #                             support as pre_dirs/pre_files/expect_file_exists.

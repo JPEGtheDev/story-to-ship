@@ -6,8 +6,9 @@
 #     bootstrap-gate-pre.sh stops gating further tool calls in this session.
 #   Skill(honesty) clears .honesty-pending-<session_id>.
 #   Skill(communication) clears .communication-pending-<session_id>.
-# Any other Skill (or any other tool) is a no-op. Never blocks: always
-# exits 0.
+# Any other Skill (or any other tool) is a no-op, and so is any call from a
+# subagent (a payload carrying agent_id): only the main-thread session
+# clears its own flags. Never blocks: always exits 0.
 #
 # Fail-open philosophy: this hook NEVER exits nonzero. Missing jq, malformed
 # stdin, an unresolved state dir, an invalid session_id, or any other
@@ -29,6 +30,14 @@ fi
 command -v jq &>/dev/null || exit 0
 [[ -z "$RAW" ]] && exit 0
 printf '%s' "$RAW" | jq empty 2>/dev/null || exit 0
+
+# Subagents identify themselves via agent_id. A subagent loading one of these
+# skills must not clear the main session's flag, so its calls are ignored,
+# matching the exemption in bootstrap-gate-pre.sh.
+AGENT_ID="$(printf '%s' "$RAW" | jq -r '.agent_id // empty' 2>/dev/null)"
+if [[ -n "$AGENT_ID" ]]; then
+  exit 0
+fi
 
 TOOL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_name // empty' 2>/dev/null)"
 SKILL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_input.skill // empty' 2>/dev/null)"

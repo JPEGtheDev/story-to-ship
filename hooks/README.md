@@ -55,7 +55,7 @@ The script's own unset default is warn (`MODE="${BOOTSTRAP_GATE_MODE:-warn}"`); 
 
 State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the three flag files named above and the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`), which is appended in both modes -- the JSONL write happens before the mode branch, and each logged line carries its own `mode` field.
 
-Subagents identify themselves via an `agent_id` field on the hook payload; `bootstrap-gate-pre.sh` exempts any call carrying one, so the gate only ever applies to the main-thread session.
+Subagents identify themselves via an `agent_id` field on the hook payload; both `bootstrap-gate-pre.sh` and `bootstrap-gate-post.sh` ignore any call carrying one, so the gate only ever applies to the main-thread session and a subagent loading a skill never clears the main session's flags.
 
 Accepted bootstrap skill names: both hooks strip everything through the last colon of `tool_input.skill` before comparing it to `session-bootstrap`, because the harness lists plugin skills as `<plugin>:<skill>`. So `session-bootstrap`, `story-to-ship:session-bootstrap`, and any other `<plugin>:session-bootstrap` satisfy the gate; `session-bootstrap:` (trailing colon) and `<plugin>:honesty` do not. `bootstrap-gate-post.sh` applies the same strip before matching `honesty` and `communication`, so `<plugin>:honesty` clears the honesty flag. `tools/first_action_audit/first-action-audit.sh` applies the same rule when it judges the first tool call after each `compact_boundary` record in a transcript (one BOUNDARY/listing/VERDICT block per compaction window).
 

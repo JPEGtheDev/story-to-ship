@@ -31,8 +31,9 @@ command -v jq &>/dev/null || exit 0
 [[ -z "$RAW" ]] && exit 0
 printf '%s' "$RAW" | jq empty 2>/dev/null || exit 0
 
-# Subagents identify themselves via agent_id. A subagent loading one of these
-# skills must not clear the main session's flag, so its calls are ignored,
+# Subagents identify themselves via agent_id. A subagent's payload carries the
+# main session's session_id, so without this check a subagent loading one of
+# these skills would clear the main session's flag. Its calls are ignored,
 # matching the exemption in bootstrap-gate-pre.sh.
 AGENT_ID="$(printf '%s' "$RAW" | jq -r '.agent_id // empty' 2>/dev/null)"
 if [[ -n "$AGENT_ID" ]]; then

@@ -27,7 +27,7 @@
 #                              from a copy of its script and its full .md
 #                              file in the per-case temp dir, with no
 #                              -loaded .md file beside them
-#   expect_stdout_grep      - newline list; every line must appear
+#   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
 #                              additionalContext value
@@ -106,8 +106,12 @@ run_case() {
 
   if [[ -f "$loaded_file_missing_file" ]]; then
     local hook_copy_dir="$state_dir/hook-copy"
-    mkdir "$hook_copy_dir"
-    cp "$hook_bin" "${hook_bin%.sh}.md" "$hook_copy_dir/"
+    if ! mkdir "$hook_copy_dir" || ! cp "$hook_bin" "${hook_bin%.sh}.md" "$hook_copy_dir/"; then
+      echo "FAIL: $name -- could not copy the hook into $hook_copy_dir"
+      fail=$((fail + 1))
+      rm -rf "$state_dir"
+      return
+    fi
     hook_bin="$hook_copy_dir/$(basename "$hook_bin")"
   fi
 

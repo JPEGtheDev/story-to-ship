@@ -2,7 +2,9 @@
 # Hermetic test harness for the bootstrap-gate hook family:
 #   hooks/bootstrap-gate-pre.sh   (PreToolUse, matcher *)
 #   hooks/bootstrap-gate-post.sh  (PostToolUse, matcher Skill)
-#   hooks/session-start.sh        (SessionStart, extended to stamp a flag file)
+#   hooks/session-start.sh        (SessionStart, extended to stamp three
+#                                  per-session pending flags: bootstrap,
+#                                  honesty, communication)
 #
 # Sibling to hooks/tests/run.sh, following the same fixture-dir pattern:
 # per-case directories under fixtures-bootstrap-gate/ carry env/input/expected
@@ -51,9 +53,15 @@
 #   expect_file_absent      - newline list of file path templates that must
 #                             NOT exist AFTER the hook runs. Same token
 #                             support as pre_dirs/pre_files/expect_file_exists.
+#                             Uses -e, so anything at the path (a directory
+#                             too) counts as present.
 #
-# State dir layout matches the bootstrap-gate contract:
+# State dir layout matches the bootstrap-gate contract: one pending flag per
+# session per gated skill (bootstrap, honesty, communication), each deleted
+# independently when its own skill loads, plus the gate log:
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-pending-<session_id>
+#   $BOOTSTRAP_GATE_STATE_DIR/.honesty-pending-<session_id>
+#   $BOOTSTRAP_GATE_STATE_DIR/.communication-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-gate-log.jsonl
 #
 # Sandbox layout: each case gets a fresh outer sandbox dir, with
@@ -89,8 +97,9 @@ log_path() {
 }
 
 # Expands the STATE_DIR / STATE_DIR_PARENT tokens in a pre_dirs/pre_files/
-# expect_file_exists template into a concrete path. STATE_DIR_PARENT must be
-# substituted before STATE_DIR since it contains STATE_DIR as a substring.
+# expect_file_exists/expect_file_absent template into a concrete path.
+# STATE_DIR_PARENT must be substituted before STATE_DIR since it contains
+# STATE_DIR as a substring.
 resolve_token_path() {
   local state_dir="$1"
   local template="$2"

@@ -43,7 +43,7 @@ This skill is **mandatory** -- `AGENTS.md` sec. Session Lifecycle requires it be
 
 Every session produces insights that can improve future agent effectiveness. Capture these systematically.
 
-**Objectivity block:** Agents and humans are structurally poor at evaluating their own work. This is not a character flaw -- it is a known bias. The explicit steps below exist to override it. Skipping steps because "it went well" is the bias asserting itself.
+**Objectivity block:** Agents are biased judges of their own work; skipping a step because "it went well" is that bias asserting itself.
 
 ---
 
@@ -66,7 +66,7 @@ Classify each lesson into one of these categories:
 |----------|---------------|
 | **Code quality** | `code-quality` skill |
 | **Testing** | `testing` skill |
-| **CI/CD** | `workflow` skill |
+| **CI/CD (continuous integration and continuous delivery)** | `workflow` skill |
 | **Documentation** | `documentation` skill |
 | **Versioning** | `versioning` skill |
 
@@ -77,7 +77,7 @@ Classify each lesson into one of these categories:
 Before proposing updates, verify the lesson is not already documented:
 
 1. Check `AGENTS.md` -- Is this pattern already listed?
-2. Check the relevant skill's `SKILL.md` -- Is this rule already stated?
+2. Check the skill the Step 2 table names for this lesson's category -- is this rule already stated?
 3. Check `references/LESSONS_LEARNED_PATTERNS.md` -- Is this category or pattern already documented?
 
 **Only propose additions for genuinely new or underemphasized patterns.**
@@ -143,9 +143,9 @@ Before generating the session summary, complete this audit:
 7. **Failure-instance evidence bar:**
    - A claimed failure instance (a miss, a violated gate, a self-attributed defect) may be recorded -- in chat, in memory, or in self-assessment.md -- only with a primary-evidence citation: a transcript timestamp, a log line, or command output.
    - Bootstrap-first miss claims (session-bootstrap not invoked as the first tool call) require `tools/first_action_audit/first-action-audit.sh` output (run it against the session transcript and quote every VERDICT line it prints, one per compaction window).
-   - Absent that evidence, the only permitted wording is "SUSPECTED <failure> -- verifying". Rationale: a false self-reported miss was once recorded on the strength of a preserved-segment replay -- a pre-compaction tool call carried into the continuation context, which renders exactly like a first-action miss; only the transcript timestamps distinguish the two.
+   - Absent that evidence, the only permitted wording is "SUSPECTED <failure> -- verifying".
 
-**Report honestly.** If you made false confidence claims, name them. This is not a punishment -- it is the calibration mechanism. A model that accurately reports its own false confidence claims is more trustworthy than one that doesn't. Over-attestation is the same defect as under-attestation -- accuracy, not humility, is the target.
+**Report honestly.** If you made false confidence claims, name them. Over-attestation is the same defect as under-attestation -- accuracy, not humility, is the target.
 
 ---
 
@@ -171,12 +171,12 @@ If changes are warranted and the session scope allows:
 
 Before generating the session summary block, write the full findings to `[SESSION_DIR]/self-assessment.md`.
 
-`[SESSION_DIR]` is the directory containing this session's `events.jsonl` (the same directory as `postmortem.md`). Writing here keeps all session artifacts co-located and out of the repo.
+`[SESSION_DIR]` is the directory containing this session's `events.jsonl` (the same directory as `postmortem.md`).
 
-A self-evaluation that exists only in the message stream is not a self-evaluation -- it is ephemeral. The external postmortem reviewer reads from disk, not from the message stream. If the file does not exist, the external reviewer cannot cross-check the self-assessment against what was claimed.
+The postmortem reviewer cross-checks the self-assessment from disk, not from the message stream, so a self-evaluation that exists only in chat cannot be checked.
 
 **Write Gate:**
-1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments (stretches of the session split by a compaction boundary or a task switch) it contained, and record both in the block's `**Span:**` line. The assessment covers that whole span. A narrower scope names every excluded segment and why; excluding a todo that shipped work this session is not a valid narrowing, so an assessment of only the final task of a multi-task session is incomplete.
+1. State the session span -- the first and last transcript timestamps -- and the number of todos or segments (stretches of the session split by a compaction boundary or a task switch) it contained, and carry both into the `**Span:**` line of the Step 8 block, which item 2 produces. The assessment covers that whole span. A narrower scope names every excluded segment and why; excluding a todo that shipped work this session is not a valid narrowing, so an assessment of only the final task of a multi-task session is incomplete.
 2. Produce the `### Session Self-Evaluation` block (using the template in Step 8)
 3. Write it to `[SESSION_DIR]/self-assessment.md`:
    - Use `## Session Self-Evaluation (YYYY-MM-DD -- [8-char-session-id])` as the top-level heading.

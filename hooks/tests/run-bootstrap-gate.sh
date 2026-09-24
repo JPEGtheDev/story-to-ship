@@ -20,7 +20,11 @@
 #                             sourcing it. An env file may unset the first
 #                             and set the second to exercise the
 #                             $CLAUDE_PROJECT_DIR/.claude state dir real
-#                             sessions use.
+#                             sessions use. The expect_flag_* and
+#                             expect_log_* checks still read the runner's
+#                             own state dir, so such a case asserts with
+#                             expect_file_exists / expect_file_absent paths
+#                             under STATE_DIR_PARENT.
 #   input                   - stdin JSON fed to the hook (required)
 #   pre_flag_sessions       - newline list of session_ids; a flag file is
 #                             created for each BEFORE the hook runs

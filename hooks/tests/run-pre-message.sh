@@ -33,7 +33,8 @@
 #                              BOOTSTRAP_GATE_STATE_DIR unset, so it
 #                              resolves its state dir as <project>/.claude,
 #                              the path real sessions use; that dir is
-#                              created and pre_flags are touched there
+#                              created and pre_flags are touched there.
+#                              state_dir_missing is ignored in such a case
 #   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the

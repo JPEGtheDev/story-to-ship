@@ -106,6 +106,7 @@ Before building or presenting any plan:
 3. Todo list has no placeholders -- every item is concrete and executable
 4. Plan has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
 5. No todo touches 3+ files or exceeds 25 tool calls without being split
+6. Every claim, in the plan file or the presentation message, that a cut or moved passage repeats, restates, duplicates, or is redundant with other text carries the pasted search output (grep or diff) that shows that other text, in the same message. A cut justified by an unproven restatement claim is a placeholder.
 
 [+] All met -> present the plan and wait for explicit user approval
 [-] Any unmet -> resolve the unmet item; do not start implementation
@@ -146,12 +147,13 @@ Do not validate what looks correct -- find what is wrong.
 Requirements: [FULL TEXT]
 Plan: [FULL PLAN WITH TODOS]
 
-Answer only these five questions:
+Answer only these six questions:
 1. What is the plan NOT addressing that the requirements ask for?
 2. What assumptions must be true for this plan to work? (name assumption + what must hold)
 3. Strongest argument against this approach?
 4. Most likely way this fails in practice?
 5. Does any claim that two competing constraints are both satisfied come with a worked example carried end-to-end? If not, name the missing example.
+6. Does every claim that a cut or moved passage is restated elsewhere carry pasted search output showing the other text? If not, name the claim.
 
 If you genuinely find no gaps after thorough analysis, state that explicitly.
 ```
@@ -239,6 +241,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 - A plan claims two competing constraints are both satisfied, and no worked example carries one concrete case end-to-end -- **STOP. Demand one worked example carried end-to-end before any further abstract argument. The example either exposes the hidden cost or proves the design absorbs it; abstract debate does neither.**
 - A DoD behavioral branch has resolved untriggered across two fixture attempts and the next fixture is another small tweak -- **STOP. The next attempt must be a structural redesign (>=5 changed lines vs the baseline fixture, diff pasted), or the plan escalates to an explicit user ruling quoted in the PR body.**
 - Plan presented, the reply requires parsing to decide whether it is approval, and you are about to start implementation -- **STOP. Needing to parse the reply means it is not plain approval. Re-present the plan in plainer terms and wait for a plain yes or no.**
+- About to tell the user that a cut repeats text found elsewhere, with no pasted search output in the same message -- **STOP. Run the search and paste it, or keep the passage.**
 
 ---
 

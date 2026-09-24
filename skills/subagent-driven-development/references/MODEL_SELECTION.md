@@ -70,6 +70,24 @@ no template-considered sentence, no tier reasoning, or no explicit `model` in th
 postmortem-reviewer template's Dispatch-routing audit row checks this after the fact; no live
 detector exists.
 
+## Explicit model on every call
+
+Pass `model` on every Agent call, template-backed or not. A template's frontmatter pin is a
+fallback for calls that omit the field, and the events log (the events JSON Lines file that the
+repo's session-events converter builds from a session transcript) records an omitted field as
+`inherit` whether the template pin or your own model ran the call, so the log does not show which
+model ran; only the call records the tier decision. Check a finished session with:
+
+```
+jq -r 'select(.type=="assistant") | .message.content[]? | select(.type=="tool_use" and .name=="Agent" and ((.input.model // "") == "")) | (.input.subagent_type // "general-purpose")' TRANSCRIPT.jsonl | sort | uniq -c
+```
+
+Empty output means every dispatch named its tier; each line is an agent type dispatched without
+one, with the count (a call that also omits `subagent_type` is listed as `general-purpose`).
+
+**Enforcement is procedural/self-check:** the checkable signal is that listing; no live detector
+exists.
+
 ## Coordinator tier
 
 This section is a separate axis from the tier table above, which governs dispatched subagents. It

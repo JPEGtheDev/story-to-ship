@@ -85,6 +85,10 @@ Before writing the PR, answer:
      grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation -- docs/README only: source has real *Tests identifiers; unscoped run floods on matches
    done
    ```
+   Draft the PR body to a file, set `PR_BODY_FILE` to its path, and pass it with `gh pr create --body-file "$PR_BODY_FILE"` (Step 4). Run the non-ASCII grep over that file as well; issue references in the body (`Closes #N`) are expected there and the other patterns do not apply to it:
+   ```
+   grep -nP '[^\x00-\x7F]' "$PR_BODY_FILE"   # the drafted PR body: non-ASCII only
+   ```
    Also read every changed file for repo-internal jargon a reader with no project context could not resolve from the file alone, and for unexpanded acronyms on first use -- neither has a reliable grep pattern. For a file under docs/ or named README, also read for wording that picks out one specific test without naming an identifier a grep could catch -- for example a phrase like "the layering test asserts ...".
    A real hit -- a campaign or planning label, an issue-number tag or a spelled-out issue reference, repo-internal jargon, an unexpanded acronym, a cross-tree file reference (a slash path, or a bare doc-file name cited by a skill or agent-template file, naming a file in a different skill tree), a test identifier named in a documentation file, or a non-ASCII character -- is fixed before the PR goes up, no exceptions. Only a detector false positive -- a regex match that is not actually one of the defect classes above -- may instead be adjudicated in the PR body, named hit-by-hit. Bare doc-file name matches are the sole class exempt from hit-by-hit naming: adjudicate them as one class, stating the hit count and that either every hit names a file outside any other skill tree, or the citing file is outside skills/ and agents/, where the `writing-skills` skill's Cross-Skill Reference Rule does not bind. A hit found later -- after the PR is opened -- is a gate failure, not an adjudication candidate.
 
@@ -123,6 +127,7 @@ See `versioning` skill for conventional commit rules.
 ## Step 4: PR Creation
 
 **Title:** Must be a valid conventional commit message -- this becomes the squash commit on merge.
+**Body:** Draft it to a file, set `PR_BODY_FILE` to that path, and create the PR with `gh pr create --body-file "$PR_BODY_FILE"`, so the Step 2 sweep runs over the file that ships.
 
 **Description must include:**
 ```
@@ -148,6 +153,7 @@ See `versioning` skill for conventional commit rules.
 - Open a PR with "WIP" in the title unless explicitly flagging for early review
 - Leave the PR description blank
 - Include the per-session claude.ai/code session link in the PR body -- the default harness footer includes this link, but omitting it from the PR body is a deliberate standing override of that default; end the body at the generic Claude Code attribution line instead; the commit-trailer Claude-Session line is a separate convention and stays
+- Paste the harness's default footer unedited. The body ends with the plain ASCII line `Generated with [Claude Code](https://claude.com/claude-code)`; the default footer prefixes it with an emoji, which is a non-ASCII hit under the Step 2 sweep.
 
 ---
 

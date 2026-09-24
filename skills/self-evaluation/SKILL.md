@@ -142,7 +142,7 @@ Before generating the session summary, complete this audit:
 
 7. **Failure-instance evidence bar:**
    - A claimed failure instance (a miss, a violated gate, a self-attributed defect) may be recorded -- in chat, in memory, or in self-assessment.md -- only with a primary-evidence citation: a transcript timestamp, a log line, or command output.
-   - Bootstrap-first miss claims (session-bootstrap not invoked as the first tool call) require `tools/first_action_audit/first-action-audit.sh` output (run it against the session transcript and quote its VERDICT line).
+   - Bootstrap-first miss claims (session-bootstrap not invoked as the first tool call) require `tools/first_action_audit/first-action-audit.sh` output (run it against the session transcript and quote every VERDICT line it prints, one per compaction window).
    - Absent that evidence, the only permitted wording is "SUSPECTED <failure> -- verifying".
 
 **Report honestly.** If you made false confidence claims, name them. Over-attestation is the same defect as under-attestation -- accuracy, not humility, is the target.

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # PostToolUse hook (matcher Skill): bootstrap-gate-post.sh
 #
-# Clears the .bootstrap-pending-<session_id> flag for the current session
-# once a Skill(session-bootstrap) call completes, so bootstrap-gate-pre.sh
-# stops gating further tool calls in this session. Any other Skill (or any
-# other tool) is a no-op. Never blocks: always exits 0.
+# Clears one per-session pending flag once its matching skill completes:
+#   Skill(session-bootstrap) clears .bootstrap-pending-<session_id>, so
+#     bootstrap-gate-pre.sh stops gating further tool calls in this session.
+#   Skill(honesty) clears .honesty-pending-<session_id>.
+#   Skill(communication) clears .communication-pending-<session_id>.
+# Any other Skill (or any other tool) is a no-op. Never blocks: always
+# exits 0.
 #
 # Fail-open philosophy: this hook NEVER exits nonzero. Missing jq, malformed
 # stdin, an unresolved state dir, an invalid session_id, or any other
@@ -34,9 +37,18 @@ SKILL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_input.skill // empty' 2>/dev/nul
 # "<plugin>:session-bootstrap" satisfy the gate; "session-bootstrap:" does not.
 SKILL_NAME="${SKILL_NAME##*:}"
 
-if [[ "$TOOL_NAME" != "Skill" || "$SKILL_NAME" != "session-bootstrap" ]]; then
+if [[ "$TOOL_NAME" != "Skill" ]]; then
   exit 0
 fi
+
+# Map the loaded skill to the flag name it clears. Any skill not in this
+# list is a no-op.
+case "$SKILL_NAME" in
+  session-bootstrap) FLAG_NAME="bootstrap" ;;
+  honesty) FLAG_NAME="honesty" ;;
+  communication) FLAG_NAME="communication" ;;
+  *) exit 0 ;;
+esac
 
 STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
 if [[ -z "$STATE_DIR" ]]; then
@@ -55,7 +67,7 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 # be trusted for a hostile session_id, so fail open silently.
 [[ "$SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]] || exit 0
 
-FLAG_FILE="$STATE_DIR/.bootstrap-pending-$SESSION_ID"
+FLAG_FILE="$STATE_DIR/.$FLAG_NAME-pending-$SESSION_ID"
 rm -f -- "$FLAG_FILE" 2>/dev/null
 
 exit 0

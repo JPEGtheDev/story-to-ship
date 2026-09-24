@@ -1,0 +1,8 @@
+{"type":"system","subtype":"compact_boundary","timestamp":"2026-01-01T00:01:00Z"}
+{"type":"assistant","timestamp":"2026-01-01T00:01:05Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"session-bootstrap"}}]}}
+{"type":"assistant","timestamp":"2026-01-01T00:01:10Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{"command":"git status"}}]}}
+{"type":"assistant","timestamp":"2026-01-01T00:01:15Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{"command":"git status"}}]}}
+{"type":"assistant","timestamp":"2026-01-01T00:01:20Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{"command":"git status"}}]}}
+{"type":"system","subtype":"compact_boundary","timestamp":"2026-01-01T00:02:00Z"}
+{"type":"assistant","timestamp":"2026-01-01T00:02:05Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Skill","input":{"skill":"session-bootstrap"}}]}}
+{"type":"assistant","timestamp":"2026-01-01T00:02:10Z","message":{"role":"assistant","content":[{"type":"tool_use","name":"Bash","input":{"command":"git status"}}]}}

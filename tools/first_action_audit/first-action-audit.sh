@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # first-action-audit.sh -- audits a Claude Code session transcript JSONL for
-# bootstrap-first compliance after the latest context compaction.
+# bootstrap-first compliance after every context compaction.
 #
 # Built after a 2026-08-09 incident where a preserved-segment replay
 # (pre-compaction tool calls carried into a continuation context) was
 # misread as a first-action miss: this script excludes any candidate
-# message whose timestamp is not strictly AFTER the last compact_boundary,
-# even if that message appears later in file order. Verified CLI transcript
-# schema version: 2.1.220.
+# message whose timestamp is not strictly AFTER the compact_boundary that
+# opens its window, even if that message appears later in file order.
+# Verified CLI transcript schema version: 2.1.220.
+# Each compact_boundary opens a window that runs to the next boundary; the
+# script prints one BOUNDARY/listing/VERDICT block per window, in file
+# order, and exits 1 if any window is a MISS.
 #
 # Fail LOUD by design: this is an audit tool, the deliberate inverse of this
 # repo's fail-open hooks (see hooks/bootstrap-gate-pre.sh). Usage and
@@ -61,11 +64,16 @@ check_rc() {
 }
 
 # Pass 1: parse each line as JSON, skipping (and counting) lines that fail
-# to parse. Also drops candidate assistant messages missing .timestamp
-# (they cannot be ordered against the boundary) into the same bad count.
-# Boundary is the LAST system/compact_boundary line's .timestamp, or the
-# literal string "none". Candidates are main-thread assistant messages
-# containing at least one tool_use item, strictly after the boundary.
+# to parse. It also drops candidate assistant messages missing a string
+# .timestamp into the same bad count. It collects every
+# system/compact_boundary .timestamp in file order (boundaries are assumed
+# to increase in file order; a boundary without a string timestamp is
+# skipped). Candidates are main-thread assistant messages containing at
+# least one tool_use item. Each candidate is assigned to the window of the
+# last boundary whose timestamp is strictly less than the candidate's;
+# candidates not strictly after the first boundary belong to no window.
+# With no boundary there is one window, tagged "none", holding every
+# candidate.
 # jq program: $-identifiers are jq variables, not shell expansions
 # shellcheck disable=SC2016
 readonly PARSE_PROG='
@@ -79,29 +87,43 @@ readonly PARSE_PROG='
     end
 )) as $p1
 | ($p1.parsed) as $all
-| ( [ $all[] | select(.type=="system" and .subtype=="compact_boundary") ] ) as $boundaries
-| ( if ($boundaries|length) > 0 then ($boundaries[-1].timestamp // null) else null end ) as $braw
-| ( if $braw == null then "none" else $braw end ) as $boundary
+| ( [ $all[] | select(.type=="system" and .subtype=="compact_boundary") | .timestamp
+      | select(type=="string") ] ) as $boundaries
 | (reduce $all[] as $line (
     {cands: [], bad: $p1.bad};
     if ($line.type=="assistant") and ($line.isSidechain != true)
        and (($line.message.content // []) | any(.type=="tool_use")) then
       if ($line.timestamp|type) != "string" then
         .bad += 1
-      elif ($boundary == "none") or ($line.timestamp > $boundary) then
+      else
         .cands += [{
           ts: $line.timestamp,
           tools: [ $line.message.content[] | select(.type=="tool_use")
                    | {name: .name, skill: (.input.skill // "")} ]
         }]
-      else
-        .
       end
     else
       .
     end
   )) as $r
-| {boundary: $boundary, bad: $r.bad, candidates: $r.cands}
+| ($r.cands) as $all_cands
+| ($boundaries|length) as $nb
+| (
+    if $nb == 0 then
+      [ {boundary: "none", candidates: $all_cands} ]
+    else
+      ( $all_cands | map(
+          . as $c
+          | ( [ range(0; $nb) as $i
+                | select($boundaries[$i] < $c.ts) | $i ] ) as $idxs
+          | $c + {widx: $idxs[-1]}
+        ) ) as $cands_with_widx
+      | [ range(0; $nb) as $i
+          | { boundary: $boundaries[$i],
+              candidates: [ $cands_with_widx[] | select(.widx == $i) | {ts, tools} ] } ]
+    end
+  ) as $windows
+| {bad: $r.bad, windows: $windows}
 '
 
 RESULT="$(jq -Rn "$PARSE_PROG" "$TRANSCRIPT")"
@@ -114,26 +136,35 @@ readonly REPORT_PROG='
 # Plugin skills are listed as "<plugin>:<skill>"; compare the bare name (strip through the last colon).
 def bare_skill: if type=="string" then sub("^.*:"; "") else "" end;
 . as $in
-| ($in.boundary) as $boundary
-| ($in.candidates) as $cands
-| ( [ $cands[] | .ts as $ts | .tools[]
-      | (if .name=="Skill" then "\($ts) Skill \(.skill)" else "\($ts) \(.name)" end) ] ) as $listing_all
-| ($listing_all[0:$n]) as $listing
 | (
-    if ($cands|length)==0 then
-      {verdict_line: "VERDICT=NO_TOOL_CALLS", exit: 0}
-    else
-      ($cands[0]) as $first
-      | ($first.tools) as $tools
-      | if ($tools|length)==1 and $tools[0].name=="Skill" and ($tools[0].skill | bare_skill)=="session-bootstrap" then
-          {verdict_line: "VERDICT=CLEAN", exit: 0}
-        else
-          ( [$tools[] | select(.name!="Skill" or (.skill | bare_skill)!="session-bootstrap")] | .[0] ) as $miss
-          | {verdict_line: "VERDICT=MISS \($miss.name // "unknown") at \($first.ts)", exit: 1}
-        end
-    end
-  ) as $v
-| {lines: (["BOUNDARY=\($boundary)"] + $listing + [$v.verdict_line]), exit: $v.exit, bad: $in.bad}
+    reduce $in.windows[] as $w (
+      {lines: [], exit: 0};
+      ($w.boundary) as $boundary
+      | ($w.candidates) as $cands
+      | ( [ $cands[] | .ts as $ts | .tools[]
+            | (if .name=="Skill" then "\($ts) Skill \(.skill)" else "\($ts) \(.name)" end) ] ) as $listing_all
+      | ($listing_all[0:$n]) as $listing
+      | (
+          if ($cands|length)==0 then
+            {verdict_line: "VERDICT=NO_TOOL_CALLS", exit: 0}
+          else
+            ($cands[0]) as $first
+            | ($first.tools) as $tools
+            | if ($tools|length)==1 and $tools[0].name=="Skill" and ($tools[0].skill | bare_skill)=="session-bootstrap" then
+                {verdict_line: "VERDICT=CLEAN", exit: 0}
+              else
+                ( [$tools[] | select(.name!="Skill" or (.skill | bare_skill)!="session-bootstrap")] | .[0] ) as $miss
+                | {verdict_line: "VERDICT=MISS \($miss.name // "unknown") at \($first.ts)", exit: 1}
+              end
+          end
+        ) as $v
+      | {
+          lines: (.lines + (["BOUNDARY=\($boundary)"] + $listing + [$v.verdict_line])),
+          exit: (if $v.exit == 1 then 1 else .exit end)
+        }
+    )
+  ) as $out
+| {lines: $out.lines, exit: $out.exit, bad: $in.bad}
 '
 
 REPORT="$(jq -c --argjson n "$N" "$REPORT_PROG" <<<"$RESULT")"

@@ -73,6 +73,12 @@ run_case() {
   local state_dir
   state_dir="$(mktemp -d "${TMPDIR:-/tmp}/pre-message-test.XXXXXX")"
 
+  if [[ -z "$state_dir" ]]; then
+    echo "FAIL: $name -- mktemp failed"
+    fail=$((fail + 1))
+    return
+  fi
+
   if [[ -f "$pre_flags_file" ]]; then
     while IFS= read -r flag_name; do
       [[ -z "$flag_name" ]] && continue
@@ -83,6 +89,7 @@ run_case() {
   local actual_stdout actual_exit
   actual_stdout="$(
     export BOOTSTRAP_GATE_STATE_DIR="$state_dir"
+    unset CLAUDE_PROJECT_DIR
     bash "$hook_bin" <"$input_file"
   )"
   actual_exit=$?

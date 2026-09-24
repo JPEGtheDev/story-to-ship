@@ -14,9 +14,13 @@
 # Case directory contract (all files optional except "hook" and "input"):
 #   hook                    - "pre" | "post" | "session-start" (required)
 #   env                     - sourced before invocation (e.g. sets
-#                             BOOTSTRAP_GATE_MODE). Never sets
-#                             BOOTSTRAP_GATE_STATE_DIR -- the runner always
-#                             points that at a fresh per-case temp dir.
+#                             BOOTSTRAP_GATE_MODE). The runner points
+#                             BOOTSTRAP_GATE_STATE_DIR at a fresh per-case
+#                             temp dir and unsets CLAUDE_PROJECT_DIR before
+#                             sourcing it. An env file may unset the first
+#                             and set the second to exercise the
+#                             $CLAUDE_PROJECT_DIR/.claude state dir real
+#                             sessions use.
 #   input                   - stdin JSON fed to the hook (required)
 #   pre_flag_sessions       - newline list of session_ids; a flag file is
 #                             created for each BEFORE the hook runs

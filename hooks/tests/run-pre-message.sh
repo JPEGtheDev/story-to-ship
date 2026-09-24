@@ -27,6 +27,13 @@
 #                              from a copy of its script and its full .md
 #                              file in the per-case temp dir, with no
 #                              -loaded .md file beside them
+#   state_via_project_dir    - if present (contents ignored), the hook runs
+#                              with CLAUDE_PROJECT_DIR set to a "project"
+#                              dir inside the per-case temp dir and with
+#                              BOOTSTRAP_GATE_STATE_DIR unset, so it
+#                              resolves its state dir as <project>/.claude,
+#                              the path real sessions use; that dir is
+#                              created and pre_flags are touched there
 #   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
@@ -34,8 +41,9 @@
 #
 # Each case gets a fresh temp dir; BOOTSTRAP_GATE_STATE_DIR is exported as
 # that temp dir for the hook run (or, for a state_dir_missing case, a
-# non-existent path inside it), and the temp dir is removed unconditionally
-# at the end of the case.
+# non-existent path inside it) and CLAUDE_PROJECT_DIR is unset, except in a
+# state_via_project_dir case (see above). The temp dir is removed
+# unconditionally at the end of the case.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GATES_HOOK="$SCRIPT_DIR/../pre-message-gates.sh"
@@ -55,6 +63,7 @@ run_case() {
   local pre_flags_file="$case_dir/pre_flags"
   local state_dir_missing_file="$case_dir/state_dir_missing"
   local loaded_file_missing_file="$case_dir/loaded_file_missing"
+  local state_via_project_dir_file="$case_dir/state_via_project_dir"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
   local expect_stdout_not_grep_file="$case_dir/expect_stdout_not_grep"
 
@@ -92,10 +101,22 @@ run_case() {
     return
   fi
 
+  local project_dir="$state_dir/project"
+  local flags_dir="$state_dir"
+  if [[ -f "$state_via_project_dir_file" ]]; then
+    flags_dir="$project_dir/.claude"
+    if ! mkdir -p "$flags_dir"; then
+      echo "FAIL: $name -- could not create $flags_dir"
+      fail=$((fail + 1))
+      rm -rf "$state_dir"
+      return
+    fi
+  fi
+
   if [[ -f "$pre_flags_file" ]]; then
     while IFS= read -r flag_name; do
       [[ -z "$flag_name" ]] && continue
-      : >"$state_dir/$flag_name"
+      : >"$flags_dir/$flag_name"
     done <"$pre_flags_file"
   fi
 
@@ -117,8 +138,13 @@ run_case() {
 
   local actual_stdout actual_exit
   actual_stdout="$(
-    export BOOTSTRAP_GATE_STATE_DIR="$hook_state_dir"
-    unset CLAUDE_PROJECT_DIR
+    if [[ -f "$state_via_project_dir_file" ]]; then
+      unset BOOTSTRAP_GATE_STATE_DIR
+      export CLAUDE_PROJECT_DIR="$project_dir"
+    else
+      export BOOTSTRAP_GATE_STATE_DIR="$hook_state_dir"
+      unset CLAUDE_PROJECT_DIR
+    fi
     bash "$hook_bin" <"$input_file"
   )"
   actual_exit=$?

@@ -1,0 +1,1 @@
+replace_all multiplies the per-occurrence diff (2) by the 3 occurrences of the old string, giving 6, which stays under the cap of 10

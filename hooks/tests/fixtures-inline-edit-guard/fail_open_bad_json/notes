@@ -1,0 +1,1 @@
+malformed stdin fails open: allowed, no stdout output, and nothing written to the ledger

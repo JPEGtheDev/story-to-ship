@@ -1,0 +1,1 @@
+the per-session cap of 30 is enforced across distinct files even though each file is individually under its own cap

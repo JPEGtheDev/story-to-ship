@@ -1,0 +1,1 @@
+shared context lines around the change do not count toward the cap, only the 1-line diff does

@@ -1,0 +1,1 @@
+Pins that a subagent call (top-level agent_id present) with the same interpreter append shape as bq_ stays allowed -- the main-thread-only rule must not affect subagent behaviour.

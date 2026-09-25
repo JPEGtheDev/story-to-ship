@@ -1,0 +1,1 @@
+{"session_id":"sess-br","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"dd if=/dev/null of=new4.md"}}

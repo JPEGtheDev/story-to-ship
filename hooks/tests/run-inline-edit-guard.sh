@@ -56,6 +56,11 @@
 #   expect_ledger_sum   - integer; expected sum of the "lines" field over
 #                          every entry in the session's ledger file after
 #                          the run (0 when the file does not exist).
+#   expect_ledger_files - integer; expected count of
+#                          .inline-edit-ledger-* entries directly under the
+#                          state dir, across every session (catches a hook
+#                          that writes its ledger under a differently-named
+#                          session id than the one the runner looked up).
 #   notes               - free-text disclosure of what the case pins and
 #                          why (not read by the runner; for reviewers).
 #
@@ -106,6 +111,15 @@ case_cleanup() {
   sub_input=""
 }
 trap case_cleanup EXIT
+
+# `[[ "$a" -ne "$b" ]]` is an arithmetic comparison: a non-integer operand
+# (a JSON string like "5", or "5.0") makes `-ne` error out with status 1,
+# which every caller below reads as "equal" -- silently passing a hook that
+# writes the wrong-typed value. int_equal requires both sides to already be
+# plain unsigned integers before comparing.
+int_equal() {
+  [[ "$1" =~ ^[0-9]+$ && "$2" =~ ^[0-9]+$ ]] && ((10#$1 == 10#$2))
+}
 
 run_case() {
   local case_dir="$1"
@@ -214,7 +228,7 @@ run_case() {
   local ok=1
   local reasons=()
 
-  if [[ "$actual_exit" -ne "$expect_exit" ]]; then
+  if ! int_equal "$expect_exit" "$actual_exit"; then
     ok=0
     reasons+=("exit code mismatch: expected $expect_exit got $actual_exit")
   fi
@@ -246,7 +260,7 @@ run_case() {
     else
       actual_ledger_lines=0
     fi
-    if [[ "$actual_ledger_lines" -ne "$expect_ledger_lines" ]]; then
+    if ! int_equal "$expect_ledger_lines" "$actual_ledger_lines"; then
       ok=0
       reasons+=("ledger line count mismatch: expected $expect_ledger_lines got $actual_ledger_lines")
     fi
@@ -260,9 +274,19 @@ run_case() {
     else
       actual_ledger_sum=0
     fi
-    if [[ "$actual_ledger_sum" -ne "$expect_ledger_sum" ]]; then
+    if ! int_equal "$expect_ledger_sum" "$actual_ledger_sum"; then
       ok=0
       reasons+=("ledger lines sum mismatch: expected $expect_ledger_sum got $actual_ledger_sum")
+    fi
+  fi
+
+  if [[ -f "$case_dir/expect_ledger_files" ]]; then
+    local expect_ledger_files actual_ledger_files
+    expect_ledger_files="$(tr -d '[:space:]' <"$case_dir/expect_ledger_files")"
+    actual_ledger_files="$(find "$state" -mindepth 1 -maxdepth 1 -name '.inline-edit-ledger-*' | grep -c '')"
+    if ! int_equal "$expect_ledger_files" "$actual_ledger_files"; then
+      ok=0
+      reasons+=("ledger file count mismatch: expected $expect_ledger_files got $actual_ledger_files")
     fi
   fi
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse hook (matcher Edit|Write): inline-edit-guard.sh
 #
-# Lets the main thread edit a repository file itself, via the Edit or Write
+# Lets the main session edit a repository file itself, via the Edit or Write
 # tool, only when the target is a prose file (by extension) and the change
 # is small, both per file and cumulatively for the session. Anything larger,
 # or any non-prose (code) file, is denied with a reason telling the
@@ -20,9 +20,11 @@
 # hits any unexpected exception. Every other input is evaluated.
 #
 # Other exemptions, decided inside the python scanner: a path that resolves
-# outside any git repository; a path matched by that repository's
-# .gitignore (via `git check-ignore`); and the repository's own top-level
-# plan.md specifically (a plan.md in a subdirectory is an ordinary file).
+# outside any git repository (including a path inside a repository's .git
+# directory, where `git rev-parse --show-toplevel` fails); a path matched
+# by that repository's .gitignore (via `git check-ignore`); and the
+# repository's own top-level plan.md specifically (a plan.md in a
+# subdirectory is an ordinary file).
 #
 # What counts, and against what: the change is measured as a line diff
 # (insertions plus deletions, via difflib.unified_diff with no context) of
@@ -53,7 +55,11 @@
 # Parallel Edit or Write calls issued in the same turn each read the
 # ledger before any of them appends its own entry, so two or more
 # concurrent calls can together exceed a cap that each individually
-# stayed under.
+# stayed under. A changed line has no length limit: one long line counts
+# as one line however many characters it holds. If the ledger append
+# fails (for example, a read-only state dir), the error is ignored and
+# the edit is allowed but not recorded, so the running totals stop
+# growing and only each edit's own size is checked against the caps.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors

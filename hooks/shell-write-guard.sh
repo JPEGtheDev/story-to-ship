@@ -58,7 +58,11 @@
 # `ln -s` to a new link, `curl -o` and other download-to-file tools, a
 # read-write redirect `<>`, node `fs.appendFileSync` / `fs.openSync(...,
 # 'a')`, and `>&` followed by a file name (which also bypasses the
-# overwrite rule for every caller, not just the main thread).
+# overwrite rule for every caller, not just the main thread). Commands
+# the scanner does not model get past both rules, for every caller:
+# `git apply`, `git am`, and `patch`; the in-place editors `ed`,
+# `vim -es`, `awk -i inplace`, and `sponge`; and a script file run by an
+# interpreter (`python3 script.py`, `node script.js`).
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors

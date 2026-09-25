@@ -1,0 +1,1 @@
+Pins that the non-literal-path regex counts an assigned-variable path in append mode ('a') as a main-thread write shape, resolving the variable via the preceding plain-string assignment.

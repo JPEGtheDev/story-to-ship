@@ -1,0 +1,1 @@
+Pins that the nearest-existing-ancestor repository lookup for a new file under a not-yet-created directory still honours gitignore -- scratch/ is ignored, so a new file under scratch/newdir/ stays allowed for the main thread.

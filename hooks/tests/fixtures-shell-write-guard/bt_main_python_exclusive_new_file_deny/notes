@@ -1,0 +1,1 @@
+Pins that a main-thread interpreter open() call in exclusive-create mode ('x') creating a new repository file is denied.

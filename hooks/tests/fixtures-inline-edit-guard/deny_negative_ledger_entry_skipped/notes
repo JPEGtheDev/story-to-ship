@@ -1,0 +1,1 @@
+a ledger entry with a negative line count is skipped, so it cannot lower the file's total: 9 prior lines plus this edit's 2 exceed the per-file cap of 10

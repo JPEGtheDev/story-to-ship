@@ -112,11 +112,8 @@ case_cleanup() {
 }
 trap case_cleanup EXIT
 
-# `[[ "$a" -ne "$b" ]]` is an arithmetic comparison: a non-integer operand
-# (a JSON string like "5", or "5.0") makes `-ne` error out with status 1,
-# which every caller below reads as "equal" -- silently passing a hook that
-# writes the wrong-typed value. int_equal requires both sides to already be
-# plain unsigned integers before comparing.
+# A plain `[[ a -ne b ]]` on a non-integer ("5", 5.0) errors with status 1,
+# which reads as "equal"; this helper treats any non-integer as a mismatch.
 int_equal() {
   [[ "$1" =~ ^[0-9]+$ && "$2" =~ ^[0-9]+$ ]] && ((10#$1 == 10#$2))
 }

@@ -62,9 +62,11 @@
 # the edit is allowed but not recorded: the running totals stop at what
 # the ledger already holds, and with no ledger each edit is checked
 # against the caps on its own size alone. The ledger is not protected from
-# the shell (by default it sits in a gitignored path, which the
-# shell-write guard leaves alone), so deleting it, emptying it, or making
-# it unreadable resets the running totals to zero.
+# the main session (by default it sits in a gitignored path, which this
+# hook exempts and the shell-write guard leaves alone), so deleting,
+# emptying, or rewriting it (from the shell or with the Write or Edit
+# tool) or making it unreadable lowers the running totals or resets them
+# to zero.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors

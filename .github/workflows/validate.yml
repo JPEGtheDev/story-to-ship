@@ -36,6 +36,7 @@ jobs:
           shellcheck hooks/bootstrap-gate-post.sh
           shellcheck hooks/workflow-model-guard.sh
           shellcheck hooks/shell-write-guard.sh
+          shellcheck hooks/inline-edit-guard.sh
           shellcheck hooks/tests/run.sh
           shellcheck hooks/tests/run-bootstrap-gate.sh
           shellcheck hooks/tests/run-pre-message.sh
@@ -43,6 +44,7 @@ jobs:
           shellcheck hooks/tests/run-skill-map-drift.sh
           shellcheck hooks/tests/run-workflow-model-guard.sh
           shellcheck hooks/tests/run-shell-write-guard.sh
+          shellcheck hooks/tests/run-inline-edit-guard.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
           shellcheck skills/sprint-runner/tools/tests/inline-copy-check.sh

@@ -1,0 +1,1 @@
+{"session_id":"sess-bi","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"cat > __CWD__/new.md <<'EOF'\nbody\nEOF"}}

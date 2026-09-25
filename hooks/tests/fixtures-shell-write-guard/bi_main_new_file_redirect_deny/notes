@@ -1,0 +1,1 @@
+Pins that a main-thread call (no top-level agent_id) writing a new file inside the repo is denied -- main-thread writes to repository files are denied so the coordinator's file changes go through the Edit and Write tools, where they can be counted.

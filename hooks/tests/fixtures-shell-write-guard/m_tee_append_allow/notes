@@ -1,1 +1,1 @@
-Pins that tee -a (append mode) against an existing tracked file is allowed, exercising the tee-command recognition path with an append flag rather than the truncating default.
+Pins that tee -a (append mode) against an existing tracked file is allowed, exercising the tee-command recognition path with an append flag rather than the truncating default. The input carries agent_id because this case pins the subagent path; the main-thread counterpart is bk_main_tee_append_deny.

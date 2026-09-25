@@ -20,7 +20,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## Workflow
 
-Pick up todo -> Dispatch implementer -> Load `two-stage-review` for the status code and both review stages -> Mark done.
+Pick up todo -> Dispatch implementer (or, for a todo that fits the Dispatch Decision Table's Inline lane row, edit inline) -> Load `two-stage-review` for the status code and both review stages -> Mark done.
 
 **Status code branches:** See the `two-stage-review` skill for all five codes and their required actions.
 
@@ -92,7 +92,7 @@ These thoughts mean stop immediately:
 | "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and both review stages live there. |
 | "About to send a dispatch prompt containing a task tag, an issue number, or a tool/CLI claim I have not run" | STOP. Dispatch text is shipped text (BEFORE PROCEEDING items 6-8). Write the prompt to a file, run the sweep on that file and paste its output, run or read the source for every tool claim, and label what you cannot verify. |
 | "Writing a verification command into a dispatch prompt that I have only seen pass" | STOP. A check that has never failed is unproven. Run it on one must-pass and one must-fail input, paste both, and redesign it if it cannot fail (BEFORE PROCEEDING item 9). |
-| "About to split one change into several inline edits, edit a code or config file inline, or call a composed change mechanical so it stays inline" | STOP. The lane is a literal replacement in a prose file under the guard's caps; everything else is an implementer dispatch. |
+| "About to split one change into several inline edits, edit a code or config file inline, or call a composed change mechanical so it stays inline" | STOP. The inline lane (the Dispatch Decision Table's Inline lane row) is a literal replacement in a prose file under the guard's caps; everything else is an implementer dispatch. |
 
 ---
 
@@ -111,7 +111,7 @@ These thoughts mean stop immediately:
 | Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file -- the template takes one file path, so no grouping |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |
-| Coordinator edit to a prose file (.md or .txt) where the replacement text is already literal, at most 10 changed lines in that file and 30 inline lines in the session (the inline-edit guard hook counts the changed lines of each edit, sums the file's edits over the session, and denies past either cap or on any other file type) | No | do inline in the feature worktree; the todo's Stage 1 and Stage 2 reviews still run (the `two-stage-review` skill, Inline-lane todos) |
+| Inline lane: coordinator edit to a prose file (.md or .txt) where the replacement text is already literal (written out in full before the edit, not composed while editing), at most 10 changed lines in that file and 30 in the session, where a changed line is one inserted or one deleted line, so replacing a line counts 2 (the inline-edit guard hook counts each edit this way, sums the file's edits over the session, and denies past either cap or on any other file type) | No | do inline in the feature worktree; the todo's Stage 1 and Stage 2 reviews still run (the `two-stage-review` skill, Inline-lane todos) |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos dispatch unless they fit the inline-lane row) |
 | Reading one known file | No | do inline |
@@ -152,12 +152,12 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step worktree creation check in the `using-git-worktrees` skill first. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
-| "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = one implementer dispatch, always. |
+| "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = at most one implementer dispatch; never bundle two todos into one dispatch. |
 | "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | Short is not the test. The inline lane admits a prose file, replacement text already literal, and the guard hook's caps; anything else dispatches regardless of estimated size. |
-| "One line at a time keeps each edit under the cap" | The guard sums every edit to the file over the session and every inline edit across the session; a split change reaches the same total and its later edits are denied. A denied edit means dispatch, not a smaller edit. |
+| "One line at a time keeps each edit under the cap" | The guard sums every edit to the file and every inline edit over the session, so a split change reaches the same total: pieces sent one after another are denied once the total passes a cap, and pieces sent in parallel, which the guard cannot see together, are still one change over the cap. A denied edit, or a change over a cap, means dispatch, not smaller edits. |
 | "The user approved the last run -- this retry is covered" | Spend-bearing launches need explicit consent PER INVOCATION. A failed launch returns to the user for a fresh go; a silent retry spends money without authorization. Ask before every launch. |
 | "The dispatch prompt is scratch text -- hygiene applies to shipped files, not to what I dictate to an implementer" | The prompt IS shipped text: the implementer builds on it and the reviewers review the result as the implementer's own. Three measured defects (a dictated issue tag, a wrong SDK line, a wrong CLI flag) each cost a full dispatch round trip. Check before sending. |
 | "The check is a one-line grep -- it obviously fires on the target" | Every externally caught defect (found by the user or a subagent, not by the coordinator) in one scored coordination session (a session the postmortem reviewer scored with its Correction-source audit row) was a one-line check that could not fire as claimed: a fixed-string grep on a phrase that wraps, a filter that breaks on an indented continuation, a line offset that assumed a fixed header. Each cost a full implementer or reviewer round. Run the check on a must-pass and a must-fail input before dispatch and paste both. |

@@ -36,17 +36,24 @@
 # <state dir>/.inline-edit-ledger-<session_id>.jsonl, appended to on every
 # counted (allowed, non-exempt) edit. A denied edit is never appended. A
 # third override, INLINE_EDIT_PROSE_EXTENSIONS (default "md txt", space
-# separated, no leading dots), controls which extensions are treated as
-# prose; anything else is denied and pointed at an implementer. Any of the
-# three overrides that is not a valid form (a non-negative integer for the
-# two caps) falls back to its default.
+# separated, no leading dots, compared case-insensitively), controls which
+# extensions are treated as prose; anything else is denied and pointed at
+# an implementer. A cap value that is not a non-negative integer falls
+# back to its default; an empty or whitespace-only extension list falls
+# back to "md txt" (a non-empty list is used as given, without dots).
 #
 # Residuals (disclosed, not silent): the ledger is per session_id, so a
 # coordinator that continues the same work across two separate sessions
 # starts back at zero for both caps. NotebookEdit is not matched by this
 # hook (only Edit and Write) and is never counted or gated here. Shell
 # writes (redirects, cp, tee, an interpreter's own file-write calls, ...)
-# are handled by hooks/shell-write-guard.sh, not this hook.
+# are handled by hooks/shell-write-guard.sh, not this hook. An edit is
+# counted the moment this hook allows it, before the tool itself runs, so
+# a tool call that then fails or is rejected still spends budget.
+# Parallel Edit or Write calls issued in the same turn each read the
+# ledger before any of them appends its own entry, so two or more
+# concurrent calls can together exceed a cap that each individually
+# stayed under.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors
@@ -98,15 +105,16 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 # No python3, no scanner: fail open (disclosed above).
 command -v python3 &>/dev/null || exit 0
 
-REPLACE_ALL="$(printf '%s' "$RAW" | jq -r 'if .tool_input.replace_all == true then "true" else "false" end' 2>/dev/null)"
-
 # old_string, new_string, and content can be large or end in newlines that
 # command substitution (and a bash variable holding them) would silently
 # strip or that would blow past the ~128 KiB exec() argument/environment
 # limit as an environment variable. Both would corrupt or bypass the line
 # count below, so the python program reads and parses the raw payload
-# itself (over a pipe, not an argument or an environment variable) for
-# those three fields instead of receiving them as IEG_* variables.
+# itself (over a here-string, not an argument or an environment variable)
+# for those three fields. tool_name, file_path, and replace_all are read
+# from that same parsed payload too -- one source of truth -- rather than
+# re-extracted into IEG_* variables; the TOOL_NAME and FILE_PATH read
+# above exist only for this wrapper's own fail-open checks.
 PROGRAM=$(cat <<'PY'
 import difflib
 import json
@@ -192,6 +200,8 @@ def load_ledger(ledger_path, real):
         n = entry.get("lines")
         if not isinstance(path, str) or isinstance(n, bool) or not isinstance(n, int):
             continue
+        if n < 0:
+            continue
         session += n
         if path == real:
             per_file += n
@@ -201,8 +211,10 @@ def load_ledger(ledger_path, real):
 def main():
     payload = json.load(sys.stdin)
     tool_input = payload.get("tool_input") or {}
+    tool_name = payload.get("tool_name") or ""
+    replace_all = tool_input.get("replace_all") is True
 
-    file_path = os.environ.get("IEG_FILE_PATH", "")
+    file_path = tool_input.get("file_path") or ""
     real = os.path.realpath(file_path)
 
     lookup_dir = nearest_existing_dir(os.path.dirname(real))
@@ -233,7 +245,7 @@ def main():
     ext = os.path.splitext(real)[1]
     ext = ext[1:] if ext.startswith(".") else ext
     extensions = prose_extensions()
-    if ext not in extensions:
+    if ext.lower() not in [e.lower() for e in extensions]:
         ext_display = ext if ext else "(none)"
         allowed_list = ", ".join("." + e for e in extensions)
         print(
@@ -242,7 +254,6 @@ def main():
         )
         return
 
-    tool_name = os.environ.get("IEG_TOOL_NAME", "")
     if tool_name == "Write":
         content = tool_input.get("content") or ""
         old_lines = read_lines(real)
@@ -256,7 +267,7 @@ def main():
         old_lines = old_string.splitlines()
         new_lines = new_string.splitlines()
         n = diff_count(old_lines, new_lines)
-        if os.environ.get("IEG_REPLACE_ALL", "false") == "true":
+        if replace_all:
             text = read_text(real)
             occurrences = text.count(old_string) if text else 0
             multiplier = occurrences if occurrences > 0 else 1
@@ -309,9 +320,6 @@ PY
 # an environment variable), so its size is bounded only by memory, not by
 # the ~128 KiB ARG_MAX that a large Write's content would otherwise hit.
 REASON="$(
-  IEG_TOOL_NAME="$TOOL_NAME" \
-  IEG_FILE_PATH="$FILE_PATH" \
-  IEG_REPLACE_ALL="$REPLACE_ALL" \
   IEG_STATE_DIR="$STATE_DIR" \
   IEG_SESSION_ID="$SESSION_ID" \
   IEG_MAX_LINES_RAW="${INLINE_EDIT_MAX_LINES:-}" \

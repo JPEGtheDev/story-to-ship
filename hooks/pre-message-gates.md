@@ -19,7 +19,7 @@ Only a fresh `Skill` tool call counts -- not a Read call, memory, or hook text. 
 3. User correction or redirect -- reload the misapplied skill
 4. Context compacted OR session resumed (`--continue`/`--resume`) -- reload every skill + `honesty` + `communication`; a 'resume directly' summary does NOT waive it (completed-call evidence does not survive)
 
-For full reload rules and examples, see the skill.
+For full reload rules and examples, see the `session-bootstrap` skill.
 
 ---
 

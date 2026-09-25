@@ -11,13 +11,21 @@ else
   RAW="$(timeout 2 cat 2>/dev/null || true)"
 fi
 
-# Stamp a bootstrap-pending flag for this session so the bootstrap-gate hooks
-# (bootstrap-gate-pre.sh / bootstrap-gate-post.sh) know a fresh session or
-# continuation needs Skill(session-bootstrap) before other tool use. Every
+# Stamp three per-session pending flags for this session: bootstrap, honesty,
+# and communication. Each flag is cleared independently by its own skill --
+# bootstrap-gate-post.sh (PostToolUse, matcher Skill) deletes
+# .bootstrap-pending-<id> when Skill(session-bootstrap) completes,
+# .honesty-pending-<id> when Skill(honesty) completes, and
+# .communication-pending-<id> when Skill(communication) completes. The
+# bootstrap-gate pair (bootstrap-gate-pre.sh / bootstrap-gate-post.sh) and
+# pre-message-gates.sh read the bootstrap flag; pre-message.sh reads the
+# honesty and communication flags to decide which text to inject. Every
 # SessionStart source (startup/resume/compact/fork/clear) stamps. This is a
 # side effect only -- it never changes this script's stdout or exit code, and
-# it fails silently (fail-open) if jq is missing, stdin has no session_id, or
-# neither state-dir variable is resolvable.
+# it fails silently (fail-open) if jq is missing, stdin has no session_id or
+# is not valid JSON, the session_id is outside the allowed characters, neither
+# state-dir variable is resolvable, or the state dir cannot be created or
+# written.
 #
 # This block MUST run before the python3/MD_FILE early-exit checks below --
 # those `exit 0` paths would otherwise skip stamping entirely, so the guard
@@ -34,7 +42,9 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
     fi
     if [[ -n "$BOOTSTRAP_STATE_DIR" ]]; then
       mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null &&
-        : >"$BOOTSTRAP_STATE_DIR/.bootstrap-pending-$BOOTSTRAP_SESSION_ID" 2>/dev/null
+        for BOOTSTRAP_FLAG_NAME in bootstrap honesty communication; do
+          { : >"$BOOTSTRAP_STATE_DIR/.$BOOTSTRAP_FLAG_NAME-pending-$BOOTSTRAP_SESSION_ID"; } 2>/dev/null
+        done
     fi
   fi
 fi

@@ -38,6 +38,7 @@ jobs:
           shellcheck hooks/shell-write-guard.sh
           shellcheck hooks/tests/run.sh
           shellcheck hooks/tests/run-bootstrap-gate.sh
+          shellcheck hooks/tests/run-pre-message.sh
           shellcheck hooks/tests/run-all.sh
           shellcheck hooks/tests/run-skill-map-drift.sh
           shellcheck hooks/tests/run-workflow-model-guard.sh
@@ -69,9 +70,9 @@ jobs:
       # "Core Skill Routing (per turn)" block in hooks/pre-message-gates.md
       # and the Skill-call check in hooks/pre-message.md (both now name
       # honesty and communication); slack kept <=20 words above the actual
-      # combined total (gates + message, currently 477) to preserve the
-      # budget's anti-creep function (a large buffer defeats the point of
-      # the gate).
+      # combined total (gates + message, 477 when the cap was set) to
+      # preserve the budget's anti-creep function (a large buffer defeats
+      # the point of the gate).
       - name: Enforce pre-message hook word budget
         run: |
           gates=$(wc -w < hooks/pre-message-gates.md)
@@ -83,6 +84,45 @@ jobs:
             exit 1
           fi
           echo "[+] Combined pre-message hook injection is within the 495-word budget"
+          oversize=0
+          for pair in pre-message-gates pre-message; do
+            full_words=$(wc -w < "hooks/$pair.md")
+            loaded_words=$(wc -w < "hooks/$pair-loaded.md")
+            echo "$pair-loaded.md: $loaded_words words; $pair.md: $full_words words"
+            if [ "$loaded_words" -ge "$full_words" ]; then
+              echo "FAILED: hooks/$pair-loaded.md ($loaded_words words) is not smaller than hooks/$pair.md ($full_words words)"
+              oversize=$((oversize + 1))
+            fi
+          done
+          if [ "$oversize" -gt 0 ]; then
+            exit 1
+          fi
+          echo "[+] Each loaded pre-message variant is smaller than its full file"
+
+      # Each loaded variant is its full file with the gate section removed.
+      # The gate section is the first "## " section of the full file, so the
+      # expected loaded file is line 1 of the full file (the opening tag)
+      # followed by the full file from its second "## " heading to the end.
+      # Line 2 of the full file must be the gate heading, so no text can sit
+      # above the gate section unchecked. Changing a shared section in one
+      # file but not the other fails here; an edit inside the gate section
+      # alone does not.
+      - name: Check loaded pre-message variants match their full files
+        run: |
+          set -e
+          drift=0
+          for pair in pre-message-gates pre-message; do
+            full="hooks/$pair.md"
+            loaded="hooks/$pair-loaded.md"
+            if ! diff -u "$loaded" <(awk 'FNR == 1 { print; next } FNR == 2 && !/^## / { print "(line 2 of the full file is not a ## heading)" } /^## / { headings++ } headings >= 2' "$full"); then
+              echo "DRIFT: $loaded is not line 1 of $full followed by $full from its second '## ' heading (diff above: - is the loaded file, + is the expected text)"
+              drift=$((drift + 1))
+            fi
+          done
+          if [ "$drift" -gt 0 ]; then
+            exit 1
+          fi
+          echo "[+] Each loaded pre-message variant is its full file minus the gate section"
 
       - name: Check for broken references in skill files
         run: |
@@ -337,10 +377,18 @@ jobs:
             10) word=ten ;;
             11) word=eleven ;;
             12) word=twelve ;;
+            13) word=thirteen ;;
+            14) word=fourteen ;;
+            15) word=fifteen ;;
+            16) word=sixteen ;;
+            17) word=seventeen ;;
+            18) word=eighteen ;;
+            19) word=nineteen ;;
+            20) word=twenty ;;
             *) word="" ;;
           esac
           if [ -z "$word" ]; then
-            echo "DRIFT: .claude/hooks has $n entries, outside the 1-12 word map in this gate -- update the gate in .github/workflows/validate.yml"
+            echo "DRIFT: .claude/hooks has $n entries, outside the 1-20 word map in this gate -- update the gate in .github/workflows/validate.yml"
             drift=$((drift + 1))
           else
             if ! grep -qiwE "$word|$n" hooks/README.md; then

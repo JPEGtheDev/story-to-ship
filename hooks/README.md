@@ -8,33 +8,35 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 
 | File | Event | Injected |
 |------|-------|----------|
-| `session-start.sh` + `session-start.md` | SessionStart | Once per session |
-| `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | Every turn |
-| `pre-message.sh` + `pre-message.md` | UserPromptSubmit | Every turn |
+| `session-start.sh` + `session-start.md` | SessionStart | On every SessionStart event, whatever its source |
+| `pre-message-gates.sh` + `pre-message-gates.md` | UserPromptSubmit | On turns where the bootstrap flag exists, or its state cannot be read |
+| `pre-message-gates.sh` + `pre-message-gates-loaded.md` | UserPromptSubmit | On turns where the bootstrap flag is clear |
+| `pre-message.sh` + `pre-message.md` | UserPromptSubmit | On turns where the honesty or communication flag exists, or their state cannot be read |
+| `pre-message.sh` + `pre-message-loaded.md` | UserPromptSubmit | On turns where both the honesty and communication flags are clear |
 | `stop-turn-log.sh` | Stop | Never -- passive log, no injection |
 | `bootstrap-gate-pre.sh` | PreToolUse | No context injection in deny mode (shipped default) -- it denies the call instead; in warn fallback, a nudge only when the session is un-bootstrapped |
 | `bootstrap-gate-post.sh` | PostToolUse | Never -- clears state, no injection |
 | `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 | `shell-write-guard.sh` | PreToolUse (matcher `Bash`) | Only when a shell command would overwrite an existing repo file, and only as a deny reason -- never as injected context |
 
-Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, `workflow-model-guard.sh`, and `shell-write-guard.sh`, whose deny/warn text is generated inline by the scripts themselves. Five `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, `workflow-model-guard.sh`, and `shell-write-guard.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
+Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, `workflow-model-guard.sh`, and `shell-write-guard.sh`, whose deny/warn text is generated inline by the scripts themselves. `pre-message-gates.sh` and `pre-message.sh` each have two paired files -- the full file and a `-loaded` variant -- and inject exactly one of them per turn, chosen by the pending flags described in the bootstrap-gate section below. Five `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, `workflow-model-guard.sh`, and `shell-write-guard.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
 ## Provenance of the injected text
 
 The per-turn files are tripwires, not rule bodies:
 
-- `pre-message-gates.md` derives from the `session-bootstrap` skill. It checks for a completed `Skill(session-bootstrap)` call and lists the reload triggers.
-- `pre-message.md` derives from the `honesty` and `communication` skills. It checks for completed `Skill(honesty)` and `Skill(communication)` calls and carries a minimal banned-vocabulary reminder.
+- `pre-message-gates.md` derives from the `session-bootstrap` skill. Its Bootstrap Gate section checks for a completed `Skill(session-bootstrap)` call and is injected only while the bootstrap flag exists. Its reload-trigger and skill-routing sections are injected on every turn -- alone, as `pre-message-gates-loaded.md`, once the flag is clear.
+- `pre-message.md` derives from the `honesty` and `communication` skills. Its Honesty Gate section checks for completed `Skill(honesty)` and `Skill(communication)` calls and is injected only while the honesty or communication flag exists. Its banned-vocabulary and before-sending sections are injected on every turn -- alone, as `pre-message-loaded.md`, once both flags are clear.
 
 The full rules live in `skills/session-bootstrap/SKILL.md`, `skills/honesty/SKILL.md`, and `skills/communication/SKILL.md`. Hook text reminds; only a `Skill` tool call loads the rules. When a skill changes, update the derived hook text to match -- the hook must never contradict its source skill.
 
 ## Word budget
 
-The two per-turn files are injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 495 words for `pre-message-gates.md` + `pre-message.md`. `session-start.md` fires once per session and is outside the budget.
+One file from each per-turn pair is injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 495 words for `pre-message-gates.md` + `pre-message.md`: the full pair is the worst-case turn, injected while the pending flags exist. CI also requires each `-loaded` variant to have fewer words than its full file, and to match its full file with the gate section removed, so changing a shared section in one file but not the other fails CI. `session-start.md` fires on each SessionStart event, not per turn, and is outside the budget.
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the ten shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for eleven entries total. The ten shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the twelve shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for thirteen entries total. The twelve shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
 
 ## stop-turn-log.sh
 
@@ -42,7 +44,7 @@ A Stop hook that appends one JSONL line per turn to a local log, unconditionally
 
 ## bootstrap-gate-pre.sh + bootstrap-gate-post.sh
 
-A PreToolUse/PostToolUse pair that gates tool use in a session that has not yet completed `Skill(session-bootstrap)`. `session-start.sh` stamps a `.bootstrap-pending-<session_id>` flag file on every SessionStart; `bootstrap-gate-post.sh` (matcher `Skill`) clears it once a `Skill(session-bootstrap)` call completes; `bootstrap-gate-pre.sh` (matcher: all tools, no matcher key) checks the flag on every other tool call.
+A PreToolUse/PostToolUse pair that gates tool use in a session that has not yet completed `Skill(session-bootstrap)`. `session-start.sh` stamps three flag files on every SessionStart: `.bootstrap-pending-<session_id>`, `.honesty-pending-<session_id>`, and `.communication-pending-<session_id>`. `bootstrap-gate-post.sh` (matcher `Skill`) deletes one flag when a `Skill` call for its skill completes -- `session-bootstrap` clears the bootstrap flag, `honesty` the honesty flag, `communication` the communication flag -- and leaves the other two. `bootstrap-gate-pre.sh` (matcher: all tools, no matcher key) checks the bootstrap flag on every other tool call. The per-turn hooks read the same flags: `pre-message-gates.sh` the bootstrap flag, `pre-message.sh` the honesty and communication flags.
 
 Mode contract, via `BOOTSTRAP_GATE_MODE`:
 
@@ -51,15 +53,17 @@ Mode contract, via `BOOTSTRAP_GATE_MODE`:
 
 The script's own unset default is warn (`MODE="${BOOTSTRAP_GATE_MODE:-warn}"`); the shipped default is deny only because the registration lines in both configs pin `BOOTSTRAP_GATE_MODE=deny` -- the prefix activates the mode, it isn't just documentation. There is no gate-off value -- disabling the gate means removing (or commenting out) its `PreToolUse`/`PostToolUse` entries in `.claude/settings.json` / `hooks/hooks.json`. To fall back to warn, change `BOOTSTRAP_GATE_MODE=deny` to `=warn` in the hook command lines for `bootstrap-gate-pre.sh` in both `.claude/settings.json` and `hooks/hooks.json`.
 
-State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the flag file `.bootstrap-pending-<session_id>` and the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`), which is appended in both modes -- the JSONL write happens before the mode branch, and each logged line carries its own `mode` field.
+State lives under `${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}`: the three flag files named above and the log `.bootstrap-gate-log.jsonl` (default path: `.claude/.bootstrap-gate-log.jsonl`), which is appended in both modes -- the JSONL write happens before the mode branch, and each logged line carries its own `mode` field.
 
-Subagents identify themselves via an `agent_id` field on the hook payload; `bootstrap-gate-pre.sh` exempts any call carrying one, so the gate only ever applies to the main-thread session.
+Subagents identify themselves via an `agent_id` field on the hook payload; both `bootstrap-gate-pre.sh` and `bootstrap-gate-post.sh` ignore any call carrying one, so the gate only ever applies to the main-thread session and a subagent loading a skill never clears the main session's flags.
 
-Accepted bootstrap skill names: both hooks strip everything through the last colon of `tool_input.skill` before comparing it to `session-bootstrap`, because the harness lists plugin skills as `<plugin>:<skill>`. So `session-bootstrap`, `story-to-ship:session-bootstrap`, and any other `<plugin>:session-bootstrap` satisfy the gate; `session-bootstrap:` (trailing colon) and `<plugin>:honesty` do not. `tools/first_action_audit/first-action-audit.sh` applies the same rule when it judges the first tool call after each `compact_boundary` record in a transcript (one BOUNDARY/listing/VERDICT block per compaction window).
+Accepted bootstrap skill names: both hooks strip everything through the last colon of `tool_input.skill` before comparing it to `session-bootstrap`, because the harness lists plugin skills as `<plugin>:<skill>`. So `session-bootstrap`, `story-to-ship:session-bootstrap`, and any other `<plugin>:session-bootstrap` satisfy the gate; `session-bootstrap:` (trailing colon) and `<plugin>:honesty` do not. `bootstrap-gate-post.sh` applies the same strip before matching `honesty` and `communication`, so `<plugin>:honesty` clears the honesty flag. `tools/first_action_audit/first-action-audit.sh` applies the same rule when it judges the first tool call after each `compact_boundary` record in a transcript (one BOUNDARY/listing/VERDICT block per compaction window).
 
 Both scripts are fail-open: missing `jq`, malformed stdin, an unresolved state dir, or an invalid `session_id` all resolve to a plain allow (or, for the post-hook, a no-op) rather than blocking or guessing. Neither script ever exits nonzero.
 
-Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` reload gates (`pre-message-gates.sh`, `pre-message.sh`) remain the backup enforcement for a session that slips through this gap.
+Documented limitation: on an auto-resumed continuation, the model's first tool calls can execute before the SessionStart hook stamps the pending flag file, in which case the gate fails open (no flag file yet means a plain allow, deny mode included) for that window. The `UserPromptSubmit` hooks (`pre-message-gates.sh`, `pre-message.sh`) do not close this gap: if they run in that window they find no flag file and, when the state directory exists, inject the `-loaded` variants, which leave out the gate sections.
+
+Documented limitation: when the state directory exists but cannot be written, `session-start.sh` stamps no flags and reports no error, so the gate allows every call and the `UserPromptSubmit` hooks inject the `-loaded` variants, which leave out the gate sections, on every turn of the session.
 
 ## workflow-model-guard.sh
 

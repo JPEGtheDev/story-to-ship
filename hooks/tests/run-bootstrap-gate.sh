@@ -2,7 +2,9 @@
 # Hermetic test harness for the bootstrap-gate hook family:
 #   hooks/bootstrap-gate-pre.sh   (PreToolUse, matcher *)
 #   hooks/bootstrap-gate-post.sh  (PostToolUse, matcher Skill)
-#   hooks/session-start.sh        (SessionStart, extended to stamp a flag file)
+#   hooks/session-start.sh        (SessionStart, extended to stamp three
+#                                  per-session pending flags: bootstrap,
+#                                  honesty, communication)
 #
 # Sibling to hooks/tests/run.sh, following the same fixture-dir pattern:
 # per-case directories under fixtures-bootstrap-gate/ carry env/input/expected
@@ -12,9 +14,17 @@
 # Case directory contract (all files optional except "hook" and "input"):
 #   hook                    - "pre" | "post" | "session-start" (required)
 #   env                     - sourced before invocation (e.g. sets
-#                             BOOTSTRAP_GATE_MODE). Never sets
-#                             BOOTSTRAP_GATE_STATE_DIR -- the runner always
-#                             points that at a fresh per-case temp dir.
+#                             BOOTSTRAP_GATE_MODE). The runner points
+#                             BOOTSTRAP_GATE_STATE_DIR at a fresh per-case
+#                             temp dir and unsets CLAUDE_PROJECT_DIR before
+#                             sourcing it. An env file may unset the first
+#                             and set the second to exercise the
+#                             $CLAUDE_PROJECT_DIR/.claude state dir real
+#                             sessions use. The expect_flag_* and
+#                             expect_log_* checks still read the runner's
+#                             own state dir, so such a case asserts with
+#                             expect_file_exists / expect_file_absent paths
+#                             under STATE_DIR_PARENT.
 #   input                   - stdin JSON fed to the hook (required)
 #   pre_flag_sessions       - newline list of session_ids; a flag file is
 #                             created for each BEFORE the hook runs
@@ -47,10 +57,21 @@
 #                             exist AFTER the hook runs. Same token support
 #                             as pre_dirs/pre_files -- used to assert a
 #                             traversal-target "canary" file survived a hook
-#                             invocation that carried a hostile session_id.
+#                             invocation that carried a hostile session_id,
+#                             or that a flag file the hook must leave in
+#                             place survived.
+#   expect_file_absent      - newline list of file path templates that must
+#                             NOT exist AFTER the hook runs. Same token
+#                             support as pre_dirs/pre_files/expect_file_exists.
+#                             Uses -e, so anything at the path (a directory
+#                             too) counts as present.
 #
-# State dir layout matches the bootstrap-gate contract:
+# State dir layout matches the bootstrap-gate contract: one pending flag per
+# session per tracked skill (session-bootstrap, honesty, communication), each
+# deleted independently when its own skill loads, plus the gate log:
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-pending-<session_id>
+#   $BOOTSTRAP_GATE_STATE_DIR/.honesty-pending-<session_id>
+#   $BOOTSTRAP_GATE_STATE_DIR/.communication-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-gate-log.jsonl
 #
 # Sandbox layout: each case gets a fresh outer sandbox dir, with
@@ -60,7 +81,8 @@
 # is designed to traverse out of the state dir (e.g. "a/../../CANARY") --
 # the traversal target lands in the sandbox, never a shared path, and
 # `rm -rf "$sandbox"` cleans it up unconditionally at the end of the case.
-# pre_dirs/pre_files/expect_file_exists templates may reference:
+# pre_dirs/pre_files/expect_file_exists/expect_file_absent templates may
+# reference:
 #   STATE_DIR         - the state subdirectory itself
 #   STATE_DIR_PARENT  - the sandbox root (one level above STATE_DIR)
 
@@ -85,8 +107,9 @@ log_path() {
 }
 
 # Expands the STATE_DIR / STATE_DIR_PARENT tokens in a pre_dirs/pre_files/
-# expect_file_exists template into a concrete path. STATE_DIR_PARENT must be
-# substituted before STATE_DIR since it contains STATE_DIR as a substring.
+# expect_file_exists/expect_file_absent template into a concrete path.
+# STATE_DIR_PARENT must be substituted before STATE_DIR since it contains
+# STATE_DIR as a substring.
 resolve_token_path() {
   local state_dir="$1"
   local template="$2"
@@ -118,6 +141,7 @@ run_case() {
   local expect_flag_exists_file="$case_dir/expect_flag_exists"
   local expect_flag_absent_file="$case_dir/expect_flag_absent"
   local expect_file_exists_file="$case_dir/expect_file_exists"
+  local expect_file_absent_file="$case_dir/expect_file_absent"
 
   if [[ ! -f "$hook_file" ]]; then
     echo "FAIL: $name"
@@ -309,6 +333,18 @@ run_case() {
         reasons+=("expected file to exist: $resolved")
       fi
     done <"$expect_file_exists_file"
+  fi
+
+  if [[ -f "$expect_file_absent_file" ]]; then
+    while IFS= read -r template; do
+      [[ -z "$template" ]] && continue
+      local resolved
+      resolved="$(resolve_token_path "$state_dir" "$template")"
+      if [[ -e "$resolved" ]]; then
+        ok=0
+        reasons+=("expected file to be absent: $resolved")
+      fi
+    done <"$expect_file_absent_file"
   fi
 
   if [[ "$ok" -eq 1 ]]; then

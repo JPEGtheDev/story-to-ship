@@ -98,29 +98,22 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 # No python3, no scanner: fail open (disclosed above).
 command -v python3 &>/dev/null || exit 0
 
-OLD_STRING="$(printf '%s' "$RAW" | jq -r '.tool_input.old_string // empty' 2>/dev/null)"
-NEW_STRING="$(printf '%s' "$RAW" | jq -r '.tool_input.new_string // empty' 2>/dev/null)"
-CONTENT="$(printf '%s' "$RAW" | jq -r '.tool_input.content // empty' 2>/dev/null)"
 REPLACE_ALL="$(printf '%s' "$RAW" | jq -r 'if .tool_input.replace_all == true then "true" else "false" end' 2>/dev/null)"
 
-REASON="$(
-  IEG_TOOL_NAME="$TOOL_NAME" \
-  IEG_FILE_PATH="$FILE_PATH" \
-  IEG_OLD_STRING="$OLD_STRING" \
-  IEG_NEW_STRING="$NEW_STRING" \
-  IEG_CONTENT="$CONTENT" \
-  IEG_REPLACE_ALL="$REPLACE_ALL" \
-  IEG_STATE_DIR="$STATE_DIR" \
-  IEG_SESSION_ID="$SESSION_ID" \
-  IEG_MAX_LINES_RAW="${INLINE_EDIT_MAX_LINES:-}" \
-  IEG_SESSION_MAX_RAW="${INLINE_EDIT_SESSION_MAX:-}" \
-  IEG_PROSE_EXT_RAW="${INLINE_EDIT_PROSE_EXTENSIONS:-}" \
-  python3 - <<'PY'
+# old_string, new_string, and content can be large or end in newlines that
+# command substitution (and a bash variable holding them) would silently
+# strip or that would blow past the ~128 KiB exec() argument/environment
+# limit as an environment variable. Both would corrupt or bypass the line
+# count below, so the python program reads and parses the raw payload
+# itself (over a pipe, not an argument or an environment variable) for
+# those three fields instead of receiving them as IEG_* variables.
+PROGRAM=$(cat <<'PY'
 import difflib
 import json
 import os
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 
 
@@ -206,6 +199,9 @@ def load_ledger(ledger_path, real):
 
 
 def main():
+    payload = json.load(sys.stdin)
+    tool_input = payload.get("tool_input") or {}
+
     file_path = os.environ.get("IEG_FILE_PATH", "")
     real = os.path.realpath(file_path)
 
@@ -248,15 +244,15 @@ def main():
 
     tool_name = os.environ.get("IEG_TOOL_NAME", "")
     if tool_name == "Write":
-        content = os.environ.get("IEG_CONTENT", "")
+        content = tool_input.get("content") or ""
         old_lines = read_lines(real)
         if old_lines is None:
             old_lines = []
         new_lines = content.splitlines()
         n = diff_count(old_lines, new_lines)
     else:
-        old_string = os.environ.get("IEG_OLD_STRING", "")
-        new_string = os.environ.get("IEG_NEW_STRING", "")
+        old_string = tool_input.get("old_string") or ""
+        new_string = tool_input.get("new_string") or ""
         old_lines = old_string.splitlines()
         new_lines = new_string.splitlines()
         n = diff_count(old_lines, new_lines)
@@ -307,6 +303,21 @@ try:
 except Exception:
     pass
 PY
+)
+
+# $RAW is fed over a here-string (a redirection, not an exec argument or
+# an environment variable), so its size is bounded only by memory, not by
+# the ~128 KiB ARG_MAX that a large Write's content would otherwise hit.
+REASON="$(
+  IEG_TOOL_NAME="$TOOL_NAME" \
+  IEG_FILE_PATH="$FILE_PATH" \
+  IEG_REPLACE_ALL="$REPLACE_ALL" \
+  IEG_STATE_DIR="$STATE_DIR" \
+  IEG_SESSION_ID="$SESSION_ID" \
+  IEG_MAX_LINES_RAW="${INLINE_EDIT_MAX_LINES:-}" \
+  IEG_SESSION_MAX_RAW="${INLINE_EDIT_SESSION_MAX:-}" \
+  IEG_PROSE_EXT_RAW="${INLINE_EDIT_PROSE_EXTENSIONS:-}" \
+  python3 -c "$PROGRAM" <<<"$RAW"
 )"
 
 [[ -z "$REASON" ]] && exit 0

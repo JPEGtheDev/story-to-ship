@@ -26,7 +26,13 @@
 #   symlinks              - one "<link-relative-path> <target-relative-path>"
 #                            pair per line; each is created inside the temp
 #                            repo with `ln -s <target> <link>` before the
-#                            commit.
+#                            commit. A link's path must NOT already exist
+#                            under repo/ (the runner copies repo/ before
+#                            creating symlinks, so `ln -s` would collide);
+#                            a case needing "a prose path that is really a
+#                            symlink to code" ships the code file under
+#                            repo/ and lists the prose path only in
+#                            symlinks, never as a repo/ file too.
 #   pre_ledger            - JSONL lines (may contain __REPO__ / __OUTSIDE__
 #                            tokens, substituted the same way as input)
 #                            written to the session's ledger file before
@@ -44,6 +50,12 @@
 #                             does not exist).
 #   notes                  - free-text disclosure of what the case pins and
 #                            why (not read by the runner; for reviewers).
+#
+# A failure while building a case's temp repo (copying repo/, creating a
+# symlink, `git add`, or the commit) fails that case with the reason
+# "case setup failed" and the hook is never invoked for it -- this is
+# distinct from both the missing-hook diagnostic and a fixture/assertion
+# failure.
 #
 # Session id: `jq -r '.session_id // "sess-1"'` run on the SUBSTITUTED
 # input; falls back to "sess-1" when the input is not valid JSON (jq's
@@ -101,8 +113,14 @@ run_case() {
   repo_real="$(cd "$repo" && pwd -P)"
   outside_real="$(cd "$outside" && pwd -P)"
 
+  # Run as a plain statement (not directly as an `if`/`!` condition) so
+  # `set -e` inside the subshell actually takes effect: bash suspends
+  # errexit for a compound command that is itself the tested condition of
+  # `if`/`while`/`!`, which would silently swallow a failing `ln`/`cp`/git
+  # step here if this subshell were written as `if ! ( ... ); then`.
   (
-    cd "$repo" || exit 1
+    set -e
+    cd "$repo"
     git init -q
     printf 'scratch/\n' >.gitignore
     if [[ -d "$case_dir/repo" ]]; then
@@ -118,6 +136,13 @@ run_case() {
     git add -A
     git -c user.name=t -c user.email=t@t commit -qm init
   )
+  local setup_status=$?
+  if [[ "$setup_status" -ne 0 ]]; then
+    echo "FAIL: $name"
+    echo "  - case setup failed"
+    fail=$((fail + 1))
+    return
+  fi
 
   local sub_input
   sub_input="$(mktemp)"

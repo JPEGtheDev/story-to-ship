@@ -1,0 +1,1 @@
+Pins that a new file in a directory that does not exist yet is still recognised as inside the repository -- the repository lookup must not give up because the target's directory is missing.

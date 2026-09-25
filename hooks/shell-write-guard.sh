@@ -26,13 +26,13 @@
 # session doing it. See hooks/README.md.
 #
 # For the main thread only (no top-level agent_id), this guard also denies
-# writes that create a new file, that append (`>>`, `tee -a`/`--append`,
-# an interpreter open() in "a"/"x" mode), or that use an interpreter
-# open()/writeFileSync() exclusive-create mode, on any repository path that
-# is not gitignored -- so the coordinator's repository changes go through
-# the Edit and Write tools, where the inline-edit guard hook counts them.
-# A dispatched subagent keeps today's behaviour for these shapes exactly
-# (new files, appends, and exclusive-create opens are allowed for it).
+# new files, and appends (`>>`, `tee -a`/`--append`, an interpreter open()
+# in "a" or "x" mode -- writeFileSync is covered by the new-file clause,
+# not by a mode), on any repository path that is not gitignored -- so the
+# coordinator's repository changes go through the Edit and Write tools,
+# where the inline-edit guard hook counts them. A dispatched subagent
+# keeps today's behaviour for these shapes exactly (new files, appends,
+# and exclusive-create opens are allowed for it).
 #
 # No marker and no escape hatch exist. The sanctioned route to overwrite a
 # protected file is the Edit or Write tool (Read the file first, then Edit
@@ -53,7 +53,12 @@
 # rev-parse) means "not a repository" and the write is allowed; once the
 # target is known to be inside a repository, only a successful git
 # check-ignore match frees it, and any other check-ignore result or error
-# leaves it protected.
+# leaves it protected. For the main thread, the scanner denies only the
+# write mechanisms it recognises -- confirmed to get through: `touch`,
+# `ln -s` to a new link, `curl -o` and other download-to-file tools, a
+# read-write redirect `<>`, node `fs.appendFileSync` / `fs.openSync(...,
+# 'a')`, and `>&` followed by a file name (which also bypasses the
+# overwrite rule for every caller, not just the main thread).
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors
@@ -114,6 +119,12 @@ PREFIX_WORDS = {
 
 NESTED_SHELLS = {"bash", "sh", "zsh", "dash", "ksh"}
 INTERPRETERS = {"python", "python2", "python3", "node", "nodejs"}
+
+# Read once into a module-level constant: SWG_MAIN_THREAD="1" means the hook
+# payload carried no top-level agent_id (a main-thread call); "0" (or
+# anything else) means a dispatched subagent. See the header comment above
+# for the two rules this flag switches between.
+MAIN_THREAD = os.environ.get("SWG_MAIN_THREAD", "0") == "1"
 
 # Longest-match-first redirect operator table. Each entry maps the operator
 # text to whether it is a *candidate* write redirect (per rule C) and
@@ -636,13 +647,6 @@ def expand_home(p):
         home = os.environ.get("HOME", "")
         return home + p[1:]
     return p
-
-
-# Read once into a module-level constant: SWG_MAIN_THREAD="1" means the hook
-# payload carried no top-level agent_id (a main-thread call); "0" (or
-# anything else) means a dispatched subagent. See the header comment above
-# for the two rules this flag switches between.
-MAIN_THREAD = os.environ.get("SWG_MAIN_THREAD", "0") == "1"
 
 
 def nearest_existing_dir(path):

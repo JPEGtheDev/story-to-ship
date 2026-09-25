@@ -1,0 +1,1 @@
+a ledger entry with a negative line count is skipped for the session total too: 29 prior lines on other files plus this edit's 2 exceed the session cap of 30, even though a -5 entry on another file would bring the sum under it

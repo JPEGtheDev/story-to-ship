@@ -18,6 +18,7 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `bootstrap-gate-post.sh` | PostToolUse | Never -- clears state, no injection |
 | `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 | `shell-write-guard.sh` | PreToolUse (matcher `Bash`) | Only when a shell command would overwrite an existing repo file, and only as a deny reason -- never as injected context |
+| `inline-edit-guard.sh` | PreToolUse (matcher `Edit\|Write`) | Only when a main-thread Edit or Write would change a file that is not prose or pass a changed-line cap, and only as a deny reason -- never as injected context |
 
 Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, `workflow-model-guard.sh`, and `shell-write-guard.sh`, whose deny/warn text is generated inline by the scripts themselves. `pre-message-gates.sh` and `pre-message.sh` each have two paired files -- the full file and a `-loaded` variant -- and inject exactly one of them per turn, chosen by the pending flags described in the bootstrap-gate section below. Five `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, `workflow-model-guard.sh`, and `shell-write-guard.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
 
@@ -36,7 +37,7 @@ One file from each per-turn pair is injected on every user prompt, so their size
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the twelve shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for thirteen entries total. The twelve shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
 
 ## stop-turn-log.sh
 

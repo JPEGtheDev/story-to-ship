@@ -1,0 +1,1 @@
+another session has used its whole per-file and per-session budget on the same file; the caps are per session, so this session's 5-line edit is allowed and lands only in this session's ledger

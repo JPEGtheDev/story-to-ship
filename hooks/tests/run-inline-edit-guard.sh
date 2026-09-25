@@ -15,41 +15,49 @@
 # not once for the whole suite) plus an optional pre-seeded ledger.
 #
 # Case directory contract (all files optional except "input"):
-#   input                 - stdin JSON fed to the hook (required). May
-#                            contain the literal tokens __REPO__ and
-#                            __OUTSIDE__, substituted (via sed) with the
-#                            case's live temp-repo / outside-dir realpaths
-#                            before the hook runs.
-#   repo/                 - a directory tree copied into the temp repo
-#                            before `git add -A && git commit` (so its
-#                            files are tracked at commit time).
-#   symlinks              - one "<link-relative-path> <target-relative-path>"
-#                            pair per line; each is created inside the temp
-#                            repo with `ln -s <target> <link>` before the
-#                            commit. A link's path must NOT already exist
-#                            under repo/ (the runner copies repo/ before
-#                            creating symlinks, so `ln -s` would collide);
-#                            a case needing "a prose path that is really a
-#                            symlink to code" ships the code file under
-#                            repo/ and lists the prose path only in
-#                            symlinks, never as a repo/ file too.
-#   pre_ledger            - JSONL lines (may contain __REPO__ / __OUTSIDE__
-#                            tokens, substituted the same way as input)
-#                            written to the session's ledger file before
-#                            the hook runs, simulating prior counted edits
-#                            in the same session.
-#   env                   - "KEY=VALUE" lines exported for this case's hook
-#                            invocation only (e.g. cap overrides).
-#   expect_exit            - exact exit code (default 0).
-#   expect_stdout           - exact-match stdout. An empty (0-byte) file
-#                             means "expect empty stdout" (allow).
-#   expect_stdout_grep      - newline list; every line must appear in
-#                             stdout (grep -F). Used for deny cases.
-#   expect_ledger_lines     - integer; expected line count of the session's
-#                             ledger file after the run (0 when the file
-#                             does not exist).
-#   notes                  - free-text disclosure of what the case pins and
-#                            why (not read by the runner; for reviewers).
+#   input               - stdin JSON fed to the hook (required). May contain
+#                          the literal tokens __REPO__ and __OUTSIDE__,
+#                          substituted (via sed) with the case's live
+#                          temp-repo / outside-dir realpaths before the
+#                          hook runs.
+#   repo/               - a directory tree copied into the temp repo before
+#                          `git add -A && git commit` (so its files are
+#                          tracked at commit time).
+#   symlinks            - one "<link-relative-path> <target-relative-path>"
+#                          pair per line; each is created inside the temp
+#                          repo with `ln -s <target> <link>` before the
+#                          commit. A link's path must NOT already exist
+#                          under repo/ (the runner copies repo/ before
+#                          creating symlinks, so `ln -s` would collide); a
+#                          case needing "a prose path that is really a
+#                          symlink to code" ships the code file under repo/
+#                          and lists the prose path only in symlinks, never
+#                          as a repo/ file too.
+#   pre_ledger          - JSONL lines (may contain __REPO__ / __OUTSIDE__
+#                          tokens, substituted the same way as input)
+#                          written to THIS session's ledger file before the
+#                          hook runs, simulating prior counted edits in the
+#                          same session.
+#   pre_ledger_other    - JSONL lines, substituted exactly like pre_ledger,
+#                          written to a DIFFERENT session's ledger file
+#                          (session id "sess-other") in the same state dir
+#                          -- simulates another session's history to prove
+#                          the caps are per-session, not shared.
+#   env                 - "KEY=VALUE" lines exported for this case's hook
+#                          invocation only (e.g. cap overrides).
+#   expect_exit         - exact exit code (default 0).
+#   expect_stdout       - exact-match stdout. An empty (0-byte) file means
+#                          "expect empty stdout" (allow).
+#   expect_stdout_grep  - newline list; every line must appear in stdout
+#                          (grep -F). Used for deny cases.
+#   expect_ledger_lines - integer; expected line count of the session's
+#                          ledger file after the run (0 when the file does
+#                          not exist).
+#   expect_ledger_sum   - integer; expected sum of the "lines" field over
+#                          every entry in the session's ledger file after
+#                          the run (0 when the file does not exist).
+#   notes               - free-text disclosure of what the case pins and
+#                          why (not read by the runner; for reviewers).
 #
 # A failure while building a case's temp repo (copying repo/, creating a
 # symlink, `git add`, or the commit) fails that case with the reason
@@ -64,6 +72,15 @@
 # $STATE is this case's fresh temp dir, exported as BOOTSTRAP_GATE_STATE_DIR
 # for the hook run (CLAUDE_PROJECT_DIR is unset for the run so the hook
 # cannot fall back to it).
+#
+# CLEANUP / INTERRUPT SAFETY: repo, outside, state, and sub_input are
+# top-level (not `local`) variables holding the CURRENT case's temp paths.
+# case_cleanup (top level, not nested in run_case) removes all four and
+# resets the variables to empty; it is registered both as `trap
+# case_cleanup EXIT` (so a SIGINT/SIGTERM mid-case -- or any other abnormal
+# exit -- still removes that case's leftovers) and as `trap case_cleanup
+# RETURN` inside run_case (so each case's temp paths are removed, and the
+# variables reset, before the next case's mktemp calls run).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOK="$SCRIPT_DIR/../inline-edit-guard.sh"
@@ -71,6 +88,24 @@ FIXTURES_DIR="$SCRIPT_DIR/fixtures-inline-edit-guard"
 
 pass=0
 fail=0
+
+repo=""
+outside=""
+state=""
+sub_input=""
+
+# shellcheck disable=SC2317,SC2329 # invoked via `trap case_cleanup EXIT|RETURN` below
+case_cleanup() {
+  [[ -n "$repo" && -d "$repo" ]] && rm -rf "$repo"
+  [[ -n "$outside" && -d "$outside" ]] && rm -rf "$outside"
+  [[ -n "$state" && -d "$state" ]] && rm -rf "$state"
+  [[ -n "$sub_input" && -f "$sub_input" ]] && rm -f "$sub_input"
+  repo=""
+  outside=""
+  state=""
+  sub_input=""
+}
+trap case_cleanup EXIT
 
 run_case() {
   local case_dir="$1"
@@ -96,18 +131,11 @@ run_case() {
     return
   fi
 
-  local repo outside state
+  trap case_cleanup RETURN
+
   repo="$(mktemp -d)"
   outside="$(mktemp -d)"
   state="$(mktemp -d)"
-
-  # shellcheck disable=SC2317,SC2329 # invoked via `trap case_cleanup RETURN` below
-  case_cleanup() {
-    [[ -n "$repo" && -d "$repo" ]] && rm -rf "$repo"
-    [[ -n "$outside" && -d "$outside" ]] && rm -rf "$outside"
-    [[ -n "$state" && -d "$state" ]] && rm -rf "$state"
-  }
-  trap case_cleanup RETURN
 
   local repo_real outside_real
   repo_real="$(cd "$repo" && pwd -P)"
@@ -127,7 +155,7 @@ run_case() {
       cp -r "$case_dir/repo/." .
     fi
     if [[ -f "$case_dir/symlinks" ]]; then
-      while IFS=' ' read -r link target; do
+      while IFS=' ' read -r link target || [[ -n "$link" ]]; do
         [[ -z "$link" ]] && continue
         mkdir -p "$(dirname "$link")"
         ln -s "$target" "$link"
@@ -144,7 +172,6 @@ run_case() {
     return
   fi
 
-  local sub_input
   sub_input="$(mktemp)"
   sed "s|__REPO__|$repo_real|g; s|__OUTSIDE__|$outside_real|g" "$input_file" >"$sub_input"
 
@@ -157,9 +184,14 @@ run_case() {
     sed "s|__REPO__|$repo_real|g; s|__OUTSIDE__|$outside_real|g" "$case_dir/pre_ledger" >"$ledger_file"
   fi
 
+  if [[ -f "$case_dir/pre_ledger_other" ]]; then
+    sed "s|__REPO__|$repo_real|g; s|__OUTSIDE__|$outside_real|g" "$case_dir/pre_ledger_other" \
+      >"$state/.inline-edit-ledger-sess-other.jsonl"
+  fi
+
   local -a env_kv=()
   if [[ -f "$case_dir/env" ]]; then
-    while IFS= read -r line; do
+    while IFS= read -r line || [[ -n "$line" ]]; do
       [[ -z "$line" ]] && continue
       env_kv+=("$line")
     done <"$case_dir/env"
@@ -175,7 +207,6 @@ run_case() {
     bash "$HOOK" <"$sub_input"
   )"
   actual_exit=$?
-  rm -f "$sub_input"
 
   local expect_exit=0
   [[ -f "$case_dir/expect_exit" ]] && expect_exit="$(tr -d '[:space:]' <"$case_dir/expect_exit")"
@@ -198,7 +229,7 @@ run_case() {
   fi
 
   if [[ -f "$case_dir/expect_stdout_grep" ]]; then
-    while IFS= read -r pattern; do
+    while IFS= read -r pattern || [[ -n "$pattern" ]]; do
       [[ -z "$pattern" ]] && continue
       if ! grep -qF "$pattern" <<<"$actual_stdout"; then
         ok=0
@@ -211,13 +242,27 @@ run_case() {
     local expect_ledger_lines actual_ledger_lines
     expect_ledger_lines="$(tr -d '[:space:]' <"$case_dir/expect_ledger_lines")"
     if [[ -f "$ledger_file" ]]; then
-      actual_ledger_lines="$(wc -l <"$ledger_file" | tr -d '[:space:]')"
+      actual_ledger_lines="$(grep -c '' "$ledger_file")"
     else
       actual_ledger_lines=0
     fi
     if [[ "$actual_ledger_lines" -ne "$expect_ledger_lines" ]]; then
       ok=0
       reasons+=("ledger line count mismatch: expected $expect_ledger_lines got $actual_ledger_lines")
+    fi
+  fi
+
+  if [[ -f "$case_dir/expect_ledger_sum" ]]; then
+    local expect_ledger_sum actual_ledger_sum
+    expect_ledger_sum="$(tr -d '[:space:]' <"$case_dir/expect_ledger_sum")"
+    if [[ -f "$ledger_file" ]]; then
+      actual_ledger_sum="$(jq -s 'map(.lines) | add // 0' "$ledger_file")"
+    else
+      actual_ledger_sum=0
+    fi
+    if [[ "$actual_ledger_sum" -ne "$expect_ledger_sum" ]]; then
+      ok=0
+      reasons+=("ledger lines sum mismatch: expected $expect_ledger_sum got $actual_ledger_sum")
     fi
   fi
 

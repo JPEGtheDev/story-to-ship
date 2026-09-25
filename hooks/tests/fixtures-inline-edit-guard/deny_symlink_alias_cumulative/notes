@@ -1,0 +1,1 @@
+an edit through a symlink alias is counted against the resolved file: 6 prior lines on doc.md plus 5 through alias.md exceed the per-file cap of 10

@@ -57,9 +57,11 @@
 # concurrent calls can together exceed a cap that each individually
 # stayed under. A changed line has no length limit: one long line counts
 # as one line however many characters it holds. If the ledger append
-# fails (for example, a read-only state dir), the error is ignored and
-# the edit is allowed but not recorded, so the running totals stop
-# growing and only each edit's own size is checked against the caps.
+# fails (for example, the ledger cannot be created in a read-only state
+# dir, or the ledger file itself is read-only), the error is ignored and
+# the edit is allowed but not recorded: the running totals stop at what
+# the ledger already holds, and with no ledger each edit is checked
+# against the caps on its own size alone.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors

@@ -28,9 +28,10 @@
 # For the main thread only (no top-level agent_id), this guard also denies
 # new files, and appends (`>>`, `tee -a`/`--append`, an interpreter open()
 # in "a" or "x" mode -- writeFileSync is covered by the new-file clause,
-# not by a mode), on any repository path that is not gitignored -- so the
-# coordinator's repository changes go through the Edit and Write tools,
-# where the inline-edit guard hook counts them. A dispatched subagent
+# not by a mode), on any repository path that is not gitignored. This
+# closes the common shell routes around the inline-edit guard hook, which
+# counts the coordinator's Edit and Write changes; it does not close every
+# route (see the residuals below). A dispatched subagent
 # keeps today's behaviour for these shapes exactly (new files, appends,
 # and exclusive-create opens are allowed for it).
 #

@@ -92,13 +92,14 @@ These thoughts mean stop immediately:
 | "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and both review stages live there. |
 | "About to send a dispatch prompt containing a task tag, an issue number, or a tool/CLI claim I have not run" | STOP. Dispatch text is shipped text (BEFORE PROCEEDING items 6-8). Write the prompt to a file, run the sweep on that file and paste its output, run or read the source for every tool claim, and label what you cannot verify. |
 | "Writing a verification command into a dispatch prompt that I have only seen pass" | STOP. A check that has never failed is unproven. Run it on one must-pass and one must-fail input, paste both, and redesign it if it cannot fail (BEFORE PROCEEDING item 9). |
+| "About to split one change into several inline edits, edit a code or config file inline, or call a composed change mechanical so it stays inline" | STOP. The lane is a literal replacement in a prose file under the guard's caps; everything else is an implementer dispatch. |
 
 ---
 
 ## Dispatch Decision Table
 
 **Context:** Deciding, for one step of a todo, whether to dispatch an agent or do the step inline in the coordinator's own context.
-**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit: anything that writes a file, or reads more than a couple of files, is dispatched.
+**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit, plus one write-side lane the guard hook enforces: a literal prose edit under the caps; anything else that writes a file, or reads more than a couple of files, is dispatched.
 
 | Task | Dispatch? | Type |
 |------|-----------|------|
@@ -110,10 +111,11 @@ These thoughts mean stop immediately:
 | Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file -- the template takes one file path, so no grouping |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |
+| Coordinator edit to a prose file (.md or .txt) where the replacement text is already literal, at most 10 changed lines in that file and 30 inline lines in the session (the inline-edit guard hook counts the changed lines of each edit, sums the file's edits over the session, and denies past either cap or on any other file type) | No | do inline in the feature worktree; the todo's Stage 1 and Stage 2 reviews still run (the `two-stage-review` skill, Inline-lane todos) |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
-| Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos require subagent dispatch regardless of estimated size) |
+| Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos dispatch unless they fit the inline-lane row) |
 | Reading one known file | No | do inline |
-| Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos require subagent dispatch regardless of size) |
+| Single-step trivial command | No | do inline (read-only tasks only, AND if the command reads file content, the file must be under 2 000 tokens -- larger files require explore agent dispatch; implementation todos dispatch unless they fit the inline-lane row) |
 
 ---
 
@@ -154,7 +156,8 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 | "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
-| "Todo is short -- I'll do it inline" | BANNED. All todos require implementer subagent dispatch regardless of estimated size. Size assessment before execution is speculation -- the outlier case always exists. |
+| "Todo is short -- I'll do it inline" | Short is not the test. The inline lane admits a prose file, replacement text already literal, and the guard hook's caps; anything else dispatches regardless of estimated size. |
+| "One line at a time keeps each edit under the cap" | The guard sums every edit to the file over the session and every inline edit across the session; a split change reaches the same total and its later edits are denied. A denied edit means dispatch, not a smaller edit. |
 | "The user approved the last run -- this retry is covered" | Spend-bearing launches need explicit consent PER INVOCATION. A failed launch returns to the user for a fresh go; a silent retry spends money without authorization. Ask before every launch. |
 | "The dispatch prompt is scratch text -- hygiene applies to shipped files, not to what I dictate to an implementer" | The prompt IS shipped text: the implementer builds on it and the reviewers review the result as the implementer's own. Three measured defects (a dictated issue tag, a wrong SDK line, a wrong CLI flag) each cost a full dispatch round trip. Check before sending. |
 | "The check is a one-line grep -- it obviously fires on the target" | Every externally caught defect (found by the user or a subagent, not by the coordinator) in one scored coordination session (a session the postmortem reviewer scored with its Correction-source audit row) was a one-line check that could not fire as claimed: a fixed-string grep on a phrase that wraps, a filter that breaks on an indented continuation, a line offset that assumed a fixed header. Each cost a full implementer or reviewer round. Run the check on a must-pass and a must-fail input before dispatch and paste both. |

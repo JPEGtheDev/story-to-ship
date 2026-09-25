@@ -5,6 +5,9 @@
 ```
 Pick up todo
     |
+    +-- Fits the Inline lane row (SKILL.md, Dispatch Decision Table)? --> Edit inline in the feature worktree,
+    |       then load `two-stage-review`: Stage 1 and Stage 2 still run on that diff.
+    |
     v
 Dispatch implementer subagent (implementer.md)
     |
@@ -55,6 +58,8 @@ Task to delegate
     +-- Read-only research? -> dispatching-parallel-agents skill
     |
     +-- Needs file changes?
+         |
+         +-- Fits the Inline lane row? -> edit inline in the feature worktree -> both review stages
          |
          v
     Create worktree (ALWAYS -- never dispatch to main working tree)

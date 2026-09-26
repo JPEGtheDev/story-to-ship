@@ -1,0 +1,1 @@
+Pins that a main-thread new-file redirect outside any git repo stays allowed -- ignored and outside-repo paths stay allowed even for the main thread.

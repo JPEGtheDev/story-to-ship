@@ -54,6 +54,15 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/shell-write-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/inline-edit-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

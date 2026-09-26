@@ -1,0 +1,1 @@
+an env override lowers the per-session cap to 12: 10 prior lines on another file plus this 5-line edit exceed it, and the deny reason reports the overridden value

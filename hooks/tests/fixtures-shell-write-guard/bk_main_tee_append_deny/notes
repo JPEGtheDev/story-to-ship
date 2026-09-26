@@ -1,0 +1,1 @@
+Pins that a main-thread tee -a append to a tracked repository file is denied -- main-thread writes to repository files are denied so the coordinator's file changes go through the Edit and Write tools, where the inline-edit guard hook counts changed lines per file.

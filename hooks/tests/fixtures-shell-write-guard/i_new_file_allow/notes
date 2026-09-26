@@ -1,1 +1,1 @@
-Pins that a bare > redirect to a path that does not yet exist in the sandbox is allowed -- there is nothing to overwrite, so the guard only protects existing files.
+Pins that a bare > redirect to a path that does not yet exist in the sandbox is allowed -- there is nothing to overwrite, so for a subagent call the guard only protects existing files. The input carries agent_id because this case pins the subagent path; the main-thread counterpart is bi_main_new_file_redirect_deny.

@@ -1,0 +1,1 @@
+a session id outside the ledger file-name charset (letters, digits, dot, underscore, hyphen) fails open: allowed, exit 0, and no ledger file is written

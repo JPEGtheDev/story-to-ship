@@ -1,0 +1,1 @@
+a subagent call (non-empty agent_id) is always allowed and never counted, even for a code file

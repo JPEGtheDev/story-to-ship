@@ -15,12 +15,25 @@
 # tool_name is not "Bash"; tool_input.command is empty or missing. Every
 # other input is evaluated.
 #
-# Subagents are NOT exempt. Unlike bootstrap-gate-pre.sh and
-# workflow-model-guard.sh (both of which skip any call carrying a top-level
-# agent_id), this guard applies identically whether the call originates
-# from the main session or a dispatched subagent -- an implementer's
-# `cat > some/tracked/file` is the same defect as the user's own session
-# doing it, so there is no agent_id exemption here. See hooks/README.md.
+# Two rules, keyed on the payload's top-level agent_id (empty for the main
+# thread, non-empty inside a dispatched subagent):
+#
+# Overwrite protection applies to every caller, main thread or subagent
+# alike. Unlike bootstrap-gate-pre.sh and workflow-model-guard.sh (both of
+# which skip any call carrying a top-level agent_id), this guard does not
+# exempt subagents from the overwrite rule -- an implementer's
+# `cat > some/tracked/file` is the same defect as the coordinator's own
+# session doing it. See hooks/README.md.
+#
+# For the main thread only (no top-level agent_id), this guard also denies
+# new files, and appends (`>>`, `tee -a`/`--append`, an interpreter open()
+# in "a" or "x" mode -- writeFileSync is covered by the new-file clause,
+# not by a mode), on any repository path that is not gitignored. This
+# closes the common shell routes around the inline-edit guard hook, which
+# counts the coordinator's Edit and Write changes; it does not close every
+# route (see the residuals below). A dispatched subagent
+# keeps today's behaviour for these shapes exactly (new files, appends,
+# and exclusive-create opens are allowed for it).
 #
 # No marker and no escape hatch exist. The sanctioned route to overwrite a
 # protected file is the Edit or Write tool (Read the file first, then Edit
@@ -41,7 +54,16 @@
 # rev-parse) means "not a repository" and the write is allowed; once the
 # target is known to be inside a repository, only a successful git
 # check-ignore match frees it, and any other check-ignore result or error
-# leaves it protected.
+# leaves it protected. For the main thread, the scanner denies only the
+# write mechanisms it recognises -- confirmed to get through: `touch`,
+# `ln -s` to a new link, `curl -o` and other download-to-file tools, a
+# read-write redirect `<>`, node `fs.appendFileSync` / `fs.openSync(...,
+# 'a')`, and `>&` followed by a file name (which also bypasses the
+# overwrite rule for every caller, not just the main thread). Commands
+# the scanner does not model get past both rules, for every caller:
+# `git apply`, `git am`, and `patch`; the in-place editors `ed`,
+# `vim -es`, `awk -i inplace`, and `sponge`; and a script file run by an
+# interpreter (`python3 script.py`, `node script.js`).
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors
@@ -66,10 +88,19 @@ CMD="$(printf '%s' "$RAW" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 CWD="$(printf '%s' "$RAW" | jq -r '.cwd // empty' 2>/dev/null)"
 [[ -z "$CWD" ]] && CWD="$PWD"
 
+# Subagents identify themselves via agent_id; the main-thread-only rules
+# below apply only when this is empty.
+AGENT_ID="$(printf '%s' "$RAW" | jq -r '.agent_id // empty' 2>/dev/null)"
+if [[ -n "$AGENT_ID" ]]; then
+  SWG_MAIN_THREAD=0
+else
+  SWG_MAIN_THREAD=1
+fi
+
 # No python3, no scanner: fail open (disclosed above).
 command -v python3 &>/dev/null || exit 0
 
-REASON="$(SWG_COMMAND="$CMD" SWG_CWD="$CWD" python3 - <<'PY'
+REASON="$(SWG_COMMAND="$CMD" SWG_CWD="$CWD" SWG_MAIN_THREAD="$SWG_MAIN_THREAD" python3 - <<'PY'
 import os
 import re
 import subprocess
@@ -93,6 +124,12 @@ PREFIX_WORDS = {
 
 NESTED_SHELLS = {"bash", "sh", "zsh", "dash", "ksh"}
 INTERPRETERS = {"python", "python2", "python3", "node", "nodejs"}
+
+# Read once into a module-level constant: SWG_MAIN_THREAD="1" means the hook
+# payload carried no top-level agent_id (a main-thread call); "0" (or
+# anything else) means a dispatched subagent. See the header comment above
+# for the two rules this flag switches between.
+MAIN_THREAD = os.environ.get("SWG_MAIN_THREAD", "0") == "1"
 
 # Longest-match-first redirect operator table. Each entry maps the operator
 # text to whether it is a *candidate* write redirect (per rule C) and
@@ -617,6 +654,40 @@ def expand_home(p):
     return p
 
 
+def nearest_existing_dir(path):
+    """Walk up from path until an existing directory is found, so a
+    repository lookup for a target under a not-yet-created directory (e.g.
+    newdir/x.md) still runs from a real ancestor instead of failing on a
+    missing cwd."""
+    d = path
+    while d and not os.path.isdir(d):
+        parent = os.path.dirname(d)
+        if parent == d:
+            return d
+        d = parent
+    return d
+
+
+def overwrite_reason(realpath, mechanism):
+    """The deny reason for a candidate target inside a non-ignored
+    repository. Main-thread calls get one unified reason (used for
+    overwrite, new-file, append, and the git-error fail-closed path);
+    subagent calls keep today's overwrite reason unchanged."""
+    if MAIN_THREAD:
+        return (
+            "shell-write-guard: main-thread shell writes to repository "
+            "files are not allowed (%s, mechanism: %s). Use the Edit or "
+            "Write tool (the inline-edit guard counts those edits) or "
+            "dispatch an implementer." % (realpath, mechanism)
+        )
+    return (
+        "shell-write-guard: this command would overwrite the existing repo "
+        "file %s (mechanism: %s). Read it with the Read tool and change it "
+        "with the Edit or Write tool; use >> if you meant to append."
+        % (realpath, mechanism)
+    )
+
+
 def check_candidate(raw_token, mechanism, base, top_cwd):
     """raw_token: Token. Denies via DenyFound, or returns (allow)."""
     if not raw_token.literal:
@@ -646,22 +717,17 @@ def check_candidate(raw_token, mechanism, base, top_cwd):
         path = os.path.normpath(os.path.join(base, expanded))
 
     realpath = os.path.realpath(path)
-    if not os.path.isfile(realpath):
+    if not os.path.isfile(realpath) and not MAIN_THREAD:
         return
 
-    dirname = os.path.dirname(realpath)
+    lookup_dir = nearest_existing_dir(os.path.dirname(realpath))
     try:
         top = subprocess.run(
-            ["git", "-C", dirname, "rev-parse", "--show-toplevel"],
+            ["git", "-C", lookup_dir, "rev-parse", "--show-toplevel"],
             capture_output=True, text=True, timeout=2,
         )
     except Exception:
-        raise DenyFound(
-            "shell-write-guard: this command would overwrite the existing "
-            "repo file %s (mechanism: %s). Read it with the Read tool and "
-            "change it with the Edit or Write tool; use >> if you meant to "
-            "append." % (realpath, mechanism)
-        )
+        raise DenyFound(overwrite_reason(realpath, mechanism))
     if top.returncode != 0:
         return
 
@@ -677,12 +743,7 @@ def check_candidate(raw_token, mechanism, base, top_cwd):
     if ignore is not None and ignore.returncode == 0:
         return
 
-    raise DenyFound(
-        "shell-write-guard: this command would overwrite the existing repo "
-        "file %s (mechanism: %s). Read it with the Read tool and change it "
-        "with the Edit or Write tool; use >> if you meant to append."
-        % (realpath, mechanism)
-    )
+    raise DenyFound(overwrite_reason(realpath, mechanism))
 
 
 def is_flag(tok):
@@ -695,7 +756,7 @@ def words_only(tokens):
 
 def check_tee(args, base, top_cwd):
     append = any(a.literal and a.text in ("-a", "--append") for a in args)
-    if append:
+    if append and not MAIN_THREAD:
         return
     for a in args:
         if is_flag(a):
@@ -917,7 +978,8 @@ def process_segment(segment, base, top_cwd):
         kind, val = tokens[i]
         if kind == "op":
             base_op = val.lstrip("0123456789")
-            is_write_redirect = base_op in (">", ">|", "&>")
+            is_write_redirect = base_op in (">", ">|", "&>") or \
+                (MAIN_THREAD and base_op == ">>")
             if is_write_redirect and i + 1 < n and tokens[i + 1][0] == "word":
                 target = tokens[i + 1][1]
                 check_candidate(target, "redirect", base, top_cwd)
@@ -947,11 +1009,18 @@ def process_segment(segment, base, top_cwd):
     return base
 
 
+# Write-mode chars matched in an interpreter open() call: "w" for every
+# caller; main-thread calls additionally count "a" (append) and "x"
+# (exclusive create) as write modes, since those are also the main-thread
+# write shapes this guard denies on repository paths.
+_WRITE_MODE_CHARS = "wax" if MAIN_THREAD else "w"
 WRITE_MODE_LITERAL_RE = re.compile(
-    r'open\(\s*([\'"])(?P<path>[^\'"]*)\1\s*,\s*(mode\s*=\s*)?([\'"])w[^\'"]*\4'
+    r'open\(\s*([\'"])(?P<path>[^\'"]*)\1\s*,\s*(mode\s*=\s*)?([\'"])[%s][^\'"]*\4'
+    % _WRITE_MODE_CHARS
 )
 WRITE_MODE_NONLITERAL_RE = re.compile(
-    r'open\(\s*(?P<expr>[^\'"\s,)][^,)]*)\s*,\s*(mode\s*=\s*)?([\'"])w'
+    r'open\(\s*(?P<expr>[^\'"\s,)][^,)]*)\s*,\s*(mode\s*=\s*)?([\'"])[%s]'
+    % _WRITE_MODE_CHARS
 )
 WRITEFILESYNC_RE = re.compile(
     r'writeFileSync\(\s*([\'"])(?P<path>[^\'"]*)\1'

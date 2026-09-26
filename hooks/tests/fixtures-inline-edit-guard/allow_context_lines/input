@@ -1,0 +1,1 @@
+{"session_id":"sess-1","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"__REPO__/doc.md","old_string":"k1\nk2\nk3\nk4\nk5\nalpha","new_string":"k1\nk2\nk3\nk4\nk5\nbeta"}}

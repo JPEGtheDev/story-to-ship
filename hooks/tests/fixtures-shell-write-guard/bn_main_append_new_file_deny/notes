@@ -1,0 +1,1 @@
+Pins that an append which creates a new repo file is denied for the main thread -- a guard that checks appends only after the existence check would miss it.

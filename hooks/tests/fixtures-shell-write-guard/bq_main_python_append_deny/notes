@@ -1,0 +1,1 @@
+Pins that a main-thread interpreter open() call in append mode ('a') on a tracked repository file is denied -- append-mode opens are also main-thread write shapes.

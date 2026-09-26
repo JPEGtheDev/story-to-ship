@@ -1,0 +1,1 @@
+../../hooks/inline-edit-guard.sh

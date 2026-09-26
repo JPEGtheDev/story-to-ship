@@ -1,0 +1,1 @@
+the configured extension list is compared case-insensitively: with the list set to MD, a small edit to doc.md is allowed

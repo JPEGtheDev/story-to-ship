@@ -1,0 +1,1 @@
+Pins that a main-thread dd creating a new repository file (of= a non-existent target) is denied, not just dd onto an existing file.

@@ -1,0 +1,1 @@
+a new file in a directory that does not exist yet is still recognised as inside the repository (looked up from the nearest existing ancestor) and counted

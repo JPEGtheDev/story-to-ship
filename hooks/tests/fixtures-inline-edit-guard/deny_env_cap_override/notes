@@ -1,0 +1,1 @@
+an env override lowers the per-file cap to 3, and the deny reason reports the overridden cap value

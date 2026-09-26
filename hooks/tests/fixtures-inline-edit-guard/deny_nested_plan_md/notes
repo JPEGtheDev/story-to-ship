@@ -1,0 +1,1 @@
+only the repository's top-level plan.md is exempt; a plan.md in a subdirectory is an ordinary prose file, so a 20-line change is denied

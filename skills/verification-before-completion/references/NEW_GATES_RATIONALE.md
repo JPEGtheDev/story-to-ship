@@ -1,6 +1,6 @@
 # New Gates: Consequences and Enforcement Scope
 
-Consequences and enforcement scope for the three New Gates sections of `../SKILL.md`. The Context, Forces, and Solution of each gate stay in `../SKILL.md`.
+Consequences and enforcement scope for the three New Gates sections of `../SKILL.md`. The Context, Forces, and Solution of each gate stay in `../SKILL.md`. DoD stands for Definition of Done.
 
 ---
 

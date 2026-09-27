@@ -70,9 +70,7 @@ Skipping any step = lying, not verifying.
 
 A green run alone is not sufficient evidence a new gate is correctly wired.
 
-**Consequences:** Doubles the verification work for every new gate (a break-it run in addition to the pass-it run). This is the cost of ruling out the vacuous-test class; skipping it trades a small amount of upfront effort for an unproven detector that can silently do nothing.
-
-**Enforcement scope:** No mechanical detector checks this rule. It is procedurally checkable in review -- the pasted mutation proof either exists in the message or it does not, and a reviewer can verify its presence directly.
+Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 
@@ -88,9 +86,7 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 **Solution:** A contract-clause fix may not close as DONE on textual review alone. Textual PASS plus a fixture run exercising the new sub-case (output pasted) = DONE. Without the fixture run, the maximum status is DONE_WITH_CONCERNS with the gap disclosed in the same message -- the word "Fixed" is not available for that change.
 
-**Consequences:** Every contract fix costs one fixture dispatch; that is the price of ruling out text-only closure.
-
-**Enforcement scope:** Reviewers and the coordinator check the fix todo's evidence for a fixture output specific to the new clause; procedurally checkable, no automated detector.
+Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 
@@ -107,9 +103,7 @@ See `references/VERIFICATION_THEORY.md` for defect removal efficiency data, trus
 
 The gate check itself: for every layer ruled ALWAYS in the canon (unless the story's Definition of Done section carries a valid category-tagged N/A line for it) and every layer ruled CONDITIONAL whose trigger fired against the actual diff, the completion claim MUST carry that layer's evidence inline, meeting that layer's own verification standard -- not a lesser substitute. Example: a CONDITIONAL mutation-testing layer whose trigger fired requires a mutation run -- break the property, run the gate, paste the named failing case, then restore the property; a green suite run alone does not satisfy it. Missing or generic evidence for any such layer -> emit the literal line `DOD-GATE: FAIL <layer>`, using the layer's canonical Key. Emit the marker as a bare line: the line begins with the marker string itself, with no surrounding formatting (no backticks, no list markers, no quotation marks). The claim fails the gate observably; it is not marked DONE. Consumers are permitted, but not required, to additionally ground cited evidence against the repo under evaluation; when that grounding shows the cited evidence does not hold there (for example, a cited diff or file that is absent from the repo), the same `DOD-GATE: FAIL <layer>` marker MAY be emitted -- a grounding-driven failure is a legitimate gate outcome, not a defect in the consumer or in the claim-checking process.
 
-**Consequences:** A ratified canon adds up to four checks to every in-scope completion claim (malformed-refusal check, uncommitted-edit check, staleness check, per-layer evidence check) beyond this skill's generic verification rules. This is the cost of making the canon's rulings actually bind completion claims instead of remaining a document nobody consults.
-
-**Enforcement scope:** Whether a CONDITIONAL layer's trigger fired against a given diff is evaluated by the Stage 1 spec-compliance reviewer and recorded in the review output -- this is reviewer judgment, not a mechanical detector (the trigger predicate is objectively checkable in principle, but no automated tool evaluates it here). The uncommitted-edit and staleness checks are procedurally checkable: a reviewer can run the git commands and compare stamps directly. The malformed-refusal check is mechanically greppable once emitted, like the completion gate's failure marker: consumers emit the literal `DOD-MALFORMED: <reason>` line, and the `DOD-GATE: FAIL <layer>` marker is likewise mechanically greppable once emitted.
+Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 

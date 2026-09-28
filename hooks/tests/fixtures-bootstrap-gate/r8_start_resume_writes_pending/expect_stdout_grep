@@ -1,0 +1,1 @@
+Reload guard: Edit, Write, NotebookEdit and Agent are held until each of these is re-invoked: using-git-worktrees, writing-plans.

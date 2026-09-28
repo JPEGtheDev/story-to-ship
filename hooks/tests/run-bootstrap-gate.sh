@@ -155,6 +155,7 @@ run_case() {
   local expect_file_absent_file="$case_dir/expect_file_absent"
   local pre_content_dir="$case_dir/pre_content"
   local expect_content_dir="$case_dir/expect_content"
+  local content_file content_base
 
   if [[ ! -f "$hook_file" ]]; then
     echo "FAIL: $name"
@@ -217,13 +218,21 @@ run_case() {
   fi
 
   # Copy content fixtures into the state dir, if requested (see pre_content
-  # in the contract comment above). Dotfiles included.
+  # in the contract comment above). Dotfiles included. A non-regular entry
+  # (e.g. a subdirectory) or a failed copy is recorded here and turned into
+  # a case failure once $reasons exists below.
+  local pre_content_failures=()
   if [[ -d "$pre_content_dir" ]]; then
-    local content_file content_base
     shopt -s dotglob nullglob
     for content_file in "$pre_content_dir"/*; do
       content_base="$(basename "$content_file")"
-      cp "$content_file" "$state_dir/$content_base"
+      if [[ ! -f "$content_file" ]]; then
+        pre_content_failures+=("pre_content entry is not a regular file: $content_base")
+        continue
+      fi
+      if ! cp "$content_file" "$state_dir/$content_base"; then
+        pre_content_failures+=("failed to copy pre_content file: $content_base")
+      fi
     done
     shopt -u dotglob nullglob
   fi
@@ -247,6 +256,11 @@ run_case() {
 
   local ok=1
   local reasons=()
+
+  if [[ "${#pre_content_failures[@]}" -gt 0 ]]; then
+    ok=0
+    reasons+=("${pre_content_failures[@]}")
+  fi
 
   if [[ "$actual_exit" -ne "$expect_exit" ]]; then
     ok=0
@@ -375,7 +389,7 @@ run_case() {
   # Compare content fixtures byte-for-byte against the state dir, if
   # requested (see expect_content in the contract comment above).
   if [[ -d "$expect_content_dir" ]]; then
-    local content_file content_base actual_content_file
+    local actual_content_file
     shopt -s dotglob nullglob
     for content_file in "$expect_content_dir"/*; do
       content_base="$(basename "$content_file")"
@@ -391,7 +405,8 @@ run_case() {
         diff_info="$(awk -v actual="$actual_content_file" '
           {
             ln++
-            if ((getline line2 < actual) <= 0) line2 = ""
+            rc = (getline line2 < actual)
+            if (rc <= 0) line2 = "<EOF>"
             if ($0 != line2) {
               print ln
               print $0
@@ -402,19 +417,27 @@ run_case() {
           }
           END {
             if (!found) {
-              if ((getline line2 < actual) > 0) {
+              rc = (getline line2 < actual)
+              if (rc > 0) {
                 print ln + 1
-                print ""
+                print "<EOF>"
                 print line2
               }
             }
           }
         ' "$content_file")"
-        local diff_line diff_expected diff_actual
-        diff_line="$(sed -n '1p' <<<"$diff_info")"
-        diff_expected="$(sed -n '2p' <<<"$diff_info")"
-        diff_actual="$(sed -n '3p' <<<"$diff_info")"
-        reasons+=("content mismatch: $content_base line $diff_line: expected [$diff_expected] got [$diff_actual]")
+        if [[ -z "$diff_info" ]]; then
+          # cmp reported a byte-level difference but no differing line was
+          # found by line-based comparison: the files agree line-for-line
+          # and only differ in whether the final line is newline-terminated.
+          reasons+=("content mismatch: $content_base differs only in final-line termination (trailing newline)")
+        else
+          local diff_line diff_expected diff_actual
+          diff_line="$(sed -n '1p' <<<"$diff_info")"
+          diff_expected="$(sed -n '2p' <<<"$diff_info")"
+          diff_actual="$(sed -n '3p' <<<"$diff_info")"
+          reasons+=("content mismatch: $content_base line $diff_line: expected [$diff_expected] got [$diff_actual]")
+        fi
       fi
     done
     shopt -u dotglob nullglob

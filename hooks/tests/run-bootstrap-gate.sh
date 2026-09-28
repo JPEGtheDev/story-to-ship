@@ -4,7 +4,10 @@
 #   hooks/bootstrap-gate-post.sh  (PostToolUse, matcher Skill)
 #   hooks/session-start.sh        (SessionStart, extended to stamp three
 #                                  per-session pending flags: bootstrap,
-#                                  honesty, communication)
+#                                  honesty, communication -- and, on a
+#                                  compact or resume source, to write the
+#                                  reload-pending set from the loaded-skills
+#                                  list, or clear both on any other source)
 #
 # Sibling to hooks/tests/run.sh, following the same fixture-dir pattern:
 # per-case directories under fixtures-bootstrap-gate/ carry env/input/expected
@@ -84,6 +87,11 @@
 #   $BOOTSTRAP_GATE_STATE_DIR/.honesty-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.communication-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-gate-log.jsonl
+#   $BOOTSTRAP_GATE_STATE_DIR/.skills-loaded-<session_id>
+#   $BOOTSTRAP_GATE_STATE_DIR/.reload-pending-<session_id>
+# session-start.sh writes the reload-pending set from the loaded list on a
+# compact or resume source (deleting it when the resulting set is empty),
+# and deletes both the loaded list and the pending set on any other source.
 #
 # Sandbox layout: each case gets a fresh outer sandbox dir, with
 # BOOTSTRAP_GATE_STATE_DIR pointed at a "state" subdirectory one level

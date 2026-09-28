@@ -87,36 +87,47 @@ fi
 MODE="${BOOTSTRAP_GATE_MODE:-warn}"
 LOG_FILE="$STATE_DIR/.bootstrap-gate-log.jsonl"
 
-# Bootstrap flag present and this isn't the call that clears it: this gate
-# alone decides, and the reload check below never runs.
-if [[ -f "$FLAG_FILE" && "$IS_BOOTSTRAP_SKILL_CALL" -ne 1 ]]; then
-  TS="$(date -u +%FT%TZ)"
-
+# Every >> append to LOG_FILE below relies on POSIX O_APPEND atomicity for
+# writes under PIPE_BUF (4096 bytes) to stay safe against concurrent sessions
+# logging at once; each invocation of this hook writes at most one record,
+# and each JSON line here is far short of that limit, so a single write(2)
+# per invocation is guaranteed not to interleave.
+log_record() {
+  local gate="$1"
   mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
-  # The >> append below relies on POSIX O_APPEND atomicity for writes under
-  # PIPE_BUF (4096 bytes) to stay safe against concurrent sessions logging at
-  # once; each JSON line here is far short of that, so a single write(2) per
-  # invocation is guaranteed not to interleave.
+  local ts
+  ts="$(date -u +%FT%TZ)"
   jq -cn \
-    --arg ts "$TS" \
+    --arg ts "$ts" \
     --arg sid "$SESSION_ID" \
     --arg tool "$TOOL_NAME" \
     --arg mode "$MODE" \
-    '{timestamp:$ts, session_id:$sid, tool_name:$tool, mode:$mode}' \
+    --arg gate "$gate" \
+    '{timestamp:$ts, session_id:$sid, tool_name:$tool, mode:$mode} + (if $gate == "" then {} else {gate:$gate} end)' \
     >>"$LOG_FILE" 2>/dev/null
+}
 
+emit_decision() {
+  local deny_reason="$1"
+  local nudge_context="$2"
   if [[ "$MODE" == "deny" ]]; then
-    REASON="bootstrap-gate: this session has not completed Skill(session-bootstrap) yet. Run Skill(session-bootstrap) before any other tool call."
     jq -cn \
-      --arg reason "$REASON" \
+      --arg reason "$deny_reason" \
       '{hookSpecificOutput:{hookEventName:"PreToolUse", permissionDecision:"deny", permissionDecisionReason:$reason}}'
   else
-    CONTEXT="[bootstrap-gate] This session has not completed Skill(session-bootstrap) yet. Run Skill(session-bootstrap) before continuing."
     jq -cn \
-      --arg context "$CONTEXT" \
+      --arg context "$nudge_context" \
       '{hookSpecificOutput:{hookEventName:"PreToolUse", additionalContext:$context}}'
   fi
+}
 
+# Bootstrap flag present and this isn't the call that clears it: this gate
+# alone decides, and the reload check below never runs.
+if [[ -f "$FLAG_FILE" && "$IS_BOOTSTRAP_SKILL_CALL" -ne 1 ]]; then
+  log_record ""
+  emit_decision \
+    "bootstrap-gate: this session has not completed Skill(session-bootstrap) yet. Run Skill(session-bootstrap) before any other tool call." \
+    "[bootstrap-gate] This session has not completed Skill(session-bootstrap) yet. Run Skill(session-bootstrap) before continuing."
   exit 0
 fi
 
@@ -128,41 +139,16 @@ case "$TOOL_NAME" in
 esac
 
 PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
-# A missing or unreadable file reads as empty (grep prints nothing), and an
-# all-blank file also reduces to empty here -- both fail open silently.
+# A missing or unreadable file reads as empty (grep prints nothing), and a
+# file with only empty lines also reduces to empty here -- both fail open
+# silently.
 PENDING_NAMES="$(grep -v '^$' -- "$PENDING_FILE" 2>/dev/null)"
 [[ -z "$PENDING_NAMES" ]] && exit 0
 
-NAMES_JOINED=""
-while IFS= read -r NAME; do
-  if [[ -z "$NAMES_JOINED" ]]; then
-    NAMES_JOINED="$NAME"
-  else
-    NAMES_JOINED="$NAMES_JOINED, $NAME"
-  fi
-done <<<"$PENDING_NAMES"
+NAMES_JOINED="${PENDING_NAMES//$'\n'/, }"
 NUM_NAMES="$(printf '%s\n' "$PENDING_NAMES" | grep -c '.')"
 
-TS="$(date -u +%FT%TZ)"
-mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
-jq -cn \
-  --arg ts "$TS" \
-  --arg sid "$SESSION_ID" \
-  --arg tool "$TOOL_NAME" \
-  --arg mode "$MODE" \
-  '{timestamp:$ts, session_id:$sid, tool_name:$tool, mode:$mode, gate:"reload"}' \
-  >>"$LOG_FILE" 2>/dev/null
-
 REASON="reload-gate: $NUM_NAMES skills loaded before the compaction are not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
-
-if [[ "$MODE" == "deny" ]]; then
-  jq -cn \
-    --arg reason "$REASON" \
-    '{hookSpecificOutput:{hookEventName:"PreToolUse", permissionDecision:"deny", permissionDecisionReason:$reason}}'
-else
-  jq -cn \
-    --arg context "$REASON" \
-    '{hookSpecificOutput:{hookEventName:"PreToolUse", additionalContext:$context}}'
-fi
-
+log_record "reload"
+emit_decision "$REASON" "$REASON"
 exit 0

@@ -63,9 +63,11 @@ fi
 RELOAD_PENDING_NAMES=""
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
   BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
-  # A session_id outside this charset (e.g. containing "/" or "..") could
+  # A session_id outside this charset (e.g. containing "/") could
   # traverse the flag path outside the state dir once concatenated below;
   # skip stamping rather than trust it.
+  # Every path built from the id appends it after a fixed file-name prefix, so
+  # an id without "/" stays in the state dir.
   if [[ -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
     BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
     if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then

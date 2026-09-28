@@ -1,23 +1,35 @@
 #!/usr/bin/env bash
 # PostToolUse hook (matcher Skill): bootstrap-gate-post.sh
 #
-# Clears one per-session pending flag once its matching skill completes:
-#   Skill(session-bootstrap) clears .bootstrap-pending-<session_id>, so
+# Every Skill call from the main session is recorded, one line per skill
+# name, in .skills-loaded-<session_id>, deduplicated by exact line match.
+# The same call also clears its name from the reload-pending list, if one
+# is pending:
+#   Skill(session-bootstrap) also clears .bootstrap-pending-<session_id>, so
 #     bootstrap-gate-pre.sh stops gating further tool calls in this session.
-#   Skill(honesty) clears .honesty-pending-<session_id>.
-#   Skill(communication) clears .communication-pending-<session_id>.
-# Any other Skill (or any other tool) is a no-op, and so is any call from a
-# subagent (a payload carrying agent_id): only the main-thread session
-# clears its own flags. Never blocks: always exits 0.
+#   Skill(honesty) also clears .honesty-pending-<session_id>.
+#   Skill(communication) also clears .communication-pending-<session_id>.
+# Any other Skill name is still recorded and still clears its own pending
+# entry, but maps to no flag file and is otherwise a no-op; any other tool
+# is a no-op. A call from a subagent (a payload carrying agent_id) is a
+# no-op before any state file is touched: only the main-thread session
+# records skills or clears its own flags. Never blocks: always exits 0.
 #
 # Fail-open philosophy: this hook NEVER exits nonzero. Missing jq, malformed
-# stdin, an unresolved state dir, an invalid session_id, or any other
-# ambiguity all resolve to a plain exit 0 (flag left untouched) rather than
-# blocking or guessing.
+# stdin, an unresolved state dir, an invalid session_id or skill name, or
+# any other ambiguity all resolve to a plain exit 0 (state left untouched)
+# rather than blocking or guessing.
 #
 # State dir resolution: ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}.
-# If neither variable is set, there is no safe place to look for the flag,
-# so this hook allows silently.
+# If neither variable is set, there is no safe place to read or write the
+# flag files, the loaded-skills list, or the pending list, so this hook
+# allows silently.
+#
+# Known race: two Skill calls running in parallel for the same session can
+# each read the pending list, rewrite it from that same original content,
+# and mv their own copy over it -- one call's removal can be overwritten by
+# the other's, so that skill's name can stay pending until it is invoked
+# again. No lock is taken to close this window.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook.
@@ -53,15 +65,6 @@ if [[ "$TOOL_NAME" != "Skill" ]]; then
   exit 0
 fi
 
-# Map the loaded skill to the flag name it clears. Any skill not in this
-# list is a no-op.
-case "$SKILL_NAME" in
-  session-bootstrap) FLAG_NAME="bootstrap" ;;
-  honesty) FLAG_NAME="honesty" ;;
-  communication) FLAG_NAME="communication" ;;
-  *) exit 0 ;;
-esac
-
 STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
 if [[ -z "$STATE_DIR" ]]; then
   if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
@@ -75,9 +78,51 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 [[ -z "$SESSION_ID" ]] && exit 0
 
 # A session_id outside this charset (e.g. containing "/" or "..") could
-# traverse FLAG_FILE outside STATE_DIR once concatenated below. State can't
-# be trusted for a hostile session_id, so fail open silently.
+# traverse the state file paths below once concatenated. State can't be
+# trusted for a hostile session_id, so fail open silently.
 [[ "$SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]] || exit 0
+
+# Record the skill and clear its own pending entry only for a name in this
+# same safe charset (an empty or malformed name -- e.g. a bare trailing
+# colon, or a slash from an untrusted skill field -- is left unrecorded).
+if [[ -n "$SKILL_NAME" && "$SKILL_NAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  LOADED_FILE="$STATE_DIR/.skills-loaded-$SESSION_ID"
+  if ! grep -qxF -- "$SKILL_NAME" "$LOADED_FILE" 2>/dev/null; then
+    printf '%s\n' "$SKILL_NAME" >>"$LOADED_FILE" 2>/dev/null
+  fi
+
+  PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
+  if [[ -f "$PENDING_FILE" ]]; then
+    TMP_FILE="$STATE_DIR/.reload-pending-$SESSION_ID.tmp.$$"
+    grep -vxF -- "$SKILL_NAME" "$PENDING_FILE" >"$TMP_FILE" 2>/dev/null
+    GREP_STATUS=$?
+    if [[ "$GREP_STATUS" -eq 0 ]]; then
+      # Some lines remain (not every line matched): replace the pending
+      # file with the filtered list.
+      mv -f -- "$TMP_FILE" "$PENDING_FILE" 2>/dev/null || rm -f -- "$TMP_FILE" 2>/dev/null
+    elif [[ "$GREP_STATUS" -eq 1 ]]; then
+      # grep exits 1 with empty output when every line matched -- the
+      # pending list is now empty, so drop both the temp file and the
+      # pending file itself rather than leaving an empty file behind.
+      rm -f -- "$TMP_FILE" "$PENDING_FILE" 2>/dev/null
+    else
+      # Any other status (e.g. 2: the pending file could not be read) is
+      # an error, not "now empty" -- leave the pending file untouched and
+      # only clean up the temp file, so an unreadable file never loses
+      # its remaining names.
+      rm -f -- "$TMP_FILE" 2>/dev/null
+    fi
+  fi
+fi
+
+# Map the loaded skill to the flag name it clears. Any skill not in this
+# list is a no-op past this point.
+case "$SKILL_NAME" in
+  session-bootstrap) FLAG_NAME="bootstrap" ;;
+  honesty) FLAG_NAME="honesty" ;;
+  communication) FLAG_NAME="communication" ;;
+  *) exit 0 ;;
+esac
 
 FLAG_FILE="$STATE_DIR/.$FLAG_NAME-pending-$SESSION_ID"
 rm -f -- "$FLAG_FILE" 2>/dev/null

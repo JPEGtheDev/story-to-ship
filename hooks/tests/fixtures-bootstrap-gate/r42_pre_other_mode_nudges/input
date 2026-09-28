@@ -1,0 +1,1 @@
+{"session_id":"sess-r42","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/tmp/x","old_string":"a","new_string":"b"}}

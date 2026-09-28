@@ -82,7 +82,8 @@
 #
 # State dir layout matches the bootstrap-gate contract: one pending flag per
 # session per tracked skill (session-bootstrap, honesty, communication), each
-# deleted independently when its own skill loads, plus the gate log:
+# deleted independently when its own skill loads, plus the gate log, the
+# loaded-skills list, and the reload-pending set:
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.honesty-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.communication-pending-<session_id>

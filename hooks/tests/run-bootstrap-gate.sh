@@ -65,6 +65,17 @@
 #                             support as pre_dirs/pre_files/expect_file_exists.
 #                             Uses -e, so anything at the path (a directory
 #                             too) counts as present.
+#   pre_content/            - directory; every file inside it (including
+#                             dotfiles) is copied into the state dir under
+#                             its own name BEFORE the hook runs. Used to
+#                             plant a state file with real content (e.g.
+#                             .skills-loaded-<session_id>), where pre_files'
+#                             empty-file semantics aren't enough.
+#   expect_content/         - directory; every file inside it (including
+#                             dotfiles) is compared byte-for-byte against the
+#                             file of the same name in the state dir AFTER
+#                             the hook runs. A missing state file or a byte
+#                             mismatch fails the case.
 #
 # State dir layout matches the bootstrap-gate contract: one pending flag per
 # session per tracked skill (session-bootstrap, honesty, communication), each
@@ -142,6 +153,8 @@ run_case() {
   local expect_flag_absent_file="$case_dir/expect_flag_absent"
   local expect_file_exists_file="$case_dir/expect_file_exists"
   local expect_file_absent_file="$case_dir/expect_file_absent"
+  local pre_content_dir="$case_dir/pre_content"
+  local expect_content_dir="$case_dir/expect_content"
 
   if [[ ! -f "$hook_file" ]]; then
     echo "FAIL: $name"
@@ -201,6 +214,18 @@ run_case() {
       [[ -z "$template" ]] && continue
       : >"$(resolve_token_path "$state_dir" "$template")"
     done <"$pre_files_file"
+  fi
+
+  # Copy content fixtures into the state dir, if requested (see pre_content
+  # in the contract comment above). Dotfiles included.
+  if [[ -d "$pre_content_dir" ]]; then
+    local content_file content_base
+    shopt -s dotglob nullglob
+    for content_file in "$pre_content_dir"/*; do
+      content_base="$(basename "$content_file")"
+      cp "$content_file" "$state_dir/$content_base"
+    done
+    shopt -u dotglob nullglob
   fi
 
   local expect_exit=0
@@ -345,6 +370,54 @@ run_case() {
         reasons+=("expected file to be absent: $resolved")
       fi
     done <"$expect_file_absent_file"
+  fi
+
+  # Compare content fixtures byte-for-byte against the state dir, if
+  # requested (see expect_content in the contract comment above).
+  if [[ -d "$expect_content_dir" ]]; then
+    local content_file content_base actual_content_file
+    shopt -s dotglob nullglob
+    for content_file in "$expect_content_dir"/*; do
+      content_base="$(basename "$content_file")"
+      actual_content_file="$state_dir/$content_base"
+      if [[ ! -f "$actual_content_file" ]]; then
+        ok=0
+        reasons+=("expected content file missing: $content_base")
+        continue
+      fi
+      if ! cmp -s "$content_file" "$actual_content_file"; then
+        ok=0
+        local diff_info
+        diff_info="$(awk -v actual="$actual_content_file" '
+          {
+            ln++
+            if ((getline line2 < actual) <= 0) line2 = ""
+            if ($0 != line2) {
+              print ln
+              print $0
+              print line2
+              found = 1
+              exit
+            }
+          }
+          END {
+            if (!found) {
+              if ((getline line2 < actual) > 0) {
+                print ln + 1
+                print ""
+                print line2
+              }
+            }
+          }
+        ' "$content_file")"
+        local diff_line diff_expected diff_actual
+        diff_line="$(sed -n '1p' <<<"$diff_info")"
+        diff_expected="$(sed -n '2p' <<<"$diff_info")"
+        diff_actual="$(sed -n '3p' <<<"$diff_info")"
+        reasons+=("content mismatch: $content_base line $diff_line: expected [$diff_expected] got [$diff_actual]")
+      fi
+    done
+    shopt -u dotglob nullglob
   fi
 
   if [[ "$ok" -eq 1 ]]; then

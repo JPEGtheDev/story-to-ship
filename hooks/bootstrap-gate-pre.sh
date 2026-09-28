@@ -68,7 +68,8 @@ SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 # A session_id outside this charset (e.g. containing "/") could
 # traverse FLAG_FILE outside STATE_DIR once concatenated below. State can't
 # be trusted for a hostile session_id, so fail open silently.
-# The id is only ever appended after a fixed file-name prefix, so an id without "/" stays in the state dir.
+# Every path built from the id appends it after a fixed file-name prefix, so
+# an id without "/" stays in the state dir.
 [[ "$SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]] || exit 0
 
 TOOL_NAME="$(printf '%s' "$RAW" | jq -r '.tool_name // empty' 2>/dev/null)"
@@ -150,10 +151,11 @@ NAMES_JOINED="${PENDING_NAMES//$'\n'/, }"
 NUM_NAMES="$(printf '%s\n' "$PENDING_NAMES" | grep -c '.')"
 
 if [[ "$NUM_NAMES" -eq 1 ]]; then
-  REASON="reload-gate: 1 skill loaded before the last compaction or resume is not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
+  SKILL_NOUN="skill" SKILL_VERB="is"
 else
-  REASON="reload-gate: $NUM_NAMES skills loaded before the last compaction or resume are not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
+  SKILL_NOUN="skills" SKILL_VERB="are"
 fi
+REASON="reload-gate: $NUM_NAMES $SKILL_NOUN loaded before the last compaction or resume $SKILL_VERB not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
 log_record "reload"
 emit_decision "$REASON" "$REASON"
 exit 0

@@ -100,7 +100,7 @@ Rules:
 Rules:
 - State fact, options, decision, next action. One line for a mechanical step; a paragraph only at a genuine fork, and it weighs the choice.
 - Delete any reasoning sentence that neither changes the next action nor records a fact needed later. The class is performative prose -- broader than any listed example.
-- This rule never licenses skipping a required check, hypothesis statement, Intent line, or tripwire question: those sentences change the next action and are always earned.
+- This rule never licenses skipping a required check, hypothesis statement, or tripwire question: those sentences change the next action and are always earned.
 - Self-check at generation time (the Red Flags entry below) is the enforcement mechanism, not a downstream gate -- no automated detector inspects reasoning before it is sent. Checkable surfaces: the postmortem reviewer's register-sampling row and the token trend against the recorded baseline.
 
 | Forbidden in reasoning | Replace with |

@@ -9,8 +9,8 @@ Reasoning tokens cost the same as output tokens. Strong models tend to prove
 sophistication through register: coined frameworks, grand principles, commentary
 on their own analysis. None of it changes the next action; all of it burns
 budget. The counter-pressure: some reflective sentences ARE the work -- a
-required tripwire self-check question, hypothesis statements in debugging, Intent
-lines in execution. A register rule that cannot tell the two apart converts a
+required tripwire self-check question, hypothesis statements in debugging.
+A register rule that cannot tell the two apart converts a
 token saving into a skipped gate. The rule therefore bans the performance class
 and explicitly protects every required check.
 
@@ -34,7 +34,7 @@ be written this way, the reasoning is at a genuine fork and earns its paragraph.
 - Governs reasoning only. Agents whose DELIVERABLE is prose (summarization,
   synthesis, claim enrichment) write the deliverable in whatever register the
   task demands; this rule never touches deliverable text.
-- Never licenses skipping a required check, hypothesis statement, Intent line,
+- Never licenses skipping a required check, hypothesis statement,
   or tripwire question.
 - Re-derivation is banned only while the original evidence is still in context
   (cite it instead). After compaction or resume the evidence is gone and

@@ -21,8 +21,15 @@
 # rather than blocking or guessing.
 #
 # State dir resolution: ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}.
-# If neither variable is set, there is no safe place to look for the flag,
-# so this hook allows silently.
+# If neither variable is set, there is no safe place to read or write the
+# flag files, the loaded-skills list, or the pending list, so this hook
+# allows silently.
+#
+# Known race: two Skill calls running in parallel for the same session can
+# each read the pending list, rewrite it from that same original content,
+# and mv their own copy over it -- one call's removal can be overwritten by
+# the other's, so that skill's name can stay pending until it is invoked
+# again. No lock is taken to close this window.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook.
@@ -87,13 +94,23 @@ if [[ -n "$SKILL_NAME" && "$SKILL_NAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
   PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
   if [[ -f "$PENDING_FILE" ]]; then
     TMP_FILE="$STATE_DIR/.reload-pending-$SESSION_ID.tmp.$$"
-    if grep -vxF -- "$SKILL_NAME" "$PENDING_FILE" >"$TMP_FILE" 2>/dev/null; then
-      mv -f -- "$TMP_FILE" "$PENDING_FILE" 2>/dev/null
-    else
+    grep -vxF -- "$SKILL_NAME" "$PENDING_FILE" >"$TMP_FILE" 2>/dev/null
+    GREP_STATUS=$?
+    if [[ "$GREP_STATUS" -eq 0 ]]; then
+      # Some lines remain (not every line matched): replace the pending
+      # file with the filtered list.
+      mv -f -- "$TMP_FILE" "$PENDING_FILE" 2>/dev/null || rm -f -- "$TMP_FILE" 2>/dev/null
+    elif [[ "$GREP_STATUS" -eq 1 ]]; then
       # grep exits 1 with empty output when every line matched -- the
       # pending list is now empty, so drop both the temp file and the
       # pending file itself rather than leaving an empty file behind.
       rm -f -- "$TMP_FILE" "$PENDING_FILE" 2>/dev/null
+    else
+      # Any other status (e.g. 2: the pending file could not be read) is
+      # an error, not "now empty" -- leave the pending file untouched and
+      # only clean up the temp file, so an unreadable file never loses
+      # its remaining names.
+      rm -f -- "$TMP_FILE" 2>/dev/null
     fi
   fi
 fi

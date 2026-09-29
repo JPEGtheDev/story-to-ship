@@ -153,13 +153,13 @@ without an OpenCode equivalent remain Claude Code-only.
 Installing this plugin adds:
 - 37 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 17 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
-- Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), and `PreToolUse`/`PostToolUse` (bootstrap-gate and workflow-model-guard checks)
+- Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.
 
 ### OpenCode adapter
 
-The repository doubles as an OpenCode plugin. `opencode.json` at the root declares the package (name, version, and a `runtime` field that satisfies OpenCode's `runtime`-or-`main` validation). `index.js` loads every `skills/<name>/SKILL.md`, strips the YAML frontmatter, and registers each as an OpenCode `skill()` tool whose description and instructions are sourced from the same files Claude Code uses, so both runtimes share one skill corpus. Claude-specific paths (`.claude/...`) in skill bodies are rewritten to OpenCode paths (`.opencode/...`) at load time. The `hooks/` system is not available in the OpenCode plugin API, so hook-only enforcement is Claude Code only.
+The repository doubles as an OpenCode plugin. The package entry point (`main` in `package.json`) is `opencode/plugin.ts`. It adds the bundled `skills/` directory to OpenCode's skill search paths, so both runtimes share one skill corpus, and it runs the shared hook scripts on OpenCode events: `session-start.sh` when a session is created or compacted, `pre-message-gates.sh` and `pre-message.sh` on each user message, `bootstrap-gate-pre.sh` before every tool call, `bootstrap-gate-post.sh` after each call to `skill` (OpenCode's name for the `Skill` tool), and `stop-turn-log.sh` when the session goes idle. The workflow model guard is a no-op there because OpenCode has no `Workflow` tool, and the shell-write and inline-edit guards run only under Claude Code.
 
 ## Repository Layout
 

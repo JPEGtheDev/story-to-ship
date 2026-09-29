@@ -1,2 +1,2 @@
 additionalContext
-reload-gate: 2 skills loaded before the compaction are not re-invoked yet: writing-plans, subagent-driven-development. Invoke each with the Skill tool, then retry.
+reload-gate: 2 skills loaded before the last compaction or resume are not re-invoked yet: writing-plans, subagent-driven-development. Invoke each with the Skill tool, then retry.

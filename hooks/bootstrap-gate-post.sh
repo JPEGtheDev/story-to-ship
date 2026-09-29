@@ -77,9 +77,11 @@ fi
 SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
 [[ -z "$SESSION_ID" ]] && exit 0
 
-# A session_id outside this charset (e.g. containing "/" or "..") could
+# A session_id outside this charset (e.g. containing "/") could
 # traverse the state file paths below once concatenated. State can't be
 # trusted for a hostile session_id, so fail open silently.
+# Every path built from the id appends it after a fixed file-name prefix, so
+# an id without "/" stays in the state dir.
 [[ "$SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]] || exit 0
 
 # Record the skill and clear its own pending entry only for a name in this

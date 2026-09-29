@@ -40,20 +40,6 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 ---
 
-## Canary
-
-When applying this skill, state this line in your response before each work-loop iteration's change -- before the implementer dispatch for that todo, or before your own first edit to a repo file when no dispatch applies:
-
-> `Intent: [what this change does in one sentence] -- proven by [the command or check that will verify it]`
-
-This canary is the coordinator's (the agent running the work loop). Implementer dispatch prompts and `agents/implementer.md` do not carry it; the implementer's canary is its `Worktree:` line, checked by the `two-stage-review` skill.
-
-This is the observable signal that the PPP (Plain Programmer's Purpose) gate (Work Loop step 2) and the verification-method requirement (BEFORE PROCEEDING item 6) were executed, not skipped. A postmortem reviewer checks the raw transcript (the session's JSONL file, not the events log converted from it) for this line: an implementer dispatch without its own `Intent:` line earlier in the same reply, or a coordinator edit to a repo file with no `Intent:` line earlier in that reply, is a skipped gate, reported as a finding. A reply is everything the agent outputs from one incoming message (a user prompt, a message from another session such as a background subagent's hand-back, or a background-task notification) to the next; a tool result, including a foreground subagent's return, does not start a new reply.
-
-**Note:** The canary raises the cost of skipping for a compliant agent -- it is not cryptographically bound to execution.
-
----
-
 ## Core Principles
 
 - **Keep It Simple:** Straightforward approach first. Introduce abstraction only when it pays for itself.

@@ -100,13 +100,18 @@ threshold on the postmortem-reviewer template's Correction-source audit row: the
 externally-caught / (self-caught + externally-caught). The threshold is 0.75, the ratio the Standard
 tier scored on its own multi-todo session, unless a stored preference for this threshold sets
 another value. The postmortem of each scored session records the session id, the coordinator model,
-and the two counts; that record is the evidence for the move.
+and the two counts; that record is the evidence for the move. A scored session is evidence for the
+model version that ran it (the transcript model field value; a new value behind the same tier name
+is a new version), not for the tier: a ratio measures one model's calibration, and the next model
+behind the same tier name can score differently, so when the model behind a tier changes, the tier
+counts as unscored for a move until a multi-todo session on the new version is scored. The earlier
+version's eligibility does not carry over; the threshold value does.
 
-Scored sessions, one line each, appended as each session is scored (never replaced, so the section is the record of every scored session):
+Scored sessions, one line each, appended as each session is scored (never replaced, so the section is the record of every scored session; each entry names the model version that ran it, and an entry that names only a tier resolves to the coordinator model its postmortem recorded):
 - Standard tier, multi-todo session: 0.75 -- the threshold.
-- Premium tier, six-item plan of skill-file edits: 0.47 (7 externally-caught of 15), zero corrections raised by the user, every external catch a dispatch-prompt verification command that could not fire as claimed. At or under the threshold, so the tier is eligible to coordinate; the coordinator still runs at the tier the stored preference names until the user changes that preference.
+- Premium tier, six-item plan of skill-file edits: 0.47 (7 externally-caught of 15), zero corrections raised by the user, every external catch a dispatch-prompt verification command that could not fire as claimed. At or under the threshold, so that model version is eligible to coordinate; the coordinator still runs at the tier the stored preference names until the user changes that preference.
 
-**Enforcement is procedural/self-check:** the checkable signal is a multi-todo session whose
-transcript model field (the per-message model value on assistant messages) is a tier with no
-recorded passing session; the Correction-source audit row produces the score after the fact. No
-live detector exists.
+**Enforcement is procedural/self-check:** the checkable signal is a multi-todo
+session, coordinated at a tier other than the stored preference, whose transcript model field (the
+per-message model value on assistant messages) is a model version with no recorded passing session;
+the Correction-source audit row produces the score after the fact. No live detector exists.

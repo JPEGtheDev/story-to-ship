@@ -16,7 +16,7 @@ def _extract_json_blocks(text):
 
 
 class JudgePromptTest(unittest.TestCase):
-    """Content-level checks on the pinned judge prompt (judge_prompt.md).
+    """Content-level checks on the judge prompt (judge_prompt.md).
 
     These assert on the actual meaning of the prompt text, not on bare
     section-header presence, so a prompt that has the right headings but
@@ -27,7 +27,7 @@ class JudgePromptTest(unittest.TestCase):
     def setUpClass(cls):
         cls.text = _read_prompt()
 
-    def test_model_line_pins_sonnet_or_higher(self):
+    def test_model_line_names_sonnet_or_higher(self):
         first_line = self.text.splitlines()[0]
         self.assertTrue(
             first_line.startswith("model:"),
@@ -35,8 +35,8 @@ class JudgePromptTest(unittest.TestCase):
         )
         self.assertRegex(
             first_line,
-            r"claude-(sonnet|opus)",
-            "model: line must pin a Sonnet-or-higher model id",
+            r"^model:\s*(claude-)?(sonnet|opus)\b",
+            "model: line must name a Sonnet-or-higher tier alias or model id",
         )
 
     def test_verdict_class_covers_all_three_claim_kinds(self):

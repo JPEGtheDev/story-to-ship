@@ -35,8 +35,8 @@ class JudgePromptTest(unittest.TestCase):
         )
         self.assertRegex(
             first_line,
-            r"claude-(sonnet|opus)",
-            "model: line must pin a Sonnet-or-higher model id",
+            r"^model:\s*(claude-)?(sonnet|opus)\b",
+            "model: line must name a Sonnet-or-higher tier alias or model id",
         )
 
     def test_verdict_class_covers_all_three_claim_kinds(self):

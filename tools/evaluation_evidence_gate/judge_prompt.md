@@ -1,4 +1,4 @@
-model: claude-sonnet-5
+model: sonnet
 
 # Evaluation-Evidence-Gate Judge Prompt
 

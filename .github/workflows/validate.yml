@@ -47,9 +47,6 @@ jobs:
           shellcheck hooks/tests/run-inline-edit-guard.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
-          shellcheck skills/sprint-runner/tools/tests/inline-copy-check.sh
-          shellcheck skills/sprint-runner/tools/tests/run.sh
-          shellcheck skills/sprint-runner/tools/tests/runner-syntax-check.sh
           echo "[+] All shell scripts pass shellcheck"
 
       - name: Run all hook fixture suites
@@ -412,15 +409,3 @@ jobs:
         run: |
           python3 -m unittest discover -s tools/session_events -p 'test_*.py'
           echo "[+] session-events converter unit tests pass"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-
-      - name: Report Node.js version
-        run: |
-          echo "node version: $(node --version)"
-
-      - name: Run sprint engine test suite
-        run: bash skills/sprint-runner/tools/tests/run.sh

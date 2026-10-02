@@ -208,6 +208,8 @@ jobs:
           check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
           check skills/two-stage-review/SKILL.md "SPEC COMPLIANCE FIRST, THEN CODE QUALITY" "{{IMPLEMENTER_EVIDENCE}}" "Adversarial scenario tested" "Canary confirmed"
+          check skills/two-stage-review/SKILL.md "A Stage 1 or Stage 2 result whose verdict is missing, or is not one of the verdict values that reviewer's template defines, counts as not passed."
+          check skills/two-stage-review/SKILL.md "After 3 fix rounds on one todo without both stages passing, stop that todo and end the turn with a prompt to the owner that states the open findings."
           check skills/honesty/SKILL.md "buried caveat"
           check skills/honesty/SKILL.md "Self-blame needs the same evidence bar"
           check skills/honesty/SKILL.md "consent-class action"

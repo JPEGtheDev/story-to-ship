@@ -228,6 +228,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 ## Red Flags -- STOP
 
 - Code or file edits before Step 0 (restate requirements) is complete -- **STOP. Do Step 0 now.**
+- Plan file holds an `[UNCLEAR:]` marker and also says requirements are clear, nothing is unclear, or Discovery or clarification is not needed -- **STOP. The plan contradicts itself. Resolve every `[UNCLEAR:]` marker (ask the owner, or run Discovery) before presenting the plan.**
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**

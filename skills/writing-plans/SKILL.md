@@ -247,4 +247,4 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 
 ## References
 
-- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks: `references/SIMPLICITY_PRINCIPLES.md`
+- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks, gate rationale: `references/SIMPLICITY_PRINCIPLES.md`

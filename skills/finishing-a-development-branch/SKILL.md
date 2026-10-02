@@ -95,6 +95,18 @@ Before writing the PR, answer:
 6. **Does any changed file ship to an execution context other than this authoring repo -- a plugin install, a package, a published doc?**
    If so, re-read that file from the consumer's seat before the PR opens: does every path, deictic phrase ("this repo", "here"), and invocation instruction still resolve where the reader actually sits? Cross-file consistency reviews do not check reader context -- this is a structural blind spot, so treat it as a standing audit dimension, not a per-incident fix.
 
+7. **Does the drafted PR body state that the owner approved, confirmed, or chose anything?**
+   List such sentences:
+   `grep -nEi '(owner|user)[^.]{0,60}(approved|confirmed|chose|picked|signed off|ruled)|(approved|confirmed|chosen|signed off) by the (owner|user)' "$PR_BODY_FILE"`
+   Compare each listed sentence against the content of the owner message that did so (find it in this conversation, or in the session transcript file after a compaction; a bare "approve all" means the list it pointed at): every item the sentence says was approved appears in that message, word for word or in plain paraphrase. Text written after that message is labelled in the body as added after approval. If the message cannot be found, delete the sentence or ask the owner to confirm it. A claim of approval over text the owner has not seen is fixed before the PR goes up.
+
+8. **Does the plan file promise an item for the PR body that the drafted body lacks?**
+   List the promises, run from the worktree root:
+   `grep -nEi 'PR[ -]body|pull request body|PR description' plan.md`
+   Then, for each listed line, take a distinctive phrase of the item it promises and count it in the body:
+   `grep -cF -- "<phrase>" "$PR_BODY_FILE"`
+   A count of 0 means the promise is missing. Every promised item is found in the drafted body file before gh pr create runs; a missing one is added to the body, or the promise is struck from the plan and the owner is told why.
+
 ---
 
 ## Step 3: Commit Cleanup
@@ -190,3 +202,5 @@ See `versioning` skill for conventional commit rules.
 - Closing a branch with OPEN acceptance criteria and no tracking issue
 - Pushing to open a PR without reading the full diff (`git diff main...HEAD`) line by line
 - "I'll skip the post-merge cleanup -- branches and worktrees can wait" -- **STOP. Delete the branch, close linked issues, and prune worktrees immediately after merging.**
+- Opening a PR whose body says the owner approved text the owner has not seen -- **STOP. Match each approval claim to the owner message that made it (Step 2, item 7) and label text added after it.**
+- Opening a PR with an item the plan promised for the body missing from it -- **STOP. List the promises and find each one in the drafted body file (Step 2, item 8) before gh pr create.**

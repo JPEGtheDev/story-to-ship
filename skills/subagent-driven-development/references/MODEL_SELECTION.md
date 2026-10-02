@@ -110,6 +110,7 @@ version's eligibility does not carry over; the threshold value does.
 Scored sessions, one line each, appended as each session is scored (never replaced, so the section is the record of every scored session; each entry names the model version that ran it, and an entry that names only a tier resolves to the coordinator model its postmortem recorded):
 - Standard tier, multi-todo session: 0.75 -- the threshold.
 - Premium tier, six-item plan of skill-file edits: 0.47 (7 externally-caught of 15), zero corrections raised by the user, every external catch a dispatch-prompt verification command that could not fire as claimed. At or under the threshold, so that model version is eligible to coordinate; the coordinator still runs at the tier the stored preference names until the user changes that preference.
+- claude-sonnet-5-5 at effort high, two-todo plan of skill-rule edits (one skill file plus one CI contract line), one fix round: 0.40 (2 externally-caught of 5), both external catches raised by dispatched reviewers (a Stage 2 NEEDS WORK and an implementer concern), zero corrections raised by the user. Under the threshold, so that model version is eligible to coordinate; the coordinator still runs at the tier the stored preference names until the user changes that preference.
 
 **Enforcement is procedural/self-check:** the checkable signal is a multi-todo
 session, coordinated at a tier other than the stored preference, whose transcript model field (the

@@ -78,7 +78,6 @@ without an OpenCode equivalent remain Claude Code-only.
 | `subagent-driven-development` | Delegation protocol for dispatching subagents |
 | `two-stage-review` | Mandatory 2-stage post-todo review (spec compliance, then quality) |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
-| `sprint-runner` | Multi-agent pipeline run from a declared, replayable JSON spec |
 | `using-git-worktrees` | Parallel agent isolation via git worktrees |
 
 ### Testing and Verification
@@ -151,7 +150,7 @@ without an OpenCode equivalent remain Claude Code-only.
 ## How It Works
 
 Installing this plugin adds:
-- 37 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 36 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 17 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 

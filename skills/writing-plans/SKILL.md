@@ -60,7 +60,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 4. Sanity-check: does the plan address every acceptance criterion?
 5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
-7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval. A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
+7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval.
 8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates also include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
 
 ### No-Placeholder Rule
@@ -128,7 +128,7 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 [+] All 5 questions answered with no gaps -> proceed to review gate or implementation
 [-] Any unanswered question or revealed gap -> stop, revise the plan, then re-run the gate
 
-**For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan. A feature with invisible async state has no failure-diagnosis path.
+**For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan.
 
 For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. The routing depends on whether Discovery ran:
 
@@ -228,6 +228,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 ## Red Flags -- STOP
 
 - Code or file edits before Step 0 (restate requirements) is complete -- **STOP. Do Step 0 now.**
+- Plan file holds an `[UNCLEAR:]` marker and also says requirements are clear, nothing is unclear, or Discovery or clarification is not needed -- **STOP. The plan contradicts itself. Resolve every `[UNCLEAR:]` marker (ask the owner, or run Discovery) before presenting the plan.**
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
@@ -247,4 +248,4 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 
 ## References
 
-- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks: `references/SIMPLICITY_PRINCIPLES.md`
+- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks, gate rationale: `references/SIMPLICITY_PRINCIPLES.md`

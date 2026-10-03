@@ -1,0 +1,1 @@
+three identical rows count once: the guard registered twice writes each row twice, and the third row is there so a reader that only collapses pairs (counting 12) is caught; 6 plus this edit 4 equals the cap of 10 and is allowed; counted more than once it would be denied

@@ -1,0 +1,1 @@
+identical rows that are not next to each other are separate edits: a row for another file sits between the two doc.md rows, so all three count and doc.md has 6 plus this edit 5, over the cap of 10; a reader that dedups against any earlier identical row, or against the previous row of the same file, would count 3 and allow it

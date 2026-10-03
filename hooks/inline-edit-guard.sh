@@ -36,7 +36,9 @@
 # lines per file, and INLINE_EDIT_SESSION_MAX (default 30) changed lines
 # for the whole session, both tracked in a per-session ledger,
 # <state dir>/.inline-edit-ledger-<session_id>.jsonl, appended to on every
-# counted (allowed, non-exempt) edit. A denied edit is never appended. A
+# counted (allowed, non-exempt) edit. A denied edit is never appended. The
+# ledger reader counts a row once when it repeats the previous row exactly
+# (same path, lines and timestamp); see the residuals below. A
 # third override, INLINE_EDIT_PROSE_EXTENSIONS (default "md txt", space
 # separated, no leading dots, compared case-insensitively), controls which
 # extensions are treated as prose; anything else is denied and pointed at
@@ -67,6 +69,21 @@
 # from the shell, emptying or rewriting it (from the shell or with the
 # Write or Edit tool), or making it unreadable lowers the running totals
 # or resets them to zero.
+# In a checkout where the guard is registered by both the plugin
+# configuration (hooks/hooks.json) and the local configuration
+# (.claude/settings.json), each edit normally runs two instances of this
+# hook and writes its ledger row twice; the reader counts such a repeated
+# row once. It skips a row only when the row is identical in path, lines
+# and timestamp (one-second resolution) to the previous valid row (a valid
+# row is one the reader's checks do not skip as blank, malformed, not a
+# JSON object, or with a bad path or line count), so: (a) two separate
+# edits of the same file with the same number of changed lines in the same
+# second also count once; (b) repeated rows that are not next to each
+# other, or whose timestamps fall in different seconds, still count twice;
+# and (c) an instance that reads the ledger after the other instance has
+# already written its row for the same edit counts that row, which no
+# reader rule can remove. This also assumes the two instances run at about
+# the same time.
 
 # Guard against a TTY, and bound the read with timeout, so a manual or
 # misbehaving invocation can never hang the hook. Mirrors
@@ -199,6 +216,7 @@ def load_ledger(ledger_path, real):
             lines = f.read().splitlines()
     except OSError:
         return 0, 0
+    previous = None
     for line in lines:
         line = line.strip()
         if not line:
@@ -215,6 +233,10 @@ def load_ledger(ledger_path, real):
             continue
         if n < 0:
             continue
+        row = (path, n, entry.get("ts"))
+        if row == previous:
+            continue
+        previous = row
         session += n
         if path == real:
             per_file += n

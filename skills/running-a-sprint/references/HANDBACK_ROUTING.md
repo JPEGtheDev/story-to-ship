@@ -28,7 +28,8 @@ Check these before acting on any hand-back:
 - The first line is a kind line naming one of the five kinds: owner question, PR ready, blocked, cap reached, interim.
 - A Limitations: line is present.
 - Once planning started, a Discovery line whose value is exactly "Discovery: ran" or "Discovery: skipped: issue carries a Feature Specification"; any other value counts as a missing line.
-- When a pull request exists: the pull request number, the CI state, the review verdicts, and the reloaded skills.
+- The reloaded skills are listed.
+- When a pull request exists: the pull request number, the CI state and the review verdicts; when none exists, these three are absent.
 - An owner question carries options and a recommendation.
 - A cap reached hand-back states the open findings.
 - The inline-edit count: compare the plan's lane entries with git diff --numstat over the runner's inline commits (a replaced line counts 2), and report a mismatch to the owner.

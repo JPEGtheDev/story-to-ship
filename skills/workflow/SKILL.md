@@ -112,5 +112,5 @@ For concrete workflow examples and patterns, see [references/WORKFLOW_EXAMPLES.m
 ## Related Skills
 
 - `finishing-a-development-branch` -- merge-gate coordination; workflow rules apply at merge
-- `infrastructure-review` -- reviews changed CI/CD files for compliance with these pipeline rules
+- `infrastructure-review` -- reviews changed CI/CD (continuous integration and continuous delivery) files for compliance with these pipeline rules
 - `visual-regression-testing` -- owns the visual regression workflow job configuration

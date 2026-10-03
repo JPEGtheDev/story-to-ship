@@ -60,7 +60,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Finishing / closing a branch                 | `finishing-a-development-branch`                   |
 | Requesting code review                       | `requesting-code-review`                           |
 | Receiving code review feedback               | `receiving-code-review`                            |
-| CI/CD (Continuous Delivery) or workflow changes | `workflow`                                         |
+| CI/CD (continuous integration and continuous delivery) or workflow changes | `workflow`                                         |
 | Writing or editing documentation             | `documentation`                                    |
 | Bug fixes or error resolution                | `execution`, `systematic-debugging`                |
 | Any failure or unexpected behavior           | `systematic-debugging`, `verification-before-completion` |

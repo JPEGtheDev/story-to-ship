@@ -1,7 +1,7 @@
 ---
 name: infrastructure-review
 license: MIT
-description: Use when adding CI/CD workflows, modifying build configuration, or updating sandboxed/packaging manifests.
+description: Use when adding CI/CD (continuous integration and continuous delivery) workflows, modifying build configuration, or updating sandboxed/packaging manifests.
 ---
 
 
@@ -35,7 +35,7 @@ Before reviewing any infrastructure change:
 
 ## Review Areas
 
-### 1. CI/CD (Continuous Delivery) Pipeline Checks
+### 1. CI/CD (continuous integration and continuous delivery) Pipeline Checks
 
 Run every item for each changed `.github/workflows/*.yml` file:
 

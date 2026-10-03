@@ -160,11 +160,11 @@ preference if it is a defect.
 ## Red Flags -- STOP
 
 - If you have read any PR comment and have not yet invoked this skill: **STOP. Load the skill NOW. Work done before loading the skill is unverified by the skill's gates.**
-- Dismissing feedback without investigation
-- Responding to feedback with "that's out of scope"
-- Closing a comment without addressing it or explicitly deferring it with a tracking issue
-- Treating approval as permission to skip the fix list
-- Implementing a fix without re-running tests
+- Dismissing feedback without investigation -- **STOP.** Reproduce the concern (Processing Feedback, step 2), then categorize it and reply on the thread with what the check found and the action its category row prescribes. For the user's comment, propose that action.
+- Responding to feedback with "that's out of scope" -- **STOP.** Re-categorize the comment in Processing Feedback, and reply with the action its category row prescribes. For the user's comment, propose that action on the thread.
+- Closing a comment without addressing it or explicitly deferring it with a tracking issue -- **STOP.** Reopen the thread and meet the Definition of "Addressed": for a must-fix comment, the committed change plus a reply stating what was done; otherwise the reply, with a tracking issue link for a deferral. For the user's comment, reply with the proposal and leave it open.
+- Treating approval as permission to skip the fix list -- **STOP.** Go back through every comment, categorize it (Processing Feedback), and post the Responding to Comments reply; an approval does not waive the Iron Law. For the user's comment, the reply is the proposal (User Review Comments).
+- Implementing a fix without re-running tests -- **STOP.** Run the full test suite fresh (`verification-before-completion`) and paste the result in the thread reply before calling the fix addressed. A user's comment gets the proposal first, with no fix until they answer.
 - User review comment read, and a fix commit or an implementer dispatch is about to land in this
   same turn -- **STOP. Reply with the check, the assessment, and the proposal; end the turn; fix
   after the user answers.**

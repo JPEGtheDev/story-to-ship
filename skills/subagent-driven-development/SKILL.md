@@ -71,7 +71,7 @@ These thoughts mean stop immediately:
 | Thought | Required action |
 |---------|----------------|
 | "I think the issue is..." | Dispatch explore agent -> read the actual code |
-| "I dispatched a subagent -- I'll also work on this while waiting" | STOP. The only permissible next call is read_agent. "I'll wait" is a binding constraint, not a statement of intent. |
+| "I dispatched a subagent -- I'll also work on this while waiting" | STOP. The only permissible next action is waiting for the completion notification. "I'll wait" is a binding constraint, not a statement of intent. |
 | "This should work because..." | Run it. Read the output. |
 | "I'm confident that..." | State the evidence, or dispatch to get it |
 | "It probably passes..." | Run the test suite |

@@ -16,7 +16,7 @@ mirrored in the row.
 | `code-quality-reviewer.md` | Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards. | opus |
 | `explorer.md` | Use for read-only multi-file research to answer specific questions. | sonnet |
 | `implementer.md` | Use when implementing a feature task in a git worktree. | sonnet |
-| `infrastructure-reviewer.md` | Use for per-file CI/CD, reproducible build, and sandboxed/packaging compliance review. | sonnet |
+| `infrastructure-reviewer.md` | Use for per-file CI/CD (continuous integration and continuous delivery), reproducible build, and sandboxed/packaging compliance review. | sonnet |
 | `plan-reviewer.md` | Use when reviewing a plan for soundness, sequencing, and enforceability before implementation begins. | sonnet |
 | `postmortem-reviewer.md` | Use when reviewing a completed agent session retrospective. | sonnet |
 | `rehearsal-subject.md` | Use when an agent must act as the coordinator under test in a behavioral rehearsal of skill or agent text. | sonnet |

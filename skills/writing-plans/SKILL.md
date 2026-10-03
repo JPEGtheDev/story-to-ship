@@ -61,7 +61,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
 7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval.
-8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates also include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
+8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
 
 ### No-Placeholder Rule
 
@@ -162,7 +162,7 @@ Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` te
 
 ### Review-Round Cap
 
-Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan length exceeds the length of the file(s) it edits, switch the review surface from plan prose to the actual diff: implement, then review the diff. Do not add more plan-review rounds.
+Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan length exceeds the length of the file(s) it edits, switch the review surface from plan prose to the diff: implement, then review the diff. Do not add more plan-review rounds.
 
 **Self-feeding detector:** a blocking finding located in text written in answer to the previous round -- not in the original plan -- is a manufactured defect. Treat it as the stop signal, not as something to fix with more prose. "Rounds keep finding real defects" and "the review must stop" can both be true at once; the fix is switching surfaces, not adding rounds.
 
@@ -172,7 +172,7 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 
 ### Untriggered-Branch Cap
 
-If a DoD-specified behavioral branch has had N>=2 fixture attempts that all resolved without triggering it: the next attempt must be a structural redesign (>=5 changed lines vs the prior fixture, measured by diff and pasted), OR the plan escalates to an explicit user ruling quoted in the PR body. Cosmetic retries (<5 changed lines) do not increment the attempt count. Disclosure prose alone cannot close the branch. The comparison baseline is the last attempt that incremented the count (the first fixture, when none has) -- cosmetic retries do not move the baseline.
+If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture attempts that all resolved without triggering it: the next attempt must be a structural redesign (>=5 changed lines vs the prior fixture, measured by diff and pasted), OR the plan escalates to an explicit user ruling quoted in the PR body. Cosmetic retries (<5 changed lines) do not increment the attempt count. Disclosure prose alone cannot close the branch. The comparison baseline is the last attempt that incremented the count (the first fixture, when none has) -- cosmetic retries do not move the baseline.
 
 **Enforcement is procedural/self-check:** successive-fixture diffs and their changed-line counts are pasted artifacts a reviewer can recount; the user ruling, when taken, is quoted in the PR body. No automated detector exists.
 
@@ -220,7 +220,7 @@ If a DoD-specified behavioral branch has had N>=2 fixture attempts that all reso
 
 - If a plan covers multiple independent subsystems, split into one plan per subsystem
 - Each plan MUST produce working, testable software on its own
-- Realism check: can this be completed and verified in this session? If not, commit to the verifiable portion only. State the remainder as a separate commitment explicitly.
+- Realism check: can this be completed and verified in this session? If not, commit to the verifiable portion only. State the remainder as a separate commitment.
 - An over-committed partial delivery is worse than a smaller honest delivery.
 
 ---

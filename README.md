@@ -142,6 +142,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
 | `rehearsal-subject` | Coordinator under test in a behavioral rehearsal of skill or agent text |
+| `story-coordinator` | One story issue run end to end as a coordinator subagent: plan, child dispatches, two-stage review, pull request, hand-back |
 | `summarization-method` | One of three parallel summarization methods -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |
@@ -151,7 +152,7 @@ without an OpenCode equivalent remain Claude Code-only.
 
 Installing this plugin adds:
 - 36 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
-- 17 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
+- 18 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 
 Skills load on demand. The hooks enforce behavioral standards across all sessions without injecting all skill content at startup. The Iron Laws -- TDD gate, evidence gate, root-cause gate, ceremony gates -- are always active. This repo's own dogfood config, `.claude/settings.json`, additionally registers a `Stop` hook that logs each turn.

@@ -32,7 +32,7 @@ Check these before acting on any hand-back:
 - When a pull request exists: the pull request number, the CI state and the review verdicts; when none exists, these three are absent.
 - An owner question carries options and a recommendation.
 - A cap reached hand-back states the open findings.
-- The inline-edit count: compare the plan's lane entries with git diff --numstat over the runner's inline commits (a replaced line counts 2), and report a mismatch to the owner.
+- The inline-edit count: a runner cannot read the inline-edit guard's ledger, so compare the lane entries in its plan file (each todo's record of its route, written as lane: dispatch or lane: inline, with a line count and a file name) with git diff --numstat over the runner's inline commits (a replaced line counts 2), and report a mismatch to the owner.
 
 ## Resume texts
 

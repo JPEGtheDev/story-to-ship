@@ -49,7 +49,9 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 - The hand-back text is the deliverable; never write a report file, since the harness may refuse it.
 - Every number in a hand-back is pasted from a command run in that same turn.
+- The inline-edit guard exempts every subagent call and neither counts nor denies its edits, so before each inline edit apply the Inline lane caps of the subagent-driven-development skill yourself: this story's running inline-edit count in that file plus this edit's lines must stay within that skill's file cap and story total cap, otherwise the edit goes to an implementer.
 - A subagent cannot read the inline-edit guard's ledger, so take the inline-edit count from git diff: commit each inline edit as its own commit, then sum the added plus deleted lines from `git -C <feature worktree> diff --numstat <inline commit>^ <inline commit> -- <file>` over the inline commits only (a replaced line is one deleted plus one added, so it counts 2, as the plan entry counts it).
+- Record each inline commit's hash in the todo's plan entry next to its `lane: inline <n> lines in <file>` clause, so the inline commits survive a compaction.
 - Compare that sum with the `<n>` in the todo's `lane: inline <n> lines in <file>` entry, and on a mismatch report both numbers in the hand-back.
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim.
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.

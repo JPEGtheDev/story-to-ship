@@ -71,9 +71,9 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 - About to write a destructor that can throw -- **STOP. Wrap the entire body in try/catch. Never rethrow.**
 - Constructor acquires two or more resources without scope-bound guards between each acquisition -- **STOP. Assign each resource to its own guard before the next `new` or open call.**
-- About to use raw `delete` instead of a scope-bound guard -- **STOP. Replace with `unique_ptr` or a custom RAII wrapper.**
+- About to use raw `delete` instead of a scope-bound guard -- **STOP. Replace with `unique_ptr` or a custom Resource Acquisition Is Initialization (RAII) wrapper.**
 - "This resource is always released before the destructor runs" -- **STOP. Prove it structurally with a guard, not by argument.**
-- Class owns handles (file, socket, GL buffer) with no custom destructor or deleter -- **STOP. Every owned resource needs a defined release path.**
+- Class owns handles (file, socket, OpenGL buffer) with no custom destructor or deleter -- **STOP. Every owned resource needs a defined release path.**
 
 ---
 

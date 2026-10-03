@@ -1,7 +1,7 @@
 ---
 name: cpp-patterns
 license: MIT
-description: Use when implementing C++ code, handling GL resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
+description: Use when implementing C++ code, handling OpenGL (GL) resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
 ---
 
 
@@ -48,7 +48,7 @@ When writing C++ code for this project, apply these patterns consistently.
 
 ## Error Handling
 
-- Check return values from OpenGL and file I/O operations
+- Check return values from OpenGL and file input/output operations
 - Log errors to console with descriptive messages
 - Use assertions for preconditions and invariants
 - Open binary data files with `"rb"` mode for cross-platform correctness

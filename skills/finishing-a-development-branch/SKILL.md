@@ -196,11 +196,11 @@ See `versioning` skill for conventional commit rules.
 
 ## Red Flags -- STOP
 
-- Opening a PR with failing tests
-- Squashing commits without reading the resulting diff
-- Merging without checking CI on main after merge
-- Closing a branch with OPEN acceptance criteria and no tracking issue
-- Pushing to open a PR without reading the full diff (`git diff main...HEAD`) line by line
+- Opening a PR with failing tests -- **STOP.** Run the Step 1 Verification Gate; open the PR only when all four checks pass.
+- Squashing commits without reading the resulting diff -- **STOP.** Run `git diff main...HEAD` (Step 2 Branch Audit, item 3) and read the squashed diff, then run `git show --stat <commit>` (Step 3 Commit Cleanup, item 3) for each commit the squash produced to confirm it lists exactly the files you intended.
+- Merging without checking CI on main after merge -- **STOP.** Verify the merge commit built green on main (Step 5 After Merge, item 3).
+- Closing a branch with OPEN acceptance criteria and no tracking issue -- **STOP.** Deliver each criterion or file a tracking issue (Step 2 Branch Audit, item 1).
+- Pushing to open a PR without reading the full diff (`git diff main...HEAD`) line by line -- **STOP.** Run `git diff main...HEAD` and read every line (Step 2 Branch Audit, item 3) before pushing.
 - "I'll skip the post-merge cleanup -- branches and worktrees can wait" -- **STOP. Delete the branch, close linked issues, and prune worktrees immediately after merging.**
 - Opening a PR whose body says the owner approved text the owner has not seen -- **STOP. Match each approval claim to the owner message that made it (Step 2, item 7) and label text added after it.**
 - Opening a PR with an item the plan promised for the body missing from it -- **STOP. List the promises and find each one in the drafted body file (Step 2, item 8) before gh pr create.**

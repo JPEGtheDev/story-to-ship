@@ -1,6 +1,6 @@
 ---
 title: "oop-principles References Index"
-description: "Index of all reference files for the oop-principles skill -- OOP patterns and anti-patterns for class hierarchy and interface design, plus the Design by Contract discipline for precondition/postcondition/invariant responsibility and its tie to Liskov substitution."
+description: "Index of all reference files for the oop-principles skill -- Object-Oriented Programming patterns and anti-patterns for class hierarchy and interface design, plus the Design by Contract discipline for precondition/postcondition/invariant responsibility and its tie to Liskov substitution."
 domain: skills
 subdomain: oop-principles
 tags: [skills, oop-principles, references, index]

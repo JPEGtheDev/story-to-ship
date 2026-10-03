@@ -1,4 +1,4 @@
-# OOP Principles Reference
+# Object-Oriented Programming Principles Reference
 
 Source: Ward Cunningham's C2 wiki audit -- patterns applicable to class hierarchy and interface design.
 

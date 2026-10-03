@@ -36,7 +36,7 @@ INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, ICacheTest, CacheImpls);
 
 ## Two-Phase Composite Operation
 
-Validate all children before executing any. See the `cpp-patterns` skill for the full C++ example of Two-Phase Composite for GL State Safety.
+Validate all children before executing any. See the `cpp-patterns` skill for the full C++ example of Two-Phase Composite for OpenGL (GL) State Safety.
 
 Behavioral contract angle: `validate()` must be idempotent and free of side effects. If validation raises an error, no execution has occurred -- the system is in its original state. Test `validate()` and `execute()` independently.
 
@@ -122,5 +122,5 @@ Before adding a test for a trivial function, ask: "Is this code so simple that i
 ## Related Skills
 
 - `contract-testing` -- iron law: every abstract type requires a contract test fixture
-- `testing` -- test taxonomy, AAA pattern, naming conventions
+- `testing` -- test taxonomy, Arrange-Act-Assert (AAA) pattern, naming conventions
 - `systematic-debugging` -- when tests surface bugs, trace to root cause before patching

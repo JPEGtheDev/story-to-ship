@@ -4,7 +4,7 @@ Generic testing canon: decision rules promoted in SKILL.md live here in full, wi
 
 ---
 
-## AAA Pattern -- Critical Rules
+## Arrange-Act-Assert (AAA) Pattern -- Critical Rules
 
 1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
    - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.
@@ -57,7 +57,7 @@ Apply this taxonomy when classifying tests and deciding where they belong:
 
 | Size | Resource use | Scope | Directory |
 |------|-------------|-------|-----------|
-| **Small** | No I/O, no network, no filesystem, no external processes, no GPU (Graphics Processing Unit)/display context | Single unit in memory | `tests/` root or subdirectory |
+| **Small** | No input/output (I/O), no network, no filesystem, no external processes, no GPU (Graphics Processing Unit)/display context | Single unit in memory | `tests/` root or subdirectory |
 | **Medium** | Localhost I/O permitted (files, sockets), no external services, no real GPU/display context | Component interactions, file I/O | `tests/integration/` |
 | **Large** | Real GPU/display context, real GPU, external processes, full system | End-to-end rendering, visual output | `tests/visual-regression/` |
 

@@ -84,7 +84,7 @@ To evaluate whether a function is too long: memorize a chunk of it, close the fi
 
 ## YAGNI Applies to Features, Not Cleanliness
 
-YAGNI (You Are Not Going to Need It) governs feature additions -- not refactoring, not naming, not structural clarity. Once and Only Once and YAGNI sit at opposite ends of a continuum. Refactoring moves code between them. Clean structure is foundational, not optional.
+YAGNI (You Ain't Gonna Need It) governs feature additions -- not refactoring, not naming, not structural clarity. Once and Only Once and YAGNI sit at opposite ends of a continuum. Refactoring moves code between them. Clean structure is foundational, not optional.
 
 A feature idea that surfaces mid-task does not have to be lost or fully built out right away. Note it cheaply and go back to the task you committed to: add a placeholder method whose sole job is to throw when someone eventually calls it, so testing announces the gap the moment that capability turns out to be needed, or write a heavy comment that spells out the plan for later. This is a way of taking notes, not a loophole around YAGNI -- the placeholder and the comment still leave the actual feature waiting on a real requirement.
 
@@ -130,7 +130,7 @@ Reuse is not inherently good. A reused component that carries more dependencies 
 
 The full principle: "Every piece of knowledge must have a single, unambiguous, authoritative representation in the system." This is broader than code deduplication. It applies to:
 - **Business rules** -- logic encoded in multiple places diverges over time
-- **Data schemas** -- same structure defined in DB, API contract, and UI model separately
+- **Data schemas** -- same structure defined in DB, API contract, and user interface (UI) model separately
 - **Configuration** -- the same value hardcoded in three places
 
 Violating DRY on *knowledge* causes the system to have no single source of truth. When a rule changes, every copy must change -- and at least one will be missed.

@@ -224,6 +224,9 @@ jobs:
           check skills/communication/SKILL.md "a finding states what the code does, never what the author must not know, understand, or have tested"
           check skills/self-evaluation/SKILL.md "Failure-instance evidence bar" "first-action-audit.sh"
           check skills/versioning/SKILL.md "Merging is the user's gate."
+          check skills/execution/SKILL.md "State a guard denial in the next message you write, before the next tool call: what was denied and what runs instead."
+          check skills/execution/SKILL.md "A copy that is only read or run is allowed once the denial is stated; a copy whose content is carried back into the denied target is the denied edit retried, and it goes to an implementer."
+          check skills/execution/SKILL.md "Writing a commit message, in a dispatch prompt or in a git commit call, is creating a commit: load the versioning skill first if it is not loaded this session."
           check agents/postmortem-reviewer.md "{{TRANSCRIPT_PATH}}" "blame direction"
           if [ "$missing" -gt 0 ]; then
             printf 'Found %s missing contract string(s)\n' "$missing"

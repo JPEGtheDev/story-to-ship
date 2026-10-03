@@ -19,7 +19,7 @@ task arrives
     -> agent applies gate before taking other actions
 ```
 
-We cannot test any of steps 1-4 using the `task` tool. The `task` tool returns text output only -- there is no tool-call telemetry, no way to observe whether the Skill tool was called, which skill was called, or whether it was called before other tools.
+We cannot test any of steps 1-4 using the Agent tool. The Agent tool returns text output only -- there is no tool-call telemetry, no way to observe whether the Skill tool was called, which skill was called, or whether it was called before other tools.
 
 Specifically, we cannot test:
 - **Skill triggering**: Does the agent automatically call the correct Skill tool based on a natural prompt?
@@ -37,7 +37,7 @@ Specifically, we cannot test:
 
 ### What we can test (and what it tells us)
 
-Using the `task` tool, we can inject skill content directly into an agent's prompt and observe whether the agent follows the gate in its text output. **This is an instruction-following test, not a skill compliance test.** It answers:
+Using the Agent tool, we can inject skill content directly into an agent's prompt and observe whether the agent follows the gate in its text output. **This is an instruction-following test, not a skill compliance test.** It answers:
 
 > "Is the skill content clear and specific enough that a model follows it when the content is directly in its context window?"
 

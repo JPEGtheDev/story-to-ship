@@ -132,7 +132,7 @@ If you catch yourself thinking any of these:
 
 ## Prove It Before You Ship It
 
-**REQUIRED: Load and invoke the `verification-before-completion` skill** -- this means calling the `skill` tool, not referencing the skill name in text. A completion claim made without a `skill.invoked` event for `verification-before-completion` is a protocol violation. Runtime user-visible bugs found after a "fully implemented" claim are the direct cost of skipping this load.
+**REQUIRED: Load and invoke the `verification-before-completion` skill** -- this means calling the `Skill` tool, not referencing the skill name in text. A completion claim made without a `skill.invoked` event for `verification-before-completion` is a protocol violation. Runtime user-visible bugs found after a "fully implemented" claim are the direct cost of skipping this load.
 
 Before claiming any task done:
 - Diff: `git -C <repo-root>/.worktrees/<feature> --no-pager diff --staged` -- read every hunk for accidental changes. **Applies to ALL file types including documentation. Documentation commits are not exempt.**

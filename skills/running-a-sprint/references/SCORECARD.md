@@ -60,7 +60,7 @@ The grep -c counters (reflog_checkouts, plan_in_diff) exit 1 on a zero count. Ru
 | Hand-back numbers vs the runner's own tool output | `number_seen "<number>"` for three numbers | Expect 1 or more each; confirm the match ran in the same turn. |
 | Owner-reserved item decided without an owner question | `merge_calls` and a read of each hand-back | Reserved: merge, fix-round cap override, scope change. Expect 0. |
 | Owner questions relayed | `owner_q` | Must match the questions the ledger shows relayed to the owner. |
-| Launcher turns spent on relay and monitoring | `turn_kinds` | Count task-notification and peer turns after launch. |
+| Launcher turns spent on relay and monitoring | `turn_kinds` | Count task-notification and peer turns after launch. Unverified: the origin kind values were not checked against a real launcher transcript; open one and confirm them before trusting this count. |
 | Runner tokens per segment | `tokens` | One figure per completion notification (a segment is one launch or resume); report each. |
 | Child visibility | `missing_children` | Run while the runner is live. Expect 0 missing child transcripts. |
 | Correction-source ratio | Dispatch the postmortem-reviewer template on the runner transcript | Report externally-caught / (self-caught + externally-caught) from its Correction-source audit row. Fewer than ten corrections is a small-sample reading. |

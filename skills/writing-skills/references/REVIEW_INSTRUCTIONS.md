@@ -51,7 +51,7 @@ item are in the reference sections above.
 - [ ] **Gate Function** -- `## BEFORE PROCEEDING` with numbered conditions and [+]/[-] branches?
 - [ ] **Rationalization Prevention** -- table with >=5 rows, specific excuses and specific counters?
 - [ ] **Red Flags->STOP** -- section with >=5 trigger thoughts, each with a concrete action?
-- [ ] **No weak language** -- run: `grep -n -i "should\|prefer\|consider\|try to\|might be worth\|could potentially\|favor\|encourage" "<resolved review target>"` -- any hit in a rule body is a FAIL? A hit MUST count as a FAIL only when it sits in a rule body; DO NOT count the noun "preference" or a quoted forbidden phrase as a FAIL.
+- [ ] **No weak language** -- run: `grep -n -i "should\|prefer\|consider\|try to\|might be worth\|could potentially\|favor\|encourage" "<resolved review target>"` -- any hit in a rule body is a FAIL? The noun "preference" and a quoted forbidden phrase are hits that are not FAILs.
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use per VOICE_AUTHORITY_RULES?
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
@@ -108,7 +108,7 @@ grep -n "\.\./[a-z].*references/" "<file>"
 
 Apply this checklist per file (anatomy elements do not apply to reference files):
 
-- [ ] **No weak language** -- grep hit in a rule body is a FAIL
+- [ ] **No weak language** -- grep hit in a rule body is a FAIL; the noun "preference" and a quoted forbidden phrase are hits that are not FAILs
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use
 - [ ] **Jargon Rule (advisory)** -- terms of art defined on first use (first-use test, VOICE_AUTHORITY_RULES); report file:line per flagged term; advisory, not NEEDS WORK-eligible.
 - [ ] **No absolute paths** -- no `/home/`, `/usr/`, `/root/` literals

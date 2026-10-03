@@ -55,7 +55,7 @@ item are in the reference sections above.
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use per VOICE_AUTHORITY_RULES?
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
-- [ ] **No cross-skill file path refs** -- other skills referenced by name in prose only, not by `../other-skill/references/FILE.md` paths?
+- [ ] **No cross-skill file path refs** -- other skills referenced by name in prose only, not by `../other-skill/references/FILE.md` paths? Run ``grep -nE "(^|[^A-Za-z-])($(ls skills | paste -sd'|'))(/|\`|[ ]skill)" "<resolved review target>" | grep -E "references/|SKILL\.md|[A-Z][A-Z]+_[A-Z_]+\.md"`` -- the command MUST run from the repository root (it lists `skills/`). A hit is a FAIL when the line names a file in another skill's tree; a line that only cites the skill's own `references/` path next to a skill name, or quotes a bad example, is a false positive.
 - [ ] **Skill-specific content** -- no generic placeholder-only examples?
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
@@ -103,7 +103,7 @@ For each reference file, run:
 wc -c "<file>"
 grep -n -i "should\|prefer\|consider\|try to\|might be worth\|could potentially\|favor\|encourage" "<file>"
 grep -n "/home/\|/usr/\|/root/" "<file>"
-grep -n "\.\./[a-z].*references/" "<file>"
+grep -nE "(^|[^A-Za-z-])($(ls skills | paste -sd'|'))(/|\`|[ ]skill)" "<file>" | grep -E "references/|SKILL\.md|[A-Z][A-Z]+_[A-Z_]+\.md"
 ```
 
 Apply this checklist per file (anatomy elements do not apply to reference files):
@@ -112,7 +112,7 @@ Apply this checklist per file (anatomy elements do not apply to reference files)
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use
 - [ ] **Jargon Rule (advisory)** -- terms of art defined on first use (first-use test, VOICE_AUTHORITY_RULES); report file:line per flagged term; advisory, not NEEDS WORK-eligible.
 - [ ] **No absolute paths** -- no `/home/`, `/usr/`, `/root/` literals
-- [ ] **No cross-skill file path refs** -- no `../other-skill/references/FILE.md` patterns
+- [ ] **No cross-skill file path refs** -- no path or bare file name into another skill's tree (the `../other-skill/references/FILE.md` form is one example); run the Step 4 command and adjudicate hits as in the Step 2 item
 - [ ] **Content matches SKILL.md pointer** -- file contains what SKILL.md says it contains
 - [ ] **Size** -- no hard limit for reference files; flag as SIZE ALERT if > 8,000 chars (~2,000 tokens)
 

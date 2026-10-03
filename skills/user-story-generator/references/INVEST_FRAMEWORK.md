@@ -116,7 +116,7 @@
 **Why it matters:**
 - Team knows when story is truly "done"
 - Reduces ambiguity and rework
-- Enables automated testing and CI/CD integration
+- Enables automated testing and CI/CD (continuous integration and continuous delivery) integration
 
 **How to check:**
 - [ ] Each acceptance criterion can be verified with a test (manual or automated)

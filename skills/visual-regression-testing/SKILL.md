@@ -1,7 +1,7 @@
 ---
 name: visual-regression-testing
 license: MIT
-description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs a GL-mock unit test, or debugging visual output by rendering and inspecting the result.
+description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs an OpenGL (GL)-mock unit test, or debugging visual output by rendering and inspecting the result.
 ---
 
 
@@ -48,7 +48,7 @@ Load this skill when:
 
 OpenGL rendering is inherently visual. Pixel output depends on Graphics Processing Unit (GPU) drivers, platform, and rendering state that unit tests cannot fully capture.
 
-### What a GL mock CAN test (full TDD applies)
+### What a GL mock CAN test (full Test-Driven Development (TDD) applies)
 
 - Shader compilation logic (uniform locations, program linking)
 - Buffer creation and binding sequences (VAO, VBO, EBO)
@@ -65,7 +65,7 @@ OpenGL rendering is inherently visual. Pixel output depends on Graphics Processi
 - Final rendered pixel output
 - Color correctness and blending
 - Instanced rendering at scale
-- UI overlay rendering
+- user interface (UI) overlay rendering
 
 ---
 
@@ -166,7 +166,7 @@ Before presenting visual regression tests:
 
 ## Related Skills
 
-- `testing` -- parent skill; TDD iron law and AAA naming conventions apply to all test files including visual regression tests
+- `testing` -- parent skill; TDD iron law and Arrange-Act-Assert (AAA) naming conventions apply to all test files including visual regression tests
 - `code-quality` -- code conventions, clang-format, and naming rules apply to test code in this directory
 - `systematic-debugging` -- use when investigating visual regression failures before proposing fixes
-- `cpp-patterns` -- production class patterns (GL resource cleanup, RAII) used in visual test fixtures
+- `cpp-patterns` -- production class patterns (GL resource cleanup, Resource Acquisition Is Initialization (RAII)) used in visual test fixtures

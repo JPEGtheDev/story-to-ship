@@ -51,12 +51,12 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 
 | Task type | Correct agent | Wrong choice |
 |-----------|--------------|--------------|
-| Read-only research across 3+ files -- patterns, symbols, hypotheses | `explore` | `general-purpose` |
+| Read-only research across 3+ files -- patterns, symbols, hypotheses | `explorer` | `general-purpose` |
 | Skill review (skill `.md` files) | `skill-reviewer` | `general-purpose` |
 | Code review (code/config files) | `code-quality-reviewer` | `general-purpose` |
-| Multi-step implementation with file modifications | `implementer` + worktree | `explore` or `general-purpose` |
+| Multi-step implementation with file modifications | `implementer` + worktree | `explorer` or `general-purpose` |
 | Build, test, or lint execution -- success/failure result only | `general-purpose` with `model` passed explicitly | `general-purpose` with no `model` (inherits the coordinator's tier) |
-| Any read-only + write combination | Separate explore and implementer agents | One general-purpose for everything |
+| Any read-only + write combination | Separate explorer and implementer agents | One general-purpose for everything |
 
 **Routing rule:** Use the most constrained agent type that can complete the job. `general-purpose` can do everything -- which means it accumulates context, produces serial output, and contaminates findings with session assumptions for work that a constrained agent would complete faster and cleaner.
 
@@ -183,7 +183,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | "I'll share my session context -- it's helpful" | It contaminates their search. They'll confirm your assumptions instead of testing them. |
 | "One agent can do all this" | Sequential agents fill your context. Parallel agents preserve it. |
 | "I don't need to verify -- the agent found it" | Findings are hypotheses. You verify before you propagate. |
-| "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explore for research across many files. |
+| "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explorer for research across many files. |
 | "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
 | "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use an isolated worktree for every dispatched agent, read-only or write. Shared branches produce conflicts. |
 | "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |

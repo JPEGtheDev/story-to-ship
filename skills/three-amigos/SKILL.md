@@ -130,7 +130,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 
 ## Related Skills
 
-- `skeptic` -- plan validation without Three Amigos ceremony; use when Discovery did not run and a single-todo feature needs review
+- the `skeptic` agent (`agents/skeptic.md`) -- plan validation without Three Amigos ceremony; use when Discovery did not run and a single-todo feature needs review
 - `brainstorming` -- design exploration; referenced by the Discovery Tracking Mechanism as a reader of the Feature Specification
 
 ## References

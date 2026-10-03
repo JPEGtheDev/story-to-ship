@@ -95,7 +95,7 @@ Before creating, editing, or shipping any skill or agent template:
 
 ---
 
-Related skills: `skill-reviewer`, `documentation`, `self-evaluation` -- see `references/DISPATCH_PATTERN.md` for details.
+Related skills: `documentation`, `self-evaluation`; dispatch the `skill-reviewer` agent per `references/DISPATCH_PATTERN.md`.
 
 ## References
 

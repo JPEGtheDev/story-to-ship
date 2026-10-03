@@ -24,6 +24,7 @@ mirrored in the row.
 | `skeptic.md` | Use when reviewing a plan for gaps before implementation begins. | sonnet |
 | `skill-reviewer.md` | Use when auditing skill files against writing-skills criteria. | opus |
 | `spec-compliance-reviewer.md` | Use for Stage 1 post-todo review to verify implementation matches spec. | sonnet |
+| `story-coordinator.md` | Use when running one story issue end to end as a coordinator subagent that plans, dispatches children, opens a pull request, and hands back. | sonnet |
 | `summarization-method.md` | Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source. | sonnet |
 | `summarization-quality.md` | Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability. | sonnet |
 | `synthesizer.md` | Use when synthesizing three parallel method summaries -- Abstractive, Extractive, State/Assign/Action/Complete (SAAC) -- into a final Markdown article. | sonnet |

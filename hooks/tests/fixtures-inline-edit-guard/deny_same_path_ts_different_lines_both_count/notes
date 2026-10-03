@@ -1,0 +1,1 @@
+rows with the same path and ts but different lines are separate edits: both count, so 7 plus this edit 4 exceeds the cap of 10

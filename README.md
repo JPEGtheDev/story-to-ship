@@ -142,6 +142,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `amigo` | Three Amigos ceremony participant |
 | `skill-reviewer` | Skill file quality audit |
 | `rehearsal-subject` | Coordinator under test in a behavioral rehearsal of skill or agent text |
+| `story-coordinator` | One story issue run end to end as a coordinator subagent: plan, child dispatches, two-stage review, pull request, hand-back |
 | `summarization-method` | One of three parallel summarization methods -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) |
 | `summarization-quality` | Summary faithfulness evaluation |
 | `synthesizer` | Multi-method summary synthesis |

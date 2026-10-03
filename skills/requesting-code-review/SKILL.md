@@ -125,7 +125,7 @@ If a reviewer approves without commenting on the specific concerns you listed:
 
 ## Red Flags -- STOP
 
-- Opening a pull request before the agent pre-review is complete and all REQUEST CHANGES, REJECT, or NEEDS WORK verdicts are resolved -- **STOP.** Run every changed file through Agent Review Dispatch, collect all verdicts, and resolve each REQUEST CHANGES, REJECT, or NEEDS WORK before asking anyone to review.
+- Opening a pull request before the agent pre-review is complete and all REQUEST CHANGES, REJECT, or NEEDS WORK verdicts are resolved -- **STOP.** Run every changed file through Agent Review Dispatch, collect all verdicts, and resolve each REQUEST CHANGES, REJECT, or NEEDS WORK before opening the pull request; if it is already open, request no review until every verdict is resolved.
 - Requesting review without a description of what changed and what to focus on -- **STOP.** Add the description (`finishing-a-development-branch` Step 4) and a Review focus block from the Selecting What to Review template, then request review.
 - Requesting review while CI is still running or red -- **STOP.** Wait for CI to finish and fix a red run (BEFORE PROCEEDING, item 1); request review only when CI is green on the branch.
 - Requesting review on a draft pull request -- **STOP.** Meet every BEFORE PROCEEDING item, run `gh pr ready` to take the pull request out of draft state, then request review.

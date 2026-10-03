@@ -115,9 +115,9 @@ Dispatch two agents, one per worktree, with an identical test harness. Compare r
 ## Red Flags -- STOP
 
 - Subagent working directly in the main repo directory -- **STOP. Create a worktree in `.worktrees/` first.**
-- Subagent output committed to `main` or the active feature branch without review -- **STOP.** Review the landed commit with `git show <commit>` now and revert it if it is not approved; before any merge, review `git diff main..agent/<name>` (Subagent Dispatch Pattern).
-- Worktree left alive after the work is merged or discarded (leaks branch clutter) -- **STOP.** Run the commands under Remove when done now: `git worktree remove`, then `branch -d` (`-D` for a discarded branch).
-- Dispatch to a worktree without passing the worktree path in the agent prompt -- **STOP.** Add the absolute worktree path to the prompt (BEFORE PROCEEDING, item 3) before dispatching.
+- Subagent output committed to `main` or the active feature branch without review -- **STOP.** Review the landed commit with `git show <commit>` now. If it is not approved: revert it when it is pushed or on the feature branch; when it exists only on local `main`, ask the user before changing `main` (a revert commit there leaves `main` unable to fast-forward to `origin/main`). Before any merge, review `git diff main..agent/<name>` (Subagent Dispatch Pattern).
+- Worktree left alive after the work is merged or discarded (leaks branch clutter) -- **STOP.** Run the commands under Remove when done now: `git worktree remove`, then `branch -d` (`-D` for a cherry-picked or discarded branch).
+- Dispatch to a worktree without passing the worktree path in the agent prompt -- **STOP.** Add the absolute worktree path to the prompt (BEFORE PROCEEDING, item 3) before dispatching; an agent already running without it cannot create its own isolation after the fact (`subagent-driven-development`), so stop it and dispatch it again with the path.
 - Merging a worktree branch before reviewing the full diff: `git diff main..agent/<name>` -- **STOP.** Run the diff command and read it (Subagent Dispatch Pattern) before any merge.
 - Using `git worktree list | wc -l` to check if you are in a worktree -- **STOP. This does NOT tell you which worktree you are in. Use `git rev-parse --show-toplevel` and compare against the expected path.**
 - "I reviewed the diff mentally -- running `git diff main..agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**

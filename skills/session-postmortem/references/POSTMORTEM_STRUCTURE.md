@@ -100,7 +100,7 @@ Derive the paths for the session being reviewed from your project's session mana
 
    **`self-assessment.md` follows the same rule:** do NOT read its existing content before writing. Each session has its own directory -- write directly. Governing instruction: Step 7 of the `self-evaluation` skill.
 
-3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and `read_agent` returning is polling (`read_agent`). Do NOT announce a verdict, summarize findings, or output any assessment until `read_agent` returns. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
+3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and its completion notification arriving is waiting. Do NOT announce a verdict, summarize findings, or output any assessment until the completion notification arrives. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
 
 4. **Reconcile.** Where the external reviewer and self-assessment agree: note the convergence. Where they conflict: the external reviewer's log-cited findings are authoritative. The self-assessment's uncited claims are not.
 
@@ -126,7 +126,7 @@ Do not editorialize in the timeline. Record events.
 
 ### Part 2: Root Cause
 
-For each failure or near-miss in the timeline, identify the **underlying cause**. Not the proximate cause ("the agent wrote code without a test") but the root cause ("no gate in the session-start checklist enforced Test-Driven Development (TDD) before the first `edit` call in this task type").
+For each failure or near-miss in the timeline, identify the **underlying cause**. Not the proximate cause ("the agent wrote code without a test") but the root cause ("no gate in the session-start checklist enforced Test-Driven Development (TDD) before the first `Edit` call in this task type").
 
 Use "5 Whys" for each failure:
 ```
@@ -242,8 +242,8 @@ Create `[SESSION_DIR]` -- the directory containing the session's `events.jsonl`.
 ls [SESSION_DIR]/postmortem.md
 ```
 
-If the file does not exist, use `create` to write it now.
-If the file already exists (multi-task session), use `edit` to append a new `## Phase N: [Task Name]` section -- never create a second postmortem file. A postmortem that exists only in the message stream is not a postmortem.
+If the file does not exist, use the Write tool to create it now.
+If the file already exists (multi-task session), append a new `## Phase N: [Task Name]` section with a shell heredoc (`cat >> [SESSION_DIR]/postmortem.md <<'EOF'`), which needs no prior read of the file -- never create a second postmortem file. A postmortem that exists only in the message stream is not a postmortem.
 
 ---
 

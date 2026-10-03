@@ -91,11 +91,11 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 
 ## Red Flags -- STOP
 
-- Generating a story without an effort estimate section
-- "I'll add the estimate later" -- add it now
-- Accepting an XL story without decomposing it first
-- Sizing M as S because "it's probably quick"
-- Estimating without accounting for testing and iteration overhead
+- Generating a story without an effort estimate section -- **STOP.** Add the Effort Estimate block (Size and Reasoning) from the Effort Estimate Block section to the story before presenting it.
+- "I'll add the estimate later" -- **STOP.** Write the Effort Estimate block now, choosing Size from the T-Shirt Size Guide; the Iron Law requires an estimate in every story.
+- Accepting an XL story without decomposing it first -- **STOP.** Split the story into L-or-smaller stories, as the XL entry of the T-Shirt Size Guide requires, then size each one.
+- Sizing M as S because "it's probably quick" -- **STOP.** Re-check the story against every criterion in the S entry of the T-Shirt Size Guide; if you cannot confirm all of them, size up, as the "The story is probably S" row of Rationalization Prevention directs (when uncertain, size up).
+- Estimating without accounting for testing and iteration overhead -- **STOP.** Re-size using the Estimation Formula table, adding its Testing and validation and Iteration and fixes components to base implementation.
 
 ---
 

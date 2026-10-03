@@ -142,12 +142,12 @@ Before presenting visual regression tests:
 
 ## Red Flags -- STOP
 
-- Auto-committing a new baseline without human review
-- Using a visual regression test to verify logic that a GL mock could test
-- Tolerance above `5.0f/255.0f` without documented justification
-- Test resolution doesn't match the application default and reason isn't documented
-- Baseline set from debug camera position without calculating proper framing
-- Diagnosing a visual bug from source code alone, without producing and reading a render
+- Auto-committing a new baseline without human review -- **STOP.** Do not commit it; get a human to review the render first, per the Iron Law. If already committed, follow the Changing existing visual output row of TDD Nuance for Visual Regression: delete the baseline, let the test fail, then have a human review the new diff and approve.
+- Using a visual regression test to verify logic that a GL mock could test -- **STOP.** Move the logic check into a GL-mock unit test with full RED-GREEN-REFACTOR, per OpenGL Visual Testing Boundary; keep the visual test for pixel output only.
+- Tolerance above `5.0f/255.0f` without documented justification -- **STOP.** Lower it to `2.0f/255.0f` for GPU-rendered output or `0.0f` for synthetic data, per Tolerance Values; keep a value above `5.0f/255.0f` only with explicit human approval and documented justification.
+- Test resolution doesn't match the application default and reason isn't documented -- **STOP.** Set the test to the application's default resolution, per Camera Positioning; keep another resolution only when the test specifically targets it, per the Self-Review Checklist item on resolution, and document that reason.
+- Baseline set from debug camera position without calculating proper framing -- **STOP.** Discard the debug coordinates and replace the debug-framed baseline through the Changing existing visual output row of TDD Nuance for Visual Regression: delete the baseline, let the test fail, set the camera with the Camera Positioning formula `distance = subject_size / (coverage_% x tan(FOV/2))`, then have a human review the new diff and approve.
+- Diagnosing a visual bug from source code alone, without producing and reading a render -- **STOP.** Produce a render, read the saved image, and describe what is on screen before diagnosing, per Qualitative Visual Analysis (Render-Capture-Look).
 
 ---
 

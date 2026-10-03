@@ -87,7 +87,7 @@ Rules:
 5. **Description field never summarizes workflow.** See `references/SKILL_ANATOMY_ELEMENTS.md` Element 1.
 
    GOOD: `description: Use when writing or reviewing any test.`
-   BAD: `description: Use when writing tests. Follows AAA pattern, enforces naming, handles Google Test patterns.` -- models followed the description instead of reading the skill body.
+   BAD: `description: Use when writing tests. Follows Arrange-Act-Assert pattern, enforces naming, handles Google Test patterns.` -- models followed the description instead of reading the skill body.
 
 ---
 

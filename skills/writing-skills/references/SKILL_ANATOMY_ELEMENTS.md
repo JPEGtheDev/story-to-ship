@@ -21,7 +21,7 @@ description: Use when [triggering conditions and symptoms only]
 
 **Bad (workflow summary):**
 ```yaml
-description: Use when writing tests. Follows AAA pattern, naming conventions, covers Google Test patterns.
+description: Use when writing tests. Follows Arrange-Act-Assert pattern, naming conventions, covers Google Test patterns.
 ```
 
 **Good (triggering conditions):**

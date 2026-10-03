@@ -53,7 +53,7 @@ Each entry has:
 ---
 
 ### RD-01: missing-visual-verification
-- signature: Claimed a UI or visual result was correct from quantitative checks (comparison tests passing) without qualitatively observing the actual running output.
+- signature: Claimed a user interface (UI) or visual result was correct from quantitative checks (comparison tests passing) without qualitatively observing the actual running output.
 - count: 18 (mined 2026-07-19)   domain: general
 - maps-to: GAP (inline remediation below)
 - remediation: A qualitative check -- actually observing the output of the running UI application (a screenshot or the live app) -- is required before claiming visual correctness; quantitative checks (comparison tests passing) do not substitute for it.

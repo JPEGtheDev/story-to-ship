@@ -183,7 +183,7 @@ The visual test **MUST fail before the baseline is correct.** If it never failed
 
 ## Anti-Pattern 6: Happy-Path-Only Doubles
 
-**The trap:** You mock a failure-capable collaborator -- file I/O, a database call, an allocator -- and every configured return is a success value. The failure branch in the production code that handles that collaborator's error case is never executed by any test.
+**The trap:** You mock a failure-capable collaborator -- file input/output (I/O), a database call, an allocator -- and every configured return is a success value. The failure branch in the production code that handles that collaborator's error case is never executed by any test.
 
 **Why it is wrong:** the rare failure is exactly what a double is _for_. Real collaborators fail rarely and nondeterministically -- a double is the only way to make that branch run deterministically, on every run. A double that only ever hands back success values idealizes the collaborator away instead of standing in for it.
 

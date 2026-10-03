@@ -51,7 +51,7 @@ item are in the reference sections above.
 - [ ] **Gate Function** -- `## BEFORE PROCEEDING` with numbered conditions and [+]/[-] branches?
 - [ ] **Rationalization Prevention** -- table with >=5 rows, specific excuses and specific counters?
 - [ ] **Red Flags->STOP** -- section with >=5 trigger thoughts, each with a concrete action?
-- [ ] **No weak language** -- run: `grep -n "should\|prefer\|consider\|try to\|might be worth\|could potentially" "<resolved review target>"` -- any hit in a rule body is a FAIL?
+- [ ] **No weak language** -- run: `grep -n -i "should\|prefer\|consider\|try to\|might be worth\|could potentially\|favor\|encourage" "<resolved review target>"` -- any hit in a rule body is a FAIL? A hit MUST count as a FAIL only when it sits in a rule body; DO NOT count the noun "preference" or a quoted forbidden phrase as a FAIL.
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use per VOICE_AUTHORITY_RULES?
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
@@ -101,7 +101,7 @@ For each reference file, run:
 
 ```bash
 wc -c "<file>"
-grep -n "should\|prefer\|consider\|try to\|might be worth\|could potentially" "<file>"
+grep -n -i "should\|prefer\|consider\|try to\|might be worth\|could potentially\|favor\|encourage" "<file>"
 grep -n "/home/\|/usr/\|/root/" "<file>"
 grep -n "\.\./[a-z].*references/" "<file>"
 ```

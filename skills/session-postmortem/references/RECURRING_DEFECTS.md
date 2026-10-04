@@ -28,7 +28,7 @@ Each entry has:
 - `count` / `domain` -- number of mined instances; `general`, or a domain tag used for
   cross-repo routing.
 - `maps-to` -- a ROUTING POINTER to the nearest existing remedy. The only valid forms are
-  `skill: <name>` (a skill under `skills/`) and `GAP (inline remediation below)`. A `skill:`
+  `skill: <name>` (a shipped skill, loaded by name) and `GAP (inline remediation below)`. A `skill:`
   target may carry a short parenthetical, and may name two skills as
   `skill: <a> (...) / <b> (...)`. It is NOT a claim the mode is solved or cannot recur. `GAP`
   means no existing skill covers the mode; a `GAP` entry MUST carry an inline `remediation`
@@ -170,12 +170,12 @@ Each entry has:
 ### RD-22: wrong-worktree-dispatch
 - signature: Dispatched an agent with main-context paths instead of the worktree path.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_agent_worktree_context
+- maps-to: skill: using-git-worktrees
 
 ### RD-23: bundled-chunks-not-per-concept
 - signature: Wrote a bundled chunks file instead of one file per concept.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_chunk_per_concept_files
+- maps-to: skill: documentation
 
 ### RD-24: context-thrashing-not-addressed
 - signature: Kept re-reading oversized chunks after being told to diagnose the thrash.
@@ -186,7 +186,7 @@ Each entry has:
 ### RD-25: cost-compared-in-tokens-not-dollars
 - signature: Compared spend in tokens instead of dollars via per-MTok pricing.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_compare_dollars_not_tokens
+- maps-to: skill: subagent-driven-development (model-selection tier-cost comparison rule)
 
 ### RD-26: forgot-required-process-step
 - signature: Omitted a required process step (e.g. Three Amigos) from a plan.
@@ -196,12 +196,12 @@ Each entry has:
 ### RD-27: generalization-increased-scoped-content
 - signature: Generalizing by inline relocation increased the scoped footprint.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_relocation_preserves_floor
+- maps-to: skill: writing-skills
 
 ### RD-28: incomplete-fix-partial-scope
 - signature: Closed a defect class after fixing only the token-narrow subset.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_leak_class_broader_than_tokens
+- maps-to: skill: honesty (class-anchored closure)
 
 ### RD-29: incorrect-rule-application
 - signature: Misapplied the acronym-expansion rule to file-format tokens (YAML/ASCII).
@@ -235,17 +235,17 @@ Each entry has:
 ### RD-34: metric-chasing-without-justification
 - signature: Optimized to hit a size/token metric without justifying the cut.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_sdd_enforcement_preserve
+- maps-to: skill: writing-skills (size and compression: enforcement is not cut to hit a token target)
 
 ### RD-35: missing-index-and-frontmatter
 - signature: Shipped documentation with no index entry and no frontmatter linking it to related files.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_chunk_per_concept_files
+- maps-to: skill: documentation
 
 ### RD-36: no-model-tiering-applied
 - signature: Dispatched agents on inherited top-tier model with no haiku/sonnet tiering.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_subagent_model_tiers
+- maps-to: skill: subagent-driven-development
 
 ### RD-37: no-validation-checkpoint-before-continued-iteration
 - signature: Kept iterating on tuning with no step-back validation checkpoint.
@@ -256,7 +256,7 @@ Each entry has:
 ### RD-38: premature-merge-proposal
 - signature: Proposed or pushed to merge; merge is the user's hard gate.
 - count: 1 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_pr_merge_signoff_user_gate
+- maps-to: skill: versioning
 
 ### RD-39: review-missed-invest-criterion
 - signature: A ceremony passed a story that was not INVESTable.

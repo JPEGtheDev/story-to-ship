@@ -195,3 +195,4 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 - `subagent-driven-development` -- orchestration framework; parallel dispatch is a specialized case of subagent dispatch
 - `using-git-worktrees` -- required for every dispatched agent, read-only and write alike; isolation guarantee
 - `execution` -- work loop and commit rhythm that parallel dispatch operates within
+- `running-a-sprint` -- the launcher-level case: one session runs several story issues in parallel through coordinator subagents, one pull request each

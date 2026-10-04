@@ -78,6 +78,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Starting a new project from scratch | `greenfield-discovery` |
 | Task references a GitHub issue number (#NNN), OR task description contains "acceptance criteria", "AC:", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
 | Summarizing external resources (articles, web pages, files) for knowledge extraction | `summarization` |
+| Running a sprint: launching several story issues through coordinator subagents from one launcher session (never from inside a coordinator subagent) | `running-a-sprint`, `subagent-driven-development`, `using-git-worktrees`; the launcher does not run Discovery for launched stories -- each runner does |
 
 If unsure, invoke `code-quality` -- it applies to every code task.
 

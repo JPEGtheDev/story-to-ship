@@ -42,7 +42,7 @@ A story whose "Files to Create/Modify" list overlaps a running story's list wait
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file in the main checkout. That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
 
 **Context:** The launcher compacts or restarts mid-sprint.
 **Forces:** The runners keep working while the launcher forgets, and a lost runner id means a runner nobody can resume. The plan file survives; the launcher's memory does not.

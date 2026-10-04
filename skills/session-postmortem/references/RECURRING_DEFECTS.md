@@ -13,7 +13,7 @@ see whether it is a known pattern and where its remedy lives.
 - 140 of those pairs are user corrections, grouped into 46 canonical failure modes.
 - Sources: story-to-ship 92, prior C++ project 46, other-project 2 (= 140).
 - Every correction is grounded in a real quoted user message. That grounding is the only
-  thing claimed as "verified" -- see the maps-to note below.
+  thing claimed as "verified" -- see the `maps-to` schema entry below.
 - The registry now holds 47 entries: 46 from the 2026-07-19 user-correction mining run (grouped
   into 46 canonical failure modes, below) plus RD-47, contributed 2026-07-23 from an
   external-reviewer session self-audit (the a0e656aa drift-postmortem). RD-47 is grounded in
@@ -27,16 +27,18 @@ Each entry has:
 - `signature` -- one line: what went wrong.
 - `count` / `domain` -- number of mined instances; `general`, or a domain tag used for
   cross-repo routing.
-- `maps-to` -- a ROUTING POINTER to the nearest existing remedy (a memory slug or a skill).
-  It is NOT a claim the mode is solved or cannot recur. `GAP` means no existing remedy is
-  catalogued; those entries carry an inline `remediation` line.
+- `maps-to` -- a ROUTING POINTER to the nearest existing remedy. The only valid forms are
+  `skill: <name>` (a skill under `skills/`) and `GAP (inline remediation below)`. A `skill:`
+  target may carry a short parenthetical, and may name two skills as
+  `skill: <a> (...) / <b> (...)`. It is NOT a claim the mode is solved or cannot recur. `GAP`
+  means no existing skill covers the mode; a `GAP` entry MUST carry an inline `remediation`
+  line.
 
 ## How to use
 
 1. A defect recurs in a session. Search this file for its signature.
-2. If present and `maps-to` names a memory or skill, load that remedy.
-3. If `GAP`, apply the inline `remediation`; if it recurs again, promote it to a memory or
-   skill rule.
+2. If present and `maps-to` names a skill, load that skill and apply its rule.
+3. If `GAP`, apply the inline `remediation`; if it recurs again, promote it to a skill rule.
 
 ## Scope and limits
 
@@ -47,7 +49,7 @@ Each entry has:
   private and are not committed, so there is no one-command regeneration from repo state.
 - Singletons (count 1) are candidates, not confirmed patterns -- flagged as such in-line;
   a few carry an explicit remediation where the corrective is already known.
-- The schema (portable mode names, maps-to slugs, domain tags) is repo-agnostic so other
+- The schema (portable mode names, maps-to skill names, domain tags) is repo-agnostic so other
   repos can adopt or sync entries later; no sync mechanism exists yet.
 
 ---
@@ -61,7 +63,7 @@ Each entry has:
 ### RD-02: bootstrap-not-fired
 - signature: Did not invoke session-bootstrap first after start, resume, or compaction.
 - count: 12 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_bootstrap_first_tool_call
+- maps-to: skill: session-bootstrap
 
 ### RD-03: unbacked-causal-diagnosis
 - signature: Stated a root cause without a trace or reproduction.
@@ -76,7 +78,8 @@ Each entry has:
 ### RD-05: unverified-claim
 - signature: Asserted a fact about code or state without reading or running it.
 - count: 7 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_correctness_over_completion
+- maps-to: GAP (inline remediation below)
+- remediation: Before asserting a fact about code or state, read the file or run the command that shows it and quote the output; if you have not, label the statement unverified instead of stating it as fact.
 
 ### RD-06: premature-or-wrong-edit
 - signature: Edited the wrong thing, or edited before confirming; needed a revert.
@@ -115,12 +118,12 @@ Each entry has:
 ### RD-12: skeptic-not-dispatched
 - signature: Presented a plan or design without the required Skeptic review.
 - count: 4 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_bulletproof_plans
+- maps-to: skill: writing-plans
 
 ### RD-13: no-branch-created
 - signature: Started work on main instead of a new branch off main.
 - count: 3 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_branch_selection
+- maps-to: skill: using-git-worktrees
 
 ### RD-14: unreviewed-direct-edit
 - signature: Edited a file inline without the 2-stage subagent review.
@@ -136,12 +139,12 @@ Each entry has:
 ### RD-16: skill-not-reloaded
 - signature: Acted in a skill's domain without invoking or reloading the skill.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_investigation_to_implementation_reload
+- maps-to: skill: session-bootstrap
 
 ### RD-17: spend-launch-without-consent
 - signature: Launched a paid child (claude -p / workflow) without per-invocation consent.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_spend_launch_consent
+- maps-to: skill: subagent-driven-development
 
 ### RD-18: sycophancy
 - signature: Devolved into uncritical agreement instead of independent analysis.
@@ -152,12 +155,12 @@ Each entry has:
 ### RD-19: verification-independence-compromised
 - signature: Reported findings on own work before dispatching an independent reviewer.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_confirmation_asymmetry_verification
+- maps-to: skill: honesty
 
 ### RD-20: wrong-branch-base
 - signature: Based a new branch off an arbitrary branch instead of main.
 - count: 2 (mined 2026-07-19)   domain: general
-- maps-to: memory: feedback_branch_selection
+- maps-to: skill: using-git-worktrees
 
 ### RD-21: wrong-reviewer-type-dispatched
 - signature: Used code-review for skill .md files instead of skill-reviewer.

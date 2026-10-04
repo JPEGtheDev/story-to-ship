@@ -41,7 +41,7 @@ Rules:
 **Spell out all acronyms on first use.** Do not introduce acronyms unless they fall into an exempt category. Project-specific and skill-specific abbreviations are forbidden -- they require context the reader may not have, and lower-end models will silently misinterpret or skip them.
 
 Exempt categories (no expansion required):
-- Universally known: CI, PR, API
+- Universally known: CI, CI/CD, PR, API, UI, I/O
 - File formats: YAML, JSON, CSV, XML -- these are the format name, not an acronym; expanding them adds no clarity
 - Encoding/character standards: ASCII -- explain the constraint in context (e.g., "ASCII-only text (no Unicode characters)") rather than expanding the initialism
 

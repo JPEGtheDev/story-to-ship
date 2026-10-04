@@ -21,7 +21,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Before creating, editing, or shipping any skill or agent template:
 
-1. **Creating a new skill?** Invoked in >=1% of sessions, and owns a domain that no existing skill (`ls skills/`) already owns?
+1. **Creating a new skill?** Invoked in >=1% of sessions, and owns a domain that no skill in the session's available-skills list already owns?
    - [+] -> proceed
    - [-] -> write a reference doc in the relevant skill's `references/` instead; do not create a skill
 

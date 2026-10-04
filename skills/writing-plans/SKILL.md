@@ -54,7 +54,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ## Decision-Deferral Gate
 
-Before writing todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record a verdict: `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. Write no todo for a DEFER or `[UNCLEAR:]` component. Rewrite a DEFER whose condition is only vague language ("later", "when needed", "eventually") as a measurable one.
+Before todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. Write no todo for a DEFER or `[UNCLEAR:]` component. Rewrite a DEFER whose condition names no observable event or threshold ("later", "when needed", "eventually") as a measurable one.
 
 ---
 

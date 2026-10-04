@@ -76,9 +76,7 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 Each task MUST be one concrete action (2-5 minutes), touch <=2 files, and is estimated at <=25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
 
-For implementation tasks, follow TDD structure (template: `references/PLAN_RATIONALE_AND_TEMPLATES.md`):
-
-Each step must be its own todo with a distinct status.
+For implementation tasks, give each TDD step its own todo and status: RED (failing test; confirm it fails), GREEN (minimal code; run the full suite), REFACTOR, COMMIT. Template: `references/PLAN_RATIONALE_AND_TEMPLATES.md`.
 
 ---
 

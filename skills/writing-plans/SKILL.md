@@ -52,6 +52,12 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ---
 
+## Decision-Deferral Gate
+
+Before todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. A DEFER component's todos use its simplest valid option; an `[UNCLEAR:]` component gets no todo until resolved. Rewrite a DEFER whose condition names no observable event or threshold ("later", "when needed", "eventually") as a measurable one.
+
+---
+
 ## Building the Plan
 
 1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch, one review pair (the spec-compliance review, then the quality review, run under the `two-stage-review` skill), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.
@@ -76,24 +82,7 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 Each task MUST be one concrete action (2-5 minutes), touch <=2 files, and is estimated at <=25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
 
-For implementation tasks, follow TDD structure:
-
-```
-Task N: [Feature or component name]
-Files:
-  - Create: exact/path/to/NewFile.<ext>
-  - Modify: exact/path/to/ExistingFile.<ext>
-  - Test:   tests/path/to/TestFile.<ext>
-
-RED   todo: Write the failing test for [behavior]
-RED   todo: Run test -- verify it fails for the right reason
-GREEN todo: Write minimal implementation to pass the test
-GREEN todo: Run full suite -- verify all tests pass
-REFACTOR todo: Clean up -- rename, extract, remove duplication; tests must stay green
-COMMIT todo: git add / git commit -m "feat[scope]: description"
-```
-
-Each step must be its own todo with a distinct status.
+For implementation tasks, give each of six TDD todos its own status: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
 
 ---
 
@@ -133,7 +122,7 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. The routing depends on whether Discovery ran:
 
 **If plan.md contains `## Feature Specification` (Discovery ran):**
-Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features. Discovery's three-amigos Refinement runs three independent personas under a unanimous-non-REJECT gate -- coverage that already exceeds the Skeptic + plan-reviewer pairing, so no additional reviewer is dispatched on the Discovery path.
+Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features.
 
 **Otherwise (no Discovery):**
 Dispatch BOTH agents in parallel: a **Skeptic Agent** and the **plan-reviewer agent**. Read both verdicts before presenting the plan as final.

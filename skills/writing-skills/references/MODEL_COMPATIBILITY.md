@@ -12,7 +12,7 @@ The full production skill execution path is:
 
 ```
 task arrives
-    -> agent reads AGENTS.md checklist
+    -> agent loads `session-bootstrap`, whose On Start table routes the task to skills
     -> agent recognizes which skill applies
     -> agent calls Skill tool
     -> skill content is injected into context
@@ -29,11 +29,11 @@ Specifically, we cannot test:
 
 ### The lower-model complication
 
-`AGENTS.md` is always injected in production, but **lower-capability models do not reliably read or apply its full content**. For lower-end models, the effective production state may be closer to "AGENTS.md partially processed" or "checklist ignored" than to the full iron-law enforcement that GPT-4.1 produces. This means:
+The SessionStart and UserPromptSubmit hooks (`hooks/hooks.json`) inject the first-tool-call rule, the Iron Law table, the skill auto-load table, and the banned-vocabulary table in production, but **lower-capability models do not reliably read or apply all of that injected text**. For lower-end models, the effective production state may be closer to "injected text partially processed" or "routing ignored" than to the full iron-law enforcement a baseline model produces. This means:
 
-- A lower-end model may skip the checklist entirely and never reach the step where it recognizes which skill to load
-- The skill routing logic in AGENTS.md assumes the model reads and acts on the "Before Every Response" checklist -- that assumption is not safe for lower-end models
-- Skills must therefore be written to function as standalone documents, not just as extensions of the checklist
+- A lower-end model may skip the injected rules and the `session-bootstrap` skill entirely and never reach the step where it recognizes which skill to load
+- The skill routing in `session-bootstrap` (its On Start table) and in the hook-injected auto-load table assumes the model reads and acts on them -- that assumption is not safe for lower-end models
+- Skills must therefore be written to function as standalone documents, not just as extensions of the routing text
 
 ### What we can test (and what it tells us)
 
@@ -80,7 +80,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 
 ## Patterns Most Likely to Fail on Lower-End Models
 
-> **Note:** Lower-end models may not reliably process the full `AGENTS.md` checklist. The patterns below assume the skill content is loaded. If a lower-end model skips the checklist entirely, it may never load the skill in the first place -- making the patterns below moot. Skills must be written to function as standalone documents regardless of checklist state.
+> **Note:** Lower-end models may not reliably process the injected hook text or the `session-bootstrap` On Start routing. The patterns below assume the skill content is loaded. If a lower-end model skips that routing entirely, it may never load the skill in the first place -- making the patterns below moot. Skills must be written to function as standalone documents regardless of routing state.
 
 ### 1. Multi-step gates with conditional branches
 **Skill:** `brainstorming` (Phase 1 Ambiguity Block), `systematic-debugging` (4-phase protocol)
@@ -90,7 +90,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 ### 2. "After every todo" rules
 **Skill:** `two-stage-review` (2-stage review), `execution` (work loop step 6)
 **Risk:** Model completes todos and skips reviewer dispatch -- moves to next item silently
-**Mitigation:** Iron Law 10 in AGENTS.md + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
+**Mitigation:** The `two-stage-review` skill's Iron Law ("YOU MUST DISPATCH REVIEWERS AFTER EVERY TODO"), which the SessionStart hook's Iron Law table also lists, + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
 
 ### 3. Announcement declarations
 **Skill:** All skills require "I am using the [skill] to [purpose]"
@@ -100,7 +100,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 ### 4. Honesty / vocabulary bans
 **Skill:** `honesty`, `verification-before-completion`
 **Risk:** Model uses "should work", "probably", "I'm confident" without catching itself
-**Mitigation:** Banned vocabulary in AGENTS.md Iron Law 6. Test by watching for banned phrases in responses.
+**Mitigation:** The `honesty` skill's Confidence Vocabulary Gate, whose banned-phrase table the SessionStart and UserPromptSubmit hooks also inject. Test by watching for banned phrases in responses.
 
 ### 5. Skill refresh rule
 **Skill:** `session-bootstrap`
@@ -123,7 +123,7 @@ When authoring or revising skills:
 |----------|----------------|
 | Model proceeds without announcing skill | Announcement is skipped -- skill not fully followed |
 | Model writes code before design gate | Brainstorming gate failed |
-| Model claims "done" without reviewer dispatch | Iron Law 10 not followed |
+| Model claims "done" without reviewer dispatch | `two-stage-review` Iron Law not followed |
 | Model uses "should work" | Honesty vocab ban not active |
 | Model answers an [UNCLEAR:] without asking | Ambiguity block in brainstorming not followed |
 | Model gives a completion claim with no inline evidence | Verification-before-completion not followed |

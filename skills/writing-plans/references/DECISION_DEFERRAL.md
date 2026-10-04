@@ -60,7 +60,7 @@ These vague words fail on their own: "later", "when needed", "eventually", "when
 - A DECIDE NOW that depends on a fact the plan does not state becomes `[UNCLEAR:] -- answer [that fact]` only when it decides, by itself, whether an option satisfies a stated requirement or contradicts one. A fact that only ranks the valid options (every option still works whichever way the fact goes) does not block: pick the simplest valid option and record the unstated fact it assumes as the named risk. An unstated requirement is a missing fact, which the Blocked question catches.
 - A DECIDE NOW with no nameable risk is malformed and is not emitted; the verdict falls to DEFER because nothing forces the decision.
 - An `[UNCLEAR:]` with no named question or contradiction is malformed.
-- A todo that depends on a DEFER component uses that component's simplest valid option and adopts no other option; a todo that needs an option beyond the simplest option is rewritten or removed. An `[UNCLEAR:]` component gets no todo until it is resolved.
+- A todo that depends on a DEFER component uses that component's simplest valid option and adopts no other option; a todo that needs an option beyond the simplest valid option is rewritten or removed. An `[UNCLEAR:]` component gets no todo until it is resolved.
 - The diagnostic runs after the Situation Gate of writing-plans. For the component it covers, a DEFER verdict wins over that gate's row "Architectural decision".
 - An `[UNCLEAR:]` verdict falls under the writing-plans "Red Flag" on `[UNCLEAR:]` markers: resolve it (ask the owner, the person who assigned the work, or run Discovery, the clarifying step of the three-amigos skill) before the plan is presented, then re-run the three questions for that component.
 

@@ -33,7 +33,7 @@ story lives in the source project's doc.
 
 **Lesson:** Always keep Act and Assert as separate phases, even when they seem naturally combined.
 
-**Added to:** `testing` skill -> Critical Rules, `TESTING_EXAMPLES.md` -> Incorrect Examples
+**Added to:** `testing` skill -> Step 2: Write Tests Following AAA (Arrange-Act-Assert) Pattern
 
 ### Ensure Output Directories Exist Before Writing
 
@@ -79,7 +79,7 @@ story lives in the source project's doc.
 
 **Lesson:** Minimize duplication across skills. Each skill owns one domain. Skills reference other skills instead of repeating content.
 
-**Added to:** `AGENTS.md` -> Skill Architecture section
+**Added to:** `writing-skills` skill -> Compression Rules (never repeat content another skill owns)
 
 ### Do Not Delete a Stable API Method When Only Its Caller Is Removed
 
@@ -103,7 +103,7 @@ Use this for fast question-based lookup -- "my lesson is about X, where does it 
 
 | If the lesson is about... | Add to... |
 |---|---|
-| Code patterns, naming, error handling | `AGENTS.md` |
+| Code patterns, naming, error handling | `code-quality` skill |
 | Test writing, Arrange-Act-Assert (AAA), mocking, visual regression | `testing` skill |
 | CI/CD workflows, artifacts, permissions | `workflow` skill |
 | Documentation format, linking, content | `documentation` skill |

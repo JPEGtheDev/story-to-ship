@@ -57,7 +57,7 @@ These vague words fail on their own: "later", "when needed", "eventually", "when
 ## Failure-Path Rules
 
 - A DEFER whose condition is only vague language, or mixes vague clauses with no measurable clause, is rejected and rewritten as a measurable condition. If no measurable condition can be named, the verdict becomes `[UNCLEAR:] -- answer [question]` where the question asks what would force the decision.
-- A DECIDE NOW that depends on a requirement the plan does not state becomes `[UNCLEAR:] -- answer [that requirement]`. A choice that stays valid whatever that requirement turns out to be is not blocked by it and stays DECIDE NOW.
+- A DECIDE NOW that depends on a requirement or fact the plan does not state becomes `[UNCLEAR:] -- answer [that requirement or fact]`. A choice that stays valid whatever that requirement or fact turns out to be is not blocked by it and stays DECIDE NOW.
 - A DECIDE NOW with no nameable risk is malformed and is not emitted; the verdict falls to DEFER because nothing forces the decision.
 - An `[UNCLEAR:]` with no named question or contradiction is malformed.
 - A todo that depends on a DEFER component is rewritten so it does not depend on it, or removed. A DEFER or `[UNCLEAR:]` component gets no todo.

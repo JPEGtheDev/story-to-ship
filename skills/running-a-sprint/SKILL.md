@@ -25,7 +25,7 @@ The stories come from an epic issue's checklist (if one exists). Read each story
 **Context:** A story with no acceptance criteria reaches intake.
 **Forces:** A runner that starts without criteria invents them, and the owner then reviews a PR built on criteria nobody agreed to. Holding back one story costs that story a delay; the other stories lose nothing.
 
-A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. A runner never drafts acceptance criteria. The launcher does not run Discovery (the three-amigos requirements ceremony) for launched stories; the runner does.
+A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the three-amigos requirements ceremony) for launched stories; the runner does.
 
 ---
 
@@ -91,7 +91,7 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
 7. Check every other open PR for mergeability (`gh pr view <PR number> --json mergeable`). For each PR that conflicts, resume its runner to fetch origin main and rebase, then send PR ready again.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger and tell the owner. Then launch the next waiting story under the Capacity rules and run intake again on each held story whose gap the owner has answered.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger and tell the owner. Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
 
 **Context:** The owner merged and the sprint feels finished.
 **Forces:** Each step removes state the next one needs or could be mistaken for, so the order is fixed: the patch comparison needs the runner branch tip, and a deleted branch loses it. A skipped step leaves a stale branch, worktree or conflict that surfaces on a later merge.

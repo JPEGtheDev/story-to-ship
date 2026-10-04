@@ -52,7 +52,7 @@ After all three Discovery amigos return:
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
 
-### Non-UI (user interface) Adaptation of the Mandatory Questions
+### Non-UI Adaptation of the Mandatory Questions
 
 `SKILL.md` mandates two extra Discovery agenda questions on top of the five above: field optionality, and UI dialog entry paths (menu paths and keyboard shortcuts that open a dialog). Both are written assuming a UI feature. For a non-UI or developer-facing feature (skills, tooling, engines, plugins), adapt the two mandatory questions instead of dropping them -- dropping a mandatory question because "there is no UI" silently loses its intent, which generalizes to: enumerate every entry path and flag any not covered.
 

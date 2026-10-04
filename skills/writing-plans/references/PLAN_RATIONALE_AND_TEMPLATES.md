@@ -1,8 +1,8 @@
 # Plan Rationale and Templates
 
-Templates and rationale moved out of SKILL.md to keep it under its size cap.
+Template for the todos of an implementation task in a writing-plans plan.
 
-## TDD todo template
+## Test-Driven Development (TDD) todo template
 
 ```
 Task N: [Feature or component name]

@@ -65,7 +65,7 @@ OpenGL rendering is inherently visual. Pixel output depends on Graphics Processi
 - Final rendered pixel output
 - Color correctness and blending
 - Instanced rendering at scale
-- User interface (UI) overlay rendering
+- UI overlay rendering
 
 ---
 

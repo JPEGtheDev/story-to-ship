@@ -51,7 +51,7 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 - Multi-file feature or change
 - Moderate integration work; requires new tests
 - Reviewable in a single PR without scope concerns
-- Examples: Add an API endpoint, implement a user interface component, write a CI/CD (continuous integration and continuous delivery) workflow
+- Examples: Add an API endpoint, implement a UI component, write a CI/CD workflow
 
 ### L -- Large
 - Architectural impact or cross-cutting change

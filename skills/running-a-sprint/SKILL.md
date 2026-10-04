@@ -153,4 +153,5 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 - [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, the required hand-back lines and the resume texts
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
+- [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

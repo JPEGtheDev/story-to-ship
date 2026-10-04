@@ -61,7 +61,7 @@ The launcher creates no worktree for a runner, because the runner creates the tr
 
 ---
 
-## Babysit loop
+## Launcher loop
 
 End the turn while runners work. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 

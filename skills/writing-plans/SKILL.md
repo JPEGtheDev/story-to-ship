@@ -54,7 +54,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ## Decision-Deferral Gate
 
-Before todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. DEFER: simplest valid option; `[UNCLEAR:]`: no todo. Rewrite a DEFER whose condition names no observable event or threshold ("later", "when needed", "eventually") as a measurable one.
+Before todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. A DEFER component's todos use its simplest valid option; an `[UNCLEAR:]` component gets no todo until resolved. Rewrite a DEFER whose condition names no observable event or threshold ("later", "when needed", "eventually") as a measurable one.
 
 ---
 
@@ -122,7 +122,7 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. The routing depends on whether Discovery ran:
 
 **If plan.md contains `## Feature Specification` (Discovery ran):**
-Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features. Discovery's three-amigos Refinement runs three independent personas under a unanimous-non-REJECT gate -- coverage that already exceeds the Skeptic + plan-reviewer pairing, so no additional reviewer is dispatched on the Discovery path.
+Invoke the `three-amigos` skill for a Refinement review. Three amigos review replaces the Skeptic for Discovery features.
 
 **Otherwise (no Discovery):**
 Dispatch BOTH agents in parallel: a **Skeptic Agent** and the **plan-reviewer agent**. Read both verdicts before presenting the plan as final.

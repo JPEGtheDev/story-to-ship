@@ -29,7 +29,7 @@ Apply the rows in order. The first row that matches decides the verdict.
 | Blocked = yes | `[UNCLEAR:] -- answer [question]` -- name the specific contradiction or the specific missing-fact question |
 | Needed = no | `DEFER -- revisit when [condition]` -- the condition must pass the rubric below |
 | Needed = yes, Costly = yes | `DECIDE NOW` -- carry a named risk: what goes wrong if the choice is left open |
-| Needed = yes, Costly = no | `DECIDE NOW` -- pick the simplest valid option; the named risk is the todo or requirement that cannot proceed without it |
+| Needed = yes, Costly = no | `DECIDE NOW` -- pick the simplest option that satisfies every stated requirement; the named risk is the todo or requirement that cannot proceed without it |
 
 ---
 
@@ -57,7 +57,7 @@ These vague words fail on their own: "later", "when needed", "eventually", "when
 ## Failure-Path Rules
 
 - A DEFER whose condition is only vague language, or mixes vague clauses with no measurable clause, is rejected and rewritten as a measurable condition. If no measurable condition can be named, the verdict becomes `[UNCLEAR:] -- answer [question]` where the question asks what would force the decision.
-- A DECIDE NOW that depends on a fact the plan does not state becomes `[UNCLEAR:] -- answer [that fact]` only when it decides, by itself, whether an option satisfies a stated requirement or contradicts one. A fact that only ranks the valid options (every option still works whichever way the fact goes) does not block: pick the simplest valid option and record the unstated fact it assumes as the named risk. An unstated requirement is a missing fact, which the Blocked question catches.
+- A DECIDE NOW that depends on a fact the plan does not state becomes `[UNCLEAR:] -- answer [that fact]` only when it decides, by itself, whether an option satisfies a stated requirement or contradicts one. A fact that only ranks the valid options (every option still works whichever way the fact goes) does not block: pick the simplest option that satisfies every stated requirement and record the unstated fact it assumes as the named risk. An unstated requirement is a missing fact, which the Blocked question catches.
 - A DECIDE NOW with no nameable risk is malformed and is not emitted; the verdict falls to DEFER because nothing forces the decision.
 - An `[UNCLEAR:]` with no named question or contradiction is malformed.
 - A todo that depends on a DEFER component uses that component's simplest valid option and adopts no other option; a todo that needs an option beyond the simplest valid option is rewritten or removed. An `[UNCLEAR:]` component gets no todo until it is resolved.

@@ -130,7 +130,7 @@ Reuse is not inherently good. A reused component that carries more dependencies 
 
 The full principle: "Every piece of knowledge must have a single, unambiguous, authoritative representation in the system." This is broader than code deduplication. It applies to:
 - **Business rules** -- logic encoded in multiple places diverges over time
-- **Data schemas** -- same structure defined in DB, API contract, and user interface (UI) model separately
+- **Data schemas** -- same structure defined in DB, API contract, and UI model separately
 - **Configuration** -- the same value hardcoded in three places
 
 Violating DRY on *knowledge* causes the system to have no single source of truth. When a rule changes, every copy must change -- and at least one will be missed.

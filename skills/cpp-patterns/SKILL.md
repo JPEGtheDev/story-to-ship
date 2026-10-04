@@ -48,7 +48,7 @@ When writing C++ code for this project, apply these patterns consistently.
 
 ## Error Handling
 
-- Check return values from OpenGL and file input/output operations
+- Check return values from OpenGL and file I/O operations
 - Log errors to console with descriptive messages
 - Use assertions for preconditions and invariants
 - Open binary data files with `"rb"` mode for cross-platform correctness

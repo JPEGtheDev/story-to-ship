@@ -1,7 +1,7 @@
 ---
 name: infrastructure-reviewer
 model: sonnet
-description: Use for per-file CI/CD (continuous integration and continuous delivery), reproducible build, and sandboxed/packaging compliance review.
+description: Use for per-file CI/CD, reproducible build, and sandboxed/packaging compliance review.
 ---
 
 # Infrastructure Reviewer Agent

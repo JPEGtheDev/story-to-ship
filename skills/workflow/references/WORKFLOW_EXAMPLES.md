@@ -1,6 +1,6 @@
 # Workflow Examples and Patterns
 
-This reference provides concrete examples of correct and incorrect CI/CD (continuous integration and continuous delivery) workflow patterns.
+This reference provides concrete examples of correct and incorrect CI/CD (Continuous Delivery) workflow patterns.
 
 ---
 

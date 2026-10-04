@@ -80,7 +80,7 @@ Before presenting tests, verify:
 4. One logical concept per test
 5. Depended-upon behavior is tested: any behavior your code relies on has a test; if behavior can change and no test breaks, it was untested. Full text: `references/TESTING_PATTERNS.md`.
 6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
-7. External dependencies are mocked (database, file input/output (I/O)). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
+7. External dependencies are mocked (database, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
 8. No testing of external libraries (std::, third-party code)
 9. Group related configuration into structs/POCOs (Plain Old C++ Objects) instead of flat variables
 10. Resource cleanup: database connections and file handles closed in destructors/cleanup, check for leaks

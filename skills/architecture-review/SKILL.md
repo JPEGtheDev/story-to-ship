@@ -20,7 +20,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## The Layer Architecture
 
-Software layers are concentric: inner layers hold domain logic and policy; outer layers hold input/output (I/O), frameworks, user interface, and external integrations. Dependencies point inward only -- an inner layer never imports, calls, or names a type from an outer layer. Every file belongs to exactly one layer. Judge each change by which layer its file occupies and which direction its dependencies run.
+Software layers are concentric: inner layers hold domain logic and policy; outer layers hold I/O, frameworks, UI, and external integrations. Dependencies point inward only -- an inner layer never imports, calls, or names a type from an outer layer. Every file belongs to exactly one layer. Judge each change by which layer its file occupies and which direction its dependencies run.
 
 ---
 
@@ -114,7 +114,7 @@ If you catch yourself thinking any of the following, STOP before writing your ve
 
 - `code-quality` -- naming conventions and C++ patterns; architecture-review checks structure, code-quality checks form
 - `testing` -- governs what lives in `tests/` vs `src/testing/`; architecture-review enforces the boundary
-- `infrastructure-review` -- CI/CD (continuous integration and continuous delivery) pipeline, build, and packaging configuration; architecture-review checks source structure
+- `infrastructure-review` -- CI/CD pipeline, build, and packaging configuration; architecture-review checks source structure
 - `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) gate for every class hierarchy change reviewed here
 
 **Design patterns and architectural principles:** `references/DESIGN_PATTERNS.md` and `references/ANTIPATTERNS.md`

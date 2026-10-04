@@ -105,7 +105,7 @@ Use this for fast question-based lookup -- "my lesson is about X, where does it 
 |---|---|
 | Code patterns, naming, error handling | `AGENTS.md` |
 | Test writing, Arrange-Act-Assert (AAA), mocking, visual regression | `testing` skill |
-| CI/CD (continuous integration and continuous delivery) workflows, artifacts, permissions | `workflow` skill |
+| CI/CD workflows, artifacts, permissions | `workflow` skill |
 | Documentation format, linking, content | `documentation` skill |
 | User story creation, estimation | `user-story-generator` skill |
 | Meta/process (skill creation, evaluation) | `self-evaluation` skill |

@@ -155,7 +155,7 @@ After any mistake or user correction:
 | Writing tests | `testing` |
 | Writing/editing C++ | `code-quality` |
 | Commits or PRs | `versioning` |
-| CI/CD (continuous integration and continuous delivery) work | `workflow` |
+| CI/CD (Continuous Delivery) work | `workflow` |
 | Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule |
 | Skill review (skill `.md` files) | `writing-skills` + `skill-reviewer` agent template |
 

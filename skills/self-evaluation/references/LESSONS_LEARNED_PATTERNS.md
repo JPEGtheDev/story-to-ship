@@ -143,8 +143,8 @@ The self-evaluation block itself is imperfect by construction. Use it to surface
 
 ### Wrong Anatomy Red Flag Propagates to All Reviews (PR #16)
 
-**Problem:** A new Red Flag added to `writing-skills/SKILL.md` claimed the Iron Law letter/spirit line MUST be INSIDE the backtick block. The canonical schema in `SKILL_ANATOMY_ELEMENTS.md` shows it OUTSIDE. Three internal skill reviewers all returned PASS because they were validating against the wrong Red Flag. The error was caught only by a Copilot review of the PR.
+**Problem:** A new Red Flag added to the `writing-skills` skill claimed the Iron Law letter/spirit line MUST be INSIDE the backtick block. The canonical schema in that skill's anatomy element reference shows it OUTSIDE. Three internal skill reviewers all returned PASS because they were validating against the wrong Red Flag. The error was caught only by a Copilot review of the PR.
 
-**Lesson:** When a Red Flag in `writing-skills` makes a format assertion ("MUST be inside/outside X"), that Red Flag becomes the schema all future skill reviewers validate against. A wrong Red Flag propagates the error to every review until caught. Before writing any Red Flag about anatomy format: (1) read `SKILL_ANATOMY_ELEMENTS.md`, (2) cite the specific line, (3) verify the claim matches the canonical example.
+**Lesson:** When a Red Flag in `writing-skills` makes a format assertion ("MUST be inside/outside X"), that Red Flag becomes the schema all future skill reviewers validate against. A wrong Red Flag propagates the error to every review until caught. Before writing any Red Flag about anatomy format: (1) read the `writing-skills` skill's anatomy element reference, (2) cite the specific line, (3) verify the claim matches the canonical example.
 
 **Added to:** `writing-skills` BEFORE PROCEEDING item 5 -- extended to cover "adding a Red Flag about anatomy format" and require canonical citation for format assertions.

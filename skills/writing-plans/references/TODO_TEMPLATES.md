@@ -1,4 +1,4 @@
-# Plan Rationale and Templates
+# Todo Templates
 
 Template for the todos of an implementation task in a writing-plans plan.
 

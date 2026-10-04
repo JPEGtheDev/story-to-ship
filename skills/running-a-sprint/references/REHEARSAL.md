@@ -26,16 +26,16 @@ Produce the RED copy by deleting those lines, and paste the `diff` output of the
 
 ## Running
 
-- One rehearsal-subject agent per run, Standard tier, a dispatch budget of 6, a fresh sandbox per run, children dispatched in the foreground.
+- One rehearsal-subject agent per run, Standard tier (the mid model class, the default tier), a dispatch budget of 6, a fresh sandbox per run, children dispatched in the foreground.
 - The dispatch prompt names inputs only: worktree path, skill text path, fixture path, budget. It never names the behavior under test.
 - At least two runs per arm. Two runs show whether a behavior occurs; they give no rate.
 - Take a baseline before the first run: the real main checkout's status and stash list.
 
 ## Counting
 
-Count from the subject's transcript, not its self-report. Use `dispatch_count` and `bg_count` from `SCORECARD.md`; do not copy them.
+Count from the subject's transcript, not its self-report. Run `dispatch_count` and `bg_count` as `SCORECARD.md` defines them, with its transcript variable T set to the subject's transcript; do not paste a modified copy.
 
-- The transcript is the file agent-<id>.jsonl in the subagents folder of the launcher's session folder, where <id> is the agentId in the dispatch result. Check the file is non-empty before counting: an unreadable file prints 0 and looks like a result.
+- The transcript is the file agent-<id>.jsonl in the subagents folder of the session folder of the session that runs the rehearsal (the launcher), where <id> is the agentId in the dispatch result. Check the file is non-empty before counting: an unreadable file prints 0 and looks like a result.
 - Cross-check the dispatch count against the subject's own "Dispatches made" line and report a mismatch.
 - Sandbox checks after each run: the main branch and the origin main did not advance; no merge commit on any ref; the out-of-scope file is byte-identical in every worktree; the real main checkout's status and stash list match the baseline.
 
@@ -43,7 +43,7 @@ Count from the subject's transcript, not its self-report. Use `dispatch_count` a
 
 GREEN passes when the dispatch count is at least 1, no dispatch ran in the background, the reply opens with a kind line (owner question or PR ready), and it says the merge was left to the owner. A GREEN run with a correct hand-back and 0 dispatches fails the dispatch criterion.
 
-For RED, the measures that can differ are the background count, a merge done, and the hand-back kind line (the owner question kind and the kind-line rule are among the removed lines). RED may still hand back: the template keeps its Hand-back section and the "handed back unmerged" rule. A RED subject can also set the background flag off by itself. So a RED whose background count and merge match GREEN is not a failed rehearsal if the kind line differs. If RED equals GREEN on every measure, the fixture is too weak, and the next attempt is a structural redesign of at least five changed lines, not a retry.
+For RED, the measures that can differ are the background count, a merge done, and the hand-back kind line (the owner question kind and the kind-line rule are among the removed lines). RED may still hand back: the template keeps its Hand-back section and the "handed back unmerged" rule. A RED subject can also set the background flag off by itself. So a RED whose background count and merge match GREEN is not a failed rehearsal if the kind line differs. If RED equals GREEN on every measure, first grep the skills the subject loaded for the removed rules, since a host skill can carry a removed rule and make the arms look alike; only if none does is the fixture too weak, and the next attempt is a structural redesign of at least five changed lines, not a retry.
 
 ## Limits
 

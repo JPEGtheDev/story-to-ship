@@ -36,7 +36,7 @@ Run at most 3 runners at once; the owner may change the number.
 **Context:** Two stories could touch the same file at the same time.
 **Forces:** Parallel runners finish sooner, but two branches that edit one file conflict at merge, and the conflict costs a runner's whole fix cycle. The "Files to Create/Modify" list in the story is the only advance signal of overlap.
 
-A story whose "Files to Create/Modify" list overlaps a running story's list waits. When the list is absent, run that story alone. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time.
+A story whose "Files to Create/Modify" list overlaps a running story's list waits. When the list is absent, run that story alone. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time. A story counts as running, for capacity and overlap, until Close-out step 5 completes.
 
 ---
 

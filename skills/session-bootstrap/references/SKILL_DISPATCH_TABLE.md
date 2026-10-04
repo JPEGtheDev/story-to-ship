@@ -32,8 +32,8 @@ do not exist. Add each row only when its skill ships:
 
 | Task type | Skill | Ships with | Tier |
 |-----------|-------|------------|------|
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` (planned) | Story 5 | domain |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` (planned) | Story 7 | domain |
+| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` (planned) | not scheduled | domain |
+| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` (planned) | not scheduled | domain |
 | Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 | domain |
 
 ## Core Skill Tags (per-turn routing block source)

@@ -30,28 +30,11 @@ reconstructing what the agent actually tried.
 
 When running `session-postmortem`, the agent can read the full JSONL transcript to reconstruct:
 - Every tool call made (and whether it succeeded or was denied by the user)
-- Iron Law check points (checklist items in AGENTS.md before every response)
+- Iron Law and BEFORE PROCEEDING gate check points of the skills loaded in that session
 - Actual decision sequence vs. stated rationale
 - Rationalization patterns (gaps between what the model said it would do and what it did)
 
 The session summary provided in a new session's context block references the JSONL path:
 ```
 read the full transcript at: ~/.claude/projects/.../session-id.jsonl
-```
-
-## Future Work
-
-**Pending task:** Build a script in `scripts/` to parse Claude Code session JSONL into
-structured postmortem input for the `session-postmortem` skill. Output format:
-
-```json
-{
-  "session_id": "...",
-  "turns": [
-    { "role": "user", "content": "..." },
-    { "role": "assistant", "content": "...", "tools_used": [...] }
-  ],
-  "iron_law_violations": [],
-  "rationalization_patterns": []
-}
 ```

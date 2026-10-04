@@ -32,8 +32,8 @@ do not exist. Add each row only when its skill ships:
 
 | Task type | Skill | Ships with | Tier |
 |-----------|-------|------------|------|
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | Story 5 | domain |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` | Story 7 | domain |
+| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` (planned) | not scheduled | domain |
+| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` (planned) | not scheduled | domain |
 | Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 | domain |
 
 ## Core Skill Tags (per-turn routing block source)
@@ -86,21 +86,21 @@ called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 
-The three active skills form a chain. Each step gates the next:
+One skill is active: `greenfield-discovery`. It heads a planned chain of three; the two
+later steps are planned and not shipped. Once all three ship, each step gates the next:
 
 ```
-greenfield-discovery  ->  greenfield-architecture  ->  greenfield-bootstrap
-(domain model)            (language/framework)          (project repo setup)
+greenfield-discovery  ->  greenfield-architecture (planned)  ->  greenfield-bootstrap (planned)
+(domain model)            (language/framework)                   (project repo setup)
 ```
 
-Each downstream skill reads the output of the prior skill from conversation history.
-Neither `greenfield-architecture` nor `greenfield-bootstrap` asks the user to repeat
-information already present in a prior skill's output block.
+Only `greenfield-discovery` can be invoked today. The planned downstream steps are meant
+to read the output of the prior step from conversation history, so the user is not asked
+to repeat information already present in a prior skill's output block.
 
 ## Consequences
 
-The greenfield-architecture and greenfield-bootstrap rows trigger only for explicit
-new-project flows -- they do not modify existing routing for ongoing projects.
-Adding them before their skills ship is low-risk: the rows only fire when the user's
-session explicitly matches the described task type, and those task types have no
-existing dispatch coverage.
+The planned `greenfield-architecture` and `greenfield-bootstrap` rows would trigger only for
+explicit new-project flows -- they would not modify existing routing for ongoing projects.
+Those rows stay out of the session-bootstrap table until their skills ship, per the rule
+in Forces above; until then the deferred table is the only place they appear.

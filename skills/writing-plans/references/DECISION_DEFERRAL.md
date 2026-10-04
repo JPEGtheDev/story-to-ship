@@ -16,8 +16,8 @@ A component that already exists in the repo and is not added by the plan is not 
 
 Answer each question yes or no for the component.
 
-1. **Blocked?** Do two or more requirements contradict each other, or is a fact missing that stops you from answering the other questions?
-2. **Needed?** Does a todo, test, or requirement in the plan need the answer, or will other work in the plan build on the choice?
+1. **Blocked?** Do two or more requirements contradict each other, or is a fact missing that stops you from answering the other questions? What the question itself asserts counts as stated.
+2. **Needed?** Does a todo, test, or requirement in the plan need the answer? Yes only when no todo can proceed without picking among the options; if the simplest option lets every todo proceed, no.
 3. **Costly?** Once other work builds on the choice, is reversing it expensive (rework across more than one todo, a data migration, or a changed interface)?
 
 ## Verdict Rule
@@ -35,11 +35,11 @@ Apply the rows in order. The first row that matches decides the verdict.
 
 ## Why DEFER: You Ain't Gonna Need It (YAGNI)
 
-YAGNI says to build only what the plan needs now. A cheap-to-change choice that nothing forces yet is a guess about the future. The guess costs effort today, and a wrong guess costs rework. Waiting costs nothing, because the choice stays cheap and the facts that settle it arrive with the work that needs it.
+YAGNI says to build only what the plan needs now. A choice that nothing forces yet, because the simplest option lets every todo proceed, is a guess about the future. The guess costs effort today, and a wrong guess costs rework. Waiting costs nothing, because the simplest option carries every todo meanwhile and the facts that settle the choice arrive with the work that needs it.
 
 ## Why DECIDE NOW: Named Risk
 
-A costly choice that other work builds on cannot wait: each todo written on top of an open choice adds rework if the choice lands differently. Naming the risk proves the decision is forced. If you cannot say what goes wrong when the choice stays open, nothing forces it, and the verdict is DEFER.
+A costly choice that no todo can proceed without cannot wait: each todo written on top of an open choice adds rework if the choice lands differently. Naming the risk proves the decision is forced. If you cannot say what goes wrong when the choice stays open, nothing forces it, and the verdict is DEFER.
 
 ---
 
@@ -57,7 +57,7 @@ These vague words fail on their own: "later", "when needed", "eventually", "when
 ## Failure-Path Rules
 
 - A DEFER whose condition is only vague language, or mixes vague clauses with no measurable clause, is rejected and rewritten as a measurable condition. If no measurable condition can be named, the verdict becomes `[UNCLEAR:] -- answer [question]` where the question asks what would force the decision.
-- A DECIDE NOW that depends on a requirement or fact the plan does not state becomes `[UNCLEAR:] -- answer [that requirement or fact]`. A choice that stays valid whatever that requirement or fact turns out to be is not blocked by it and stays DECIDE NOW.
+- A DECIDE NOW that depends on a requirement or fact the plan does not state becomes `[UNCLEAR:] -- answer [that requirement or fact]` only when it decides, by itself, whether an option satisfies a stated requirement or contradicts one. A fact that only makes one valid option preferable does not block: pick the simplest valid option and name the risk.
 - A DECIDE NOW with no nameable risk is malformed and is not emitted; the verdict falls to DEFER because nothing forces the decision.
 - An `[UNCLEAR:]` with no named question or contradiction is malformed.
 - A todo that depends on a DEFER component is rewritten so it does not depend on it, or removed. A DEFER or `[UNCLEAR:]` component gets no todo.

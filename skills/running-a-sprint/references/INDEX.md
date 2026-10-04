@@ -10,7 +10,7 @@ related:
 
 # running-a-sprint References Index
 
-These files back the launcher loop enforced by `../SKILL.md`.
+These files back the watch loop enforced by `../SKILL.md`.
 
 ---
 

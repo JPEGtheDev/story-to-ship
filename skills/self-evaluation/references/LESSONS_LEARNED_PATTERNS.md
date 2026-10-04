@@ -27,7 +27,7 @@ story lives in the source project's doc.
 
 ## Testing Lessons
 
-### Separate Act and Assert (PR #64)
+### Separate Act and Assert
 
 **Problem:** Tests combined `// Act & Assert` phases, making failures harder to diagnose.
 
@@ -67,13 +67,13 @@ story lives in the source project's doc.
 
 **Why:** A checker's pattern exists to enforce a convention. Expanding the pattern to match every deviation instead of fixing the deviation erodes the convention until the check no longer means anything.
 
-### Don't Modify README Unless Asked (PR #64)
+### Don't Modify README Unless Asked
 
 **Problem:** Agent added visual regression testing docs to README, which wasn't requested.
 
 **Lesson:** Don't update README unless specifically asked by the user.
 
-### Skills Should Cross-Reference (PR #64)
+### Skills Should Cross-Reference
 
 **Problem:** Testing skill duplicated CI pipeline rules from workflow skill.
 
@@ -141,7 +141,7 @@ The self-evaluation block itself is imperfect by construction. Use it to surface
 
 ## Skill Authoring Lessons
 
-### Wrong Anatomy Red Flag Propagates to All Reviews (PR #16)
+### Wrong Anatomy Red Flag Propagates to All Reviews
 
 **Problem:** A new Red Flag added to the `writing-skills` skill claimed the Iron Law letter/spirit line MUST be INSIDE the backtick block. The canonical schema in that skill's anatomy element reference shows it OUTSIDE. Three internal skill reviewers all returned PASS because they were validating against the wrong Red Flag. The error was caught only by a Copilot review of the PR.
 

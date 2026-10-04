@@ -87,7 +87,7 @@ story lives in the source project's doc.
 
 **Why:** Call sites driven by preference or feature flags are volatile and often come back. The underlying API is comparatively stable. Deleting the method on a temporary caller removal creates unnecessary rework the next time the caller returns.
 
-### Worktree `../` Relative Path Creates Sibling Outside Repo (Metaballs session)
+### Worktree `../` Relative Path Creates Sibling Outside Repo
 
 **Problem:** Three amigo worktrees were created with `git worktree add ../amigo-refinement-*`. From `[repo-root]`, `../` resolves to the parent directory, placing the worktrees at `[repo-root]/../amigo-refinement-*`. Agent prompts were given a path one level up from the actual location. All three amigos returned BLOCKED -- the path didn't exist at the specified location.
 

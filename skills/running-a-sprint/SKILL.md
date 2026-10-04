@@ -42,7 +42,7 @@ A story whose "Files to Create/Modify" list overlaps a running story's list wait
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason, because it has no runner and a reload would lose it. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
 
 **Context:** The launcher compacts or restarts mid-sprint.
 **Forces:** The runners keep working while the launcher forgets, and a lost runner id means a runner nobody can resume. The plan file survives; the launcher's memory does not.
@@ -89,9 +89,9 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 3. Read the lane entries and inline commit hashes from the runner's plan file and run the `lane_sum` count from `references/SCORECARD.md` before step 4 deletes the branch. Then remove the runner worktree (`git -C R worktree remove --force <path>` once `git -C <path> status --short` shows only the untracked plan file; anything else goes to the owner, and do not continue) and every `.worktrees/<prefix>-*` child worktree, orphaned child worktrees included (find them with `git -C R worktree list`).
 4. Delete the branch locally (`git -C R branch -D <branch>`; the squash leaves it unmerged in git's view) and on origin with git push origin --delete <branch>, run through `git -C R`.
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
-6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` in its body and save it with `gh issue edit --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
+6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
 7. Check every other open PR for mergeability (`gh pr view <PR number> --json mergeable`). For each PR that conflicts, resume its runner to fetch origin main and rebase, then send PR ready again.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger and tell the owner.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger and tell the owner. Then launch the next waiting story under the Capacity rules and run intake again on each held story whose gap the owner has answered.
 
 **Context:** The owner merged and the sprint feels finished.
 **Forces:** Each step removes state the next one needs or could be mistaken for, so the order is fixed: the patch comparison needs the runner branch tip, and a deleted branch loses it. A skipped step leaves a stale branch, worktree or conflict that surfaces on a later merge.

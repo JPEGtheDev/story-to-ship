@@ -52,6 +52,12 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 ---
 
+## Decision-Deferral Gate
+
+Before writing todos, apply `references/DECISION_DEFERRAL.md` to each significant architectural or infrastructure component and record a verdict: `DECIDE NOW`, `DEFER -- revisit when [condition]`, or `[UNCLEAR:] -- answer [question]`. Write no todo for a DEFER or `[UNCLEAR:]` component. Rewrite a DEFER whose condition is only vague language ("later", "when needed", "eventually") as a measurable one.
+
+---
+
 ## Building the Plan
 
 1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch, one review pair (the spec-compliance review, then the quality review, run under the `two-stage-review` skill), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.

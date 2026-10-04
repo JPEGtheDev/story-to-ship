@@ -144,7 +144,7 @@ After all three Discovery amigos return:
 - Developer Amigo: Final code diff, test results, architecture impact.
 - Tester Amigo: Test coverage report, AC list, edge case list from Discovery.
 
-Read-set completeness gate: before dispatching any amigo whose agenda includes verifying that evidence or an artifact exists or holds -- Signoff always qualifies; Progress Check, Pivot Assessment, and Retrospective qualify whenever their agenda cites specific evidence -- extract every artifact path the PR body, DoD, or todo evidence cites (scratchpad/, /tmp/claude-*, session directories); confirm each appears in that amigo's Read First; paste the path-diff in the dispatch turn. An empty diff is the dispatch precondition. A 'missing X' blocker from a dispatched amigo = first check the dispatch prompt for read-set omission before treating it as a work gap.
+Read-set completeness gate: before dispatching any amigo whose agenda includes verifying that evidence or an artifact exists or holds -- Signoff always qualifies; Progress Check, Pivot Assessment, and Retrospective qualify whenever their agenda cites specific evidence -- extract every artifact path the PR body, Definition of Done (DoD), or todo evidence cites (scratchpad/, /tmp/claude-*, session directories); confirm each appears in that amigo's Read First; paste the path-diff in the dispatch turn. An empty diff is the dispatch precondition. A 'missing X' blocker from a dispatched amigo = first check the dispatch prompt for read-set omission before treating it as a work gap.
 
 ### Agenda -- Questions
 

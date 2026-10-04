@@ -34,7 +34,7 @@ Avoids letting language constraints limit design thinking.
 
 ---
 
-## YAGNI Applied to Plans
+## You Ain't Gonna Need It (YAGNI) Applied to Plans
 
 YAGNI governs feature additions -- **not** code clarity, refactoring, or structural decisions.
 
@@ -239,7 +239,7 @@ Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Speci
     v
 Build todo list: YAGNI + PPP per item + No Placeholders
     v
-TDD task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
+Test-Driven Development (TDD) task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
     v
 Plan review: covers all criteria? downsides named?
     v

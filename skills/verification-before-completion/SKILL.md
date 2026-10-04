@@ -90,7 +90,7 @@ Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 
-## New Gates: DoD Canon Check on Completion Claims
+## New Gates: Definition of Done (DoD) Canon Check on Completion Claims
 
 **Context:** Applies to every completion claim made in a repo that has a ratified Definition of Done (DoD) canon at `docs/DOD.md`, as produced by the `defining-done` skill's ratification interview. If `docs/DOD.md` does not exist, this section does not apply -- the canon-absent state is not in force, and the generic verification rules elsewhere in this skill govern the claim unchanged.
 

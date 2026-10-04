@@ -43,7 +43,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smell
 
 **Why it hurts:** Dead code accumulates. Future-proofing creates cognitive burden without present-day value.
 
-**Primary Refactorings:** Remove unused code and layers (You Aren't Gonna Need It (YAGNI))
+**Primary Refactorings:** Remove unused code and layers (You Ain't Gonna Need It (YAGNI))
 
 ---
 

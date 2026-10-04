@@ -4,7 +4,7 @@ Generic testing canon: decision rules promoted in SKILL.md live here in full, wi
 
 ---
 
-## AAA Pattern -- Critical Rules
+## Arrange-Act-Assert (AAA) Pattern -- Critical Rules
 
 1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
    - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.

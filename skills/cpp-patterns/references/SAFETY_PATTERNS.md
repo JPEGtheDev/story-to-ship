@@ -86,7 +86,7 @@ C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hi
 
 ---
 
-## Two-Phase Composite for GL State Safety
+## Two-Phase Composite for OpenGL (GL) State Safety
 
 When executing multiple GL operations that can fail, validate the entire sequence before executing any of it:
 
@@ -143,7 +143,7 @@ If a destructor contains code that can fail:
 2. Log the error -- do not re-throw
 3. Complete the cleanup regardless
 
-For RAII resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint -- the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
+For Resource Acquisition Is Initialization (RAII) resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint -- the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
 
 ---
 

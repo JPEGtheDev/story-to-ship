@@ -99,7 +99,7 @@ Numbered list of rules. Specific, concrete, no soft language.
 
 ## Related
 
-- [Testing Standards](../TESTING_STANDARDS.md) -- AAA pattern and naming conventions
+- [Testing Standards](../TESTING_STANDARDS.md) -- Arrange-Act-Assert (AAA) pattern and naming conventions
 - [Integration Tests](integration-tests.md) -- multi-component test patterns
 ```
 

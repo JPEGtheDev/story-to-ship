@@ -141,5 +141,5 @@ After generation is complete: switch modes. Apply the Six Thinking Hats or a Ske
 ## Related Skills
 
 - `brainstorming` -- hard gate: load before any design with unclear approach
-- `writing-plans` -- Simplicity Principles reference; YAGNI; Skeptic Agent
-- `architecture-review` -- OOP Principles reference; layer boundary gate
+- `writing-plans` -- Simplicity Principles reference; You Ain't Gonna Need It (YAGNI); Skeptic Agent
+- `architecture-review` -- Object-Oriented Programming (OOP) Principles reference; layer boundary gate

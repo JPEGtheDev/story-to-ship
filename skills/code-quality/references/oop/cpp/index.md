@@ -1,4 +1,4 @@
-# C++ OOP Tier -- Dispatch Table
+# C++ Object-Oriented Programming (OOP) Tier -- Dispatch Table
 
 Apply this tier when modified files include `.cpp` or `.hpp` extensions.
 

@@ -63,6 +63,6 @@ A failing contract test means the hierarchy is wrong -- fix the hierarchy, not t
 
 ## Related Skills
 
-- `testing` -- parent skill; Test Doubles taxonomy, saw-the-test-fail gate, AAA naming
+- `testing` -- parent skill; Test Doubles taxonomy, saw-the-test-fail gate, Arrange-Act-Assert (AAA) naming
 - `oop-principles` -- sibling; contract tests enforce Liskov Substitution
 - `architecture-review` -- sibling; interfaces also need layer boundary review

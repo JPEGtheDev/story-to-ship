@@ -1,4 +1,4 @@
-# DoD Canon Authoring Template
+# Definition of Done (DoD) Canon Authoring Template
 
 This is the authoring template for a repo's ratified Definition of Done (DoD) canon:
 the flat index file `docs/DOD.md` and its optional per-layer detail files under

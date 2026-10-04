@@ -1,4 +1,4 @@
-# Code Smells -- OOP Specific
+# Code Smells -- Object-Oriented Programming (OOP) Specific
 
 Source: Martin Fowler's _Refactoring_. These smells require class or inheritance concepts.
 Apply when working on class-based code. For universal smells see `../code-smells.md`.

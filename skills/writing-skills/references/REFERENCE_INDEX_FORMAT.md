@@ -44,7 +44,7 @@ related:
 
 **Field rules:**
 - `title` -- `"<skill-name> References Index"` -- no variation.
-- `description` -- one concrete sentence that names the key reference topics. Not "this directory contains files about X" -- name the topics: "Index of reference files for the code-quality skill -- universal smells and design principles, plus OOP tier dispatch table, checklists, and toolchain config."
+- `description` -- one concrete sentence that names the key reference topics. Not "this directory contains files about X" -- name the topics: "Index of reference files for the code-quality skill -- universal smells and design principles, plus Object-Oriented Programming (OOP) tier dispatch table, checklists, and toolchain config."
 - `domain` -- always `skills` for skill reference directories.
 - `subdomain` -- the skill directory name (e.g., `code-quality`, `writing-skills`).
 - `tags` -- MUST include `skills`, the skill name, `references`, and `index` as the first four entries.

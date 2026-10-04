@@ -22,7 +22,7 @@ Modules should be configured at the point where they are composed--such as in ma
 ## Language-Independent Design
 Designs that are tied to the idioms of a specific programming language--such as its syntax, memory model, or standard library--cannot be easily ported or reasoned about at the architectural level. To create robust and adaptable architectures, express design in terms of roles, responsibilities, and interfaces, not language-specific constructs. This makes the design applicable to polyglot systems and easier to communicate. (Source: C2 Wiki "LanguageIndependentDesign")
 
-## No Abstraction Without Two Cases (YAGNI for Generality)
+## No Abstraction Without Two Cases (You Ain't Gonna Need It (YAGNI) for Generality)
 Abstractions should not be created for a single use case; this is YAGNI (You Ain't Gonna Need It) applied to generality. An abstraction is only justified when there are at least two distinct concrete cases that need to be unified. Premature abstraction is often more difficult to remove than premature concreteness, so wait until the need for generality is proven. (Source: C2 Wiki "YouArentGonnaNeedIt")
 
 ## Alan Kay on Messaging

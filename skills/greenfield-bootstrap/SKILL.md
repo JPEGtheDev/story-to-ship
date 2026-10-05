@@ -93,7 +93,7 @@ Substitute `<project-name>`, `<project-id>`, and the per-stack values (the C# ve
 When a hook denies a write:
 
 1. Do NOT retry the write in another form: no shell redirection, no other extension, no other path.
-2. Dispatch one subagent. Its prompt names the stack, the project name and id, the substituted values, the Problem and Open Questions text, the target directory, the files still unwritten, and the full paths of this skill's `references/SHARED_TEMPLATES.md` and of the chosen stack file under `references/stacks/` (this skill's base directory plus each relative path). Tell it to read both files and write only those files into the same directory.
+2. Dispatch one subagent. Its prompt names the stack, the project name and id, the substituted values, the Problem and Open Questions text, the target directory, the files still unwritten, and the full paths of this skill's `references/SHARED_TEMPLATES.md` and of the chosen stack file under `references/stacks/` (this skill's base directory plus `references/` plus the path its mapping row names, such as `stacks/python.md`). Tell it to read both reference files and write only the unwritten files into the same directory.
 3. When it returns, list the directory to confirm the files exist. Then run the hello world and emit the block yourself.
 
 ---

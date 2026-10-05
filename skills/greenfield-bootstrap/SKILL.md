@@ -80,7 +80,7 @@ Write each file with the Write tool, one file per call, from the chosen stack fi
 - `README.md` (`## Shared: README.md`): purpose from the Problem field, Open Questions only when the field is not `None`.
 - The three issue templates (`## Shared: .github/ISSUE_TEMPLATE/bug_report.md`, `user_story.md`, `spike.md`).
 
-Substitute `<project-name>`, `<project-id>`, and the per-stack values (the C# version, the Go version) as the reference names them. The reply NEVER pastes scaffold file content in a code block.
+Substitute `<project-name>`, `<project-id>`, and the per-stack values (the C# version, the Go version) as the chosen stack file names them. The reply NEVER pastes scaffold file content in a code block.
 
 ---
 

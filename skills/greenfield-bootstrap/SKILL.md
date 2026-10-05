@@ -7,7 +7,7 @@ description: Use when a Domain Model block and an Architecture Decision block ex
 ## Iron Law
 
 ```
-YOU MUST WRITE NO FILE UNTIL THE DOMAIN MODEL, A SUPPORTED STACK, AND A CLEAR TARGET DIRECTORY ARE CONFIRMED, AND REPORT PASSED ONLY FOR A HELLO WORLD RUN THAT EXITED 0.
+YOU MUST WRITE NO FILE UNTIL THE DOMAIN MODEL AND A SUPPORTED STACK ARE CONFIRMED AND EITHER NONE OF THE LISTED TARGET PATHS EXISTS OR THE USER SAID OVERWRITE, AND REPORT PASSED ONLY FOR A HELLO WORLD RUN THAT EXITED 0.
 No exceptions.
 ```
 
@@ -35,7 +35,8 @@ Every literal value (file contents, ignore entries, workflow steps, run commands
 - **Architecture Decision block:** read the `Language:` line (required) and, for TypeScript only, the `Runtime/framework:` line. Use the text before each ` -- ` separator. Ignore the other lines.
 - NEVER ask the user to restate anything those blocks hold.
 - **No `## Domain Model` block** (a bare invocation, or an Architecture Decision block alone): write no file. Tell the user to run the `greenfield-discovery` skill first. Stop.
-- **No `## Architecture Decision` block, or a Language value that is blank, `TBD` (to be decided) or `[UNCLEAR:]`:** ask exactly one question for the stack before writing any file, then continue on the answer. When the Language value names two supported languages (for example `Go or Rust`), the one question asks which one to scaffold.
+- **No `## Architecture Decision` block, or a Language value that is blank, `TBD` (to be decided) or `[UNCLEAR:]`:** ask exactly one question for the stack before writing any file, then continue on the answer.
+- **A Language value that names more than one language** (for example `Go or Rust`, or `Go or Java`): ask exactly one question, which language to scaffold, before writing any file. The answer goes through the stack gate, and an unsupported answer gets the refusal text.
 - **No user able to answer** (the skill runs inside a subagent, or nobody can reply): every question in this skill becomes a stop. Write no file. Name the missing fact: the stack, or the overwrite decision.
 
 ---
@@ -62,7 +63,7 @@ Map the Language value with the `## Tokens and Language Mapping` section of `ref
 
 **Forces:** Merging into a file the user owns can destroy work and blurs which files the skill wrote.
 
-1. Run the stack's field-2 toolchain probe first. The Go and C# values (the Go version, the C# major version `M`) come from the installed tool; the stack's field 3 says how.
+1. Run the stack's field-2 toolchain probe first. (Field N is numbered item N of the chosen `## Stack:` section of `references/STACK_TEMPLATES.md`.) The Go and C# values (the Go version, the C# major version `M`) come from the installed tool; the stack's field 3 says how.
 2. List every path the stack writes: the shared files (`.gitignore`, `README.md`, `.github/workflows/smoke.yml`, and the three files under `.github/ISSUE_TEMPLATE/`) plus the stack's field-3 files.
 3. Check each listed path. If any of them exists, write nothing and ask once whether to overwrite the listed files or stop. Stop on "stop", and stop when no user can answer.
 4. NEVER merge into an existing file. On "overwrite", read each existing file once so the Write tool accepts the overwrite, then replace it whole.
@@ -147,11 +148,16 @@ Before writing the first file, verify all of the following:
 
 1. A `## Domain Model` block with a Problem field exists
 2. The Language value is known (from the block or from one answer) and maps to a stack section; for TypeScript the Runtime/framework value is on the supported list
-3. The field-2 probe ran and the Go or C# values are substituted
+3. The field-2 probe ran, and for Go and C# the version value is substituted
 4. Every path the stack writes is listed, and none exists, or the user said overwrite
 
 [+] All 4 met -> write the files
-[-] Any unmet -> write nothing; run the matching step above (tell the user to run `greenfield-discovery`, ask the one stack question, print the refusal text, ask the overwrite question), or stop naming the missing fact when no user can answer
+[-] Any unmet -> write nothing; run the step that matches the unmet condition, or stop naming the missing fact when no user can answer:
+- Item 1 unmet -> tell the user to run `greenfield-discovery`.
+- Item 2 unmet because the Language value is absent, blank, `TBD` or `[UNCLEAR:]`, or names more than one language -> ask the one stack question. The answer goes through the stack gate.
+- Item 2 unmet because the Language value or the TypeScript Runtime/framework value is not supported -> print the refusal text.
+- Item 3 unmet -> run the field-2 probe and substitute the values.
+- Item 4 unmet -> ask the overwrite question.
 
 ---
 

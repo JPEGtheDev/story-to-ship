@@ -21,7 +21,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Load this skill after the `greenfield-discovery` skill (it produces the `## Domain Model` block) and the `greenfield-architecture` skill (it produces the `## Architecture Decision` block). The skill ends with the `## Bootstrapped Files` block.
 
-Every literal value (file contents, ignore entries, workflow steps, run commands, tokens) lives in `references/STACK_TEMPLATES.md`. Copy values from it as written. This file holds the procedure and the gates only. The hello world is the one-line program the stack's template prints.
+Every literal value (file contents, ignore entries, workflow steps, run commands, tokens) lives in `references/SHARED_TEMPLATES.md` (tokens, language mapping, shared file templates) and in the chosen stack's file under `references/stacks/` (that stack's fields). Copy values from them as written. This file holds the procedure and the gates only. The hello world is the one-line program the stack's template prints.
 
 ---
 
@@ -47,7 +47,7 @@ Every literal value (file contents, ignore entries, workflow steps, run commands
 
 **Forces:** A value outside the seven stacks has no template, and a near-match written from memory ships unreviewed files.
 
-Map the Language value with the `## Tokens and Language Mapping` section of `references/STACK_TEMPLATES.md`. A match selects its `## Stack: <label>` section. A value that maps to no stack section gets exactly this text, with [X] filled in, and no file is written:
+Map the Language value with the `## Tokens and Language Mapping` section of `references/SHARED_TEMPLATES.md`. A match selects the stack file its row names (and the `## Stack: <label>` section in it). A value that maps to no stack section gets exactly this text, with [X] filled in, and no file is written:
 
 `Stack [X] is not in the supported list. Supported: Python, TypeScript/Node.js, Rust, Go, C#, C++, C/embedded C.`
 
@@ -63,7 +63,7 @@ Map the Language value with the `## Tokens and Language Mapping` section of `ref
 
 **Forces:** Merging into a file the user owns can destroy work and blurs which files the skill wrote.
 
-1. Run the stack's field-2 toolchain probe first. (Field N is numbered item N of the chosen `## Stack:` section of `references/STACK_TEMPLATES.md`.) The Go and C# values (the Go version, the C# major version `M`) come from the installed tool; the stack's field 3 says how.
+1. Run the stack's field-2 toolchain probe first. (Field N is numbered item N of the `## Stack:` section in the chosen stack file under `references/stacks/`.) The Go and C# values (the Go version, the C# major version `M`) come from the installed tool; the stack's field 3 says how.
 2. List every path the stack writes: the shared files (`.gitignore`, `README.md`, `.github/workflows/smoke.yml`, and the three files under `.github/ISSUE_TEMPLATE/`) plus the stack's field-3 files.
 3. Check each listed path. If any of them exists, write nothing and ask once whether to overwrite the listed files or stop. Stop on "stop", and stop when no user can answer.
 4. NEVER merge into an existing file. On "overwrite", read each existing file once so the Write tool accepts the overwrite, then replace it whole.
@@ -72,9 +72,9 @@ Map the Language value with the `## Tokens and Language Mapping` section of `ref
 
 ## Writing the Files
 
-Write each file with the Write tool, one file per call, from `references/STACK_TEMPLATES.md`:
+Write each file with the Write tool, one file per call, from the chosen stack file under `references/stacks/` and from the `## Shared:` sections of `references/SHARED_TEMPLATES.md`:
 
-- The stack's field-3 files, from the chosen `## Stack: <label>` section.
+- The stack's field-3 files, from the chosen stack file.
 - `.gitignore` (`## Shared: .gitignore`): exactly the stack's field-4 entries.
 - `.github/workflows/smoke.yml` (`## Shared: .github/workflows/smoke.yml`): the frame with the stack's field-6 steps inserted.
 - `README.md` (`## Shared: README.md`): purpose from the Problem field, Open Questions only when the field is not `None`.
@@ -93,7 +93,7 @@ Substitute `<project-name>`, `<project-id>`, and the per-stack values (the C# ve
 When a hook denies a write:
 
 1. Do NOT retry the write in another form: no shell redirection, no other extension, no other path.
-2. Dispatch one subagent. Its prompt names the stack, the project name and id, the substituted values, the Problem and Open Questions text, the target directory, the files still unwritten, and the full path of this skill's `references/STACK_TEMPLATES.md` (this skill's base directory plus that relative path). Tell it to read the reference and write only those files into the same directory.
+2. Dispatch one subagent. Its prompt names the stack, the project name and id, the substituted values, the Problem and Open Questions text, the target directory, the files still unwritten, and the full paths of this skill's `references/SHARED_TEMPLATES.md` and of the chosen stack file under `references/stacks/` (this skill's base directory plus each relative path). Tell it to read both files and write only those files into the same directory.
 3. When it returns, list the directory to confirm the files exist. Then run the hello world and emit the block yourself.
 
 ---

@@ -29,5 +29,5 @@ The skill procedure in SKILL.md cites a reference file for every literal value i
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- procedure and gates that cite this reference
+- [SKILL.md](../SKILL.md) -- procedure and gates that cite these references
 - The `greenfield-discovery` skill produces the `## Domain Model` block this skill reads; the `greenfield-architecture` skill produces the `## Architecture Decision` block it reads.

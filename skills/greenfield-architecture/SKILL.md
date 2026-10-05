@@ -102,10 +102,10 @@ Runtime/framework: [name] -- [one-sentence rationale]. Risk: [named risk]
 Persistence: [one form: decided choice, or "none" with reason -- rationale. Risk: named risk / DEFERRED -- revisit when measurable condition / [UNCLEAR:] -- answer question]
 API boundary: [one form: decided choice, or "none" with reason -- rationale. Risk: named risk / DEFERRED -- revisit when measurable condition / [UNCLEAR:] -- answer question]
 Implementation-level choices:
-- [ORM or library]: DEFERRED -- revisit when [measurable condition]
+- [ORM or library]: [one form: name -- stated by the user / DEFERRED -- revisit when measurable condition]
 ```
 
-Each field takes exactly one value: delete the bracketed alternatives it does not use.
+Each field takes exactly one value: keep one slash-separated form and drop the rest; keep `[UNCLEAR:]` as written.
 
 A measurable condition names an observable event, such as "when the first integration test touches the database layer". "Later", "when needed", "eventually", and "when the time is right" fail.
 

@@ -1,6 +1,6 @@
 # Stack Templates
 
-Per-stack facts for `greenfield-bootstrap`. Each `## Stack:` section below holds the literal files, `.gitignore` entries, workflow steps, and local-run commands for one supported stack. Copy the values as written. Two tokens apply in every stack and are substituted when the files are written: `<project-name>` and `<project-id>`. The Go and C# sections each substitute one more value, stated where it appears. Each stack's smoke workflow is the GitHub Actions workflow at `.github/workflows/smoke.yml` that builds and runs the hello world on every push and pull request. The `## Shared:` sections after the stacks hold the stack-independent files, which are combined with the chosen stack's values.
+Per-stack facts for `greenfield-bootstrap`. Each `## Stack:` section below holds the literal files, `.gitignore` entries, workflow steps, and local-run commands for one supported stack. Copy the values as written. Two tokens apply in every stack and are substituted when the files are written: `<project-name>` and `<project-id>`. The Go and C# sections each substitute one more value, stated where it appears. Each stack's smoke workflow is the GitHub Actions workflow at `.github/workflows/smoke.yml` that builds and runs the hello world on every push and pull request. The `## Shared:` sections after the stacks hold the stack-independent files, which are combined with the chosen stack's values. Each `## Stack:` section is a numbered list of seven items, and "field N" anywhere in this file means numbered item N of the chosen stack's section.
 
 ## Tokens and Language Mapping
 
@@ -386,7 +386,7 @@ The README is the same for every stack except the prerequisites line and the run
 
 In the project directory, run:
 
-`<the stack's field-7 local-run commands>`
+<the stack's field-7 local-run commands>
 ```
 
 Fill rules:
@@ -394,19 +394,21 @@ Fill rules:
 - `<project-name>` is the token defined above.
 - The purpose paragraph restates the Problem field in plain sentences. When the Open Questions field is not `None`, the paragraph does not state the answer to any open question as settled.
 - The `## Open questions` section is written only when the Open Questions field is not `None`. It lists each open question as one bullet. When the field is `None`, omit the whole section, heading included.
-- `## How to run` holds the commands of field 7 in the chosen `## Stack:` section, as written there. When field 7 gives a fallback or a second command (`python3 main.py`, `node dist/main.js`, `./build/hello_world`), keep that wording.
+- `## How to run` holds the text of field 7 in the chosen `## Stack:` section after its `Local run, in the project directory:` label, copied as written, including its own code spans, any fallback or second command (`python3 main.py`, `node dist/main.js`, `./build/hello_world`) and any closing sentence. Do not wrap the copied text in another code span.
 
 Prerequisites line per stack:
 
 | Stack | Prerequisites line |
 |---|---|
 | Python | Python 3 |
-| TypeScript/Node.js | Node.js LTS with npm |
+| TypeScript/Node.js | Node.js Long-Term Support (LTS) release with npm |
 | Rust | Rust toolchain with Cargo |
 | Go | Go |
-| C# | .NET SDK of version M (the same `M` as in the C# section) |
+| C# | .NET SDK of version M |
 | C++ | CMake and a C++ compiler |
 | C/embedded C | gcc for a hosted build; the build runs on the host, not cross-compiled for a device |
+
+In the C# row, `M` is the major version substituted in the C# section; write that value in place of `M`.
 
 ## Shared: .gitignore
 
@@ -479,7 +481,6 @@ labels: bug
 name: User story
 about: Describe a unit of work as a story with acceptance criteria
 title: "[Story] "
-labels: story
 ---
 
 **Type:** Feature | Refactor | Spike | Bug
@@ -533,7 +534,6 @@ labels: story
 name: Spike
 about: Time-boxed investigation to answer a question before committing to work
 title: "[Spike] "
-labels: spike
 ---
 
 ## Question
@@ -558,7 +558,7 @@ labels: spike
 
 ## Exit criteria
 
-- [ ] [The question is answered]
-- [ ] [Findings are recorded above]
-- [ ] [A decision and next step are written down]
+- [ ] The question is answered
+- [ ] Findings are recorded above
+- [ ] A decision and next step are written down
 ```

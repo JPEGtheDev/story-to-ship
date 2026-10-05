@@ -61,6 +61,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `three-amigos` | Acceptance criteria ceremony -- blocks implementation until criteria are clear |
 | `defining-done` | Definition of Done ratification interview -- elicits the owner's ruling on each verification layer: always, conditional, or not applicable |
 | `greenfield-discovery` | Domain model interview for new projects -- blocks code decisions until the domain is documented |
+| `greenfield-architecture` | Language, runtime, and initial architecture advisor for new projects -- asks familiarity with the candidate stacks before recommending, and records each deferred decision with a measurable revisit condition |
 | `user-story-generator` | INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)-aligned story authoring |
 | `user-story-estimation` | T-shirt sizing and effort estimation |
 
@@ -152,7 +153,7 @@ without an OpenCode equivalent remain Claude Code-only.
 ## How It Works
 
 Installing this plugin adds:
-- 37 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 38 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 18 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 

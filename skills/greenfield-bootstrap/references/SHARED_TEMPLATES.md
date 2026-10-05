@@ -29,7 +29,7 @@ Not supported: TypeScript whose `Runtime/framework` value names any runtime or f
 
 ### Action versions
 
-Every generated workflow starts from `actions/checkout@v7`. The stack files' workflow steps use these setup actions: `actions/setup-python@v7`, `actions/setup-node@v7`, `actions/setup-go@v7`, `actions/setup-dotnet@v6`. Rust, C and C++ use the toolchain preinstalled on the `ubuntu-latest` runner (Cargo, CMake, gcc and g++ are listed in its image readme), so those stacks have no setup step.
+Every generated workflow starts from `actions/checkout@v7`. The stack files' workflow steps use these setup actions: `actions/setup-python@v7`, `actions/setup-node@v7`, `actions/setup-go@v7`, `actions/setup-dotnet@v6` (which installs the .NET Software Development Kit (SDK)). Rust, C and C++ use the toolchain preinstalled on the `ubuntu-latest` runner (Cargo, CMake, gcc and g++ are listed in its image readme), so those stacks have no setup step.
 
 ## Shared: README.md
 

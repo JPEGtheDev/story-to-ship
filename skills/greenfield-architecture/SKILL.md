@@ -76,7 +76,7 @@ User declines to report familiarity: ask once more at most, then proceed and rec
 
 Load the decision-deferral reference of the `writing-plans` skill. It sits in the references folder of the `writing-plans` skill directory, a sibling of this skill's base directory, and it is the reference that the Decision-Deferral Gate section of the `writing-plans` skill names. Read it before the first decision. If it cannot be found or read, stop and tell the user so; NEVER run the diagnostic from memory.
 
-Apply its three questions (Blocked? Needed? Costly?) to each architectural decision automatically, and record the verdict: `DECIDE NOW` with a named risk, `DEFER -- revisit when [condition]` with a measurable condition (an observable event), or `[UNCLEAR:] -- answer [question]`. The user never invokes a separate skill for this.
+Apply its three questions (Blocked? Needed? Costly?) to each architectural decision automatically, and record the verdict: `DECIDE NOW` with a named risk, `DEFER -- revisit when [condition]` with a measurable condition (an observable event), or `[UNCLEAR:] -- answer [question]` (a blocking open question). The user never invokes a separate skill for this.
 
 At this stage no plan or todos exist, so read the reference's questions against the domain model's Success Criteria and the requirements the user stated. The `## Architecture Decision` block spells the deferral verdict `DEFERRED -- revisit when [condition]`.
 

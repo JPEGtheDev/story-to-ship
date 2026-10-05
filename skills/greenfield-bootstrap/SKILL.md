@@ -107,7 +107,7 @@ When a hook denies a write:
 - **Tool missing:** still write the files. Report the hello world as NOT RUN, naming the missing tool. NEVER claim it ran. NEVER install a toolchain or any dependency beyond what the stack's own build step fetches.
 - **Tool present:** before the summary, run the stack's field-7 commands in the target directory, unpiped (no `|`, no redirection). One run is the whole field-7 sequence. Note whether `package-lock.json`, `Cargo.lock` and `go.sum` exist before the run.
 - **Exit 0:** PASSED, with the command and exit code.
-- **A failure:** make at most one fix to a file this skill wrote, then re-run once, also when no fix applies (a failure can be transient). Then report FAILED with the command and exit code of the last run. A run that did not exit 0 is NEVER PASSED. At most two runs.
+- **A failure:** make at most one fix to a file this skill wrote, then re-run once, also when no fix applies (a failure can be transient). Then report the last run: PASSED when it exited 0, else FAILED with the command and exit code. A run that did not exit 0 is NEVER PASSED. At most two runs.
 
 **Context (one-fix limit):** Applies after the first failing run, whatever the cause.
 
@@ -169,7 +169,7 @@ Before writing the first file, verify all of the following:
 - Writing into a directory that holds a listed path without asking, or merging into it -> STOP. Ask once, or stop.
 - Retrying a denied write with a shell redirect or another extension -> STOP. Dispatch the subagent.
 - Installing a toolchain, or running a dependency install the stack's build step does not run -> STOP. Report NOT RUN naming the tool.
-- Reporting PASSED from reading the code, or after a non-zero exit -> STOP. Report NOT RUN or FAILED.
+- Reporting PASSED from reading the code, or when the last run exited non-zero -> STOP. Report NOT RUN or FAILED.
 - A third run, or a second fix -> STOP. Report FAILED.
 - Pasting scaffold file content in the reply, or fencing the emitted block -> STOP. Emit plain lines.
 - Running `git init` or committing the new files -> STOP. The skill ends with the block.

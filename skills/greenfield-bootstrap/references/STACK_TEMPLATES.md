@@ -1,6 +1,6 @@
 # Stack Templates
 
-Per-stack facts for `greenfield-bootstrap`. Each `## Stack:` section below holds the literal files, `.gitignore` entries, workflow steps, and local-run commands for one supported stack. Copy the values as written. Two tokens apply in every stack and are substituted when the files are written: `<project-name>` and `<project-id>`. The Go and C# sections each substitute one more value, stated where it appears. Each stack's smoke workflow is the GitHub Actions workflow at `.github/workflows/smoke.yml` that builds and runs the hello world on every push and pull request.
+Per-stack facts for `greenfield-bootstrap`. Each `## Stack:` section below holds the literal files, `.gitignore` entries, workflow steps, and local-run commands for one supported stack. Copy the values as written. Two tokens apply in every stack and are substituted when the files are written: `<project-name>` and `<project-id>`. The Go and C# sections each substitute one more value, stated where it appears. Each stack's smoke workflow is the GitHub Actions workflow at `.github/workflows/smoke.yml` that builds and runs the hello world on every push and pull request. The `## Shared:` sections after the stacks hold the stack-independent files, which are combined with the chosen stack's values.
 
 ## Tokens and Language Mapping
 
@@ -25,7 +25,7 @@ Take the Language value from the `## Architecture Decision` block (produced by t
 | C++ | `## Stack: C++` |
 | C, C99, C11, Embedded C | `## Stack: C/embedded C` |
 
-Not supported: TypeScript whose `Runtime/framework` value names anything outside that list (for example Deno, Bun, Next.js, React or Vite, even alongside Node.js), JavaScript, and every other language. The TypeScript template is a console program, so a browser app or a full-stack framework is out of scope.
+Not supported: TypeScript whose `Runtime/framework` value names any runtime or framework outside that list (for example Deno, Bun, Next.js, React or Vite, even alongside Node.js), JavaScript, and every other language. The TypeScript template is a console program, so a browser app or a full-stack framework is out of scope.
 
 ### Action versions
 
@@ -71,7 +71,7 @@ __pycache__/
 
 ## Stack: TypeScript/Node.js
 
-1. Accepted Language values: `TypeScript`, when every runtime or framework the `Runtime/framework` value names (the part before its ` -- ` separator) is on this list: Node.js, Express, NestJS, Fastify, Koa. The framework itself is not scaffolded; the hello world stays a plain Node.js console program. A value that names anything else, even alongside Node.js (for example Deno, Bun, Next.js, React or Vite), is not supported, because the template is a console program and a browser app or a full-stack framework is out of scope.
+1. Accepted Language values: `TypeScript`, when every runtime or framework the `Runtime/framework` value names (the part before its ` -- ` separator) is on this list: Node.js, Express, NestJS, Fastify, Koa. The framework itself is not scaffolded; the hello world stays a plain Node.js console program. A value that names any other runtime or framework, even alongside Node.js (for example Deno, Bun, Next.js, React or Vite), is not supported, because the template is a console program and a browser app or a full-stack framework is out of scope.
 
 2. Toolchain probe: `command -v node && command -v npm`. When either prints nothing, skip the local run and report `node` as missing (npm ships with Node.js) in the final `## Bootstrapped Files` summary.
 
@@ -364,3 +364,201 @@ hello_world
 ```
 
 7. Local run, in the project directory: `gcc main.c -o hello_world && ./hello_world`.
+
+## Shared: README.md
+
+The README is the same for every stack except the prerequisites line and the run commands. Write it from this template:
+
+```markdown
+# <project-name>
+
+<Purpose: one paragraph of plain sentences restating the Problem field of the `## Domain Model` block.>
+
+## Open questions
+
+- <one open question from the Open Questions field of the `## Domain Model` block>
+
+## Prerequisites
+
+- <the prerequisites line for the chosen stack, from the table below>
+
+## How to run
+
+In the project directory, run:
+
+`<the stack's field-7 local-run commands>`
+```
+
+Fill rules:
+
+- `<project-name>` is the token defined above.
+- The purpose paragraph restates the Problem field in plain sentences. When the Open Questions field is not `None`, the paragraph does not state the answer to any open question as settled.
+- The `## Open questions` section is written only when the Open Questions field is not `None`. It lists each open question as one bullet. When the field is `None`, omit the whole section, heading included.
+- `## How to run` holds the commands of field 7 in the chosen `## Stack:` section, as written there. When field 7 gives a fallback or a second command (`python3 main.py`, `node dist/main.js`, `./build/hello_world`), keep that wording.
+
+Prerequisites line per stack:
+
+| Stack | Prerequisites line |
+|---|---|
+| Python | Python 3 |
+| TypeScript/Node.js | Node.js LTS with npm |
+| Rust | Rust toolchain with Cargo |
+| Go | Go |
+| C# | .NET SDK of version M (the same `M` as in the C# section) |
+| C++ | CMake and a C++ compiler |
+| C/embedded C | gcc for a hosted build; the build runs on the host, not cross-compiled for a device |
+
+## Shared: .gitignore
+
+The `.gitignore` holds exactly the chosen stack's field-4 entries, one per line. It holds no generic entries and no entries from any other stack.
+
+## Shared: .github/workflows/smoke.yml
+
+The workflow frame is the same for every stack. Insert the chosen stack's field-6 steps in place of the marker comment line. The field-6 snippets are already indented six spaces, which matches the `steps:` list below, so paste them without re-indenting. Delete the marker comment line after the insert.
+
+```yaml
+name: Smoke
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      # INSERT THE STACK'S FIELD-6 STEPS HERE
+```
+
+Build and run stay separate steps. No step is followed by a command that forces success, and build and run commands are never joined with a semicolon, so a failing hello world fails the job.
+
+## Shared: .github/ISSUE_TEMPLATE/bug_report.md
+
+```markdown
+---
+name: Bug report
+about: Report something that does not work as expected
+title: "[Bug] "
+labels: bug
+---
+
+## Summary
+
+[One or two sentences describing the bug]
+
+## Steps to reproduce
+
+1. [First step]
+2. [Second step]
+3. [What you see]
+
+## Expected behavior
+
+[What you expected to happen]
+
+## Actual behavior
+
+[What happened instead, with error messages or output]
+
+## Environment
+
+- OS: [e.g., Ubuntu 24.04]
+- Tool versions: [e.g., language runtime and build tool versions]
+- Commit or version: [e.g., git commit hash]
+```
+
+## Shared: .github/ISSUE_TEMPLATE/user_story.md
+
+```markdown
+---
+name: User story
+about: Describe a unit of work as a story with acceptance criteria
+title: "[Story] "
+labels: story
+---
+
+**Type:** Feature | Refactor | Spike | Bug
+**Size:** S | M | L
+**Depends On:** [Issue numbers or "None"]
+
+---
+
+## User Story
+
+**As a** [role: developer, tester, user]
+**I want to** [action]
+**So that** [outcome/business value]
+
+---
+
+## Acceptance Criteria
+
+- [ ] [Specific, measurable outcome]
+- [ ] [Another measurable outcome]
+- [ ] [Edge case or constraint]
+
+---
+
+## Technical Notes
+
+**Dependencies:**
+- [Other stories, external packages, or "None"]
+
+**Constraints:**
+- [Platform requirements, performance targets]
+
+**Files to Create/Modify:**
+- [List of modules with specific file paths]
+
+---
+
+## Definition of Done
+
+- [ ] Code written and peer-reviewed
+- [ ] Tests written and passing
+- [ ] No new linter or compiler warnings
+- [ ] Documentation updated
+- [ ] Ready to merge to the main branch
+```
+
+## Shared: .github/ISSUE_TEMPLATE/spike.md
+
+```markdown
+---
+name: Spike
+about: Time-boxed investigation to answer a question before committing to work
+title: "[Spike] "
+labels: spike
+---
+
+## Question
+
+[The single question this spike answers]
+
+## Timebox
+
+[Maximum time to spend, e.g., 4 hours]
+
+## Approach
+
+[How you will investigate: what to read, build, or measure]
+
+## Findings
+
+[What was learned, with evidence such as links, numbers, or code snippets]
+
+## Decision and next step
+
+[The decision the findings support and the follow-up issue to open]
+
+## Exit criteria
+
+- [ ] [The question is answered]
+- [ ] [Findings are recorded above]
+- [ ] [A decision and next step are written down]
+```

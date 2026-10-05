@@ -107,7 +107,7 @@ When a hook denies a write:
 - **Tool missing:** still write the files. Report the hello world as NOT RUN, naming the missing tool. NEVER claim it ran. NEVER install a toolchain or any dependency beyond what the stack's own build step fetches.
 - **Tool present:** before the summary, run the stack's field-7 commands in the target directory, unpiped (no `|`, no redirection). One run is the whole field-7 sequence. Note whether `package-lock.json`, `Cargo.lock` and `go.sum` exist before the run.
 - **Exit 0:** PASSED, with the command and exit code.
-- **A failure:** make at most one fix to a file this skill wrote and re-run once. Then report FAILED with the command and exit code of the last run. A run that did not exit 0 is NEVER PASSED. At most two runs.
+- **A failure:** make at most one fix to a file this skill wrote, then re-run once, also when no fix applies (a failure can be transient). Then report FAILED with the command and exit code of the last run. A run that did not exit 0 is NEVER PASSED. At most two runs.
 
 **Context (one-fix limit):** Applies after the first failing run, whatever the cause.
 

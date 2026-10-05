@@ -62,7 +62,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `defining-done` | Definition of Done ratification interview -- elicits the owner's ruling on each verification layer: always, conditional, or not applicable |
 | `greenfield-discovery` | Domain model interview for new projects -- blocks code decisions until the domain is documented |
 | `greenfield-architecture` | Language, runtime, and initial architecture advisor for new projects -- asks familiarity with the candidate stacks before recommending, and records each deferred decision with a measurable revisit condition |
-| `greenfield-bootstrap` | Starter project writer for new projects -- writes a runnable skeleton for one of seven supported stacks (README, smoke workflow, issue templates, hello world) and runs the hello world before reporting |
+| `greenfield-bootstrap` | Starter project writer for new projects -- writes a runnable skeleton for one of seven supported stacks (README, smoke workflow, issue templates, hello world) and runs the hello world when the stack's toolchain is installed |
 | `user-story-generator` | INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)-aligned story authoring |
 | `user-story-estimation` | T-shirt sizing and effort estimation |
 

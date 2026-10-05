@@ -70,7 +70,7 @@ User declines to report familiarity: ask once more at most, then proceed and rec
 
 ## Decision-Deferral Diagnostic
 
-**Context:** The reference's questions are written for a plan with todos. This skill runs before any plan or todos exist.
+**Context:** The reference below assumes a plan with todos. This skill runs before any plan or todos exist.
 
 **Forces:** Running the questions from memory drifts from the text. Reading them against a plan that does not exist yields no answer.
 

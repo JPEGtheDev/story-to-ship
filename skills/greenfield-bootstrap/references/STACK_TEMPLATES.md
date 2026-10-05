@@ -13,19 +13,19 @@ Per-stack facts for `greenfield-bootstrap`. Each `## Stack:` section below holds
 
 ### Language-value mapping
 
-Take the Language value from the `## Architecture Decision` block (produced by the `greenfield-architecture` skill) before its ` -- ` separator. Ignore version numbers and parenthetical notes when matching: `Python 3.12` -> Python; `C++20` -> C++; `C# (.NET 8)` -> C#. For TypeScript, also read the `Runtime/framework` value from the same block.
+Take the Language value from the `## Architecture Decision` block (produced by the `greenfield-architecture` skill) before its ` -- ` separator. Ignore version numbers and parenthetical notes when matching: `Python 3.12` -> Python; `C++20` -> C++; `C# (.NET 8)` -> C#. For TypeScript, also read the `Runtime/framework` value from the same block, again only the part before its ` -- ` separator.
 
 | Language value | Stack section |
 |---|---|
 | Python | `## Stack: Python` |
-| TypeScript, with a `Runtime/framework` value naming Node.js or a Node.js server framework (Express, NestJS, Fastify, Koa) | `## Stack: TypeScript/Node.js` |
+| TypeScript, when every runtime or framework the `Runtime/framework` value names is on this list: Node.js, Express, NestJS, Fastify, Koa | `## Stack: TypeScript/Node.js` |
 | Rust | `## Stack: Rust` |
 | Go, Golang | `## Stack: Go` |
 | C# | `## Stack: C#` |
 | C++ | `## Stack: C++` |
 | C, C99, C11, Embedded C | `## Stack: C/embedded C` |
 
-Not supported: TypeScript with any other `Runtime/framework` value (Deno, Bun, a browser framework such as React, Vite or Next.js), JavaScript, and every other language.
+Not supported: TypeScript whose `Runtime/framework` value names anything outside that list (for example Deno, Bun, Next.js, React or Vite, even alongside Node.js), JavaScript, and every other language. The TypeScript template is a console program, so a browser app or a full-stack framework is out of scope.
 
 ### Action versions
 
@@ -71,7 +71,7 @@ __pycache__/
 
 ## Stack: TypeScript/Node.js
 
-1. Accepted Language values: `TypeScript`, when the `Runtime/framework` value names Node.js or a Node.js server framework (Express, NestJS, Fastify, Koa). The framework itself is not scaffolded; the hello world stays a plain Node.js console program. Any other `Runtime/framework` value with TypeScript (Deno, Bun, a browser framework such as React, Vite or Next.js) is not supported.
+1. Accepted Language values: `TypeScript`, when every runtime or framework the `Runtime/framework` value names (the part before its ` -- ` separator) is on this list: Node.js, Express, NestJS, Fastify, Koa. The framework itself is not scaffolded; the hello world stays a plain Node.js console program. A value that names anything else, even alongside Node.js (for example Deno, Bun, Next.js, React or Vite), is not supported, because the template is a console program and a browser app or a full-stack framework is out of scope.
 
 2. Toolchain probe: `command -v node && command -v npm`. When either prints nothing, skip the local run and report `node` as missing (npm ships with Node.js) in the final `## Bootstrapped Files` summary.
 

@@ -84,7 +84,7 @@ At this stage no plan or todos exist, so read the reference's questions against 
 
 ## Architecture Decision Block
 
-**Context:** The block is the skill's only output, and the plan that follows reads it.
+**Context:** The block is the skill's only output, and the plan the `writing-plans` skill builds next reads it.
 
 **Forces:** An omitted field looks like a decision nobody faced. A vague field cannot be checked. A guess at a blocked field hides the open question.
 

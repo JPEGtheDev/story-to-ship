@@ -13,7 +13,7 @@ Does NOT apply when: An existing project is being extended or refactored. Use ex
 
 ## Forces
 
-Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. The `greenfield-discovery` skill is the gate that ensures domain understanding precedes every downstream decision.
+Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. On the full domain-model path, the `greenfield-discovery` skill is the gate that ensures domain understanding precedes the downstream decisions.
 
 Adding dispatch rows before their referenced skills exist causes broken sessions -- the model invokes a skill file that does not exist. Rows are added only when the referenced skill ships.
 
@@ -86,13 +86,16 @@ called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 
-Three skills form the chain. The recommended order is discovery, then architecture, then
-bootstrap. Each step reads the prior step's block from the conversation, so the user is not
-asked to repeat information already present in a prior skill's output block:
+Three skills form the chain, with a Definition of Done step between the first two. The
+recommended order is discovery, then `defining-done` (ratifying the Definition of Done canon
+with the product owner), then architecture, then bootstrap. Each skill reads the block the
+prior skill wrote (the Domain Model block or the Architecture Decision block) from the
+conversation, so the user is not asked to repeat information already present:
 
 ```
-greenfield-discovery  ->  greenfield-architecture  ->  greenfield-bootstrap
-(Domain Model block)      (Architecture Decision)      (project starter files)
+greenfield-discovery -> defining-done -> greenfield-architecture -> greenfield-bootstrap
+(Domain Model block)    (DoD canon)      (Architecture Decision     (project starter files)
+                                          block)
 ```
 
 `greenfield-architecture` also works from a bare start without discovery: it asks for the

@@ -86,15 +86,16 @@ called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 
-Three skills form the chain, with a Definition of Done step between the first two. The
-recommended order is discovery, then `defining-done` (ratifying the Definition of Done canon
-with the product owner), then architecture, then bootstrap. Each skill reads the block the
-prior skill wrote (the Domain Model block or the Architecture Decision block) from the
-conversation, so the user is not asked to repeat information already present:
+Three greenfield skills form the chain, with a Definition of Done step between the first two.
+The recommended order is discovery, then `defining-done`, which ratifies the
+Definition of Done (DoD) with the product owner, then architecture, then bootstrap. The skills
+pass blocks forward in the conversation: `greenfield-architecture` reads the Domain Model
+block, and `greenfield-bootstrap` reads the Domain Model and Architecture Decision blocks, so
+the user is not asked to repeat information already present:
 
 ```
 greenfield-discovery -> defining-done -> greenfield-architecture -> greenfield-bootstrap
-(Domain Model block)    (DoD canon)      (Architecture Decision     (project starter files)
+(Domain Model block)    (DoD)            (Architecture Decision     (project starter files)
                                           block)
 ```
 

@@ -21,18 +21,18 @@ fi
 # pre-message-gates.sh read the bootstrap flag; pre-message.sh reads the
 # honesty and communication flags to decide which text to inject. Every
 # SessionStart source (startup/resume/compact/fork/clear) stamps, unless the
-# payload carries a non-empty agent_id (see below). Stamping
-# the three flags is a side effect only -- it never changes this script's
-# stdout or exit code, and it fails silently (fail-open) if jq is missing,
-# stdin has no session_id or is not valid JSON, the session_id is outside the
-# allowed characters, neither state-dir variable is resolvable, or the state
-# dir cannot be created or written. The reload part below sets the names the
+# payload carries a non-empty agent_id (see below). Stamping the three flags
+# is a side effect only -- it never changes this script's stdout or exit
+# code, and it fails silently (fail-open) if jq is missing, stdin has no
+# session_id or is not valid JSON, the session_id is outside the allowed
+# characters, neither state-dir variable is resolvable, or the state dir
+# cannot be created or written. The reload part below sets the names the
 # banner sentence prints -- the exit code still never changes.
 # A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
 # the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
-# subagent's own compaction, which carries the parent's session_id: for such a
-# payload this whole block does nothing, on every source, so the parent's flags
-# and reload list stay as they were.
+# subagent (for example its own compaction) and carries the parent's
+# session_id: for such a payload this whole block does nothing, on every
+# source, so the parent's flags and reload list stay as they were.
 #
 # After the three flags are stamped (for a payload without agent_id), this
 # same block also maintains the reload set for a compaction or resume, using

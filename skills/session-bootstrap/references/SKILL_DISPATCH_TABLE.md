@@ -24,7 +24,7 @@ These rows are present in the session-bootstrap "On Start" table:
 | Task type | Skill | Tier |
 |-----------|-------|------|
 | Starting a new project from scratch | `greenfield-discovery` | domain |
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` | domain |
+| Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` | domain |
 | Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` | domain |
 
 ## Dispatch Rows (deferred)

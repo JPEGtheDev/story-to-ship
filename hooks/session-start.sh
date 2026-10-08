@@ -20,18 +20,25 @@ fi
 # bootstrap-gate pair (bootstrap-gate-pre.sh / bootstrap-gate-post.sh) and
 # pre-message-gates.sh read the bootstrap flag; pre-message.sh reads the
 # honesty and communication flags to decide which text to inject. Every
-# SessionStart source (startup/resume/compact/fork/clear) stamps. Stamping
+# SessionStart source (startup/resume/compact/fork/clear) stamps, unless the
+# payload carries a non-empty agent_id (see below). Stamping
 # the three flags is a side effect only -- it never changes this script's
 # stdout or exit code, and it fails silently (fail-open) if jq is missing,
 # stdin has no session_id or is not valid JSON, the session_id is outside the
 # allowed characters, neither state-dir variable is resolvable, or the state
 # dir cannot be created or written. The reload part below sets the names the
 # banner sentence prints -- the exit code still never changes.
+# A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
+# the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
+# subagent's own compaction, which carries the parent's session_id: for such a
+# payload this whole block does nothing, on every source, so the parent's flags
+# and reload list stay as they were.
 #
-# After the three flags are stamped, this same block also maintains the
-# reload set for a compaction or resume, using the same guards (jq present,
-# stdin valid JSON, session_id in the allowed charset, state dir resolved and
-# created) -- when any guard fails, nothing below happens either (fail-open):
+# After the three flags are stamped (for a payload without agent_id), this
+# same block also maintains the reload set for a compaction or resume, using
+# the same guards (jq present, stdin valid JSON, session_id in the allowed
+# charset, state dir resolved and created) -- when any guard fails, nothing
+# below happens either (fail-open):
 #   .skills-loaded-<session_id>  is the de-duplicated list
 #     bootstrap-gate-post.sh appends to, one distinct Skill name per line,
 #     the first time the main session loads each skill (deleted by this
@@ -52,23 +59,28 @@ fi
 # unreadable loaded list, which fails open the same way the rest of this
 # block does -- deletes the pending file instead of leaving an empty one
 # behind.
-# On every other source, including a payload with no source field at all,
-# both the loaded list and the pending file are deleted: a fresh session
-# (startup/fork/clear/anything unrecognized) has no prior skill loads to
-# reload, and stale state from a reused session_id must not carry over.
+# On every other source (for a payload without agent_id), including a payload
+# with no source field at all, both the loaded list and the pending file are
+# deleted: a fresh session (startup/fork/clear/anything unrecognized) has no
+# prior skill loads to reload, and stale state from a reused session_id must
+# not carry over.
 #
 # This block MUST run before the python3/MD_FILE early-exit checks below --
 # those `exit 0` paths would otherwise skip stamping entirely, so the guard
-# added here only skips the stamping itself, never the whole script.
+# added here only skips the stamping itself, never the whole script. The
+# agent_id rule is the same: it skips this block only, so a subagent payload
+# still gets the banner and session-start.md text from the section below.
 RELOAD_PENDING_NAMES=""
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
   BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
+  # Non-empty agent_id means a subagent payload: skip the whole block below.
+  BOOTSTRAP_AGENT_ID="$(printf '%s' "$RAW" | jq -r '.agent_id // empty' 2>/dev/null)"
   # A session_id outside this charset (e.g. containing "/") could
   # traverse the flag path outside the state dir once concatenated below;
   # skip stamping rather than trust it.
   # Every path built from the id appends it after a fixed file-name prefix, so
   # an id without "/" stays in the state dir.
-  if [[ -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  if [[ -z "$BOOTSTRAP_AGENT_ID" && -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
     BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
     if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
       BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"

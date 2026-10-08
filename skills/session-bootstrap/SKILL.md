@@ -84,7 +84,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 
 If unsure, invoke `code-quality` -- it applies to every code task.
 
-Row context and deferred greenfield rows: see `references/SKILL_DISPATCH_TABLE.md`.
+Row context and the greenfield chain: see `references/SKILL_DISPATCH_TABLE.md`.
 
 **Loading protocol:**
 1. Invoke `honesty` and `communication` immediately after this skill returns -- every session, regardless of task type; hook-injected gate text does not substitute for the invocation

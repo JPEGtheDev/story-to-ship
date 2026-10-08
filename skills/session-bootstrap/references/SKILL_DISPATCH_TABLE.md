@@ -97,8 +97,8 @@ greenfield-discovery  ->  greenfield-architecture  ->  greenfield-bootstrap
 
 `greenfield-architecture` also works from a bare start without discovery: it asks for the
 problem type, output type, and deployment target instead of reading a Domain Model block.
-`greenfield-bootstrap` needs both a Domain Model block and an Architecture Decision block;
-with no Domain Model block it writes no file and points the user to `greenfield-discovery`.
+`greenfield-bootstrap` needs a Domain Model block; with none it writes no file and points the
+user to `greenfield-discovery`. With no Architecture Decision block it asks one question for the stack.
 
 ## Consequences
 

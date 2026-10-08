@@ -113,7 +113,7 @@ Each entry has:
 - maps-to: skill: honesty
 - note: signature BROADENED 2026-07-23 from the external-reviewer self-audit of session a0e656aa (the drift-postmortem), not the 2026-07-19 user-correction mining run; `count: 4` reflects the PRE-broadening signature and is not re-tallied under the broadened definition (source transcripts are private/uncommitted -- no regeneration).
 - see also: RD-47 (re-assertion decay) -- when the bare claim is a RESTATED prior verdict rather than a first-time unbacked claim.
-- detector: offline precision/recall harness at `tools/evaluation_evidence_gate/` (`judge_prompt.md` defines the claim classes; also cited by `agents/postmortem-reviewer.md` for the empirical-backing precision split).
+- detector: the empirical-backing precision-split in `agents/postmortem-reviewer.md` (after the fact; it classifies each declare-clean claim as evidence-absent, evidence-gathered-not-shown, or epistemically-marked).
 
 ### RD-12: skeptic-not-dispatched
 - signature: Presented a plan or design without the required Skeptic review.

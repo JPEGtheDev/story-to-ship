@@ -150,7 +150,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 - Architecture or code recommendations appearing before `## Domain Model` is written -> STOP. Finish the domain interview first. No architecture without a domain model.
 - Re-running the interview when a `## Domain Model` block already exists in the conversation -> STOP. Read the existing block. Do not ask the user to repeat information.
 - Continuing past a contradictory answer without flagging it -> STOP. Write the `[UNCLEAR:]` label at the point of detection. Resolve it before asking the next question.
-- Invoking `greenfield-architecture` or `greenfield-bootstrap` before invoking `defining-done` -> STOP. Ratify the Definition of Done canon with the product owner first; stories generated before ratification carry an unratified fallback DoD forward.
+- Invoking `greenfield-architecture` or `greenfield-bootstrap` before invoking `defining-done` -> STOP. Ratify the Definition of Done canon with the product owner first.
 
 ---
 

@@ -76,7 +76,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Any new plan with 2+ todos or an architectural decision | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Auditing or reorganizing a collection of files, tasks, or artifacts with multiple valid structural approaches | `brainstorming`, `writing-plans` |
 | Starting a new project from scratch | `greenfield-discovery` |
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` |
+| Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` |
 | Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` |
 | Task references a GitHub issue number (#NNN), OR task description contains "acceptance criteria", "AC:", or Given/When/Then blocks -- if unsure whether ACs exist, read the issue before planning | `three-amigos` -- run Discovery (Ceremony 1) before planning begins; surfaces AC ambiguities as `[UNCLEAR:]` labels before the plan is built |
 | Summarizing external resources (articles, web pages, files) for knowledge extraction | `summarization` |

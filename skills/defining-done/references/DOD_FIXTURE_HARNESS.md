@@ -1,7 +1,7 @@
 # Definition of Done Fixture Harness: When to Re-run It
 
 The fixture harness in `tools/dod_fixtures/` checks captured transcripts of the
-Definition of Done (DoD) skills for the pinned marker lines. It is not part of
+Definition of Done skills for the pinned marker lines. It is not part of
 continuous integration, because each model-backed run costs money. Each such run
 needs the owner's consent every time, including a re-run of a scenario that
 already passed.

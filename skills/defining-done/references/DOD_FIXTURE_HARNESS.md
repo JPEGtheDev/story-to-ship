@@ -1,4 +1,4 @@
-# DoD Fixture Harness: When to Re-run It
+# Definition of Done Fixture Harness: When to Re-run It
 
 The fixture harness in `tools/dod_fixtures/` checks captured transcripts of the
 Definition of Done (DoD) skills for the pinned marker lines. It is not part of

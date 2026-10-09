@@ -12,6 +12,7 @@ related:
 
 These references define the repo-agnostic taxonomy the defining-done interview walks
 group by group to produce a repo's ratified Definition of Done canon.
+One further reference covers re-running the fixture harness after a marker change.
 
 ---
 

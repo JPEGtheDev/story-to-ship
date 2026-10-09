@@ -1,6 +1,6 @@
 ---
 title: "defining-done References Index"
-description: "Index of all reference files for the defining-done skill -- the repo-agnostic Definition of Done verification-layer taxonomy consumed by the ratification interview."
+description: "Index of all reference files for the defining-done skill -- the repo-agnostic Definition of Done verification-layer taxonomy consumed by the ratification interview, and the guide to re-running the fixture harness after a marker change."
 domain: skills
 subdomain: defining-done
 tags: [skills, defining-done, references, index]

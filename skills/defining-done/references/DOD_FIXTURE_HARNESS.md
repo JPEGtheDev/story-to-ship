@@ -50,7 +50,6 @@ it). The harness lives in a repository checkout that contains
   of the emitted line's stated reason (grounding-driven or missing evidence). The
   README holds the full rule.
 - A plain PASS is not enough for these scenarios:
-  - evidence-complete: apply the reason read above.
   - dirty-canon and dirty-canon-generator: the checks are forbid-only. Also read
     the transcript to confirm the uncommitted edit is stated plainly and the run
     continues.

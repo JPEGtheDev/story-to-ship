@@ -119,13 +119,12 @@ A class-closed claim may only be made when the message citing it contains BOTH:
 Absent either citation, the only permitted verdict is "closed THIS ROUND" -- an explicitly
 round-scoped claim that carries no residual-zero implication beyond the round just completed.
 
-**Scope of this rule (stated so it does not overclaim).** Neither existing after-the-fact
-detector checks what this rule requires: the evaluation-evidence-gate judge scores whether a
-closure claim carries inline/quoted evidence, and the postmortem-reviewer precision-split
-classifies that evidence as absent, gathered-not-shown, or epistemically-marked -- neither
-checks sweep WIDTH or REVIEWER INDEPENDENCE. A narrow token-grep pasted inline would pass
-both. Enforcement of this rule is therefore self-check at generation time (the Red Flags scan
-below), not a downstream gate.
+**Scope of this rule (stated so it does not overclaim).** The only after-the-fact detector
+is the postmortem-reviewer precision-split, which classifies a closure claim's evidence as
+absent, gathered-not-shown, or epistemically-marked. It does not check sweep WIDTH or
+REVIEWER INDEPENDENCE, so a narrow token-grep pasted inline would pass it. Enforcement of
+this rule is therefore self-check at generation time (the Red Flags scan below), not a
+downstream gate.
 
 ---
 

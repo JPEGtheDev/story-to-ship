@@ -1,6 +1,6 @@
 # Skill Dispatch Table -- Greenfield Workflow
 
-Context, forces, and row definitions for the one active greenfield dispatch row added to the
+Context, forces, and row definitions for the greenfield dispatch rows added to the
 session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 ---
@@ -13,7 +13,7 @@ Does NOT apply when: An existing project is being extended or refactored. Use ex
 
 ## Forces
 
-Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. The `greenfield-discovery` skill is the gate that ensures domain understanding precedes every downstream decision.
+Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. On the full domain-model path, the `greenfield-discovery` skill is the gate that ensures domain understanding precedes the downstream decisions.
 
 Adding dispatch rows before their referenced skills exist causes broken sessions -- the model invokes a skill file that does not exist. Rows are added only when the referenced skill ships.
 
@@ -24,30 +24,30 @@ These rows are present in the session-bootstrap "On Start" table:
 | Task type | Skill | Tier |
 |-----------|-------|------|
 | Starting a new project from scratch | `greenfield-discovery` | domain |
+| Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` | domain |
+| Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` | domain |
 
 ## Dispatch Rows (deferred)
 
-The following rows are NOT yet in the session-bootstrap table because the referenced skills
-do not exist. Add each row only when its skill ships:
+The following row is NOT yet in the session-bootstrap table because the referenced skill
+does not exist. Add the row only when its skill ships:
 
 | Task type | Skill | Ships with | Tier |
 |-----------|-------|------------|------|
-| Choosing a language, runtime, or framework for a new project | `greenfield-architecture` (planned) | not scheduled | domain |
-| Bootstrapping a new project repo after domain model + architecture decision | `greenfield-bootstrap` (planned) | not scheduled | domain |
-| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | Story 4 | domain |
+| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | when the skill ships | domain |
 
 ## Core Skill Tags (per-turn routing block source)
 
 Tag format: a trailing `Tier` column (`core` or `domain`) rather than an HTML comment
-marker, because both dispatch-rows tables above already use multi-column pipe tables
-(the deferred table has 3 columns) -- a Tier column is a lower-diff, mechanically
+marker, because the dispatch-rows tables above already use multi-column pipe tables
+(the active table has 3 columns, the deferred table 4) -- a Tier column is a lower-diff, mechanically
 greppable extension of the existing structure.
 
 DISCLOSURE: the "Core Skill Tags" table below is a NEW table added together with
 the per-turn core skill-map routing block injected via `hooks/pre-message-gates.md`,
 not in-place tagging of the pre-existing "Dispatch Rows" tables above -- every row in
-those two tables was already greenfield/domain before this table existed, so the
-greenfield rows carry the `Tier` column purely for consistency, and the core rows had
+those tables was already domain-tier before this table existed, so those rows carry the
+`Tier` column purely for consistency, and the core rows had
 to be introduced from scratch. Adding a new table (rather than trying to tag
 mixed-skill rows in session-bootstrap SKILL.md's own "On Start" table, e.g. "Creating
 a PR or commit" maps to both `versioning` (domain) and `verification-before-completion`
@@ -86,21 +86,25 @@ called out here for reviewer attention.
 
 ## Greenfield Invocation Chain
 
-One skill is active: `greenfield-discovery`. It heads a planned chain of three; the two
-later steps are planned and not shipped. Once all three ship, each step gates the next:
+Three greenfield skills form the chain, with a Definition of Done step between the first two.
+The recommended order is discovery, then `defining-done`, which ratifies the
+Definition of Done (DoD) with the product owner, then architecture, then bootstrap. The skills
+pass blocks forward in the conversation: `greenfield-architecture` reads the Domain Model
+block, and `greenfield-bootstrap` reads the Domain Model and Architecture Decision blocks, so
+the user is not asked to repeat information already present:
 
 ```
-greenfield-discovery  ->  greenfield-architecture (planned)  ->  greenfield-bootstrap (planned)
-(domain model)            (language/framework)                   (project repo setup)
+greenfield-discovery -> defining-done -> greenfield-architecture -> greenfield-bootstrap
+(Domain Model block)    (DoD)            (Architecture Decision     (project starter files)
+                                          block)
 ```
 
-Only `greenfield-discovery` can be invoked today. The planned downstream steps are meant
-to read the output of the prior step from conversation history, so the user is not asked
-to repeat information already present in a prior skill's output block.
+`greenfield-architecture` also works from a bare start without discovery: it asks for the
+problem type, output type, and deployment target instead of reading a Domain Model block.
+`greenfield-bootstrap` needs a Domain Model block; with none it writes no file and points the
+user to `greenfield-discovery`. With no Architecture Decision block it asks one question for the stack.
 
 ## Consequences
 
-The planned `greenfield-architecture` and `greenfield-bootstrap` rows would trigger only for
-explicit new-project flows -- they would not modify existing routing for ongoing projects.
-Those rows stay out of the session-bootstrap table until their skills ship, per the rule
-in Forces above; until then the deferred table is the only place they appear.
+The `greenfield-architecture` and `greenfield-bootstrap` rows trigger only for explicit
+new-project flows. They do not change routing for existing projects.

@@ -45,12 +45,12 @@ it). The harness lives in a repository checkout that contains
 - Marker scenarios: `check-markers.sh` prints `RESULT: PASS (N/N)` and exits 0.
   Exit 1 is a failed assertion. Exit 2 is a usage error (bad file or flag), not a
   marker finding.
-- A `RESULT: FAIL` is a finding. Do not re-run until it passes. One exception, for
+- A `RESULT: FAIL` is a finding. Do not re-run hoping for a pass. One exception, for
   evidence-complete and dirty-canon: a failed `DOD-GATE: FAIL` forbid needs a read
   of the emitted line's stated reason (grounding-driven or missing evidence). The
   README holds the full rule.
 - A plain PASS is not enough for these scenarios:
-  - evidence-complete: apply the two-tier read above.
+  - evidence-complete: apply the reason read above.
   - dirty-canon and dirty-canon-generator: the checks are forbid-only. Also read
     the transcript to confirm the uncommitted edit is stated plainly and the run
     continues.

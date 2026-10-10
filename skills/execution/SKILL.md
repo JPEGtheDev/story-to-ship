@@ -30,7 +30,7 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 1. Working branch confirmed: the feature branch lives in a worktree under `.worktrees/`, and the main checkout stays on `main` (the `using-git-worktrees` skill, Feature branch). `<repo-root>` is the main checkout's path, never a worktree's. Run `git -C <repo-root>/.worktrees/<feature> branch --show-current`; output must NOT be `main` or `master`. If no feature worktree exists: run `git -C <repo-root> fetch origin main`, then `git -C <repo-root> worktree add .worktrees/<feature> -b <new-branch> origin/main` now. Do not advance past this item until the feature worktree is on a non-main branch.
 2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
-3. For multi-step tasks (3+ steps): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
+3. For multi-step tasks (2+ todos): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
 4. Required skills for this domain are loaded (check session-bootstrap On Start table)
 5. No placeholders in any todo -- every item is concrete and executable
 6. Verification method is identified -- know what command proves success before starting

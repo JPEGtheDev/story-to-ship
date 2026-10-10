@@ -6,26 +6,27 @@ Source: Ward Cunningham's C2 wiki audit -- C++-specific patterns for resource sa
 
 ## Zitface Pattern (Pimpl + NullObject)
 
-Combines pointer-to-implementation with a static null object for safe default state:
+Combines pointer-to-implementation with a null object for safe default state:
 
 ```cpp
+#include <memory>
+
 class Animal {
     struct Impl {
         virtual void speak() = 0;
-        virtual Impl* clone() const = 0;
+        virtual std::unique_ptr<Impl> clone() const = 0;
         virtual ~Impl() = default;
     };
     struct NullImpl : Impl {
         void speak() override {}
-        NullImpl* clone() const override { return &instance(); }
-        static NullImpl& instance() { static NullImpl n; return n; }
+        std::unique_ptr<Impl> clone() const override { return std::make_unique<NullImpl>(); }
     };
 
-    Impl* impl;
+    std::unique_ptr<Impl> impl;
 public:
-    Animal() : impl(&NullImpl::instance()) {}
-    Animal(const Animal& o) : impl(o.impl == &NullImpl::instance() ? &NullImpl::instance() : o.impl->clone()) {}
-    ~Animal() { if (impl != &NullImpl::instance()) delete impl; }
+    Animal() : impl(std::make_unique<NullImpl>()) {}
+    Animal(const Animal& o) : impl(o.impl->clone()) {}
+    Animal& operator=(const Animal& o) { impl = o.impl->clone(); return *this; }
     void speak() { impl->speak(); }
 };
 ```

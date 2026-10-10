@@ -58,7 +58,7 @@ be written this way, the reasoning is at a genuine fork and earns its paragraph.
 
 ## Promotion
 
-Moving from self-check to a measured, checked rule follows the writing-skills Jargon Rule precedent: measure
+Promotion to a checked rule follows the writing-skills Jargon Rule precedent: measure
 the rule's effect on a hand-adjudicated sample (paired dispatches with and
 without the block, N >= 10 per arm, token counts from the session record), then
 promote explicitly if the effect is real and precision is acceptable.

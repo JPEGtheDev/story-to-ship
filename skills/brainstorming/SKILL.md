@@ -117,7 +117,7 @@ A task is architecture-impacting when it touches 2+ architectural layers OR adds
 
 ## BEFORE PROCEEDING
 
-This gate is Phase 4. Every item MUST be checked before handing off to `writing-plans`; an item marked not applicable with its reason counts as checked.
+This gate is Phase 4. Every item MUST be checked before handing off to `writing-plans`. Items 6 and 8 are checked when marked not applicable in the form their own text gives; items 1-5 and 7 have no not-applicable form.
 
 1. All `[UNCLEAR:]` ambiguities resolved -- none remain
 2. Simplest approach identified and chosen or explicitly rejected with reason

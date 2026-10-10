@@ -24,31 +24,24 @@ Violating the letter of this rule is violating the spirit of this rule.
 2. Can its destructor fail or throw?
 3. Does its constructor acquire multiple resources?
 
-[+] No owned resources -> skip this skill  [-] Any owned resource -> apply the rules below
+[-] Any question answered yes -> apply the rules below. [+] All three answered no -> skip this skill.
 
 ---
 
 ## Destructor Rule
 
-Throwing from a destructor during stack unwinding calls `std::terminate` -- no other destructors run. Wrap every destructor body in try/catch; never rethrow.
+Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Wrap every destructor body in try/catch; never rethrow.
 
 ## Constructor Rule
 
 If the constructor acquires resource A then throws while acquiring resource B, A leaks -- the destructor is never called on a partially-constructed object. Each acquisition must be handed to its own scope-bound guard before the next acquisition begins.
 
-**When acquisition happens in a factory method (not a constructor) using raw pointers:** if `unique_ptr` cannot be used (e.g., the pointer is a member reset by a helper method), wrap the second `new` in try-catch -- delete and null the first pointer before rethrowing:
+**When acquisition happens in a factory method (not a constructor) into raw pointer members:** hold the first acquisition in a local `std::unique_ptr`, assign the members only after the last acquisition, and `release()` last.
 
 ```cpp
-void createResources() {
-    executor_ = new Executor();
-    try {
-        cache_ = new Cache(*executor_);
-    } catch (...) {
-        delete executor_;
-        executor_ = nullptr;
-        throw;
-    }
-}
+auto executor = std::make_unique<Executor>();
+cache_ = new Cache(*executor);
+executor_ = executor.release();
 ```
 
 See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples.
@@ -60,7 +53,7 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 | Excuse | Reality |
 |---|---|
 | "The cleanup is simple, it won't throw" | Wrap now -- that property must hold for all future edits. |
-| "`std::terminate` is acceptable here" | Not during stack unwinding -- it prevents all remaining destructors from running. |
+| "`std::terminate` is acceptable here" | Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. |
 | "The second allocation almost never fails" | "Almost never" is not a safety guarantee. Wrap in a scope-bound guard. |
 | "Owning guards add boilerplate" | The boilerplate is the guarantee. Inline cleanup is a future leak. |
 | "The partial construction case never happens in practice" | "Never in practice" is not a structural guarantee. Scope-bound guards prevent the case unconditionally -- no statistical argument required. |
@@ -79,6 +72,6 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 ## Related Skills
 
-- `cpp-patterns` -- parent skill; OpenGL smell catalog and DRY patterns
+- `cpp-patterns` -- parent skill; OpenGL smell catalog and Don't Repeat Yourself (DRY) patterns
 - `oop-principles` -- sibling; resource-owning types also need the Is-A / Has-A gate
 - `systematic-debugging` -- sibling; use when a crash points to destructor failure

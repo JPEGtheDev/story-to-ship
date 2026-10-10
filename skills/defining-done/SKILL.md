@@ -27,7 +27,7 @@ Violating the letter of this rule is violating the spirit of this rule.
    [-] -> STOP. This skill requires a live owner exchange.
 3. Check for an existing `docs/DOD.md`.
    [+] absent -> proceed with the fresh interview below
-   [-] present -> STOP. A canon already exists; this is a re-ratification. Continue at Delta Re-Ratification Mode below -- do not run the fresh group-by-group interview over an existing canon.
+   [-] present -> a canon already exists, so this is a re-ratification: do not run the fresh group-by-group interview; go to Delta Re-Ratification Mode now.
 
 [+] All met -> proceed
 [-] Any unmet -> resolve the failing condition's action above first
@@ -40,7 +40,7 @@ Walk `references/DOD_TAXONOMY.md`'s 5 groups IN ORDER: Acceptance & Traceability
 
 Within a group, one layer at a time:
 1. Present the layer as INFORMATION ONLY: its name, Key, group, Verifies text, and example checkable triggers, verbatim from the taxonomy.
-2. Ask the owner to rule it: ALWAYS, CONDITIONAL with a trigger, or N/A with a category.
+2. Ask the owner to rule it: ALWAYS, CONDITIONAL with a trigger, or not applicable (N/A) with a category.
 3. NEVER pre-fill a ruling, suggest one as a default, or skip a layer -- silence is not a ruling. All 20 layers get an explicit owner ruling every interview.
 
 **Checkability re-elicitation loop:** a CONDITIONAL ruling's trigger MUST be an objectively checkable predicate -- mechanically evaluable from a diff's changed-file list or content (path globs, file-type conditions, diff-content conditions). If the owner's proposed trigger is not checkable, explain why in plain terms and re-elicit.
@@ -101,8 +101,11 @@ different, observable state from "absent."
   taxonomy that does not exist yet. REFUSE with a diagnostic naming the impossible
   stamp relationship, then STOP.
 
-**Delta elicitation.** Using `references/DOD_TAXONOMY.md`'s Delta rule line,
-identify only the layers added or changed since the canon's recorded stamp. Elicit a
+**Delta elicitation.** Identify the delta layers from the taxonomy's change record:
+the delta layers are the union of the keys in the added and changed parts of the
+Stamp history entries after the canon's stamp, up to and including the taxonomy's
+current stamp. If the list has no entry for a stamp in that range, REFUSE with a
+diagnostic naming the missing stamp, then STOP. Elicit a
 ruling for each delta layer only -- every rule of the Interview Procedure above
 applies unchanged to these layers: no defaults, the checkability re-elicitation loop
 with its 3-attempt bound, and the closed N/A category list. Before the delta
@@ -122,13 +125,16 @@ delta set triggers the write step.
 > already open, since the owner is present anyway; but a delta pass only ratified
 > the delta layers -- touching any other line would ship an unratified change under
 > the guise of a stamp bump.
-> Solution: the new `docs/DOD.md` is the old file with exactly two kinds of
-> change: delta ruling lines added or replaced for the layers identified above, and
-> the `Stamp:` line updated to the taxonomy's current stamp. Every other byte --
-> every untouched ruling line, the frontmatter, the narrative line -- is carried
-> over byte-for-byte.
-> Consequences: prior rulings survive byte-untouched except the stamp; an owner or
-> reviewer can diff the old and new canon and see exactly, and only, the delta.
+> Solution: the new `docs/DOD.md` is the old file with exactly three permitted
+> changes: delta ruling lines added or replaced for the delta layers; the `Stamp:`
+> line updated to the taxonomy's current stamp; and the `related` frontmatter
+> entries updated for the detail files of the delta layers. Every other byte --
+> every untouched ruling line, the narrative line, the rest of the frontmatter --
+> is carried over byte-for-byte. When the delta adds a detail file, follow the Write
+> Step's detail-file and index-chain order.
+> Consequences: prior rulings survive byte-untouched; an owner or reviewer can diff
+> the old and new canon and see only the delta rulings, the stamp, and the `related`
+> entries.
 
 The same atomic write order and abandonment rule from the Write Step above apply
 unchanged: nothing is written before this step, and a delta interview abandoned
@@ -147,7 +153,7 @@ before its ratification pass completes leaves `docs/DOD.md` unmodified.
 | "A scratch file isn't really the canon, so drafting one is fine" | Any file on disk before ratification IS a canon artifact to anything that reads `docs/`. No scratch files, ever. |
 | "The owner gave a reason for N/A, that's enough" | A reason is not a category. Re-ask until one of the three closed categories is named. |
 | "We're on attempt 4 of the trigger, one more phrasing might land" | The loop is bounded at 3. Offer the binary choice now -- ALWAYS or N/A repo-ruled -- never a 4th attempt. |
-| "Prior rulings look stale, I'll refresh a few while the file's open" | Byte-preservation is absolute. A delta pass ratifies only the delta layers; touching any other ruling line ships an unratified change under the guise of a stamp bump. |
+| "Prior rulings look stale, I'll refresh a few while the file's open" | Byte-preservation is absolute outside the three permitted changes (delta ruling lines, the `Stamp:` line, the `related` entries for delta detail files). A delta pass ratifies only the delta layers; touching any other ruling line ships an unratified change under the guise of a stamp bump. |
 | "Stamps are equal, but I'll re-ask a couple of layers just to be safe" | Equal stamps means the canon is current. Stop -- there is nothing to elicit and nothing to write. |
 
 ---
@@ -161,7 +167,7 @@ before its ratification pass completes leaves `docs/DOD.md` unmodified.
 - Past 3 failed trigger attempts and still drafting a new phrasing -- STOP. Offer the bounded ALWAYS/N/A choice now.
 - N/A ruling given with only free text, no category tag -- STOP. Re-ask for one of the three closed categories.
 - Interview interrupted and a partial DOD.md or detail file already exists -- STOP. This skill's design makes that state impossible; do not compound it by continuing the write.
-- In delta mode, about to edit a ruling line the delta pass did not just ratify -- STOP. Byte-preservation is absolute; only delta lines and `Stamp:` change.
+- In delta mode, about to edit a ruling line the delta pass did not just ratify -- STOP. Byte-preservation is absolute outside the three permitted changes: delta ruling lines, the `Stamp:` line, and the `related` entries for delta detail files.
 - An existing `docs/DOD.md` failed to parse and the fresh interview is about to run anyway -- STOP. Refuse with a diagnostic naming what failed; never guess over an unreadable canon.
 
 ---

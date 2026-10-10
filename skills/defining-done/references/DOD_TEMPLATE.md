@@ -14,8 +14,8 @@ elaboration below is illustrative only.
 `docs/DOD.md` is a cross-cutting standard file per the documentation skill's
 file-naming convention (`docs/UPPERCASE.md`). It MUST stay under the documentation
 skill's 800-token cap -- one line per taxonomy layer, no elaboration beyond a short
-optional free-text tail on N/A lines. Longer rationale goes to a detail file (Section
-B), never into the index.
+optional free-text tail on not applicable (N/A) lines. Longer rationale goes to a detail
+file (Section B), never into the index.
 
 ### A.1 Frontmatter
 
@@ -28,7 +28,12 @@ cross-cutting files do not carry `subdomain`. There is also no `version` field -
 that field is a dropped, deliberately absent artifact, unrelated to the `Stamp:`
 mechanism below. `tags` MUST start `[cross-cutting, standards, ...]` (per the
 template) followed by `dod` and any additional tags. `related` MUST link to
-`docs/INDEX.md` and to each detail file this canon has.
+`docs/INDEX.md` and to each detail file this canon has. On a delta re-ratification,
+`related` entries are updated only for the detail files of the delta layers -- one of
+the three permitted changes to the existing canon: delta ruling lines added or
+replaced for the delta layers; the `Stamp:` line updated to the taxonomy's current
+stamp; and the `related` frontmatter entries updated for the detail files of the delta
+layers. Every other byte of the canon stays byte-for-byte.
 
 ### A.2 Machine-readable stamp
 
@@ -44,8 +49,8 @@ ratified or delta-ratified against. `Stamp: vN` is the single
 source of truth consumers read to detect staleness (Section C). A human-readable
 narrative line such as `Ratified against DOD_TAXONOMY.md vN.` MAY also appear
 immediately above the ruling lines as optional, non-normative prose -- it exists for
-human readability only. No consumer (generator, completion gate, or any other
-tooling) MUST ever parse the narrative line; `Stamp: vN` is authoritative and the
+human readability only. Consumers (the generator, the completion gate, or any other
+tooling) MUST NOT parse the narrative line; `Stamp: vN` is authoritative and the
 narrative line, if present, MUST agree with it or be treated as a documentation bug,
 not a second source of truth.
 
@@ -152,9 +157,10 @@ Example full paths: `docs/dod/test-suite-integrity/mutation-testing.md`,
 Detail-file frontmatter follows the documentation skill's frontmatter schema for an
 individual reference file: `title`, `description`, `domain: dod`,
 `subdomain: <group-slug>`, `tags` starting `[dod, <group-slug>, <layer-key>]`, and
-`related` linking back to `docs/DOD.md` and to `DOD_TAXONOMY.md`. A `## Related`
-section is required at the bottom, per the documentation skill's convention. The
-per-file 800-token cap applies -- one concept (one layer's rationale) per file.
+`related` linking back to `docs/DOD.md` only (the taxonomy ships with the skill, not with
+the target repo, so a link to it would dangle). A `## Related` section is required at the
+bottom, per the documentation skill's convention. The per-file 800-token cap applies --
+one concept (one layer's rationale) per file.
 
 ### B.4 Write order
 

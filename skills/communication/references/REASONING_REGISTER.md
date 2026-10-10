@@ -1,7 +1,6 @@
 # Reasoning Register -- Rationale, Example, Measurement
 
-Companion to the "Keep Reasoning Terse" rule in `SKILL.md`. The rule is ADVISORY
-until measured (see Promotion below).
+Companion to the "Keep Reasoning Terse" rule in `SKILL.md`.
 
 ## Why this rule exists
 
@@ -59,7 +58,7 @@ be written this way, the reasoning is at a genuine fork and earns its paragraph.
 
 ## Promotion
 
-Advisory -> enforced follows the writing-skills Jargon Rule precedent: measure
+Promotion to a checked rule follows the writing-skills Jargon Rule: measure
 the rule's effect on a hand-adjudicated sample (paired dispatches with and
 without the block, N >= 10 per arm, token counts from the session record), then
 promote explicitly if the effect is real and precision is acceptable.

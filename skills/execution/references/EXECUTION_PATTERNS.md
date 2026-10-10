@@ -176,8 +176,8 @@ Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-refer
 ```
 Task arrives
     v
-Trivial (1 file, 1 step)? -> Implement directly
-    v (multi-step)
+Trivial (1 todo)? -> Implement directly
+    v (2+ todos)
 Invoke writing-plans -> clarify -> plan -> Skeptic + plan-reviewer pair
     v
 Per todo: in-progress -> PPP (Plain Programmer's Purpose) gate -> implement -> prove -> done -> commit

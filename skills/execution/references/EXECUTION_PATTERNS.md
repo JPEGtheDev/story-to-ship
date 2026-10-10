@@ -124,7 +124,7 @@ This behavior is the foundation of predictable trust. Consistent commitment-keep
 
 ---
 
-## MIWMIRMIF -- Extended Rationale
+## Make It Work, Make It Right, Make It Fast (MIWMIRMIF) -- Extended Rationale
 
 **Relationship to the TDD (Test-Driven Development) cycle:**
 
@@ -153,7 +153,7 @@ After any mistake or user correction:
 | Bug or failure | `systematic-debugging` |
 | Completion claim | `verification-before-completion` |
 | Writing tests | `testing` |
-| Writing/editing C++ | `code-quality` |
+| Writing/editing C++ | `code-quality`, `cpp-patterns`, `cpp-safety` |
 | Commits or PRs | `versioning` |
 | CI/CD (Continuous Delivery) work | `workflow` |
 | Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule |
@@ -176,8 +176,8 @@ Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-refer
 ```
 Task arrives
     v
-Trivial (1 file, 1 step)? -> Implement directly
-    v (multi-step)
+Trivial (1 todo)? -> Implement directly
+    v (2+ todos)
 Invoke writing-plans -> clarify -> plan -> Skeptic + plan-reviewer pair
     v
 Per todo: in-progress -> PPP (Plain Programmer's Purpose) gate -> implement -> prove -> done -> commit

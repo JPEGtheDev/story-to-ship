@@ -30,7 +30,7 @@ Before modifying or creating any file in the repo or claiming any task done:
 
 1. Working branch confirmed: the feature branch lives in a worktree under `.worktrees/`, and the main checkout stays on `main` (the `using-git-worktrees` skill, Feature branch). `<repo-root>` is the main checkout's path, never a worktree's. Run `git -C <repo-root>/.worktrees/<feature> branch --show-current`; output must NOT be `main` or `master`. If no feature worktree exists: run `git -C <repo-root> fetch origin main`, then `git -C <repo-root> worktree add .worktrees/<feature> -b <new-branch> origin/main` now. Do not advance past this item until the feature worktree is on a non-main branch.
 2. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
-3. For multi-step tasks (3+ steps): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
+3. For multi-step tasks (2+ todos): the todo list for this work exists in the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1)
 4. Required skills for this domain are loaded (check session-bootstrap On Start table)
 5. No placeholders in any todo -- every item is concrete and executable
 6. Verification method is identified -- know what command proves success before starting
@@ -60,7 +60,7 @@ Before modifying or creating any file in the repo or claiming any task done:
 - Never let a commitment expire silently -- do not end a response with an announced item quietly dropped
 - "I'll get to it next turn" is not a completion -- only "I completed X, verified by [evidence]" is
 
-**Mid-session expectations drift:** If user feedback mid-session reveals your understanding of a requirement was wrong, stop and re-execute Step 0 (Clarify Expectations) before continuing. Do not silently absorb the correction and continue on the old plan.
+**Mid-session expectations drift:** If user feedback mid-session reveals your understanding of a requirement was wrong, stop and re-run Step 0 (Clarify Expectations) of the `writing-plans` skill before continuing. Do not silently absorb the correction and continue on the old plan.
 
 ### The Work Loop
 
@@ -260,7 +260,7 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | "The todo is small, no review needed" | Small todos introduce the same bugs as large ones. YOU MUST dispatch both reviewer stages after every todo without exception. |
 | "I'll review the spec compliance myself, no need to dispatch" | You wrote the code -- you will rationalize away the gaps. Dispatch spec-compliance-reviewer.md every time. |
 | "The previous todo had no issues, this one is probably fine too" | Each todo is independent. Prior clean reviews do not carry over. Dispatch reviewers after this todo. |
-| "I'm close to the end, I'll skip the Skeptic for this todo" | End-of-plan todos are the most likely to drift from the original scope. The Skeptic Agent is mandatory regardless of position in the plan. |
+| "I'm close to the end, I'll skip Stage 1/Stage 2 for this todo" | End-of-plan todos drift most. Both review stages run on every todo (see the `two-stage-review` skill). |
 | "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (see "Re-review required for review-covered territory" in the `two-stage-review` skill; exemption is only an explicit same-turn user waiver). |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a todo in the plan file or as a session note. "I'll remember" is not a commitment mechanism. |

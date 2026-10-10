@@ -53,7 +53,7 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 | Excuse | Reality |
 |---|---|
 | "The cleanup is simple, it won't throw" | Wrap now -- that property must hold for all future edits. |
-| "`std::terminate` is acceptable here" | Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. |
+| "`std::terminate` is acceptable here" | Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Termination may skip pending cleanup; catch and log inside the destructor instead. |
 | "The second allocation almost never fails" | "Almost never" is not a safety guarantee. Wrap in a scope-bound guard. |
 | "Owning guards add boilerplate" | The boilerplate is the guarantee. Inline cleanup is a future leak. |
 | "The partial construction case never happens in practice" | "Never in practice" is not a structural guarantee. Scope-bound guards prevent the case unconditionally -- no statistical argument required. |

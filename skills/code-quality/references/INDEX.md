@@ -45,4 +45,4 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- enforcement gate that drives both tiers; see the `writing-skills` skill's `TIERED_REFERENCE_MODEL` reference for the model this structure follows
+- [SKILL.md](../SKILL.md) -- enforcement gate that drives both tiers; this structure follows the `writing-skills` skill's tiered reference model

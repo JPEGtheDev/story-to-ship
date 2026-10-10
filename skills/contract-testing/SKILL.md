@@ -1,7 +1,7 @@
 ---
 name: contract-testing
 license: MIT
-description: Use when writing tests for any interface, abstract base class, or type with 2+ implementations (a mock counts).
+description: Use when writing tests for any interface or abstract type with 2+ implementations (a mock counts).
 ---
 
 
@@ -20,7 +20,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## BEFORE PROCEEDING
 
-1. Is this an interface, abstract class, or type with 2+ implementations, counting one you are about to add (a mock counts)? If no, this skill does not apply -- stop here.
+1. Is this an interface or abstract type with 2+ implementations, counting one you are about to add (a mock counts)? If no, this skill does not apply -- stop here.
 2. Does a contract test fixture exist for it?
 3. Does every concrete implementation pass all contract tests?
 
@@ -47,7 +47,7 @@ A failing contract test means an implementation breaks an invariant -- fix the i
 | Excuse | Reality |
 |---|---|
 | "Integration tests cover the contract" | Integration tests verify composition, not behavioral invariants. |
-| "There is only one implementation" | A mock is a second implementation, and so is one you are about to add. With a mock or a second implementation, write the fixture now; with one implementation, no mock and no second one planned, this skill does not apply. |
+| "There is only one implementation" | A mock is a second implementation, and so is one you are about to add. With a mock or a second implementation, write the fixture now; with one implementation, no mock and none about to be added, this skill does not apply. |
 | "The interface is simple, nothing to test" | Simple interfaces still have invariants (no-throw, non-null return). |
 | "The mock already tests the behavior" | Mocks verify interactions, not behavioral contracts. Both are needed. |
 | "The contract test is redundant -- the implementations are clearly equivalent" | Equivalence is an assumption, not evidence. Contract tests document and enforce invariants across all current and future implementations. |
@@ -59,7 +59,7 @@ A failing contract test means an implementation breaks an invariant -- fix the i
 - Adding a second implementation without verifying it against the existing contract fixture -- **STOP. Run the full contract suite against the new implementation before merging.**
 - About to write an interface test using `TEST_F` instead of `TYPED_TEST_P` -- **STOP. `TEST_F` instantiates the concrete fixture directly; it does not test behavioral invariants across implementations.**
 - Contract test failing, about to modify the test to make it pass -- **STOP. A failing contract test means an implementation violates the LSP. Fix the implementation, not the test; if the invariant cannot hold for a legitimate subtype, fix the hierarchy.**
-- "The interface has only one implementation now, contract tests can wait" -- **STOP. Count the mock and any second implementation you are about to add: each is a second implementation, so write the fixture now. With one real implementation, no mock and no second one planned, this skill does not apply.**
+- "The interface has only one implementation now, contract tests can wait" -- **STOP. Count the mock and any second implementation you are about to add: each is a second implementation, so write the fixture now. With one real implementation, no mock and none about to be added, this skill does not apply.**
 - Deleting a contract test because "the implementation was simplified" -- **STOP. Simplified implementations still have invariants. Removing a contract test removes the guarantee.**
 
 ---

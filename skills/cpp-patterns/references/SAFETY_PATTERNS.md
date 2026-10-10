@@ -48,21 +48,21 @@ For OpenGL resource handles: value semantics implies cloning the resource or usi
 
 ## Virtual Static Idiom (C-style Callback Adapter)
 
-Bridges C-style `void*` callbacks (SDL3 event handlers, OpenGL debug callbacks) with C++ virtual dispatch:
+Bridges C-style `void*` callbacks (Simple DirectMedia Layer 3 (SDL3) event handlers, OpenGL debug callbacks) with C++ virtual dispatch:
 
 ```cpp
 class EventHandler {
-    static void staticCallback(void* userdata, SDL_Event* e) {
-        static_cast<EventHandler*>(userdata)->onEvent(e);
+    static bool SDLCALL staticCallback(void* userdata, SDL_Event* e) {
+        return static_cast<EventHandler*>(userdata)->onEvent(e);
     }
-    virtual void onEvent(SDL_Event* e) = 0;
+    virtual bool onEvent(SDL_Event* e) = 0;
 public:
     void* callbackPtr() { return this; }
     SDL_EventFilter filter() { return staticCallback; }
 };
 ```
 
-The static wrapper holds the this-pointer in `userdata`; the virtual method provides the polymorphic dispatch.
+The static wrapper holds the this-pointer in `userdata`; the virtual method provides the polymorphic dispatch. The `bool` return is the filter result: `true` keeps the event, `false` drops it.
 
 ---
 

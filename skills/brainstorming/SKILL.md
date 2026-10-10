@@ -124,7 +124,7 @@ This gate is Phase 4. Every item MUST be checked before handing off to `writing-
 3. All trade-offs named -- none left implicit
 4. Exact file paths named -- no "somewhere in src/"
 5. Out-of-scope items explicitly listed
-6. Architecture impact assessed (layer boundaries, dependency direction) if the task is architecture-impacting; otherwise the task is marked not architecture-impacting with BOTH test results shown (layers touched, new dependency) -- a bare "not architecture-impacting" does not satisfy this item
+6. Architecture impact assessed (layer boundaries, dependency direction) if the task is architecture-impacting; otherwise the task is marked not architecture-impacting with BOTH conditions of the architecture-impacting definition answered (layers touched, new dependency) -- a bare "not architecture-impacting" does not satisfy this item
 7. Test strategy stated (every task); an architecture-impacting task also states how the real external dependency is isolated (question 8)
 8. Falsification criterion named if the task is a test design, research methodology, or evaluation framework (a task whose deliverable is the test, method, or evaluation, not the Test strategy line every task carries); otherwise marked not applicable with the reason this task is none of the three
 

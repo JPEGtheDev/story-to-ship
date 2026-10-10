@@ -176,4 +176,5 @@ Any skill that needs the Definition of Done canon discovers it by checking wheth
 
 - `references/DOD_TAXONOMY.md` -- the 20-layer, 5-group taxonomy this interview walks.
 - `references/DOD_TEMPLATE.md` -- the canon index and detail-file authoring template this interview's write step produces output against.
+- `references/DOD_FIXTURE_HARNESS.md` -- when to re-run the fixture harness after a change to a Definition of Done marker line or the rules behind it, the commands, and how to read a pass.
 - `references/INDEX.md` -- this skill's reference-file catalog.

@@ -6,7 +6,7 @@ Source: Ward Cunningham's C2 wiki audit -- patterns for writing tests against in
 
 ## Testing Abstract Base Classes
 
-Write a test fixture for the abstract type using a minimal mock implementation. This test fixture becomes the contract: every concrete subclass must pass it.
+Write a test fixture for the abstract type and instantiate it once per concrete implementation, the minimal mock included. This test fixture becomes the contract: every concrete subclass must pass it.
 
 ```cpp
 // Abstract typed fixture -- parameterised over each concrete implementation
@@ -20,13 +20,13 @@ protected:
 TYPED_TEST_SUITE_P(ICacheTest);
 
 TYPED_TEST_P(ICacheTest, Clear_DoesNotThrow) {
-    EXPECT_NO_THROW(cache_->Clear());
+    EXPECT_NO_THROW(this->cache_->Clear());
 }
 
 REGISTER_TYPED_TEST_SUITE_P(ICacheTest, Clear_DoesNotThrow);
 
 // Instantiate once per concrete type -- all contract tests run automatically:
-using CacheImpls = ::testing::Types<MockCache>;
+using CacheImpls = ::testing::Types<LruCache, MockCache>;  // add every concrete implementation
 INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, ICacheTest, CacheImpls);
 ```
 
@@ -42,7 +42,7 @@ Behavioral contract angle: `validate()` must be idempotent and free of side effe
 
 ---
 
-## Micro-Iteration Test Loop (XP Test FAQ)
+## Micro-Iteration Test Loop (Extreme Programming (XP) Test FAQ)
 
 One failing test at a time. The loop:
 
@@ -113,7 +113,7 @@ Acceptance tests verify behavior from the outside (user-visible outcomes, system
 
 ## Fixture-Backed Tools for Customer-Authored Acceptance Tests
 
-The boundary above still leaves open who writes the acceptance test. A fixture-backed tool answers that: the customer authors the check as a plain document (for example, HTML editable in any standard editor), while the developer supplies the fixture on the other side -- the glue code that turns that document into something the runner can execute automatically. Once a fixture exists for a given kind of check, the customer can compose further tests against it, or assemble several into one larger document, with no developer reprogramming anything underneath. This is a direct answer to "customers can't write test code": developer effort is not removed, it shifts from authoring individual tests toward building and maintaining the fixture layer those tests plug into. `systematic-debugging/references/DEBUGGING_TACTICS.md` names a fixture-backed tool (FIT) as one example under its "suspect the requirement first" heuristic. Source: C2 Wiki "AcceptanceTest".
+The boundary above still leaves open who writes the acceptance test. A fixture-backed tool answers that: the customer authors the check as a plain document (for example, HTML editable in any standard editor), while the developer supplies the fixture on the other side -- the glue code that turns that document into something the runner can execute automatically. Once a fixture exists for a given kind of check, the customer can compose further tests against it, or assemble several into one larger document, with no developer reprogramming anything underneath. This is a direct answer to "customers can't write test code": developer effort is not removed, it shifts from authoring individual tests toward building and maintaining the fixture layer those tests plug into. The `systematic-debugging` skill names a fixture-backed tool, FIT (Framework for Integrated Test), as one example under its "suspect the requirement first" heuristic. Source: C2 Wiki "AcceptanceTest".
 
 ## Code So Simple It Has To Work
 
@@ -121,6 +121,5 @@ Before adding a test for a trivial function, ask: "Is this code so simple that i
 
 ## Related Skills
 
-- `contract-testing` -- iron law: every abstract type requires a contract test fixture
 - `testing` -- test taxonomy, Arrange-Act-Assert (AAA) pattern, naming conventions
 - `systematic-debugging` -- when tests surface bugs, trace to root cause before patching

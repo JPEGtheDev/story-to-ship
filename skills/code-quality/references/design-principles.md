@@ -46,7 +46,7 @@ When a method name requires a preposition ("from", "to", "with") or a conjunctio
 Method names that require prepositions or conjunctions are signals, not style choices:
 
 - `applyUpdatesTo(Account)` -> the method belongs on `Account`
-- `getAddressesFrom(Message)` -> feature envy; `Message` should provide its own addresses
+- `getAddressesFrom(Message)` -> feature envy; move address extraction onto `Message`
 - `validateAndSave()` -> two responsibilities; extract two methods
 
 Rename first. The right name often reveals the right design.

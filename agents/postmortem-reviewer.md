@@ -40,7 +40,7 @@ The output MUST match `{{REPO_PATH}}`.
 
 Read these files in order:
 
-1. `{{EVENTS_JSONL_PATH}}` -- the raw event stream. Extract:
+1. `{{EVENTS_JSONL_PATH}}` -- the raw event stream. If the dispatcher has not produced it (the file is missing or has zero lines) and the session transcript is available, run `python3 tools/session_events/session_to_events.py {{TRANSCRIPT_PATH}} --out {{EVENTS_JSONL_PATH}}` from `{{REPO_PATH}}`; never run it over a non-empty file. A non-zero exit, a missing converter, or a zero-line output means the converter could not run: name the raw transcript as the substitute source in the report. Extract:
    - All `user.message` events -> what the user actually asked for
    - All `skill.invoked` events -> which skills were loaded, and when
    - File writes and shell commands are not in the events log: read the raw transcript's `Edit`, `Write`, `NotebookEdit`, and `Bash` tool calls for when code or files were written

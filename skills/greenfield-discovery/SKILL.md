@@ -61,7 +61,7 @@ During the interview, compare each answer against prior answers. If an answer co
 
 > "[UNCLEAR: you said [X] but also [Y] -- these appear mutually exclusive because [reason]. Which is correct?]"
 
-DO NOT proceed to the next question while a contradiction is unresolved. Wait for the user to clarify, then continue. The one exception is a flag the user explicitly defers. The test is per flag: the user states, in reply to that flag, that it stays open or is decided later. "I don't know", "not sure", silence, an unrelated answer, hurry, or a blanket "figure it out later" is NOT a deferral; the flag stays open. DO NOT offer, suggest, infer or assume a deferral, and DO NOT add "or defer" to the flag text. After a deferral, continue the interview and record the item in Open Questions with the marker "Deferred by the user." If the user later answers a deferred flag, remove it from Open Questions.
+DO NOT proceed to the next question while a contradiction is unresolved. Wait for the user to clarify, then continue. The one exception is a flag the user explicitly defers. The test is per flag: the user states, in reply to that flag, that it stays open or is decided later. "I don't know" or "not sure" alone, silence, an unrelated answer, hurry, or a blanket "figure it out later" is NOT a deferral; the flag stays open. DO NOT offer, suggest, infer or assume a deferral, and DO NOT add "or defer" to the flag text. After a deferral, continue the interview and record the item in Open Questions with the marker "Deferred by the user." If the user later answers a deferred flag, remove it from Open Questions.
 
 **Forces (resolve contradictions immediately):** Unresolved contradictions compound -- a domain model built on two incompatible premises requires a full re-interview to correct.
 
@@ -87,7 +87,7 @@ After all interview question categories are covered, ask this exact question as 
 1. Read each provided document.
 2. Extract domain-specific vocabulary: entity names, operation names, domain constraints, success metrics.
 3. Compare extracted concepts against interview answers. Note confirmations, expansions, and contradictions.
-4. For any contradiction between docs and interview: flag it -- "[UNCLEAR: interview stated X; document states Y -- which is authoritative?]" -- and resolve before proceeding, or the user explicitly defers it (see Contradiction Detection).
+4. For any contradiction between docs and interview: flag it -- "[UNCLEAR: interview stated X; document states Y -- which is authoritative?]" -- and resolve before proceeding, unless the user explicitly defers it (see Contradiction Detection).
 
 DO NOT skip this phase if documents are provided. The domain model MUST incorporate document content.
 
@@ -135,7 +135,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 2. No contradiction left unhandled -- every `[UNCLEAR:]` flag is answered and cleared, or explicitly deferred by the user and listed in Open Questions
 3. Documentation question asked: "Do you have any supporting documentation, whitepapers, or domain references I should read?"
 4. User has answered the documentation question
-5. If docs provided: docs read, domain concepts extracted, contradictions resolved, or deferred by the user and listed in Open Questions
+5. If docs provided: docs read, domain concepts extracted, contradictions resolved, or explicitly deferred by the user and listed in Open Questions
 6. Completeness gate from `references/DOMAIN_MODEL_SCHEMA.md` passed: all Required fields contain project-specific vocabulary
 
 [+] All 6 met -> produce the `## Domain Model` block
@@ -161,7 +161,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 | "The user's initial description is detailed enough -- I can skip the interview" | A detailed description is not a domain model. The interview extracts structure the user does not know they have not stated. Missing structure becomes wrong architecture. |
 | "The documentation question is unnecessary -- they already mentioned they have no docs" | The documentation question MUST be the last line of the interview phase regardless. Confirm explicitly before producing the model. |
 | "The ## Domain Model has some placeholders but I will fill them in during architecture" | A model with placeholders is not a model. Architecture decisions made against placeholders produce the wrong architecture. Fill every field now. |
-| "I see a contradiction but it is minor -- I will note it later" | Minor contradictions compound. Flag `[UNCLEAR:]` at the moment of detection and resolve before asking the next question, unless the user explicitly defers it. "Later" does not exist. |
+| "I see a contradiction but it is minor -- I will note it later" | Minor contradictions compound. Flag `[UNCLEAR:]` at the moment of detection and resolve before asking the next question, unless the user explicitly defers it (see Contradiction Detection). An agent-chosen "later" does not exist. |
 | "greenfield-architecture already knows the domain -- I will skip reading the ## Domain Model" | Read the existing `## Domain Model` block. The most recent block is authoritative. Architecture built from a stale or assumed domain produces a misaligned design. |
 | "The user is in a hurry -- I will ask fewer questions" | The interview requires at least one question per category: problem, users, core entities, success criteria. Speed is not grounds for skipping categories. A rushed domain model produces the wrong architecture. |
 

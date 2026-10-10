@@ -1,7 +1,7 @@
 ---
 name: cpp-patterns
 license: MIT
-description: Use when implementing C++ code, handling OpenGL (GL) resources, working with SDL3, or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
+description: Use when implementing C++ code, handling OpenGL (GL) resources, working with Simple DirectMedia Layer 3 (SDL3), or applying Don't Repeat Yourself (DRY)/deprecation/docs-commit patterns.
 ---
 
 
@@ -220,7 +220,7 @@ These smells are not caught by clang-tidy. Catch them in code review.
 
 - `cpp-safety` -- sub-domain skill; destructor must not throw and every resource must have a scope-bound owning guard -- load this skill when the class owns any resource
 - `code-quality` -- clang-format and naming conventions; cpp-patterns covers structural patterns, code-quality covers form
-- `oop-principles` -- sub-domain skill; run Is-A / Has-A and SOLID gate before any new inheritance in C++ code
+- `oop-principles` -- sub-domain skill; run the Is-A / Has-A gate and the SOLID gate (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) before any new inheritance in C++ code
 
 ---
 

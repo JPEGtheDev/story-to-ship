@@ -6,26 +6,27 @@ Source: Ward Cunningham's C2 wiki audit -- C++-specific patterns for resource sa
 
 ## Zitface Pattern (Pimpl + NullObject)
 
-Combines pointer-to-implementation with a static null object for safe default state:
+Combines pointer-to-implementation with a null object for safe default state:
 
 ```cpp
+#include <memory>
+
 class Animal {
     struct Impl {
         virtual void speak() = 0;
-        virtual Impl* clone() const = 0;
+        virtual std::unique_ptr<Impl> clone() const = 0;
         virtual ~Impl() = default;
     };
     struct NullImpl : Impl {
         void speak() override {}
-        NullImpl* clone() const override { return &instance(); }
-        static NullImpl& instance() { static NullImpl n; return n; }
+        std::unique_ptr<Impl> clone() const override { return std::make_unique<NullImpl>(); }
     };
 
-    Impl* impl;
+    std::unique_ptr<Impl> impl;
 public:
-    Animal() : impl(&NullImpl::instance()) {}
-    Animal(const Animal& o) : impl(o.impl == &NullImpl::instance() ? &NullImpl::instance() : o.impl->clone()) {}
-    ~Animal() { if (impl != &NullImpl::instance()) delete impl; }
+    Animal() : impl(std::make_unique<NullImpl>()) {}
+    Animal(const Animal& o) : impl(o.impl->clone()) {}
+    Animal& operator=(const Animal& o) { impl = o.impl->clone(); return *this; }
     void speak() { impl->speak(); }
 };
 ```
@@ -47,21 +48,21 @@ For OpenGL resource handles: value semantics implies cloning the resource or usi
 
 ## Virtual Static Idiom (C-style Callback Adapter)
 
-Bridges C-style `void*` callbacks (SDL3 event handlers, OpenGL debug callbacks) with C++ virtual dispatch:
+Bridges C-style `void*` callbacks (Simple DirectMedia Layer 3 (SDL3) event handlers, OpenGL debug callbacks) with C++ virtual dispatch:
 
 ```cpp
 class EventHandler {
-    static void staticCallback(void* userdata, SDL_Event* e) {
-        static_cast<EventHandler*>(userdata)->onEvent(e);
+    static bool SDLCALL staticCallback(void* userdata, SDL_Event* e) {
+        return static_cast<EventHandler*>(userdata)->onEvent(e);
     }
-    virtual void onEvent(SDL_Event* e) = 0;
+    virtual bool onEvent(SDL_Event* e) = 0;
 public:
     void* callbackPtr() { return this; }
     SDL_EventFilter filter() { return staticCallback; }
 };
 ```
 
-The static wrapper holds the this-pointer in `userdata`; the virtual method provides the polymorphic dispatch.
+The static wrapper holds the this-pointer in `userdata`; the virtual method provides the polymorphic dispatch. The `bool` return is the filter result: `true` keeps the event, `false` drops it.
 
 ---
 
@@ -82,7 +83,7 @@ This restores testability and removes hidden coupling.
 
 See the `oop-principles` skill -- Speculative Hierarchy Anti-Pattern -- for the hierarchy design rule.
 
-C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
+C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Do not add CRTP-style base classes until three or more real, concrete variants are actively in use.
 
 ---
 
@@ -108,7 +109,7 @@ void executeAll(const std::vector<GLCommand*>& cmds) {
 
 Polymorphic objects cannot be safely passed across process boundaries via shared memory. A vtable pointer is a memory address in the originating process's address space -- it does not exist in another process's memory space.
 
-Workarounds: serialize state to a plain-data structure, reconstruct on the other side. Never pass `IOpenGLContext*` through IPC.
+Workarounds: serialize state to a plain-data structure, reconstruct on the other side. Never pass `IOpenGLContext*` through Inter-Process Communication (IPC).
 
 ---
 
@@ -136,14 +137,7 @@ Use `std::weak_ptr` instead of raw pointers for non-owning references to managed
 
 ## No Exceptions in Destructor
 
-Destructors must not throw. Throwing from a destructor during stack unwinding (when another exception is already active) calls `std::terminate` and kills the process.
-
-If a destructor contains code that can fail:
-1. Wrap it in `try/catch`
-2. Log the error -- do not re-throw
-3. Complete the cleanup regardless
-
-For Resource Acquisition Is Initialization (RAII) resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint -- the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
+See the `cpp-safety` skill -- Destructor Rule -- for the rule that destructors must not throw.
 
 ---
 
@@ -239,5 +233,4 @@ Source: C2 Wiki "TheSourceCodeIsTheDesign".
 ## Related Skills
 
 - `cpp-safety` -- iron law: every resource is owned by a scope-bound guard; destructors never throw
-- `cpp-patterns` -- broader C++ idiom reference
 - `oop-principles` -- structural design before implementation choices

@@ -89,7 +89,7 @@ The source code is the design. Minimal artifacts, maximum feedback. Long feedbac
 
 ## Wiki / Knowledge Base Design Principles
 
-See `documentation/references/` for documentation conventions. The principles for collaborative knowledge systems: Simple (low friction), Observable (visible diffs), Convergent (duplication removed), Tolerant (imperfect contributions welcome), Precise (titles answer the question they ask).
+See the `documentation` skill for documentation conventions. The principles for collaborative knowledge systems: Simple (low friction), Observable (visible diffs), Convergent (duplication removed), Tolerant (imperfect contributions welcome), Precise (titles answer the question they ask).
 
 Anti-patterns to avoid in skill and doc files: unresolved debate left as prose, information only accessible to insiders, more words than content.
 

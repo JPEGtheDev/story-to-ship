@@ -102,6 +102,8 @@ Answer all applicable questions before writing a single line of production code.
 
 ### Additional Questions (architecture-impacting tasks)
 
+A task is architecture-impacting when it touches 2+ architectural layers OR adds a new dependency or library.
+
 6. **Does this cross a layer boundary?**
    Dependency direction must be outer -> inner. Never inner -> outer.
 
@@ -115,18 +117,19 @@ Answer all applicable questions before writing a single line of production code.
 
 ## BEFORE PROCEEDING
 
-Every item MUST be checked before handing off to `writing-plans`.
+This gate is Phase 4. Every item MUST be checked before handing off to `writing-plans`; an item marked not applicable with its reason counts as checked.
 
 1. All `[UNCLEAR:]` ambiguities resolved -- none remain
 2. Simplest approach identified and chosen or explicitly rejected with reason
 3. All trade-offs named -- none left implicit
 4. Exact file paths named -- no "somewhere in src/"
 5. Out-of-scope items explicitly listed
-6. Architecture impact assessed (layer boundaries, dependency direction)
-7. Test strategy stated
+6. Architecture impact assessed (layer boundaries, dependency direction) if the task is architecture-impacting; otherwise the task is marked not architecture-impacting with BOTH test results shown (layers touched, new dependency) -- a bare "not architecture-impacting" does not satisfy this item
+7. Test strategy stated (every task); an architecture-impacting task also states how the real external dependency is isolated (question 8)
+8. Falsification criterion named if the task is a test design, research methodology, or evaluation framework (a task whose deliverable is the test, method, or evaluation, not the Test strategy line every task carries); otherwise marked not applicable with the reason this task is none of the three
 
 [+] All checked -> output Design Decision Record -> hand off to `writing-plans`
-[-] Any unchecked -> STOP. Return to the relevant phase. Do not proceed.
+[-] Any unchecked -> STOP. Return to the relevant phase. Do not proceed. For item 8: name the result, finding, or evidence that would prove the approach wrong, then record it in the Design Decision Record.
 
 ---
 
@@ -156,7 +159,7 @@ When the gate is fully passed, output this record. It becomes part of the PR des
 
 **Test strategy:** [how correctness will be verified]
 
-**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong -- required for any test design, research methodology, or evaluation framework; if you cannot name one, the claim is an unfalsifiable rationalization, not a testable design claim]
+**What would falsify this approach:** [name the result, finding, or evidence that would prove this approach is wrong -- required for any test design, research methodology, or evaluation framework; if you cannot name one, the claim is an unfalsifiable rationalization, not a testable design claim; for any other task write `not applicable: <reason this task is none of the three>`]
 
 **Gate passed:** YES -- awaiting user approval
 ```
@@ -185,7 +188,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 2. Run Phases 1-5 for **each subsystem separately** -- one Design Decision Record per subsystem
 3. Present all records to the user together; get approval for all before proceeding
 4. Hand off to `writing-plans` with all approved records as context -- one plan per subsystem
-5. Each subsystem plan runs its own Skeptic + plan-reviewer pair review independently (per `writing-plans`)
+5. Each subsystem plan gets its own plan review per the `writing-plans` skill (three-amigos Refinement when Discovery ran).
 
 **Do NOT create a single Design Decision Record for a task with independent subsystems.** A merged record hides coupling between subsystems. Identify the boundary first, then design each side separately.
 
@@ -200,7 +203,7 @@ If the task spans **2+ independent subsystems** (different architectural layers,
 | "I'll clarify as I go" | Mid-implementation clarification means rework. Clarify first. |
 | "We can refactor later" | Design debt compounds. 2 minutes now saves 2 hours later. |
 | "The approach is obvious" | Obvious approaches still need trade-offs named to be defensible. |
-| "TBD for now" | TBD is not a file path. It is a deferred decision that will block the implementer. |
+| "To Be Determined (TBD) for now" | TBD is not a file path. It is a deferred decision that will block the implementer. |
 | "I'll figure it out as I code" | Exploratory coding without a gate produces uncommittable work. |
 | "A respected expert recommends it" | Reputation is not an argument -- ask for the evidence and reasoning behind the recommendation, and judge those. Expertise still counts when the reasoning is included; the gap is a name standing in for it. |
 

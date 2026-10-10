@@ -153,7 +153,7 @@ After any mistake or user correction:
 | Bug or failure | `systematic-debugging` |
 | Completion claim | `verification-before-completion` |
 | Writing tests | `testing` |
-| Writing/editing C++ | `code-quality` |
+| Writing/editing C++ | `code-quality`, `cpp-patterns`, `cpp-safety` |
 | Commits or PRs | `versioning` |
 | CI/CD (Continuous Delivery) work | `workflow` |
 | Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule |

@@ -124,7 +124,7 @@ This behavior is the foundation of predictable trust. Consistent commitment-keep
 
 ---
 
-## MIWMIRMIF -- Extended Rationale
+## Make It Work, Make It Right, Make It Fast (MIWMIRMIF) -- Extended Rationale
 
 **Relationship to the TDD (Test-Driven Development) cycle:**
 

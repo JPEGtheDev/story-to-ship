@@ -60,7 +60,7 @@ Before modifying or creating any file in the repo or claiming any task done:
 - Never let a commitment expire silently -- do not end a response with an announced item quietly dropped
 - "I'll get to it next turn" is not a completion -- only "I completed X, verified by [evidence]" is
 
-**Mid-session expectations drift:** If user feedback mid-session reveals your understanding of a requirement was wrong, stop and re-execute Step 0 (Clarify Expectations) before continuing. Do not silently absorb the correction and continue on the old plan.
+**Mid-session expectations drift:** If user feedback mid-session reveals your understanding of a requirement was wrong, stop and re-run Step 0 (Clarify Expectations) of the `writing-plans` skill before continuing. Do not silently absorb the correction and continue on the old plan.
 
 ### The Work Loop
 

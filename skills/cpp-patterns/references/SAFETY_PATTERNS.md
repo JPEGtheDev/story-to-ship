@@ -83,7 +83,7 @@ This restores testability and removes hidden coupling.
 
 See the `oop-principles` skill -- Speculative Hierarchy Anti-Pattern -- for the hierarchy design rule.
 
-C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Resist CRTP-style base classes until three or more real, concrete variants are actively in use.
+C++-specific note: Curiously Recurring Template Pattern (CRTP)-based template hierarchies compound the hazard -- they add compile-time complexity and harder debugging on top of the structural debt. Do not add CRTP-style base classes until three or more real, concrete variants are actively in use.
 
 ---
 
@@ -109,7 +109,7 @@ void executeAll(const std::vector<GLCommand*>& cmds) {
 
 Polymorphic objects cannot be safely passed across process boundaries via shared memory. A vtable pointer is a memory address in the originating process's address space -- it does not exist in another process's memory space.
 
-Workarounds: serialize state to a plain-data structure, reconstruct on the other side. Never pass `IOpenGLContext*` through IPC.
+Workarounds: serialize state to a plain-data structure, reconstruct on the other side. Never pass `IOpenGLContext*` through Inter-Process Communication (IPC).
 
 ---
 
@@ -137,14 +137,7 @@ Use `std::weak_ptr` instead of raw pointers for non-owning references to managed
 
 ## No Exceptions in Destructor
 
-Destructors must not throw. Throwing from a destructor during stack unwinding (when another exception is already active) calls `std::terminate` and kills the process.
-
-If a destructor contains code that can fail:
-1. Wrap it in `try/catch`
-2. Log the error -- do not re-throw
-3. Complete the cleanup regardless
-
-For Resource Acquisition Is Initialization (RAII) resource types (GL buffer handles, texture handles, shader programs), this is a critical correctness constraint -- the resource must be released even if the release encounters an error. Source: C2 Wiki "BewareOfExceptionsInTheDestructor".
+See the `cpp-safety` skill -- Destructor Rule -- for the rule that destructors must not throw.
 
 ---
 
@@ -240,5 +233,4 @@ Source: C2 Wiki "TheSourceCodeIsTheDesign".
 ## Related Skills
 
 - `cpp-safety` -- iron law: every resource is owned by a scope-bound guard; destructors never throw
-- `cpp-patterns` -- broader C++ idiom reference
 - `oop-principles` -- structural design before implementation choices

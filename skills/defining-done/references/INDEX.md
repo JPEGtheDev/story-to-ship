@@ -1,6 +1,6 @@
 ---
 title: "defining-done References Index"
-description: "Index of all reference files for the defining-done skill -- the repo-agnostic Definition of Done verification-layer taxonomy consumed by the ratification interview, and the guide to re-running the fixture harness after a marker change."
+description: "Index of all reference files for the defining-done skill -- the repo-agnostic Definition of Done verification-layer taxonomy consumed by the ratification interview, `DOD_TEMPLATE.md` (the authoring template for the canon index and detail files), and the guide to re-running the fixture harness after a marker change."
 domain: skills
 subdomain: defining-done
 tags: [skills, defining-done, references, index]
@@ -12,7 +12,8 @@ related:
 
 These references define the repo-agnostic taxonomy the defining-done interview walks
 group by group to produce a repo's ratified Definition of Done canon.
-One further reference covers re-running the fixture harness after a marker change.
+Two further references cover the authoring template for the canon index and detail
+files (`DOD_TEMPLATE.md`) and re-running the fixture harness after a marker change.
 
 ---
 

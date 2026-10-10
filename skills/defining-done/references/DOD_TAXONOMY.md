@@ -9,8 +9,21 @@ comes from the product owner.
 
 Stamp: v1
 Delta rule: a re-ratification interview against a newer stamp elicits ONLY the layers
-added or changed since the canon's recorded stamp; every other prior ruling is left
-untouched.
+added or changed since the canon's recorded stamp, as listed in the history list
+below; every other prior ruling is left untouched.
+
+Change record (the Stamp history):
+- v1: added all 20 layers; changed none
+
+When the Stamp line is bumped, add one entry for the new stamp in this form, listing
+the keys added and the keys changed:
+`- vN: added <key, key | none>; changed <key, key | none>`
+A change means a change of meaning (Group, what a layer verifies, or what its trigger
+examples match); wording-only edits need no entry and no bump.
+A layer's Key is permanent: it is never renamed and the layer is never removed, in
+any edit, with or without a stamp bump. The Key transform below runs once, when a
+layer is first added; a later change to the layer name leaves its Key as it was.
+Every canon keys its ruling lines by Key, so a changed Key orphans them.
 
 Key transform: each layer's `Key` is the layer name lowercased, with spaces and
 slashes converted to hyphens, and any parenthetical suffix dropped.
@@ -53,8 +66,8 @@ spec.
 suite independent of unit tests, so acceptance status does not depend on a human
 re-verifying it by hand every time the suite runs.
 **Example checkable triggers:**
-- diff adds or modifies files under an `acceptance/` or `e2e-acceptance/` test
-  directory
+- diff adds or modifies files under an `acceptance/` test directory or an
+  end-to-end (E2E) test directory named `e2e-acceptance/`
 - diff changes a story/issue whose linked acceptance-criteria (AC) block references
   an automated test path
 

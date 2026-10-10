@@ -90,7 +90,7 @@ A feature idea that surfaces mid-task does not have to be lost or fully built ou
 
 YAGNI only works safely alongside a set of practices that keep adding a feature cheap once it is genuinely needed. Collective ownership means any developer can touch any part of the codebase to add that capability without waiting on a designated owner. Relentless refactoring, paired with a discipline that keeps each rule living in only one spot, means new behavior has an obvious place to land instead of a hunt through duplicated logic. A thorough automated test suite catches regressions the new addition would otherwise introduce silently. Remove any single one of these practices and deferred work stops being a disciplined choice -- it turns into skipping the design work and hoping things go fine. Disciplined deferral is not the same as reckless just-ship-it speed, even though the two can look alike from the outside.
 
-How safe deferral feels is not purely a matter of team discipline -- it also depends on the rebuild and retest cost the language and architecture impose on revisiting a decision later. In a large compiled C++ codebase, touching a lower-level or foundational piece tends to trigger a slow rebuild across dependent translation units, so a deferred decision can come back as a rebuild cascade once it finally needs revisiting. A more loosely coupled, interpreted codebase does not carry that penalty, so trying a change and retesting it stays comparatively cheap. Tight interfaces and a fast, disciplined test suite narrow this gap but do not close it, so the same YAGNI judgment call should weigh differently depending on what the codebase's build and architecture actually charge for changing course later. Source: C2 Wiki "YouArentGonnaNeedIt".
+How safe deferral feels is not purely a matter of team discipline -- it also depends on the rebuild and retest cost the language and architecture impose on revisiting a decision later. In a large compiled C++ codebase, touching a lower-level or foundational piece tends to trigger a slow rebuild across dependent translation units, so a deferred decision can come back as a rebuild cascade once it finally needs revisiting. A more loosely coupled, interpreted codebase does not carry that penalty, so trying a change and retesting it stays comparatively cheap. Tight interfaces and a fast, disciplined test suite narrow this gap but do not close it, so the same YAGNI judgment call weighs differently depending on what the codebase's build and architecture actually charge for changing course later. Source: C2 Wiki "YouArentGonnaNeedIt".
 
 ## Global State Is a Smell
 
@@ -106,7 +106,7 @@ Code is not written for the compiler -- it is written for the next person who re
 
 ## Essential vs Accidental Complexity
 
-Essential complexity is inherent in the problem. Accidental complexity is introduced by the solution. Every line of code, every abstraction layer, every framework dependency is a cost. Justify each by pointing to the essential complexity it addresses. If you cannot, it is accidental and should be removed. Source: C2 Wiki "EssentialComplexity" / "AccidentalComplexity".
+Essential complexity is inherent in the problem. Accidental complexity is introduced by the solution. Every line of code, every abstraction layer, every framework dependency is a cost. Justify each by pointing to the essential complexity it addresses. If you cannot, it is accidental; remove it. Source: C2 Wiki "EssentialComplexity" / "AccidentalComplexity".
 
 ## Actionable Error Messages
 
@@ -118,11 +118,11 @@ Clever code is code that requires the reader to hold a mental model not derivabl
 
 ## BandAid Anti-Pattern
 
-A BandAid fix applies a patch at the symptom site without addressing the origin of the problem. Signs: the fix must be applied in multiple places; the fix requires a comment explaining why it exists; the fix breaks under edge cases the original bug did not trigger. When a fix requires touching more than two callsites, stop -- find the origin. Diagnostic use: see systematic-debugging/references/DEBUGGING_TACTICS.md -- BandAid Detection. Source: C2 Wiki "BandAidSolution".
+A BandAid fix applies a patch at the symptom site without addressing the origin of the problem. Signs: the fix must be applied in multiple places; the fix requires a comment explaining why it exists; the fix breaks under edge cases the original bug did not trigger. When a fix requires touching more than two callsites, stop -- find the origin. Diagnostic use: see the `systematic-debugging` skill's BandAid detection tactic. Source: C2 Wiki "BandAidSolution".
 
 ## Bloated Reuse
 
-Reuse is not inherently good. A reused component that carries more dependencies than the caller needs is an anchor: it slows builds, creates implicit coupling, and forces unrelated upgrades. Prefer duplication of small, stable code over reuse of large, unstable components. Source: C2 Wiki "ReusabilitySmell".
+Reuse is not inherently good. A reused component that carries more dependencies than the caller needs is an anchor: it slows builds, creates implicit coupling, and forces unrelated upgrades. Duplicate small, stable code instead of reusing large, unstable components. Source: C2 Wiki "ReusabilitySmell".
 
 ---
 
@@ -130,7 +130,7 @@ Reuse is not inherently good. A reused component that carries more dependencies 
 
 The full principle: "Every piece of knowledge must have a single, unambiguous, authoritative representation in the system." This is broader than code deduplication. It applies to:
 - **Business rules** -- logic encoded in multiple places diverges over time
-- **Data schemas** -- same structure defined in DB, API contract, and UI model separately
+- **Data schemas** -- same structure defined in database (DB), API contract, and UI model separately
 - **Configuration** -- the same value hardcoded in three places
 
 Violating DRY on *knowledge* causes the system to have no single source of truth. When a rule changes, every copy must change -- and at least one will be missed.
@@ -159,17 +159,16 @@ Organize methods so that each method does one thing at one level of abstraction.
 A design smell is a structural signal that a system's design is accumulating technical debt -- analogous to code smells in Martin Fowler's catalog but operating at the module or subsystem level.
 
 Common design smells:
-- **Divergent Change** -- one module changes for many unrelated reasons (SRP violation at module level)
+- **Divergent Change** -- one module changes for many unrelated reasons (Single Responsibility Principle (SRP) violation at module level)
 - **Shotgun Surgery** -- one logical change requires editing many unrelated modules
 - **Parallel Inheritance Hierarchies** -- adding a class in one hierarchy requires adding a corresponding class in another
 - **Middle Man** -- a module that exists only to delegate to another
 
-Design smells are not fixable by local refactoring alone. They require architectural review and restructuring. Use `references/ANTIPATTERNS.md` in the architecture-review skill for higher-level structural failures.
+Design smells are not fixable by local refactoring alone. They require architectural review and restructuring. See the `architecture-review` skill for higher-level structural antipatterns.
 
 ---
 
 ## Related Skills
 
-- `code-quality` -- clang-format, naming conventions, smell checklist, pre-commit gate
 - `cpp-patterns` -- C++-specific idioms for these principles
 - `writing-plans` -- Simplicity Principles reference for planning with YAGNI

@@ -16,7 +16,7 @@ boundaries, the token baseline, and the measurement plan.
 
 | File | Covers |
 |------|--------|
-| `REASONING_REGISTER.md` | Why the Keep Reasoning Terse rule exists, the terse class-closure worked example, scope boundaries, the token baseline and measurement plan, and the advisory-to-promoted path. |
+| `REASONING_REGISTER.md` | Why the Keep Reasoning Terse rule exists, the terse class-closure worked example, scope boundaries, the token baseline and measurement plan, and the promotion path. |
 
 ## Related
 

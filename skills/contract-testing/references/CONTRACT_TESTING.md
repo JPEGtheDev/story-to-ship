@@ -30,7 +30,7 @@ using CacheImpls = ::testing::Types<LruCache, MockCache>;  // add every concrete
 INSTANTIATE_TYPED_TEST_SUITE_P(AllImpls, ICacheTest, CacheImpls);
 ```
 
-`std::unique_ptr` owns the cache -- no manual `TearDown` required. If any inherited test is inappropriate for a concrete subclass, that signals the behavior does not belong in the base type -- redesign the hierarchy.
+`std::unique_ptr` owns the cache -- no manual `TearDown` required. If an implementation breaks an invariant, fix the implementation, not the test; if an inherited test cannot hold for a legitimate concrete subclass, the behavior does not belong in the base type -- fix the hierarchy.
 
 ---
 

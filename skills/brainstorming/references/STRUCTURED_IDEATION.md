@@ -75,7 +75,7 @@ Forcing a pattern onto code that does not need it adds indirection with no payof
 
 ---
 
-## Evolutionary Design (XP Model)
+## Evolutionary Design in Extreme Programming (XP)
 
 XP does not eliminate design -- it distributes design throughout development:
 

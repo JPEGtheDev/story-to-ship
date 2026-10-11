@@ -134,4 +134,4 @@ This output proves the ceremony was identified before dispatch. It does not prov
 
 ## References
 
-- `references/CEREMONIES.md` -- per-amigo sources, agenda lists, output formats, and model selection rationale for all 6 ceremonies
+- `references/CEREMONIES.md` -- per-amigo sources, agenda lists, and output formats for all 6 ceremonies

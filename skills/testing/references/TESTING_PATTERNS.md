@@ -17,7 +17,7 @@ Generic testing canon: decision rules promoted in SKILL.md live here in full, wi
 ## AAA Pattern -- Template (Three Phases)
 
 ```cpp
-TEST(SuiteName, MethodName_Condition_ExpectedResult)
+TEST(SuiteName, UnitName_StateUnderTest_ExpectedResult)
 {
     // Arrange
     // Set up test preconditions, create objects, define expected values

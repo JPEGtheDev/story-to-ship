@@ -31,7 +31,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 **RED -> GREEN -> REFACTOR. In that order. Every time.**
 
-- **RED:** Write one failing test. Name: `UnitName_Condition_ExpectedResult`. YOU MUST SEE IT FAIL -- confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
+- **RED:** Write one failing test. Name it per the Naming Convention section. YOU MUST SEE IT FAIL -- confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
 - **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
 - **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
 
@@ -39,7 +39,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 ## Step 1: Determine Test Type
 
-- **Unit test** -- single class/function in isolation -> `tests/core/`
+- **Unit test** -- single class/function in isolation -> `tests/` root or subdirectory
 - **Integration test** -- component interactions -> `tests/integration/`
 
 Classification gate: if a "unit test" touches a real file it is an integration test; a real GPU (Graphics Processing Unit) or display context makes it visual/large. Classify BEFORE writing. Full text: `references/TESTING_PATTERNS.md`.
@@ -62,7 +62,7 @@ Use format: `UnitName_StateUnderTest_ExpectedResult`
 Examples:
 - `UserLogin_WithValidCredentials_GrantsAccess`
 
-**`_ExpectedResult` must describe the behavior or invariant proven -- not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
+**The ExpectedResult part must describe the behavior or invariant proven -- not the return value.** The result name must answer "what property holds?" not "what did the call return?". `_SeekIsAbsolute` is better than `_ReturnsTrue`; `_CacheMissCallsReader` is better than `_ReturnsValue`.
 
 See `references/TESTING_PATTERNS.md` for naming examples.
 
@@ -80,7 +80,7 @@ Before presenting tests, verify:
 4. One logical concept per test
 5. Depended-upon behavior is tested: any behavior your code relies on has a test; if behavior can change and no test breaks, it was untested. Full text: `references/TESTING_PATTERNS.md`.
 6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
-7. External dependencies are mocked (database, file I/O). Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
+7. Unit (Small) tests mock external dependencies (database, file input/output (I/O)); integration (Medium) tests may use local files. Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
 8. No testing of external libraries (std::, third-party code)
 9. Group related configuration into structs/POCOs (Plain Old C++ Objects) instead of flat variables
 10. Resource cleanup: database connections and file handles closed in destructors/cleanup, check for leaks
@@ -96,23 +96,23 @@ Before presenting tests, verify:
 
 ## Red Flags -- STOP
 
-If you catch yourself thinking any of these, STOP and start over with RED:
+If you catch yourself thinking any of these, STOP and take the action the item names:
 
 - Writing implementation code before writing a test
 - "I'll write tests after to verify it works"
 - "The visual regression test will cover this"
 - "It's too complex to unit test with MockDatabase" (MockDatabase exists for exactly this)
 - "I already manually tested it"
-- Test passes immediately without seeing it fail first
+- Test passes immediately without seeing it fail first -- fix the test
 - Fixed a bug without writing a regression test that reproduces it first
 - A test double (mock or stub) that only ever returns happy-path values -- STOP. A double exists to FORCE the rare condition (error return, timeout, boundary value) deterministically on every run. Add the failure-forcing case, or state in the test why the double's collaborator cannot fail.
-- A test that mirrors the implementation's structure, or that you could only write by reading the source -- it tests a coincidence, not a contract. Full text: `references/TESTING_PATTERNS.md`.
+- A test that mirrors the implementation's structure, or that you could only write by reading the source -- it tests a coincidence, not a contract; rewrite the test from the requirements. Full text: `references/TESTING_PATTERNS.md`.
 - "Let's refactor without writing tests first" -- reckless restructuring, not refactoring; characterization tests come first. Full text: `references/TESTING_PATTERNS.md`.
 - "Tests after achieve the same goals"
 - "I need to get the implementation right before I know what to test"
 - "Just this once" or "This is different because..."
 
-**All of these mean: Delete any code written before the test. Start over with RED.**
+**Each item above names its own action; items without one: delete code written before the test and start over with RED.**
 
 ---
 

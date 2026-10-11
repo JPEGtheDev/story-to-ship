@@ -9,7 +9,7 @@ description: Use when creating GitHub Actions workflows, adding CI jobs, configu
 
 ```
 PIPELINES NEVER COMMIT OR PUSH TO A BRANCH
-YOU MUST ensure no workflow step commits or pushes to a branch -- outputs go to artifacts, step summaries, PR comments or check runs.
+YOU MUST ensure no workflow step runs `git commit` or pushes to a branch -- outputs go to artifacts, step summaries, PR comments or check runs.
 No exceptions.
 ```
 

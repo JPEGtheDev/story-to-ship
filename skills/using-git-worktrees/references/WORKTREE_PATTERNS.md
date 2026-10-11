@@ -14,14 +14,14 @@ Benefits:
 
 ## A/B Testing with Worktrees
 
-When "I think" is not enough and empirical evidence is needed:
+When "I think" is not enough and empirical evidence is needed, first run Create step 1 of SKILL.md (gitignore check). After creating each worktree below, run Create steps 3 and 4 of SKILL.md (top-level check, branch isolation check) against that worktree's path, and do not dispatch unless creation exited 0, step 3 printed that worktree's absolute path and step 4 printed that worktree's own agent branch name. `<base>` is the commit both approaches start from:
 
 ```bash
 # Approach A
-git worktree add .worktrees/approach-a -b agent/approach-a
+git -C <repo-root> worktree add .worktrees/approach-a -b agent/approach-a <base>
 
 # Approach B
-git worktree add .worktrees/approach-b -b agent/approach-b
+git -C <repo-root> worktree add .worktrees/approach-b -b agent/approach-b <base>
 
 # Dispatch two agents -- one per worktree -- with identical test harness
 # Compare: test results, line count, coupling, readability

@@ -8,7 +8,7 @@ description: Use when dispatching any subagent (every dispatched agent runs in i
 ## Iron Law
 
 ```
-YOU MUST NEVER LET A SUBAGENT COMMIT DIRECTLY TO THE MAIN WORKING BRANCH.
+YOU MUST DISPATCH EVERY SUBAGENT INTO ITS OWN WORKTREE UNDER .worktrees/ AND NEVER LET IT COMMIT TO MAIN OR THE ACTIVE DEVELOPMENT BRANCH.
 No exceptions.
 ```
 
@@ -46,7 +46,7 @@ The main context's edits, commits, and pushes for the feature happen in `.worktr
 
 ```bash
 # Step 1: Verify .worktrees is gitignored
-git check-ignore -q .worktrees || echo "ADD .worktrees TO .gitignore FIRST"
+git check-ignore -q .worktrees/ || { echo "ADD .worktrees/ TO .gitignore FIRST"; exit 1; }
 
 # Step 2: Create the worktree on a new branch
 git worktree add .worktrees/agent-<name> -b agent/<name> <base>
@@ -92,13 +92,14 @@ Before creating a worktree, verify:
 3. The subagent prompt includes the worktree path explicitly
 
 [+] All met -> create the worktree and dispatch
-[-] Any unmet -> work in the main context instead
+[-] Condition 1 unmet -> do the work in the main context, no subagent
+[-] Condition 2 or 3 unmet -> name the branch agent/<purpose> (condition 2) and add the absolute worktree path to the prompt (condition 3), whichever is unmet, then re-check this list
 
 ---
 
 ## Subagent Dispatch Pattern
 
-Create worktree -> pass path to subagent -> subagent commits to its branch -> main context reviews diff (`git diff main..agent/<name>`) -> merge or cherry-pick if approved, `git worktree remove` if rejected.
+Create worktree -> pass path to subagent -> subagent commits to its branch -> main context reviews diff (`git diff <base>...agent/<name>`, with `<base>` as in Create step 2) -> merge or cherry-pick if approved, `git worktree remove` if rejected.
 
 **The subagent MUST NOT push to `main`, `master`, or the active development branch.**
 
@@ -115,12 +116,12 @@ Dispatch two agents, one per worktree, with an identical test harness. Compare r
 ## Red Flags -- STOP
 
 - Subagent working directly in the main repo directory -- **STOP. Create a worktree in `.worktrees/` first.**
-- Subagent output committed to `main` or the active feature branch without review -- **STOP.** Review the landed commit with `git show <commit>` now. If it is not approved: revert it when it is pushed or on the feature branch; when it exists only on local `main`, ask the user before changing `main` (a revert commit there leaves `main` unable to fast-forward to `origin/main`). Before any merge, review `git diff main..agent/<name>` (Subagent Dispatch Pattern).
+- Subagent output committed to `main` or the active feature branch without review -- **STOP.** Review the landed commit with `git show <commit>` now. If it is not approved: revert it when it is pushed or on the feature branch; when it exists only on local `main`, ask the user before changing `main` (a revert commit there leaves `main` unable to fast-forward to `origin/main`). Before any merge, review the diff the way the Subagent Dispatch Pattern prescribes.
 - Worktree left alive after the work is merged or discarded (leaks branch clutter) -- **STOP.** Run the commands under Remove when done now: `git worktree remove`, then `branch -d` (`-D` for a cherry-picked or discarded branch).
 - Dispatch to a worktree without passing the worktree path in the agent prompt -- **STOP.** Add the absolute worktree path to the prompt (BEFORE PROCEEDING, item 3) before dispatching; an agent already running without it cannot create its own isolation after the fact (`subagent-driven-development`), so stop it and dispatch it again with the path.
-- Merging a worktree branch before reviewing the full diff: `git diff main..agent/<name>` -- **STOP.** Run the diff command and read it (Subagent Dispatch Pattern) before any merge.
+- Merging a worktree branch before reviewing the full diff: `git diff <base>...agent/<name>` -- **STOP.** Run the diff command and read it (Subagent Dispatch Pattern) before any merge.
 - Using `git worktree list | wc -l` to check if you are in a worktree -- **STOP. This does NOT tell you which worktree you are in. Use `git rev-parse --show-toplevel` and compare against the expected path.**
-- "I reviewed the diff mentally -- running `git diff main..agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**
+- "I reviewed the diff mentally -- running `git diff <base>...agent/<name>` explicitly is redundant" -- **STOP. Run the diff command. Mental review is not a structural check.**
 - Using `git worktree add ../name` (relative `../` path) -- **STOP. This places the worktree OUTSIDE the repo root as an unpredictable sibling directory. The resulting absolute path differs from the path you think you passed to the agent, causing BLOCKED dispatches. Always use `.worktrees/agent-<name>` (inside the repo, gitignored).**
 - Running any git command without `-C <repo-root>` after a `cd` appeared in any prior Bash call this session -- **STOP. The Bash tool's working directory persists across calls. A prior `cd` into a worktree will cause the next bare `git` command to run inside that worktree's branch, not the main branch. Always use `git -C /absolute/repo/path` or verify with `pwd` before any git operation that touches the main branch.**
 - About to create a worktree from a `<base>` other than the feature branch or, for a reviewer's worktree, the branch that reviewer inspects -- **STOP. Run `git -C <repo-root> fetch origin main`, then `git -C <repo-root> rev-list --left-right --count origin/main...<base>`. Output is `L<tab>R` (L = commits on main not in `<base>`; R = commits in `<base>` not on main). If L > 0 and R = 0: `<base>` is behind main -- for `main`, run `git -C <repo-root> pull --ff-only` (the main checkout is on `main`); for any other branch, use `main` as the base. If R > 0: `<base>` has local commits -- only valid base if the user explicitly named it. Only `0<tab>0` means current with main.**

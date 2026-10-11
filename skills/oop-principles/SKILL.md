@@ -52,7 +52,7 @@ See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patt
 | "Inheritance is the natural model here" | Natural is not correct. Run the Is-A test. |
 | "The base class is just for code reuse" | Reuse is composition's job. Inheritance is for substitutability. |
 | "The substitution test passes today" | Does it pass under all invariants, including error semantics? |
-| "The derived class only adds methods; it doesn't change base behavior" | Adding methods can still tighten preconditions or weaken postconditions. Run the Liskov Substitution Principle (LSP) check for every added method. |
+| "The derived class only adds methods; it doesn't change base behavior" | An added method can break a base invariant (e.g. a mutator on an immutable base), and every override can tighten a precondition or weaken a postcondition. Check each override and each added method against the base contract. |
 | "Interface Segregation doesn't apply -- all clients need all methods" | Verify by inspection: find every caller of every interface method. If any caller never calls a method, the interface is too fat. |
 | "The callee will validate it" / "the caller already checked" | With no stated contract, both sides are guessing -- the check lands nowhere, or twice, and neither side actually knows which. The missing contract is the defect, not the missing check. State the precondition explicitly, assign it to caller or callee, then verify it lands exactly where assigned. |
 

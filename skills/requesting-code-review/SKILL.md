@@ -65,11 +65,16 @@ For non-trivial PRs, dispatch code review agents before requesting human review:
 - Code/config files -> `code-quality-reviewer.md`
 - Architecture-relevant changes (available on request, not required for every changed file) -> `architecture-reviewer.md`
 
+In the example, the dispatcher keeps each double-brace token exactly as written and must replace the bracketed text after it with the value, so the token binds that value to the template placeholder of the same name.
+
 ```
 # For each group of at most two files that implement one change, dispatch the matching template, e.g.:
 Agent(description="Review [change]", subagent_type="code-quality-reviewer", prompt="
-Review [file path(s), one per line] changed in this PR; return one verdict block per file.
-SHA: [commit SHA]
+Review {{FILES}} [the files under review, one path per line], changed in this PR; return one verdict block per file.
+Review the state at SHA: [commit SHA (the git commit hash); SHA stands for Secure Hash Algorithm]
+Worktree: {{WORKTREE_PATH}} [absolute path of the worktree that holds the changed files]
+Implementer's pasted verification output: {{IMPLEMENTER_EVIDENCE}} [the implementer's pasted verification commands and their output, verbatim; if the implementer pasted no runnable command, write 'No runnable command was pasted.' here so the reviewer states in its verdict that no spot-check was possible]
+End each verdict block with the literal line: Adversarial scenario tested: <scenario, or trigger not matched>
 Focus: [specific concern for these files]
 ")
 ```
@@ -114,7 +119,7 @@ Do not add reviewers as a formality. Each reviewer MUST have a specific reason f
 
 ---
 
-## Responding to "LGTM"
+## Responding to "LGTM (Looks Good To Me)"
 
 If a reviewer approves without commenting on the specific concerns you listed:
 
@@ -140,5 +145,5 @@ If a reviewer approves without commenting on the specific concerns you listed:
 | "The PR description explains everything -- reviewers will figure it out" | Reviewers read a lot of PRs. A focused review request is faster and produces better feedback. |
 | "I'll just ask for a quick look" | "Quick look" reviews find nothing. State what you want reviewed. |
 | "CI is red but it's a flaky test" | Red CI is red CI. Fix or document the flake; do not request review against it. |
-| "I'll address the agent findings after human review" | Agent REQUEST CHANGES, REJECT, or NEEDS WORK verdicts must be resolved first. Human review should not be spent on issues a machine already found. |
+| "I'll address the agent findings after human review" | Agent REQUEST CHANGES, REJECT, or NEEDS WORK verdicts must be resolved first. Never spend human review on issues a machine already found. |
 | "I reviewed the diff myself, that's equivalent" | Self-review does not catch the issues a fresh reviewer catches. Dispatch anyway. |

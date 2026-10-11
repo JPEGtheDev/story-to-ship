@@ -24,8 +24,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Before writing any documentation:
 
-1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
-2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat root file unless it's a cross-cutting standard)
+1. Identify the **domain** and **subdomain** from `docs/INDEX.md` and the domain indexes; if no taxonomy exists yet, define one per `references/DOCUMENTATION_EXAMPLES.md`
+2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat file directly under `docs/`)
 3. Confirm no existing file already covers this concept: run `grep -rF -- "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
@@ -38,8 +38,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
-| Cross-cutting standards | `docs/UPPERCASE.md` |
+| Domain guides and standards | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
 | Agent onboarding | `AGENTS.md` -- summarize only |

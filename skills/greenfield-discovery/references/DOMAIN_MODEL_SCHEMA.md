@@ -37,10 +37,12 @@ Every field marked Required MUST contain project-specific content. Placeholder t
 - GOOD: "A researcher configures a 3-body gravitational simulation, runs it, and exports a trajectory plot in under 5 minutes without writing code."
 
 ### Open Questions
-**Optional.** Items flagged `[UNCLEAR:]` during the interview.
-- Each entry is one unresolved contradiction or ambiguity discovered during the interview.
-- Format: `[UNCLEAR: user stated X AND Y -- these are mutually exclusive because Z. Which is correct?]`
-- Write "None" if no contradictions were found.
+**Optional.** Holds only `[UNCLEAR:]` flags the user explicitly deferred. The deferral test is defined in the Contradiction Detection paragraph of SKILL.md.
+- Each entry is one such flag.
+- Format: `[UNCLEAR: user stated X AND Y -- these are mutually exclusive because Z. Which is correct?]` followed by "Deferred by the user."
+- Write "None" when the user deferred nothing.
+- A flag the user answered is cleared and is not listed.
+- Completeness gate items 1-4 still apply, so a deferred flag never excuses a placeholder or a missing Required field.
 
 ---
 
@@ -52,7 +54,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 2. Users field names roles explicitly -- no "end users" or "people"
 3. Core Entities uses domain-specific vocabulary -- no generic names (Model, Item, Record)
 4. Success Criteria describes an observable user outcome -- not an implementation milestone
-5. Any `[UNCLEAR:]` items from the interview are listed in Open Questions
+5. Every `[UNCLEAR:]` flag is either answered and cleared, or explicitly deferred by the user and listed in Open Questions
 
 [+] All met -> produce the `## Domain Model` block
 [-] Any unmet -> return to the relevant interview question; do not produce the block until resolved

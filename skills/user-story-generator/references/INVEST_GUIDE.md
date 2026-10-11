@@ -69,9 +69,9 @@ Response:
 **User wants to refactor globals**  
 Consult the host project's architecture documentation for refactoring patterns.
 
-**Story is too large (L or epic-sized)**  
+**Story needs more than one sprint (or is epic-sized)**  
 Suggest breaking it down:
-> "This feels like a larger effort (2-3 days or more). Would you like me to break it into 3-4 smaller stories that can be worked on independently?"
+> "This looks like more than one sprint of work. Would you like me to break it into 3-4 smaller stories that can be worked on independently?"
 
 **User overrides your suggestion**  
 Accept it gracefully:

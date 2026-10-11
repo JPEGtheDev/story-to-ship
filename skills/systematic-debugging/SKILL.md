@@ -7,15 +7,6 @@ description: Use when encountering any bug, test failure, build error, or unexpe
 
 # Instructions for Agent
 
-## How This Skill is Invoked
-
-This skill is **mandatory before proposing any fix**. It applies whenever you encounter:
-- A test failure, build error, or CI failure
-- Unexpected rendering or application behavior
-- Anything the user describes as "broken"
-
----
-
 ## Iron Law
 
 ```
@@ -26,14 +17,6 @@ No exceptions.
 Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the systematic-debugging skill to [brief description of issue]."
-
----
-
-## Canary
-
-```
-CANARY: systematic-debugging loaded. Issue: [name it]. No fix before root cause.
-```
 
 ---
 
@@ -77,7 +60,7 @@ Each phase MUST be completed in order.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
-See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and structured tactic selection.
+See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and the RubberDucking tactic.
 
 ### Phase 1: Root Cause Investigation
 
@@ -126,6 +109,19 @@ Load `subagent-driven-development` before creating a worktree or editing any fil
 - Verify the fix resolves the issue
    **Note for runtime behavior bugs:** "Verify the fix resolves the issue" requires an observation artifact from the running application (as defined in Phase 1 above), not only a passing test. The observation artifact must show the reported symptom is absent.
 - Check if the same pattern exists elsewhere in the codebase
+- Before committing the fix, run the BandAid check: see `references/DEBUGGING_TACTICS.md`, section BandAid Detection. If you cannot explain the fix in terms of the root cause, stop and return to Phase 1.
+
+---
+
+## Canary
+
+Before stating a root cause (the end of Phase 1), write this line:
+
+```
+Root cause: X because Y (evidence: <artifact or output line>)
+```
+
+This shows gate item 3 ran. It does not prove the evidence is correct.
 
 ---
 
@@ -176,10 +172,10 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "Multiple fixes at once saves time" | Can't isolate what worked. Creates new bugs. |
 | "I've already looked at it, I know the problem" | Looking at symptoms != understanding root cause. |
 | "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. |
-| "One more fix attempt" (after 2+ failures) | 3+ failures = architectural problem. Question the approach. |
+| "One more fix attempt" (after 2 failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
-| "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates the read-before-act Iron Law. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
-| "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Run the gate. Show the output. |
+| "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates this skill's Iron Law: the earlier investigation ran without the Phase 0 problem statement and the BEFORE PROCEEDING gate. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
+| "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Re-run the reproduction (gate item 2) and show the output. |
 | "The code shows the behavior is correct -- the user must be misreading the output" | Source code describes programmer intent; the running application produces what the user observes. For runtime behavior bugs, the running application is the ground truth. Dispatch the researcher with "Build + observe" required. |
 | "Reading the relevant code is faster than running the app" | Speed does not matter if the investigation is wrong. Code reading for a runtime behavior bug is theorizing. The observation artifact determines Phase 2 scope. Dispatch the researcher. |
 | "The fix is small -- I don't need to load `subagent-driven-development`" | Fix size is irrelevant to the Phase 4 gate. Phase 4 is an implementation step regardless of scope. Load `subagent-driven-development` before creating a worktree or editing any file. No exceptions. |

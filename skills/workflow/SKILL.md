@@ -42,7 +42,7 @@ CI pipelines observe and report -- they never commit or push to a branch. Every 
 ### Rules That Must NEVER Be Violated
 
 1. **NEVER commit or push to a branch from a pipeline.** Pipelines never change branch contents. Committing from CI creates infinite loops, race conditions, and audit trail problems.
-2. **NEVER use `data:` URIs (Uniform Resource Identifiers) for inline images in PR comments.** GitHub strips `data:image/png;base64,...` from `<img>` tags in comments and step summaries for security.
+2. **NEVER use `data:` URIs for inline images in PR comments.** GitHub strips `data:image/png;base64,...` from `<img>` tags in comments and step summaries for security.
 
 ### Rules That Must ALWAYS Be Followed
 
@@ -67,7 +67,7 @@ For canonical YAML templates (Artifact Upload, Idempotent PR Comment) see `refer
 Before presenting workflow changes, verify:
 
 1. No `git commit` and no branch `git push` in any step
-2. No `data:` URIs (Uniform Resource Identifiers) in PR comment bodies
+2. No `data:` URIs in PR comment bodies
 3. Permissions are minimal (`contents: read`; add only the write scopes the job needs: `checks: write`, `pull-requests: write`, or `contents: write` on a tag-pushing release job)
 4. Generated files uploaded as artifacts (not committed)
 5. PR comments are idempotent (update existing, don't duplicate)

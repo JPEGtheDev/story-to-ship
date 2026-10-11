@@ -111,7 +111,7 @@ permissions:
 
 **Why:** Creates infinite loops, race conditions, and audit trail problems.
 
-### [-] Base64 Data URIs (Uniform Resource Identifiers) in PR Comments
+### [-] Base64 Data URIs in PR Comments
 
 ```javascript
 // BAD: GitHub strips data: images from img tags

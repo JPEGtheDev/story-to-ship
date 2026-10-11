@@ -97,7 +97,7 @@
 - Multiple stories can be merged and released frequently
 
 **How to check:**
-- [ ] This story can be completed in 3-5 days max
+- [ ] This story can be completed within one sprint
 - [ ] One developer (or small pair) can own it start-to-finish
 - [ ] Fits comfortably in the sprint timeline
 

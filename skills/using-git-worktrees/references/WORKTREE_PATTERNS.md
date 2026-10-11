@@ -14,7 +14,7 @@ Benefits:
 
 ## A/B Testing with Worktrees
 
-When "I think" is not enough and empirical evidence is needed, first run Create step 1 of SKILL.md (gitignore check). After each `worktree add` below, run Create steps 3 and 4 of SKILL.md (top-level check, branch isolation check) against that worktree's path, and do not dispatch on a nonzero exit. `<base>` is the commit both approaches start from:
+When "I think" is not enough and empirical evidence is needed, first run Create step 1 of SKILL.md (gitignore check). After creating each worktree below, run Create steps 3 and 4 of SKILL.md (top-level check, branch isolation check) against that worktree's path, and do not dispatch on a nonzero exit. `<base>` is the commit both approaches start from:
 
 ```bash
 # Approach A

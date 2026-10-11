@@ -141,7 +141,7 @@ Contracts are a useful discipline, not a clean, universally safe one:
   a matter of author discipline and reviewer attention, not a compiler guarantee. In review,
   treat any contract expression that calls another method as suspect until that method is
   confirmed side-effect-free.
-- **Whether contracts would have caught bugs like Y2K is a live, unresolved dispute.** One
+- **Whether contracts would have caught bugs like Year 2000 (Y2K) is a live, unresolved dispute.** One
   position: writing preconditions and postconditions forces a fragile, undocumented assumption
   -- such as representing a year with only two digits -- out into the open, where it becomes
   visible before it breaks anything. The opposing position: a contract only gets written for a

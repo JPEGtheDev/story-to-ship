@@ -93,7 +93,7 @@ Before creating a worktree, verify:
 
 [+] All met -> create the worktree and dispatch
 [-] Condition 1 unmet -> do the work in the main context, no subagent
-[-] Condition 2 or 3 unmet -> name the branch agent/<purpose> or add the absolute worktree path to the prompt, then re-check this list
+[-] Condition 2 or 3 unmet -> name the branch agent/<purpose> (condition 2) and add the absolute worktree path to the prompt (condition 3), whichever is unmet, then re-check this list
 
 ---
 

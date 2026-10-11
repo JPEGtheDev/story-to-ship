@@ -1,1 +1,1 @@
-{"session_id":"sess-t2a-ac1_residue_agent_allowed","hook_event_name":"PreToolUse","tool_name":"Agent","tool_input":{"description":"x","prompt":"x"}}
+{"session_id":"sess-rows_only_action_names_agent_allowed","hook_event_name":"PreToolUse","tool_name":"Agent","tool_input":{"description":"x","prompt":"x"}}

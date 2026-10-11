@@ -1,1 +1,1 @@
-{"session_id":"sess-t2a-ac3_skills_edit_worktree_abs_de","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/abs/.worktrees/w/skills/x/SKILL.md","old_string":"a","new_string":"b"}}
+{"session_id":"sess-rows_skills_edit_worktree_abs_denied","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"/abs/.worktrees/w/skills/x/SKILL.md","old_string":"a","new_string":"b"}}

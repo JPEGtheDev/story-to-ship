@@ -1,7 +1,7 @@
 ---
 name: session-bootstrap
 license: MIT
-description: Use when opening a new conversation to load required skills, identify task type, and restore session context before acting.
+description: Use when opening a new conversation or resuming one after context compaction or a harness session resume.
 ---
 
 
@@ -100,10 +100,10 @@ Row context and the greenfield chain: see `references/SKILL_DISPATCH_TABLE.md`.
 4. Skill load announcement made for each loaded skill
 5. `git status` checked in main working tree -- if uncommitted changes exist with no active work in progress, identify their source (prior agent? manual edit?), read the diff, then commit or revert explicitly before starting new work.
 6. If resuming a prior session: pending todos read from the plan file (a todo is defined in the `writing-plans` skill, Building the Plan step 1); Skeptic + plan-reviewer pair dispatched (per `writing-plans`) before first implementation step
-7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in session memory), OR loading `self-evaluation` now before picking up the first new todo
+7. If resuming a session that was interrupted mid-task: confirmed the prior session's self-evaluation ran (look for `### Session Self-Evaluation` block in the prior session's self-assessment file; see the `self-evaluation` skill, Step 7), OR loading `self-evaluation` now before picking up the first new todo
 8. Stored memories checked for user-specified model preference overrides -- applies to all agent dispatch decisions this session
 9. If this task requires reading 3+ files for research or review: an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) is dispatched -- NOT done inline
-10. Session hooks checked: if SessionStart or UserPromptSubmit hook failed, all skills MUST be invoked manually this session -- no auto-loading is available. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty`, `communication`, and every skill in the On Start table
+10. Session hooks checked: if no hook-injected text appeared at SessionStart or on your first prompt (UserPromptSubmit), the hooks did not run: every skill MUST be invoked manually this session. If the hooks succeeded, they injected gate text only: a `Skill` tool invocation is still required for `honesty`, `communication`, and every skill in the On Start table
 11. If a hook script or hook registration fix was committed (or edited) during this session: Do NOT claim hooks are working from the edit landing alone. Confirm with an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming the hook is active.
 12. If `docs/INDEX.md` exists: load it now. Load any applicable `docs/<domain>/INDEX.md` files. These indexes map the repo's documented scope and goals -- load them before planning or implementing anything this session.
 
@@ -145,7 +145,7 @@ If you have nothing to report, still include the block with zeroes.
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` -- **STOP. Load the `self-evaluation` skill now.**
-- Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
+- Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in the prior session's self-assessment file; see the `self-evaluation` skill, Step 7) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional -- **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" -- **STOP. Memory degrades. Skills update. Load fresh every session.**
 - Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**
@@ -166,7 +166,7 @@ If you have nothing to report, still include the block with zeroes.
 | "Skipping announcement to save space"              | Announcement is the commitment mechanism           | State it. No skip.                         |
 | "I'll skim the skill -- I know the gist"            | Skimming misses updates and specific gate conditions | Read fully. The gate conditions are the point. |
 | "'Always active' means I don't need to invoke honesty or communication" | The declaration activates the rule reference, not the rule body. Without invocation, the confidence vocabulary, process language, and register rules are absent. | Invoke `honesty` and `communication` explicitly. Every session. |
-| "I ran the hook script and it exited 0 -- hooks are working" | Running the script by hand and getting exit 0 tests the script, not whether the hook system fires it. Hook script content and settings-file registration both take effect within the current session -- no restart needed (verified on command-line interface version 2.1.220) -- but that only means the fix CAN fire, not that it DID. | Confirm an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming hooks are working. |
+| "I ran the hook script and it exited 0 -- hooks are working" | Exit 0 tests the script, not that the hook system fired it. | Confirm an observed firing this session -- injected hook context or a fresh log line from the hook -- before claiming hooks are working. |
 | "I'm just gathering context, not reviewing"        | Research reading to inform a plan is still review. Inline review is biased by your assumptions. | Dispatch an explore or reviewer agent (`skill-reviewer`/`code-quality-reviewer` templates) for any 3+ file research task. |
 | "An existing branch with a relevant name is the correct base for this work" | Branch name is not branch currency. The correct base is main unless the user names a specific branch. An existing feature branch that predates a recent merged PR silently contaminates all downstream agents with stale state. | Create the branch from `origin/main` in a worktree: `git -C <repo-root> fetch origin main`, then `git -C <repo-root> worktree add .worktrees/<feature> -b <new-branch> origin/main`. |
 | "The continuation summary said resume directly, so I can skip the reload" | "Resume directly" governs message etiquette (do not re-narrate the summary), not the skill-load gate. Compaction/resume wiped the completed-call evidence; the rule still binds. | Re-invoke `session-bootstrap` + `honesty` + `communication` first, then resume. |

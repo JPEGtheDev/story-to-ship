@@ -85,7 +85,7 @@ feed the dispatched agent, and invoking `check-markers.sh` against the
 captured transcript. Run `./run-scenario.sh --help` for its usage text.
 
 The scenarios this harness covers: one positive and one negative case per
-marker-emitting behavior it proves, plus four scenarios whose pass
+marker-emitting behavior it proves, plus five scenarios whose pass
 condition is not fully captured by a `check-markers.sh` require/forbid
 pairing alone, so each carries its own pass condition in addition --
 delta re-ratification (no marker check at all; a byte-preservation check
@@ -97,13 +97,15 @@ completion-gate scenarios entry below for the two-tier read that resolves
 it), dirty-canon (a forbid-only negative control on all three markers,
 paired with a transcript read for the plain-statement-and-continue
 behavior itself, with the same grounding-driven caveat applying to its
-`DOD-GATE: FAIL` forbid specifically), and dirty-canon-generator (the
+`DOD-GATE: FAIL` forbid specifically), dirty-canon-generator (the
 story-generator analogue: a forbid-only negative control on all three of
 its markers, paired with the same kind of transcript read, but with no
 grounding-driven caveat on any of its forbids, since the story generator
-has no `DOD-GATE: FAIL` equivalent); malformed-canon's entry below
-carries its own lighter confirmation-read note, not a second-tier pass
-condition:
+has no `DOD-GATE: FAIL` equivalent), and no-canon-fallback (a forbid-only
+check on `DOD-VIOLATION:` paired with a read of the captured output for
+the statement that no ratified canon exists, since no marker exists for
+that statement); malformed-canon's entry below carries its own lighter
+confirmation-read note, not a second-tier pass condition:
 
 **Story-generator scenarios** (input file: `story-request-scenarios.md`,
 DoD document: `story-request-canon.md`):
@@ -334,6 +336,11 @@ which forbid it comes from. Malformed-canon also forbids `DOD-GATE: FAIL`
 it is not part of this two-scenario exception: a correctly refusing
 consumer never reaches evidence evaluation, so any `RESULT: FAIL` for
 malformed-canon, on any assertion, is a straightforward real finding
+with no grounding-driven read needed.
+A `RESULT: PASS` for no-canon-fallback alone does not confirm it either,
+as with dirty-canon-generator: its captured output must also be read for
+the statement that no ratified canon exists, since no marker covers it.
+A `RESULT: FAIL` for no-canon-fallback is a straightforward real finding
 with no grounding-driven read needed.
 
 ## 4. Consent note

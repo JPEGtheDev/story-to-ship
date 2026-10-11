@@ -37,8 +37,8 @@ Canonical template and verdict definitions for session postmortem reports.
 [If no issues: state explicitly with supporting evidence]
 
 ### Action Items
-| # | Root Cause / Factor | Action Item | Target File |
-|---|---------------------|-------------|-------------|
+| # | Root Cause / Factor | Action Item | Strength | Target File |
+|---|---------------------|-------------|----------|-------------|
 
 ### Iron Law Compliance
 [Insert the Iron Law Compliance Check table from the "## Iron Law Compliance Check" section below]

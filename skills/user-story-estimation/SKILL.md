@@ -93,9 +93,9 @@ Size the total effort, not the base alone: base implementation is 40-60% of tota
 
 ## Token Budget (Plans With 8 or More Todos)
 
-The `writing-plans` skill (item 7) loads this skill for a plan with 8 or more todos, counted as numbered plan items, so the agent can compute the token budget before presenting the plan. Only this section applies to that load; the Iron Law, announce line, Effort Estimate block and INVEST gate item apply to stories, not to the plan. Below 8 todos this section does not apply.
+The `writing-plans` skill (item 7) loads this skill for a plan with 8 or more todos, counted as numbered plan items, so the agent can compute the token budget before presenting the plan. Only this section applies to that load; the Iron Law, announce line, Effort Estimate block and the first BEFORE PROCEEDING item apply to stories, not to the plan. Below 8 todos this section does not apply.
 
-- Minimum dispatch count = todos x 3 (one implementer, one Stage 1 review, one Stage 2 review per todo; Stage 2 is one dispatch per group of at most two files) + plan-review dispatches (2 for the Skeptic and plan-reviewer pair, 3 when a Three Amigos Refinement replaces them) + 1 whole-branch review when the plan adds a gate. Fix rounds add dispatches, so this is a minimum.
+- Minimum dispatch count = todos x 3 (one implementer, one Stage 1 spec-compliance review, one Stage 2 quality review per todo; Stage 2 is one dispatch per group of at most two files) + plan-review dispatches (2 for the Skeptic and plan-reviewer pair, 3 when a Three Amigos Refinement replaces them) + the review after all todos (1 final code reviewer, or 3 for the Three Amigos Signoff when Discovery ran) + 1 whole-branch coherence review when the plan adds a gate. Fix rounds add dispatches, so this is a minimum.
 - Tokens per dispatch: use a figure measured from a prior run of the same kind. When none exists, write "unmeasured" and report the dispatch count only. DO NOT convert tool calls to tokens.
 - Raw token counts are not comparable across model tiers. For cost, MUST use the Model Selection section of the `subagent-driven-development` skill; DO NOT restate its tables here.
 - MUST state the todo count, the minimum dispatch count and the tokens-per-dispatch figure (or "unmeasured") in the plan presentation. The owner judges them; this section sets no pass/fail rule.

@@ -6,15 +6,17 @@ Generic testing canon: decision rules promoted in SKILL.md live here in full, wi
 
 ## Arrange-Act-Assert (AAA) Pattern -- Critical Rules
 
-1. **NEVER combine phases.** Do not write `// Arrange & Act` or `// Act & Assert`. Each phase gets its own comment and section.
-   - **Exception:** `// Act & Assert` is acceptable only for `EXPECT_NO_THROW`/`EXPECT_THROW` tests where the action IS the assertion.
+1. **NEVER combine phases.** Do not write a combined Arrange-and-Act or Act-and-Assert comment, in the test language's own comment syntax. Each phase gets its own comment and section.
+   - **Exception:** a combined Act-and-Assert comment is acceptable only for a test that expects an exception (in C++ Google Test, `EXPECT_THROW`/`EXPECT_NO_THROW`), where the action IS the assertion.
 2. **If no Arrange is needed**, omit `// Arrange` entirely -- start with `// Act`.
 3. **Move expected values to Arrange** as named variables, not inline in Assert.
 4. **One logical concept per test** -- split if testing multiple behaviors.
 
 ---
 
-## AAA Pattern -- Template (Three Phases)
+## AAA Pattern -- Template (Three Phases), C++ Google Test Example
+
+Other languages use their own comment syntax for the same three phases (`# Arrange` in Python and shell).
 
 ```cpp
 TEST(SuiteName, UnitName_StateUnderTest_ExpectedResult)
@@ -34,7 +36,7 @@ TEST(SuiteName, UnitName_StateUnderTest_ExpectedResult)
 
 ## Test Double Taxonomy
 
-Use the **least sophisticated double** that answers your question. Reaching for `EXPECT_CALL` when a stub suffices is over-engineering.
+Use the **least sophisticated double** that answers your question. Reaching for a call-expectation mock (C++ Google Mock: `EXPECT_CALL`) when a stub suffices is over-engineering.
 
 | Double | Behavior | Verifies Calls? | When to Use |
 |--------|----------|-----------------|-------------|
@@ -47,7 +49,7 @@ Use the **least sophisticated double** that answers your question. Reaching for 
 
 **Key principle:** Mock the *role* (interface), not the concrete object. `MockWidget` mocks `IWidget` -- stable across implementation changes.
 
-**When NOT to use Google Mock:** If the question is "does this run without crashing?", a stub suffices. Only use `EXPECT_CALL` when the interaction itself is the behavior under test.
+**When NOT to use Google Mock:** If the question is "does this run without crashing?", a stub suffices. Only use a call expectation (C++ Google Mock: `EXPECT_CALL`) when the interaction itself is the behavior under test.
 
 ---
 

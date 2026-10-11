@@ -54,7 +54,7 @@ See `references/OOP_PRINCIPLES.md` for violation signals and hierarchy anti-patt
 | "The substitution test passes today" | Does it pass under all invariants, including error semantics? |
 | "The derived class only adds methods; it doesn't change base behavior" | An added method can break a base invariant (e.g. a mutator on an immutable base), and every override can tighten a precondition or weaken a postcondition. Check each override and each added method against the base contract. |
 | "Interface Segregation doesn't apply -- all clients need all methods" | Verify by inspection: find every caller of every interface method. If any caller never calls a method, the interface is too fat. |
-| "The callee will validate it" / "the caller already checked" | With no stated contract, both sides are guessing -- the check lands nowhere, or twice, and neither side actually knows which. The missing contract is the defect, not the missing check. State the precondition explicitly, assign it to caller or callee, then verify it lands exactly where assigned. |
+| "The callee will validate it" / "the caller already checked" | With no stated contract, both sides are guessing -- the check lands nowhere, or twice, and neither side actually knows which. The missing contract is the defect, not the missing check. State the precondition explicitly, assign it to caller or callee, then verify it lands exactly where assigned. Exception: a callee whose violated precondition would corrupt shared state re-checks it (see references/DESIGN_BY_CONTRACT.md). |
 
 ---
 

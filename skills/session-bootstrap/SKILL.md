@@ -164,6 +164,5 @@ Row context and the greenfield chain: see `references/SKILL_DISPATCH_TABLE.md`.
 
 - `references/RATIONALE.md` -- why the SKILL.md rules exist:
   invoke-before-acting, skill refresh, why honesty and communication are
-  peers, the git status check, why hook fixes need an observed firing, and
-  the unconditional self-evaluation block.
+  peers, the git status check, and why hook fixes need an observed firing.
 - `references/INDEX.md` -- index of this skill's reference files.

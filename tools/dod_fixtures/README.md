@@ -215,11 +215,13 @@ for the added layer. This scenario has no marker check --
 `DOD-VIOLATION:`, `DOD-GATE: FAIL`, or `DOD-STALE:` marker. Its pass
 condition is read directly from the transcript and the resulting
 document: the canon produced by the interview must differ from the input
-canon only by the new ruling line(s) for the delta layers, the `Stamp:` line
-update, and `related` entries for the detail files of the delta layers. This
-fixture supplies no detail file for the added layer, so `related` is expected
-to stay as it is; an added detail file with its `related` entry is a permitted
-change, not a failure. Every other byte must be preserved.
+canon only by the new ruling line(s) for the delta layers (the layers
+the newer taxonomy adds or changes), the `Stamp:` line update, and
+`related` frontmatter entries for the detail files of the delta layers.
+This fixture supplies no detail file for the added layer, so `related`
+is expected to stay as it is; an added detail file with its `related`
+entry is a permitted change, not a failure. Every other byte must be
+preserved.
 
 **Dirty-canon scenario** (input file: `completion-claim-scenarios.md`
 Case B; DoD document: `completion-claim-canon.md`, committed as a

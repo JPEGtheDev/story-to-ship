@@ -161,7 +161,7 @@ Estimable:
 Small:
   [ ] Completable in one sprint (<2 weeks)
   [ ] One developer/pair can own it
-  [ ] Not an Epic or large feature
+  [ ] Not an Epic
 
 Testable:
   [ ] All acceptance criteria are measurable

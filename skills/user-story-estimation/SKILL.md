@@ -26,7 +26,7 @@ Every generated story must include this section:
 ## Effort Estimate
 
 **Size:** [XS | S | M | L | XL]
-**Reasoning:** [One sentence explaining complexity level]
+**Reasoning:** [One sentence covering the complexity level and any unknowns]
 ```
 
 Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
@@ -87,6 +87,19 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 | Iteration and fixes | 15-25% |
 | Documentation | 5-10% |
 
+Size the total effort, not the base alone: base implementation is 40-60% of total, so count the testing, iteration and documentation rows when choosing Size.
+
+---
+
+## Token Budget (Plans With 8 or More Todos)
+
+The `writing-plans` skill (item 7) loads this skill for a plan with 8 or more todos, counted as numbered plan items, so the agent can compute the token budget before presenting the plan. Only this section applies to that load; the Iron Law, announce line, Effort Estimate block and INVEST gate item apply to stories, not to the plan. Below 8 todos this section does not apply.
+
+- Minimum dispatch count = todos x 3 (one implementer, one Stage 1 review, one Stage 2 review per todo; Stage 2 is one dispatch per group of at most two files) + plan-review dispatches (2 for the Skeptic and plan-reviewer pair, 3 when a Three Amigos Refinement replaces them) + 1 whole-branch review when the plan adds a gate. Fix rounds add dispatches, so this is a minimum.
+- Tokens per dispatch: use a figure measured from a prior run of the same kind. When none exists, write "unmeasured" and report the dispatch count only. DO NOT convert tool calls to tokens.
+- Raw token counts are not comparable across model tiers. For cost, MUST use the Model Selection section of the `subagent-driven-development` skill; DO NOT restate its tables here.
+- MUST state the todo count, the minimum dispatch count and the tokens-per-dispatch figure (or "unmeasured") in the plan presentation. The owner judges them; this section sets no pass/fail rule.
+
 ---
 
 ## Red Flags -- STOP
@@ -102,12 +115,12 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 ## BEFORE PROCEEDING
 
 1. The story has been validated against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable)
-2. All unknowns are identified and noted in the estimate
+2. All unknowns are identified and noted in Reasoning (write "none" when there are none)
 3. The task breakdown reflects actual work, not a best-case scenario
 4. XL stories have been decomposed before any estimate is committed
 
 [+] All met -> commit to the estimate
-[-] Any unmet -> resolve unknowns and recheck INVEST compliance before estimating
+[-] Any unmet -> fix that item (re-validate INVEST, note unknowns in Reasoning, re-list the real work, decompose XL), then re-run this gate
 
 ---
 
@@ -125,4 +138,4 @@ Size tokens (XS, S, M, L, XL) are defined in the T-Shirt Size Guide below.
 
 ## Related Skills
 
-- `user-story-generator` -- companion skill that generates the stories this skill estimates; this skill owns the full XS-XL scale and the **Size** + **Reasoning** estimate block
+- `user-story-generator` -- companion skill that generates the stories this skill estimates; this skill owns the full XS-XL scale and the Effort Estimate block. When both skills are loaded together, the generator story's header Size satisfies this block's Size line, and one Effort Estimate section is emitted, not two.

@@ -119,7 +119,7 @@ Test code requires its own refactoring discipline. Just like production code can
 - Extract targeted factory methods that build specific scenarios
 - Use parameterized tests if many tests need similar (but not identical) fixtures
 - Move heavy setup to lazy initialization (only create what a test actually uses)
-- If many tests need the same base state, use inheritance sparingly -- favor composition and helper functions
+- If many tests need the same base state, build it with composition and helper functions; do not derive one fixture class from another fixture class to share base state
 
 ---
 
@@ -171,7 +171,7 @@ Test code requires its own refactoring discipline. Just like production code can
       image = loadImage("test.png")
       assertEq(image.width(), 256)
       assertEq(image.height(), 512)
-      assertGt(image.pixelData().size(), 0)  // Specific, observable outcome
+      assertEq(image.pixelData().size(), 256 * 512 * 4)  // RGBA: 4 bytes per pixel for 256 x 512 pixels
 ```
 
 **Why it hurts:**
@@ -241,19 +241,19 @@ Test code requires its own refactoring discipline. Just like production code can
 
 ```
 [-] BAD (duplicated setup):
-  test "ParseValidJSON_ReturnsObject":
+  test "Parser_ValidJson_ReturnsObject":
       json = '{ "name": "test", "age": 25 }'
       parser = new Parser()
       result = parser.parse(json)
       assertTrue(result.valid())
   
-  test "ParseJSON_ExtractsName":
+  test "Parser_ValidJson_ExtractsName":
       json = '{ "name": "test", "age": 25 }'  // copied
       parser = new Parser()
       result = parser.parse(json)
       assertEq(result.name(), "test")
   
-  test "ParseJSON_ExtractsAge":
+  test "Parser_ValidJson_ExtractsAge":
       json = '{ "name": "test", "age": 25 }'  // copied again
       parser = new Parser()
       result = parser.parse(json)
@@ -263,15 +263,15 @@ Test code requires its own refactoring discipline. Just like production code can
   function validTestJSON():
       return '{ "name": "test", "age": 25 }'
   
-  test "ParseValidJSON_ReturnsObject":
+  test "Parser_ValidJson_ReturnsObject":
       result = new Parser().parse(validTestJSON())
       assertTrue(result.valid())
   
-  test "ParseJSON_ExtractsName":
+  test "Parser_ValidJson_ExtractsName":
       result = new Parser().parse(validTestJSON())
       assertEq(result.name(), "test")
   
-  test "ParseJSON_ExtractsAge":
+  test "Parser_ValidJson_ExtractsAge":
       result = new Parser().parse(validTestJSON())
       assertEq(result.age(), 25)
 ```
@@ -286,7 +286,7 @@ Test code requires its own refactoring discipline. Just like production code can
 - Extract shared assertions to helper functions
 - BUT preserve enough test detail that reading the test still reveals what it's testing -- don't hide the important parts in abstract helpers
 - Use test fixtures or parameterized tests for common setup scenarios
-- **Key balance:** DRY (Don't Repeat Yourself) is good; overly abstract tests are bad. Extract the "what" not the "why". Readers should still understand the test's intent from the test itself.
+- **Key balance:** DRY (Don't Repeat Yourself) is good; overly abstract tests are bad. Extract the "what" not the "why". Readers MUST be able to understand the test's intent from the test itself.
 
 ---
 
@@ -302,16 +302,16 @@ Key principle: **test duplication is more tolerable than production duplication*
   // Reader has to trace through makeValidSubmarine and verifyBehavior to understand what's being tested
 
 [+] GOOD: Test repeats some setup but intent is clear
-  test "Dive_IncreasesDepth":
+  test "Submarine_AtSurface_DiveIncreasesDepth":
       // Arrange
       submarine = new Submarine(maxDepth: 800, ballastCapacity: 600)
       submarine.position = Vector3(0, 0, 0)
       
       // Act
-      submarine.dive()
+      submarine.dive(depth: 50)
       
       // Assert
-      expectLt(submarine.position.z, 0)
+      expectEq(submarine.position.z, -50)
 ```
 
 The balance: extract duplication that obscures nothing; keep inline whatever the reader needs to understand the test's intent.
@@ -338,7 +338,7 @@ If a test has always passed:
 
 **Fix:**
 - **RED-first discipline:** Write the test FIRST, see it fail, understand the failure, THEN write code.
-- If a test passes immediately without changes: delete it. The test is broken. Start over.
+- If a test passes immediately without changes: the test is wrong. Fix it before writing production code.
 - Verify each test can actually detect breakage: intentionally break the production code and confirm the test fails.
 
 ---
@@ -353,7 +353,7 @@ If a test has always passed:
 
 4. **Red-first always.** Write the test, watch it fail, understand the failure, THEN write production code.
 
-5. **Test the contract, not the implementation.** If production code changes internally but the behavior is the same, the test should still pass. If the test must change, it was testing implementation details, not behavior.
+5. **Test the contract, not the implementation.** If production code changes internally but the behavior is the same, the test MUST still pass. If the test must change, it was testing implementation details, not behavior.
 
 6. **Weak assertions hide bugs.** "Is not null" is not a valid assertion. Assert specific, observable outcomes.
 
@@ -375,4 +375,4 @@ If a test has always passed:
 | Lazy Test | Assertions are too weak ("is not null") | Assert exact, observable outcomes |
 | Assertion Roulette | Multiple asserts, no way to know which failed | One assert per test, or use clear messages |
 | Test Code Duplication | Same setup/assert copied across tests | Extract to helpers, but preserve test intent |
-| Never Red | Test has always passed | Delete and restart; RED-first. See it fail. |
+| Never Red | Test has always passed | Fix the test; RED-first. See it fail. |

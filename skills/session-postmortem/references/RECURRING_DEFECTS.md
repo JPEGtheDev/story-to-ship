@@ -15,7 +15,7 @@ see whether it is a known pattern and where its remedy lives.
 - Every correction is grounded in a real quoted user message. That grounding is the only
   thing claimed as "verified" -- see the `maps-to` schema entry below.
 - The registry now holds 47 entries: 46 from the 2026-07-19 user-correction mining run (grouped
-  into 46 canonical failure modes, below) plus RD-47, contributed 2026-07-23 from an
+  into 46 canonical failure modes, below) plus Recurring Defect (RD) entry RD-47, contributed 2026-07-23 from an
   external-reviewer session self-audit (the a0e656aa drift-postmortem). RD-47 is grounded in
   that postmortem's event log, not a quoted user correction, so the "every correction is
   grounded in a real quoted user message" claim above scopes to the 46 mined modes only.
@@ -184,7 +184,7 @@ Each entry has:
 - remediation: candidate (1 instance -- not yet a confirmed pattern).
 
 ### RD-25: cost-compared-in-tokens-not-dollars
-- signature: Compared spend in tokens instead of dollars via per-MTok pricing.
+- signature: Compared spend in tokens instead of dollars via pricing per million tokens (MTok).
 - count: 1 (mined 2026-07-19)   domain: general
 - maps-to: skill: subagent-driven-development (model-selection tier-cost comparison rule)
 
@@ -259,7 +259,7 @@ Each entry has:
 - maps-to: skill: versioning
 
 ### RD-39: review-missed-invest-criterion
-- signature: A ceremony passed a story that was not INVESTable.
+- signature: A ceremony passed a story that did not meet Independent, Negotiable, Valuable, Estimable, Small, Testable (INVEST) criteria.
 - count: 1 (mined 2026-07-19)   domain: general
 - maps-to: skill: three-amigos
 

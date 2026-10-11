@@ -85,7 +85,7 @@ Each index uses this format:
 
 Universal token maximum: 800 tokens per article (all types). External references linked in the index have no local limit -- the limit applies only to files stored in the repo.
 
-Include in each index: owned doc files at that level, architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. `docs/INDEX.md` does not repeat entries listed in a domain index; it links to the domain index instead.
+Include in each domain index: the doc files under that domain directory, including every subdomain, plus architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. `docs/INDEX.md` links to each domain index.
 
 The index is the fast-path for discovering what documentation exists. Without it, agents scan the filesystem; with it, agents read one file. For external sources, the index entry links out rather than storing content. Source: DDD "Context Map" pattern.
 

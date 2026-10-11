@@ -42,7 +42,7 @@ Every field marked Required MUST contain project-specific content. Placeholder t
 - Format: `[UNCLEAR: user stated X AND Y -- these are mutually exclusive because Z. Which is correct?]` followed by "Deferred by the user."
 - Write "None" when the user deferred nothing.
 - A flag the user answered is cleared and is not listed.
-- A deferral excuses only that flag from gate item 5. Completeness gate items 1-4 still apply, so a deferred flag never excuses a placeholder or a missing Required field.
+- Completeness gate items 1-4 still apply, so a deferred flag never excuses a placeholder or a missing Required field.
 
 ---
 

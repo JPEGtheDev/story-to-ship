@@ -1,7 +1,7 @@
 ---
 name: session-bootstrap
 license: MIT
-description: Use when opening a new conversation to load required skills, identify task type, and restore session context before acting.
+description: Use when opening a new conversation or resuming one after context compaction or a harness session resume.
 ---
 
 

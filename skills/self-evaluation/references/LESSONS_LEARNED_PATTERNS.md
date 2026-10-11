@@ -15,7 +15,7 @@ story lives in the source project's doc.
 
 **Rule:** Always open binary data files with binary mode (`"rb"`/`"wb"`), never text mode (`"r"`/`"w"`).
 
-**Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every operating system (OS) a developer tests on.
+**Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every OS a developer tests on.
 
 ### Return Large Stored Objects by Const Reference
 

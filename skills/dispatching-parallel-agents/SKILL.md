@@ -92,7 +92,7 @@ Dispatch agents in parallel when ALL of the following are true:
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
-[-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
+[-] Any unmet -> resolve the dependency, define the return format, serialize the dispatch, create the missing worktree, or (for a hypothesis-testing batch) dispatch the `skeptic` agent on the experiment design, before proceeding
 
 ---
 

@@ -1,7 +1,10 @@
 # Worktree Self-Check -- Canonical Block
 
-This file is the source of truth for the Worktree Self-Check block used by every agent
-template in agents/. Read-only templates carry the core block (Variant A). Templates that
+This file is the source of truth for the Worktree Self-Check block used by each agent
+template in agents/ that takes a {{WORKTREE_PATH}} or {{REPO_PATH}} input. Templates with
+no such input carry no block: the summarization and claim-enrichment templates work from
+inline text and, at most, temp or output paths, and story-coordinator creates its own
+worktrees. Read-only templates carry the core block (Variant A). Templates that
 COMMIT to a branch (currently only implementer) additionally carry the branch-isolation
 step (Variant B). Copy the applicable variant verbatim, substituting the template's own
 path placeholder (e.g. {{REPO_PATH}} for postmortem-reviewer, {{WORKTREE_PATH}} elsewhere).

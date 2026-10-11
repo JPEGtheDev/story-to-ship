@@ -55,7 +55,7 @@ Pick up next todo.
 ```
 Task to delegate
     |
-    +-- Read-only research? -> dispatching-parallel-agents skill
+    +-- Read-only research? -> Dispatch Decision Table (SKILL.md); fan-out -> dispatching-parallel-agents skill
     |
     +-- Needs file changes?
          |

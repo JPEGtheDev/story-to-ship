@@ -39,7 +39,7 @@ Before dispatching any subagent:
 1. The todo has a single, clear objective -- no compound tasks bundled together. Any specific limits, counts, or numbers in the task description are verified from source files, not from memory.
 2. The agent prompt includes all necessary context: file paths, constraints, and return format.
 3. A worktree exists for this agent. **All agents -- read-only and write-side alike -- run in a worktree.** Work done inline by the main agent (the "do inline" rows of the Dispatch Decision Table) is exempt -- the worktree rule attaches to dispatch.
-   See `references/WORKTREE_SETUP.md` for the `{{WORKTREE_PATH}}` value and the read-only exemption; the setup commands are in the `using-git-worktrees` skill. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that dispatched agent templates run on start.
+   See `references/WORKTREE_SETUP.md` for the `{{WORKTREE_PATH}}` value and the read-only exemption; the setup commands are in the `using-git-worktrees` skill. `references/WORKTREE_SELF_CHECK.md` is the canonical self-check block that agent templates taking a `{{WORKTREE_PATH}}` or `{{REPO_PATH}}` input run on start.
 4. If a pre-built template exists in `.claude/agents/` for this task type (index: `references/AGENT_TEMPLATES.md`): use it instead of injecting rules inline; general-purpose only under the rule in `references/MODEL_SELECTION.md`.
 5. Agent type is correct for the task: explore for read-only research, `skill-reviewer.md` or `code-quality-reviewer.md` for Stage 2 review (grouped as the `two-stage-review` skill's Stage 2 rule says), `implementer.md`+worktree for file modifications, general-purpose for build/test/lint.
 6. Dispatch text is shipped text: the implementer builds on it and the reviewers review the result as the implementer's own, so a label, tag, or wrong tool claim in the prompt ships as a defect. The prompt for this dispatch -- research or implementation alike -- was written to a file before sending, and the dispatch message points the agent at that file.
@@ -127,7 +127,7 @@ See the `using-git-worktrees` skill for full worktree lifecycle, commands, and s
 
 ## Model Selection
 
-See `references/MODEL_SELECTION.md` for model tier table and concurrency rules.
+See `references/MODEL_SELECTION.md` for the model tier table and the general-purpose and explicit-model rules; concurrency lives in `dispatching-parallel-agents`.
 
 ---
 
@@ -149,11 +149,11 @@ See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirica
 
 | Excuse | Reality |
 |--------|---------|
-| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the 4-step worktree creation check in the `using-git-worktrees` skill first. |
+| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the worktree creation check in the `using-git-worktrees` skill first: write-side agents run all four steps, read-only agents skip step 4 (branch isolation). |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
 | "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = at most one implementer dispatch; never bundle two todos into one dispatch. |
-| "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm assumptions before acting. |
+| "I already know what to do -- the researcher step is overhead" | YOU MUST dispatch the researcher.md template to confirm an assumption about runtime behavior (observable only by running the app) before acting; any other assumption follows the Dispatch Decision Table, and a 1-2 file read follows the inline rows. |
 | "I dispatched an audit subagent -- that's a complete audit" | NO. Name every dimension the agent must check in the prompt. An unnamed dimension will not be checked. The audit prompt is the specification -- an incomplete specification produces an incomplete audit. |
 | "No `## Feature Specification` in plan.md -- that means Ceremony 5 doesn't apply" | Absence signals Discovery never ran. If Discovery was required for this task (new or unclear Acceptance Criteria (AC)), surface that gap to the user before dispatching the final code reviewer. Do not silently skip Three Amigos routing. |
 | "Todo is short -- I'll do it inline" | Short is not the test. The inline lane admits a prose file, replacement text already literal, and the guard hook's caps; anything else dispatches regardless of estimated size. |

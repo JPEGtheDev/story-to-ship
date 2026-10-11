@@ -49,7 +49,7 @@ not applied, in that turn (User Review Comments below).
 | Category | Action |
 |----------|--------|
 | Correct -- I missed this | Acknowledge, fix, thank them specifically for the catch |
-| Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue |
+| Correct but low priority | Acknowledge as valid, explain why it is deferred, open a tracking issue. Never used for a high-signal comment (Distinguishing Signal from Noise). |
 | I disagree -- have a counter-argument | State the counter-argument with reasoning. Do not just dismiss. |
 | Inquiry -- reviewer asks "why did X change?" | An inquiry wants the rationale, not a change. Answer on the thread with the reasoning and the evidence that drove the decision (cite the source file, rule, or data). Modify code only if writing the answer reveals the rationale was wrong. Distinct from "I don't understand" below: there the REVIEWER's comment is unclear to you; here the reviewer is asking for YOUR rationale. |
 | Bug report phrased as a question (e.g. "why is this not null-checked?") | Not an inquiry -- a change request wearing a question mark. The test is what the reviewer wants: rationale (inquiry) or a code change (bug report), not whether the comment contains the word "why". Categorize and fix like any other correctness finding. For the user's comments, see User Review Comments below: the fix is proposed, not applied, in that turn. |

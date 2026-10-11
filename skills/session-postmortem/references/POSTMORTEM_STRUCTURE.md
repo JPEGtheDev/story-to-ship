@@ -88,19 +88,29 @@ A self-assessment cannot find what the agent rationalized away. **An external re
 
 ### Setup
 
-Derive the paths for the session being reviewed from your project's session management conventions.
+`[SESSION_DIR]` is the folder the user gives for the session's files; when the user gives none, it is `scratch/<session-id>/` under the repository root, created if missing.
+
+The reviewer dispatch (Protocol step 2) takes these values:
+
+- `SESSION_ID`: the session id.
+- `TRANSCRIPT_PATH`: the session transcript.
+- `EVENTS_JSONL_PATH`: `[SESSION_DIR]/events.jsonl` by default.
+- `SESSION_WORKSPACE_PATH`: the folder that holds the session's `checkpoints/` folder, or `none` when there is no `checkpoints/` folder.
+- `REPO_PATH`: the repository root.
+- `SELF_ASSESSMENT_PATH`: `[SESSION_DIR]/self-assessment.md`.
+- `OUTPUT_PATH`: `[SESSION_DIR]/postmortem-external.md`, the file the reviewer writes its report to.
 
 ### Protocol
 
-1. **Dispatch the external reviewer subagent** using the `postmortem-reviewer` agent with the above paths filled in. The reviewer reads `events.jsonl`; if it is missing, the reviewer produces it with the converter named in skill BEFORE PROCEEDING item 2 (the agent template carries the command), or uses the declared substitute source (same item) if the converter could not run.
-
-2. **Run self-assessment in parallel** (the main agent does Parts 1-5 from memory while the reviewer works). **INDEPENDENCE GATE: Write the self-assessment FROM MEMORY ONLY -- do NOT read `events.jsonl`, checkpoints, `plan.md`, or any session artifact before writing `[SESSION_DIR]/self-assessment.md`. `[SESSION_DIR]/self-assessment.md` MUST be created on disk before you read any source data. Only after the file exists may you read session data or wait for the external review to complete. Reading session artifacts first means the self-assessment is a log summary, not independent assessment. Do NOT announce yourself as "external reviewer" or "cold read" in your own context -- that role belongs exclusively to the dispatched subagent.**
+1. **Run self-assessment** (the main agent does Parts 1-5 from memory, before the reviewer is dispatched). **INDEPENDENCE GATE: Write the self-assessment FROM MEMORY ONLY -- do NOT read `events.jsonl`, checkpoints, `plan.md`, or any session artifact before writing `[SESSION_DIR]/self-assessment.md`. `[SESSION_DIR]/self-assessment.md` MUST be created on disk before you read any source data. Only after the file exists may you read session data, dispatch the reviewer (step 2) or wait for its result (step 3). Reading session artifacts first means the self-assessment is a log summary, not independent assessment. Do NOT announce yourself as "external reviewer" or "cold read" in your own context -- that role belongs exclusively to the dispatched subagent.**
 
    **If the postmortem file for this session already exists** (multi-phase session): do NOT read its content to find an append anchor. Append with `## Phase N: [Task Name]` -- construct a unique section heading without reading the existing file. "Finding the anchor" is not an exemption from the independence gate.
 
    **`self-assessment.md` follows the same rule:** do NOT read its existing content before writing. Each session has its own directory -- write directly. Governing instruction: Step 7 of the `self-evaluation` skill.
 
-3. **Wait for the reviewer to complete.** Read its output from `postmortem-external.md`. **The only permissible action between dispatching the external reviewer and its completion notification arriving is waiting. Do NOT announce a verdict, summarize findings, or output any assessment until the completion notification arrives. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
+2. **Dispatch the external reviewer subagent** using the `postmortem-reviewer` agent with the values listed in Setup filled in. The session folder sits under `scratch/`, which the reviewer lists, so tell the reviewer to read the self-assessment last, only after it has read the log. The reviewer reads `events.jsonl`; if it is missing, the reviewer produces it with the converter named in skill BEFORE PROCEEDING item 2 (the agent template carries the command), or uses the declared substitute source (same item) if the converter could not run.
+
+3. **Wait for the reviewer to complete.** Read its output from `[SESSION_DIR]/postmortem-external.md` (the OUTPUT_PATH value). **The only permissible action between dispatching the external reviewer and its completion notification arriving is waiting. Do NOT announce a verdict, summarize findings, or output any assessment until the completion notification arrives. A verdict announced before the external review completes will be based on incomplete information and may directly contradict the reviewer's log-cited findings.**
 
 4. **Reconcile.** Where the external reviewer and self-assessment agree: note the convergence. Where they conflict: the external reviewer's log-cited findings are authoritative. The self-assessment's uncited claims are not.
 

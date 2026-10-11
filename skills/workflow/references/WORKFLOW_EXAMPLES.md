@@ -79,7 +79,7 @@ This reference provides concrete examples of correct and incorrect CI/CD (Contin
 
 ### [+] Link to Artifacts in PR Comments
 
-```yaml
+```javascript
 const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 const artifactsUrl = `${runUrl}#artifacts`;
 body += `**[Download images from workflow artifacts](${artifactsUrl})**\n\n`;
@@ -111,10 +111,10 @@ permissions:
 
 **Why:** Creates infinite loops, race conditions, and audit trail problems.
 
-### [-] Base64 Data URIs in PR Comments
+### [-] Base64 Data URIs (Uniform Resource Identifiers) in PR Comments
 
-```yaml
-# BAD: GitHub strips data: URIs from img tags
+```javascript
+// BAD: GitHub strips data: images from img tags
 body += `<img src="data:image/png;base64,${base64Data}" />`;
 ```
 
@@ -165,33 +165,14 @@ jobs:
 
 ```bash
 TOTAL=$(grep -E '^\[==========\] [0-9]+ tests? from [0-9]+ test suites? ran\.' output.txt \
-  | tail -1 | grep -oE '[0-9]+' | head -1 || echo "0")
+  | tail -1 | grep -oE '[0-9]+' | head -1 || true)
 PASSED=$(grep -E '^\[  PASSED  \] [0-9]+ tests?\.' output.txt \
-  | tail -1 | grep -oE '[0-9]+' | head -1 || echo "0")
+  | tail -1 | grep -oE '[0-9]+' | head -1 || true)
 FAILED=$(grep -E '^\[  FAILED  \] [0-9]+ tests?, listed below:' output.txt \
-  | tail -1 | grep -oE '[0-9]+' | head -1 || echo "0")
+  | tail -1 | grep -oE '[0-9]+' | head -1 || true)
+TOTAL=${TOTAL:-0}
+PASSED=${PASSED:-0}
+FAILED=${FAILED:-0}
 ```
 
-**Note:** Don't use `"X tests from"` lines -- gtest outputs one per suite. Always parse the final summary.
-
----
-
-## Hook Content Size Limit
-
-Hook output strings -- `additionalContext`, `systemMessage`, and plain stdout -- are capped at **10,000 characters per hook per turn** by Claude Code. (Source: Claude Code hooks documentation.)
-
-When a hook exceeds the limit:
-- The full text is saved to a file in the session directory
-- The agent receives only a 2KB preview and a file path -- not the full content
-- The injected context is silently incomplete
-
-**Rule:** Every hook content file MUST stay under 10,000 characters. Verify with `wc -c hooks/*.md`.
-
-Split large hook content into separate hooks, each under the limit. The project's UserPromptSubmit hooks demonstrate this pattern: `pre-message-gates.md` (bootstrap check and core-skill routing, ~1.6KB) and `pre-message.md` (honesty and communication gate, ~1.6KB) are separate hooks, each under the 10,000-character ceiling.
-
-**Check sizes:**
-```bash
-wc -c hooks/*.md
-```
-
-Any file at or above 10,000 characters will be truncated when the hook fires.
+**Note:** Don't use `"X tests from"` lines -- gtest outputs one per suite. Always parse the final summary. The `|| true` and `:-0` default make a missing summary line count as 0 under both `bash -e` and `bash -eo pipefail`.

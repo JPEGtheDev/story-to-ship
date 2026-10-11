@@ -32,7 +32,7 @@ TEST_F(RenderingRegressionTest, RenderDefaultCube_AngledView_MatchesBaseline)
 
 | Type | Role | Purpose |
 |------|------|---------|
-| `Image` | The project's image utility | RGBA pixel buffer with save/load (PPM, PNG) |
+| `Image` | The project's image utility | red-green-blue-alpha (RGBA) pixel buffer with save/load (PPM, PNG) |
 | `ComparisonResult` | The project's testing support library | Match status, similarity, diff image |
 | `PixelComparator` | The project's testing support library | Pixel comparison engine |
 | `ImageFormat` | The project's image utility | Format enum (PPM, PNG) for Image::save/load |

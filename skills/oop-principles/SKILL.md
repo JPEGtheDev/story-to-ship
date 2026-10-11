@@ -24,7 +24,7 @@ Applies to new inheritance, a new interface, or review of an existing hierarchy.
 
 1. For each inheritance pair in scope (B extends A): does B pass a substitution test -- can any code accepting A accept B without behavioral change? Not applicable when no inheritance pair is in scope (counts as met).
 2. Does the design satisfy all five SOLID principles? Name each principle and give a one-line answer for each.
-[+] All met -> proceed  [-] Any unmet -> redesign; use composition where the Is-A test fails
+[+] All met -> proceed  [-] Any unmet -> redesign; use composition where item 1 fails
 
 ---
 

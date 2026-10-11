@@ -15,7 +15,7 @@ story lives in the source project's doc.
 
 **Rule:** Always open binary data files with binary mode (`"rb"`/`"wb"`), never text mode (`"r"`/`"w"`).
 
-**Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every OS a developer tests on.
+**Why:** Text mode silently translates line-ending bytes on some platforms, corrupting binary reads/writes. The corruption is platform-dependent, so it will not reproduce on every operating system (OS) a developer tests on.
 
 ### Return Large Stored Objects by Const Reference
 
@@ -94,21 +94,6 @@ story lives in the source project's doc.
 **Lesson:** Never use `../` relative paths with `git worktree add`. Always use `.worktrees/agent-<name>` (inside the repo, gitignored). The `.worktrees/` convention makes absolute paths predictable: `<repo_root>/.worktrees/<name>`. `../` paths land at a depth dependent on the current working directory, which is easy to get wrong when constructing agent prompt absolute paths.
 
 **Added to:** `using-git-worktrees` skill -> Red Flags section
-
----
-
-## Quick Reference: Where to Add Lessons
-
-Use this for fast question-based lookup -- "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.
-
-| If the lesson is about... | Add to... |
-|---|---|
-| Code patterns, naming, error handling | `code-quality` skill |
-| Test writing, Arrange-Act-Assert (AAA), mocking, visual regression | `testing` skill |
-| CI/CD workflows, artifacts, permissions | `workflow` skill |
-| Documentation format, linking, content | `documentation` skill |
-| User story creation, estimation | `user-story-generator` skill |
-| Meta/process (skill creation, evaluation) | `self-evaluation` skill |
 
 ---
 

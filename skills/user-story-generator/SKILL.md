@@ -148,7 +148,7 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 
 - Story has no acceptance criteria -> STOP. Write at least one testable acceptance criterion before generating.
 - Story requires another story to be done first ("depends on #X") -> STOP. Redesign the split so this story can be delivered independently.
-- Story spans multiple unrelated components or layers -> STOP. Split into separate stories, one per component or layer.
+- Story spans multiple unrelated components or layers -> STOP. Split by user-visible outcome (a vertical slice that may cross layers), never into one story per layer.
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
 - Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.

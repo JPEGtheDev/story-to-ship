@@ -33,7 +33,7 @@ For row 4 (BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk -
 
 Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 
-Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
+Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 required post-merge for multi-session work, optional for single-session work. Full agendas: `references/CEREMONIES.md`.
 
 ---
 
@@ -84,7 +84,6 @@ A Feature Specification that does not address both questions is incomplete and M
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
 - After all verdicts: delete worktrees and branches.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
-- Agent prompts MUST include an explicit `cd {{WORKTREE_PATH}} &&` before the worktree self-check. Agents start in the session's main repo directory, not the worktree -- without the explicit `cd`, the self-check will always return BLOCKED.
 - If a stop hook fires during an active amigo wait: respond to the hook only if the hook action does not modify any file that running amigos are currently reading. Committing a previously untracked file that amigos have not opened is safe. Staging or modifying plan.md, SKILL.md, or any reference file an amigo may be reading is not safe. Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
 
 ---
@@ -123,7 +122,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 | "Developer knows the code, skip that amigo" | Amigo reads code first. Findings are evidence. |
 | "Two approved -- majority rules" | Any REJECT blocks. Majority is irrelevant. |
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |
-| "Retrospective is optional" | Process debt accumulates. Expected, not optional. |
+| "Retrospective is optional" | Required for multi-session work; optional only for single-session work. Skipped retrospectives let process debt accumulate. |
 | "Not fully blocked, skip Pivot Assessment" | A DONE_WITH_CONCERNS result carrying a correctness or scope risk also triggers the owner prompt, then Pivot Assessment. |
 
 ---
@@ -135,4 +134,4 @@ This output proves the ceremony was identified before dispatch. It does not prov
 
 ## References
 
-- `references/CEREMONIES.md` -- per-amigo sources, agenda lists, output formats, and model selection rationale for all 6 ceremonies
+- `references/CEREMONIES.md` -- per-amigo sources, agenda lists, and output formats for all 6 ceremonies

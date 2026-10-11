@@ -122,7 +122,7 @@ git tag v1.2.3 -m "Release v1.2.3" && git push origin v1.2.3
 Verify the commit message/PR title uses the correct type. Check your project's release automation for manual override options.
 
 **Need a release:**
-Merge a PR with a conventional title (the user merges). Where the repo has release automation, it tags the merge; otherwise create the tag manually as in Step 3.
+Open a PR with a conventional title; the user merges it. Where the repo has release automation, it tags the merge; otherwise create the tag manually as in Step 3.
 
 ---
 

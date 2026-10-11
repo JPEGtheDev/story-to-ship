@@ -116,3 +116,25 @@ BAD: `"See [CONVENTIONAL_COMMITS.md](../versioning/references/CONVENTIONAL_COMMI
 | Sub-domain skills | <=150 lines | 200 lines |
 
 When a skill exceeds its ideal max, split by domain. Each split must have a distinct iron law.
+
+---
+
+## Hook Content Size Limit
+
+Hook output strings -- `additionalContext`, `systemMessage`, and plain stdout -- are capped at **10,000 characters per hook per turn** by Claude Code. (Source: Claude Code hooks documentation.)
+
+When a hook exceeds the limit:
+- The full text is saved to a file in the session directory
+- The agent receives only a 2KB preview and a file path -- not the full content
+- The injected context is silently incomplete
+
+**Rule:** Every hook content file (not hooks/README.md) MUST stay under 10,000 characters. Verify with `wc -c $(ls hooks/*.md | grep -v README.md)`.
+
+Split large hook content into separate hooks, each under the limit. The project's UserPromptSubmit hooks demonstrate this pattern: `pre-message-gates.md` (bootstrap check and core-skill routing, ~1.6KB) and `pre-message.md` (honesty and communication gate, ~1.6KB) are separate hooks, each under the 10,000-character ceiling.
+
+**Check sizes:**
+```bash
+wc -c $(ls hooks/*.md | grep -v README.md)
+```
+
+Any file at or above 10,000 characters will be truncated when the hook fires.

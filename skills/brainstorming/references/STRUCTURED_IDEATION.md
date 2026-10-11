@@ -49,7 +49,7 @@ Adapt the literary writers' workshop format for design and code review:
 2. **Author is silent:** the author observes while others discuss; does not defend
 3. **Summarize first:** one reviewer restates the work's intent in their own words -- confirms understanding before critique
 4. **Positive feedback first:** state what works well and why
-5. **Suggestions for improvement:** frame as conditional observations rather than judgments ("If the intent is X, this approach limits Y") -- not directives, not unqualified verdicts. (Note: "I wondered if..." phrasing is for human collaborative workshops only -- agent code review output must remain direct per the code-quality skill.)
+5. **Suggestions for improvement:** frame as conditional observations rather than judgments ("If the intent is X, this approach limits Y") -- not directives, not unqualified verdicts. (Note: "I wondered if..." phrasing is for human collaborative workshops only -- agent code review output must state the finding and the fix directly, per the `communication` skill.)
 6. **Author responds last:** addresses clarifications only, not defenses
 
 The goal is learning, not verdict. This format reduces defensive responses and surfaces signal that direct critique suppresses.
@@ -75,7 +75,7 @@ Forcing a pattern onto code that does not need it adds indirection with no payof
 
 ---
 
-## Evolutionary Design (XP Model)
+## Evolutionary Design in Extreme Programming (XP)
 
 XP does not eliminate design -- it distributes design throughout development:
 
@@ -89,7 +89,7 @@ The source code is the design. Minimal artifacts, maximum feedback. Long feedbac
 
 ## Wiki / Knowledge Base Design Principles
 
-See `documentation/references/` for documentation conventions. The principles for collaborative knowledge systems: Simple (low friction), Observable (visible diffs), Convergent (duplication removed), Tolerant (imperfect contributions welcome), Precise (titles answer the question they ask).
+See the `documentation` skill for documentation conventions. The principles for collaborative knowledge systems: Simple (low friction), Observable (visible diffs), Convergent (duplication removed), Tolerant (imperfect contributions welcome), Precise (titles answer the question they ask).
 
 Anti-patterns to avoid in skill and doc files: unresolved debate left as prose, information only accessible to insiders, more words than content.
 

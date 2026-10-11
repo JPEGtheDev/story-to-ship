@@ -62,7 +62,7 @@ Operations on result objects must not have fewer capabilities than the objects t
 
 Define the interface (abstract class / concept) before the concrete implementation. This forces clarity about expected behavior and prevents implementation bias from shaping the contract. The interface enables test doubles and makes multiple implementations straightforward.
 
-Pattern: one `IRenderer` / one `Renderer`. The test suite works against `IRenderer`.
+Pattern: one `IRenderer` / one `Renderer`. The test suite works against `IRenderer`. A single interface with a single implementation, written so tests can substitute a test double, is a legitimate abstraction and not a Speculative Hierarchy; the three-variant threshold applies to base classes added for variants that do not exist yet.
 
 ---
 

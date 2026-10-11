@@ -337,11 +337,11 @@ it is not part of this two-scenario exception: a correctly refusing
 consumer never reaches evidence evaluation, so any `RESULT: FAIL` for
 malformed-canon, on any assertion, is a straightforward real finding
 with no grounding-driven read needed.
-
-A PASS alone does not confirm no-canon-fallback either: its captured
-output must also be read for the statement that no ratified canon
-exists, since no marker covers it. A `RESULT: FAIL` for no-canon-fallback
-is a straightforward real finding with no grounding-driven read needed.
+A `RESULT: PASS` for no-canon-fallback alone does not confirm it either,
+as with dirty-canon-generator: its captured output must also be read for
+the statement that no ratified canon exists, since no marker covers it.
+A `RESULT: FAIL` for no-canon-fallback is a straightforward real finding
+with no grounding-driven read needed.
 
 ## 4. Consent note
 

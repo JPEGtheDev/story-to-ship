@@ -88,7 +88,7 @@
 
 ## S - Small
 
-**What it means:** Stories are completable within one sprint (typically 1-2 weeks).
+**What it means:** Stories are completable within one sprint. Size L means up to one sprint; a story that needs more than one sprint is split.
 
 **Why it matters:**
 - Fast feedback loops

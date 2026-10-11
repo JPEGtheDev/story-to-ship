@@ -70,10 +70,9 @@ A parent API or platform repo may own upper-level domain documentation. A micros
 
 ## Documentation Index
 
-Every `docs/` directory at each level MUST maintain an `INDEX.md` for what it owns:
-- `docs/INDEX.md` -- cross-cutting standards and links to domain-level indexes
-- `docs/<domain>/INDEX.md` -- domain-wide docs and links to subdomain indexes
-- `docs/<domain>/<subdomain>/INDEX.md` -- subdomain-specific docs
+Every `docs/` directory at these two levels MUST maintain an `INDEX.md` for what it owns:
+- `docs/INDEX.md` -- links to the domain-level indexes
+- `docs/<domain>/INDEX.md` -- domain-wide docs and the docs of each subdomain
 
 Each index uses this format:
 
@@ -86,7 +85,7 @@ Each index uses this format:
 
 Universal token maximum: 800 tokens per article (all types). External references linked in the index have no local limit -- the limit applies only to files stored in the repo.
 
-Include in each index: owned doc files at that level, architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. Do not duplicate entries already in a child index -- link to the child index instead.
+Include in each domain index: the doc files under that domain directory, including every subdomain, plus architecture diagrams, relevant research papers, articles, and any external sources that informed decisions in that domain. `docs/INDEX.md` links to each domain index.
 
 The index is the fast-path for discovering what documentation exists. Without it, agents scan the filesystem; with it, agents read one file. For external sources, the index entry links out rather than storing content. Source: DDD "Context Map" pattern.
 

@@ -12,7 +12,7 @@ Define your domains using Domain-Driven Design (DDD) Bounded Contexts: one direc
 1. Identify your top-level bounded contexts (e.g., `payments`, `catalog`, `delivery`). Each becomes a `docs/<domain>/` directory.
 2. Within each context, identify subdomains -- cohesive sub-concerns that share terminology. Each becomes `docs/<domain>/<subdomain>/`.
 3. When a subdomain needs further splitting, add a third level: `docs/<domain>/<subdomain>/<subdomain2>/`. Use sparingly -- three levels is the maximum.
-4. Cross-cutting concerns (standards that apply across domains) go at `docs/UPPERCASE.md` as flat files.
+4. A standard that spans domains still sits in the one domain and one subdomain that governs it (e.g., `docs/payments/standards/`); when no domain governs it, give it its own domain (e.g., `docs/standards/<subdomain>/`). Other domains link to it, and no flat standards files sit directly under `docs/`.
 
 **Example structure (replace with your actual bounded contexts):**
 
@@ -21,7 +21,6 @@ Define your domains using Domain-Driven Design (DDD) Bounded Contexts: one direc
 | Domain | `docs/payments/` | Payments bounded context |
 | Subdomain | `docs/payments/invoicing/` | Invoicing sub-concern |
 | Sub-subdomain | `docs/payments/invoicing/disputes/` | Dispute resolution patterns (use only when a subdomain is too broad) |
-| Cross-cutting | `docs/PAYMENTS_STANDARDS.md` | Standards that apply across all payments docs |
 
 ---
 
@@ -37,7 +36,7 @@ domain: <domain>
 subdomain: <subdomain>
 tags: [<domain>, <subdomain>, <additional-tags>]
 related:
-  - "../RELATED_DOC.md"
+  - "../<other-subdomain>/RELATED_DOC.md"
 ---
 ```
 
@@ -47,23 +46,11 @@ related:
 - `related` -- relative paths from the file's own directory; verified to exist before adding
 - `subdomain2` -- omit this field entirely when not using a third level. Do NOT write `subdomain2: ""`. Only add it when a value exists: `subdomain2: <value>`
 
-**Cross-cutting standard files** (`docs/UPPERCASE.md`):
-```yaml
----
-title: "Standards Title"
-description: "One sentence describing the standards this file defines and what domains it covers."
-domain: cross-cutting
-tags: [<domain>, standards, <additional-tags>]
-related:
-  - "<domain>/<subdomain>/concept.md"
----
-```
-
 ---
 
 ## Domain Guide Template
 
-```markdown
+````markdown
 ---
 title: "Concept Name"
 description: "One concrete sentence about exactly what this covers."
@@ -71,7 +58,7 @@ domain: <domain>
 subdomain: <subdomain>
 tags: [<domain>, <subdomain>]
 related:
-  - "../RELATED_STANDARDS.md"
+  - "../../<standards-domain>/<standards-subdomain>/RELATED_STANDARDS.md"
 ---
 
 # Concept Name
@@ -99,9 +86,9 @@ Numbered list of rules. Specific, concrete, no soft language.
 
 ## Related
 
-- [Testing Standards](../TESTING_STANDARDS.md) -- Arrange-Act-Assert (AAA) pattern and naming conventions
+- [Testing Standards](../../<standards-domain>/<standards-subdomain>/TESTING_STANDARDS.md) -- Arrange-Act-Assert (AAA) pattern and naming conventions
 - [Integration Tests](integration-tests.md) -- multi-component test patterns
-```
+````
 
 ---
 
@@ -113,7 +100,7 @@ Every doc file MUST end with a `## Related` section:
 ## Related
 
 - [Link Text](relative/path.md) -- one-line description of why it's related
-- [Another Doc](../other.md) -- one-line description
+- [Another Doc](../<other-subdomain>/other.md) -- one-line description
 ```
 
 Rules:
@@ -129,26 +116,23 @@ Rules:
 ### From `docs/<domain>/<subdomain>/concept.md` (guide inside a subdomain directory):
 
 ```markdown
-<!-- [+] Correct: relative path from docs/<domain>/<subdomain>/ to docs/ -->
-See [Standards Doc](../../STANDARDS_DOC.md) for details.
+<!-- [+] Correct: relative path from docs/<domain>/<subdomain>/ to docs/INDEX.md -->
+See [Docs Index](../../INDEX.md) for details.
 
-<!-- [-] Incorrect: one level short -->
-See [Standards Doc](../STANDARDS_DOC.md) for details.
+<!-- [-] Incorrect: one level short, resolves to docs/<domain>/INDEX.md instead of docs/INDEX.md -->
+See [Docs Index](../INDEX.md) for details.
 ```
 
-### From `docs/CROSS_CUTTING_STANDARDS.md` (root cross-cutting file):
+### From `docs/INDEX.md` (root index file):
 
 ```markdown
-<!-- [+] Correct: same directory -->
-See [Other Standards](OTHER_STANDARDS.md) for additional conventions.
-
 <!-- [+] Correct: subdirectory -->
-See [Subdomain Guide](<domain>/<subdomain>/concept.md) for domain-specific patterns.
+See [Domain Index](<domain>/INDEX.md) for domain-specific docs.
 ```
 
 ---
 
-## Copilot Skill File Template (SKILL.md)
+## Skill File Template (SKILL.md)
 
 Skills follow a strict 5-element anatomy. See the `writing-skills` skill for the full authoring standard.
 

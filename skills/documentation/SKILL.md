@@ -24,8 +24,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Before writing any documentation:
 
-1. Identify the **domain** and **subdomain** from the taxonomy in `references/DOCUMENTATION_EXAMPLES.md`
-2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (not a flat root file unless it's a cross-cutting standard)
+1. Identify the **domain** and **subdomain** from `docs/INDEX.md` and the domain indexes; if no taxonomy exists yet, define one per `references/DOCUMENTATION_EXAMPLES.md`
+2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/`
 3. Confirm no existing file already covers this concept: run `grep -rF -- "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
@@ -38,8 +38,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
-| Cross-cutting standards | `docs/UPPERCASE.md` |
+| Domain guides and standards | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
 | Agent onboarding | `AGENTS.md` -- summarize only |
@@ -98,7 +97,7 @@ Before presenting documentation, verify:
 7. `## Related` section is present at the bottom (sole exception: `docs/DOD.md`)
 8. Documentation matches current code state
 9. All acronyms spelled out on first use -- no unexpanded project-specific or technical abbreviations (see Acronym Rule in the `writing-skills` skill)
-10. Relevant `docs/INDEX.md` and `docs/<domain>/INDEX.md` updated to include this file
+10. `docs/<domain>/INDEX.md` updated to include this file; `docs/INDEX.md` updated to link the domain index when the file starts a new domain
 11. No verification-state claims (hedge form, affirmative form, or a live snapshot count) -- that content belongs on the issue tracker, not in the doc
 12. No test file, test project, test class, or test method named as an identifier or picked out in words -- it may state that a build-time or continuous-integration test enforces a rule without naming the test, and it may name a configuration location (for example the project file holding a coverage threshold); a phrase that individuates one test ("the layering test asserts ...") names it, an indefinite statement that a test enforces the rule does not; code may point at a doc section, a doc does not point at a test identifier
 

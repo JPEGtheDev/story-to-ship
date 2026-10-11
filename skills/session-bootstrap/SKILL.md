@@ -112,26 +112,7 @@ Row context and the greenfield chain: see `references/SKILL_DISPATCH_TABLE.md`.
 
 ---
 
-## On Finish -- Self-Evaluate and Compact
-
-**Self-evaluation fires at session END.** If a major task completes mid-session with no further work planned, treat it as session end and execute On Finish now.
-
-**Before your final message to the user**, execute all of the following:
-
-1. **Load** the `self-evaluation` skill and follow its steps.
-2. **Identify lessons learned** -- mistakes made, user corrections, patterns discovered.
-3. **Check existing skills** -- is the lesson already documented? If yes, skip.
-4. **Apply updates** -- for High/Medium priority lessons, update the relevant skill file.
-   Commit the skill update with the session's work.
-5. **Compact** -- scan any files you touched for bloated comments or duplicated docs.
-   Migrate detail to skills/docs and leave 1-line references.
-6. **Report** -- include a `### Session Self-Evaluation` block in your final message:
-   ```
-   ### Session Self-Evaluation
-   Lessons: [count] | Skills updated: [list or "None"] | Compacted: [files or "None"]
-   ```
-
-If you have nothing to report, still include the block with zeroes.
+**At session end**, load `self-evaluation` before the final message.
 
 ---
 
@@ -146,7 +127,7 @@ If you have nothing to report, still include the block with zeroes.
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` -- **STOP. Load the `self-evaluation` skill now.**
 - Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in the prior session's self-assessment file; see the `self-evaluation` skill, Step 7) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
-- Treating the "On Finish" steps as optional -- **STOP. They are mandatory. Execute every step.**
+- Treating the `self-evaluation` steps as optional -- **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" -- **STOP. Memory degrades. Skills update. Load fresh every session.**
 - Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**
 - About to make an irreversible change (branch creation, push) without the `execution` skill loaded -- **STOP. Load `execution` before the first irreversible action.**
@@ -174,7 +155,7 @@ If you have nothing to report, still include the block with zeroes.
 
 ## Related Skills
 
-- `self-evaluation` -- the On Finish step calls this skill directly
+- `self-evaluation` -- session end calls this skill directly
 - `honesty` -- MUST be explicitly invoked at session start; hooks fail silently; full rule body is not in context until invoked
 - `communication` -- always-active peer of `honesty`; register rules for user-facing text; invoke immediately after `session-bootstrap` returns
 - `writing-skills` -- governs skill authoring; load when creating or editing a skill
@@ -183,6 +164,5 @@ If you have nothing to report, still include the block with zeroes.
 
 - `references/RATIONALE.md` -- why the SKILL.md rules exist:
   invoke-before-acting, skill refresh, why honesty and communication are
-  peers, the git status check, why hook fixes need an observed firing, and
-  the unconditional self-evaluation block.
+  peers, the git status check, and why hook fixes need an observed firing.
 - `references/INDEX.md` -- index of this skill's reference files.

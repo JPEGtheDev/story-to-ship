@@ -12,7 +12,7 @@ After Three Amigos Refinement approves a plan, stories must be created in the ri
 
 ## Rule
 
-**Approved stories go to GitHub issues, not `plan.md`.** Create one issue per story after Three Amigos Refinement approves the plan. Use `mcp__github__issue_write`, or `gh issue create` when no GitHub tool is available, with the full user story, Acceptance Criteria, effort estimate, and Definition of Done.
+**Approved stories go to GitHub issues, not `plan.md`.** Create one issue per story after Three Amigos Refinement approves the plan. Use `mcp__github__issue_write`, or `gh issue create` when that tool is not available, with the full user story, Acceptance Criteria, effort estimate, and Definition of Done.
 
 `plan.md` holds the `## Feature Specification` (Discovery output) and `## Implementation Notes` (Developer amigo findings) only. Individual stories in plan.md are a scratch surface -- not a substitute for GitHub issues.
 

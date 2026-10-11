@@ -186,7 +186,7 @@ See `versioning` skill for conventional commit rules.
 | Excuse | Reality |
 |--------|---------|
 | "I'll clean up the commits later" | Later never comes. Clean them now while context is fresh. |
-| "The tests pass locally, CI will be fine" | CI has a different environment. It fails independently. Verify the diff, not the confidence. |
+| "The tests pass locally, CI will be fine" | Open the PR (Step 4), then wait for its CI run to finish green before asking for merge; local green is not CI green. |
 | "It's close enough -- I'll fix it in follow-up" | Undefined follow-up is a polite word for "never." Open a tracking issue with a due date or do it now. |
 | "The PR description can be filled in later" | PR descriptions written after the fact are summaries, not design records. Write them now. |
 | "CI passed on the branch, merge is safe" | CI on the branch does not verify the merge commit. Verify CI is green on main AFTER the merge. |

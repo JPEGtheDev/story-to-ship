@@ -14,16 +14,29 @@
 #    runs.
 #
 # 2. Reload gate (second, only Edit, Write, NotebookEdit and Agent). After a
-#    compaction or resume, hooks/session-start.sh writes the names of the
-#    skills that were loaded before the break into
-#    .reload-pending-<session_id>, one per line; hooks/bootstrap-gate-post.sh
-#    removes a name from that file each time the matching Skill call
-#    completes. This gate runs once the bootstrap flag is absent, or the
-#    call is the Skill(session-bootstrap) call, and holds Edit, Write,
-#    NotebookEdit and Agent until every remaining pending name is
-#    re-invoked. It fails open (exits 0 with no output and no log line) for
-#    every other tool, for a missing/unreadable/empty pending file, and for
-#    a pending file that contains no non-empty lines.
+#    compaction or resume, hooks/session-start.sh writes the skills to
+#    re-invoke into .reload-pending-<session_id>, one per line: the session's
+#    role skill (if any) followed by five action skills.
+#    hooks/bootstrap-gate-post.sh removes a name from that file each time the
+#    matching Skill call completes. This gate runs once the bootstrap flag is
+#    absent, or the call is the Skill(session-bootstrap) call. Each pending
+#    name holds only the call it guards:
+#      - role name (running-a-sprint): holds Edit, Write, NotebookEdit, Agent.
+#      - subagent-driven-development, using-git-worktrees: hold Agent.
+#      - writing-skills: holds Edit, Write, NotebookEdit when the path field
+#        (tool_input.file_path, else tool_input.notebook_path) has a directory
+#        named skills or agents anywhere in it; an absent or empty path never
+#        triggers it.
+#      - versioning, verification-before-completion: hold nothing here (they
+#        belong to the Bash row, handled elsewhere).
+#      - any other name is ignored: it holds nothing.
+#    The deny reason lists only the names that hold the current call, in
+#    pending-file order. If every listed name is a role name, the sentence
+#    says "loaded before the last compaction or resume"; if any is an action
+#    name it says "needed after the last compaction or resume". The gate
+#    fails open (exits 0 with no output and no log line) for every other
+#    tool, for a missing/unreadable/empty pending file, and when no pending
+#    name holds the call.
 #
 # Fail-open philosophy: this hook NEVER exits nonzero. Missing jq, malformed
 # stdin, an unresolved state dir, an invalid session_id, or any other
@@ -133,8 +146,8 @@ if [[ -f "$FLAG_FILE" && "$IS_BOOTSTRAP_SKILL_CALL" -ne 1 ]]; then
   exit 0
 fi
 
-# Reload gate: only Edit, Write, NotebookEdit and Agent are held for a
-# reload-pending name; every other tool exits 0 silently.
+# Reload gate: only Edit, Write, NotebookEdit and Agent can be held; every
+# other tool exits 0 silently.
 case "$TOOL_NAME" in
   Edit | Write | NotebookEdit | Agent) ;;
   *) exit 0 ;;
@@ -147,15 +160,60 @@ PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
 PENDING_NAMES="$(grep -v '^$' -- "$PENDING_FILE" 2>/dev/null)"
 [[ -z "$PENDING_NAMES" ]] && exit 0
 
-NAMES_JOINED="${PENDING_NAMES//$'\n'/, }"
-NUM_NAMES="$(printf '%s\n' "$PENDING_NAMES" | grep -c '.')"
+# Path field for the writing-skills hold: the first non-empty string of
+# file_path, else notebook_path. Edit, Write and NotebookEdit only.
+TARGET_PATH=""
+if [[ "$TOOL_NAME" != "Agent" ]]; then
+  TARGET_PATH="$(printf '%s' "$RAW" | jq -r \
+    '[.tool_input.file_path, .tool_input.notebook_path] | map(select(type == "string" and . != "")) | .[0] // empty' \
+    2>/dev/null)"
+fi
+
+# holds_call <name>: succeeds when the pending name holds the current call.
+# Role and action names are whitelisted here; any other name holds nothing.
+# versioning and verification-before-completion belong to the Bash row and
+# never hold the tools handled here.
+holds_call() {
+  case "$1" in
+    running-a-sprint) return 0 ;;
+    subagent-driven-development | using-git-worktrees)
+      [[ "$TOOL_NAME" == "Agent" ]]
+      ;;
+    writing-skills)
+      [[ "$TOOL_NAME" != "Agent" && "$TARGET_PATH" =~ (^|/)(skills|agents)/ ]]
+      ;;
+    *) return 1 ;;
+  esac
+}
+
+MISSING=()
+HAS_ACTION=0
+while IFS= read -r NAME; do
+  holds_call "$NAME" || continue
+  # A duplicate line must not be listed twice.
+  case " ${MISSING[*]:-} " in *" $NAME "*) continue ;; esac
+  MISSING+=("$NAME")
+  [[ "$NAME" != "running-a-sprint" ]] && HAS_ACTION=1
+done <<<"$PENDING_NAMES"
+[[ "${#MISSING[@]}" -eq 0 ]] && exit 0
+
+NAMES_JOINED=""
+for NAME in "${MISSING[@]}"; do
+  NAMES_JOINED+="${NAMES_JOINED:+, }$NAME"
+done
+NUM_NAMES="${#MISSING[@]}"
 
 if [[ "$NUM_NAMES" -eq 1 ]]; then
   SKILL_NOUN="skill" SKILL_VERB="is"
 else
   SKILL_NOUN="skills" SKILL_VERB="are"
 fi
-REASON="reload-gate: $NUM_NAMES $SKILL_NOUN loaded before the last compaction or resume $SKILL_VERB not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
+if [[ "$HAS_ACTION" -eq 1 ]]; then
+  WHEN="needed after the last compaction or resume"
+else
+  WHEN="loaded before the last compaction or resume"
+fi
+REASON="reload-gate: $NUM_NAMES $SKILL_NOUN $WHEN $SKILL_VERB not re-invoked yet: $NAMES_JOINED. Invoke each with the Skill tool, then retry."
 log_record "reload"
 emit_decision "$REASON" "$REASON"
 exit 0

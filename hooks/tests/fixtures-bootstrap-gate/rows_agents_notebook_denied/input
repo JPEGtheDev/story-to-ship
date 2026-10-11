@@ -1,0 +1,1 @@
+{"session_id":"sess-t2a-ac3_agents_notebook_denied","hook_event_name":"PreToolUse","tool_name":"NotebookEdit","tool_input":{"notebook_path":"agents/n.ipynb","new_source":"b"}}

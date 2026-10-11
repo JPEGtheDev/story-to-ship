@@ -1,0 +1,1 @@
+{"session_id":"sess-t2a-ac3_agents_edit_denied","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"agents/y.md","old_string":"a","new_string":"b"}}

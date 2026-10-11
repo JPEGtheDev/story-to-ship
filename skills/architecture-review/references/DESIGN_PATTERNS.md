@@ -17,7 +17,7 @@ The Principle of Least Authority states: grant each component only the minimum a
 The Security Door anti-pattern occurs when authorization checks are centralized in one place, but resources are accessed in many places throughout the system. This is like locking the front door but leaving the windows open--security is easily bypassed. Authorization must be co-located with resource access to ensure that every entry point is protected. (Source: C2 Wiki "SecurityDoor")
 
 ## Configurable Modularity
-Modules should be configured at the point where they are composed--such as in main, a factory, or a dependency injection container--not inside the module itself. If a module hard-codes its collaborators, it cannot be tested or reused in isolation. Configurable modularity enables better testability, flexibility, and separation of concerns. (Source: C2 Wiki "ConfigurableModularity")
+Configure modules where they are composed--such as in main, a factory, or a dependency injection container--not inside the module itself. If a module hard-codes its collaborators, it cannot be tested or reused in isolation. Configurable modularity enables better testability, flexibility, and separation of concerns. (Source: C2 Wiki "ConfigurableModularity")
 
 ## Language-Independent Design
 Designs that are tied to the idioms of a specific programming language--such as its syntax, memory model, or standard library--cannot be easily ported or reasoned about at the architectural level. To create robust and adaptable architectures, express design in terms of roles, responsibilities, and interfaces, not language-specific constructs. This makes the design applicable to polyglot systems and easier to communicate. (Source: C2 Wiki "LanguageIndependentDesign")

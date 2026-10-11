@@ -43,7 +43,7 @@ Where the repo uses **zero-manual releases**, every push to main triggers an aut
 |------|-------------|---------|
 | `feat:` | MINOR (0.1.0 -> 0.2.0) | `feat: add query result caching` |
 | `fix:` | PATCH (0.1.0 -> 0.1.1) | `fix: resolve crash on startup` |
-| `<type>!:` for any type, or a `BREAKING CHANGE` / `BREAKING_CHANGE` footer | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
+| `<type>!:` or `<type>(scope)!:` header for any type, or a `BREAKING CHANGE` / `BREAKING_CHANGE` footer | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
 | `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `perf:` | PATCH (default) | `docs: update README` |
 
 Every commit type triggers at least a PATCH bump. The table is the one place the mapping is stated.

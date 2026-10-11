@@ -103,7 +103,6 @@
 
 **Red flags:**
 - Story is labeled "Epic" but not broken down
-- Estimated at "M" or "L" size
 - Multiple teams need to coordinate to complete it
 - Timeline spans multiple sprints
 

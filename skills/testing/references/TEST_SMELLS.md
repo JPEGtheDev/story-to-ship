@@ -119,7 +119,7 @@ Test code requires its own refactoring discipline. Just like production code can
 - Extract targeted factory methods that build specific scenarios
 - Use parameterized tests if many tests need similar (but not identical) fixtures
 - Move heavy setup to lazy initialization (only create what a test actually uses)
-- If many tests need the same base state, build it with composition and helper functions; do not share fixture state through inheritance
+- If many tests need the same base state, build it with composition and helper functions; do not derive one fixture class from another fixture class to share base state
 
 ---
 
@@ -308,10 +308,10 @@ Key principle: **test duplication is more tolerable than production duplication*
       submarine.position = Vector3(0, 0, 0)
       
       // Act
-      submarine.dive()
+      submarine.dive(depth: 50)
       
       // Assert
-      expectLt(submarine.position.z, 0)
+      expectEq(submarine.position.z, -50)
 ```
 
 The balance: extract duplication that obscures nothing; keep inline whatever the reader needs to understand the test's intent.

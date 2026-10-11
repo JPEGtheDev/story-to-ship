@@ -257,7 +257,7 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - "I already know what I'd write -- no need to actually write it"
 - Closing a session without the Session Self-Evaluation block in the final message
 - Closing self-evaluation without writing findings to `[SESSION_DIR]/self-assessment.md` on disk (Step 7 gate)
-- About to execute Step 6 (Apply Updates) before BEFORE PROCEEDING conditions 1-3 are met -- **STOP. DO NOT apply skill updates until (a) the session's primary work is complete, (b) all commits are staged or pushed, and (c) you are on the correct branch for skill updates. Seeing the fix does not authorize applying it early.**
+- About to execute Step 6 (Apply Updates) before BEFORE PROCEEDING conditions 1-3 are met -- **STOP. DO NOT apply skill updates until (a) the session's primary work is complete, (b) all commits are staged or pushed, and (c) the final message has not yet been sent. Seeing the fix does not authorize applying it early.**
 - About to edit a skill file whose `Base directory` contains `plugins/cache` -- **STOP. This is a plugin snapshot. Edits here are untracked and will be lost. Document the change in self-assessment.md under `## Deferred Skill Updates` and open a PR in the source repo instead.**
 
 **All of these mean: Load the `self-evaluation` skill and complete all 8 steps. Write to `[SESSION_DIR]/self-assessment.md` (Step 7). Then include the `### Session Self-Evaluation` block in the final message (Step 8).**

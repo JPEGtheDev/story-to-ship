@@ -97,21 +97,6 @@ story lives in the source project's doc.
 
 ---
 
-## Quick Reference: Where to Add Lessons
-
-Use this for fast question-based lookup -- "my lesson is about X, where does it go?" For formal classification with concrete examples, use the Category Classification Table below.
-
-| If the lesson is about... | Add to... |
-|---|---|
-| Code patterns, naming, error handling | `code-quality` skill |
-| Test writing, Arrange-Act-Assert (AAA), mocking, visual regression | `testing` skill |
-| CI/CD workflows, artifacts, permissions | `workflow` skill |
-| Documentation format, linking, content | `documentation` skill |
-| User story creation, estimation | `user-story-generator` skill |
-| Meta/process (skill creation, evaluation) | `self-evaluation` skill |
-
----
-
 ## Category Classification Table
 
 Use this when classifying a captured lesson into a skill update. The Examples column gives concrete signals for each category.

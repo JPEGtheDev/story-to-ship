@@ -46,7 +46,7 @@ Where the repo uses **zero-manual releases**, every push to main triggers an aut
 | `<type>!:` or `<type>(scope)!:` header for any type, or a `BREAKING CHANGE` / `BREAKING_CHANGE` footer | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
 | `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `perf:` | PATCH (default) | `docs: update README` |
 
-Every commit type triggers at least a PATCH bump. The table is the one place the mapping is stated.
+Every commit type triggers at least a PATCH bump.
 
 ---
 

@@ -83,4 +83,4 @@ Only after the user confirms, generate the story using this template:
 
 ## Estimating Effort and Model Selection
 
-Load the `user-story-estimation` skill for S/M/L size breakdown, model tier selection, and validated examples. Always include the Effort Estimate section in every generated story.
+Load `user-story-estimation` for the size scale; for model tier, load `subagent-driven-development`. Always include the Effort Estimate section in every generated story.

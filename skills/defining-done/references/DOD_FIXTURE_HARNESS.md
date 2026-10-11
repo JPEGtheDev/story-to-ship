@@ -54,8 +54,11 @@ it). The harness lives in a repository checkout that contains
     the transcript to confirm the uncommitted edit is stated plainly and the run
     continues.
   - delta-reratification: no `check-markers.sh` run exists for it. The pass is
-    that the resulting canon differs from the input by exactly the new ruling
-    lines plus the Stamp line.
+    that the resulting canon differs from the input only by the new ruling lines
+    for the delta layers, the Stamp line, and `related` entries for the detail
+    files of the delta layers. The fixture supplies no detail file for the added
+    layer, so `related` is expected to stay as it is; an added detail file with
+    its `related` entry is permitted. Every other byte is preserved.
   - malformed-canon: confirm the diagnostic names the missing Stamp line.
   - no-canon-fallback: the check is forbid-only (`--forbid 'DOD-VIOLATION:'`).
     Also read the captured output to confirm the generated story states that no

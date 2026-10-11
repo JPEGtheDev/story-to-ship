@@ -122,7 +122,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 | "Developer knows the code, skip that amigo" | Amigo reads code first. Findings are evidence. |
 | "Two approved -- majority rules" | Any REJECT blocks. Majority is irrelevant. |
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |
-| "Retrospective is optional" | Process debt accumulates. Expected, not optional. |
+| "Retrospective is optional" | Required for multi-session work; optional only for single-session work. Skipped retrospectives let process debt accumulate. |
 | "Not fully blocked, skip Pivot Assessment" | A DONE_WITH_CONCERNS result carrying a correctness or scope risk also triggers the owner prompt, then Pivot Assessment. |
 
 ---

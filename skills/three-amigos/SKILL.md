@@ -33,7 +33,7 @@ For row 4 (BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk -
 
 Ceremony model tiers are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony. Do not restate model IDs here.
 
-Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 expected post-merge. Full agendas: `references/CEREMONIES.md`.
+Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery features. 5 required if Discovery ran. 3+4 trigger-based. 6 required post-merge for multi-session work, optional for single-session work. Full agendas: `references/CEREMONIES.md`.
 
 ---
 

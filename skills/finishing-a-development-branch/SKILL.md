@@ -119,7 +119,7 @@ Choose one of these four options -- do not mix them:
 | **Squash into one commit** | Small feature/fix -- all changes tell one story |
 | **Squash into logical groups** | Larger branch -- separate "feat" from "test" from "refactor" commits |
 | **Keep all commits** | Each commit is already clean, atomic, and independently meaningful |
-| **Interactive rebase** | Mix of clean and messy commits -- clean up before squashing |
+| **Fixup rebase** | Clean commits with distinct subjects plus fixes that belong inside one of them -- record each fix with `git commit --fixup <sha>`, then, with a clean working tree, run `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash "$(git merge-base main HEAD)"`; no editor opens; on any nonzero exit run `git rebase --abort`; after exit 0 confirm that `git diff ORIG_HEAD HEAD` prints nothing and that `git log --stat main..HEAD` shows each fix in its target commit; if either check fails, run `git reset --hard ORIG_HEAD`; for messy commits, shared subjects, a failed check, or an aborted rebase, take Squash into logical groups instead |
 
 **Squash prescribed command:** Use `git reset --mixed HEAD~N`. Use `--mixed`, not `--soft`. `--soft` carries staged hunks forward and can silently include unintended changes. `--mixed` clears the index so the new commit starts from a clean slate.
 

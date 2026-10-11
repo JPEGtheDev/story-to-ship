@@ -160,7 +160,7 @@ Read-set completeness gate: before dispatching any amigo whose agenda includes v
 
 **Trigger:** Feature merged and closed.  
 **Output:** Process improvement items. No verdict -- pure learning output.  
-**Required:** Expected for all multi-session features. Optional for single-session.
+**Required:** YES for multi-session work. Optional for single-session work.
 
 ### Read First
 

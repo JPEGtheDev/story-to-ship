@@ -17,7 +17,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 **Remediation:**
 - Set clear goals with measurable outcomes
 - Timebox analysis phases with hard deadlines
-- Encourage incremental progress and learning by doing
+- Make incremental progress and learn by doing
 - Empower someone to call "analysis complete" and move forward
 
 ---

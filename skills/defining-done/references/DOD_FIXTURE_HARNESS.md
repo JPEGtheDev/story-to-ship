@@ -57,6 +57,9 @@ it). The harness lives in a repository checkout that contains
     that the resulting canon differs from the input by exactly the new ruling
     lines plus the Stamp line.
   - malformed-canon: confirm the diagnostic names the missing Stamp line.
+  - no-canon-fallback: the check is forbid-only (`--forbid 'DOD-VIOLATION:'`).
+    Also read the captured output to confirm the generated story states that no
+    ratified canon exists. No marker exists for that statement.
 - A forbid-only pass on an empty or truncated transcript proves nothing. Confirm
   the transcript is non-empty. A marker that is indented, bulleted or quoted is
   not counted by either flag.

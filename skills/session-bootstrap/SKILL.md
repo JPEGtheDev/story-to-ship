@@ -145,7 +145,7 @@ If you have nothing to report, still include the block with zeroes.
 - Skipping the skill-load announcement -- **STOP. State "I am using the [skill] skill to [purpose]." No skip.**
 - Announced "I am using skill X" without invoking the skill tool in the same response -- **STOP. An announcement without a matching `skill.invoked` event is a false statement. The announcement and the `skill` tool call MUST occur in the same turn. Load the skill now.**
 - Finishing a session without running `self-evaluation` -- **STOP. Load the `self-evaluation` skill now.**
-- Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in session memory) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
+- Resuming from a prior session that was interrupted mid-task (no `### Session Self-Evaluation` block in the prior session's self-assessment file; see the `self-evaluation` skill, Step 7) and about to pick up a new todo -- **STOP. The prior session's self-evaluation did not complete. Load `self-evaluation` for the prior session's work before starting any new todos.**
 - Treating the "On Finish" steps as optional -- **STOP. They are mandatory. Execute every step.**
 - Saying "I remember the skill content" -- **STOP. Memory degrades. Skills update. Load fresh every session.**
 - Branch about to be created, but the plan the user approved was the pre-review version -- **STOP. Re-present the post-review revised plan (after the Skeptic + plan-reviewer pair). Wait for explicit user approval before creating the branch.**

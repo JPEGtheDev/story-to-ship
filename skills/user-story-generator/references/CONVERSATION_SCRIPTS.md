@@ -54,7 +54,7 @@ Based on their answers, ask **one or two follow-up questions** to clarify:
 
 ### For spikes:
 - "What's the key question we're trying to answer?"
-- "What would a successful spike deliver? (doc, PoC, recommendation)"
+- "What would a successful spike deliver? (doc, proof of concept (PoC), recommendation)"
 - "What timebox are you targeting for this?"
 
 ### For bugs:

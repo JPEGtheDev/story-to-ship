@@ -147,11 +147,11 @@ These thoughts mean stop immediately:
 | "I verified one file, the rest are probably fine" | Every file the todo changed is listed in a Stage 2 dispatch and gets its own verdict block. A return with fewer blocks than its dispatch listed is incomplete -- no extrapolation across files. |
 | "The subagent said PASS, that's good enough" | A subagent's self-assessment is not a review. PASS from an implementer means dispatch Stage 1 -- not skip it. |
 | "I'll do a quick scan instead of dispatching a reviewer agent" | A quick scan inherits your assumptions. A dispatched `skill-reviewer.md` or `code-quality-reviewer.md` agent does not. Dispatch the agent. |
-| "The two stages of review are redundant -- I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then code-quality-reviewer.md. Writing carefully is not a substitute for independent review. |
+| "The two stages of review are redundant -- I wrote the code carefully" | YOU MUST dispatch spec-compliance-reviewer.md first, then the Stage 2 template for the file type (skill-reviewer.md or code-quality-reviewer.md). Care is no substitute for independent review. |
 | "The concerns are nits -- not a correctness or scope risk, so I'll skip Ceremony 4" | "Correctness or scope risk" is objective: does it affect behavior, API surface, or stated requirements? If yes, prompt the owner, then Ceremony 4. "Feels minor" is not a valid exemption. |
 | "This concern in the implementer result does affect behavior, so I'm treating it as a finding and fixing it in this same pass" | Judging a concern in an implementer result behavior-affecting is the trigger for the owner prompt, not a license to fix it: end the turn with the prompt before any fix or dispatch. |
 | "The subagent hit a rate limit -- I'll do the review inline instead" | Rate limits are temporary. Inline review inherits your assumptions and blind spots. The whole point of a dispatched reviewer is independence from the author's context. Wait for the reset and dispatch. |
-| "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Documented failure mode (source postmortem): the agent adjudicating whether its own change is "covered enough" to skip re-review IS the failure -- not a valid exemption. YOU MUST re-review any change in review-covered territory. |
+| "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Failure mode: an agent calling its own change "covered enough" to skip re-review. That IS the failure, not an exemption. YOU MUST re-review any change in review-covered territory. |
 
 ---
 

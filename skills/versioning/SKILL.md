@@ -52,7 +52,7 @@ Every commit type triggers at least a PATCH bump.
 
 ## Step 2: PR Title Rules
 
-**When the repo squash-merges,** the PR title becomes the single commit on main, which determines the version bump.
+**When the repo squash-merges,** the PR title becomes the message of the single commit on main, which determines the version bump.
 
 ### Creating a New PR
 

@@ -49,7 +49,7 @@ CI pipelines observe and report -- they never commit or push to a branch. Every 
 3. **Upload generated files** (images, reports) as workflow artifacts via `actions/upload-artifact`.
 4. **Link to artifact downloads** in PR comments for visibility.
 5. **Use `$GITHUB_STEP_SUMMARY`** for rich text reports on the Actions tab.
-6. **Keep permissions minimal** -- keep `contents: read` and add only the one write scope the step needs: `checks: write` for check results, `pull-requests: write` for PR comments, and `contents: write` only on a release job that pushes a tag.
+6. **Keep permissions minimal** -- keep `contents: read` and add only the write scopes the job needs, one per thing it writes: `checks: write` for check results, `pull-requests: write` for PR comments, and `contents: write` only on a release job that pushes a tag.
 7. **Use idempotent PR comments** -- find and update existing comments instead of creating duplicates.
 
 ---
@@ -68,12 +68,12 @@ Before presenting workflow changes, verify:
 
 1. No `git commit` and no branch `git push` in any step
 2. No `data:` URIs (Uniform Resource Identifiers) in PR comment bodies
-3. Permissions are minimal (`contents: read`; add only the one write scope the step needs: `checks: write`, `pull-requests: write`, or `contents: write` on a tag-pushing release job)
+3. Permissions are minimal (`contents: read`; add only the write scopes the job needs: `checks: write`, `pull-requests: write`, or `contents: write` on a tag-pushing release job)
 4. Generated files uploaded as artifacts (not committed)
 5. PR comments are idempotent (update existing, don't duplicate)
 6. Job dependencies are correct (`needs:` ordering)
 7. `if: always()` on every artifact-upload and PR-comment step that reports test results
-8. `retention-days:` set: 30 for PR runs, 90 for release runs
+8. `retention-days:` set: 30 for PR runs, 90 for release runs (30 for any other run)
 
 [+] All met -> proceed with presenting workflow changes
 [-] Any unmet -> fix before presenting

@@ -166,7 +166,7 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 - Recommended model tier (Economy/Standard/Premium)
 - One-sentence reasoning for the model choice
 
-**Tier planning for decomposed stories:** Reserve Premium for stories that make architectural or design decisions. When decomposition front-loads those decisions into a Premium story, recommend Standard for the implementation stories that execute them, and Economy for mechanical, fully-specified changes. A breakdown where every story recommends Premium is a signal the decomposition did not separate deciding from executing.
+**Tier planning for decomposed stories:** Reserve Premium for stories that make architectural or design decisions. When decomposition front-loads those decisions into a Premium story, recommend Standard for the implementation stories that execute them, and Economy only when the story's output is mechanically verifiable. A breakdown where every story recommends Premium is a signal the decomposition did not separate deciding from executing.
 
 ## Related Skills
 

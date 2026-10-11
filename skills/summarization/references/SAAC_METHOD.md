@@ -1,4 +1,4 @@
-# SAAC Summarization Method
+# State/Assign/Action/Complete (SAAC) Summarization Method
 
 ## What It Is
 

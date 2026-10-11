@@ -51,7 +51,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - Architecture feels imposed, not emergent
 
 **Remediation:**
-- Favor iterative design with frequent validation
+- Use iterative design with frequent validation
 - Allow architecture to emerge from refactoring as you learn
 - Design in layers: sketch the boundary (coarse), code the interior (fine)
 - Revisit assumptions regularly; update the design as understanding improves

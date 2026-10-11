@@ -17,7 +17,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 **Remediation:**
 - Set clear goals with measurable outcomes
 - Timebox analysis phases with hard deadlines
-- Encourage incremental progress and learning by doing
+- Make incremental progress and learn by doing
 - Empower someone to call "analysis complete" and move forward
 
 ---
@@ -51,7 +51,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - Architecture feels imposed, not emergent
 
 **Remediation:**
-- Favor iterative design with frequent validation
+- Use iterative design with frequent validation
 - Allow architecture to emerge from refactoring as you learn
 - Design in layers: sketch the boundary (coarse), code the interior (fine)
 - Revisit assumptions regularly; update the design as understanding improves
@@ -86,7 +86,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - One class is referenced everywhere in the codebase
 - Changes to it ripple throughout the system
 - High fan-in; the class is tightly coupled to many others
-- Often misapplied as a Mediator pattern
+- Misapplied as a Mediator pattern
 
 **Remediation:**
 - Redistribute responsibilities to smaller, cohesive classes
@@ -122,12 +122,12 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - Code indentation drifts right with each conditional
 - Comprehension collapses beyond 3 levels of nesting
 - Hard to reason about the main flow
-- Often indicates missing abstraction
+- Indicates a missing abstraction
 
 **Remediation:**
 - Use Guard Clauses (early exit on error conditions) to flatten structure
 - Extract Method for loop bodies and nested blocks
-- Consider a state machine or strategy pattern if logic is complex
+- Use a state machine or strategy pattern when nesting stays beyond 3 levels after the guard clauses and extracted methods above
 - Refactor conditionals into polymorphic dispatch when appropriate
 
 ---

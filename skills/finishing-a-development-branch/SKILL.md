@@ -57,7 +57,8 @@ Before writing the PR, answer:
    List each criterion. Mark DONE or OPEN. Any OPEN item must be extracted to a new issue or be deliberately deferred (with the user's knowledge).
 
 2. **Are there any open TODOs in the code?**
-   Run: `grep -rn "TODO\|FIXME\|HACK\|XXX" src/ tests/`
+   Run: `root=$(git rev-parse --show-toplevel) && git -C "$root" diff --name-only -z --diff-filter=d main...HEAD | xargs -0 -r git -C "$root" --literal-pathspecs grep -InE "TODO|FIXME|HACK|XXX" --`
+   Judge the scan by what it prints, not by its exit status: no output at all means clean; a `fatal:` or `error:` line means the scan did not run, so fix the cause and re-run.
    Each hit must be either fixed now, converted to an issue, or accepted with a comment explaining why.
 
 3. **Does the diff contain any accidental changes?**
@@ -118,7 +119,7 @@ Choose one of these four options -- do not mix them:
 | **Squash into one commit** | Small feature/fix -- all changes tell one story |
 | **Squash into logical groups** | Larger branch -- separate "feat" from "test" from "refactor" commits |
 | **Keep all commits** | Each commit is already clean, atomic, and independently meaningful |
-| **Interactive rebase** | Mix of clean and messy commits -- clean up before squashing |
+| **Fixup rebase** | Clean commits with distinct subjects plus fixes that belong inside one of them -- record each fix with `git commit --fixup <sha>`, then, with a clean working tree, run `GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash "$(git merge-base main HEAD)"`; no editor opens; on any nonzero exit run `git rebase --abort`; after exit 0 confirm that `git diff ORIG_HEAD HEAD` prints nothing and that `git log --stat main..HEAD` shows each fix in its target commit; if either check fails, run `git reset --hard ORIG_HEAD`; for messy commits, shared subjects, a failed check, or an aborted rebase, take Squash into logical groups instead |
 
 **Squash prescribed command:** Use `git reset --mixed HEAD~N`. Use `--mixed`, not `--soft`. `--soft` carries staged hunks forward and can silently include unintended changes. `--mixed` clears the index so the new commit starts from a clean slate.
 
@@ -185,7 +186,7 @@ See `versioning` skill for conventional commit rules.
 | Excuse | Reality |
 |--------|---------|
 | "I'll clean up the commits later" | Later never comes. Clean them now while context is fresh. |
-| "The tests pass locally, CI will be fine" | CI has a different environment. It fails independently. Verify the diff, not the confidence. |
+| "The tests pass locally, CI will be fine" | Open the PR (Step 4), then wait for its CI run to finish green before asking for merge; local green is not CI green. |
 | "It's close enough -- I'll fix it in follow-up" | Undefined follow-up is a polite word for "never." Open a tracking issue with a due date or do it now. |
 | "The PR description can be filled in later" | PR descriptions written after the fact are summaries, not design records. Write them now. |
 | "CI passed on the branch, merge is safe" | CI on the branch does not verify the merge commit. Verify CI is green on main AFTER the merge. |

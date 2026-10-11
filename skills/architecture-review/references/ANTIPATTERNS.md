@@ -86,7 +86,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 - One class is referenced everywhere in the codebase
 - Changes to it ripple throughout the system
 - High fan-in; the class is tightly coupled to many others
-- Often misapplied as a Mediator pattern
+- Misapplied as a Mediator pattern
 
 **Remediation:**
 - Redistribute responsibilities to smaller, cohesive classes

@@ -51,7 +51,7 @@ OpenGL rendering is inherently visual. Pixel output depends on Graphics Processi
 ### What a GL mock CAN test (full Test-Driven Development (TDD) applies)
 
 - Shader compilation logic (uniform locations, program linking)
-- Buffer creation and binding sequences (VAO, VBO, EBO)
+- Buffer creation and binding sequences: vertex array object (VAO), vertex buffer object (VBO), element buffer object (EBO)
 - Draw call parameters (primitive type, index count, offset)
 - State machine transitions (depth test, blending, viewport)
 - View/projection matrix calculations

@@ -33,7 +33,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## How This Skill is Invoked
 
-This skill is **mandatory** -- the `session-bootstrap` skill's "On Finish" section requires it before every final message. You will also be invoked:
+This skill is **mandatory** -- the `session-bootstrap` skill requires it at session end, before every final message, including when a major task completes mid-session with no further work planned. You will also be invoked:
 - When explicitly asked: "Run self-evaluation", "What did you learn?", "Improve skills"
 - After addressing code review feedback that reveals a recurring pattern
 
@@ -165,6 +165,8 @@ If changes are warranted and the session scope allows:
 2. **Keep changes minimal** -- Add only what's necessary, don't restructure
 3. **Maintain skill boundaries** -- Don't duplicate content across skills
 
+**Compact (always runs; reports "None" when nothing needed it):** Scan every file you touched this session for bloated comments and duplicated docs. Migrate detail to skills or docs and leave 1-line references. A skill file in a plugin cache is covered by the Plugin Context Gate above. Commit skill updates and compaction edits with the session's work. The BEFORE PROCEEDING commit condition covers the primary work; commits made here come in addition.
+
 ---
 
 ## Step 7: Write Findings to Disk
@@ -201,6 +203,7 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 **Span:** [first timestamp] -- [last timestamp]; [N] todos/segments; excluded: [segment -- reason, or "none"]
 **Lessons Captured:** [count]
 **Skills Updated:** [list of skills modified, or "None"]
+**Compacted:** [files compacted, or "None"]
 **Key Patterns Added:**
 - [Pattern 1: brief description]
 - [Pattern 2: brief description]
@@ -213,6 +216,8 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 **Deferred (Low Priority):**
 - [Pattern that was noted but not implemented]
 ```
+
+Always include this block in the final message. When there is nothing to report, fill the fields with 0 or "None"; a zero count is valid only after Steps 1-5 ran.
 
 ---
 
@@ -243,7 +248,7 @@ Include the `### Session Self-Evaluation` block in the final message to the user
 ## Related Skills
 
 - `session-postmortem` -- external reviewer that reads self-assessment.md written by this skill; complements but does not replace self-evaluation
-- `session-bootstrap` -- On Finish section calls this skill directly at session end
+- `session-bootstrap` -- requires this skill at session end, before the final message
 
 ---
 

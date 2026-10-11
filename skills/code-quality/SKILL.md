@@ -23,7 +23,7 @@ Before every commit:
 
 ### Step 1: Universal Tier (all code, no exceptions)
 
-1. `references/code-smells.md` Universal Smells section -- none present in changed code
+1. `references/code-smells.md` -- none present in changed code
 2. `references/design-principles.md` -- no principle violations (Don't Repeat Yourself (DRY), You Ain't Gonna Need It (YAGNI), Composed Method, Beck's Rules)
 3. Self-documenting check: no comment substitutes for a poor name; no magic numbers; no clever code
 
@@ -33,7 +33,7 @@ Before every commit:
 ### Step 2: Identify Paradigm
 
 Run in order; stop at first match:
-1. `.cpp` or `.hpp` files modified -> C++ Object-Oriented Programming (OOP) tier (`references/oop/cpp/index.md`)
+1. `.cpp`, `.cc`, `.cxx`, `.h`, `.hh`, `.hpp` files modified -> C++ Object-Oriented Programming (OOP) tier (`references/oop/cpp/index.md`)
 2. No match -> universal only (skip Step 3)
 
 **Python OOP tier** (Python files with `class` definitions): deferred -- `references/oop/python/` does not exist yet. Apply universal tier only.
@@ -56,8 +56,8 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 
 | Signal | Wrong fix | Right fix |
 |--------|-----------|-----------|
-| `// 0=Fullscreen, 1=AutoCOM...` above a switch | Add a better comment | Replace magic numbers with a named enum |
-| `magic_value = 42; // timeout in ms` | Document the constant | `constexpr int kTimeoutMs = 42;` |
+| `// 0=Fullscreen, 1=Window...` above a switch | Add a better comment | Replace magic numbers with a named enum |
+| `magic_value = 42; // timeout in ms` | Document the constant | `constexpr int TIMEOUT_MS = 42;` |
 | Function with a `bool` parameter | Comment at the call site | Replace with an enum or named overloads |
 
 **Rule:** If a comment explains what a value *is*, the comment is a code smell. Make the code say it.
@@ -100,7 +100,6 @@ Load `references/[paradigm]/index.md` and apply all checks listed there.
 - `references/oop/cpp/formatting-rules.md` -- human-reviewable C++ formatting patterns
 - `references/oop/cpp/naming-tables.md` -- OOP naming conventions
 - `references/oop/cpp/review-checklist.md` -- full OOP pre-commit checklist
-- `references/oop/cpp/invocation.md` -- OOP tier invocation instructions
 - Commit format: `versioning` skill
 - Testing patterns: `testing` skill
 - C++ runtime patterns: `cpp-patterns` skill

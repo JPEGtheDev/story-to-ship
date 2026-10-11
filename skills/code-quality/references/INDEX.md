@@ -35,7 +35,6 @@ Universal files fire for every code task. OOP tier fires only when the trigger i
 | `oop/cpp/cpp-toolchain.md` | clang-format and clang-tidy configuration |
 | `oop/cpp/formatting-rules.md` | Human-reviewable formatting patterns clang-format does not catch |
 | `oop/cpp/naming-tables.md` | Naming convention tables by category for OOP identifiers |
-| `oop/cpp/invocation.md` | How the OOP tier is invoked; maps to the tier check sequence |
 
 ### Python (`oop/python/`) -- deferred
 

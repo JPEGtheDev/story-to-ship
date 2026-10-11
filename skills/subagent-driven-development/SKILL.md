@@ -127,7 +127,7 @@ See the `using-git-worktrees` skill for full worktree lifecycle, commands, and s
 
 ## Model Selection
 
-See `references/MODEL_SELECTION.md` for model tier table and concurrency rules.
+See `references/MODEL_SELECTION.md` for the model tier table and the general-purpose and explicit-model rules; concurrency lives in `dispatching-parallel-agents`.
 
 ---
 

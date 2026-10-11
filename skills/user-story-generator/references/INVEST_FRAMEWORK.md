@@ -88,7 +88,7 @@
 
 ## S - Small
 
-**What it means:** Stories are completable within one sprint (typically 1-2 weeks).
+**What it means:** Stories are completable within one sprint. Size L means up to one sprint; a story that needs more than one sprint is split.
 
 **Why it matters:**
 - Fast feedback loops
@@ -97,13 +97,12 @@
 - Multiple stories can be merged and released frequently
 
 **How to check:**
-- [ ] This story can be completed in 3-5 days max
+- [ ] This story can be completed within one sprint
 - [ ] One developer (or small pair) can own it start-to-finish
 - [ ] Fits comfortably in the sprint timeline
 
 **Red flags:**
 - Story is labeled "Epic" but not broken down
-- Estimated at "M" or "L" size
 - Multiple teams need to coordinate to complete it
 - Timeline spans multiple sprints
 
@@ -159,9 +158,9 @@ Estimable:
   [ ] No hard blockers (unknowns) before starting
 
 Small:
-  [ ] Completable in one sprint (<2 weeks)
+  [ ] Completable in one sprint
   [ ] One developer/pair can own it
-  [ ] Not an Epic or large feature
+  [ ] Not an Epic
 
 Testable:
   [ ] All acceptance criteria are measurable

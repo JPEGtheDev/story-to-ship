@@ -54,7 +54,7 @@ Based on their answers, ask **one or two follow-up questions** to clarify:
 
 ### For spikes:
 - "What's the key question we're trying to answer?"
-- "What would a successful spike deliver? (doc, PoC, recommendation)"
+- "What would a successful spike deliver? (doc, proof of concept (PoC), recommendation)"
 - "What timebox are you targeting for this?"
 
 ### For bugs:
@@ -113,7 +113,7 @@ Make them immediately and conversationally:
 
 ### If they want breakdown:
 Ask how they want it split:
-> "Should I break this into independent stories by component, or sequential subtasks for one person?"
+> "Do you want me to break this into independent stories, each one a user-visible outcome (a vertical slice), or into sequential subtasks for one person?"
 
 ### If they want to create a GitHub issue:
 Offer to format it:

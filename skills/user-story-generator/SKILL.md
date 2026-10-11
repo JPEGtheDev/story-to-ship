@@ -148,7 +148,7 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 
 - Story has no acceptance criteria -> STOP. Write at least one testable acceptance criterion before generating.
 - Story requires another story to be done first ("depends on #X") -> STOP. Redesign the split so this story can be delivered independently.
-- Story spans multiple unrelated components or layers -> STOP. Split into separate stories, one per component or layer.
+- Story spans multiple unrelated components or layers -> STOP. Split by user-visible outcome (a vertical slice that may cross layers), never into one story per layer.
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
 - Can't write a failing test for the acceptance criteria -> STOP. Rewrite the criterion until a failing test can be written for it.
@@ -166,8 +166,8 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 - Recommended model tier (Economy/Standard/Premium)
 - One-sentence reasoning for the model choice
 
-**Tier planning for decomposed stories:** Reserve Premium for stories that make architectural or design decisions. When decomposition front-loads those decisions into a Premium story, recommend Standard for the implementation stories that execute them, and Economy for mechanical, fully-specified changes. A breakdown where every story recommends Premium is a signal the decomposition did not separate deciding from executing.
+**Tier planning for decomposed stories:** Reserve Premium for stories that make architectural or design decisions. When decomposition front-loads those decisions into a Premium story, recommend Standard for the implementation stories that execute them, and Economy only when the story's output is mechanically verifiable, never for work that needs judgment. A breakdown where every story recommends Premium is a signal the decomposition did not separate deciding from executing.
 
 ## Related Skills
 
-See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the malformed-canon definition this skill consumes.
+See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL); this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the malformed-canon definition this skill consumes.

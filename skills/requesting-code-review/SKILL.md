@@ -65,11 +65,13 @@ For non-trivial PRs, dispatch code review agents before requesting human review:
 - Code/config files -> `code-quality-reviewer.md`
 - Architecture-relevant changes (available on request, not required for every changed file) -> `architecture-reviewer.md`
 
+In the example, the dispatcher keeps each double-brace token exactly as written and must replace the bracketed text after it with the value, so the token binds that value to the template placeholder of the same name.
+
 ```
 # For each group of at most two files that implement one change, dispatch the matching template, e.g.:
 Agent(description="Review [change]", subagent_type="code-quality-reviewer", prompt="
 Review {{FILES}} [the files under review, one path per line], changed in this PR; return one verdict block per file.
-SHA: [commit SHA (the git commit hash)]
+Review the state at SHA: [commit SHA (the git commit hash); SHA stands for Secure Hash Algorithm]
 Worktree: {{WORKTREE_PATH}} [absolute path of the worktree that holds the changed files]
 Implementer's pasted verification output: {{IMPLEMENTER_EVIDENCE}} [the implementer's pasted verification commands and their output, verbatim; if the implementer pasted no runnable command, write 'No runnable command was pasted.' here so the reviewer states in its verdict that no spot-check was possible]
 End each verdict block with the literal line: Adversarial scenario tested: <scenario, or trigger not matched>

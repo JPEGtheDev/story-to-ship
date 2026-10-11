@@ -26,7 +26,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 | Step | Agent | Runs when |
 |------|-------|-----------|
-| 1-3 | Abstractive, Extractive, SAAC | Parallel -- after source is in context |
+| 1-3 | Abstractive, Extractive, State/Assign/Action/Complete (SAAC) | Parallel -- after source is in context |
 | 4 | Synthesizer | After all 3 method agents return |
 | 5 | Claim Enrichment | After synthesizer writes temp file |
 | 6 | Quality Evaluator | After claim enrichment writes enriched temp file |
@@ -40,12 +40,13 @@ Partial failure: 1 of 3 methods fails -> synthesizer notes the gap and proceeds.
 Before dispatching any agent, verify:
 
 1. Source content is in context -- pasted, fetched, or read from file. If absent: read or fetch the source now. Do not dispatch until source is in context.
-2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (ask user for directory after summary completes -- not before).
+2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (record `ASK_USER`; ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file)).
 3. `scratch/summaries/` exists for the temp file.
 
 [+] All met -> dispatch agents 1-3 in parallel
 [-] Source missing -> fetch or read the source. Do not dispatch.
-[-] Output path unknown -> note it; ask user after summary completes.
+[-] No path and no directory -> record `ASK_USER`. This adds an action and does not block dispatch: dispatch agents 1-3 as normal, then ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file).
+[-] `scratch/summaries/` missing -> create it (`mkdir -p scratch/summaries`), then re-check.
 
 ---
 
@@ -73,7 +74,7 @@ See `references/PIPELINE.md` for per-agent prompt structure, variable fill-in, a
 |-----------|--------|
 | Explicit path provided | Use it |
 | Directory only, no filename | Kebab-case source title + `.md` in that directory |
-| Nothing provided | Ask for directory after summary completes; auto-derive filename |
+| Nothing provided | Record `ASK_USER`; ask for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file); auto-derive filename |
 
 Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 
@@ -83,9 +84,9 @@ Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 
 | Excuse | Reality |
 |--------|---------|
-| "Two of the three methods returned, good enough" | All three must return before dispatching the synthesizer. One missing method = incomplete synthesis. Wait or halt. |
+| "Two of the three methods returned, good enough" | All three must report pass or fail. A method still running has not failed -- wait. 1 failed -> proceed with the gap noted; 2+ failed -> halt. |
 | "The source was in context from a prior message" | Re-read or re-fetch the full source now. Partial context produces partial summaries. |
-| "I'll derive the output path without asking" | If no path and no directory was given: ask the user after summary completes. Do not invent a path. |
+| "I'll derive the output path without asking" | If no path and no directory was given: ask the user after the enriched temp file is written and before dispatching the quality agent (it writes the final file). Do not invent a path. |
 | "The temp file is good enough, skip quality" | The quality gate is mandatory. Temp file is for review only. Final output requires the quality agent to run. |
 | "Quality found minor issues, skip the revision cycle" | One revision cycle is allowed and required when quality flags issues. Run it before writing final output. |
 | "The source is short, all three methods will produce the same output" | Method diversity is the point. Overlap is informative. Run all three regardless of source length. |
@@ -95,7 +96,7 @@ Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 ## Red Flags -- STOP
 
 - About to dispatch the synthesizer without all 3 method results in hand -- **STOP. Wait for all three. Note any failed agent before proceeding.**
-- About to write output to a path the user did not specify or confirm -- **STOP. Ask for the directory after summary completes.**
+- About to write output to a path the user did not specify or confirm -- **STOP. Ask for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file).**
 - Source content is a URL or filename but not yet fetched or read -- **STOP. Fetch or read the source before any dispatch.**
 - Quality agent returned failures and revision cycle has not run -- **STOP. Run the revision cycle. Then write final output.**
 - About to skip the temp file step -- **STOP. Write to `scratch/summaries/temp-[title].md` before dispatching quality.**

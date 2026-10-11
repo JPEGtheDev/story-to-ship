@@ -1,4 +1,4 @@
-# SAAC Summarization Method
+# State/Assign/Action/Complete (SAAC) Summarization Method
 
 ## What It Is
 
@@ -29,7 +29,7 @@ Action item count is a soft cap. Add an item beyond the cap only if it is indepe
 |--------------|---------------------|
 | Short (< 1,000 words) | 3-5 actions |
 | Medium (1,000-3,000 words) | 5-7 actions |
-| Long (> 3,000 words) | 6-8 actions |
+| Long (3,001-7,500 words) | 6-8 actions |
 | Very long (7,501-25,000 words) | 6-8 actions (unchanged); the synthesized article targets 1,500-2,500 words absolute, not a percentage |
 | Very long (> 25,000 words) | 6-8 actions (unchanged); the synthesized article targets 2,500-4,000 words absolute, not a percentage |
 

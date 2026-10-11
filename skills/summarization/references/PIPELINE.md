@@ -13,7 +13,7 @@ Dispatch three `summarization-method` agents simultaneously via the Agent tool.
 - Full method instructions from the relevant reference file (read and inline):
   - Abstractive agent: contents of `references/ABSTRACTIVE_METHOD.md`
   - Extractive agent: contents of `references/EXTRACTIVE_METHOD.md`
-  - SAAC agent: contents of `references/SAAC_METHOD.md`
+  - State/Assign/Action/Complete (SAAC) agent: contents of `references/SAAC_METHOD.md`
 
 **Each agent returns:** A single method summary in the format defined by its reference file.
 

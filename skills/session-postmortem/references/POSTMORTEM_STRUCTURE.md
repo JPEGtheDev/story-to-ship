@@ -244,9 +244,9 @@ No vague items. "Be more careful" is not an action item. "Add the phrase 'X' to 
 **Before announcing the postmortem complete**, the final report MUST be written to disk.
 
 Path format: `[SESSION_DIR]/postmortem.md`
-- Example: `~/.claude/projects/.../ca61de74-.../postmortem.md`
+- Example: `scratch/<session-id>/postmortem.md`
 
-Create `[SESSION_DIR]` -- the directory containing the session's `events.jsonl`.
+Create `[SESSION_DIR]` if it is missing: the folder the user gives, else `scratch/<session-id>/` under the repository root.
 
 ```bash
 ls [SESSION_DIR]/postmortem.md

@@ -147,7 +147,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - "It's probably X, let me fix that"
 - "Add multiple changes, run tests, see what sticks"
 - "I don't fully understand but this might work"
-- "I've already tried 2 things, one more fix won't hurt"
+- "I've already tried 3 things, one more fix won't hurt"
 - "Let me just rerun the test" (for a failing test -- rerunning without understanding = ignoring root cause)
 - "It works on my machine" (still needs root cause)
 - "CI must have a glitch" (still needs root cause)
@@ -172,7 +172,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "Multiple fixes at once saves time" | Can't isolate what worked. Creates new bugs. |
 | "I've already looked at it, I know the problem" | Looking at symptoms != understanding root cause. |
 | "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. |
-| "One more fix attempt" (after 2 failures) | 3+ failures = architectural problem. Question the approach. |
+| "One more fix attempt" (after 3 failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
 | "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates this skill's Iron Law: the earlier investigation ran without the Phase 0 problem statement and the BEFORE PROCEEDING gate. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |
 | "The user confirmed this behavior works" | User confirmation is not empirical verification. Exercise the behavior yourself in the target environment and record the output. "It worked for them" is a second-hand report, not evidence. Re-run the reproduction (gate item 2) and show the output. |

@@ -8,7 +8,7 @@ A HeisenBug is a bug that disappears or changes behavior when you attempt to obs
 
 | Cause | Symptom | Investigation action |
 |-------|---------|---------------------|
-| Uninitialized variable | Zero in debug builds (compilers zero-initialize stack in debug mode), garbage in release | Explicitly initialize all variables. Run with address sanitizer (`-fsanitize=address,undefined`). |
+| Uninitialized variable | Often zero in debug builds only because the stack page was fresh (no compiler guarantees it; some compilers fill with a marker pattern), garbage in release | Explicitly initialize all variables. Run with address sanitizer (`-fsanitize=address,undefined`). |
 | `assert(x = 5)` single-equals trap | Assignment inside `assert` executes in debug, but the entire expression is removed in release (`NDEBUG`) | Audit every `assert` statement for `=` vs `==`. |
 | Stack padding | Buffer overflow corrupts neighbor data in release, but is absorbed by debug padding | Run with address sanitizer. Never rely on stack layout. |
 | Debugger timing | Race condition disappears because step-through execution serializes threads | Test without the debugger attached. Use thread sanitizer (`-fsanitize=thread`). |

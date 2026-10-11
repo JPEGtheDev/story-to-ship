@@ -8,7 +8,7 @@ description: Use when multiple independent read-only research tasks can run simu
 ## Iron Law
 
 ```
-YOU MUST RESTRICT PARALLEL AGENTS TO READ-ONLY WORK ONLY.
+YOU MUST NOT LET TWO PARALLEL AGENTS WRITE THE SAME FILE.
 YOU MUST PROVIDE EACH DISPATCHED AGENT WITH ITS OWN ISOLATED WORKTREE -- ONE WORKTREE PER AGENT.
 No exceptions.
 ```
@@ -92,7 +92,7 @@ Dispatch agents in parallel when ALL of the following are true:
 5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
 
 [+] All met -> dispatch agents
-[-] Any unmet -> resolve the dependency, define the return format, or serialize the dispatch before proceeding
+[-] Any unmet -> resolve the dependency, define the return format, serialize the dispatch, create the missing worktree, or (for a hypothesis-testing batch) dispatch the `skeptic` agent on the experiment design, before proceeding
 
 ---
 
@@ -186,7 +186,7 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 | "I'll use general-purpose -- it can do everything" | general-purpose for read-only research wastes context and produces serial output. Use explorer for research across many files. |
 | "I'll run them sequentially -- parallel is harder to coordinate" | YOU MUST run independent tasks in parallel. Sequential dispatch wastes turns. |
 | "The agents can share the same branch -- I'll merge their changes manually" | YOU MUST use an isolated worktree for every dispatched agent, read-only or write. Shared branches produce conflicts. |
-| "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially -- 17-second gaps per call are not parallel. Parallel execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
+| "I announced the tool calls in one turn, so they run in parallel" | Model Context Protocol (MCP) tool calls in a single assistant turn execute sequentially. Parallel agent execution requires separate Agent dispatch in a single message. Do not announce "in parallel" for same-turn tool call sequences. |
 
 ---
 

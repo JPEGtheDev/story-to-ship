@@ -163,6 +163,5 @@ Terminate immediately on encountering irrecoverable state corruption rather than
 
 ## Related Skills
 
-- `systematic-debugging` -- four-phase root cause protocol; HeisenBug patterns
 - `testing` -- test taxonomy; saw-test-fail gate
 - `cpp-safety` -- resource ownership patterns; exception-safe destructors

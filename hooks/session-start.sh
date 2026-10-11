@@ -26,8 +26,8 @@ fi
 # code, and it fails silently (fail-open) if jq is missing, stdin has no
 # session_id or is not valid JSON, the session_id is outside the allowed
 # characters, neither state-dir variable is resolvable, or the state dir
-# cannot be created or written. The reload part below sets the names the
-# banner sentence prints -- the exit code still never changes.
+# cannot be created or written. The reload part below sets the role and
+# written flag the banner sentence prints -- the exit code still never changes.
 # A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
 # the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
 # subagent (for example its own compaction) and carries the parent's
@@ -45,20 +45,24 @@ fi
 #     block on any source other than compact or resume). This block never
 #     modifies or deletes it on a compact/resume source.
 #   .reload-pending-<session_id> is what a later PreToolUse check reads to
-#     hold Edit, Write, NotebookEdit and Agent until each pending name is
-#     re-invoked.
-# On source compact or resume: the pending set is the non-empty lines of the
-# loaded list, de-duplicated, sorted (LC_ALL=C), minus session-bootstrap,
-# honesty and communication (exact whole-line matches, since those three
-# reload via their own flag files above, not this list). A non-empty set
+#     hold tools until each pending name is re-invoked. The role name holds
+#     Edit, Write, NotebookEdit and Agent; each action name holds only its
+#     own action (an agent dispatch, git commit or gh pr create, an edit
+#     under skills/ or agents/).
+# On source compact or resume: the pending set is the role skill (if any)
+# followed by the five action skills, one name per line, no blanks, no
+# duplicates. The role is the first line of the loaded list (load order)
+# that matches the charset ^[A-Za-z0-9._-]+$ and is in RELOAD_ROLE_NAMES
+# (running-a-sprint). The action names, in this order, are
+# subagent-driven-development, using-git-worktrees, versioning,
+# verification-before-completion, writing-skills. A missing, empty or
+# unreadable loaded list means no role; the five action names are still
+# written, so the pending file is never empty on these sources. The set
 # replaces the pending file (temp file + mv -f, so a partial write never
 # leaves a half-written file in place; if the write or mv fails, both the
 # temp file and the existing pending file are removed -- fail-open, so a
 # stale pending list from an earlier compaction never holds tools under
-# names the banner no longer shows). An empty set -- including a missing or
-# unreadable loaded list, which fails open the same way the rest of this
-# block does -- deletes the pending file instead of leaving an empty one
-# behind.
+# names the banner no longer shows). The loaded list is only read here.
 # On every other source (for a payload without agent_id), including a payload
 # with no source field at all, both the loaded list and the pending file are
 # deleted: a fresh session (startup/fork/clear/anything unrecognized) has no
@@ -70,7 +74,10 @@ fi
 # added here only skips the stamping itself, never the whole script. The
 # agent_id rule is the same: it skips this block only, so a subagent payload
 # still gets the banner and session-start.md text from the section below.
-RELOAD_PENDING_NAMES=""
+RELOAD_PENDING_WRITTEN=""
+RELOAD_PENDING_ROLE=""
+RELOAD_ROLE_NAMES=(running-a-sprint)
+RELOAD_ACTION_NAMES=(subagent-driven-development using-git-worktrees versioning verification-before-completion writing-skills)
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
   BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
   # Non-empty agent_id means a subagent payload: skip the whole block below.
@@ -94,24 +101,34 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
       RELOAD_LOADED_FILE="$BOOTSTRAP_STATE_DIR/.skills-loaded-$BOOTSTRAP_SESSION_ID"
       RELOAD_PENDING_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID"
       if [[ "$BOOTSTRAP_SOURCE" == "compact" || "$BOOTSTRAP_SOURCE" == "resume" ]]; then
-        # A missing or unreadable loaded list reads as empty here (grep on a
-        # nonexistent file prints nothing to stdout), so this yields an empty
-        # set and falls into the "delete the pending file" branch below --
-        # the hold is lifted rather than left stuck, matching the fail-open
-        # behavior of the rest of this block.
-        RELOAD_SET="$(grep -v '^$' -- "$RELOAD_LOADED_FILE" 2>/dev/null |
-          LC_ALL=C sort -u |
-          grep -vxF -e session-bootstrap -e honesty -e communication 2>/dev/null)"
-        if [[ -n "$RELOAD_SET" ]]; then
-          RELOAD_TMP_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID.tmp.$$"
-          if printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE" 2>/dev/null &&
-            mv -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null; then
-            RELOAD_PENDING_NAMES="${RELOAD_SET//$'\n'/, }"
-          else
-            rm -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null
-          fi
+        # Role = first valid name in the loaded list that is in the role list.
+        # A missing or unreadable loaded list reads as empty (the redirect
+        # fails silently), so there is no role and the action names are still
+        # written.
+        RELOAD_ROLE=""
+        if [[ -r "$RELOAD_LOADED_FILE" ]]; then
+          while IFS= read -r RELOAD_LINE || [[ -n "$RELOAD_LINE" ]]; do
+            if [[ "$RELOAD_LINE" =~ ^[A-Za-z0-9._-]+$ ]]; then
+              for RELOAD_ROLE_NAME in "${RELOAD_ROLE_NAMES[@]}"; do
+                if [[ "$RELOAD_LINE" == "$RELOAD_ROLE_NAME" ]]; then
+                  RELOAD_ROLE="$RELOAD_LINE"
+                  break 2
+                fi
+              done
+            fi
+          done <"$RELOAD_LOADED_FILE" 2>/dev/null
+        fi
+        RELOAD_SET="$RELOAD_ROLE"
+        for RELOAD_ACTION_NAME in "${RELOAD_ACTION_NAMES[@]}"; do
+          RELOAD_SET+="${RELOAD_SET:+$'\n'}$RELOAD_ACTION_NAME"
+        done
+        RELOAD_TMP_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID.tmp.$$"
+        if printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE" 2>/dev/null &&
+          mv -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null; then
+          RELOAD_PENDING_WRITTEN=1
+          RELOAD_PENDING_ROLE="$RELOAD_ROLE"
         else
-          rm -f -- "$RELOAD_PENDING_FILE" 2>/dev/null
+          rm -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null
         fi
       else
         rm -f -- "$RELOAD_LOADED_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null
@@ -130,11 +147,12 @@ if [[ ! -f "$MD_FILE" ]]; then
   exit 0
 fi
 
-python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_NAMES" << 'PYEOF'
+python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_WRITTEN" "$RELOAD_PENDING_ROLE" << 'PYEOF'
 import json, pathlib, sys
 content = pathlib.Path(sys.argv[1]).read_text()
 raw = sys.argv[2] if len(sys.argv) > 2 else ""
-reload_names = sys.argv[3] if len(sys.argv) > 3 else ""
+reload_written = (sys.argv[3] if len(sys.argv) > 3 else "") != ""
+reload_role = sys.argv[4] if len(sys.argv) > 4 else ""
 source = ""
 try:
     source = (json.loads(raw).get("source") or "") if raw.strip() else ""
@@ -143,11 +161,22 @@ except Exception:
 banner = ""
 if source in ("compact", "resume"):
     reload_sentence = ""
-    if reload_names:
-        reload_sentence = (
-            " Reload guard: Edit, Write, NotebookEdit and Agent are held until "
-            "each of these is re-invoked: %s." % reload_names
+    if reload_written:
+        reload_rest = (
+            "held until subagent-driven-development and using-git-worktrees are "
+            "re-invoked; git commit or gh pr create until versioning and "
+            "verification-before-completion are re-invoked; an edit under "
+            "skills/ or agents/ until writing-skills is re-invoked. Nothing else "
+            "is held; invoke each only when you reach that action."
         )
+        if reload_role:
+            reload_sentence = (
+                " Reload guard: Edit, Write, NotebookEdit and Agent are held "
+                "until the role skill is re-invoked: %s. A dispatch of an agent "
+                "is also %s" % (reload_role, reload_rest)
+            )
+        else:
+            reload_sentence = " Reload guard: a dispatch of an agent is " + reload_rest
     banner = (
         "[CONTINUATION: source=%s] This is a resumed or compacted context. "
         "The summary/preamble is NOT a completed Skill call -- the prior skill-load "

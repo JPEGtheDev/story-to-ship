@@ -112,9 +112,10 @@ fail the moment a subtype instance is substituted in -- without a single line of
 code ever being touched.
 
 This is consistent with the oop-principles gate: a derived class that "only adds methods" can
-still violate substitutability if any override tightens a precondition or weakens a
-postcondition -- adding a method is not automatically safe, and every override needs the
-weaken-precondition / strengthen-postcondition check applied to it individually.
+still violate substitutability -- an added method can break a base invariant (for example, a
+mutator on an immutable base), and any override that tightens a precondition or weakens a
+postcondition breaks it too. Check each added method against the base invariants and each
+override against the weaken-precondition / strengthen-postcondition rule.
 
 In a language with native contract support, a base class's contract is inherited automatically
 by every descendant. In most languages, nothing enforces this at compile time -- verifying that
@@ -141,7 +142,7 @@ Contracts are a useful discipline, not a clean, universally safe one:
   a matter of author discipline and reviewer attention, not a compiler guarantee. In review,
   treat any contract expression that calls another method as suspect until that method is
   confirmed side-effect-free.
-- **Whether contracts would have caught bugs like Y2K is a live, unresolved dispute.** One
+- **Whether contracts would have caught bugs like Year 2000 (Y2K) is a live, unresolved dispute.** One
   position: writing preconditions and postconditions forces a fragile, undocumented assumption
   -- such as representing a year with only two digits -- out into the open, where it becomes
   visible before it breaks anything. The opposing position: a contract only gets written for a

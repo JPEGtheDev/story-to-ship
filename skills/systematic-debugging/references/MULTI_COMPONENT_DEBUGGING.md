@@ -8,7 +8,7 @@ Before proposing any fix in a multi-component failure:
 
 1. **Name the layers involved.** List every component the failing code path touches in execution order.
    ```
-   Example: command-line interface (CLI) -> ImportService -> DatabaseConnection -> QueryEngine -> Serializer -> Response
+   Example: CLI -> ImportService -> DatabaseConnection -> QueryEngine -> Serializer -> Response
    ```
 
 2. **Identify the boundary between "working" and "broken."**

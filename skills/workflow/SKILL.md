@@ -42,14 +42,14 @@ CI pipelines observe and report -- they never commit or push to a branch. Every 
 ### Rules That Must NEVER Be Violated
 
 1. **NEVER commit or push to a branch from a pipeline.** Pipelines never change branch contents. Committing from CI creates infinite loops, race conditions, and audit trail problems.
-2. **NEVER use `data:` URIs for inline images in PR comments.** GitHub strips `data:image/png;base64,...` from `<img>` tags in comments and step summaries for security.
+2. **NEVER use `data:` URIs (Uniform Resource Identifiers) for inline images in PR comments.** GitHub strips `data:image/png;base64,...` from `<img>` tags in comments and step summaries for security.
 
 ### Rules That Must ALWAYS Be Followed
 
 3. **Upload generated files** (images, reports) as workflow artifacts via `actions/upload-artifact`.
 4. **Link to artifact downloads** in PR comments for visibility.
 5. **Use `$GITHUB_STEP_SUMMARY`** for rich text reports on the Actions tab.
-6. **Keep permissions minimal** -- use `contents: read` unless the job needs to write checks or comments.
+6. **Keep permissions minimal** -- keep `contents: read` and add only the one write scope the step needs: `checks: write` for check results, `pull-requests: write` for PR comments, and `contents: write` only on a release job that pushes a tag.
 7. **Use idempotent PR comments** -- find and update existing comments instead of creating duplicates.
 
 ---
@@ -67,13 +67,13 @@ For canonical YAML templates (Artifact Upload, Idempotent PR Comment) see `refer
 Before presenting workflow changes, verify:
 
 1. No `git commit` and no branch `git push` in any step
-2. No `data:` URIs in PR comment bodies
-3. Permissions are minimal (`contents: read` unless writing comments/checks)
+2. No `data:` URIs (Uniform Resource Identifiers) in PR comment bodies
+3. Permissions are minimal (`contents: read`; add only the one write scope the step needs: `checks: write`, `pull-requests: write`, or `contents: write` on a tag-pushing release job)
 4. Generated files uploaded as artifacts (not committed)
 5. PR comments are idempotent (update existing, don't duplicate)
 6. Job dependencies are correct (`needs:` ordering)
-7. `if: always()` on artifact upload and PR comment steps where needed
-8. Artifact retention set appropriately (default: 30 days)
+7. `if: always()` on every artifact-upload and PR-comment step that reports test results
+8. `retention-days:` set: 30 for PR runs, 90 for release runs
 
 [+] All met -> proceed with presenting workflow changes
 [-] Any unmet -> fix before presenting
@@ -87,7 +87,7 @@ Before presenting workflow changes, verify:
 | "I need to commit from CI to fix this issue" | NEVER. Fix the code locally, push, let CI re-run. Committing from CI creates loops. |
 | "Broad permissions are easier than figuring out minimal ones" | Broad permissions are a security risk. Use minimal permissions -- write only what's needed. |
 | "I'll test this workflow change in CI" | Test locally with `act` or trace the logic manually. Don't waste CI minutes on avoidable failures. |
-| "Artifact retention doesn't matter much" | Excessive retention wastes storage. PRs: short retention. Releases: longer. |
+| "Artifact retention doesn't matter much" | Excessive retention wastes storage. Set `retention-days:` 30 for PR runs, 90 for release runs. |
 | "The trigger seems right, I'll push and check" | Incorrect triggers cause runaway pipelines or missing runs. Verify the trigger logic before pushing. |
 | "This job doesn't need to wait for the other to finish" | Race conditions in CI are hard to debug. Use `needs:` dependencies explicitly. |
 

@@ -159,7 +159,7 @@ Estimable:
   [ ] No hard blockers (unknowns) before starting
 
 Small:
-  [ ] Completable in one sprint (<2 weeks)
+  [ ] Completable in one sprint
   [ ] One developer/pair can own it
   [ ] Not an Epic
 

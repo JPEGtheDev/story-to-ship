@@ -10,8 +10,11 @@ real canon content or copied into any live taxonomy.
 
 Stamp: v1
 Delta rule: a re-ratification interview against a newer stamp elicits ONLY the
-layers added or changed since the canon's recorded stamp; every other prior
-ruling is left untouched.
+layers added or changed since the canon's recorded stamp, as listed in the
+history list below; every other prior ruling is left untouched.
+
+Change record (the Stamp history):
+- v1: added idempotency-checks, schema-migration-safety, changelog-entry, feature-flag-cleanup; changed none
 
 Key transform: each layer's `Key` is the layer name lowercased, with spaces and
 slashes converted to hyphens, and any parenthetical suffix dropped.

@@ -57,7 +57,8 @@ Before writing the PR, answer:
    List each criterion. Mark DONE or OPEN. Any OPEN item must be extracted to a new issue or be deliberately deferred (with the user's knowledge).
 
 2. **Are there any open TODOs in the code?**
-   Run: `grep -rn "TODO\|FIXME\|HACK\|XXX" src/ tests/`
+   Run: `root=$(git rev-parse --show-toplevel) && git -C "$root" diff --name-only -z --diff-filter=d main...HEAD | xargs -0 -r git -C "$root" --literal-pathspecs grep -InE "TODO|FIXME|HACK|XXX" --`
+   Judge the scan by what it prints, not by its exit status: no output at all means clean; a `fatal:` or `error:` line means the scan did not run, so fix the cause and re-run.
    Each hit must be either fixed now, converted to an issue, or accepted with a comment explaining why.
 
 3. **Does the diff contain any accidental changes?**

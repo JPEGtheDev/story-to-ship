@@ -6,7 +6,7 @@ Clang-format settings and clang-tidy configuration.
 
 ## clang-format Settings
 
-Auto-enforced via `.clang-format`. Key settings:
+Example `.clang-format` settings (a consuming repository's own file governs):
 
 | Rule | Value |
 |------|-------|
@@ -14,7 +14,7 @@ Auto-enforced via `.clang-format`. Key settings:
 | Indentation | 4 spaces (no tabs) |
 | Line length | 120 characters |
 | Functions/classes braces | Allman (new line) |
-| Control structure braces | K&R (same line) |
+| Control structure braces | Kernighan and Ritchie (K&R) (same line) |
 | Include order | C++ standard -> system -> external libs -> project headers |
 | Pointer alignment | Left (`int* ptr`) |
 
@@ -26,28 +26,28 @@ Full configuration: `.clang-format`
 
 ```bash
 # Analyze a source file
-clang-tidy src/main.cpp -- -Isrc/glad/include
+clang-tidy src/main.cpp -- -I<third-party include dir>
 
 # Analyze using compilation database
 clang-tidy src/main.cpp -p build
 
 # Auto-fix (always review auto-fix output before committing -- it can change behavior)
-clang-tidy -fix src/main.cpp -- -Isrc/glad/include
+clang-tidy -fix src/main.cpp -- -I<third-party include dir>
 ```
 
 Configuration in `.clang-tidy` enforces:
 - `modernize-*` -- Modern C++ practices (smart pointers, nullptr, auto, range-based loops)
 - `readability-*` -- Const correctness, function complexity (<=25 cognitive, <=50 statements, <5 params)
-- `cppcoreguidelines-*` -- Microsoft C++ Core Guidelines
+- `cppcoreguidelines-*` -- C++ Core Guidelines (isocpp; Stroustrup and Sutter)
 - `performance-*`, `bugprone-*`, `portability-*`, `clang-analyzer-*`
 
-Header filter excludes embedded libs: `glad`, `stb_*`.
+Header filter excludes vendored third-party libraries.
 
 **CI status:** clang-tidy runs in CI as advisory (non-blocking). clang-format is blocking.
 
 ---
 
-## STL vs. C++ Standard Library
+## Standard Template Library (STL) vs. C++ Standard Library
 
 The Standard Template Library started out as an independent, template-based library of generic containers and algorithms, organized around an iterator abstraction that lets a pre-written algorithm run over both built-in and user-defined containers. It predates the C++ Standard Library, having been absorbed into it only afterward; the resulting Standard Library added a large amount of functionality that the earlier template library had never included.
 

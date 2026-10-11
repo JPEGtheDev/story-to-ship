@@ -8,7 +8,7 @@ Extractive summarization identifies and **lifts the most important passages verb
 
 1. **Verbatim only.** Copy text exactly as it appears in the source. Do not alter wording, fix grammar, or modernize phrasing.
 2. **Never paraphrase.** If a passage is too long to lift in full, select the most essential sentence or clause within it -- do not summarize it.
-3. **Select for density.** Prefer passages that carry a complete idea in few words. Skip filler, transitions, and rhetorical framing that adds no information.
+3. **Select for density.** Select passages that carry a complete idea in the fewest words. Skip filler, transitions, and rhetorical framing that adds no information.
 4. **Cite location when possible.** If the source has sections, headings, or paragraph numbers, note where the passage was found.
 5. **Quantity guideline (soft cap):** Select the minimum number of passages needed to cover every distinct major claim. Add a passage beyond the cap only if it is not implied by another selected passage.
 

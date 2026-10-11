@@ -156,7 +156,7 @@ Before presenting visual regression tests:
 | Excuse | Reality |
 |--------|---------|
 | "The visual looks fine to me" | Auto-approval bypasses the human review requirement |
-| "A GL mock can't test this" | If it's logic, not pixels, a GL mock likely can -- reconsider |
+| "A GL mock can't test this" | If the behavior is not pixel output, it is testable with an OpenGL call mock. Write the mock test first. |
 | "High tolerance is more robust" | High tolerance masks real regressions |
 | "I'll set the resolution later" | Wrong resolution causes artifacts in every subsequent baseline |
 | "Visual tests cover what the unit tests don't" | Visual tests are slow and cover pixels; unit tests cover logic. Both are needed. |

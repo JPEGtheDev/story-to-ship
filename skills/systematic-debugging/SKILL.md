@@ -147,7 +147,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 - "It's probably X, let me fix that"
 - "Add multiple changes, run tests, see what sticks"
 - "I don't fully understand but this might work"
-- "I've already tried 2 things, one more fix won't hurt"
+- "I've already tried 3 things, one more fix won't hurt"
 - "Let me just rerun the test" (for a failing test -- rerunning without understanding = ignoring root cause)
 - "It works on my machine" (still needs root cause)
 - "CI must have a glitch" (still needs root cause)

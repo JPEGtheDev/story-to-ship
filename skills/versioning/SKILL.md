@@ -23,7 +23,7 @@ Violating the letter of this rule is violating the spirit of this rule. Wrong fo
 
 ## Core Principle: Commit Messages Drive Releases
 
-This project uses **zero-manual releases**. Every push to main triggers an automated release. The commit message (which comes from the squash-merged PR title) determines the version bump.
+Where the repo uses **zero-manual releases**, every push to main triggers an automated release, and the commit message determines the version bump. When the repo squash-merges, that commit message is the PR title.
 
 ---
 
@@ -43,16 +43,16 @@ This project uses **zero-manual releases**. Every push to main triggers an autom
 |------|-------------|---------|
 | `feat:` | MINOR (0.1.0 -> 0.2.0) | `feat: add query result caching` |
 | `fix:` | PATCH (0.1.0 -> 0.1.1) | `fix: resolve crash on startup` |
-| `feat!:` / `fix!:` / `BREAKING CHANGE:` | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
+| `<type>!:` for any type, or a `BREAKING CHANGE` / `BREAKING_CHANGE` footer | MAJOR (0.1.0 -> 1.0.0) | `feat!: redesign Serializer API` |
 | `docs:`, `test:`, `chore:`, `refactor:`, `style:`, `perf:` | PATCH (default) | `docs: update README` |
 
-Every commit type triggers at least a PATCH bump. The release workflow specifically detects `feat:` and `fix:` plus any `!` breaking marker.
+Every commit type triggers at least a PATCH bump. The table is the one place the mapping is stated.
 
 ---
 
 ## Step 2: PR Title Rules
 
-**This project uses squash merging.** The PR title becomes the single commit message on main, which determines the version bump.
+**When the repo squash-merges,** the PR title becomes the single commit on main, which determines the version bump.
 
 ### Creating a New PR
 
@@ -73,6 +73,7 @@ The PR title **MUST** use conventional commits format:
 
 **DO NOT modify the PR title** unless the user explicitly asks.
 
+- If the existing PR title does not conform to conventional format, ask the user; do not change it yourself
 - The PR title represents the **overall feature or fix**, not individual subtasks
 - Individual commits within the PR MUST still use conventional format
 - Update the PR **description** (not title) to track subtask progress
@@ -113,8 +114,6 @@ create Semantic Versioning (semver) tags manually when no automation exists:
 git tag v1.2.3 -m "Release v1.2.3" && git push origin v1.2.3
 ```
 
-The mapping: `feat!` / `BREAKING CHANGE` -> MAJOR, `feat:` -> MINOR, all else -> PATCH.
-
 ---
 
 ## Troubleshooting
@@ -123,7 +122,7 @@ The mapping: `feat!` / `BREAKING CHANGE` -> MAJOR, `feat:` -> MINOR, all else ->
 Verify the commit message/PR title uses the correct type. Check your project's release automation for manual override options.
 
 **Need a release:**
-Just push conventional commits to main -- it's automatic.
+Merge a PR with a conventional title (the user merges). Where the repo has release automation, it tags the merge; otherwise create the tag manually as in Step 3.
 
 ---
 
@@ -146,8 +145,8 @@ If you catch yourself thinking any of these, stop and follow the rule:
 - About to write a commit message without checking the type first -> STOP. Determine the type (`feat`/`fix`/`docs`/`chore`) before writing.
 - "feat or fix, doesn't really matter" -> STOP. Ask: does it add new user-visible behavior? Yes = `feat`. No = `fix`.
 - Commit message starts with a capital letter or ends with a period -> STOP. Rewrite: `type: lowercase description, no period`.
-- PR title doesn't start with `<type>[scope]:` format -> STOP. Fix the title now. It becomes the squash commit message.
-- "I'll change the PR title later if needed" -> STOP. Fix it before requesting review. Merged titles are permanent.
+- PR title doesn't start with `<type>[scope]:` format -> STOP. If the PR is not yet opened, correct the title before opening. If it already exists, ask the user; do not change it yourself.
+- "I'll change the PR title later if needed" -> STOP. A PR not yet opened gets its title corrected before opening; for an existing PR, ask the user. Merged titles are permanent.
 - Working on a hotfix and tempted to use `feat` to "be safe" -> STOP. Hotfixes are `fix`. Use `feat` only for new behavior.
 
 ---
@@ -155,5 +154,5 @@ If you catch yourself thinking any of these, stop and follow the rule:
 ## Reference
 
 - [Conventional Commits specification](https://www.conventionalcommits.org)
-- Release pipeline: `.github/workflows/release.yml`
+- Release pipeline: your project's release workflow definition
 - CI workflow rules: `workflow` skill

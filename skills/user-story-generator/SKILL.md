@@ -170,4 +170,4 @@ See `references/CONVERSATION_SCRIPTS.md` for story elicitation conversation scri
 
 ## Related Skills
 
-See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL) and validated examples; this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier selection, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the malformed-canon definition this skill consumes.
+See the `user-story-estimation` skill for the full T-shirt size scale (XS-XL); this skill's own template (`references/STORY_TEMPLATE.md`) restricts generated stories to S/M/L. For model tier, load the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Always include the Effort Estimate section in every generated story. The `defining-done` skill owns the DoD canon, its taxonomy, and the malformed-canon definition this skill consumes.

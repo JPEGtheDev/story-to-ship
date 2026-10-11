@@ -54,7 +54,7 @@ Skipping any step = lying, not verifying.
 | Staging deployed and tested | "Staging verified, pending production" | ~~Done~~ |
 | Production deployed, monitored, working | **"Done"** (the only correct use) | -- |
 
-**Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains.
+**Gate:** Marking a todo "done" when unit tests pass = wrong definition. Invisible work remains. The table and the Gate line govern the user-facing word "done", also when it names a todo; DONE (capitals) is a status code of the `two-stage-review` skill and claims no production delivery.
 
 ---
 
@@ -124,7 +124,7 @@ A "no" or "unknown" on any item = resolve it or document it explicitly in the PR
 
 ---
 
-### Banned Without Evidence
+## Banned Without Evidence
 
 These words and phrases **cannot appear in any response** unless fresh verification output is shown inline:
 
@@ -136,6 +136,12 @@ These words and phrases **cannot appear in any response** unless fresh verificat
 | `"I'm confident"` / `"I'm sure"` | Confidence is not evidence |
 | **`"Should work"`** | **BANNED. No substitute. Run the verification.** |
 | `"That should do it"` | BANNED. Same reason. |
+
+Process language (use whenever verification has not run), the substitute for the `"Works"` / `"Working"` row:
+- `"Running verification now..."`
+- `"Haven't run the gate yet -- doing that now"`
+- `"Identified likely cause -- confirming before claiming fix"`
+- `"Uncertain about X -- dispatching subagent to confirm"`
 
 Evidence must be **inline**, not referenced:
 
@@ -185,7 +191,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 - "The contract fix reads correctly" -- **STOP. Textual review does not prove a dispatched agent's behavior changed; run a fixture exercising the new sub-case before claiming DONE.**
 - "The canon is stale, so the gate doesn't bind" -- **STOP. A stale canon still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate the claim against it anyway.**
 - "The canon has uncommitted edits, skip the gate" -- **STOP. Uncommitted edits are warn-and-consume; state plainly that the canon carries uncommitted local edits and continue evaluating the claim against it.**
-- "The trigger didn't obviously fire, skip the layer" -- **STOP. Trigger firing is a recorded Stage 1 reviewer judgment, not a silent self-exemption -- the reviewer decides and records it, not the claimant.**
+- "The trigger didn't obviously fire, skip the layer" -- **STOP. The story's canon-derived Definition of Done section (`user-story-generator` skill) records firing for the anticipated diff; a layer it omits did not fire unless the actual diff triggers it. With no such section the trigger counts as fired and the claimant supplies the evidence.**
 - "The canon is malformed, fall back to generic verification" -- **STOP. Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
@@ -202,7 +208,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "I ran it earlier" | Earlier run does not cover current changes. |
 | "CI will catch it" | CI is a safety net, not your job. |
 | "Just this once" | This "once" becomes the precedent the next one cites. The gate has no exception path. |
-| "I already manually verified" | Manual != automated. Results can't be reproduced or cited. |
+| "I already manually verified" | A manual check counts only for runtime behavior fixes, with the observation artifact required above; for any other claim, add the command and its pasted output. |
 | "Build passed, tests must be fine" | Build and tests are separate gates. |
 | "The automated tests pass -- the runtime behavior fix is done" | Pass/fail tests verify code logic. They do not demonstrate what the user observes in the running application. Show an observation artifact demonstrating the reported symptom is absent. |
 | "They all follow the same pattern" | If the pattern was wrong once, it was wrong for all N. For N >= 3 parallel edits of the same structure: view at least 3 of the edited files before committing -- not 1. |
@@ -211,7 +217,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "The fix looks right on review" | Textual PASS is not behavioral evidence for a contract clause; paste a fixture run for the new sub-case, or cap the claim at DONE_WITH_CONCERNS. |
 | "The canon is stale so the gate doesn't bind" | A stale canon is still consumed and still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate anyway. |
 | "The canon has uncommitted edits, skip the gate" | Uncommitted local edits are a warn-and-consume state, not a parse failure; state plainly that the canon carries uncommitted local edits and keep evaluating the claim against it. |
-| "The trigger didn't obviously fire, skip the layer" | Trigger firing is recorded Stage 1 reviewer judgment, not a self-exemption the claimant grants itself. |
+| "The trigger didn't obviously fire, skip the layer" | The story's canon-derived Definition of Done section (`user-story-generator` skill) records firing for the anticipated diff; a layer it omits did not fire unless the actual diff triggers it. With no such section the trigger counts as fired and the claimant supplies the evidence. |
 | "The canon is malformed, fall back to generic verification" | Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse. |
 
 ---

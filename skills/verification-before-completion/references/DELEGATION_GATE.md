@@ -36,6 +36,6 @@ Agent reports: "Done" / "Complete" / "Fixed" / "Committed"
 | "I committed [X]" | `git log --oneline -5` -- does the commit exist? |
 | "I updated the file" | `git diff HEAD [file]` -- are the changes present? |
 | "All tests pass" | Run the project's test suite yourself |
-| "I created the skill" | `ls .claude/skills/[skill-name]/SKILL.md` -- does it exist? |
+| "I created the skill" | Confirm the new skill's SKILL.md exists where the skill was created |
 
 **Never relay a subagent's completion claim to the user without first running this gate.**

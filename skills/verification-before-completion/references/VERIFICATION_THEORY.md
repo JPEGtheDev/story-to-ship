@@ -19,7 +19,7 @@ The IBM Cleanroom result: formal inspections achieved <0.1 defects/KLOC (thousan
 Before claiming any PR ready:
 1. **Tests pass** -- execution-time defects caught
 2. **Diff reviewed** -- logical and interface defects caught (`git diff` read hunk by hunk)
-3. **Format verified** -- `clang-format --dry-run` clean
+3. **Format verified** -- the host project's format command clean
 4. **Scope verified** -- changes touch only what the task required; no accidental changes
 
 **Rationalization:** "Tests pass -- I'm done." Counter: no single technique removes >70% of defects. Tests + diff review is the minimum combined instrument set.
@@ -49,10 +49,10 @@ Every withdrawal forces the user into verification mode for the rest of the sess
 | Claim | Requires | Not Sufficient |
 |-------|----------|----------------|
 | "Tests pass" | Test command output: 0 failures | Previous run, "should pass", CI green |
-| "Build succeeds" | cmake output: exit 0 | Linter passing, "looks right" |
-| "Formatted correctly" | `clang-format --dry-run`: 0 errors + `git diff` inspected | "I ran clang-format" without checking diff |
+| "Build succeeds" | The host project's build command (as its docs define it): exit 0 | Linter passing, "looks right" |
+| "Formatted correctly" | The host project's format command (as its docs define it): 0 errors + `git diff` inspected | Ran the formatter without inspecting the diff |
 | "Bug is fixed" | Test reproducing original bug: passes | Code changed, assumed fixed |
-| "PR is ready" | All three gate commands: pass | Tests passing only |
+| "PR is ready" | All four gate items: pass | Tests passing only |
 | "Feature complete" | Every acceptance criterion verified | Tests passing |
 
 ---

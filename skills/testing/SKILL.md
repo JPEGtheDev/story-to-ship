@@ -74,7 +74,7 @@ For visual regression, see the `visual-regression-testing` skill.
 
 Before presenting tests, verify:
 
-1. Every test has separate Arrange, Act, and Assert comments in the test language's comment syntax (no combined Arrange-and-Act comment). Exception: a combined Act-and-Assert comment is acceptable ONLY for a test that expects an exception, where the action IS the assertion; if no Arrange is needed, omit the Arrange comment. Full text: `references/TESTING_PATTERNS.md`.
+1. Every test has separate Arrange, Act, and Assert comments in the test language's comment syntax (no combined Arrange-and-Act comment). Exception: a combined Act-and-Assert comment is acceptable ONLY for a test whose assertion wraps the action (it asserts that the call throws, or does not throw), where the action IS the assertion; if no Arrange is needed, omit the Arrange comment. Full text: `references/TESTING_PATTERNS.md`.
 2. Test name follows `UnitName_StateUnderTest_ExpectedResult` pattern
 3. Expected values are named variables in Arrange (not inline literals in Assert)
 4. One logical concept per test
@@ -89,10 +89,10 @@ Before presenting tests, verify:
 13. For functions that return bool/error-code: failure-path tests assert output parameters are unchanged
 14. For visual regression tests: see visual-regression-testing skill checklist
 
+For C++ tests, items 1, 8, 9, 10, and 13 have specifics in `## C++ and Google Test Specifics`.
+
 [+] All met -> proceed
 [-] Any unmet -> write the test first before touching implementation code
-
-For C++ tests, items 1, 8, 9, 10, and 13 have specifics in `## C++ and Google Test Specifics`.
 
 ---
 
@@ -101,7 +101,7 @@ For C++ tests, items 1, 8, 9, 10, and 13 have specifics in `## C++ and Google Te
 - Item 1 exception: `EXPECT_THROW`/`EXPECT_NO_THROW` tests may use `// Act & Assert`.
 - Item 8: do not test `std::` or other external library code.
 - Item 9: group related configuration into structs/POCOs (Plain Old C++ Objects).
-- Item 10: close database connections and file handles in destructors.
+- Item 10: close database connections and file handles in destructors or other cleanup code.
 - Item 13: after a failing call, assert the output is unchanged, e.g. `EXPECT_EQ(outValue, initialValue)` after `EXPECT_FALSE(call(..., &outValue))`.
 
 ---
@@ -113,7 +113,7 @@ If you catch yourself thinking any of these, STOP and take the action the item n
 - Writing implementation code before writing a test
 - "I'll write tests after to verify it works"
 - "The visual regression test will cover this"
-- "It's too complex to unit test with a database double" (a database double exists for exactly this)
+- "It's too complex to unit test with a database double" (write a database double; that is what doubles are for)
 - "I already manually tested it"
 - Test passes immediately without seeing it fail first -- fix the test
 - Fixed a bug without writing a regression test that reproduces it first
@@ -135,7 +135,7 @@ If you catch yourself thinking any of these, STOP and take the action the item n
 | "Too simple to test" | Simple code breaks. The test takes 30 seconds. |
 | "I'll write tests after" | Tests passing immediately after implementation prove nothing. |
 | "Visual regression test will cover it" | Visual tests are slow and test pixels, not logic. Unit test the logic. |
-| "Too complex to test in isolation" | That's a design signal. Simplify the interface. A database double is there for database calls. |
+| "Too complex to test in isolation" | That's a design signal. Simplify the interface, and use a database double for database calls. |
 | "Already manually tested it" | Manual testing is ad-hoc. No record, can't re-run, misses edge cases. |
 | "TDD slows me down" | TDD is faster than debugging production failures. |
 | "Tests after achieve the same goals" | Tests-after answer "what does this do?" Tests-first answer "what SHOULD this do?" |

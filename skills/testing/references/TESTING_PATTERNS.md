@@ -6,9 +6,9 @@ Generic testing canon: decision rules promoted in SKILL.md live here in full, wi
 
 ## Arrange-Act-Assert (AAA) Pattern -- Critical Rules
 
-1. **NEVER combine phases.** Do not write a combined Arrange-and-Act or Act-and-Assert comment, in the test language's own comment syntax. Each phase gets its own comment and section.
-   - **Exception:** a combined Act-and-Assert comment is acceptable only for a test that expects an exception (in C++ Google Test, `EXPECT_THROW`/`EXPECT_NO_THROW`), where the action IS the assertion.
-2. **If no Arrange is needed**, omit `// Arrange` entirely -- start with `// Act`.
+1. **NEVER combine phases.** Do not write a combined Arrange-and-Act or Act-and-Assert comment, in any comment syntax. Each phase gets its own comment and section.
+   - **Exception:** a combined Act-and-Assert comment is acceptable only for a test whose assertion wraps the action (it asserts that the call throws, or does not throw; in C++ Google Test, `EXPECT_THROW`/`EXPECT_NO_THROW`), where the action IS the assertion.
+2. **If no Arrange is needed**, omit the Arrange comment entirely -- start with the Act comment.
 3. **Move expected values to Arrange** as named variables, not inline in Assert.
 4. **One logical concept per test** -- split if testing multiple behaviors.
 

@@ -25,7 +25,7 @@ Each new round of PR review comments requires a fresh skill invocation. A load f
 ## BEFORE PROCEEDING
 
 1. I have read every comment fully before drafting any response
-2. Every comment is categorized (must-fix / defer / discuss)
+2. Every comment is categorized per the table in Processing Feedback
 3. No must-fix comment is dismissed without investigation
 4. I am not about to defend rather than understand
 5. If new comments arrived since the last round, I have invoked this skill again before triaging them
@@ -55,6 +55,8 @@ not applied, in that turn (User Review Comments below).
 | Bug report phrased as a question (e.g. "why is this not null-checked?") | Not an inquiry -- a change request wearing a question mark. The test is what the reviewer wants: rationale (inquiry) or a code change (bug report), not whether the comment contains the word "why". Categorize and fix like any other correctness finding. For the user's comments, see User Review Comments below: the fix is proposed, not applied, in that turn. |
 | I don't understand | Ask a specific clarifying question. Not "can you elaborate?" -- name what specifically is unclear. |
 | Style preference (not standards) | Note it is a preference, not a defect. Discuss if needed. |
+
+**Must-fix** means exactly two rows of the table: "Correct -- I missed this" and "Bug report phrased as a question".
 
 **When the fix is relocating misplaced content:** Identify the out-of-scope content, remove it from this file, and put it in the correct location. Do not expand the file's scope to justify keeping content that does not belong here. If the content genuinely belongs here, first determine whether the file's scope is correctly stated before deciding to relocate.
 
@@ -90,11 +92,13 @@ dispatch in the same turn as the reply to a user review comment. No live detecto
 
 **Required for every non-trivial comment:**
 - Acknowledge what the reviewer found (even if you disagree)
-- State your decision: fix, defer, disagree, or answer with reasoning
-- If fixing: show the fix or link to the commit
-- If deferring: link to the tracking issue
-- If disagreeing: state the counter-argument directly; invite further discussion if unresolved
-- If answering an inquiry: state the rationale and evidence directly on the thread; do not apologize or revert the code unless the reviewer asks for a change
+- State which category from the table in Processing Feedback the comment falls in
+- Correct -- I missed this, or Bug report phrased as a question: show the fix or link to the commit
+- Correct but low priority: link to the tracking issue
+- I disagree -- have a counter-argument: state the counter-argument directly; invite further discussion if unresolved
+- Inquiry: state the rationale and evidence directly on the thread; do not apologize or revert the code unless the reviewer asks for a change
+- I don't understand: ask the specific clarifying question the table prescribes
+- Style preference: note it is a preference, not a defect; discuss if needed
 
 **Banned phrases:**
 - "Good point, will fix!" (without stating what was wrong or how it was fixed)

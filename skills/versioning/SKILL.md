@@ -130,8 +130,8 @@ Open a PR with a conventional title; the user merges it. Where the repo has rele
 
 | Excuse | Reality |
 |--------|---------|
-| "The commit type doesn't matter much" | Wrong type = wrong version bump. `fix` -> patch, `feat` -> minor, `feat!` -> major. Automation parses this. |
-| "I'll fix the commit message after the PR is merged" | Merged commit messages are permanent. The PR title IS the squash commit message. |
+| "The commit type doesn't matter much" | Wrong type = wrong version bump. `fix` -> patch, `feat` -> minor, `<type>!` -> major. Automation parses this. |
+| "I'll fix the commit message after the PR is merged" | Merged commit messages are permanent. When the repo squash-merges, the PR title IS the commit message on main. |
 | "This feels like a feat but it's technically a fix" | Ask: does it add a new user-visible behavior? Yes -> `feat`. No -> `fix`. |
 | "The PR title is close enough to conventional format" | Close enough = broken parsing. The format must be exact. |
 | "I'll write a proper commit message once the work is done" | Write the commit type first -- it clarifies scope and prevents scope creep. |

@@ -133,8 +133,7 @@ Not all review comments carry equal weight. Before acting:
 | Low | Preference that differs from documented standards |
 | Noise | Vague comment with no specific claim ("this seems off") |
 
-For **high signal** comments: address them in this PR before merge. No exceptions; a user's
-comment is still proposed first (User Review Comments above).
+For **high signal** comments: address them in this PR before merge. No exceptions; "Correct but low priority" never applies to them, and a user's comment is still proposed first (User Review Comments above).
 For **medium signal**: follow documented standards. If standards conflict, escalate.
 For **low signal / noise**: ask for specifics. If no specifics come, treat as resolved.
 

@@ -1,0 +1,1 @@
+Reload guard: Edit, Write, NotebookEdit and Agent are held until the role skill is re-invoked: running-a-sprint. A dispatch of an agent is also held until

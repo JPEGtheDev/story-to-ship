@@ -27,7 +27,8 @@ fi
 # session_id or is not valid JSON, the session_id is outside the allowed
 # characters, neither state-dir variable is resolvable, or the state dir
 # cannot be created or written. The reload part below sets the role and
-# written flag the banner sentence prints -- the exit code still never changes.
+# written flag; the banner sentence prints the role and depends on the written
+# flag -- the exit code still never changes.
 # A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
 # the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
 # subagent (for example its own compaction) and carries the parent's
@@ -102,9 +103,8 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
       RELOAD_PENDING_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID"
       if [[ "$BOOTSTRAP_SOURCE" == "compact" || "$BOOTSTRAP_SOURCE" == "resume" ]]; then
         # Role = first valid name in the loaded list that is in the role list.
-        # A missing or unreadable loaded list reads as empty (the redirect
-        # fails silently), so there is no role and the action names are still
-        # written.
+        # A missing or unreadable loaded list is skipped by the -r test below,
+        # so there is no role and the action names are still written.
         RELOAD_ROLE=""
         if [[ -r "$RELOAD_LOADED_FILE" ]]; then
           while IFS= read -r RELOAD_LINE || [[ -n "$RELOAD_LINE" ]]; do
@@ -123,7 +123,7 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
           RELOAD_SET+="${RELOAD_SET:+$'\n'}$RELOAD_ACTION_NAME"
         done
         RELOAD_TMP_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID.tmp.$$"
-        if printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE" 2>/dev/null &&
+        if { printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE"; } 2>/dev/null &&
           mv -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null; then
           RELOAD_PENDING_WRITTEN=1
           RELOAD_PENDING_ROLE="$RELOAD_ROLE"

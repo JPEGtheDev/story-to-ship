@@ -90,6 +90,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 | Correct artifact retention | [+]/[-] | ... |
 | No hardcoded secrets | [+]/[-] | ... |
 | Correct triggers | [+]/[-] | ... |
+| Matrix covers required platforms | [+]/[-] | ... |
 | Third-party actions pinned | [+]/[-] | ... |
 
 ### Build Reproducibility (skip if not a build configuration file)

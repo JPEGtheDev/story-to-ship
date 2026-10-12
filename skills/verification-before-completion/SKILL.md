@@ -39,7 +39,7 @@ BEFORE claiming any status or expressing satisfaction:
 
 Skipping any step = lying, not verifying.
 
-**DoD canon:** if `docs/DOD.md` exists at the repo root, invoke the `dod-canon-check` skill with the Skill tool before any completion claim. [-] If it exists and that skill is not loaded and satisfied, do not make the claim.
+**Definition of Done canon:** if `docs/DOD.md` exists at the repo root, invoke the `dod-canon-check` skill with the Skill tool before any completion claim. [-] If it exists and that skill is not loaded and satisfied, do not make the claim.
 
 **For runtime behavior fixes** (the original bug report described what the user sees, hears, or experiences in the running application): Step 2 (RUN) MUST produce an observation artifact (a screenshot of the relevant user interface (UI) state or a log excerpt from the running process) that shows the reported symptom is absent. A pass/fail test result does not satisfy this step -- it verifies code logic, not observed runtime behavior. Show the observation artifact inline before claiming the fix is complete.
 

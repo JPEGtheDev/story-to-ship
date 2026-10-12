@@ -83,7 +83,7 @@ Run every item for any changed sandboxed/packaging manifest:
 
 For the full report table template (Pipeline Safety, Build Reproducibility, Packaging Compliance sections) and dispatch instructions, see `references/INFRA_REVIEW_TEMPLATES.md`.
 
-A verdict of ISSUES FOUND means the PR is NOT mergeable until every critical issue is resolved.
+A verdict of ISSUES FOUND means the PR is NOT mergeable until every NO item is resolved.
 
 ---
 

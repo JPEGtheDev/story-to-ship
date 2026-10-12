@@ -1,6 +1,6 @@
 # Todo Templates
 
-Template for the todos of an implementation task in a writing-plans plan.
+Template for one implementation task in a writing-plans plan. The task is one todo; Steps 1-6 are its ordered steps, reviewed once at the end.
 
 ## Test-Driven Development (TDD) todo template
 
@@ -11,10 +11,10 @@ Files:
   - Modify: exact/path/to/ExistingFile.<ext>
   - Test:   tests/path/to/TestFile.<ext>
 
-RED   todo: Write the failing test for [behavior]
-RED   todo: Run test -- verify it fails for the right reason
-GREEN todo: Write minimal implementation to pass the test
-GREEN todo: Run full suite -- verify all tests pass
-REFACTOR todo: Clean up -- rename, extract, remove duplication; tests must stay green
-COMMIT todo: git add / git commit -m "feat[scope]: description"
+Step 1 RED:      Write the failing test for [behavior]
+Step 2 RED:      Run test -- verify it fails for the right reason
+Step 3 GREEN:    Write minimal implementation to pass the test
+Step 4 GREEN:    Run full suite -- verify all tests pass
+Step 5 REFACTOR: Clean up -- rename, extract, remove duplication; tests must stay green
+Step 6 COMMIT:   git add / git commit -m "feat(scope): description"
 ```

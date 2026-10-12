@@ -1,6 +1,6 @@
 # Model Compatibility Reference
 
-All skills in this system are written for **GPT-4.1 as the baseline**. This document identifies patterns that are most likely to be skipped or misapplied by lower-capability models, and the mitigation already built into each skill.
+All skills in this system are written for **a baseline model that needs literal, mechanically precise instructions**. This document identifies patterns that are most likely to be skipped or misapplied by lower-capability models, and the mitigation already built into each skill.
 
 ---
 

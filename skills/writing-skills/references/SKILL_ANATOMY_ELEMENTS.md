@@ -1,6 +1,6 @@
 # Skill Anatomy -- Element Reference
 
-Full schemas and examples for each of the 5 required skill elements.
+Full schemas and examples for each of the 6 required skill elements.
 
 ---
 
@@ -95,6 +95,18 @@ Gates must specify what happens on FAIL -- not just list conditions.
 ```
 
 Rationalization tables are the most powerful element -- they preemptively name the excuses and counter them before the agent reaches for them.
+
+---
+
+## Element 6: Red Flags -> STOP
+
+```markdown
+## Red Flags -- STOP
+
+- [trigger] -- **STOP. [concrete action to take instead.]**
+```
+
+The section holds at least 5 items (>=5). Each item pairs a trigger with a concrete action. A trigger with no action fails the reviewer's Red Flags check. The section has no fixed position in the file.
 
 ---
 

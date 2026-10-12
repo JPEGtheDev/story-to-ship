@@ -8,7 +8,7 @@ description: Use when creating, editing, or reviewing a skill file.
 ## Iron Law
 
 ```
-YOU MUST: VERIFY ALL FIVE GATE ELEMENTS BEFORE SHIPPING ANY SKILL. No exceptions.
+YOU MUST: VERIFY ALL SIX GATE ELEMENTS BEFORE SHIPPING ANY SKILL. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -25,13 +25,14 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] -> proceed
    - [-] -> write a reference doc in the relevant skill's `references/` instead; do not create a skill
 
-2. **5-element anatomy check** -- all 5 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
+2. **6-element anatomy check** -- all 6 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
    - FRONTMATTER: `name` + `description` starting with "Use when..."
    - IRON LAW: ALL CAPS rule + "Violating the letter..." line + "YOU MUST" + "No exceptions."
    - ANNOUNCEMENT: `**Announce at start:** "I am using the [skill] to [purpose]."`
    - GATE FUNCTION: `## BEFORE PROCEEDING` with numbered conditions + [+]/[-] branches
    - RATIONALIZATION TABLE: `## Rationalization Prevention` with >=5 rows
-   - Not all 5 present -> add the missing element now; do not proceed until all 5 are in place.
+   - RED FLAGS -> STOP: a `## Red Flags -- STOP` section with >=5 items, each naming a trigger and a concrete STOP action
+   - Not all 6 present -> add the missing element now; do not proceed until all 6 are in place.
 
 3. **Alexandrian form check** -- every rule with more than one application context, or any rule that could be misapplied in an edge case, MUST answer Context + Forces. See `references/SKILL_ANATOMY_ELEMENTS.md`.
    - Not met -> identify which rules lack Context/Forces; add them before proceeding.

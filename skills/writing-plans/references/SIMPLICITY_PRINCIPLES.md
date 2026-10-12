@@ -231,8 +231,6 @@ Rationale moved out of SKILL.md to keep that file under its size limit.
 ```
 Task arrives
     v
-Trivial (1 file, 1 step)? -> Implement directly
-    v (multi-step)
 Step 0: Clarify Expectations -- restate requirements, label [UNCLEAR:]
     v
 Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair

@@ -31,12 +31,12 @@ A story with no acceptance criteria is NOT launched. Relay the gap to the owner 
 
 ## Capacity
 
-Run at most 3 runners at once; the owner may change the number.
+Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count, so the next story launches while the owner reviews. A runner resumed for a fix round, an owner answer or a rebase counts as working again. The limit gates launches only: a resume is never deferred, so the working count can pass the limit, and no story launches until it is below the limit again. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends, the launcher launches each waiting story that the limit and the overlap rule allow.
 
 **Context:** Two stories could touch the same file at the same time.
 **Forces:** Parallel runners finish sooner, but two branches that edit one file conflict at merge, and the conflict costs a runner's whole fix cycle. The "Files to Create/Modify" list in the story is the only advance signal of overlap.
 
-A story whose "Files to Create/Modify" list overlaps a running story's list waits. When the list is absent, run that story alone. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time. A story counts as running, for capacity and overlap, until Close-out step 5 completes.
+A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time, each waiting until the previous story's pull request is merged.
 
 ---
 
@@ -103,8 +103,8 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 Before dispatching any runner, answering any hand-back, or closing out any merge:
 
 1. The ledger was re-read this turn and the runner or story is in it.
-2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no overlap with a running story.
-3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action is the only action taken, and the PR number and CI state were re-checked with `gh pr view`.
+2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request.
+3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after the owner reported the merge, and runs in the order of the Close-out section.
 
 [+] All 4 met -> proceed
@@ -118,7 +118,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to answer a runner's question, or a child's result, myself -- STOP. Look up the row in `references/HANDBACK_ROUTING.md`; owner-reserved questions go to the owner.
 - About to merge, override the fix-round cap or change a story's scope -- STOP. These are the owner's: relay the question with the runner's recommendation and end the turn.
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
-- About to launch a runner past the capacity limit, or one whose file list overlaps a running story's -- STOP. Wait for a runner to finish, or run it alone when the list is absent.
+- About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until the working count is below the limit or the overlapping story's pull request merges, or run it alone when the list is absent.
 - About to close out before the owner reported the merge, or in a different order -- STOP. Confirm the merge on origin and follow the Close-out steps in order.
 - About to put rule text, a vendor model name or a worktree path for the runner into the launch prompt -- STOP. Name the three inputs and the scope only.
 
@@ -132,7 +132,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 | "The runner's recommendation is clearly right; I will approve it." | The owner reserves merge, fix-round cap override and scope change. The recommendation goes to the owner, not past them. |
 | "The hand-back says CI is green; re-running `gh pr view` is redundant." | The runner reports its own output. The launcher's check is the only independent one. |
 | "A child's result arrived; I will answer the child and save a turn." | The result belongs to the runner's plan. Resume the runner with the child-result text and never act on it. |
-| "The overlap is small; both stories can run at once." | Small overlaps still conflict at merge. Wait for the running story to finish. |
+| "The overlap is small; both stories can run at once." | Small overlaps still conflict at merge. Wait until the overlapping story's pull request merges. |
 | "The PR merged, so the worktree and branch can wait." | A stale worktree or branch resurfaces as a failed merge or a wrong base later. Close out in order now. |
 | "I already know the routing table; I will skip the lookup." | A row names what the launcher must NOT do, and memory drops those cells first. Look it up. |
 

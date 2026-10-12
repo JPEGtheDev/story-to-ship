@@ -120,14 +120,14 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 
 **Symptoms:**
 - Code indentation drifts right with each conditional
-- Comprehension collapses beyond 3 levels of nesting
+- Comprehension collapses beyond 3 levels of nesting, counting the function body as level 1
 - Hard to reason about the main flow
 - Indicates a missing abstraction
 
 **Remediation:**
 - Use Guard Clauses (early exit on error conditions) to flatten structure
 - Extract Method for loop bodies and nested blocks
-- Use a state machine or strategy pattern when nesting stays beyond 3 levels after the guard clauses and extracted methods above
+- Use a state machine or strategy pattern when nesting stays beyond 3 levels after the guard clauses and extracted methods above (the function body is level 1)
 - Refactor conditionals into polymorphic dispatch when appropriate
 
 ---

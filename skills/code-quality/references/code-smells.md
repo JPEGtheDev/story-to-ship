@@ -7,7 +7,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smell
 
 ### 1. Long Method
 
-**What it looks like:** A function exceeding 20 lines, or mixing multiple levels of abstraction, or with nested control structures more than 3 levels deep.
+**What it looks like:** A function exceeding 20 lines, or mixing multiple levels of abstraction, or with code indented more than 3 levels. Count nesting inside the function: the function body is nesting level 1, so three control structures nested inside a function body already reach level 4.
 
 **Why it hurts:** Hard to understand, test, and reuse. Mixing abstraction levels confuses intent.
 
@@ -84,7 +84,7 @@ Triggers to investigate -- not absolute violations.
 | Heuristic | Threshold | Indicates |
 |-----------|-----------|-----------|
 | Function length | > 20 lines | Long Method |
-| Nesting depth | > 3 levels | Complex control flow; Extract Function |
+| Nesting depth | > 3 levels (function body = level 1) | Complex control flow; Extract Function |
 | Parameter count | > 3 | Long Parameter List |
 | Duplication ratio | Same code in 2+ locations | Duplicated Code |
 | Cyclic dependencies | Module A -> B -> A | Architectural problem |
@@ -98,7 +98,7 @@ Triggers to investigate -- not absolute violations.
 | Signal | Action |
 |--------|--------|
 | Magic number in code | Name it as a constant |
-| Nesting > 3 levels | Introduce guard clauses |
+| Nesting > 3 levels (function body = level 1) | Introduce guard clauses |
 | Comment explains WHAT the code does | Rename or refactor instead |
 
 ---

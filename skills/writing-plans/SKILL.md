@@ -32,7 +32,7 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 ```
 
 - Label every ambiguity `[UNCLEAR: ...]` -- never silently assume
-- For each acceptance criterion that references a field with possible optionality (required, optional, conditional, nullable): state the optionality explicitly. If the issue text does not resolve it, label `[UNCLEAR: optional?]`. Assuming a field is required when the AC intended optional ships as a defect.
+- For each acceptance criterion that references a field with possible optionality (required, optional, conditional, nullable): state the optionality explicitly. If the issue text does not resolve it, label `[UNCLEAR: optional?]`. Assuming a field is required when optional was intended ships as a defect.
 - If requirements have gaps: name the gap and state your assumption
 - Map each acceptance criterion to a verifiable test
 - "This seems obvious" is the warning sign you need this step most
@@ -236,4 +236,4 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 
 ## References
 
-- Simplicity principles, dimensions of simplicity table, quick reference flowchart, assign problems not tasks, gate rationale: `references/SIMPLICITY_PRINCIPLES.md`
+- Simplicity principles, dimensions of simplicity, quick reference flowchart, assign problems not tasks, gate rationale: `references/SIMPLICITY_PRINCIPLES.md`

@@ -36,18 +36,21 @@
 #        span is not matched. The command is read and scanned only when one
 #        of these two names is pending, so every other Bash call exits
 #        before looking at it. In a UTF-8 locale GNU grep 3.12 takes about
-#        1.6 s to scan a 200,000-character command that is one long word
-#        (0.09 s at 50,000); the same input takes 0.03 s in the C locale,
-#        and ordinary commands are far below this. A role name never
-#        holds Bash.
+#        1.6 s to scan a 200,000-character unbroken word followed by
+#        ' git commit' or ' gh pr create' (0.09 s at 50,000). A lone long
+#        word, and the same input in the C locale (0.03 s), scan quickly;
+#        ordinary commands are far below this. A role name never holds
+#        Bash.
 #        The Bash hold misses by design: git push, gh pr merge, edit and
 #        ready, gh api, MCP pull-request tools, bash -c '...', aliases, and
 #        command git commit; a command behind a wrapper (time, env FOO=1,
 #        sudo, nohup, xargs), behind a compound-command keyword or brace
 #        (if ...; then, { ...; }, ! git commit), or inside backticks; text
-#        after an escaped quote (\") or after an apostrophe in a # comment
-#        or in a heredoc body on an earlier line, because the single
-#        quote-stripping pass pairs that quote with a later one; option
+#        between an escaped quote (\"), or an apostrophe or unpaired
+#        double quote (5\" screen) in a # comment or in a heredoc body on
+#        an earlier line, and the next quote, because the single
+#        quote-stripping pass pairs that quote with a later one (nothing
+#        is hidden when no later quote exists); option
 #        spellings other than the listed ones (git --git-dir .git commit,
 #        gh --repo=o/r pr create); and a redirection attached to the
 #        subcommand (git commit>out). It also over-holds a heredoc body

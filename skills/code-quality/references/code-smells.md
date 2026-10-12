@@ -98,7 +98,7 @@ Triggers to investigate -- not absolute violations.
 | Signal | Action |
 |--------|--------|
 | Magic number in code | Name it as a constant |
-| Nesting > 3 levels | Introduce guard clauses |
+| Nesting > 3 levels (function body = level 1) | Introduce guard clauses |
 | Comment explains WHAT the code does | Rename or refactor instead |
 
 ---

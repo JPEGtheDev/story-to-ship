@@ -104,7 +104,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 1. The ledger was re-read this turn and the runner or story is in it.
 2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request.
-3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then the launch check in the Capacity section, are the only actions taken, and the PR number and CI state were re-checked with `gh pr view`.
+3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after the owner reported the merge, and runs in the order of the Close-out section.
 
 [+] All 4 met -> proceed
@@ -118,7 +118,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to answer a runner's question, or a child's result, myself -- STOP. Look up the row in `references/HANDBACK_ROUTING.md`; owner-reserved questions go to the owner.
 - About to merge, override the fix-round cap or change a story's scope -- STOP. These are the owner's: relay the question with the runner's recommendation and end the turn.
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
-- About to launch a story while 3 or more runners are working, or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until fewer than 3 runners are working or the overlapping story's pull request merges, or run it alone when the list is absent.
+- About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until the working count is below the limit or the overlapping story's pull request merges, or run it alone when the list is absent.
 - About to close out before the owner reported the merge, or in a different order -- STOP. Confirm the merge on origin and follow the Close-out steps in order.
 - About to put rule text, a vendor model name or a worktree path for the runner into the launch prompt -- STOP. Name the three inputs and the scope only.
 

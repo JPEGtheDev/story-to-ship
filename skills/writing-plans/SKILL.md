@@ -79,7 +79,7 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 ### Task Granularity (TDD: Test-Driven Development Steps)
 
-Each task MUST be one todo of ordered steps (2-5 minutes each), touch <=2 non-test files (one test file does not count), and be estimated at <=25 tool calls in total. Any todo exceeding any limit MUST be split before the plan is presented.
+Each task MUST be one todo of ordered steps (2-5 minutes each), touch <=2 non-test files (test files do not count), and be estimated at <=25 tool calls in total. Any todo exceeding any limit MUST be split before the plan is presented.
 
 For implementation tasks, the TDD steps are the ordered steps of the task's one todo, reviewed once at the end: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
 

@@ -35,19 +35,24 @@
 #        BASH_COMMIT_RE and BASH_PR_RE). Text inside a well-formed quoted
 #        span is not matched. The command is read and scanned only when one
 #        of these two names is pending, so every other Bash call exits
-#        before looking at it. A role name never holds Bash.
+#        before looking at it. In a UTF-8 locale GNU grep 3.12 takes about
+#        1.6 s to scan a 200,000-character command that is one long word
+#        (0.09 s at 50,000); the same input takes 0.03 s in the C locale,
+#        and ordinary commands are far below this. A role name never
+#        holds Bash.
 #        The Bash hold misses by design: git push, gh pr merge, edit and
 #        ready, gh api, MCP pull-request tools, bash -c '...', aliases, and
 #        command git commit; a command behind a wrapper (time, env FOO=1,
 #        sudo, nohup, xargs), behind a compound-command keyword or brace
 #        (if ...; then, { ...; }, ! git commit), or inside backticks; text
 #        after an escaped quote (\") or after an apostrophe in a # comment
-#        on an earlier line, because the single quote-stripping pass pairs
-#        that quote with a later one; option spellings other than the listed
-#        ones (git --git-dir .git commit, gh --repo=o/r pr create); and a
-#        redirection attached to the subcommand (git commit>out). It also
-#        over-holds any heredoc body line that starts with git commit,
-#        whatever quoting the delimiter has (<<EOF or <<'EOF').
+#        or in a heredoc body on an earlier line, because the single
+#        quote-stripping pass pairs that quote with a later one; option
+#        spellings other than the listed ones (git --git-dir .git commit,
+#        gh --repo=o/r pr create); and a redirection attached to the
+#        subcommand (git commit>out). It also over-holds a heredoc body
+#        line that starts with git commit, whatever quoting the delimiter
+#        has (<<EOF or <<'EOF').
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence

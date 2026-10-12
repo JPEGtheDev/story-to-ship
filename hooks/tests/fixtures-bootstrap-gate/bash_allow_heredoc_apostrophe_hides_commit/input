@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_allow_heredoc_apostrophe_hides_commit","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"cat >msg <<EOF\nit's done\nEOF\ngit commit -F msg\necho 'ok'"}}

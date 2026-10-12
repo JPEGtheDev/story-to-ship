@@ -43,7 +43,7 @@ wc -c .claude/skills/<skill-name>/SKILL.md | awk '{print int($1/4) " tokens"}'
 
 ## Writing for Mechanical Execution (Literal-Execution Baseline)
 
-Every line in every skill MUST satisfy this test: **Can a GPT-4.1 class model execute this instruction literally without inferring intent?**
+Every line in every skill MUST satisfy this test: **Can a baseline model that needs literal, mechanically precise instructions carry out this instruction without inferring intent?**
 
 Rules:
 - Use imperative sentences. Not "you should check" -- "Check. Stop if not met."

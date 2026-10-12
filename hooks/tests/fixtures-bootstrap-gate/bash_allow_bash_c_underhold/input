@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_allow_bash_c_underhold","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"bash -c 'git commit -m x'"}}

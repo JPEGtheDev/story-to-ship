@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_gh_R_pr_create","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"gh -R o/r pr create"}}

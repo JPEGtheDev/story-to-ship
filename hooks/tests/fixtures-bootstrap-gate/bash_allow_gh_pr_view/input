@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_allow_gh_pr_view","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"gh pr view 3"}}

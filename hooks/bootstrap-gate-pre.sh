@@ -13,22 +13,29 @@
 #    this gate alone decides the outcome and the reload gate below never
 #    runs.
 #
-# 2. Reload gate (second, only Edit, Write, NotebookEdit and Agent). After a
-#    compaction or resume, hooks/session-start.sh writes the skills to
-#    re-invoke into .reload-pending-<session_id>, one per line: the session's
-#    role skill (if any) followed by five action skills.
+# 2. Reload gate (second, only Edit, Write, NotebookEdit, Agent and Bash).
+#    After a compaction or resume, hooks/session-start.sh writes the skills
+#    to re-invoke into .reload-pending-<session_id>, one per line: the
+#    session's role skill (if any) followed by five action skills.
 #    hooks/bootstrap-gate-post.sh removes a name from that file each time the
 #    matching Skill call completes. This gate runs once the bootstrap flag is
 #    absent, or the call is the Skill(session-bootstrap) call. Each pending
 #    name holds only the call it guards:
-#      - role name (running-a-sprint): holds Edit, Write, NotebookEdit, Agent.
+#      - role name (running-a-sprint): holds Edit, Write, NotebookEdit, Agent;
+#        never Bash.
 #      - subagent-driven-development, using-git-worktrees: hold Agent.
 #      - writing-skills: holds Edit, Write, NotebookEdit when the path field
 #        (tool_input.file_path, else tool_input.notebook_path) has a directory
 #        named skills or agents anywhere in it; an absent or empty path never
 #        triggers it.
-#      - versioning, verification-before-completion: hold none of the tools
-#        this gate handles.
+#      - versioning, verification-before-completion: hold Bash, and only a
+#        Bash command that runs git commit or gh pr create at command
+#        position (start of the command, or after ;, &, |, ( or $( ; with
+#        optional VAR=value prefixes and the git or gh options listed at
+#        BASH_COMMIT_RE and BASH_PR_RE). Text inside quotes never counts.
+#        The command is read and scanned only when one of these two names
+#        is pending, so every other Bash call exits before looking at it.
+#        A role name never holds Bash.
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence
@@ -146,10 +153,10 @@ if [[ -f "$FLAG_FILE" && "$IS_BOOTSTRAP_SKILL_CALL" -ne 1 ]]; then
   exit 0
 fi
 
-# Reload gate: only Edit, Write, NotebookEdit and Agent can be held; every
-# other tool exits 0 silently.
+# Reload gate: only Edit, Write, NotebookEdit, Agent and Bash can be held;
+# every other tool exits 0 silently.
 case "$TOOL_NAME" in
-  Edit | Write | NotebookEdit | Agent) ;;
+  Edit | Write | NotebookEdit | Agent | Bash) ;;
   *) exit 0 ;;
 esac
 
@@ -160,10 +167,46 @@ PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
 PENDING_NAMES="$(grep -v '^$' -- "$PENDING_FILE" 2>/dev/null)"
 [[ -z "$PENDING_NAMES" ]] && exit 0
 
+# Bash is held only by versioning and verification-before-completion. Unless
+# one of them is pending, exit before the command is read, so ordinary Bash
+# calls pay for one grep on the pending names and nothing more.
+if [[ "$TOOL_NAME" == "Bash" ]]; then
+  grep -qxE 'versioning|verification-before-completion' <<<"$PENDING_NAMES" || exit 0
+fi
+
+# Command-position patterns for the Bash hold (grep -E, no \b or other
+# non-portable escapes). A command starts at the beginning of the string or
+# after ; & | or (, which also covers && || and $( ; optional VAR=value
+# assignments may precede it. The end set after commit and create is a
+# space, ; & | ), or the end of the string, so commit-tree and commit-graph
+# do not match.
+BASH_START='(^|[;&|(])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*'
+BASH_END='($|[[:space:];&|)])'
+BASH_COMMIT_RE="${BASH_START}git[[:space:]]+(((-C|-c)[[:space:]]+[^[:space:]]+|--git-dir=[^[:space:]]+|--work-tree=[^[:space:]]+|--no-pager|-P)[[:space:]]+)*commit${BASH_END}"
+BASH_PR_RE="${BASH_START}gh[[:space:]]+((-R|--repo)[[:space:]]+[^[:space:]]+[[:space:]]+)*pr[[:space:]]+create${BASH_END}"
+
+# bash_command_hits: succeeds when .tool_input.command (a non-empty string)
+# runs git commit or gh pr create. Newlines become ; (a newline separates
+# commands, and quoted spans can cross lines), then each double- or
+# single-quoted span is replaced by Q in ONE sed pass; the leftmost span
+# wins, so an apostrophe inside double quotes does not open a span.
+bash_command_hits() {
+  local cmd
+  cmd="$(printf '%s' "$RAW" | jq -r \
+    '.tool_input.command | select(type == "string") // empty' 2>/dev/null)"
+  [[ -z "$cmd" ]] && return 1
+  cmd="$(printf '%s' "$cmd" | tr '\n' ';' | sed -E "s/\"[^\"]*\"|'[^']*'/Q/g")"
+  printf '%s' "$cmd" | grep -qE -e "$BASH_COMMIT_RE" -e "$BASH_PR_RE"
+}
+BASH_HIT=0
+if [[ "$TOOL_NAME" == "Bash" ]] && bash_command_hits; then
+  BASH_HIT=1
+fi
+
 # Path field for the writing-skills hold: the first non-empty string of
 # file_path, else notebook_path. Edit, Write and NotebookEdit only.
 TARGET_PATH=""
-if [[ "$TOOL_NAME" != "Agent" ]]; then
+if [[ "$TOOL_NAME" != "Agent" && "$TOOL_NAME" != "Bash" ]]; then
   TARGET_PATH="$(printf '%s' "$RAW" | jq -r \
     '[.tool_input.file_path, .tool_input.notebook_path] | map(select(type == "string" and . != "")) | .[0] // empty' \
     2>/dev/null)"
@@ -176,11 +219,20 @@ is_role() {
 
 # holds_call <name>: succeeds when the pending name holds the current call.
 # Role and action names are whitelisted here; any other name holds nothing.
-# versioning and verification-before-completion hold none of the tools
-# handled here.
+# A role name holds every handled tool except Bash.
+# subagent-driven-development and using-git-worktrees hold Agent.
+# writing-skills holds Edit, Write and NotebookEdit on a skills or agents
+# path. versioning and verification-before-completion hold a Bash call whose
+# command runs git commit or gh pr create (BASH_HIT, set above).
 holds_call() {
-  is_role "$1" && return 0
+  if is_role "$1"; then
+    [[ "$TOOL_NAME" != "Bash" ]]
+    return
+  fi
   case "$1" in
+    versioning | verification-before-completion)
+      [[ "$TOOL_NAME" == "Bash" && "$BASH_HIT" -eq 1 ]]
+      ;;
     subagent-driven-development | using-git-worktrees)
       [[ "$TOOL_NAME" == "Agent" ]]
       ;;

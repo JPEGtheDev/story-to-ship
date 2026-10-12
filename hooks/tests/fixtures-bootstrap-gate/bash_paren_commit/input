@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_paren_commit","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"(git commit -m x)"}}

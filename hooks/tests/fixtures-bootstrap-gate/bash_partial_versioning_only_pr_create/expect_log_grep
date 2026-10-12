@@ -1,0 +1,4 @@
+"gate":"reload"
+"tool_name":"Bash"
+"mode":"deny"
+sess-bash_partial_versioning_only_pr_create

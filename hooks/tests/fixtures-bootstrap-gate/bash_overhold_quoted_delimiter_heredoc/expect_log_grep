@@ -1,0 +1,4 @@
+"gate":"reload"
+"tool_name":"Bash"
+"mode":"deny"
+sess-bash_overhold_quoted_delimiter_heredoc

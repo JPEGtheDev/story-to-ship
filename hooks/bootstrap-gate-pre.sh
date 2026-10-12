@@ -46,8 +46,8 @@
 #        that quote with a later one; option spellings other than the listed
 #        ones (git --git-dir .git commit, gh --repo=o/r pr create); and a
 #        redirection attached to the subcommand (git commit>out). It also
-#        over-holds an unquoted heredoc body line that starts with git
-#        commit.
+#        over-holds any heredoc body line that starts with git commit,
+#        whatever quoting the delimiter has (<<EOF or <<'EOF').
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence

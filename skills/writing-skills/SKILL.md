@@ -31,7 +31,7 @@ Before creating, editing, or shipping any skill or agent template:
    - ANNOUNCEMENT: `**Announce at start:** "I am using the [skill] to [purpose]."`
    - GATE FUNCTION: `## BEFORE PROCEEDING` with numbered conditions + [+]/[-] branches
    - RATIONALIZATION TABLE: `## Rationalization Prevention` with >=5 rows
-   - RED FLAGS -> STOP: a `## Red Flags -- STOP` section with >=5 items, each naming a trigger and a concrete STOP action
+   - RED FLAGS -> STOP: a `Red Flags -- STOP` section with >=5 items, each naming a trigger and a concrete STOP action
    - Not all 6 present -> add the missing element now; do not proceed until all 6 are in place.
 
 3. **Alexandrian form check** -- every rule with more than one application context, or any rule that could be misapplied in an edge case, MUST answer Context + Forces. See `references/SKILL_ANATOMY_ELEMENTS.md`.

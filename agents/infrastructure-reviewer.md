@@ -42,7 +42,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 
 Run every applicable section for the file type. Skip sections that do not apply (e.g., skip the packaging review for a build configuration file change). Run each section against the **full file**, not just changed lines.
 
-### 1. CI/CD Pipeline -- applies to `.github/workflows/*.yml`
+### 1. CI/CD Pipeline -- applies to `.github/workflows/*.yml` and `.github/workflows/*.yaml`
 
 - [ ] No `git commit` or `git push` in any workflow step -- pipelines are read-only
 - [ ] All `permissions:` blocks are minimal -- read-only where possible; write only where explicitly justified

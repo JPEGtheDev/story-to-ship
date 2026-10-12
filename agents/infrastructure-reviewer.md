@@ -45,8 +45,8 @@ Run every applicable section for the file type. Skip sections that do not apply 
 ### 1. CI/CD Pipeline -- applies to `.github/workflows/*.yml` and `.github/workflows/*.yaml`
 
 - [ ] No `git commit` or `git push` in any workflow step -- pipelines are read-only
-- [ ] All `permissions:` blocks are minimal -- read-only where possible; write only where explicitly justified
-- [ ] Artifacts uploaded with correct retention -- short for PRs (7 days), longer for releases (90 days)
+- [ ] All `permissions:` blocks are minimal -- `contents: read` unless a step writes: `checks: write` for check results, `pull-requests: write` for PR comments, `contents: write` only on a release job that pushes a tag; each write scope justified in a comment
+- [ ] Artifacts set `retention-days:` per the `workflow` skill's retention rule
 - [ ] No secrets hardcoded -- all sensitive values via `${{ secrets.X }}` only
 - [ ] Workflow triggers are intentional -- no unintended `workflow_run` chains
 - [ ] Matrix builds cover required platforms (Linux at minimum)

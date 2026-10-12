@@ -41,7 +41,7 @@ wc -c .claude/skills/<skill-name>/SKILL.md | awk '{print int($1/4) " tokens"}'
 
 ---
 
-## Writing for Mechanical Execution (GPT-4.1 Baseline)
+## Writing for Mechanical Execution (Literal-Execution Baseline)
 
 Every line in every skill MUST satisfy this test: **Can a GPT-4.1 class model execute this instruction literally without inferring intent?**
 

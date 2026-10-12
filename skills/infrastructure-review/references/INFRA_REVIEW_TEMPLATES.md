@@ -13,6 +13,7 @@
 | Correct artifact retention | [+]/[-] | ... |
 | No hardcoded secrets | [+]/[-] | ... |
 | Correct triggers | [+]/[-] | ... |
+| Matrix covers required platforms | [+]/[-] | ... |
 | Pinned third-party actions | [+]/[-] | ... |
 
 ### Build Reproducibility
@@ -49,4 +50,4 @@ Run infrastructure-review on any PR that touches:
 - a build configuration file -- root or any subdirectory (e.g. `CMakeLists.txt`, `package.json`, `Cargo.toml`, `pyproject.toml`)
 - a sandboxed/packaging manifest -- any manifest or build file (e.g. a Flatpak manifest, `Dockerfile`, `snapcraft.yaml`)
 
-Dispatch 1 `infrastructure-reviewer.md` agent per changed file (parallel) -- use `subagent_type: "infrastructure-reviewer"`. Provide: `{{FILE_PATH}}` and `{{DIFF}}`. Collect all reports before approving the PR.
+Dispatch 1 `infrastructure-reviewer.md` agent per changed file (parallel) -- use `subagent_type: "infrastructure-reviewer"`. Provide: `{{FILE_PATH}}` and `{{WORKTREE_PATH}}`. Collect all reports before approving the PR.

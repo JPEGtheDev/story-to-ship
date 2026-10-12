@@ -37,11 +37,11 @@ Before reviewing any infrastructure change:
 
 ### 1. CI/CD (Continuous Delivery) Pipeline Checks
 
-Run every item for each changed `.github/workflows/*.yml` file:
+Run every item for each changed `.github/workflows/*.yml` or `.github/workflows/*.yaml` file:
 
 1. No `git commit` or `git push` in any workflow step -- pipelines are read-only (see `workflow` skill)
-2. All `permissions:` blocks are minimal -- read-only where possible; write only where explicitly justified
-3. Artifacts uploaded with correct retention -- short for PRs (7 days), longer for releases (90 days)
+2. All `permissions:` blocks are minimal -- `contents: read` unless a step writes: `checks: write` for check results, `pull-requests: write` for PR comments, `contents: write` only on a release job that pushes a tag; each write scope justified in a comment
+3. Artifacts set `retention-days:` per the `workflow` skill's retention rule
 4. No secrets hardcoded -- all sensitive values via `${{ secrets.X }}` only
 5. Workflow triggers are intentional -- `push` and `pull_request` events correct; no unintended `workflow_run` chains
 6. Matrix builds cover required platforms (Linux at minimum; Windows/macOS if the project targets them)
@@ -83,7 +83,7 @@ Run every item for any changed sandboxed/packaging manifest:
 
 For the full report table template (Pipeline Safety, Build Reproducibility, Packaging Compliance sections) and dispatch instructions, see `references/INFRA_REVIEW_TEMPLATES.md`.
 
-A verdict of ISSUES FOUND means the PR is NOT mergeable until every critical issue is resolved.
+A verdict of ISSUES FOUND means the PR is NOT mergeable until every NO item is resolved.
 
 ---
 

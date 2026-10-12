@@ -39,6 +39,8 @@ BEFORE claiming any status or expressing satisfaction:
 
 Skipping any step = lying, not verifying.
 
+**DoD canon:** if `docs/DOD.md` exists at the repo root, invoke the `dod-canon-check` skill with the Skill tool before any completion claim. [-] If it exists and that skill is not loaded and satisfied, do not make the claim.
+
 **For runtime behavior fixes** (the original bug report described what the user sees, hears, or experiences in the running application): Step 2 (RUN) MUST produce an observation artifact (a screenshot of the relevant user interface (UI) state or a log excerpt from the running process) that shows the reported symptom is absent. A pass/fail test result does not satisfy this step -- it verifies code logic, not observed runtime behavior. Show the observation artifact inline before claiming the fix is complete.
 
 ---
@@ -90,22 +92,6 @@ Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 
-## New Gates: Definition of Done (DoD) Canon Check on Completion Claims
-
-**Context:** Applies to every completion claim made in a repo that has a ratified Definition of Done (DoD) canon at `docs/DOD.md`, as produced by the `defining-done` skill's ratification interview. If `docs/DOD.md` does not exist, this section does not apply -- the canon-absent state is not in force, and the generic verification rules elsewhere in this skill govern the claim unchanged.
-
-**Forces:** A repo with a ratified canon has already ruled, layer by layer, which verification is always required and which is conditional on the diff. A completion claim that ignores those rulings and falls back to generic verification silently discards a ratification the product owner did. But a canon can itself be stale, hand-edited, or corrupted -- treating a compromised canon as authoritative without surfacing that is its own failure mode, and refusing to evaluate any claim just because the canon looks imperfect throws out a real ratification over a warning-grade defect.
-
-**Solution:** Before evaluating a completion claim against the canon:
-- Read `docs/DOD.md`. If its structure cannot be parsed -- per the `defining-done` skill's malformed-canon rule -- REFUSE to evaluate the completion claim, emit the literal line `DOD-MALFORMED: <reason>` naming exactly what failed to parse, and state that diagnostic in the refusal. Emit the marker as a bare line: the line begins with the marker string itself, with no surrounding formatting (no backticks, no list markers, no quotation marks). Never proceed as if no canon existed; "present but unreadable" and "absent" are different states.
-- Run `git status --porcelain docs/DOD.md` and `git diff -- docs/DOD.md`. If the output shows an uncommitted modification, state plainly that the canon carries uncommitted local edits and continue evaluating the claim against it (warn-and-consume -- no marker line is emitted for this case). If the status output shows the canon as untracked (`??` -- a freshly ratified canon not yet committed), state plainly that the canon is not yet tracked by git and continue consuming it (no marker line is emitted for this case either). If the canon file is not under git control (for example a test copy in a temporary directory), note that the check does not apply and continue.
-- Compare the canon's `Stamp:` value against the `defining-done` skill's taxonomy's current stamp. If the canon is older, emit the literal line `DOD-STALE: canon v<N> behind taxonomy v<M>` and continue evaluating the claim against the canon. Emit the marker as a bare line: the line begins with the marker string itself, with no surrounding formatting (no backticks, no list markers, no quotation marks).
-
-The gate check itself: for every layer ruled ALWAYS in the canon (unless the story's Definition of Done section carries a valid category-tagged N/A line for it) and every layer ruled CONDITIONAL whose trigger fired against the actual diff, the completion claim MUST carry that layer's evidence inline, meeting that layer's own verification standard -- not a lesser substitute. Example: a CONDITIONAL mutation-testing layer whose trigger fired requires a mutation run -- break the property, run the gate, paste the named failing case, then restore the property; a green suite run alone does not satisfy it. Missing or generic evidence for any such layer -> emit the literal line `DOD-GATE: FAIL <layer>`, using the layer's canonical Key. Emit the marker as a bare line: the line begins with the marker string itself, with no surrounding formatting (no backticks, no list markers, no quotation marks). The claim fails the gate observably; it is not marked DONE. Consumers are permitted, but not required, to additionally ground cited evidence against the repo under evaluation; when that grounding shows the cited evidence does not hold there (for example, a cited diff or file that is absent from the repo), the same `DOD-GATE: FAIL <layer>` marker MAY be emitted -- a grounding-driven failure is a legitimate gate outcome, not a defect in the consumer or in the claim-checking process.
-
-Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
-
----
 
 ## Pre-PR Checklist
 
@@ -189,10 +175,7 @@ If you find yourself thinking any of the following, you are about to make an unv
 - "My new test/gate passed on the first run" -- **STOP. A green run alone does not prove the gate can fail. Paste a mutation run or an equivalent failing-case run too.**
 - "Exit 0 means done" / "The count is probably fine" -- **STOP. Compare the result to a known baseline (an expected count, a known-bad case, or a prior-run reference) before accepting it as evidence.**
 - "The contract fix reads correctly" -- **STOP. Textual review does not prove a dispatched agent's behavior changed; run a fixture exercising the new sub-case before claiming DONE.**
-- "The canon is stale, so the gate doesn't bind" -- **STOP. A stale canon still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate the claim against it anyway.**
-- "The canon has uncommitted edits, skip the gate" -- **STOP. Uncommitted edits are warn-and-consume; state plainly that the canon carries uncommitted local edits and continue evaluating the claim against it.**
-- "The trigger didn't obviously fire, skip the layer" -- **STOP. The story's canon-derived Definition of Done section (`user-story-generator` skill) records firing for the anticipated diff; a layer it omits did not fire unless the actual diff triggers it. With no such section the trigger counts as fired and the claimant supplies the evidence.**
-- "The canon is malformed, fall back to generic verification" -- **STOP. Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse.**
+- `docs/DOD.md` exists and a completion claim is about to go out without `dod-canon-check` loaded -- **STOP. Load it; the canon rules live there.**
 
 **All of these mean: Run the verification commands NOW. Then state your claim.**
 
@@ -215,10 +198,6 @@ If you find yourself thinking any of the following, you are about to make an unv
 | "My new test passed on the first run" | A green run alone does not prove the gate can fail. Paste a mutation run or a failing-case run too -- a fixture that passes regardless of the mechanism is worse than none. |
 | "Exit 0 means done" / "The count is probably fine" | A green signal without a baseline comparison is not verification. State the expected count before reading the result, or name a known-bad case that must still fail. |
 | "The fix looks right on review" | Textual PASS is not behavioral evidence for a contract clause; paste a fixture run for the new sub-case, or cap the claim at DONE_WITH_CONCERNS. |
-| "The canon is stale so the gate doesn't bind" | A stale canon is still consumed and still gates the claim; emit `DOD-STALE: canon v<N> behind taxonomy v<M>` and evaluate anyway. |
-| "The canon has uncommitted edits, skip the gate" | Uncommitted local edits are a warn-and-consume state, not a parse failure; state plainly that the canon carries uncommitted local edits and keep evaluating the claim against it. |
-| "The trigger didn't obviously fire, skip the layer" | The story's canon-derived Definition of Done section (`user-story-generator` skill) records firing for the anticipated diff; a layer it omits did not fire unless the actual diff triggers it. With no such section the trigger counts as fired and the claimant supplies the evidence. |
-| "The canon is malformed, fall back to generic verification" | Malformed is not absent -- refuse to evaluate the claim and name exactly what failed to parse. |
 
 ---
 

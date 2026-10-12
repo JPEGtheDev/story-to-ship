@@ -46,16 +46,17 @@
 #        command git commit; a command behind a wrapper (time, env FOO=1,
 #        sudo, nohup, xargs), behind a compound-command keyword or brace
 #        (if ...; then, { ...; }, ! git commit), or inside backticks; text
-#        between an escaped quote (\"), or an apostrophe or unpaired
-#        double quote (5\" screen) in a # comment or in a heredoc body on
-#        an earlier line, and the next quote, because the single
-#        quote-stripping pass pairs that quote with a later one (nothing
-#        is hidden when no later quote exists); option
-#        spellings other than the listed ones (git --git-dir .git commit,
-#        gh --repo=o/r pr create); and a redirection attached to the
+#        after an escaped quote (\"), or after an apostrophe or an unpaired
+#        double quote (5" screen) in a # comment or in a heredoc body on an
+#        earlier line (the single quote-stripping pass pairs that stray
+#        quote with the next quote, which shifts the pairing of every later
+#        quote, so unquoted text between later quoted spans can be hidden
+#        too; with no later quote nothing is hidden); option spellings
+#        other than the listed ones (git --git-dir .git commit, gh
+#        --repo=o/r pr create); and a redirection attached to the
 #        subcommand (git commit>out). It also over-holds a heredoc body
 #        line that starts with git commit, whatever quoting the delimiter
-#        has (<<EOF or <<'EOF').
+#        has (<<EOF or <<'EOF'), unless quote pairing (above) hides it.
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence

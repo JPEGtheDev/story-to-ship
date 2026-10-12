@@ -116,7 +116,7 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 | Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` (deferred) |
 | Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` (deferred) |
 
-A paradigm tier can hold one subfolder per language, for example C++ and Python under the object-oriented tier.
+A paradigm tier can hold one subfolder per language when two or more languages share its checks, for example C++ and Python under the object-oriented tier; each language subfolder then holds its own `index.md` at `references/<paradigm>/<language>/index.md`, and Step 3 loads that file.
 
 ---
 

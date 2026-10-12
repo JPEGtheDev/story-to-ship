@@ -237,7 +237,7 @@ Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Speci
     v
 Build todo list: YAGNI + PPP per item + No Placeholders
     v
-Test-Driven Development (TDD) task structure: RED / GREEN / REFACTOR / COMMIT as separate todos
+Test-Driven Development (TDD) task structure: RED / GREEN / REFACTOR / COMMIT as ordered steps of one todo
     v
 Plan review: covers all criteria? downsides named?
     v

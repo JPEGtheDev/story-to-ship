@@ -233,13 +233,13 @@ Task arrives
     v
 Step 0: Clarify Expectations -- restate requirements, label [UNCLEAR:]
     v
-Smart Trust Gate -- answer 5 questions
-    v
 Build todo list: YAGNI + PPP per item + No Placeholders
     v
 Test-Driven Development (TDD) task structure: RED / GREEN / REFACTOR / COMMIT as ordered steps of one todo
     v
-Plan review: if 2+ todos, check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair; covers all criteria? downsides named?
+Smart Trust Gate -- answer 5 questions
+    v
+Plan review: if 2+ todos or an architectural decision, check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair; covers all criteria? downsides named?
     v
 Present plan to user -- WAIT for explicit approval
     v

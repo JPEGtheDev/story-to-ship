@@ -107,7 +107,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 **Risk:** Model never reloads a skill after 3 prompts or on new todo -- relies on stale context
 **Mitigation:** Session-bootstrap explicitly states reload triggers. Test across a 5-prompt session.
 
-## Writing Skills for GPT-4.1 Compliance
+## Writing Skills for Baseline-Model Compliance
 
 When authoring or revising skills:
 

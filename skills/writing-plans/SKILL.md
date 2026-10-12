@@ -43,7 +43,6 @@ My optimization target: [user's stated outcome], not [convenient proxy]."
 
 | Situation | Response |
 |---|---|
-| Obvious single-file fix | Implement immediately -- no plan needed |
 | 2+ files touched | Outline sequence before coding |
 | Architectural decision | Specify approach before touching code |
 | Ambiguous requirements | Clarify first -- do not plan around unknowns |
@@ -80,9 +79,9 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 ### Task Granularity (TDD: Test-Driven Development Steps)
 
-Each task MUST be one concrete action (2-5 minutes), touch <=2 files, and is estimated at <=25 tool calls. Any todo exceeding either limit MUST be split before the plan is presented.
+Each task MUST be one todo of ordered steps (2-5 minutes each), touch <=2 non-test files (one test file does not count), and be estimated at <=25 tool calls in total. Any todo exceeding any limit MUST be split before the plan is presented.
 
-For implementation tasks, give each of six TDD todos its own status: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
+For implementation tasks, the TDD steps are the ordered steps of the task's one todo, reviewed once at the end: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
 
 ---
 
@@ -93,8 +92,8 @@ Before building or presenting any plan:
 1. Requirements restated in own words -- ambiguities labeled `[UNCLEAR:]`
 2. Every acceptance criterion is mapped to a verifiable checkpoint
 3. Todo list has no placeholders -- every item is concrete and executable
-4. Plan has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
-5. No todo touches 3+ files or exceeds 25 tool calls without being split
+4. A plan with 2+ todos or an architectural decision has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
+5. No todo touches 3+ non-test files or exceeds 25 tool calls without being split
 6. Every claim, in the plan file or the presentation message, that a cut or moved passage repeats, restates, duplicates, or is redundant with other text carries the pasted search output (grep or diff) that shows that other text, in the same message. A cut justified by an unproven restatement claim is a placeholder.
 
 [+] All met -> present the plan and wait for explicit user approval
@@ -114,7 +113,7 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 | 4 | **Do I have the capability?** Any libraries or patterns requiring research before coding? | Wrong assumptions |
 | 5 | **What would a skeptic say?** Strongest argument against this approach | Comfort choices |
 
-[+] All 5 questions answered with no gaps -> proceed to review gate or implementation
+[+] All 5 questions answered with no gaps -> proceed to the review gate, then present the plan and wait for approval
 [-] Any unanswered question or revealed gap -> stop, revise the plan, then re-run the gate
 
 **For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan.
@@ -188,11 +187,11 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 | "I'll update todos later" | Later never comes -- update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
 | "We'll probably need this later" | YAGNI -- not in criteria means not in this plan |
-| "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ files = compounding scope. Split on file boundaries before the plan is presented. |
+| "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ non-test files = compounding scope. Split on file boundaries before the plan is presented. |
 | "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
-| "I listed all the main files -- the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find .claude/skills -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
+| "I listed all the main files -- the audit scope is complete" | Listing top-level files from memory or a shallow glob misses references/ subdirectories, recently-added files, and nested content. For any audit task, run a file listing command (e.g. `find <skills-dir> -type f -name '*.md'`) before planning. Do not enumerate scope from memory. |
 | "I found the bug -- fixing it now" | A request to debug or research is not a request to fix. Present findings first. Wait for instruction. |
 | "Plan states a numerical estimate (word count, file size, line count) without measuring" | Measure before writing. Run `wc -w` or `wc -l`. Unverified numerical claims in plans cause failed acceptance criteria. |
 | "It's just a quick test, I don't need todos" | Any multi-step task without todos has no review gate. The Skeptic and Three Amigos dispatch rules cannot fire if todos were never created. Create todos first, then execute. |
@@ -221,7 +220,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
-- A single todo touches 3+ files or is estimated at 30+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
+- A single todo touches 3+ non-test files or is estimated at 26+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
 - Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**

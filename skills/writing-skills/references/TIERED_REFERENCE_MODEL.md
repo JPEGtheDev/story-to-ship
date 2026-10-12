@@ -53,7 +53,7 @@ Apply this tier when any of the following are true:
 **Ordered check list** -- numbered, action-first, reference-linked:
 ```markdown
 1. **Formatting** -- `cpp-toolchain.md` -- run clang-format and clang-tidy before committing
-2. **Naming** -- `naming-tables.md` -- verify all new identifiers follow OOP naming conventions
+2. **Naming** -- `naming-tables.md` -- verify all new identifiers follow Object-Oriented Programming (OOP) naming conventions
 ```
 
 **Pass/fail gate** (at bottom):
@@ -111,10 +111,12 @@ Do NOT add enforcement logic to the paradigm reference files. The `index.md` lis
 
 | Paradigm | Trigger | Subfolder |
 |----------|---------|-----------|
-| Object-Oriented Programming (OOP) / C++ | `.cpp` or `.hpp` extensions | the `cpp` subfolder of the OOP tier |
-| OOP / Python | deferred -- no Python subfolder exists yet | the `python` subfolder of the OOP tier (deferred) |
+| OOP / C++ | `.cpp` or `.hpp` extensions | the `cpp` subfolder of the OOP tier |
+| OOP / Python | deferred -- the `code-quality` skill has no Python subfolder yet | the `python` subfolder of the OOP tier (deferred) |
 | Scripting | `.sh`, `.ps1`, or `.bash` extensions | `scripting/` (deferred) |
 | Functional | `.hs`, `.elm`, `.ex` extensions | `functional/` (deferred) |
+
+A paradigm tier can hold one subfolder per language, for example C++ and Python under the object-oriented tier.
 
 ---
 

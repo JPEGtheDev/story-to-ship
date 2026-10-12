@@ -1,6 +1,6 @@
 # Size and Token Efficiency
 
-**Why this matters:** Skills are written for GPT-4.1 as the baseline. Every instruction must be mechanically precise and literally executable -- no nested conditionals, no implied reasoning chains. Verbose skills evict iron law content from the context window.
+**Why this matters:** Skills are written for a baseline model that needs literal, mechanically precise instructions. Every instruction must be mechanically precise and literally executable -- no nested conditionals, no implied reasoning chains. Verbose skills evict iron law content from the context window.
 
 ---
 

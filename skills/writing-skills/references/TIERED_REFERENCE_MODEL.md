@@ -52,8 +52,8 @@ Apply this tier when any of the following are true:
 
 **Ordered check list** -- numbered, action-first, reference-linked:
 ```markdown
-1. **Formatting** -- `cpp-toolchain.md` -- run clang-format and clang-tidy before committing
-2. **Naming** -- `naming-tables.md` -- verify all new identifiers follow Object-Oriented Programming (OOP) naming conventions
+1. **Formatting** -- `<toolchain-ref>.md` -- run clang-format and clang-tidy before committing
+2. **Naming** -- `<naming-ref>.md` -- verify all new identifiers follow Object-Oriented Programming (OOP) naming conventions
 ```
 
 **Pass/fail gate** (at bottom):

@@ -32,10 +32,22 @@
 #        Bash command that runs git commit or gh pr create at command
 #        position (start of the command, or after ;, &, |, ( or $( ; with
 #        optional VAR=value prefixes and the git or gh options listed at
-#        BASH_COMMIT_RE and BASH_PR_RE). Text inside quotes never counts.
-#        The command is read and scanned only when one of these two names
-#        is pending, so every other Bash call exits before looking at it.
-#        A role name never holds Bash.
+#        BASH_COMMIT_RE and BASH_PR_RE). Text inside a well-formed quoted
+#        span is not matched. The command is read and scanned only when one
+#        of these two names is pending, so every other Bash call exits
+#        before looking at it. A role name never holds Bash.
+#        The Bash hold misses by design: git push, gh pr merge, edit and
+#        ready, gh api, MCP pull-request tools, bash -c '...', aliases, and
+#        command git commit; a command behind a wrapper (time, env FOO=1,
+#        sudo, nohup, xargs), behind a compound-command keyword or brace
+#        (if ...; then, { ...; }, ! git commit), or inside backticks; text
+#        after an escaped quote (\") or after an apostrophe in a # comment
+#        on an earlier line, because the single quote-stripping pass pairs
+#        that quote with a later one; option spellings other than the listed
+#        ones (git --git-dir .git commit, gh --repo=o/r pr create); and a
+#        redirection attached to the subcommand (git commit>out). It also
+#        over-holds an unquoted heredoc body line that starts with git
+#        commit.
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence
@@ -167,9 +179,10 @@ PENDING_FILE="$STATE_DIR/.reload-pending-$SESSION_ID"
 PENDING_NAMES="$(grep -v '^$' -- "$PENDING_FILE" 2>/dev/null)"
 [[ -z "$PENDING_NAMES" ]] && exit 0
 
-# Bash is held only by versioning and verification-before-completion. Unless
-# one of them is pending, exit before the command is read, so ordinary Bash
-# calls pay for one grep on the pending names and nothing more.
+# Bash is held only by versioning and verification-before-completion. Cost of
+# a Bash call: one grep of the pending file; one more grep when that file has
+# names; the command is read and scanned only when versioning or
+# verification-before-completion is pending, otherwise this exits first.
 if [[ "$TOOL_NAME" == "Bash" ]]; then
   grep -qxE 'versioning|verification-before-completion' <<<"$PENDING_NAMES" || exit 0
 fi

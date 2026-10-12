@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_role_pending_commit_reason","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git commit -m x"}}

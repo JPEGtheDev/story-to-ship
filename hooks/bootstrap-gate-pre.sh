@@ -27,8 +27,8 @@
 #        (tool_input.file_path, else tool_input.notebook_path) has a directory
 #        named skills or agents anywhere in it; an absent or empty path never
 #        triggers it.
-#      - versioning, verification-before-completion: hold nothing here (they
-#        belong to the Bash row, handled elsewhere).
+#      - versioning, verification-before-completion: hold none of the tools
+#        this gate handles.
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence
@@ -169,13 +169,18 @@ if [[ "$TOOL_NAME" != "Agent" ]]; then
     2>/dev/null)"
 fi
 
+# is_role <name>: succeeds for a role name (the only one is running-a-sprint).
+is_role() {
+  [[ "$1" == "running-a-sprint" ]]
+}
+
 # holds_call <name>: succeeds when the pending name holds the current call.
 # Role and action names are whitelisted here; any other name holds nothing.
-# versioning and verification-before-completion belong to the Bash row and
-# never hold the tools handled here.
+# versioning and verification-before-completion hold none of the tools
+# handled here.
 holds_call() {
+  is_role "$1" && return 0
   case "$1" in
-    running-a-sprint) return 0 ;;
     subagent-driven-development | using-git-worktrees)
       [[ "$TOOL_NAME" == "Agent" ]]
       ;;
@@ -193,7 +198,7 @@ while IFS= read -r NAME; do
   # A duplicate line must not be listed twice.
   case " ${MISSING[*]:-} " in *" $NAME "*) continue ;; esac
   MISSING+=("$NAME")
-  [[ "$NAME" != "running-a-sprint" ]] && HAS_ACTION=1
+  is_role "$NAME" || HAS_ACTION=1
 done <<<"$PENDING_NAMES"
 [[ "${#MISSING[@]}" -eq 0 ]] && exit 0
 

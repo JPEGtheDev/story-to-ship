@@ -44,19 +44,22 @@
 #        The Bash hold misses by design: git push, gh pr merge, edit and
 #        ready, gh api, MCP pull-request tools, bash -c '...', aliases, and
 #        command git commit; a command behind a wrapper (time, env FOO=1,
-#        sudo, nohup, xargs), behind a compound-command keyword or brace
-#        (if ...; then, { ...; }, ! git commit), or inside backticks; text
-#        after an escaped quote (\"), or after an apostrophe or an unpaired
-#        double quote (5" screen) in a # comment or in a heredoc body on an
-#        earlier line (the single quote-stripping pass pairs that stray
-#        quote with the next quote, which shifts the pairing of every later
-#        quote, so unquoted text between later quoted spans can be hidden
-#        too; with no later quote nothing is hidden); option spellings
-#        other than the listed ones (git --git-dir .git commit, gh
-#        --repo=o/r pr create); and a redirection attached to the
-#        subcommand (git commit>out). It also over-holds a heredoc body
-#        line that starts with git commit, whatever quoting the delimiter
-#        has (<<EOF or <<'EOF'), unless quote pairing (above) hides it.
+#        sudo, nohup, xargs), behind a compound-command keyword or brace (if
+#        ...; then, { ...; }, ! git commit), or inside backticks; a real git
+#        commit that follows a quote with no partner, which can be missed: an
+#        escaped quote (\" or \') anywhere in the command, or an apostrophe
+#        or an unpaired double quote (5" screen) in a # comment or in a
+#        heredoc body on an earlier line (the single quote-stripping pass
+#        pairs such a stray quote with the next quote of the same kind, which
+#        can shift the pairing of the later quotes of that kind, so unquoted
+#        text between later quoted spans can be hidden too; with no later
+#        quote of that kind nothing is hidden); option spellings other than
+#        the listed ones (git --git-dir .git commit,
+#        gh --repo=o/r pr create); and a redirection attached to the
+#        subcommand (git commit>out). It also over-holds a heredoc body line
+#        that starts with git commit or gh pr create, whatever quoting the
+#        delimiter has (<<EOF or <<'EOF'), unless quote pairing (above) hides
+#        it.
 #      - any other name is ignored: it holds nothing.
 #    The deny reason lists only the names that hold the current call, in
 #    pending-file order. If every listed name is a role name, the sentence

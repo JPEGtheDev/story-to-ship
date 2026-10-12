@@ -84,7 +84,7 @@ Triggers to investigate -- not absolute violations.
 | Heuristic | Threshold | Indicates |
 |-----------|-----------|-----------|
 | Function length | > 20 lines | Long Method |
-| Nesting depth | > 3 levels | Complex control flow; Extract Function |
+| Nesting depth | > 3 levels (function body = level 1) | Complex control flow; Extract Function |
 | Parameter count | > 3 | Long Parameter List |
 | Duplication ratio | Same code in 2+ locations | Duplicated Code |
 | Cyclic dependencies | Module A -> B -> A | Architectural problem |

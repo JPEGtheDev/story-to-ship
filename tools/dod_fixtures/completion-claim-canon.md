@@ -1,6 +1,6 @@
 ---
 title: "Driftmark Definition of Done"
-description: "Synthetic, ratified Definition of Done document for the fictional Driftmark parcel-routing backend service. Used only to exercise the verification-before-completion skill's Definition of Done completion-gate check."
+description: "Synthetic, ratified Definition of Done document for the fictional Driftmark parcel-routing backend service. Used only to exercise the dod-canon-check skill's Definition of Done completion-gate check."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---

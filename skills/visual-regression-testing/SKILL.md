@@ -1,7 +1,7 @@
 ---
 name: visual-regression-testing
 license: MIT
-description: Use when writing or maintaining visual regression tests, approving visual baselines, or deciding whether something belongs in a VR test vs an OpenGL (GL)-mock unit test, or debugging visual output by rendering and inspecting the result.
+description: Use when writing or maintaining visual regression tests, approving baselines, choosing between a render test and an OpenGL (GL) mock unit test, or debugging visual output.
 ---
 
 
@@ -51,7 +51,7 @@ OpenGL rendering is inherently visual. Pixel output depends on Graphics Processi
 ### What a GL mock CAN test (full Test-Driven Development (TDD) applies)
 
 - Shader compilation logic (uniform locations, program linking)
-- Buffer creation and binding sequences (VAO, VBO, EBO)
+- Buffer creation and binding sequences: vertex array object (VAO), vertex buffer object (VBO), element buffer object (EBO)
 - Draw call parameters (primitive type, index count, offset)
 - State machine transitions (depth test, blending, viewport)
 - View/projection matrix calculations
@@ -156,7 +156,7 @@ Before presenting visual regression tests:
 | Excuse | Reality |
 |--------|---------|
 | "The visual looks fine to me" | Auto-approval bypasses the human review requirement |
-| "A GL mock can't test this" | If it's logic, not pixels, a GL mock likely can -- reconsider |
+| "A GL mock can't test this" | If the behavior is not pixel output, it is testable with an OpenGL call mock. Write the mock test first. |
 | "High tolerance is more robust" | High tolerance masks real regressions |
 | "I'll set the resolution later" | Wrong resolution causes artifacts in every subsequent baseline |
 | "Visual tests cover what the unit tests don't" | Visual tests are slow and cover pixels; unit tests cover logic. Both are needed. |

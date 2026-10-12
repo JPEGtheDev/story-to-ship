@@ -41,7 +41,7 @@ TEST_F(RenderingRegressionTest, RenderDefaultCube_AngledView_MatchesBaseline)
 
 ## Qualitative Render-Capture-Look Example
 
-Unlike a regression test, a qualitative test has no baseline and no pass/fail pixel comparison. It always exits successfully in the GTest sense -- its value is the saved image and the agent's description of that image after reading it.
+Unlike a regression test, a qualitative test has no baseline and no pass/fail pixel comparison. It always exits successfully in the Google Test (GTest) sense -- its value is the saved image and the agent's description of that image after reading it.
 
 ```cpp
 TEST_F(RenderingQualitativeTest, Qualitative_ParameterSweep_BlurRadiusComparison)

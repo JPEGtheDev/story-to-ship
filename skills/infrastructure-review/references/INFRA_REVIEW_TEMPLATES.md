@@ -13,6 +13,7 @@
 | Correct artifact retention | [+]/[-] | ... |
 | No hardcoded secrets | [+]/[-] | ... |
 | Correct triggers | [+]/[-] | ... |
+| Matrix covers required platforms | [+]/[-] | ... |
 | Pinned third-party actions | [+]/[-] | ... |
 
 ### Build Reproducibility

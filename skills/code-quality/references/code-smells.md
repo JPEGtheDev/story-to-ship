@@ -7,7 +7,7 @@ For OOP-specific smells (Feature Envy, Data Clumps, etc.) see `oop/cpp/oop-smell
 
 ### 1. Long Method
 
-**What it looks like:** A function exceeding 20 lines, or mixing multiple levels of abstraction, or with nested control structures more than 3 levels deep.
+**What it looks like:** A function exceeding 20 lines, or mixing multiple levels of abstraction, or with code indented more than 3 levels. Count nesting inside the function: the function body is nesting level 1, so three control structures nested inside a function body already reach level 4.
 
 **Why it hurts:** Hard to understand, test, and reuse. Mixing abstraction levels confuses intent.
 

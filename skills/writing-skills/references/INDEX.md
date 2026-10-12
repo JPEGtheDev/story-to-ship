@@ -18,7 +18,7 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 
 | File | Covers |
 |------|--------|
-| `SKILL_ANATOMY_ELEMENTS.md` | Full schemas and BAD/GOOD examples for all 5 required skill elements (FRONTMATTER, IRON LAW, ANNOUNCEMENT, GATE FUNCTION, RATIONALIZATION TABLE); Alexandrian Pattern Form guide |
+| `SKILL_ANATOMY_ELEMENTS.md` | Full schemas and BAD/GOOD examples for all 6 required skill elements (FRONTMATTER, IRON LAW, ANNOUNCEMENT, GATE FUNCTION, RATIONALIZATION TABLE, RED FLAGS); Alexandrian Pattern Form guide |
 | `VOICE_AUTHORITY_RULES.md` | Authority table, Absolute Path Rule, Acronym Rule, Jargon Rule; applies to every line of a skill file or agent template |
 | `SIZE_AND_COMPRESSION.md` | Token count targets, compression rules, line limits, the character limit on hook output, Skill Composition Model; baseline is a model that needs literal, mechanically precise instructions |
 | `MODEL_COMPATIBILITY.md` | Patterns most likely skipped or misapplied by lower-capability models; mitigations built into each skill |
@@ -31,4 +31,4 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 
 ## Related
 
-- [SKILL.md](../SKILL.md) -- enforcement gate; drives skill creation and editing workflow; the `code-quality` skill's `references/oop/cpp/` directory is the reference implementation of the tiered model
+- [SKILL.md](../SKILL.md) -- enforcement gate; drives skill creation and editing workflow; the C++ object-oriented tier of the `code-quality` skill is the reference implementation of the tiered model

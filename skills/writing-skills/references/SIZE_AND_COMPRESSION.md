@@ -1,6 +1,6 @@
 # Size and Token Efficiency
 
-**Why this matters:** Skills are written for GPT-4.1 as the baseline. Every instruction must be mechanically precise and literally executable -- no nested conditionals, no implied reasoning chains. Verbose skills evict iron law content from the context window.
+**Why this matters:** Skills are written for a baseline model that needs literal, mechanically precise instructions. Every instruction must be mechanically precise and literally executable -- no nested conditionals, no implied reasoning chains. Verbose skills evict iron law content from the context window.
 
 ---
 
@@ -41,9 +41,9 @@ wc -c .claude/skills/<skill-name>/SKILL.md | awk '{print int($1/4) " tokens"}'
 
 ---
 
-## Writing for Mechanical Execution (GPT-4.1 Baseline)
+## Writing for Mechanical Execution (Literal-Execution Baseline)
 
-Every line in every skill MUST satisfy this test: **Can a GPT-4.1 class model execute this instruction literally without inferring intent?**
+Every line in every skill MUST satisfy this test: **Can a baseline model that needs literal, mechanically precise instructions carry out this instruction without inferring intent?**
 
 Rules:
 - Use imperative sentences. Not "you should check" -- "Check. Stop if not met."

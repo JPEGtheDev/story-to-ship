@@ -1,6 +1,6 @@
 # Model Compatibility Reference
 
-All skills in this system are written for **GPT-4.1 as the baseline**. This document identifies patterns that are most likely to be skipped or misapplied by lower-capability models, and the mitigation already built into each skill.
+All skills in this system are written for **a baseline model that needs literal, mechanically precise instructions**. This document identifies patterns that are most likely to be skipped or misapplied by lower-capability models, and the mitigation already built into each skill.
 
 ---
 
@@ -107,7 +107,7 @@ To evaluate a skill against a specific model without the full test harness, use 
 **Risk:** Model never reloads a skill after 3 prompts or on new todo -- relies on stale context
 **Mitigation:** Session-bootstrap explicitly states reload triggers. Test across a 5-prompt session.
 
-## Writing Skills for GPT-4.1 Compliance
+## Writing Skills for Baseline-Model Compliance
 
 When authoring or revising skills:
 

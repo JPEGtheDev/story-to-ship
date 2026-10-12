@@ -127,7 +127,7 @@ An anti-pattern is an attractive-but-harmful solution. It appears to solve a pro
 **Remediation:**
 - Use Guard Clauses (early exit on error conditions) to flatten structure
 - Extract Method for loop bodies and nested blocks
-- Use a state machine or strategy pattern when nesting stays beyond 3 levels after the guard clauses and extracted methods above
+- Use a state machine or strategy pattern when nesting stays beyond 3 levels after the guard clauses and extracted methods above (the function body is level 1)
 - Refactor conditionals into polymorphic dispatch when appropriate
 
 ---

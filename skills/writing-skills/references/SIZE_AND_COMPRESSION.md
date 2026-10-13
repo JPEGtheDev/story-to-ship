@@ -20,7 +20,7 @@
 
 When SKILL.md exceeds its ideal max:
 
-1. For every section or block beyond the 5-element anatomy minimum, classify it:
+1. For every section or block beyond the 6-element anatomy minimum, classify it:
    - **Rationale** (explanation of why rules exist, motivational framing, history) -> move to `references/`. Never delete it.
    - **Enforcement** (STOP conditions, bans, gates, rationalization rows, BEFORE PROCEEDING items) -> do NOT cut to hit a token target. Proceed to step 2.
 

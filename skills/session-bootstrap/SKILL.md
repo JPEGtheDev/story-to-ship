@@ -52,7 +52,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Any implementation work                      | `execution`                                        |
 | Planning a multi-step task                   | `writing-plans`                                    |
 | Unclear approach or design choices           | `brainstorming`                                    |
-| Writing or editing code                      | `execution`, `code-quality`                        |
+| Writing or editing code                      | `execution`, `code-quality`, `exception-philosophy` |
 | Writing code with rendering/runtime patterns | `execution`, `code-quality`, `cpp-patterns`        |
 | Writing or editing tests                     | `execution`, `code-quality`, `testing`             |
 | Writing visual regression tests              | `execution`, `code-quality`, `testing`, `visual-regression-testing` |

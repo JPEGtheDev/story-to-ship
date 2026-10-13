@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## When to Invoke
 
-Load this skill after the `greenfield-discovery` skill (it produces the `## Domain Model` block) and the `greenfield-architecture` skill (it produces the `## Architecture Decision` block). The skill ends with the `## Bootstrapped Files` block.
+Load this skill after the `greenfield-discovery` skill (it produces the `## Domain Model` block), the `defining-done` skill (it writes `docs/DOD.md`) and the `greenfield-architecture` skill (it produces the `## Architecture Decision` block). The skill ends with the `## Bootstrapped Files` block.
 
 Every literal value (file contents, ignore entries, workflow steps, run commands, tokens) lives in `references/SHARED_TEMPLATES.md` (tokens, language mapping, shared file templates) and in the chosen stack's file under `references/stacks/` (that stack's fields). Copy values from them as written. This file holds the procedure and the gates only. The hello world is the one-line program the stack's template prints.
 

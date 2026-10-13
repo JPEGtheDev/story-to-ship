@@ -89,6 +89,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `testing` | TDD (Test-Driven Development) gate -- no production code without a failing test first |
 | `contract-testing` | Interface and abstract base class test coverage |
 | `systematic-debugging` | Root-cause protocol -- no patches without tracing to root |
+| `dod-canon-check` | Definition of Done canon gate -- in a repo with a ratified `docs/DOD.md`, no completion claim passes without inline evidence for every always-required and fired conditional layer |
 
 ### Code Review
 | Skill | Purpose |
@@ -154,7 +155,7 @@ without an OpenCode equivalent remain Claude Code-only.
 ## How It Works
 
 Installing this plugin adds:
-- 39 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 40 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 18 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 

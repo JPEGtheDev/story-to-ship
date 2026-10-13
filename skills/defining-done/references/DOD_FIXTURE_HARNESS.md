@@ -11,7 +11,7 @@ already passed.
 Re-run the harness after any change to:
 
 - a marker string, a marker's emit condition, or the canon parse rules, in the
-  defining-done, verification-before-completion, or user-story-generator skills;
+  defining-done, dod-canon-check, or user-story-generator skills;
 - a rule a scenario also proves, even though the change touches no marker string:
   the uncommitted-edit warning, the no-canon fallback, delta re-ratification, or
   the comparison of the canon's Stamp against the taxonomy's Stamp;

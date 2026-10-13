@@ -36,6 +36,16 @@ does not exist. Add the row only when its skill ships:
 |-----------|-------|------------|------|
 | Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | when the skill ships | domain |
 
+## Dispatch Rows (routed from a parent skill)
+
+The following row is NOT in the session-bootstrap "On Start" table. Its route is the
+Definition of Done canon item in the BEFORE PROCEEDING section of the
+`verification-before-completion` skill, which names the skill to load:
+
+| Task type | Skill | Tier |
+|-----------|-------|------|
+| Making a completion claim in a repo that has a ratified `docs/DOD.md` | `dod-canon-check` | domain |
+
 ## Core Skill Tags (per-turn routing block source)
 
 Tag format: a trailing `Tier` column (`core` or `domain`) rather than an HTML comment

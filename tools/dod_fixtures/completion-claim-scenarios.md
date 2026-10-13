@@ -3,7 +3,7 @@
 ## 0. Purpose and design notes
 
 This file carries three scenarios dispatched against the
-verification-before-completion skill: the Definition of Done
+dod-canon-check skill: the Definition of Done
 completion-gate check (`DOD-GATE: FAIL <layer>` on missing or generic
 evidence, silent pass on complete evidence) and a stale-stamp variant
 that exercises the staleness warning on the completion gate's
@@ -51,7 +51,7 @@ Design notes (read before dispatching):
   `visual-regression: N/A | category: target-absent` ruling genuinely
   match its elaboration: the app has no rendered UI, generated image, or
   graphics-rendering path for that layer to verify.
-- The verification-before-completion skill's Definition of Done gate
+- The dod-canon-check skill's Definition of Done gate
   check compares the document's `Stamp:` value against the
   defining-done skill's taxonomy's current stamp -- the same fixed,
   unconditional reference the story-request fixture relies on for its
@@ -68,7 +68,7 @@ Design notes (read before dispatching):
 ## Case A -- evidence-missing completion claim
 
 Dispatch this completion claim text verbatim to the
-verification-before-completion skill, with
+dod-canon-check skill, with
 `tools/dod_fixtures/completion-claim-canon.md` placed at `docs/DOD.md`
 per Design notes:
 
@@ -94,7 +94,7 @@ both under `tools/`, so `completion-claim-canon.md`'s `mutation-testing`
 CONDITIONAL trigger fires. The claim's `mutation-testing` evidence is a
 green suite run only -- no property was broken, no failing case is
 named, nothing was restored. That is exactly what the
-verification-before-completion skill's Definition of Done gate check
+dod-canon-check skill's Definition of Done gate check
 calls out as insufficient ("a green suite run alone does not satisfy
 it"). Per that same gate check, the claim MUST fail the gate for this
 layer: `DOD-GATE: FAIL mutation-testing`.
@@ -108,7 +108,7 @@ tools/dod_fixtures/check-markers.sh <evidence-missing-output> --require 'DOD-GAT
 ## Case B -- evidence-complete negative control
 
 Dispatch this completion claim text verbatim to the
-verification-before-completion skill, with the same
+dod-canon-check skill, with the same
 `completion-claim-canon.md` document placed at `docs/DOD.md` per Design
 notes:
 
@@ -138,7 +138,7 @@ Every ALWAYS layer (`coverage`, `lint-format-static-analysis`) and the
 fired CONDITIONAL layer (`mutation-testing`) carry evidence meeting that
 layer's own standard -- the `mutation-testing` entry names the broken
 property, the named failing case, and the restore step, per the
-verification-before-completion skill's Definition of Done gate check
+dod-canon-check skill's Definition of Done gate check
 ("break the property, run the gate, paste the named failing case, then
 restore the property"). `visual-regression` is the document's only other
 layer and is ruled not-applicable (`target-absent`), so it needs no
@@ -181,13 +181,13 @@ awk '/^<!-- STALE-CANON:BEGIN -->$/{f=1;next}/^<!-- STALE-CANON:END -->$/{f=0}f'
 
 Then dispatch the Case A or Case B claim text (either works -- this case
 isolates document staleness, not claim evidence completeness) to the
-verification-before-completion skill with the materialized file placed
+dod-canon-check skill with the materialized file placed
 at `docs/DOD.md` per Design notes.
 
 <!-- STALE-CANON:BEGIN -->
 ---
 title: "Driftmark Definition of Done (stale-stamp variant)"
-description: "Deliberately stale-stamped variant of the Driftmark fixture document, used only to exercise the verification-before-completion skill's staleness warning on the completion-gate consumption path. Never a real ratified document."
+description: "Deliberately stale-stamped variant of the Driftmark fixture document, used only to exercise the dod-canon-check skill's staleness warning on the completion-gate consumption path. Never a real ratified document."
 domain: cross-cutting
 tags: [cross-cutting, standards, dod, fixture]
 ---
@@ -245,5 +245,5 @@ substitute for it.
   document Case A and Case B run against.
 - [README.md](README.md) -- the fixture harness's run procedure and
   marker definitions.
-- The verification-before-completion skill's Definition of Done gate
+- The dod-canon-check skill's Definition of Done gate
   check is what these three cases exercise.

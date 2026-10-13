@@ -28,7 +28,7 @@ queryEngine.run(query, connection, indexPlan)
   .saveAs("report.csv")
 ```
 
-Then work backward to fit the production language (C++20). If the production language requires significant ceremony to express the ideal, the gap reveals a missing abstraction -- add it.
+Then work backward to fit the production language. If the production language requires significant ceremony to express the ideal, the gap reveals a missing abstraction -- add it.
 
 Avoids letting language constraints limit design thinking.
 
@@ -111,7 +111,7 @@ Before finalizing any design or implementation, ask: "Is there a simpler solutio
 
 ## Dimensions of Simplicity
 
-Kent Beck's ordered checklist for assessing design quality: (1) Passes all tests. (2) Reveals intention -- names, structure, and organization communicate what the code does without comment. (3) No duplication -- each concept has exactly one home. (4) Fewest elements -- no class, method, or variable that does not serve a purpose in criteria 1-3. Apply in order: criterion 1 gates criterion 2, which gates criterion 3, which gates criterion 4. Source: C2 Wiki "XpSimplicityRules".
+Kent Beck's ordered checklist for assessing design quality: (1) Passes all tests. (2) No duplication -- each concept has exactly one home. (3) Reveals intention -- names, structure, and organization communicate what the code does without comment. (4) Fewest elements -- no class, method, or variable that does not serve a purpose in criteria 1-3. Apply in order: criterion 1 gates criterion 2, which gates criterion 3, which gates criterion 4. Source: C2 Wiki "XpSimplicityRules".
 
 ## Assign Problems, Not Tasks
 
@@ -220,7 +220,7 @@ Rationale moved out of SKILL.md to keep that file under its size limit.
 
 ## Related Skills
 
-- `writing-plans` -- YAGNI, PPP, Skeptic + plan-reviewer gate
+- `writing-plans` -- YAGNI, Plain Programmer's Purpose (PPP), Skeptic + plan-reviewer gate
 - `brainstorming` -- Structured Ideation reference for design exploration
 - `execution` -- Make It Work -> Make It Right -> Make It Fast gate
 
@@ -233,13 +233,13 @@ Task arrives
     v
 Step 0: Clarify Expectations -- restate requirements, label [UNCLEAR:]
     v
-Smart Trust Gate -- answer 5 questions; if 2+ todos: check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair
-    v
 Build todo list: YAGNI + PPP per item + No Placeholders
     v
 Test-Driven Development (TDD) task structure: RED / GREEN / REFACTOR / COMMIT as ordered steps of one todo
     v
-Plan review: covers all criteria? downsides named?
+Smart Trust Gate -- answer 5 questions
+    v
+Plan review: if 2+ todos or an architectural decision, check for `## Feature Specification` -> three-amigos Refinement OR Skeptic + plan-reviewer pair; covers all criteria? downsides named?
     v
 Present plan to user -- WAIT for explicit approval
     v

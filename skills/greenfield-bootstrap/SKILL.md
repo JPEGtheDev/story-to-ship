@@ -155,7 +155,7 @@ Before writing the first file, verify all of the following:
 
 [+] All 5 met -> write the files
 [-] Any unmet -> write nothing; run the step that matches the unmet condition, or stop naming the missing fact when no user can answer:
-- Item 1 unmet -> tell the user to run `greenfield-discovery`.
+- Item 1 unmet -> tell the user to run `greenfield-discovery`, then `defining-done`.
 - Item 2 unmet -> tell the user to run `defining-done`.
 - Item 3 unmet because the Language value is absent, blank, `TBD` or `[UNCLEAR:]`, or names more than one language -> ask the one stack question. The answer goes through the stack gate.
 - Item 3 unmet because the Language value or the TypeScript Runtime/framework value is not supported -> print the refusal text.

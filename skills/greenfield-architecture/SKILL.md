@@ -149,7 +149,8 @@ Before emitting the recommendation and the `## Architecture Decision` block, ver
 
 ## Red Flags -- STOP
 
-- Recommending a language or asking an architecture question with no `## Domain Model` block or no `docs/DOD.md` -> STOP. Send the user to the `greenfield-discovery` skill, then the `defining-done` skill.
+- Recommending a language or asking an architecture question with no `## Domain Model` block -> STOP. Send the user to the `greenfield-discovery` skill, then the `defining-done` skill.
+- Recommending a language or asking an architecture question with a `## Domain Model` block and no `docs/DOD.md` -> STOP. Invoke the `defining-done` skill first; do not send the user back to discovery.
 - Presenting a single stack as the recommendation before the user answered the familiarity question -> STOP. Name the candidates and ask first.
 - Asking the user to re-describe the problem, users, entities, or success criteria when a `## Domain Model` block exists -> STOP. Read the block.
 - Reply to low familiarity lacks `[LOW FAMILIARITY]` or the exact question -> STOP. Add both.

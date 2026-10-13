@@ -201,3 +201,4 @@ Before writing the first file, verify all of the following:
 
 - `greenfield-discovery` -- produces the `## Domain Model` block this skill reads
 - `greenfield-architecture` -- produces the `## Architecture Decision` block this skill reads
+- `defining-done` -- ratifies the Definition of Done canon in `docs/DOD.md` that this skill requires

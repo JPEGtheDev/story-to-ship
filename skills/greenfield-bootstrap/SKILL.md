@@ -34,7 +34,7 @@ Every literal value (file contents, ignore entries, workflow steps, run commands
 - **Domain Model block:** read the **Problem:** field (required; it becomes the README purpose). Read **Open Questions:** (optional). Ignore the other fields.
 - **Architecture Decision block:** read the `Language:` line (required) and, for TypeScript only, the `Runtime/framework:` line. Use the text before each ` -- ` separator. Ignore the other lines.
 - NEVER ask the user to restate anything those blocks hold.
-- **No `## Domain Model` block** (a bare invocation, or an Architecture Decision block alone): write no file. Tell the user to run the `greenfield-discovery` skill first. Stop.
+- **No `## Domain Model` block** (a bare invocation, or an Architecture Decision block alone): write no file. Tell the user to run the `greenfield-discovery` skill, then the `defining-done` skill. Stop.
 - **A Domain Model block and no ratified canon:** the canon is ratified when `docs/DOD.md` exists in the working directory (the project repository root, also inside a subagent). A present file passes with no re-ratification. Only an absent file means no canon: write no file, tell the user to run the `defining-done` skill first, and stop. This check comes after the Domain Model check and before the stack question.
 - **No `## Architecture Decision` block, or a Language value that is blank, `TBD` (to be decided) or `[UNCLEAR:]`:** ask exactly one question for the stack before writing any file, then continue on the answer.
 - **A Language value that names more than one language** (for example `Go or Rust`, or `Go or Java`): ask exactly one question, which language to scaffold, before writing any file. The answer goes through the stack gate, and an unsupported answer gets the refusal text.

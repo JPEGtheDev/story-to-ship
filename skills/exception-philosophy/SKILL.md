@@ -35,16 +35,22 @@ Inputs: a description of each catch site is required. The exception type is requ
 3. Is the site inside a destructor body?
    - [+] -> apply the `cpp-safety` skill; stop here.
    - [-] -> go to 4
-4. Classify the site and print one line:
-   - Failure is unrecoverable here, or the caller owns the decision -> `VERDICT: SURFACE` (rationale: LetItCrash).
-   - Failure must be observed but not swallowed -> `VERDICT: LOG AND RETHROW` (rationale: FailFast). A broad-type catch that re-raises is this verdict and is allowed.
-   - A recovery is possible -> go to 5.
-5. HANDLE test. Did the developer state (a) a concrete recovery action with an observable end state other than "continue", and (b) how that recovery will be tested?
-   - [+] and the type is not broad -> `VERDICT: HANDLE` (rationale: DontCatchExceptions).
-   - [-] -> print `VERDICT: HANDLE WITHHELD`, name the missing item, and ask for it.
-6. Is the type broad (closed list: Exception, Error, Throwable, BaseException, std::exception, catch (...), bare except) with no specific recovery and no re-raise?
-   - [+] -> print `VERDICT: HANDLE WITHHELD` and refuse HANDLE (rationale: DontCatchExceptions). Offer SURFACE or LOG AND RETHROW.
-   - [-] -> the verdict from 4 or 5 stands.
+4. Has the developer named the exception type for this site?
+   - [+] -> go to 5
+   - [-] -> ask for the type. Print no verdict.
+5. Collect three facts, asking for any that is missing. Print no verdict yet.
+   - Type: broad (closed list: Exception, Error, Throwable, BaseException, std::exception, catch (...), bare except) or specific.
+   - Re-raise: does the catch re-raise after observing?
+   - Recovery: did the developer state (a) a concrete recovery action with an observable end state other than "continue", and (b) how that recovery will be tested?
+6. Print exactly one line for the site, from this table. Re-raise is checked first, recovery second, and a broad type changes only the last row.
+
+   | Re-raise | Recovery + test | Verdict line |
+   |----------|-----------------|--------------|
+   | yes | no | `VERDICT: LOG AND RETHROW` (rationale: FailFast); allowed for a broad type |
+   | yes | yes | `VERDICT: HANDLE` (rationale: DontCatchExceptions); the stated recovery path is evaluated as HANDLE, any type |
+   | no | yes | `VERDICT: HANDLE` (rationale: DontCatchExceptions); a broad type is not refused because a specific recovery and test are stated |
+   | no | no, type broad | `VERDICT: HANDLE WITHHELD` (rationale: DontCatchExceptions); refuse HANDLE and offer SURFACE or LOG AND RETHROW |
+   | no | no, type specific | `VERDICT: SURFACE` (rationale: LetItCrash); if the developer claims a recovery but names no end state or no test, print `VERDICT: HANDLE WITHHELD` instead, name the missing item, and ask for it |
 
 ---
 

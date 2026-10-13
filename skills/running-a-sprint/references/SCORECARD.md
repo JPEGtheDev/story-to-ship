@@ -67,7 +67,7 @@ The grep -c counters (reflog_checkouts, plan_in_diff) exit 1 on a zero count. Ru
 
 ## Auditing a subagent transcript
 
-The first-action audit script skips every record whose isSidechain is true, and every record in a subagent transcript is sidechain. On the original it prints NO_TOOL_CALLS, which looks like a pass but audited nothing. Audit a copy with isSidechain set to false on every record. The shell-write guard needs a literal write target and the script needs a regular file, so the copy goes to a literal path outside the repository:
+The first-action audit script skips every record whose isSidechain is true, and every record in a subagent transcript is sidechain. On the original it prints NO_TOOL_CALLS, which looks like a pass but audited nothing. The script needs a checkout of the repository; otherwise mark the audit UNVERIFIED. Audit a copy with isSidechain set to false on every record. The shell-write guard needs a literal write target and the script needs a regular file, so the copy goes to a literal path outside the repository:
 
 ```bash
 jq -c '.isSidechain=false' "$T" > /tmp/sidechain-cleared.jsonl

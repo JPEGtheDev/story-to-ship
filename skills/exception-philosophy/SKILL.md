@@ -38,7 +38,7 @@ Inputs: a description of each catch site is required. The exception type is requ
 4. Has the developer named the exception type for this site?
    - [+] -> go to 5
    - [-] -> ask for the type. Print no verdict.
-5. Collect three facts, asking for any that is missing. Print no verdict yet.
+5. Collect three facts. Ask for the type or the re-raise answer if it is missing; ask for recovery details only when the developer claims a recovery, and treat a site with no claimed recovery as "no" without asking. Print no verdict yet.
    - Type: broad (closed list: Exception, Error, Throwable, BaseException, std::exception, catch (...), bare except) or specific.
    - Re-raise: does the catch re-raise after observing?
    - Recovery: did the developer state (a) a concrete recovery action with an observable end state other than "continue", and (b) how that recovery will be tested?

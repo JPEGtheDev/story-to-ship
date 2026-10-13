@@ -26,15 +26,7 @@ These rows are present in the session-bootstrap "On Start" table:
 | Starting a new project from scratch | `greenfield-discovery` | domain |
 | Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` | domain |
 | Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` | domain |
-
-## Dispatch Rows (deferred)
-
-The following row is NOT yet in the session-bootstrap table because the referenced skill
-does not exist. Add the row only when its skill ships:
-
-| Task type | Skill | Ships with | Tier |
-|-----------|-------|------------|------|
-| Writing or reviewing code | add `exception-philosophy` alongside existing `code-quality` | when the skill ships | domain |
+| Writing or editing code | `exception-philosophy`, loaded alongside `code-quality` | domain |
 
 ## Dispatch Rows (routed from a parent skill)
 
@@ -50,7 +42,7 @@ Definition of Done canon item in the BEFORE PROCEEDING section of the
 
 Tag format: a trailing `Tier` column (`core` or `domain`) rather than an HTML comment
 marker, because the dispatch-rows tables above already use multi-column pipe tables
-(the active table has 3 columns, the deferred table 4) -- a Tier column is a lower-diff, mechanically
+(the active table has 3 columns) -- a Tier column is a lower-diff, mechanically
 greppable extension of the existing structure.
 
 DISCLOSURE: the "Core Skill Tags" table below is a NEW table added together with

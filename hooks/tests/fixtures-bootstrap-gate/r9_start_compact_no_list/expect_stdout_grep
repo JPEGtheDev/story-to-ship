@@ -1,0 +1,1 @@
+Reload guard: a dispatch of an agent is held until subagent-driven-development and using-git-worktrees are re-invoked; git commit or gh pr create until versioning and verification-before-completion are re-invoked; an edit under skills/ or agents/ until writing-skills is re-invoked. Nothing else is held; invoke each only when you reach that action.

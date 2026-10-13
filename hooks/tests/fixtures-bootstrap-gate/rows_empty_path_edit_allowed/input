@@ -1,0 +1,1 @@
+{"session_id":"sess-rows_empty_path_edit_allowed","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"","old_string":"a","new_string":"b"}}

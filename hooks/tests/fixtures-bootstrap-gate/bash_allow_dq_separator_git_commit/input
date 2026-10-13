@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_allow_dq_separator_git_commit","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"echo \"a; git commit -m x\""}}

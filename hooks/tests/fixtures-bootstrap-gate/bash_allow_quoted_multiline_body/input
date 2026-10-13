@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_allow_quoted_multiline_body","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"gh issue create --body \"steps:\ngit commit -m x\n\""}}

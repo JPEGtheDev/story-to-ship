@@ -1,0 +1,4 @@
+"gate":"reload"
+"tool_name":"Bash"
+"mode":"deny"
+sess-bash_gh_repo_pr_create

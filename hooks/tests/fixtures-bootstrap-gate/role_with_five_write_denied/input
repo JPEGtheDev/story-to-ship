@@ -1,0 +1,1 @@
+{"session_id":"sess-role_with_five_write_denied","hook_event_name":"PreToolUse","tool_name":"Write","tool_input":{"file_path":"/tmp/x","content":"b"}}

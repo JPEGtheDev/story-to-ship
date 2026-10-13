@@ -1,0 +1,3 @@
+permissionDecision
+deny
+reload-gate: 2 skills needed after the last compaction or resume are not re-invoked yet: writing-skills, running-a-sprint. Invoke each with the Skill tool, then retry.

@@ -1,0 +1,1 @@
+{"session_id":"sess-bash_work_tree_eq_commit","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"git --work-tree=/x commit -m y"}}

@@ -82,7 +82,7 @@ Copy one row per runner into the sprint ledger.
 
 - Story: <story reference>
 - Predictions held: <names> / missed: <names, or none>
-- First three skill calls: <list>; first-action audit: <CLEAN or MISS>
+- First three skill calls: <list>; first-action audit: <CLEAN, MISS, or UNVERIFIED>
 - cd into worktrees count: <n>; background children: <explicit true, not explicitly false>
 - Dispatch count: <n>; dispatches without a model: <n>
 - Main-checkout reflog checkout lines: <n>; plan file in the PR diff: <n>

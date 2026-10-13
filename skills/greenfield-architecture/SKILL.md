@@ -21,25 +21,30 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Load this skill when a developer starts a new project and needs a primary language, a runtime or framework, and an initial architecture. The skill writes no files, generates no stories, and creates no project. It ends with the `## Architecture Decision` block.
 
-A user who has only an idea and wants the full domain interview is pointed to the `greenfield-discovery` skill. The bare path below still works without it.
+### Entry Gate
+
+Check in this order, before any other question:
+
+1. No `## Domain Model` block in the conversation: write no recommendation and ask no architecture question. Tell the user to run the `greenfield-discovery` skill, then the `defining-done` skill, and stop. A request for only a language gets the same answer.
+2. A block exists and `docs/DOD.md` is absent from the working directory (the project repository root, also inside a subagent): invoke the `defining-done` skill with the user, then continue. A present file passes through with no re-ratification.
+
+When no user can answer (this skill runs in a subagent, or nobody can reply), each check becomes a stop that writes nothing and names the missing fact: the Domain Model block, or the ratified canon.
 
 ---
 
 ## Input Paths
 
-**Context:** The skill starts from two situations: the conversation holds a `## Domain Model` block, or it holds none.
+**Context:** The skill starts from a conversation that holds a `## Domain Model` block.
 
-**Forces:** A user asked to re-describe what the block already says loses trust and time. A bare invocation has no facts, so recommending without three basic facts guesses.
+**Forces:** A user asked to re-describe what the block already says loses trust and time.
 
-- **Domain-model path.** Use the most recent `## Domain Model` block. Its five fields are Problem, Users, Core Entities, Success Criteria, and Open Questions. NEVER ask the user to re-describe anything those fields contain. Deployment target is not a block field, so ask for it unless the conversation already states it.
-- **Bare path.** No block exists. Ask only problem type, output type, and deployment target before recommending.
+Use the most recent `## Domain Model` block. Its five fields are Problem, Users, Core Entities, Success Criteria, and Open Questions. NEVER ask the user to re-describe anything those fields contain. Deployment target is not a block field, so ask for it unless the conversation already states it.
 
 ### Turn Order
 
-| Path | Turn 1 | Turn 2 | Turn 3 |
-|------|--------|--------|--------|
-| Domain-model | Ask only the context facts the block lacks (facts this skill needs that the block does not hold, such as deployment target), name two or three candidate stacks without recommending one, and ask familiarity | Recommendation and `## Architecture Decision` block | none |
-| Bare | Ask only problem type, output type, deployment target | Name two or three candidates without recommending one, ask familiarity | Recommendation and `## Architecture Decision` block |
+| Turn 1 | Turn 2 |
+|--------|--------|
+| Ask only the context facts the block lacks (facts this skill needs that the block does not hold, such as deployment target), name two or three candidate stacks without recommending one, and ask familiarity | Recommendation and `## Architecture Decision` block |
 
 Name two or three candidates, never more. Candidates come from no fixed list of stacks; name what fits the problem.
 
@@ -129,20 +134,22 @@ A measurable condition names an observable event, such as "when the first integr
 
 Before emitting the recommendation and the `## Architecture Decision` block, verify all of the following:
 
-1. Input path settled: the most recent `## Domain Model` block was read, or the three bare-path facts (problem type, output type, deployment target) were asked and answered
+1. Entry gate passed: the most recent `## Domain Model` block was read and `docs/DOD.md` exists
 2. Two or three candidates named (never more) and familiarity answered (or declined twice and recorded as "familiarity not reported")
 3. `[LOW FAMILIARITY]` handled if low familiarity was reported: the question was asked and the answer applied
 4. The decision-deferral reference was read and its diagnostic ran on every architectural decision
 5. No blocking contradiction or blocking `[UNCLEAR:]` remains on the language or runtime; a blocking `[UNCLEAR:]` on persistence or API boundary sits in its field and its question was asked
 6. Every deferred item carries a measurable condition
+7. No recommendation or architecture question was written before the entry gate passed
 
-[+] All 6 met -> emit the recommendation and the block
-[-] Any unmet -> complete the unmet step; DO NOT emit the block until all 6 are met
+[+] All 7 met -> emit the recommendation and the block
+[-] Any unmet -> complete the unmet step; DO NOT emit the block until all 7 are met
 
 ---
 
 ## Red Flags -- STOP
 
+- Recommending a language or asking an architecture question with no `## Domain Model` block or no `docs/DOD.md` -> STOP. Send the user to the `greenfield-discovery` skill, then the `defining-done` skill.
 - Presenting a single stack as the recommendation before the user answered the familiarity question -> STOP. Name the candidates and ask first.
 - Asking the user to re-describe the problem, users, entities, or success criteria when a `## Domain Model` block exists -> STOP. Read the block.
 - Reply to low familiarity lacks `[LOW FAMILIARITY]` or the exact question -> STOP. Add both.
@@ -159,6 +166,7 @@ Before emitting the recommendation and the `## Architecture Decision` block, ver
 
 | Excuse | Reality |
 |--------|---------|
+| "The user only wants a language, so skip discovery" | A language picked with no Domain Model block is a guess. Send the user to the `greenfield-discovery` skill, then the `defining-done` skill, and stop. |
 | "One stack is obviously right, so asking familiarity wastes a turn" | The best stack the developer cannot maintain is the wrong stack. The question costs one turn; a mismatch costs the project. |
 | "The domain model is vague, so I will ask the user to restate it" | Read the block. Surface its `[UNCLEAR:]` items and ask only about those and the missing context facts. |
 | "The user said they want to try the stack, so low familiarity is a plus" | Wanting to try it is low familiarity. Emit `[LOW FAMILIARITY]` and the question; the user decides. |
@@ -173,4 +181,5 @@ Before emitting the recommendation and the `## Architecture Decision` block, ver
 ## Related Skills
 
 - `greenfield-discovery` -- produces the `## Domain Model` block this skill reads
+- `defining-done` -- ratifies the Definition of Done canon before this skill continues
 - `writing-plans` -- owns the decision-deferral reference and its Decision-Deferral Gate

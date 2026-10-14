@@ -120,7 +120,7 @@ Specifically flag any case where:
 
 - **COVERAGE:** the message asserts that a search, review, or scan was exhaustive ("fully covered," "0 remaining," "all cases," "checked everything").
 - **CLOSURE/COMPLETION:** the message asserts that work reached a finished, correct state ("done," "fixed," "resolved," "passes," "all tests pass").
-- **CAUSAL:** the message asserts a cause or diagnosis ("X because Y," "the bug is X," "this fails because of Z").
+- **CAUSAL:** the message asserts a cause, diagnosis, or explanation ("X because Y," "the bug is X," "this fails because of Z").
 
 The test is semantic, not keyword matching: would a reader take the message as a settled conclusion about coverage, completion, or causation, rather than as an open question, a plan, or a narration of steps with no concluding claim? Apply that test to each message. The informal labels "declare-clean" and "causal" used in this file refer to the same population defined here.
 

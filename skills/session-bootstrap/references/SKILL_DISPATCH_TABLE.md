@@ -101,10 +101,11 @@ greenfield-discovery -> defining-done -> greenfield-architecture -> greenfield-b
                                           block)
 ```
 
-`greenfield-architecture` also works from a bare start without discovery: it asks for the
-problem type, output type, and deployment target instead of reading a Domain Model block.
-`greenfield-bootstrap` needs a Domain Model block; with none it writes no file and points the
-user to `greenfield-discovery`. With no Architecture Decision block it asks one question for the stack.
+With no Domain Model block, `greenfield-architecture` and `greenfield-bootstrap` each stop and
+route to `greenfield-discovery`, then `defining-done`. With a Domain Model block but no
+`docs/DOD.md`, `greenfield-architecture` invokes `defining-done` and then continues, while
+`greenfield-bootstrap` writes nothing and routes to `defining-done`. With no Architecture
+Decision block, `greenfield-bootstrap` asks one question for the stack.
 
 ## Consequences
 

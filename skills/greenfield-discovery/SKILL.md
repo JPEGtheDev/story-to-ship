@@ -163,6 +163,7 @@ Before producing the `## Domain Model` block, verify all of the following:
 | "The ## Domain Model has some placeholders but I will fill them in during architecture" | A model with placeholders is not a model. Architecture decisions made against placeholders produce the wrong architecture. Fill every field now. |
 | "I see a contradiction but it is minor -- I will note it later" | Minor contradictions compound. Flag `[UNCLEAR:]` at the moment of detection and resolve before asking the next question, unless the user explicitly defers it (see Contradiction Detection). An agent-chosen "later" does not exist. |
 | "greenfield-architecture already knows the domain -- I will skip reading the ## Domain Model" | Read the existing `## Domain Model` block. The most recent block is authoritative. Architecture built from a stale or assumed domain produces a misaligned design. |
+| "I will ratify the Definition of Done after the architecture is chosen" | The product owner is live now, and the canon is what stories read afterwards. Ratify right after the Domain Model and before architecture or bootstrap (see Downstream Contract). |
 | "The user is in a hurry -- I will ask fewer questions" | The interview requires at least one question per category: problem, users, core entities, success criteria. Speed is not grounds for skipping categories. A rushed domain model produces the wrong architecture. |
 
 ---

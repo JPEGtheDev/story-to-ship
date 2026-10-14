@@ -7,7 +7,7 @@ description: Use when a Domain Model block and an Architecture Decision block ex
 ## Iron Law
 
 ```
-YOU MUST WRITE NO FILE UNTIL THE DOMAIN MODEL AND A SUPPORTED STACK ARE CONFIRMED AND EITHER NONE OF THE LISTED TARGET PATHS EXISTS OR THE USER SAID OVERWRITE, AND REPORT PASSED ONLY FOR A HELLO WORLD RUN THAT EXITED 0.
+YOU MUST WRITE NO FILE UNTIL THE DOMAIN MODEL, A RATIFIED DEFINITION OF DONE CANON AND A SUPPORTED STACK ARE CONFIRMED AND EITHER NONE OF THE LISTED TARGET PATHS EXISTS OR THE USER SAID OVERWRITE, AND REPORT PASSED ONLY FOR A HELLO WORLD RUN THAT EXITED 0.
 No exceptions.
 ```
 
@@ -19,7 +19,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## When to Invoke
 
-Load this skill after the `greenfield-discovery` skill (it produces the `## Domain Model` block) and the `greenfield-architecture` skill (it produces the `## Architecture Decision` block). The skill ends with the `## Bootstrapped Files` block.
+Load this skill after the `greenfield-discovery` skill (it produces the `## Domain Model` block), the `defining-done` skill (it writes `docs/DOD.md`) and the `greenfield-architecture` skill (it produces the `## Architecture Decision` block). The skill ends with the `## Bootstrapped Files` block.
 
 Every literal value (file contents, ignore entries, workflow steps, run commands, tokens) lives in `references/SHARED_TEMPLATES.md` (tokens, language mapping, shared file templates) and in the chosen stack's file under `references/stacks/` (that stack's fields). Copy values from them as written. This file holds the procedure and the gates only. The hello world is the one-line program the stack's template prints.
 
@@ -34,10 +34,11 @@ Every literal value (file contents, ignore entries, workflow steps, run commands
 - **Domain Model block:** read the **Problem:** field (required; it becomes the README purpose). Read **Open Questions:** (optional). Ignore the other fields.
 - **Architecture Decision block:** read the `Language:` line (required) and, for TypeScript only, the `Runtime/framework:` line. Use the text before each ` -- ` separator. Ignore the other lines.
 - NEVER ask the user to restate anything those blocks hold.
-- **No `## Domain Model` block** (a bare invocation, or an Architecture Decision block alone): write no file. Tell the user to run the `greenfield-discovery` skill first. Stop.
+- **No `## Domain Model` block** (a bare invocation, or an Architecture Decision block alone): write no file. Tell the user to run the `greenfield-discovery` skill, then the `defining-done` skill. Stop.
+- **A Domain Model block and no ratified canon:** the canon is ratified when `docs/DOD.md` exists in the working directory (the project repository root, also inside a subagent). A present file passes with no re-ratification. Only an absent file means no canon: write no file, tell the user to run the `defining-done` skill first, and stop. This check comes after the Domain Model check and before the stack question.
 - **No `## Architecture Decision` block, or a Language value that is blank, `TBD` (to be decided) or `[UNCLEAR:]`:** ask exactly one question for the stack before writing any file, then continue on the answer.
 - **A Language value that names more than one language** (for example `Go or Rust`, or `Go or Java`): ask exactly one question, which language to scaffold, before writing any file. The answer goes through the stack gate, and an unsupported answer gets the refusal text.
-- **No user able to answer** (the skill runs inside a subagent, or nobody can reply): every question in this skill becomes a stop. Write no file. Name the missing fact: the stack, or the overwrite decision.
+- **No user able to answer** (the skill runs inside a subagent, or nobody can reply): every question in this skill becomes a stop. Write no file. Name the missing fact: the stack, the overwrite decision, or the ratified canon.
 
 ---
 
@@ -147,22 +148,25 @@ DO NOT run `git init`, commit, push, or create a remote. DO NOT install toolchai
 Before writing the first file, verify all of the following:
 
 1. A `## Domain Model` block with a Problem field exists
-2. The Language value is known (from the block or from one answer) and maps to a stack section; for TypeScript the Runtime/framework value is on the supported list
-3. The field-2 probe ran, and for Go and C# the version value is substituted
-4. Every path the stack writes is listed, and none exists, or the user said overwrite
+2. `docs/DOD.md` exists (the ratified canon)
+3. The Language value is known (from the block or from one answer) and maps to a stack section; for TypeScript the Runtime/framework value is on the supported list
+4. The field-2 probe ran, and for Go and C# the version value is substituted
+5. Every path the stack writes is listed, and none exists, or the user said overwrite
 
-[+] All 4 met -> write the files
+[+] All 5 met -> write the files
 [-] Any unmet -> write nothing; run the step that matches the unmet condition, or stop naming the missing fact when no user can answer:
-- Item 1 unmet -> tell the user to run `greenfield-discovery`.
-- Item 2 unmet because the Language value is absent, blank, `TBD` or `[UNCLEAR:]`, or names more than one language -> ask the one stack question. The answer goes through the stack gate.
-- Item 2 unmet because the Language value or the TypeScript Runtime/framework value is not supported -> print the refusal text.
-- Item 3 unmet -> run the field-2 probe and substitute the values.
-- Item 4 unmet -> ask the overwrite question.
+- Item 1 unmet -> tell the user to run `greenfield-discovery`, then `defining-done`.
+- Item 2 unmet -> tell the user to run `defining-done`.
+- Item 3 unmet because the Language value is absent, blank, `TBD` or `[UNCLEAR:]`, or names more than one language -> ask the one stack question. The answer goes through the stack gate.
+- Item 3 unmet because the Language value or the TypeScript Runtime/framework value is not supported -> print the refusal text.
+- Item 4 unmet -> run the field-2 probe and substitute the values.
+- Item 5 unmet -> ask the overwrite question.
 
 ---
 
 ## Red Flags -- STOP
 
+- Writing a file because an Architecture Decision block exists while `docs/DOD.md` is absent -> STOP. Tell the user to run `defining-done`.
 - Asking the user to restate the problem or the stack when the blocks hold them -> STOP. Read the blocks.
 - Writing a file before the stack gate and the existing-file check passed -> STOP. Write nothing until both pass.
 - Filling a refusal with a paraphrase, or scaffolding the nearest stack -> STOP. Print the exact text with [X] filled in.
@@ -180,6 +184,7 @@ Before writing the first file, verify all of the following:
 
 | Excuse | Reality |
 |--------|---------|
+| "The Architecture Decision block exists, so the canon is not needed" | The block records the stack, not the Definition of Done. Without `docs/DOD.md`, write nothing and send the user to `defining-done`. |
 | "The user is gone, so I will pick the stack myself" | An unanswerable question is a stop. Name the missing fact and write nothing. |
 | "The toolchain is missing, so I will report PASSED from reading the code" | PASSED means a run exited 0. Report NOT RUN, name the tool, and never install it. |
 | "The directory holds only a README.md, so merging a few lines is harmless" | A merge destroys the user's file and breaks the exact file list. Ask once: overwrite the listed files, or stop. |
@@ -196,3 +201,4 @@ Before writing the first file, verify all of the following:
 
 - `greenfield-discovery` -- produces the `## Domain Model` block this skill reads
 - `greenfield-architecture` -- produces the `## Architecture Decision` block this skill reads
+- `defining-done` -- ratifies the Definition of Done canon in `docs/DOD.md` that this skill requires

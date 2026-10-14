@@ -7,11 +7,12 @@
 #    mode) tool use in a session that has not yet completed
 #    Skill(session-bootstrap), as recorded by a
 #    .bootstrap-pending-<session_id> flag file that hooks/session-start.sh
-#    stamps on every SessionStart and hooks/bootstrap-gate-post.sh clears
-#    once the session-bootstrap Skill call completes. While this flag is
-#    present and the call is not the Skill(session-bootstrap) call itself,
-#    this gate alone decides the outcome and the reload gate below never
-#    runs.
+#    stamps on every SessionStart whose payload has no non-empty agent_id
+#    (a subagent payload stamps nothing) and hooks/bootstrap-gate-post.sh
+#    clears once the session-bootstrap Skill call completes. While this
+#    flag is present and the call is not the Skill(session-bootstrap) call
+#    itself, this gate alone decides the outcome and the reload gate below
+#    never runs.
 #
 # 2. Reload gate (second, only Edit, Write, NotebookEdit, Agent and Bash).
 #    After a compaction or resume, hooks/session-start.sh writes the skills

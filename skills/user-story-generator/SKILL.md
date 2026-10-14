@@ -125,6 +125,8 @@ existed -- "present but unreadable" is not "absent".
 and state in the generated story that no ratified canon exists and the Definition of
 Done section uses unratified template defaults.
 
+**Editing these marker rules:** when you change a marker string, its emit condition, or the canon parse rules in this section, run the fixture procedure in the `defining-done` skill (its fixture harness reference) before merging. The procedure needs a repository checkout, and each model-backed run needs the owner's consent.
+
 ## Rationalization Prevention
 
 | Excuse | Reality |

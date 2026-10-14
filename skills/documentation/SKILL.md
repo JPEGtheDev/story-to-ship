@@ -41,7 +41,7 @@ Before writing any documentation:
 | Domain guides and standards | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
-| Agent onboarding | `AGENTS.md` -- summarize only |
+| Agent onboarding | `AGENTS.md` at the project root, when the project keeps one -- summarize only |
 
 ---
 

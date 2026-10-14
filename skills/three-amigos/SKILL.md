@@ -40,6 +40,8 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
 ## BEFORE PROCEEDING
 
 1. Which ceremony? (see When to Invoke)
+   [+] Ceremony named from the When to Invoke table -> go to item 2
+   [-] No ceremony named -> pick one from the table before dispatching
 2. Did Discovery run? Check plan.md for `## Feature Specification`.
    [+] -> Three Amigos for Ceremonies 2, 5, 6
    [-] -> Skeptic + plan-reviewer pair for Ceremony 2 (see `writing-plans`)

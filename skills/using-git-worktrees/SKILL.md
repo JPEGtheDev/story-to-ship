@@ -14,9 +14,9 @@ No exceptions.
 
 Violating the letter of this rule is violating the spirit of this rule.
 
-Every subagent gets its own worktree. The main context reviews and merges.
-
 **Announce at start:** "I am using the using-git-worktrees skill to create a worktree for [purpose]."
+
+Every subagent gets its own worktree. The main context reviews and merges.
 
 ---
 

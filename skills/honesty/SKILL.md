@@ -26,6 +26,8 @@ See `references/HONESTY_PRINCIPLES.md` for trust rationale, Show Your Work, Trus
 
 ## The Confidence Vocabulary Gate
 
+**Context:** Wording a result, a status, or a level of certainty in any response.
+
 | Forbidden without evidence  | Required replacement                                          |
 |-----------------------------|---------------------------------------------------------------|
 | "Done" / "Complete" / "Fixed" | Show the verification output inline, then state completion  |

@@ -40,7 +40,7 @@ The output MUST match `{{REPO_PATH}}`.
 
 Read these files in order:
 
-1. `{{EVENTS_JSONL_PATH}}` -- the raw event stream. If the dispatcher has not produced it (the file is missing or has zero lines) and the session transcript is available, run `python3 tools/session_events/session_to_events.py {{TRANSCRIPT_PATH}} --out {{EVENTS_JSONL_PATH}}` from `{{REPO_PATH}}` (needs a checkout of the repository; otherwise the converter counts as missing, see the next sentence); never run it over a non-empty file. A non-zero exit, a missing converter, or a zero-line output means the converter could not run: name the raw transcript as the substitute source in the report. Extract:
+1. `{{EVENTS_JSONL_PATH}}` -- the raw event stream. If the dispatcher has not produced it (the file is missing or has zero lines) and the session transcript is available (the supplied {{TRANSCRIPT_PATH}}, or the path derived in the header when none was supplied; write the derived path out with the home directory expanded, since quotes block `~` expansion), run `python3 tools/session_events/session_to_events.py "{{TRANSCRIPT_PATH}}" --out "{{EVENTS_JSONL_PATH}}"` from `{{REPO_PATH}}` (needs a checkout of the repository; otherwise the converter counts as missing, see the next sentence); never run it over a non-empty file. A non-zero exit, a missing converter, or a zero-line output means the converter could not run: name the raw transcript as the substitute source in the report. Extract:
    - All `user.message` events -> what the user actually asked for
    - All `skill.invoked` events -> which skills were loaded, and when
    - File writes and shell commands are not in the events log: read the raw transcript's `Edit`, `Write`, `NotebookEdit`, and `Bash` tool calls for when code or files were written
@@ -116,11 +116,11 @@ Specifically flag any case where:
 
 ### Empirical-backing precision-split (declare-clean / causal claims)
 
-**Candidate set:** A claim is in scope for this split if it is a settled verdict of one of three classes:
+**Candidate set:** A claim is in scope for this split if it is a settled verdict of one of three claim types:
 
 - **COVERAGE:** the message asserts that a search, review, or scan was exhaustive ("fully covered," "0 remaining," "all cases," "checked everything").
 - **CLOSURE/COMPLETION:** the message asserts that work reached a finished, correct state ("done," "fixed," "resolved," "passes," "all tests pass").
-- **CAUSAL:** the message asserts a cause or diagnosis ("X because Y," "the bug is X," "this fails because of Z").
+- **CAUSAL:** the message asserts a cause, diagnosis, or explanation ("X because Y," "the bug is X," "this fails because of Z").
 
 The test is semantic, not keyword matching: would a reader take the message as a settled conclusion about coverage, completion, or causation, rather than as an open question, a plan, or a narration of steps with no concluding claim? Apply that test to each message. The informal labels "declare-clean" and "causal" used in this file refer to the same population defined here.
 

@@ -9,7 +9,7 @@ session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 Applies when: A developer opens a new session to build a new project from scratch -- no existing codebase, no defined architecture.
 
-Does NOT apply when: An existing project is being extended or refactored. Use existing `execution`, `brainstorming`, and `writing-plans` routes for those tasks. The last row of the active table, `exception-philosophy`, is not a greenfield row: it applies to all code writing, new or existing.
+Does NOT apply when: An existing project is being extended or refactored. Use existing `execution`, `brainstorming`, and `writing-plans` routes for those tasks. Two rows of the active table are not greenfield rows: `defining-done` applies whenever a Definition of Done canon is ratified or changed, and the last row, `exception-philosophy`, applies to all code writing, new or existing.
 
 ## Forces
 

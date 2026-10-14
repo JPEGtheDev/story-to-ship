@@ -70,6 +70,7 @@ Before writing code, invoke the `Skill` tool for the skill(s) relevant to your t
 | Parallel agent work / A/B testing            | `subagent-driven-development`, `using-git-worktrees` |
 | Creating user stories                        | `user-story-generator`, `user-story-estimation`    |
 | Creating or editing a skill file             | `writing-skills`                                   |
+| Ratifying or changing a Definition of Done canon or its markers | `defining-done` |
 | Resuming from a prior session with pending tasks | `writing-plans`; if `## Feature Specification` present in plan.md: dispatch `three-amigos` Refinement; otherwise dispatch the Skeptic + plan-reviewer pair (see `writing-plans`), before first implementation step |
 | Schema design, new data structure, or plan with >=5 implementation items | `brainstorming`, `writing-plans` |
 | Auditing communication quality or postmortem | `honesty`, `communication`, `session-postmortem`   |

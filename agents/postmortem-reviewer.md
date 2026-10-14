@@ -116,7 +116,7 @@ Specifically flag any case where:
 
 ### Empirical-backing precision-split (declare-clean / causal claims)
 
-**Candidate set:** A claim is in scope for this split if it is a settled verdict of one of three classes:
+**Candidate set:** A claim is in scope for this split if it is a settled verdict of one of three claim types:
 
 - **COVERAGE:** the message asserts that a search, review, or scan was exhaustive ("fully covered," "0 remaining," "all cases," "checked everything").
 - **CLOSURE/COMPLETION:** the message asserts that work reached a finished, correct state ("done," "fixed," "resolved," "passes," "all tests pass").

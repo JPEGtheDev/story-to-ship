@@ -41,6 +41,8 @@ Skipping any step = lying, not verifying.
 
 **Definition of Done canon:** if `docs/DOD.md` exists at the repo root, invoke the `dod-canon-check` skill with the Skill tool before any completion claim. [-] If it exists and that skill is not loaded and satisfied, do not make the claim.
 
+**Editing the canon rule above:** the fixture procedure in the `defining-done` skill (its fixture harness reference) runs `dod-canon-check` directly and never this skill, so after a change here confirm the rule still names `dod-canon-check`, and run that procedure only when the change also alters the marker lines `dod-canon-check` emits. This adds no step to a completion claim. The procedure needs a repository checkout, and each model-backed run needs the owner's consent.
+
 **For runtime behavior fixes** (the original bug report described what the user sees, hears, or experiences in the running application): Step 2 (RUN) MUST produce an observation artifact (a screenshot of the relevant user interface (UI) state or a log excerpt from the running process) that shows the reported symptom is absent. A pass/fail test result does not satisfy this step -- it verifies code logic, not observed runtime behavior. Show the observation artifact inline before claiming the fix is complete.
 
 ---

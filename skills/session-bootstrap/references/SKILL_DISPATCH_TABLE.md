@@ -1,6 +1,6 @@
 # Skill Dispatch Table -- Greenfield Workflow
 
-Context, forces, and row definitions for the greenfield dispatch rows, plus the code-writing `exception-philosophy` row, added to the
+Context, forces, and row definitions for the greenfield dispatch rows, plus the `defining-done` row and the code-writing `exception-philosophy` row, added to the
 session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 ---
@@ -9,7 +9,7 @@ session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 Applies when: A developer opens a new session to build a new project from scratch -- no existing codebase, no defined architecture.
 
-Does NOT apply when: An existing project is being extended or refactored. Use existing `execution`, `brainstorming`, and `writing-plans` routes for those tasks. The last row of the active table, `exception-philosophy`, is not a greenfield row: it applies to all code writing, new or existing.
+Does NOT apply when: An existing project is being extended or refactored. Use existing `execution`, `brainstorming`, and `writing-plans` routes for those tasks. Two rows of the active table are not greenfield rows: `defining-done` applies whenever a Definition of Done canon is ratified or changed, and the last row, `exception-philosophy`, applies to all code writing, new or existing.
 
 ## Forces
 
@@ -26,6 +26,7 @@ These rows are present in the session-bootstrap "On Start" table:
 | Starting a new project from scratch | `greenfield-discovery` | domain |
 | Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` | domain |
 | Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` | domain |
+| Ratifying or changing a Definition of Done canon or its markers | `defining-done` | domain |
 | Writing or editing code | `exception-philosophy`, loaded alongside `code-quality` | domain |
 
 ## Dispatch Rows (routed from a parent skill)

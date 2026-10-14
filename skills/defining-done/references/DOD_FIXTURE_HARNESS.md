@@ -25,7 +25,7 @@ directory. The harness README defers to it.
 
 Run every command from the repository root (`git rev-parse --show-toplevel` finds
 it). The harness lives in a repository checkout that contains
-`tools/dod_fixtures/`.
+`tools/dod_fixtures/`; without a checkout, skip the harness and state in the pull request that it was not run.
 
 - `tools/dod_fixtures/run-scenario.sh --list` lists the scenarios.
   `tools/dod_fixtures/README.md`, Section 3, holds the per-scenario procedure.

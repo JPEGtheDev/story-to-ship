@@ -252,6 +252,7 @@ jobs:
           check skills/execution/SKILL.md "A copy that is only read or run is allowed once the denial is stated; a copy whose content is carried back into the denied target is the denied edit retried, and it goes to an implementer."
           check skills/execution/SKILL.md "Writing a commit message, in a dispatch prompt or in a git commit call, is creating a commit: load the versioning skill first if it is not loaded this session."
           check agents/postmortem-reviewer.md "{{TRANSCRIPT_PATH}}" "blame direction"
+          check agents/postmortem-reviewer.md 'session_to_events.py "{{TRANSCRIPT_PATH}}" --out "{{EVENTS_JSONL_PATH}}"'
           if [ "$missing" -gt 0 ]; then
             printf 'Found %s missing contract string(s)\n' "$missing"
             exit 1

@@ -1,6 +1,6 @@
 # Skill Dispatch Table -- Greenfield Workflow
 
-Context, forces, and row definitions for the greenfield dispatch rows, plus the code-writing `exception-philosophy` row, added to the
+Context, forces, and row definitions for the greenfield dispatch rows, plus the `defining-done` row and the code-writing `exception-philosophy` row, added to the
 session-bootstrap "On Start -- Minimum Skill Loads by Task Type" table.
 
 ---
@@ -26,6 +26,7 @@ These rows are present in the session-bootstrap "On Start" table:
 | Starting a new project from scratch | `greenfield-discovery` | domain |
 | Choosing a language, runtime, framework, or initial architecture for a new project | `greenfield-architecture` | domain |
 | Writing starter files for a new project once its domain model and architecture are decided | `greenfield-bootstrap` | domain |
+| Ratifying or changing a Definition of Done canon or its markers | `defining-done` | domain |
 | Writing or editing code | `exception-philosophy`, loaded alongside `code-quality` | domain |
 
 ## Dispatch Rows (routed from a parent skill)

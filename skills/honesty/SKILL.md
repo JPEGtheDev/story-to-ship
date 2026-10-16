@@ -92,7 +92,7 @@ surface-form list, is what catches causal-claim decay.
 **Scope of this tripwire (stated so it does not overclaim).** The surface-form list catches
 the high-volume DECLARE-CLEAN class only. It does NOT catch general causal or mechanism
 claims phrased outside these forms -- those are carried by the re-assertion rule above and
-by the postmortem-reviewer precision-split detector (after the fact). This is a volume net
+by the postmortem-reviewer precision-split detector (after the fact; it sorts each claim's evidence as absent, gathered-not-shown, or epistemically-marked). This is a volume net
 with a known ceiling, not a complete evidence gate.
 
 **Class-anchored closure (specialization for CLASS claims).** A claim that a defect CLASS is

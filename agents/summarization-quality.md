@@ -1,6 +1,7 @@
 ---
 name: summarization-quality
 model: sonnet
+tools: Read, Write
 description: Use when evaluating a synthesized summary article for faithfulness, completeness, and actionability.
 ---
 

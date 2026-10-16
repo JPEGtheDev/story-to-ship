@@ -1,6 +1,7 @@
 ---
 name: amigo
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use when dispatching a Three Amigos ceremony participant.
 ---
 <!-- Per-ceremony model tiers are defined in skills/subagent-driven-development/references/MODEL_SELECTION.md (Tier Assignments section). The frontmatter model is the default; the dispatching skill overrides it per ceremony. -->

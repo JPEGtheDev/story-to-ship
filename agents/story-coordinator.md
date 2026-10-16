@@ -1,6 +1,7 @@
 ---
 name: story-coordinator
 model: sonnet
+tools: Read, Grep, Glob, Bash, Edit, Write, Skill, Agent
 description: Use when running one story issue end to end as a coordinator subagent that plans, dispatches children, opens a pull request, and hands back.
 ---
 

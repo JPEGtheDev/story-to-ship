@@ -1,6 +1,7 @@
 ---
 name: explorer
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use for read-only multi-file research to answer specific questions.
 ---
 

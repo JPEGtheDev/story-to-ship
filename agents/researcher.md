@@ -1,6 +1,7 @@
 ---
 name: researcher
 model: sonnet
+tools: Read, Grep, Glob, Bash, Write
 description: Use when empirically confirming or denying a hypothesis.
 ---
 

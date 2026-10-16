@@ -1,6 +1,7 @@
 ---
 name: infrastructure-reviewer
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use for per-file CI/CD, reproducible build, and sandboxed/packaging compliance review.
 ---
 

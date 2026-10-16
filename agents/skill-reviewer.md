@@ -1,6 +1,7 @@
 ---
 name: skill-reviewer
 model: opus
+tools: Read, Grep, Glob, Bash
 description: Use when auditing skill files against writing-skills criteria.
 ---
 

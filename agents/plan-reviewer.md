@@ -1,6 +1,7 @@
 ---
 name: plan-reviewer
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use when reviewing a plan for soundness, sequencing, and enforceability before implementation begins.
 ---
 

@@ -185,6 +185,29 @@ jobs:
           fi
           echo "[+] No agents/ or skills/*/SKILL.md frontmatter value contains an unquoted colon-space"
 
+      - name: Require one tools line in agents/ frontmatter
+        # AGENTS_DIR exists so the gate-can-fail proofs can point this step at a
+        # temp copy; CI never sets it. A template with no tools line inherits every
+        # tool, which is the cost this gate keeps out.
+        run: |
+          set -e
+          fail=0
+          for f in "${AGENTS_DIR:-agents}"/*.md; do
+            fm=$(sed -n '2,/^---$/p' "$f")
+            closed=$(printf '%s\n' "$fm" | tail -n 1)
+            n=$(printf '%s\n' "$fm" | grep -cE '^tools: *[A-Za-z]' || true)
+            other=$(printf '%s\n' "$fm" | sed '$d' | grep -cvE '^[A-Za-z_-]+: ' || true)
+            if [ "$closed" != "---" ] || [ "$other" -ne 0 ] || [ "$n" -ne 1 ]; then
+              printf 'FAILED: %s needs one non-empty tools: line in a closed frontmatter block of key: value lines (tools lines %s, other lines %s)\n' "$f" "$n" "$other"
+              fail=$((fail + 1))
+            fi
+          done
+          if [ "$fail" -gt 0 ]; then
+            echo "Found $fail agents/ template(s) without a valid tools: line"
+            exit 1
+          fi
+          echo "[+] Every agents/ template has one tools: line in its frontmatter"
+
       - name: Check agent template contracts
         run: |
           set -e

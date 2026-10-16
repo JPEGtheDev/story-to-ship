@@ -90,7 +90,7 @@ called out here for reviewer attention.
 ## Greenfield Invocation Chain
 
 Three greenfield skills form the chain, with a Definition of Done step between the first two.
-The required order, enforced for its first two steps, is discovery, then `defining-done`, which ratifies the
+The order, with the first two steps required before architecture or bootstrap, is discovery, then `defining-done`, which ratifies the
 Definition of Done (DoD) with the product owner, then architecture, then bootstrap. The skills
 pass blocks forward in the conversation: `greenfield-architecture` reads the Domain Model
 block, and `greenfield-bootstrap` reads the Domain Model and Architecture Decision blocks, so

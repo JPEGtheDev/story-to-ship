@@ -13,7 +13,7 @@ Does NOT apply when: An existing project is being extended or refactored. Use ex
 
 ## Forces
 
-Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. On the full domain-model path, the `greenfield-discovery` skill is the gate that ensures domain understanding precedes the downstream decisions.
+Without greenfield-specific routing, new projects jump directly to architecture or implementation before the problem domain is understood. Domain interviews that run after architecture is chosen produce models that rationalize the existing design rather than revealing the correct one. On the full domain-model path (the whole `greenfield-discovery` interview, ending in the `## Domain Model` block), the `greenfield-discovery` skill is the gate that ensures domain understanding precedes the downstream decisions.
 
 Adding dispatch rows before their referenced skills exist causes broken sessions -- the model invokes a skill file that does not exist. Rows are added only when the referenced skill ships.
 
@@ -90,7 +90,7 @@ called out here for reviewer attention.
 ## Greenfield Invocation Chain
 
 Three greenfield skills form the chain, with a Definition of Done step between the first two.
-The recommended order is discovery, then `defining-done`, which ratifies the
+The order, with the first two steps required before architecture or bootstrap, is discovery, then `defining-done`, which ratifies the
 Definition of Done (DoD) with the product owner, then architecture, then bootstrap. The skills
 pass blocks forward in the conversation: `greenfield-architecture` reads the Domain Model
 block, and `greenfield-bootstrap` reads the Domain Model and Architecture Decision blocks, so

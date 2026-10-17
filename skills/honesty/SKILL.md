@@ -92,7 +92,7 @@ surface-form list, is what catches causal-claim decay.
 **Scope of this tripwire (stated so it does not overclaim).** The surface-form list catches
 the high-volume DECLARE-CLEAN class only. It does NOT catch general causal or mechanism
 claims phrased outside these forms -- those are carried by the re-assertion rule above and
-by the postmortem-reviewer precision-split detector (after the fact). This is a volume net
+by the postmortem-reviewer precision-split detector (after the fact; it sorts each claim's evidence as absent, gathered-not-shown, or epistemically-marked). This is a volume net
 with a known ceiling, not a complete evidence gate.
 
 **Class-anchored closure (specialization for CLASS claims).** A claim that a defect CLASS is
@@ -121,7 +121,7 @@ A class-closed claim may only be made when the message citing it contains BOTH:
 Absent either citation, the only permitted verdict is "closed THIS ROUND" -- an explicitly
 round-scoped claim that carries no residual-zero implication beyond the round just completed.
 
-**Scope of this rule (stated so it does not overclaim).** The only after-the-fact detector
+**Scope of this rule (stated so it does not overclaim).** The only after-the-fact detector for closure-claim evidence
 is the postmortem-reviewer precision-split, which classifies a closure claim's evidence as
 absent, gathered-not-shown, or epistemically-marked. It does not check sweep WIDTH or
 REVIEWER INDEPENDENCE, so a narrow token-grep pasted inline would pass it. Enforcement of

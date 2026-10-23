@@ -1,6 +1,6 @@
 ---
 title: "running-a-sprint References Index"
-description: "Index of reference files for the running-a-sprint skill -- the hand-back and runner-event routing table with the required hand-back lines and the resume texts, and the sprint scorecard with its predictions, measures table and counting commands, subagent-transcript audit, and per-runner scorecard row, and the coordinator rehearsal procedure with its fixture, arms, counting and result-reading rules."
+description: "Index of reference files for the running-a-sprint skill -- the hand-back and runner-event routing table with the required hand-back lines and the resume texts, and the sprint scorecard with its predictions, measures table and counting commands, subagent-transcript audit, the per-tier usage close-out step, and per-runner scorecard row, and the coordinator rehearsal procedure with its fixture, arms, counting and result-reading rules."
 domain: skills
 subdomain: running-a-sprint
 tags: [skills, running-a-sprint, references, index]

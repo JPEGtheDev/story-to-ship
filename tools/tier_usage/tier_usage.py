@@ -331,7 +331,7 @@ def cost_for(totals, spec):
     total = 0
     for usage_key in USAGE_KEYS:
         total += totals[usage_key] * rates.get(RATE_KEY_FOR_USAGE[usage_key], 0)
-    return round(total / 1000000, 4)
+    return total / 1000000
 
 
 def _description(meta):
@@ -486,11 +486,18 @@ def _cell(value):
     return str(value)
 
 
+def _row_cell(column, value):
+    # Row costs are kept unrounded for the summary; only the display rounds.
+    if column == "cost_usd" and _is_number(value):
+        return str(round(value, 4))
+    return _cell(value)
+
+
 def render(rows, counts):
     """Return the tab-separated table followed by the skipped-lines summary."""
     lines = ["\t".join(COLUMNS)]
     for row in rows:
-        lines.append("\t".join(_cell(row[column]) for column in COLUMNS))
+        lines.append("\t".join(_row_cell(column, row[column]) for column in COLUMNS))
     lines.append(
         f"# skipped malformed lines: {counts['malformed']}; "
         f"malformed meta files: {counts['malformed_meta']}; "
@@ -561,7 +568,8 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     )
     est_output = sum(row["est_output_tokens"] for row in counted)
     priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
-    cost = round(sum(priced), 4) if priced else NO_RATES
+    total = sum(priced)
+    cost = round(total, 4) if priced else NO_RATES
 
     assigned = [
         owner
@@ -570,8 +578,8 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     ]
     if todo_count:
         per_todo_tokens = "%.1f" % (input_side / todo_count)
-        if _is_number(cost):
-            per_todo_usd = round(cost / todo_count, 4)
+        if priced:
+            per_todo_usd = round(total / todo_count, 4)
         else:
             per_todo_usd = NO_RATES
     else:

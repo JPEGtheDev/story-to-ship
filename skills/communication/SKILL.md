@@ -117,10 +117,10 @@ Rules:
 1. No forbidden phrasing from the Talk Straight table is present
 2. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, command-line tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks. Exception: non-ASCII is permitted ONLY inside a clearly-marked verbatim quotation of external source material (e.g. a code block or block quote reproducing the source exactly) -- it MUST NOT appear in your own prose, arrows, dashes, or status marks
 3. Every project-internal term in the outgoing text is defined at its first use in this conversation, and any update leads with the decision rather than the research trail (Plain Language rule above)
-4. Any text bound for a public PR or issue thread: load the reviewing-outside-contributions skill before posting.
+4. Any text addressed to a non-owner contributor on a public PR or issue thread: load the `reviewing-outside-contributions` skill now; do not post until it is loaded.
 
 [+] All met -> send the response
-[-] Any unmet -> rewrite the offending phrase or run the required verification before sending
+[-] Any unmet -> rewrite the offending phrase, run the required verification, or load the skill item 4 names, before sending
 
 ---
 

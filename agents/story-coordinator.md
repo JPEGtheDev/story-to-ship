@@ -73,30 +73,29 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 - When the launcher resumes you with a Reconcile text (it names a merged PR, its merge commit, the overlapping files and the merged story), run a reconcile on your own branch.
 - A reconcile is one unit of work with a fresh count of 3 fix rounds, separate from your todos.
-- Update: run `git -C <feature worktree> fetch origin main`, then rebase the branch onto origin/main.
+- Update: fetch both refs with `git -C <feature worktree> fetch origin main <branch>`, record the lease sha with `git -C <feature worktree> rev-parse origin/<branch>`, then rebase the branch onto origin/main.
 - Keep both stories' intent in every conflict; if the rebase cannot finish, run `git -C <feature worktree> rebase --abort` and hand back kind blocked.
-- Push only your own branch, with `--force-with-lease=<branch>:<sha you fetched>`, never plain --force; a rejected lease is a hand-back of kind blocked.
+- Push only your own branch, with `--force-with-lease=<branch>:<lease sha>` using the sha recorded before the rebase, never plain --force; a rejected lease is a hand-back of kind blocked.
 - After the rebase the inline commits have new hashes: match each old inline commit to its new one by subject (`git -C <feature worktree> log --format='%h %s' origin/main..HEAD`).
 - Rewrite the `inline commits:` hashes in the plan entry to the new ones.
-- Make the numstat comparison on the new commits, and explain any difference a conflict caused instead of reporting it as a mismatch.
+- Recount the lane `<n>` from numstat on the new commits; when a conflict changed an inline commit, update the plan entry's lane and report the old and new numbers with the conflict as the reason.
 - Append a `## Reconcile record` section to the PR body; never replace an earlier one.
 - The section starts with the line `Merged PR <n>:`, then one bullet per resolved hunk, `<file>: <hunk> -- <reason>`, or the single bullet `no conflicts`.
 - Write the Reconcile record before any owner-question hand-back.
 - Cross-story check: dispatch a fresh spec-compliance-reviewer child at the Standard tier with run_in_background false.
-- Its requirements are the acceptance criteria of both stories; its files are every file in the overlap list, as they stand after the update.
+- Its requirements are the acceptance criteria of both stories; it reads every overlapping file as it stands after the update and reports each statement that now contradicts another statement and each acceptance criterion of either story that is no longer met.
 - Each finding quotes a file:line pair; a result with no findings lists the files read.
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
 - CI failing on the updated head is also a fix round.
 - Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
 - The Stage 2 review stays as the two-stage-review skill requires for the changed parts.
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
-- Hand back kind owner question when resolving needs dropping one story's intent; the question names both intents and the hunk, with options and your recommendation.
-- A contradiction left after the third fix round is kind cap reached, with the open findings.
-- A fresh runner started by the launcher for a PR whose runner could not be resumed gets both stories, both diffs and the PR body.
-- That fresh runner works in a new worktree made from origin/<branch>: `git -C <repo root> worktree add .worktrees/<prefix>-reconcile ...`.
-- That fresh runner opens no new pull request and follows this section; the one-issue-one-PR rule above stays for the issue it was launched for.
-- The Skeptic and plan steps do not run for a reconcile; the Discovery line is required only when your plan file exists.
-- CI pins in the workflow detect deleted wording only; the cap, the no-merge rule and the owner question are checked by reading the transcript.
+- Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
+- Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.
+- A fresh runner launched for a PR whose runner could not be resumed has no plan file: it fetches both stories, both diffs and the PR body with `gh`, skips the plan-entry steps above, and needs no Discovery line.
+- That fresh runner works in a worktree made with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -B <branch> origin/<branch>`, pushes only that branch, and opens no new pull request; the one-issue-one-PR rule above stays for the story it was launched for.
+- Discovery and planning do not run for a reconcile; the Discovery line is required only when your plan file exists.
+- CI pins in the workflow detect deleted wording only; the cap, the rule that the owner merges and the owner question are checked by reading the transcript.
 
 ## Resume
 

@@ -9,7 +9,7 @@ description: Use when writing or reviewing any C++ class that owns resources, ha
 
 ```
 DESTRUCTORS NEVER THROW -- EVERY RESOURCE IS OWNED BY A SCOPE-BOUND GUARD
-YOU MUST wrap every destructor body in try/catch and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
+YOU MUST guard each destructor release step with its own try/catch (or give each resource its own owning guard), log the failure, never rethrow, and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.

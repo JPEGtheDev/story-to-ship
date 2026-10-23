@@ -608,6 +608,24 @@ class TierShapeTests(unittest.TestCase):
         # Assert
         self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
 
+    def test_LoadTiers_RateIsNaN_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"input": float("nan")}}
+        # Act
+        with self.assertRaises(ValueError) as caught:
+            load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
+
+    def test_LoadTiers_RateIsInfinity_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"output": float("inf")}}
+        # Act
+        with self.assertRaises(ValueError) as caught:
+            load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
+
     def test_LoadTiers_RatesNull_Accepted(self):
         # Arrange
         spec = {"match": ["x"], "rates_per_million": None}
@@ -1018,6 +1036,14 @@ class FixRoundDetectionTests(unittest.TestCase):
         # Assert
         self.assertEqual(rounds, 0)
 
+    def test_FixRound_FixingWordAfterReview_Counts(self):
+        # Arrange
+        description = "Fixing todo 2 after review"
+        # Act
+        rounds = fix_rounds_of(description)
+        # Assert
+        self.assertEqual(rounds, 1)
+
     def test_FixRound_FixesWordForTodoTwo_Counts(self):
         # Arrange
         description = "Fixes for todo 2"
@@ -1235,19 +1261,23 @@ class SummaryTests(unittest.TestCase):
             "cache_read": 0,
             "output": 0,
         }
+        # Row costs are 10 tokens * 10 per million = 0.0001 and 21 tokens * 10
+        # per million = 0.00021, so the unrounded total is 0.00031 and two todos
+        # divide it to 0.000155, which rounds to 0.0002. Rounding the total first
+        # gives 0.0003, and 0.0003 / 2 = 0.00015 rounds down to 0.0001.
         with tempfile.TemporaryDirectory() as tmp:
             write_dispatch(tmp, "p1", meta=runner_meta())
             write_dispatch(
                 tmp,
                 "i1",
                 meta=dispatch_meta("implementer", "Implement todo 1", "p1"),
-                lines=[assistant(model_id(FAMILY_A), token_usage=usage(3, 0, 0, 0))],
+                lines=[assistant(model_id(FAMILY_A), token_usage=usage(10, 0, 0, 0))],
             )
             write_dispatch(
                 tmp,
-                "d1",
-                meta=dispatch_meta("explorer", "Map the repo", "p1"),
-                lines=[assistant(model_id(FAMILY_A), token_usage=usage(3, 0, 0, 0))],
+                "i2",
+                meta=dispatch_meta("implementer", "Implement todo 2", "p1"),
+                lines=[assistant(model_id(FAMILY_A), token_usage=usage(21, 0, 0, 0))],
             )
             rows, _ = collect_rows(tmp, tiers)
         # Act
@@ -1255,8 +1285,8 @@ class SummaryTests(unittest.TestCase):
             tier_usage.summarize(rows), "p1:story-coordinator", "economy"
         )
         # Assert
-        self.assertEqual(entry["cost_usd"], 0.0001)
-        self.assertEqual(entry["cost_per_todo_usd"], 0.0001)
+        self.assertEqual(entry["cost_usd"], 0.0003)
+        self.assertEqual(entry["cost_per_todo_usd"], 0.0002)
 
     def test_Summary_LauncherDirectGroupsSortBeforeCoordinatorGroup(self):
         rows = tied_rows(

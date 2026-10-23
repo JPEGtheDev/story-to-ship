@@ -344,7 +344,10 @@ class EmptyFolderTests(unittest.TestCase):
         self.assertEqual(code, 0)
         lines = out.splitlines()
         self.assertEqual(lines[0], "\t".join(tier_usage.COLUMNS))
-        self.assertTrue(lines[-1].startswith("# skipped"), lines[-1])
+        self.assertTrue(lines[-4].startswith("# skipped"), lines[-4])
+        self.assertEqual(lines[-3], "")
+        self.assertTrue(lines[-2].startswith("# summary"), lines[-2])
+        self.assertEqual(lines[-1], "\t".join(tier_usage.SUMMARY_COLUMNS))
 
 
 class PairingTests(unittest.TestCase):
@@ -904,6 +907,190 @@ class OtherTypesTests(unittest.TestCase):
             (row["todo"], row["fix_rounds"], row["first_stage1_pass"]),
             ("unattributed", "-", "-"),
         )
+
+
+def model_id(family):
+    return "claude-%s-4-5" % family
+
+
+def summary_entry_for(entries, runner, tier):
+    matches = [
+        entry
+        for entry in entries
+        if entry["runner"] == runner and entry["tier"] == tier
+    ]
+    if len(matches) != 1:
+        raise AssertionError(
+            "expected one summary for %s %s, got %d" % (runner, tier, len(matches))
+        )
+    return matches[0]
+
+
+FULL_SUMMARY_LINES = [
+    ("a1:story-coordinator", "economy", "5", "3663", NO_RATES, "66", "1221.0", NO_RATES, "1/2", "1.0", "0", "0", "1/5"),
+    ("a1:story-coordinator", "standard", "6", "6327", NO_RATES, "114", "2109.0", NO_RATES, "0/1", "0.0", "0", "0", "0/5"),
+    ("a1:story-coordinator", "premium", "3", "2331", NO_RATES, "42", "777.0", NO_RATES, "n/a", "n/a", "1", "0", "0/3"),
+    ("a2:story-coordinator", "economy", "1", "1665", NO_RATES, "30", "1665.0", NO_RATES, "n/a", "0.0", "0", "0", "0/1"),
+    ("a2:story-coordinator", "standard", "1", "1554", NO_RATES, "28", "1554.0", NO_RATES, "n/a", "n/a", "0", "0", "0/0"),
+    ("a2:story-coordinator", "premium", "1", "1776", NO_RATES, "32", "1776.0", NO_RATES, "n/a", "n/a", "1", "0", "0/1"),
+]
+
+
+class SummaryTests(unittest.TestCase):
+    def test_Summary_FullFixture_SixGroupLinesMatchExpected(self):
+        rows, _ = collect_rows(FULL)
+        text = tier_usage.render_summary(tier_usage.summarize(rows))
+        got = [tuple(line.split("\t")) for line in text.splitlines()[2:]]
+        self.assertEqual(got, FULL_SUMMARY_LINES)
+
+    def test_Summary_FullFixtureWithRates_A1EconomyCostIs33AndPerTodo11(self):
+        tiers = default_tiers()
+        for spec in tiers.values():
+            spec["rates_per_million"] = {
+                "input": 1000000,
+                "cache_write": 0,
+                "cache_read": 0,
+                "output": 0,
+            }
+        with tempfile.TemporaryDirectory() as tmp:
+            loaded = tier_usage.load_tiers(write_tiers(tmp, tiers))
+            rows, _ = collect_rows(FULL, loaded)
+        entry = summary_entry_for(
+            tier_usage.summarize(rows), "a1:story-coordinator", "economy"
+        )
+        self.assertEqual(entry["cost_usd"], 33.0)
+        self.assertEqual(entry["cost_per_todo_usd"], 11.0)
+
+    def test_Summary_BasicFixture_RunnerTiersInOrderWithUnmappedLast(self):
+        rows, _ = collect_rows(BASIC)
+        entries = tier_usage.summarize(rows)
+        tiers = [
+            entry["tier"]
+            for entry in entries
+            if entry["runner"] == "r1:story-coordinator"
+        ]
+        self.assertEqual(tiers, ["economy", "standard", "premium", "unmapped"])
+        unmapped = summary_entry_for(entries, "r1:story-coordinator", "unmapped")
+        self.assertEqual(unmapped["dispatches"], 1)
+
+    def test_Summary_FixOnOtherTier_TodoCountsUnderFirstImplementerTier(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                (
+                    "i1",
+                    dispatch_meta("implementer", "Implement todo 1", "p1"),
+                    [assistant(model_id(FAMILY_A), token_usage=usage(1, 0, 0, 1))],
+                ),
+                (
+                    "f1",
+                    dispatch_meta("implementer", "Fix round 1 for todo 1", "p1"),
+                    [
+                        assistant(
+                            model_id(FAMILY_B),
+                            timestamp="2026-01-01T00:00:05.000Z",
+                            token_usage=usage(2, 0, 0, 1),
+                        )
+                    ],
+                ),
+            ]
+        )
+        entries = tier_usage.summarize(rows)
+        economy = summary_entry_for(entries, "p1:story-coordinator", "economy")
+        standard = summary_entry_for(entries, "p1:story-coordinator", "standard")
+        self.assertEqual(economy["cost_per_todo_tokens"], "1.0")
+        self.assertEqual(economy["avg_fix_rounds"], "1.0")
+        self.assertEqual(standard["cost_per_todo_tokens"], "2.0")
+        self.assertEqual(standard["first_pass_stage1"], "n/a")
+        self.assertEqual(standard["avg_fix_rounds"], "n/a")
+
+    def test_Summary_ZeroTodosInRunner_PerTodoAndAveragesAreNotApplicable(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                (
+                    "x1",
+                    dispatch_meta("explorer", "Map the repo", "p1"),
+                    [assistant(model_id(FAMILY_A), token_usage=usage(3, 0, 0, 2))],
+                ),
+            ]
+        )
+        entry = summary_entry_for(
+            tier_usage.summarize(rows), "p1:story-coordinator", "economy"
+        )
+        self.assertEqual(entry["cost_per_todo_tokens"], "n/a")
+        self.assertEqual(entry["cost_per_todo_usd"], "n/a")
+        self.assertEqual(entry["first_pass_stage1"], "n/a")
+        self.assertEqual(entry["avg_fix_rounds"], "n/a")
+
+    def test_Summary_UnreadableStage2Verdict_CountedAsUnreadableNotNotPassed(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                (
+                    "q1",
+                    dispatch_meta("code-quality-reviewer", "Review todo 1", "p1"),
+                    [verdict_line("Looks fine, but no verdict line")],
+                ),
+                (
+                    "q2",
+                    dispatch_meta("code-quality-reviewer", "Review todo 2", "p1"),
+                    [verdict_line("VERDICT: REQUEST CHANGES")],
+                ),
+            ]
+        )
+        entry = summary_entry_for(
+            tier_usage.summarize(rows), "p1:story-coordinator", "standard"
+        )
+        self.assertEqual(entry["stage2_unreadable"], 1)
+        self.assertEqual(entry["stage2_not_passed"], 1)
+
+    def test_Summary_RowsWithoutUsage_CountedInDispatchesSkippedInSums(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("x1", dispatch_meta("explorer", "Map the repo", "p1"), None),
+            ]
+        )
+        entry = summary_entry_for(
+            tier_usage.summarize(rows), "p1:story-coordinator", "unmapped"
+        )
+        self.assertEqual(entry["dispatches"], 2)
+        self.assertEqual(entry["input_side_tokens"], 0)
+        self.assertEqual(entry["est_output_tokens"], 0)
+        self.assertEqual(entry["cost_usd"], NO_RATES)
+
+
+class SummaryOutputTests(unittest.TestCase):
+    def test_Main_NoRows_SummaryIsHeaderOnlyAndExitZero(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "subagents"))
+            code, out, _ = run_main([tmp])
+        self.assertEqual(code, 0)
+        lines = out.splitlines()
+        self.assertTrue(lines[-2].startswith("# summary"), lines[-2])
+        self.assertEqual(lines[-1], "\t".join(tier_usage.SUMMARY_COLUMNS))
+
+    def test_Main_FullFixtureSummaryComment_SaysEstimated(self):
+        code, out, _ = run_main([FULL])
+        self.assertEqual(code, 0)
+        lines = out.splitlines()
+        start = [index for index, line in enumerate(lines) if line.startswith("# summary")]
+        self.assertEqual(len(start), 1)
+        self.assertIn("estimated", lines[start[0]])
+        self.assertIn("est_output_tokens", lines[start[0] + 1].split("\t"))
+
+    def test_Main_FullFixtureOrder_RowsThenSkippedThenBlankThenSummary(self):
+        code, out, _ = run_main([FULL])
+        self.assertEqual(code, 0)
+        lines = out.splitlines()
+        skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
+        self.assertEqual(len(skipped), 1)
+        at = skipped[0]
+        self.assertEqual(lines[0], "\t".join(tier_usage.COLUMNS))
+        self.assertEqual(lines[at + 1], "")
+        self.assertTrue(lines[at + 2].startswith("# summary"), lines[at + 2])
+        self.assertEqual(lines[at + 3], "\t".join(tier_usage.SUMMARY_COLUMNS))
 
 
 if __name__ == "__main__":

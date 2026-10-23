@@ -69,9 +69,39 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Three owner-reserved decisions exist: merge, fix-round cap override, scope change.
 - On one of these, or on a serious blocker (something you cannot clear within the story's scope and existing rulings), stop and hand back with the options and your recommendation, then wait to be resumed.
 
+## Reconcile
+
+- When the launcher resumes you with a Reconcile text (it names a merged PR, its merge commit, the overlapping files and the merged story), run a reconcile on your own branch.
+- A reconcile is one unit of work with a fresh count of 3 fix rounds, separate from your todos.
+- Update: run `git -C <feature worktree> fetch origin main`, then rebase the branch onto origin/main.
+- Keep both stories' intent in every conflict; if the rebase cannot finish, run `git -C <feature worktree> rebase --abort` and hand back kind blocked.
+- Push only your own branch, with `--force-with-lease=<branch>:<sha you fetched>`, never plain --force; a rejected lease is a hand-back of kind blocked.
+- After the rebase the inline commits have new hashes: match each old inline commit to its new one by subject (`git -C <feature worktree> log --format='%h %s' origin/main..HEAD`).
+- Rewrite the `inline commits:` hashes in the plan entry to the new ones.
+- Make the numstat comparison on the new commits, and explain any difference a conflict caused instead of reporting it as a mismatch.
+- Append a `## Reconcile record` section to the PR body; never replace an earlier one.
+- The section starts with the line `Merged PR <n>:`, then one bullet per resolved hunk, `<file>: <hunk> -- <reason>`, or the single bullet `no conflicts`.
+- Write the Reconcile record before any owner-question hand-back.
+- Cross-story check: dispatch a fresh spec-compliance-reviewer child at the Standard tier with run_in_background false.
+- Its requirements are the acceptance criteria of both stories; its files are every file in the overlap list, as they stand after the update.
+- Each finding quotes a file:line pair; a result with no findings lists the files read.
+- Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
+- CI failing on the updated head is also a fix round.
+- Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
+- The Stage 2 review stays as the two-stage-review skill requires for the changed parts.
+- Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
+- Hand back kind owner question when resolving needs dropping one story's intent; the question names both intents and the hunk, with options and your recommendation.
+- A contradiction left after the third fix round is kind cap reached, with the open findings.
+- A fresh runner started by the launcher for a PR whose runner could not be resumed gets both stories, both diffs and the PR body.
+- That fresh runner works in a new worktree made from origin/<branch>: `git -C <repo root> worktree add .worktrees/<prefix>-reconcile ...`.
+- That fresh runner opens no new pull request and follows this section; the one-issue-one-PR rule above stays for the issue it was launched for.
+- The Skeptic and plan steps do not run for a reconcile; the Discovery line is required only when your plan file exists.
+- CI pins in the workflow detect deleted wording only; the cap, the no-merge rule and the owner question are checked by reading the transcript.
+
 ## Resume
 
 - When resumed after a session limit killed you, validate in-flight children first: run `git -C <path> status` and `log` on each child worktree before dispatching anything.
 - When resumed with a child transcript path, read it.
+- When resumed with a Reconcile text, follow the Reconcile section.
 
 Keep reasoning terse as the communication skill's Keep Reasoning Terse rule says.

@@ -79,7 +79,13 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 ### Task Granularity (TDD: Test-Driven Development Steps)
 
-Each task MUST be one todo of ordered steps (2-5 minutes each), touch <=2 non-test files (test files do not count), and be estimated at <=25 tool calls in total. Any todo exceeding any limit MUST be split before the plan is presented.
+Each task MUST be one todo of ordered steps (2-5 minutes each).
+
+A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
+
+**Context:** The earlier sizing rule capped a todo by how many files it touched and how many tool calls it was estimated to take. Both counts are poor proxies: the number of files says little about size or risk, and a coherent multi-file change was cut into pieces that no single review could judge whole.
+
+**Forces:** Sizing by objective keeps each review meaningful and lets a coherent change stay in one todo. A tool-call estimate is advisory only: an estimate far above the plan's other todos is a prompt to check the todo for a second objective, never a reason to refuse or stop it.
 
 For implementation tasks, the TDD steps are the ordered steps of the task's one todo, reviewed once at the end: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
 
@@ -93,7 +99,7 @@ Before building or presenting any plan:
 2. Every acceptance criterion is mapped to a verifiable checkpoint
 3. Todo list has no placeholders -- every item is concrete and executable
 4. A plan with 2+ todos or an architectural decision has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
-5. No todo touches 3+ non-test files or exceeds 25 tool calls without being split
+5. Every todo has one objective that one review can judge; no todo holds two independently verifiable objectives or is too large for one review to judge without being split
 6. Every claim, in the plan file or the presentation message, that a cut or moved passage repeats, restates, duplicates, or is redundant with other text carries the pasted search output (grep or diff) that shows that other text, in the same message. A cut justified by an unproven restatement claim is a placeholder.
 
 [+] All met -> present the plan and wait for explicit user approval
@@ -187,7 +193,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 | "I'll update todos later" | Later never comes -- update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
 | "We'll probably need this later" | YAGNI -- not in criteria means not in this plan |
-| "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ non-test files = compounding scope. Split on file boundaries before the plan is presented. |
+| "This todo touches multiple files but they're closely related" | Related files may stay one todo when they serve one objective. A second objective splits the todo however related the files are, before the plan is presented. |
 | "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
@@ -220,7 +226,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
-- A single todo touches 3+ non-test files or is estimated at 26+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
+- A todo holds more than one objective or is one that no single review could judge -- **STOP. Split the todo before presenting the plan. A todo with two objectives is a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
 - Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**

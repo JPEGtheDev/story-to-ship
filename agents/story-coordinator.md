@@ -74,8 +74,8 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - When the launcher resumes you with a Reconcile text (it names a merged PR, its merge commit, the overlapping files and the merged story), run a reconcile on your own branch.
 - A reconcile is one unit of work with a fresh count of 3 fix rounds, separate from your todos.
 - Update: fetch both refs with `git -C <feature worktree> fetch origin main <branch>`, record the lease sha with `git -C <feature worktree> rev-parse origin/<branch>`, then rebase the branch onto origin/main.
-- Keep both stories' intent in every conflict; if the rebase cannot finish, run `git -C <feature worktree> rebase --abort` and hand back kind blocked.
-- Push only your own branch, with `--force-with-lease=<branch>:<lease sha>` using the sha recorded before the rebase, never plain --force; a rejected lease is a hand-back of kind blocked.
+- Keep both stories' intent in every conflict; if the rebase cannot finish for a mechanical reason, run `git -C <feature worktree> rebase --abort` and hand back kind blocked (a conflict that cannot be resolved without dropping an intent is the owner-question case below).
+- Push only your own branch, with `git -C <feature worktree> push --force-with-lease=<branch>:<lease sha> origin HEAD:<branch>` using the sha recorded before the rebase, never plain --force; a rejected lease is a hand-back of kind blocked.
 - After the rebase the inline commits have new hashes: match each old inline commit to its new one by subject (`git -C <feature worktree> log --format='%h %s' origin/main..HEAD`).
 - Rewrite the `inline commits:` hashes in the plan entry to the new ones.
 - Recount the lane `<n>` from numstat on the new commits; when a conflict changed an inline commit, update the plan entry's lane and report the old and new numbers with the conflict as the reason.
@@ -93,7 +93,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.
 - A fresh runner launched for a PR whose runner could not be resumed has no plan file: it fetches both stories, both diffs and the PR body with `gh`, skips the plan-entry steps above, and needs no Discovery line.
-- That fresh runner works in a worktree made with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -B <branch> origin/<branch>`, pushes only that branch, and opens no new pull request; the one-issue-one-PR rule above stays for the story it was launched for.
+- That fresh runner first runs `git -C {{REPO_ROOT}} fetch origin <branch>`, then works in a worktree made with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -b reconcile-{{WORKTREE_PREFIX}} origin/<branch>` (a new local branch, so it never collides with the dead runner's worktree), pushes only to `<branch>` as above, and opens no new pull request; the one-issue-one-PR rule above stays for the story it was launched for.
 - Discovery and planning do not run for a reconcile; the Discovery line is required only when your plan file exists.
 - CI pins in the workflow detect deleted wording only; the cap, the rule that the owner merges and the owner question are checked by reading the transcript.
 

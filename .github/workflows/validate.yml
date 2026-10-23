@@ -526,3 +526,8 @@ jobs:
         run: |
           python3 -m unittest discover -s tools/session_events -p 'test_*.py'
           echo "[+] session-events converter unit tests pass"
+
+      - name: Run tier usage script unit tests
+        run: |
+          python3 -m unittest discover -s tools/tier_usage -p 'test_*.py'
+          echo "[+] tier usage script unit tests pass"

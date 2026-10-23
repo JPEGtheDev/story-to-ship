@@ -530,65 +530,83 @@ class TierShapeTests(unittest.TestCase):
     def test_LoadTiers_TiersValueNotObject_RaisesNamingTiers(self):
         # Arrange
         text = '{"tiers": ["economy"]}'
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'tiers'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_raw_tiers(text)
+        # Assert
+        self.assertIn("'tiers'", str(caught.exception))
 
     def test_LoadTiers_TierSpecNotObject_RaisesNamingTier(self):
         # Arrange
         text = '{"tiers": {"economy": "%s"}}' % FAMILY_A
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_raw_tiers(text)
+        # Assert
+        self.assertIn("'economy'", str(caught.exception))
 
     def test_LoadTiers_MatchIsPlainString_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": "abc"}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'match'")
 
     def test_LoadTiers_MatchHoldsEmptyString_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": [""]}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'match'")
 
     def test_LoadTiers_MatchHoldsNumber_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": [3]}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'match'")
 
     def test_LoadTiers_RateIsString_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": ["x"], "rates_per_million": {"input": "3"}}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
 
     def test_LoadTiers_RateIsNull_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": ["x"], "rates_per_million": {"input": None}}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
 
     def test_LoadTiers_RateIsBool_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": ["x"], "rates_per_million": {"output": True}}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
 
     def test_LoadTiers_RatesIsList_RaisesNamingTierAndField(self):
         # Arrange
         spec = {"match": ["x"], "rates_per_million": [1, 2]}
-        # Act and Assert
-        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+        # Act
+        with self.assertRaises(ValueError) as caught:
             load_tier_spec(spec)
+        # Assert
+        self.assertRegex(str(caught.exception), "'economy'.*'rates_per_million'")
 
     def test_LoadTiers_RatesNull_Accepted(self):
         # Arrange

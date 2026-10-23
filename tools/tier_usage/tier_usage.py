@@ -448,6 +448,156 @@ def render(rows, counts):
     return "\n".join(lines) + "\n"
 
 
+SUMMARY_COMMENT = (
+    "# summary per runner per tier; est_output_tokens is estimated because "
+    "transcripts record placeholder output counts"
+)
+SUMMARY_COLUMNS = [
+    "runner",
+    "tier",
+    "dispatches",
+    "input_side_tokens",
+    "cost_usd",
+    "est_output_tokens",
+    "cost_per_todo_tokens",
+    "cost_per_todo_usd",
+    "first_pass_stage1",
+    "avg_fix_rounds",
+    "stage2_not_passed",
+    "stage2_unreadable",
+    "unattributed",
+]
+TIER_ORDER = ("economy", "standard", "premium")
+STAGE2_TYPES = frozenset({"code-quality-reviewer", "skill-reviewer"})
+STAGE2_NOT_PASSED = frozenset({"REQUEST CHANGES", "REJECT", "NEEDS WORK"})
+
+
+def _start_key(row):
+    return (row["first_ts"] is None, row["first_ts"] or "", row["agent_id"])
+
+
+def _tier_rank(tier):
+    if tier in TIER_ORDER:
+        return (0, TIER_ORDER.index(tier), "")
+    return (1, 0, tier)
+
+
+def _is_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _todo_owners(rows):
+    """Map (runner, todo) to the implementer row that owns the todo.
+
+    A todo counts once, under the tier that did its first implementation: the
+    tier of its implementer row with the earliest first_ts (rows without one
+    last, ties by agent_id). A fix dispatch on another tier does not move it.
+    """
+    owners = {}
+    for row in rows:
+        if row["agent_type"] != IMPLEMENTER:
+            continue
+        if row["todo"] in (NO_VALUE, UNATTRIBUTED):
+            continue
+        scope = (row["runner"], row["todo"])
+        current = owners.get(scope)
+        if current is None or _start_key(row) < _start_key(current):
+            owners[scope] = row
+    return owners
+
+
+def _summary_entry(runner, tier, members, owners, todo_count):
+    counted = [row for row in members if row["input_tokens"] is not None]
+    input_side = sum(
+        row["input_tokens"] + row["cache_write_tokens"] + row["cache_read_tokens"]
+        for row in counted
+    )
+    est_output = sum(row["est_output_tokens"] for row in counted)
+    priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
+    cost = round(sum(priced), 4) if priced else NO_RATES
+
+    assigned = [
+        owner
+        for (owner_runner, _todo), owner in owners.items()
+        if owner_runner == runner and owner["tier"] == tier
+    ]
+    if todo_count:
+        per_todo_tokens = "%.1f" % (input_side / todo_count)
+        if _is_number(cost):
+            per_todo_usd = round(cost / todo_count, 4)
+        else:
+            per_todo_usd = NO_RATES
+    else:
+        per_todo_tokens = NOT_APPLICABLE
+        per_todo_usd = NOT_APPLICABLE
+
+    yes = sum(1 for owner in assigned if owner["first_stage1_pass"] == "yes")
+    no = sum(1 for owner in assigned if owner["first_stage1_pass"] == "no")
+    first_pass = "%d/%d" % (yes, yes + no) if yes + no else NOT_APPLICABLE
+    if assigned:
+        fix_total = sum(owner["fix_rounds"] for owner in assigned)
+        avg_fix = "%.1f" % (fix_total / len(assigned))
+    else:
+        avg_fix = NOT_APPLICABLE
+
+    stage2 = [row for row in members if row["agent_type"] in STAGE2_TYPES]
+    not_passed = sum(1 for row in stage2 if row["verdict"] in STAGE2_NOT_PASSED)
+    unreadable = sum(1 for row in stage2 if row["verdict"] == UNREADABLE)
+
+    typed = [row for row in members if row["agent_type"] in TODO_TYPES]
+    unattributed_count = sum(1 for row in typed if row["todo"] == UNATTRIBUTED)
+
+    return {
+        "runner": runner,
+        "tier": tier,
+        "dispatches": len(members),
+        "input_side_tokens": input_side,
+        "cost_usd": cost,
+        "est_output_tokens": est_output,
+        "cost_per_todo_tokens": per_todo_tokens,
+        "cost_per_todo_usd": per_todo_usd,
+        "first_pass_stage1": first_pass,
+        "avg_fix_rounds": avg_fix,
+        "stage2_not_passed": not_passed,
+        "stage2_unreadable": unreadable,
+        "unattributed": "%d/%d" % (unattributed_count, len(typed)),
+    }
+
+
+def summarize(rows):
+    """Return one summary dict per (runner, tier) group that has rows.
+
+    Groups are ordered by runner, then tier in TIER_ORDER, then any other
+    tier names alphabetically. Values are already formatted for output.
+    """
+    owners = _todo_owners(rows)
+    todo_counts = {}
+    for runner, _todo in owners:
+        todo_counts[runner] = todo_counts.get(runner, 0) + 1
+    groups = {}
+    for row in rows:
+        groups.setdefault((row["runner"], row["tier"]), []).append(row)
+    ordered = sorted(groups, key=lambda key: (key[0], _tier_rank(key[1])))
+    return [
+        _summary_entry(
+            runner,
+            tier,
+            groups[(runner, tier)],
+            owners,
+            todo_counts.get(runner, 0),
+        )
+        for runner, tier in ordered
+    ]
+
+
+def render_summary(summary):
+    """Return the per-runner, per-tier summary as tab-separated text."""
+    lines = [SUMMARY_COMMENT, "\t".join(SUMMARY_COLUMNS)]
+    for entry in summary:
+        lines.append("\t".join(_cell(entry[column]) for column in SUMMARY_COLUMNS))
+    return "\n".join(lines) + "\n"
+
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description="Print one tier usage row per subagent dispatch in a session folder."
@@ -467,6 +617,8 @@ def main(argv):
 
     rows, counts = collect(args.session_dir, tiers)
     sys.stdout.write(render(rows, counts))
+    sys.stdout.write("\n")
+    sys.stdout.write(render_summary(summarize(rows)))
     return 0
 
 

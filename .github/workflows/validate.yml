@@ -232,6 +232,14 @@ jobs:
               fi
             done
           }
+          checkabsent() {
+            file="$1"
+            pattern="$2"
+            while IFS= read -r line; do
+              printf 'FAILED: %s still contains a file-count or tool-call sizing limit: %s\n' "$file" "$line"
+              missing=$((missing + 1))
+            done < <(grep -iE -- "$pattern" "$file" || true)
+          }
           check agents/implementer.md "FINAL reply message" "Limitations:" "ASCII"
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
@@ -241,6 +249,12 @@ jobs:
           check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
           check skills/writing-plans/SKILL.md "ask the owner, or run Discovery) before presenting the plan"
+          # These pins prove presence and absence of wording only, not that a todo is sized correctly.
+          checkx skills/writing-plans/SKILL.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          checkx agents/implementer.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          checkabsent skills/writing-plans/SKILL.md '<=2 (non-test )?files|3\+ non-test|2 non-test|26\+|25 tool|<=25|exceeds 25|file count|sizing limit'
+          checkabsent agents/implementer.md '<=2 (non-test )?files|3\+ non-test|2 non-test|26\+|25 tool|<=25|exceeds 25|file count|sizing limit'
+          checkabsent skills/three-amigos/references/CEREMONIES.md '<=2 (non-test )?files|3\+ non-test|2 non-test|26\+|25 tool|<=25|exceeds 25|file count|sizing limit'
           # The checkx lines below copy the deferral gate (SKILL.md) and the whole deferral reference word for word, on purpose:
           # a rule change must be a deliberate edit here too. checkx needs a line equal to the pin, so text added to a pinned line fails.
           # Known limit: a pin only proves its line exists somewhere in the file; added, wrapped or moved text is not detected.

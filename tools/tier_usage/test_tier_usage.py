@@ -377,6 +377,45 @@ class MalformedTests(unittest.TestCase):
         self.assertEqual(token_tuple(row_for(rows, "m2")), (1, 2, 3, 4))
 
 
+class MalformedMetaTests(unittest.TestCase):
+    def test_Collect_MalformedMetaWithTranscript_CountedAsMetaFileNotNoMeta(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "subagents"))
+            folder = os.path.join(tmp, "subagents")
+            with open(os.path.join(folder, "agent-bad.meta.json"), "w", encoding="utf-8") as handle:
+                handle.write("{not json")
+            write_dispatch(
+                folder,
+                "bad",
+                lines=[assistant(model_id(FAMILY_B), token_usage=usage(1, 0, 0, 1))],
+            )
+            # Act
+            rows, counts = collect_rows(tmp)
+        # Assert
+        self.assertEqual(rows, [])
+        self.assertEqual(counts["malformed_meta"], 1)
+        self.assertEqual(counts["no_meta"], 0)
+        self.assertEqual(counts["malformed"], 0)
+
+    def test_Main_MalformedMetaFile_FooterNamesMetaFileCount(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = os.path.join(tmp, "subagents")
+            os.makedirs(folder)
+            with open(os.path.join(folder, "agent-bad.meta.json"), "w", encoding="utf-8") as handle:
+                handle.write("[")
+            # Act
+            code, out, _ = run_main([tmp])
+        # Assert
+        self.assertEqual(code, 0)
+        footers = [line for line in out.splitlines() if line.startswith("# skipped")]
+        self.assertEqual(
+            footers,
+            ["# skipped malformed lines: 0; malformed meta files: 1; jsonl without meta: 0"],
+        )
+
+
 class EmptyFolderTests(unittest.TestCase):
     def test_Collect_EmptySubagents_ReturnsNoRows(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import context_measure
@@ -383,6 +384,106 @@ class ContextMeasureTest(unittest.TestCase):
         records = [attachment_line({"type": "total_tokens_reminder", "text": text})]
         self.assertEqual(bucket_totals(records)["other_harness"], len(text))
 
+    def test_invoked_skills_with_rendered_counts_in_skill_bodies(self):
+        record = attachment_line(
+            {"type": "invoked_skills", "skills": [{"name": "pdf", "content": "IGNORED"}]}
+        )
+        record["rendered"] = [{"content": "Base directory for this skill: /x"}]
+        buckets = bucket_totals([record])
+        self.assertEqual(buckets["skill_bodies"], len("Base directory for this skill: /x"))
+        self.assertEqual(buckets["other_harness"], 0)
+
+    def test_invoked_skills_without_rendered_walks_skill_content_into_skill_bodies(self):
+        body = "Base directory for this skill: /x"
+        records = [attachment_line({"type": "invoked_skills", "skills": [{"content": body}]})]
+        buckets = bucket_totals(records)
+        self.assertEqual(buckets["skill_bodies"], len(body))
+        self.assertEqual(buckets["other_harness"], 0)
+
+    def test_queued_notification_without_peer_origin_counts_in_notifications(self):
+        body = "<task-notification>done</task-notification>"
+        records = [attachment_line({"type": "queued_command", "prompt": body})]
+        buckets = bucket_totals(records)
+        self.assertEqual(buckets["notifications"], len(body))
+        self.assertEqual(buckets["other_harness"], 0)
+
+    def test_queued_command_other_text_stays_in_other_harness_and_peer_in_handbacks(self):
+        records = [
+            attachment_line({"type": "queued_command", "prompt": "do this"}, uuid="q1"),
+            attachment_line(
+                {
+                    "type": "queued_command",
+                    "prompt": HANDBACK_TEXT,
+                    "origin": {"kind": "peer", "handback": True},
+                },
+                uuid="q2",
+            ),
+        ]
+        buckets = bucket_totals(records)
+        self.assertEqual(buckets["other_harness"], len("do this"))
+        self.assertEqual(buckets["handbacks"], len(HANDBACK_TEXT))
+        self.assertEqual(buckets["notifications"], 0)
+
+    def test_handback_key_ignores_harness_trailer_in_either_form(self):
+        queued_body = '<agent-message from="abc">\n[Subagent hand-back] result text\n</agent-message>'
+        peer_text = (
+            "Another Claude session sent a message:\n" + queued_body + "\nthat is a harness trailer."
+        )
+        records = [
+            user_record(peer_text, uuid="p1", origin={"kind": "peer", "handback": True}),
+            attachment_line(
+                {
+                    "type": "queued_command",
+                    "prompt": queued_body,
+                    "origin": {"kind": "peer", "handback": True},
+                },
+                uuid="a1",
+            ),
+        ]
+        measured = context_measure.measure(records)
+        self.assertEqual(measured["totals"]["buckets"]["handbacks"], len(peer_text))
+
+    def test_assistant_without_message_id_counts_once_per_uuid(self):
+        records = [
+            assistant_line(None, [text_block("hi")], uuid="a-1"),
+            assistant_line(None, [text_block("hi")], uuid="a-1"),
+        ]
+        self.assertEqual(bucket_totals(records)["assistant_text"], 2)
+
+    def test_line_that_exhausts_the_parser_stack_is_skipped_and_counted(self):
+        path = self.write_lines(["[" * 100000, json.dumps(human_prompt("ok", uuid="g1"))])
+        records, malformed = context_measure.load_records(path)
+        self.assertEqual(malformed, 1)
+        self.assertEqual(len(records), 1)
+
+    def test_user_record_with_empty_content_list_adds_nothing_and_starts_no_turn(self):
+        records = [human_prompt("first", uuid="p1"), user_record([], uuid="e1")]
+        measured = context_measure.measure(records)
+        self.assertEqual(len(measured["turns"]), 2)
+        self.assertEqual(measured["totals"]["buckets"]["user_text"], len("first"))
+        self.assertEqual(sum(measured["totals"]["buckets"].values()), len("first"))
+
+    def test_list_content_notification_counts_in_notifications_not_as_prompt(self):
+        body = "<task-notification>done</task-notification>"
+        measured = context_measure.measure([user_record([text_block(body)], uuid="n3")])
+        self.assertEqual(len(measured["turns"]), 1)
+        self.assertEqual(measured["totals"]["buckets"]["notifications"], len(body))
+        self.assertEqual(measured["totals"]["buckets"]["user_text"], 0)
+
+    def test_human_prompt_as_list_of_text_blocks_counts_user_text_and_starts_turn(self):
+        records = [user_record([text_block("abc"), text_block("de")], uuid="h1")]
+        measured = context_measure.measure(records)
+        self.assertEqual(len(measured["turns"]), 2)
+        self.assertEqual(measured["totals"]["buckets"]["user_text"], 5)
+
+    def test_hook_content_that_is_not_a_list_counts_zero(self):
+        records = [
+            attachment_line(
+                {"type": "hook_additional_context", "content": "abc", "hookEvent": "SessionStart"}
+            )
+        ]
+        self.assertEqual(bucket_totals(records)["hook_session_start"], 0)
+
 
 def write_bytes(data):
     handle = tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False)
@@ -538,6 +639,14 @@ class CliTest(unittest.TestCase):
         self.assertTrue(out.isascii())
         self.assertIn(ascii(name)[1:-1], out)
 
+    def test_unreadable_file_exits_two_with_error_and_empty_stdout(self):
+        path = self.sample_path()
+        with mock.patch("builtins.open", side_effect=PermissionError(13, "Permission denied")):
+            code, out, err = self.run_main([path])
+        self.assertEqual(code, 2)
+        self.assertEqual(out, "")
+        self.assertTrue(err.startswith("error:"))
+
 
 def system_record(subtype, uuid=None, sidechain=False):
     record = {"type": "system", "subtype": subtype}
@@ -688,6 +797,16 @@ class BehaviourTest(unittest.TestCase):
         self.assertEqual(behaviour["compactions"], 0)
         self.assertEqual(behaviour["reload_checks"], [])
         self.assertEqual(behaviour["reload_misses"], 0)
+
+    def test_two_compact_boundaries_with_same_uuid_count_one_compaction(self):
+        records = [compact_boundary("c1"), compact_boundary("c1")]
+        self.assertEqual(context_measure.behaviour(records)["compactions"], 1)
+
+    def test_format_behaviour_lists_phrase_table_row_with_count(self):
+        records = [assistant_line("msg_1", [text_block("should work")])]
+        text = context_measure.format_behaviour(context_measure.behaviour(records))
+        self.assertRegex(text, r"(?m)^Phrase\s+Count$")
+        self.assertRegex(text, r"(?m)^should work\s+1$")
 
     def test_sidechain_assistant_and_compaction_records_are_excluded(self):
         records = [

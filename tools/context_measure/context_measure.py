@@ -34,6 +34,7 @@ SKILL_BODY_PREFIX = "Base directory for this skill"
 NOTIFICATION_PREFIX = "<task-notification>"
 HANDBACK_MARKER = "[Subagent hand-back]"
 HANDBACK_FROM = 'from="'
+CLOSING_TAGS = ("</agent-message>", "</cross-session-message>")
 NON_TEXT_KEYS = ("type", "toolUseID")
 NOT_INJECTED_SUBTYPES = (
     "hook_success",
@@ -43,9 +44,11 @@ NOT_INJECTED_SUBTYPES = (
     "thinking_drop",
 )
 # The first six phrases are the unconditional bans in the honesty skill
-# (skills/honesty/SKILL.md); the rest are the punchy-phrasing examples in the
-# communication skill (skills/communication/SKILL.md). The list is a fixed
-# constant so a baseline and a later measure use the same words.
+# (skills/honesty/SKILL.md). The last six are the punchy-phrasing examples in the
+# communication skill (skills/communication/SKILL.md), except "load bearing" with
+# a space: that is an added variant of the hyphenated "load-bearing" and is
+# counted apart from it. The list is a fixed constant so a baseline and a later
+# measure use the same words.
 BANNED_PHRASES = (
     "should work",
     "that should do it",
@@ -89,7 +92,7 @@ def load_records(path):
         for raw_line in handle:
             try:
                 record = json.loads(raw_line.decode("utf-8"))
-            except (UnicodeDecodeError, ValueError):
+            except (UnicodeDecodeError, ValueError, RecursionError):
                 malformed += 1
                 continue
             if isinstance(record, dict):
@@ -214,8 +217,10 @@ def other_attachment_chars(record, attachment):
 
 def handback_key(text):
     """(sender, sha1 of the hand-back body). The sender is the text between the
-    first 'from="' and the next quote; the body is the text after the first
-    marker, or the whole text when the marker is absent."""
+    first 'from="' and the next quote. The body is the text after the first
+    marker, cut at the first closing tag of either form (so the harness wrapper
+    that differs between the two forms is ignored); with no closing tag it runs
+    to the end. With no marker the body is the whole text."""
     sender = ""
     start = text.find(HANDBACK_FROM)
     if start != -1:
@@ -226,6 +231,10 @@ def handback_key(text):
     marker_at = text.find(HANDBACK_MARKER)
     if marker_at != -1:
         body = text[marker_at + len(HANDBACK_MARKER):]
+        cuts = [body.find(tag) for tag in CLOSING_TAGS]
+        cuts = [cut for cut in cuts if cut != -1]
+        if cuts:
+            body = body[: min(cuts)]
     else:
         body = text
     digest = hashlib.sha1(body.encode("utf-8", "surrogatepass")).hexdigest()
@@ -252,6 +261,8 @@ def is_human_prompt(record):
     if isinstance(content, str):
         return True
     if isinstance(content, list):
+        if not content:
+            return False
         return not any(
             isinstance(block, dict) and block.get("type") == "tool_result"
             for block in content
@@ -280,21 +291,8 @@ def count_tool_results(turn, content, tool_names):
         add_tool_result(turn, tool_name, tool_result_length(block.get("content")))
 
 
-def count_assistant(turn, record, tool_names, seen_blocks):
-    message = record.get("message")
-    if not isinstance(message, dict) or not isinstance(message.get("content"), list):
-        return
-    message_id = message.get("id")
-    if not isinstance(message_id, str) or message_id == "":
-        message_id = None
-    for block in message["content"]:
-        if not isinstance(block, dict):
-            continue
-        if message_id is not None:
-            key = (message_id, json.dumps(block, sort_keys=True))
-            if key in seen_blocks:
-                continue
-            seen_blocks.add(key)
+def count_assistant(turn, record, tool_names, seen_blocks, seen_uuids):
+    for block in new_assistant_blocks(record, seen_blocks, seen_uuids):
         block_type = block.get("type")
         if block_type == "text" and isinstance(block.get("text"), str):
             add_chars(turn, "assistant_text", len(block["text"]))
@@ -322,8 +320,8 @@ def count_user_record(turns, record, state):
     if is_origin_kind(origin, "peer"):
         count_handback(turn, state, message_text(content))
         return
-    if is_origin_kind(origin, "task-notification") or (
-        isinstance(content, str) and content.startswith(NOTIFICATION_PREFIX)
+    if is_origin_kind(origin, "task-notification") or first_text(content).startswith(
+        NOTIFICATION_PREFIX
     ):
         add_chars(turn, "notifications", len(message_text(content)))
         return
@@ -359,6 +357,17 @@ def count_attachment(turns, record, state):
         prompt = attachment.get("prompt")
         count_handback(turn, state, prompt if isinstance(prompt, str) else "")
         return
+    if subtype == "invoked_skills":
+        add_chars(turn, "skill_bodies", other_attachment_chars(record, attachment))
+        return
+    prompt = attachment.get("prompt")
+    if (
+        subtype == "queued_command"
+        and isinstance(prompt, str)
+        and prompt.startswith(NOTIFICATION_PREFIX)
+    ):
+        add_chars(turn, "notifications", other_attachment_chars(record, attachment))
+        return
     add_chars(turn, "other_harness", other_attachment_chars(record, attachment))
 
 
@@ -378,6 +387,7 @@ def measure(records):
         "tool_names": {},
         "seen_blocks": set(),
         "seen_uuids": set(),
+        "seen_assistant_uuids": set(),
         "handbacks": set(),
     }
     for record in records:
@@ -386,7 +396,11 @@ def measure(records):
         record_type = record.get("type")
         if record_type == "assistant":
             count_assistant(
-                turns[-1], record, state["tool_names"], state["seen_blocks"]
+                turns[-1],
+                record,
+                state["tool_names"],
+                state["seen_blocks"],
+                state["seen_assistant_uuids"],
             )
             continue
         if record_type not in ("user", "attachment"):
@@ -404,15 +418,21 @@ def measure(records):
     return {"turns": turns, "totals": sum_totals(turns)}
 
 
-def new_assistant_blocks(record, seen_blocks):
-    """Content blocks of an assistant record not seen before, in order. Uses the
-    same (message.id, block signature) dedup as count_assistant."""
+def new_assistant_blocks(record, seen_blocks, seen_uuids):
+    """Content blocks of an assistant record not seen before, in order. With a
+    message.id, each (id, block signature) pair counts once. Without one, the
+    record's uuid counts once; a record with neither counts every block."""
     message = record.get("message")
     if not isinstance(message, dict) or not isinstance(message.get("content"), list):
         return []
     message_id = message.get("id")
     if not isinstance(message_id, str) or message_id == "":
         message_id = None
+        uuid = record.get("uuid")
+        if isinstance(uuid, str):
+            if uuid in seen_uuids:
+                return []
+            seen_uuids.add(uuid)
     fresh = []
     for block in message["content"]:
         if not isinstance(block, dict):
@@ -452,6 +472,7 @@ def behaviour(records):
     scanning = False
     seen_blocks = set()
     seen_uuids = set()
+    seen_assistant_uuids = set()
     for record in records:
         if not isinstance(record, dict) or record.get("isSidechain") is True:
             continue
@@ -476,7 +497,7 @@ def behaviour(records):
             continue
         if record_type != "assistant":
             continue
-        for block in new_assistant_blocks(record, seen_blocks):
+        for block in new_assistant_blocks(record, seen_blocks, seen_assistant_uuids):
             block_type = block.get("type")
             if block_type == "text" and isinstance(block.get("text"), str):
                 text_chars += len(block["text"])

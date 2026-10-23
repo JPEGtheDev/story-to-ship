@@ -561,6 +561,13 @@ def _todo_owners(rows):
 
 
 def _summary_entry(runner, tier, members, owners, todo_count):
+    """Return one summary dict for the rows of a single (runner, tier) group.
+
+    cost_per_todo_tokens and cost_per_todo_usd divide by the runner's attributed
+    todo count across all tiers, so the per-tier values add up to the runner's
+    per-todo cost. The numerator is every row of this group, including
+    coordinator, reviewer and unattributed rows; rows without usage add zero.
+    """
     counted = [row for row in members if row["input_tokens"] is not None]
     input_side = sum(
         row["input_tokens"] + row["cache_write_tokens"] + row["cache_read_tokens"]

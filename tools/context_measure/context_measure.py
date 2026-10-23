@@ -43,12 +43,12 @@ NOT_INJECTED_SUBTYPES = (
     "deferred_tools_record",
     "thinking_drop",
 )
-# The first six phrases are the unconditional bans in the honesty skill
-# (skills/honesty/SKILL.md). The last six are the punchy-phrasing examples in the
-# communication skill (skills/communication/SKILL.md), except "load bearing" with
-# a space: that is an added variant of the hyphenated "load-bearing" and is
-# counted apart from it. The list is a fixed constant so a baseline and a later
-# measure use the same words.
+# The first six phrases are the unconditional bans in the honesty skill. The next
+# five are the punchy-phrasing examples in the communication skill: "load-bearing",
+# "crucially", "the deeper point", "a real win" and "elegant". "load bearing" (with
+# a space) is an added variant of "load-bearing" and is counted apart from it; it
+# sits right after "load-bearing" in the tuple. The list is a fixed constant so a
+# baseline and a later measure use the same words.
 BANNED_PHRASES = (
     "should work",
     "that should do it",

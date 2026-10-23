@@ -50,7 +50,7 @@ Each source is one bucket in the report.
 - `hook_other`: text injected by any other hook event, or by a hook with no event name.
 - `other_harness`: meta user records that are not skill bodies, and attachment records other than `invoked_skills` (those count under `skill_bodies`). A record with a `rendered` list counts the rendered text; without one, the string values of the attachment count, except for the metadata-only subtypes listed below.
 - `tool_results`: the content of each tool result, by tool name. A result whose tool use cannot be matched counts under `unknown_tool`.
-- `handbacks`: sub-agent hand-backs, from peer-origin user records and peer-origin queued-command attachments. Each hand-back counts once, whichever form it arrives in and whatever framing text surrounds it; see the counting rules.
+- `handbacks`: sub-agent hand-backs, from peer-origin user records and peer-origin queued-command attachments. Each hand-back counts once, whichever form it arrives in; see the counting rules.
 - `notifications`: task notifications (background-task completions), from task-notification user records and task-notification queued-command attachments.
 - `assistant_text`: text blocks of assistant messages.
 - `assistant_thinking`: thinking blocks of assistant messages (see the blind spots).
@@ -68,7 +68,9 @@ unless the record carries a `rendered` list.
 - Units are characters, not tokens. The tool does not run a tokenizer.
 - Sub-agent records (`isSidechain` true) are excluded from every count.
 - Assistant blocks are counted once per (message id, block content). A block that is
-  written again under the same message id is not counted twice.
+  written again under the same message id is not counted twice. A record with no
+  message id counts once per `uuid`; a record with neither a message id nor a `uuid`
+  counts once per line.
 - User and attachment records are counted once per `uuid`.
 - A hand-back can arrive in two forms: a peer-origin user record, or a peer-origin
   queued-command attachment. It is counted once per (sender, hash of the body). The

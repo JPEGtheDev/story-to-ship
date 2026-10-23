@@ -90,7 +90,7 @@ If the task as dispatched carries two independently verifiable objectives, or is
 
 ```
 STATUS: NEEDS_CONTEXT
-Missing context: This task as described carries more than one objective, or is one that no single
+Missing context: This task as described carries two independently verifiable objectives, or is one that no single
 review could judge (Task Granularity, `writing-plans` skill). The orchestrator must split it by
 objective before dispatching. Suggested split:
   - Subtask A: [description, files, objective]

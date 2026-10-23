@@ -497,6 +497,22 @@ class SessionRootTests(unittest.TestCase):
         self.assertEqual(rows_sub, rows_fixture)
 
 
+class CostRoundingTests(unittest.TestCase):
+    def test_CostFor_SubCentTotal_ReturnsUnroundedCost(self):
+        # Arrange
+        totals = {
+            "input_tokens": 3,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "output_tokens": 0,
+        }
+        spec = {"rates_per_million": {"input": 10}}
+        # Act
+        cost = tier_usage.cost_for(totals, spec)
+        # Assert
+        self.assertEqual(cost, 0.00003)
+
+
 def load_raw_tiers(text):
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "tiers.json")
@@ -1191,6 +1207,38 @@ class SummaryTests(unittest.TestCase):
         )
         self.assertEqual(entry["cost_usd"], 33.0)
         self.assertEqual(entry["cost_per_todo_usd"], 11.0)
+
+    def test_Summary_SubCentRowCosts_PerTodoComputedFromUnroundedTotal(self):
+        # Arrange
+        tiers = default_tiers()
+        tiers["economy"]["rates_per_million"] = {
+            "input": 10,
+            "cache_write": 0,
+            "cache_read": 0,
+            "output": 0,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            write_dispatch(tmp, "p1", meta=runner_meta())
+            write_dispatch(
+                tmp,
+                "i1",
+                meta=dispatch_meta("implementer", "Implement todo 1", "p1"),
+                lines=[assistant(model_id(FAMILY_A), token_usage=usage(3, 0, 0, 0))],
+            )
+            write_dispatch(
+                tmp,
+                "d1",
+                meta=dispatch_meta("explorer", "Map the repo", "p1"),
+                lines=[assistant(model_id(FAMILY_A), token_usage=usage(3, 0, 0, 0))],
+            )
+            rows, _ = collect_rows(tmp, tiers)
+        # Act
+        entry = summary_entry_for(
+            tier_usage.summarize(rows), "p1:story-coordinator", "economy"
+        )
+        # Assert
+        self.assertEqual(entry["cost_usd"], 0.0001)
+        self.assertEqual(entry["cost_per_todo_usd"], 0.0001)
 
     def test_Summary_LauncherDirectGroupsSortBeforeCoordinatorGroup(self):
         rows = tied_rows(

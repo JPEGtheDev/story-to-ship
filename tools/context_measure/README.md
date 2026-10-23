@@ -48,15 +48,15 @@ Each source is one bucket in the report.
 - `hook_session_start`: text injected by SessionStart hooks (the `content` strings of `hook_additional_context` attachments).
 - `hook_user_prompt`: text injected by UserPromptSubmit hooks (same record type).
 - `hook_other`: text injected by any other hook event, or by a hook with no event name.
-- `other_harness`: meta user records that are not skill bodies, and other attachment records. A record with a `rendered` list counts the rendered text; without one, the string values of the attachment count, except for the metadata-only subtypes listed below.
+- `other_harness`: meta user records that are not skill bodies, and attachment records other than `invoked_skills` (those count under `skill_bodies`). A record with a `rendered` list counts the rendered text; without one, the string values of the attachment count, except for the metadata-only subtypes listed below.
 - `tool_results`: the content of each tool result, by tool name. A result whose tool use cannot be matched counts under `unknown_tool`.
-- `handbacks`: sub-agent hand-backs, from peer-origin user records and peer-origin queued-command attachments. Each hand-back counts once; see the counting rules.
-- `notifications`: task-notification user records (background-task completions).
+- `handbacks`: sub-agent hand-backs, from peer-origin user records and peer-origin queued-command attachments. Each hand-back counts once, whichever form it arrives in and whatever framing text surrounds it; see the counting rules.
+- `notifications`: task notifications (background-task completions), from task-notification user records and task-notification queued-command attachments.
 - `assistant_text`: text blocks of assistant messages.
 - `assistant_thinking`: thinking blocks of assistant messages (see the blind spots).
 - `assistant_tool_use_input`: the JSON length of each tool-use input.
 - `user_text`: the text of each human prompt.
-- `skill_bodies`: meta user records whose text starts with "Base directory for this skill", that is, a loaded skill body.
+- `skill_bodies`: meta user records whose text starts with "Base directory for this skill", that is, a loaded skill body; and `invoked_skills` attachments, which re-send loaded skill bodies after a compaction.
 - `compaction_summary`: the summary record written at a compaction.
 
 The metadata-only attachment subtypes are `hook_success`, `prompt_snapshot`,
@@ -73,18 +73,22 @@ unless the record carries a `rendered` list.
 - A hand-back can arrive in two forms: a peer-origin user record, or a peer-origin
   queued-command attachment. It is counted once per (sender, hash of the body). The
   sender is the text between `from="` and the next quote. The body is the text after
-  the `[Subagent hand-back]` marker, or the whole text when the marker is missing.
-  The characters counted are those of the first arrival.
+  the `[Subagent hand-back]` marker, or the whole text when the marker is missing, and
+  it ends at the closing tag of the hand-back message (`agent-message` or
+  `cross-session-message`). The harness adds different framing text around the same
+  hand-back in each form, so the same hand-back arriving as a user record and as a
+  queued-command attachment counts once. The characters counted are those of the first
+  arrival.
 
 ## Behaviour baseline
 
 `--behaviour` reads the main thread only (sub-agent records excluded).
 
-- Banned phrases. The list is a fixed constant in the module. The first six phrases come
-  from the honesty skill; the rest come from the communication skill. Matching is
-  case-insensitive,
-  a straight or curly apostrophe matches, and a hit must not touch a letter or digit
-  on either side. Fenced code blocks are removed before matching.
+- Banned phrases. The list is a fixed constant in the module. The first six phrases
+  come from the honesty skill and the next five from the communication skill; "load
+  bearing" (with a space) is an added variant of "load-bearing". Matching is
+  case-insensitive, a straight or curly apostrophe matches, and a hit must not touch a
+  letter or digit on either side. Fenced code blocks are removed before matching.
 - Rate. Banned hits per 10 000 characters of assistant text (text blocks only).
 - Skill calls. The number of Skill tool calls, and the top three skills by count.
 - Reload check. Each compaction boundary starts a check. The check scans the following

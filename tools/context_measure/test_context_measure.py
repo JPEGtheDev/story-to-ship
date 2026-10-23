@@ -587,7 +587,7 @@ class BehaviourTest(unittest.TestCase):
         self.assertEqual(context_measure.behaviour(records)["banned"]["should work"], 1)
 
     def test_curly_apostrophe_matches_straight_apostrophe_phrase(self):
-        records = [assistant_line("msg_1", [text_block("I’m sure")])]
+        records = [assistant_line("msg_1", [text_block("I\u2019m sure")])]
         self.assertEqual(context_measure.behaviour(records)["banned"]["i'm sure"], 1)
 
     def test_load_bearing_and_hyphenated_are_counted_separately(self):
@@ -721,9 +721,10 @@ class BehaviourCliTest(unittest.TestCase):
             [
                 json.dumps(human_prompt("should work", uuid="p1")),
                 json.dumps(assistant_line("msg_1", [text_block("I'm sure")])),
-                json.dumps(assistant_line("msg_2", [skill_block("t1", "honesty")])),
+                json.dumps(assistant_line("msg_2", [skill_block("t1", "communication")])),
                 json.dumps(compact_boundary("c1")),
-                json.dumps(assistant_line("msg_3", [tool_use_block("t2", "Edit", {})])),
+                json.dumps(assistant_line("msg_3", [skill_block("t2", "honesty")])),
+                json.dumps(assistant_line("msg_4", [tool_use_block("t3", "Edit", {})])),
             ]
         )
 

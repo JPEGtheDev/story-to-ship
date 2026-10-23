@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 
 BUCKETS = (
@@ -41,6 +42,42 @@ NOT_INJECTED_SUBTYPES = (
     "deferred_tools_record",
     "thinking_drop",
 )
+# The first six phrases are the unconditional bans in the honesty skill
+# (skills/honesty/SKILL.md); the rest are the punchy-phrasing examples in the
+# communication skill (skills/communication/SKILL.md). The list is a fixed
+# constant so a baseline and a later measure use the same words.
+BANNED_PHRASES = (
+    "should work",
+    "that should do it",
+    "i'm confident",
+    "i'm sure",
+    "i'm fairly confident",
+    "probably passes",
+    "load-bearing",
+    "load bearing",
+    "crucially",
+    "the deeper point",
+    "a real win",
+    "elegant",
+)
+FENCED_CODE = re.compile(r"```.*?```", re.DOTALL)
+GATED_TOOLS = ("Edit", "Write", "NotebookEdit", "Agent")
+RELOAD_SKILLS = ("honesty", "communication")
+COMPACT_BOUNDARY = "compact_boundary"
+END_OF_TRANSCRIPT = "end_of_transcript"
+
+
+def phrase_pattern(phrase):
+    """Case-insensitive pattern for one phrase: no ASCII letter or digit may touch
+    either end, and an apostrophe matches a straight or a curly one."""
+    body = r"['\u2019]".join(re.escape(part) for part in phrase.split("'"))
+    return re.compile(
+        r"(?<![A-Za-z0-9])" + body + r"(?![A-Za-z0-9])",
+        re.IGNORECASE | re.ASCII,
+    )
+
+
+BANNED_PATTERNS = tuple((phrase, phrase_pattern(phrase)) for phrase in BANNED_PHRASES)
 
 
 def load_records(path):
@@ -367,6 +404,154 @@ def measure(records):
     return {"turns": turns, "totals": sum_totals(turns)}
 
 
+def new_assistant_blocks(record, seen_blocks):
+    """Content blocks of an assistant record not seen before, in order. Uses the
+    same (message.id, block signature) dedup as count_assistant."""
+    message = record.get("message")
+    if not isinstance(message, dict) or not isinstance(message.get("content"), list):
+        return []
+    message_id = message.get("id")
+    if not isinstance(message_id, str) or message_id == "":
+        message_id = None
+    fresh = []
+    for block in message["content"]:
+        if not isinstance(block, dict):
+            continue
+        if message_id is not None:
+            key = (message_id, json.dumps(block, sort_keys=True))
+            if key in seen_blocks:
+                continue
+            seen_blocks.add(key)
+        fresh.append(block)
+    return fresh
+
+
+def skill_name(block):
+    """The name of a Skill tool_use block with any plugin prefix removed, or None
+    when input.skill is not a string."""
+    tool_input = block.get("input")
+    if not isinstance(tool_input, dict) or not isinstance(tool_input.get("skill"), str):
+        return None
+    return tool_input["skill"].rsplit(":", 1)[-1]
+
+
+def banned_counts(text):
+    """Banned-phrase hits in one text block, with fenced code removed."""
+    visible = FENCED_CODE.sub("", text)
+    return {phrase: len(pattern.findall(visible)) for phrase, pattern in BANNED_PATTERNS}
+
+
+def behaviour(records):
+    """Behaviour baseline over the main thread: banned phrases, Skill calls and
+    the reload check after each compaction."""
+    banned = {phrase: 0 for phrase in BANNED_PHRASES}
+    text_chars = 0
+    skill_calls = 0
+    skills = {}
+    checks = []
+    scanning = False
+    seen_blocks = set()
+    seen_uuids = set()
+    for record in records:
+        if not isinstance(record, dict) or record.get("isSidechain") is True:
+            continue
+        record_type = record.get("type")
+        if record_type == "system":
+            if record.get("subtype") != COMPACT_BOUNDARY:
+                continue
+            uuid = record.get("uuid")
+            if isinstance(uuid, str):
+                if uuid in seen_uuids:
+                    continue
+                seen_uuids.add(uuid)
+            checks.append(
+                {
+                    "compaction": len(checks) + 1,
+                    "honesty": False,
+                    "communication": False,
+                    "first_gated_tool": END_OF_TRANSCRIPT,
+                }
+            )
+            scanning = True
+            continue
+        if record_type != "assistant":
+            continue
+        for block in new_assistant_blocks(record, seen_blocks):
+            block_type = block.get("type")
+            if block_type == "text" and isinstance(block.get("text"), str):
+                text_chars += len(block["text"])
+                for phrase, count in banned_counts(block["text"]).items():
+                    banned[phrase] += count
+            elif block_type == "tool_use":
+                name = block.get("name")
+                skill = skill_name(block) if name == "Skill" else None
+                if name == "Skill":
+                    skill_calls += 1
+                    if skill is not None:
+                        skills[skill] = skills.get(skill, 0) + 1
+                if not scanning or not checks:
+                    continue
+                check = checks[-1]
+                if name in GATED_TOOLS:
+                    check["first_gated_tool"] = name
+                    scanning = False
+                elif skill in RELOAD_SKILLS:
+                    check[skill] = True
+    banned_total = sum(banned.values())
+    rate = round(banned_total * 10000 / text_chars, 2) if text_chars else 0.0
+    misses = sum(1 for check in checks if not (check["honesty"] and check["communication"]))
+    return {
+        "assistant_text_chars": text_chars,
+        "banned": banned,
+        "banned_total": banned_total,
+        "banned_per_10k_chars": rate,
+        "skill_calls": skill_calls,
+        "skills": skills,
+        "compactions": len(checks),
+        "reload_checks": checks,
+        "reload_misses": misses,
+    }
+
+
+def format_behaviour(baseline):
+    """The Behaviour baseline section, ready to append to the text report."""
+    lines = [
+        "Behaviour baseline",
+        "Banned phrases: " + ", ".join(BANNED_PHRASES),
+        "Assistant text characters: %d" % baseline["assistant_text_chars"],
+        "Banned total: %d" % baseline["banned_total"],
+        "Banned per 10k characters: %.2f" % baseline["banned_per_10k_chars"],
+    ]
+    rows = [
+        [phrase, str(count)] for phrase, count in baseline["banned"].items() if count > 0
+    ]
+    if rows:
+        lines.extend(render_table(["Phrase", "Count"], rows))
+    else:
+        lines.append("No banned phrases found.")
+    lines.append("Skill calls: %d" % baseline["skill_calls"])
+    top = sorted(baseline["skills"].items(), key=lambda item: (-item[1], item[0]))[:3]
+    if top:
+        lines.append(
+            "Top skills: " + ", ".join("%s=%d" % (ascii_text(name), count) for name, count in top)
+        )
+    else:
+        lines.append("Top skills: none")
+    lines.append("Compactions: %d" % baseline["compactions"])
+    for check in baseline["reload_checks"]:
+        lines.append(
+            "compaction %d: honesty=%s communication=%s first_gated_tool=%s"
+            % (
+                check["compaction"],
+                "yes" if check["honesty"] else "no",
+                "yes" if check["communication"] else "no",
+                ascii_text(check["first_gated_tool"]),
+            )
+        )
+    lines.append("Reload misses: %d" % baseline["reload_misses"])
+    return "\n".join(lines) + "\n"
+
+
 def ascii_text(value):
     """The value as ASCII-only text: non-ASCII characters become escapes."""
     return ascii(value)[1:-1]
@@ -471,6 +656,11 @@ def main(argv=None):
     parser.add_argument(
         "--json", action="store_true", help="print the full measurement as one JSON object"
     )
+    parser.add_argument(
+        "--behaviour",
+        action="store_true",
+        help="add the behaviour baseline (banned phrases, skills, reload checks)",
+    )
     args = parser.parse_args(argv)
     path = args.transcript
     if not os.path.isfile(path):
@@ -484,6 +674,7 @@ def main(argv=None):
     if not records:
         return fail("no parseable JSON object line in %s" % ascii_text(path))
     result = measure(records)
+    baseline = behaviour(records) if args.behaviour else None
     if args.json:
         data = {
             "path": path,
@@ -492,9 +683,14 @@ def main(argv=None):
             "totals": result["totals"],
             "turns": result["turns"],
         }
+        if baseline is not None:
+            data["behaviour"] = baseline
         sys.stdout.write(json.dumps(data, sort_keys=True, indent=2) + "\n")
     else:
-        sys.stdout.write(format_report(path, len(records), malformed, result, args.top))
+        report = format_report(path, len(records), malformed, result, args.top)
+        if baseline is not None:
+            report += "\n" + format_behaviour(baseline)
+        sys.stdout.write(report)
     return 0
 
 

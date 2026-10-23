@@ -296,10 +296,21 @@ jobs:
               fi
             done
           }
-          check skills/running-a-sprint/SKILL.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text'
-          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Reconcile text:' 'Reconcile: merged PR' 'fresh count of 3'
-          check agents/story-coordinator.md '## Reconcile' '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read'
-          check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:'
+          checkx() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qxF -- "$s" "$file"; then
+                printf 'FAILED: %s has no line equal to: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/SKILL.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text' 'still working gets state `reconcile pending`' 'A reconcile in progress finishes before' 'gh pr list --state open --json number' 'is not a sprint PR'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Reconcile text:' 'Reconcile: merged PR' 'fresh count of 3' 'run `gh pr view <PR number> --json body`' 'a fresh count of 3 for that reconcile' 'each statement that now contradicts another statement'
+          checkx agents/story-coordinator.md '## Reconcile'
+          check agents/story-coordinator.md '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read' 'rev-parse origin/<branch>' 'each statement that now contradicts another statement' 'worktree add .worktrees/{{WORKTREE_PREFIX}} -B'
+          check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing reconcile contract string(s)"
             exit 1

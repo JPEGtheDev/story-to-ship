@@ -190,4 +190,4 @@ preference if it is a defect.
 
 ## Related Skills
 
-- `reviewing-outside-contributions` -- register for replies and review comments addressed to a non-owner contributor on a public PR or issue thread
+- `reviewing-outside-contributions` -- tone and wording rules for replies and review comments addressed to a non-owner contributor on a public PR or issue thread

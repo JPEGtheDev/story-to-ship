@@ -47,7 +47,7 @@ A story whose "Files to Create/Modify" list overlaps the list of a working runne
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason, because it has no runner and a reload would lose it. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. State values include `reconciling <merged PR number>` and `reconcile pending` (a reconcile waiting for the runner to hand back or for the owner to answer). A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason, because it has no runner and a reload would lose it. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
 
 **Context:** The launcher compacts or restarts mid-sprint.
 **Forces:** The runners keep working while the launcher forgets, and a lost runner id means a runner nobody can resume. The plan file survives; the launcher's memory does not.
@@ -95,7 +95,15 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 4. Delete the branch locally (`git -C R branch -D <branch>`; the squash leaves it unmerged in git's view) and on origin with git push origin --delete <branch>, run through `git -C R`.
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
-7. Check every other open PR for mergeability (`gh pr view <PR number> --json mergeable`). For each PR that conflicts, resume its runner to fetch origin main and rebase, then send PR ready again.
+7. Reconcile the other open sprint PRs against the merged change. Take the merged change's files from `git -C R diff --name-only S^ S`. For each other open sprint PR in the ledger, list its files with `gh pr diff <PR number> --name-only` (do not use `--json files`; it is capped at 100 files) and intersect the two lists. An empty intersection means no reconcile is sent for that PR.
+   - For a non-empty intersection, resume that PR's runner with the Reconcile text from `references/HANDBACK_ROUTING.md` (Resume texts), fill its placeholders, and set the ledger state to `reconciling <merged PR number>`.
+   - A runner still working gets state `reconcile pending` and the Reconcile text when it hands back a kind other than interim.
+   - A runner held for the owner (owner question, cap reached, blocked) gets state `reconcile pending` until the owner answers. The launcher's one-line message to the owner says the PR is waiting on a reconcile.
+   - A killed runner gets the validate-first text from `references/HANDBACK_ROUTING.md`, then the Reconcile text.
+   - A runner that cannot be resumed (the resume errors, or no runner id is recorded) is replaced by a fresh story-coordinator runner that the launcher starts with both stories (issue bodies), both diffs, the PR body, and the plan file when its worktree still exists. The fresh runner works in a new worktree made from `origin/<branch>` and opens no new PR.
+   - A reconcile in progress finishes before the next one is sent to the same runner. A second merge queues another. When a PR itself merges, drop its reconcile entries from the ledger.
+   - An open PR with no ledger entry is not reconciled. Tell the owner in one line "PR <n> overlaps the merged change but is not a sprint PR".
+   - The runner answers with a PR ready hand-back that carries a `Reconcile:` line. Verify it like any other PR ready (`references/HANDBACK_ROUTING.md`), then tell the owner in one line that the PR head changed and needs a fresh look.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger and tell the owner. Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
 
 **Context:** The owner merged and the sprint feels finished.

@@ -358,17 +358,14 @@ def _is_fix_dispatch(description):
     return ROUND_PATTERN.search(description) is not None
 
 
+def _start_key(row):
+    return (row["first_ts"] is None, row["first_ts"] or "", row["agent_id"])
+
+
 def _first_stage1_pass(reviews):
     if not reviews:
         return NOT_APPLICABLE
-    first = min(
-        reviews,
-        key=lambda row: (
-            row["first_ts"] is None,
-            row["first_ts"] or "",
-            row["agent_id"],
-        ),
-    )
+    first = min(reviews, key=_start_key)
     if first["verdict"] == "PASS":
         return "yes"
     if first["verdict"] == "GAPS":
@@ -479,14 +476,7 @@ def collect(session_dir, tiers):
         rows.append(row)
 
     tie_todos(rows)
-    rows.sort(
-        key=lambda row: (
-            row["runner"],
-            row["first_ts"] is None,
-            row["first_ts"] or "",
-            row["agent_id"],
-        )
-    )
+    rows.sort(key=lambda row: (row["runner"], _start_key(row)))
     return rows, counts
 
 
@@ -531,10 +521,6 @@ SUMMARY_COLUMNS = [
 TIER_ORDER = ("economy", "standard", "premium")
 STAGE2_TYPES = frozenset({"code-quality-reviewer", "skill-reviewer"})
 STAGE2_NOT_PASSED = frozenset({"REQUEST CHANGES", "REJECT", "NEEDS WORK"})
-
-
-def _start_key(row):
-    return (row["first_ts"] is None, row["first_ts"] or "", row["agent_id"])
 
 
 def _tier_rank(tier):

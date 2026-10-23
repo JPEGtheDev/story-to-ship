@@ -147,3 +147,7 @@ If a reviewer approves without commenting on the specific concerns you listed:
 | "CI is red but it's a flaky test" | Red CI is red CI. Fix or document the flake; do not request review against it. |
 | "I'll address the agent findings after human review" | Agent REQUEST CHANGES, REJECT, or NEEDS WORK verdicts must be resolved first. Never spend human review on issues a machine already found. |
 | "I reviewed the diff myself, that's equivalent" | Self-review does not catch the issues a fresh reviewer catches. Dispatch anyway. |
+
+## Related Skills
+
+- `reviewing-outside-contributions` -- register for the review request text when it is posted to a non-owner contributor on a public thread

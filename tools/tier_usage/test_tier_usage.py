@@ -458,6 +458,113 @@ class SessionRootTests(unittest.TestCase):
         self.assertEqual(rows_sub, rows_fixture)
 
 
+def load_raw_tiers(text):
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "tiers.json")
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(text)
+        return tier_usage.load_tiers(path)
+
+
+def load_tier_spec(spec):
+    with tempfile.TemporaryDirectory() as tmp:
+        return tier_usage.load_tiers(write_tiers(tmp, {"economy": spec}))
+
+
+class TierShapeTests(unittest.TestCase):
+    def test_LoadTiers_TiersValueNotObject_RaisesNamingTiers(self):
+        # Arrange
+        text = '{"tiers": ["economy"]}'
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'tiers'"):
+            load_raw_tiers(text)
+
+    def test_LoadTiers_TierSpecNotObject_RaisesNamingTier(self):
+        # Arrange
+        text = '{"tiers": {"economy": "%s"}}' % FAMILY_A
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'"):
+            load_raw_tiers(text)
+
+    def test_LoadTiers_MatchIsPlainString_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": "abc"}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_MatchHoldsEmptyString_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": [""]}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_MatchHoldsNumber_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": [3]}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'match'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_RateIsString_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"input": "3"}}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_RateIsNull_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"input": None}}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_RateIsBool_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"output": True}}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_RatesIsList_RaisesNamingTierAndField(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": [1, 2]}
+        # Act and Assert
+        with self.assertRaisesRegex(ValueError, "'economy'.*'rates_per_million'"):
+            load_tier_spec(spec)
+
+    def test_LoadTiers_RatesNull_Accepted(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": None}
+        # Act
+        loaded = load_tier_spec(spec)
+        # Assert
+        self.assertIsNone(loaded["economy"]["rates_per_million"])
+
+    def test_LoadTiers_ValidShape_Accepted(self):
+        # Arrange
+        spec = {"match": ["x"], "rates_per_million": {"input": 3, "output": 15.5}}
+        # Act
+        loaded = load_tier_spec(spec)
+        # Assert
+        self.assertEqual(loaded["economy"]["match"], ["x"])
+
+    def test_Main_BadRateValue_ExitsTwoWithMessage(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "subagents"))
+            tiers_path = write_tiers(
+                tmp, {"economy": {"match": ["x"], "rates_per_million": {"input": "3"}}}
+            )
+            # Act
+            code, _, err = run_main([tmp, "--tiers", tiers_path])
+        # Assert
+        self.assertEqual(code, 2)
+        self.assertIn("'economy'", err)
+
+
 class VendorNameTests(unittest.TestCase):
     def test_ScriptAndTestText_ContainsNoFamilyName(self):
         for path in (os.path.join(HERE, "tier_usage.py"), os.path.abspath(__file__)):

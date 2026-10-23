@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""Print one usage row per subagent dispatch found in a session folder.
+
+The input is SESSION_DIR/subagents when that folder exists, otherwise
+SESSION_DIR itself. Each dispatch is an agent-<id>.meta.json file, with an
+optional agent-<id>.jsonl transcript beside it. The model-to-tier table is
+read from tiers.json (next to this script unless --tiers is given).
+"""
+
+import argparse
+import json
+import os
+import sys
+
+DEFAULT_TIERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiers.json")
+COLUMNS = [
+    "agent_id",
+    "agent_type",
+    "tier",
+    "runner",
+    "input_tokens",
+    "cache_write_tokens",
+    "cache_read_tokens",
+    "est_output_tokens",
+    "cost_usd",
+    "verdict",
+]
+NO_RATES = "n/a (no rates)"
+NO_VALUE = "-"
+MAX_HOPS = 10
+SYNTHETIC_MODEL = "<synthetic>"
+USAGE_KEYS = (
+    "input_tokens",
+    "cache_creation_input_tokens",
+    "cache_read_input_tokens",
+    "output_tokens",
+)
+RATE_KEY_FOR_USAGE = {
+    "input_tokens": "input",
+    "cache_creation_input_tokens": "cache_write",
+    "cache_read_input_tokens": "cache_read",
+    "output_tokens": "output",
+}
+AGENT_PREFIX = "agent-"
+META_SUFFIX = ".meta.json"
+TRANSCRIPT_SUFFIX = ".jsonl"
+
+
+def load_tiers(path):
+    """Return the tiers mapping (name -> spec) in file order."""
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    return data["tiers"]
+
+
+def tier_for_model(model_id, tiers):
+    """Return the first tier (file order) whose match fragment occurs in the id."""
+    lowered = model_id.lower()
+    for name, spec in tiers.items():
+        for fragment in spec.get("match", []):
+            if fragment and fragment.lower() in lowered:
+                return name
+    return None
+
+
+def tier_label(model_ids, tiers):
+    """Combine the tiers of several model ids into one tier label."""
+    found = {tier_for_model(model_id, tiers) for model_id in model_ids}
+    if not found:
+        return "unmapped"
+    mapped = {tier for tier in found if tier is not None}
+    if None in found:
+        return "mixed" if mapped else "unmapped"
+    if len(mapped) == 1:
+        return mapped.pop()
+    return "mixed"
+
+
+def _as_int(value):
+    if isinstance(value, bool) or not isinstance(value, int):
+        return 0
+    return value
+
+
+def read_transcript(path):
+    """Parse one transcript into its counted usage records and bookkeeping."""
+    usage_by_message = {}
+    model_ids = set()
+    timestamps = []
+    malformed = 0
+    with open(path, encoding="utf-8", errors="replace") as handle:
+        for line_no, raw in enumerate(handle):
+            text = raw.strip()
+            if not text:
+                continue
+            try:
+                obj = json.loads(text)
+            except ValueError:
+                malformed += 1
+                continue
+            if not isinstance(obj, dict):
+                malformed += 1
+                continue
+            if obj.get("type") != "assistant":
+                continue
+            message = obj.get("message")
+            if not isinstance(message, dict):
+                continue
+            model = message.get("model")
+            if not isinstance(model, str):
+                model = ""
+            if model == SYNTHETIC_MODEL:
+                continue
+            model_ids.add(model)
+            timestamp = obj.get("timestamp")
+            if isinstance(timestamp, str):
+                timestamps.append(timestamp)
+            usage = message.get("usage")
+            if not isinstance(usage, dict):
+                usage = {}
+            message_id = message.get("id")
+            key = message_id if isinstance(message_id, str) else ("line", line_no)
+            usage_by_message[key] = usage
+    return {
+        "model_ids": model_ids,
+        "usages": list(usage_by_message.values()),
+        "first_ts": min(timestamps) if timestamps else None,
+        "malformed": malformed,
+    }
+
+
+def _read_meta(path):
+    try:
+        with open(path, encoding="utf-8") as handle:
+            meta = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    if not isinstance(meta, dict):
+        return None
+    return meta
+
+
+def _agent_type(meta):
+    value = meta.get("agentType")
+    if isinstance(value, str) and value:
+        return value
+    return "unknown"
+
+
+def runner_for(agent_id, metas):
+    """Follow parent links to the top-level dispatch, or mark the walk orphan."""
+    current = agent_id
+    seen = {agent_id}
+    hops = 0
+    while True:
+        meta = metas[current]
+        parent = meta.get("parentAgentId")
+        if not isinstance(parent, str) or not parent:
+            return f"{current}:{_agent_type(meta)}"
+        if hops == MAX_HOPS or parent in seen or parent not in metas:
+            return f"orphan:{current}"
+        seen.add(parent)
+        current = parent
+        hops += 1
+
+
+def cost_for(totals, spec):
+    """Return the dollar cost for the totals under a tier spec, or NO_RATES."""
+    rates = spec.get("rates_per_million") if spec else None
+    if not isinstance(rates, dict):
+        return NO_RATES
+    total = 0
+    for usage_key in USAGE_KEYS:
+        total += totals[usage_key] * rates.get(RATE_KEY_FOR_USAGE[usage_key], 0)
+    return round(total / 1000000, 4)
+
+
+def collect(session_dir, tiers):
+    """Return (rows, counts) for every dispatch in the session folder."""
+    subagents = os.path.join(session_dir, "subagents")
+    root = subagents if os.path.isdir(subagents) else session_dir
+    counts = {"malformed": 0, "no_meta": 0}
+
+    metas = {}
+    transcripts = {}
+    for name in sorted(os.listdir(root)):
+        path = os.path.join(root, name)
+        if not os.path.isfile(path) or not name.startswith(AGENT_PREFIX):
+            continue
+        if name.endswith(META_SUFFIX):
+            agent_id = name[len(AGENT_PREFIX) : -len(META_SUFFIX)]
+            meta = _read_meta(path)
+            if meta is None:
+                counts["malformed"] += 1
+            else:
+                metas[agent_id] = meta
+        elif name.endswith(TRANSCRIPT_SUFFIX):
+            agent_id = name[len(AGENT_PREFIX) : -len(TRANSCRIPT_SUFFIX)]
+            transcripts[agent_id] = path
+
+    stats_by_id = {}
+    for agent_id, path in transcripts.items():
+        stats = read_transcript(path)
+        counts["malformed"] += stats["malformed"]
+        if agent_id in metas:
+            stats_by_id[agent_id] = stats
+        else:
+            counts["no_meta"] += 1
+
+    rows = []
+    for agent_id in sorted(metas):
+        meta = metas[agent_id]
+        stats = stats_by_id.get(agent_id)
+        if stats and stats["model_ids"]:
+            tier = tier_label(sorted(stats["model_ids"]), tiers)
+        else:
+            alias = meta.get("model")
+            alias_ids = [alias] if isinstance(alias, str) and alias else []
+            tier = tier_label(alias_ids, tiers)
+
+        row = {
+            "agent_id": agent_id,
+            "agent_type": _agent_type(meta),
+            "tier": tier,
+            "runner": runner_for(agent_id, metas),
+            "verdict": NO_VALUE,
+            "first_ts": stats["first_ts"] if stats else None,
+        }
+        if stats and stats["usages"]:
+            totals = {key: 0 for key in USAGE_KEYS}
+            for usage in stats["usages"]:
+                for key in USAGE_KEYS:
+                    totals[key] += _as_int(usage.get(key))
+            row["input_tokens"] = totals["input_tokens"]
+            row["cache_write_tokens"] = totals["cache_creation_input_tokens"]
+            row["cache_read_tokens"] = totals["cache_read_input_tokens"]
+            row["est_output_tokens"] = totals["output_tokens"]
+            row["cost_usd"] = cost_for(totals, tiers.get(tier))
+        else:
+            row["input_tokens"] = None
+            row["cache_write_tokens"] = None
+            row["cache_read_tokens"] = None
+            row["est_output_tokens"] = None
+            row["cost_usd"] = None
+        rows.append(row)
+
+    rows.sort(
+        key=lambda row: (
+            row["runner"],
+            row["first_ts"] is None,
+            row["first_ts"] or "",
+            row["agent_id"],
+        )
+    )
+    return rows, counts
+
+
+def _cell(value):
+    if value is None:
+        return NO_VALUE
+    return str(value)
+
+
+def render(rows, counts):
+    """Return the tab-separated table followed by the skipped-lines summary."""
+    lines = ["\t".join(COLUMNS)]
+    for row in rows:
+        lines.append("\t".join(_cell(row[column]) for column in COLUMNS))
+    lines.append(
+        f"# skipped malformed lines: {counts['malformed']}; "
+        f"jsonl without meta: {counts['no_meta']}"
+    )
+    return "\n".join(lines) + "\n"
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description="Print one tier usage row per subagent dispatch in a session folder."
+    )
+    parser.add_argument("session_dir")
+    parser.add_argument("--tiers", default=DEFAULT_TIERS)
+    args = parser.parse_args(argv)
+
+    if not os.path.isdir(args.session_dir):
+        print(f"not a directory: {args.session_dir}", file=sys.stderr)
+        return 2
+    try:
+        tiers = load_tiers(args.tiers)
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        print(f"cannot load tiers from {args.tiers}: {error}", file=sys.stderr)
+        return 2
+
+    rows, counts = collect(args.session_dir, tiers)
+    sys.stdout.write(render(rows, counts))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

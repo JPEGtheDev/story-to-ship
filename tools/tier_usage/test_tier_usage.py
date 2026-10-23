@@ -141,12 +141,12 @@ class BasicFixtureTests(unittest.TestCase):
             for row in rows
         ]
         expected = [
+            ("standard", "launcher-direct", 7, 70, 700, 15),
             ("standard", "r1:story-coordinator", 1, 10, 100, 5),
             ("economy", "r1:story-coordinator", 5, 50, 500, 16),
             ("standard", "r1:story-coordinator", 4, 40, 400, 11),
             ("premium", "r1:story-coordinator", 6, 60, 600, 13),
             ("unmapped", "r1:story-coordinator", 8, 80, 800, 17),
-            ("standard", "r2:implementer", 7, 70, 700, 15),
         ]
         self.assertEqual(got, expected)
 
@@ -154,8 +154,12 @@ class BasicFixtureTests(unittest.TestCase):
         rows, _ = collect_rows(BASIC)
         self.assertEqual(
             [row["agent_id"] for row in rows],
-            ["r1", "i1", "s1", "g1", "u1", "r2"],
+            ["r2", "r1", "i1", "s1", "g1", "u1"],
         )
+
+    def test_Collect_BasicFixture_TopLevelImplementerIsLauncherDirect(self):
+        rows, _ = collect_rows(BASIC)
+        self.assertEqual(row_for(rows, "r2")["runner"], "launcher-direct")
 
     def test_Collect_BasicFixtureNullRates_CostIsNoRates(self):
         rows, _ = collect_rows(BASIC)
@@ -192,6 +196,7 @@ class DupUsageTests(unittest.TestCase):
         rows, _ = collect_rows(DUP_USAGE)
         self.assertEqual(len(rows), 1)
         self.assertEqual(token_tuple(rows[0]), (4, 40, 400, 11))
+        self.assertEqual(rows[0]["runner"], "launcher-direct")
 
     def test_Collect_DupUsageWithoutDuplicateFirstLine_SameTokens(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -294,7 +299,49 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             ids = write_chain(tmp, 11)
             rows, _ = collect_rows(tmp)
-        self.assertEqual(row_for(rows, ids[0])["runner"], "%s:implementer" % ids[-1])
+        self.assertEqual(row_for(rows, ids[0])["runner"], "launcher-direct")
+
+    def test_Collect_TopLevelNonCoordinator_ChildAndGrandchildShareLauncherDirect(self):
+        rows = tied_rows(
+            [
+                ("t1", dispatch_meta("implementer", "Implement todo 1"), None),
+                ("c1", dispatch_meta("explorer", "Look", "t1"), None),
+                ("g1", dispatch_meta("explorer", "Look deeper", "c1"), None),
+            ]
+        )
+        for agent_id in ("t1", "c1", "g1"):
+            self.assertEqual(row_for(rows, agent_id)["runner"], "launcher-direct")
+
+    def test_Collect_TopLevelCoordinator_RunnerNamedAndNotLauncherDirect(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("c1", dispatch_meta("explorer", "Look", "p1"), None),
+                ("x1", dispatch_meta("explorer", "Look again"), None),
+            ]
+        )
+        self.assertEqual(row_for(rows, "p1")["runner"], "p1:story-coordinator")
+        self.assertEqual(row_for(rows, "c1")["runner"], "p1:story-coordinator")
+        self.assertEqual(row_for(rows, "x1")["runner"], "launcher-direct")
+
+    def test_Collect_TwoTopLevelNonCoordinators_ShareLauncherDirect(self):
+        rows = tied_rows(
+            [
+                ("a1", dispatch_meta("explorer", "First"), None),
+                ("b2", dispatch_meta("skeptic", "Second"), None),
+            ]
+        )
+        self.assertEqual(row_for(rows, "a1")["runner"], "launcher-direct")
+        self.assertEqual(row_for(rows, "b2")["runner"], "launcher-direct")
+
+    def test_Collect_MissingParentUnderNonCoordinatorChain_RunnerIsOrphan(self):
+        rows = tied_rows(
+            [
+                ("g1", dispatch_meta("explorer", "Top", "gone"), None),
+                ("g2", dispatch_meta("explorer", "Child", "g1"), None),
+            ]
+        )
+        self.assertEqual(row_for(rows, "g2")["runner"], "orphan:g1")
 
 
 class MalformedTests(unittest.TestCase):
@@ -469,6 +516,10 @@ class VerdictFixtureTests(unittest.TestCase):
             got,
             {"v1": "DONE_WITH_CONCERNS", "v2": "GAPS", "v3": "NEEDS WORK"},
         )
+
+    def test_Collect_VerdictsFixture_TopLevelRowsAreLauncherDirect(self):
+        rows, _ = collect_rows(VERDICTS)
+        self.assertEqual({row["runner"] for row in rows}, {"launcher-direct"})
 
     def test_ReadTranscript_HandbackFixture_FinalTextIsHandbackMessage(self):
         stats = tier_usage.read_transcript(
@@ -960,6 +1011,41 @@ class SummaryTests(unittest.TestCase):
         )
         self.assertEqual(entry["cost_usd"], 33.0)
         self.assertEqual(entry["cost_per_todo_usd"], 11.0)
+
+    def test_Summary_LauncherDirectGroupsSortBeforeCoordinatorGroup(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                (
+                    "i1",
+                    dispatch_meta("implementer", "Implement todo 1", "p1"),
+                    [assistant(model_id(FAMILY_A), token_usage=usage(1, 0, 0, 1))],
+                ),
+                (
+                    "d1",
+                    dispatch_meta("explorer", "Map the repo"),
+                    [assistant(model_id(FAMILY_A), token_usage=usage(2, 0, 0, 1))],
+                ),
+                (
+                    "d2",
+                    dispatch_meta("explorer", "Map more"),
+                    [assistant(model_id(FAMILY_B), token_usage=usage(3, 0, 0, 1))],
+                ),
+            ]
+        )
+        entries = tier_usage.summarize(rows)
+        self.assertEqual(
+            [(entry["runner"], entry["tier"]) for entry in entries],
+            [
+                ("launcher-direct", "economy"),
+                ("launcher-direct", "standard"),
+                ("p1:story-coordinator", "economy"),
+                ("p1:story-coordinator", "unmapped"),
+            ],
+        )
+        direct = summary_entry_for(entries, "launcher-direct", "economy")
+        self.assertEqual(direct["dispatches"], 1)
+        self.assertEqual(direct["input_side_tokens"], 2)
 
     def test_Summary_BasicFixture_RunnerTiersInOrderWithUnmappedLast(self):
         rows, _ = collect_rows(BASIC)

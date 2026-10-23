@@ -77,22 +77,27 @@ Before writing any code, state your scope estimate:
 ```
 Scope estimate:
 - Files to touch: [list each file]
-- File count: [N]
 - Estimated tool calls: [N]
 ```
 
-If **file count > 2** or **estimated tool calls > 25**, return immediately:
+The file list is informational and the tool-call estimate is advisory; neither stops you.
+
+Size is set by objective, per the Task Granularity rule in the `writing-plans` skill:
+
+A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
+
+If the task as dispatched carries more than one objective, or is one that no single review could judge, return immediately:
 
 ```
 STATUS: NEEDS_CONTEXT
-Missing context: This task as described requires touching [N] files and an estimated [N] tool
-calls, which exceeds the per-todo sizing limit (<=2 files, <=25 tool calls). The orchestrator
-must split this task before dispatching. Suggested split:
-  - Subtask A: [description, files, estimated tool calls]
-  - Subtask B: [description, files, estimated tool calls]
+Missing context: This task as described carries more than one objective, or is one that no single
+review could judge (Task Granularity, `writing-plans` skill). The orchestrator must split it by
+objective before dispatching. Suggested split:
+  - Subtask A: [description, files, objective]
+  - Subtask B: [description, files, objective]
 ```
 
-Do NOT proceed with an oversized task. Return the split recommendation and stop.
+Do NOT proceed with a task that holds more than one objective. Return the split recommendation and stop. A large tool-call estimate or a long file list alone never triggers this return; an estimate far above a typical todo is only a prompt to re-check the task for a second objective.
 
 ---
 

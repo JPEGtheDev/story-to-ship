@@ -399,9 +399,10 @@ def collect(session_dir, tiers):
     """Return (rows, counts) for every dispatch in the session folder."""
     subagents = os.path.join(session_dir, "subagents")
     root = subagents if os.path.isdir(subagents) else session_dir
-    counts = {"malformed": 0, "no_meta": 0}
+    counts = {"malformed": 0, "malformed_meta": 0, "no_meta": 0}
 
     metas = {}
+    bad_metas = set()
     transcripts = {}
     for name in sorted(os.listdir(root)):
         path = os.path.join(root, name)
@@ -411,7 +412,8 @@ def collect(session_dir, tiers):
             agent_id = name[len(AGENT_PREFIX) : -len(META_SUFFIX)]
             meta = _read_meta(path)
             if meta is None:
-                counts["malformed"] += 1
+                counts["malformed_meta"] += 1
+                bad_metas.add(agent_id)
             else:
                 metas[agent_id] = meta
         elif name.endswith(TRANSCRIPT_SUFFIX):
@@ -424,7 +426,7 @@ def collect(session_dir, tiers):
         counts["malformed"] += stats["malformed"]
         if agent_id in metas:
             stats_by_id[agent_id] = stats
-        else:
+        elif agent_id not in bad_metas:
             counts["no_meta"] += 1
 
     rows = []
@@ -492,6 +494,7 @@ def render(rows, counts):
         lines.append("\t".join(_cell(row[column]) for column in COLUMNS))
     lines.append(
         f"# skipped malformed lines: {counts['malformed']}; "
+        f"malformed meta files: {counts['malformed_meta']}; "
         f"jsonl without meta: {counts['no_meta']}"
     )
     return "\n".join(lines) + "\n"

@@ -104,7 +104,7 @@ TODO_TYPES = frozenset(
 UNATTRIBUTED = "unattributed"
 NOT_APPLICABLE = "n/a"
 TODO_PATTERN = re.compile(r"(?i)\b(?:todo|t)\s*#?(\d+[a-z]?)\b")
-FIX_PATTERN = re.compile(r"(?i)\bfix\w*")
+FIX_PATTERN = re.compile(r"(?i)\b(?:fix|fixes|fixed)\b")
 ROUND_PATTERN = re.compile(r"(?i)\bround\s*\d+")
 RERUN_PATTERN = re.compile(r"(?i)\bre-?(?:check|run)\b")
 

@@ -86,7 +86,7 @@ Size is set by objective, per the Task Granularity rule in the `writing-plans` s
 
 A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
 
-If the task as dispatched carries more than one objective, or is one that no single review could judge, return immediately:
+If the task as dispatched carries two independently verifiable objectives, or is one that no single review could judge, return immediately:
 
 ```
 STATUS: NEEDS_CONTEXT

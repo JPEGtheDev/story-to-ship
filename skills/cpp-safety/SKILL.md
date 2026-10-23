@@ -64,7 +64,7 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 ## Red Flags -- STOP
 
-- About to write a destructor that can throw -- **STOP. Wrap the entire body in try/catch. Never rethrow.**
+- About to write a destructor that can throw -- **STOP. Guard each release step with its own try/catch (or give each resource its own owning guard); log, never rethrow.**
 - Constructor acquires two or more resources without scope-bound guards between each acquisition -- **STOP. Assign each resource to its own guard before the next `new` or open call.**
 - About to use raw `delete` instead of a scope-bound guard -- **STOP. Replace with `unique_ptr` or a custom Resource Acquisition Is Initialization (RAII) wrapper.**
 - "This resource is always released before the destructor runs" -- **STOP. Prove it structurally with a guard, not by argument.**

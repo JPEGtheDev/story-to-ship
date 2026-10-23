@@ -1,6 +1,7 @@
 ---
 name: architecture-reviewer
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use when reviewing a changed file against architecture and design principles -- You Ain't Gonna Need It (YAGNI), Clean Architecture, Clean Code, Deferred Decisions, Golden Hammer.
 ---
 

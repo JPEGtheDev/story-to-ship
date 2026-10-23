@@ -1,6 +1,7 @@
 ---
 name: skeptic
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use when reviewing a plan for gaps before implementation begins.
 ---
 

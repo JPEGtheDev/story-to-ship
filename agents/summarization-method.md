@@ -1,6 +1,7 @@
 ---
 name: summarization-method
 model: sonnet
+tools: Read
 description: Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source.
 ---
 

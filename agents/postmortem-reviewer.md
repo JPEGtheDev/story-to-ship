@@ -1,6 +1,7 @@
 ---
 name: postmortem-reviewer
 model: sonnet
+tools: Read, Grep, Glob, Bash, Write, Skill
 description: Use when reviewing a completed agent session retrospective.
 ---
 

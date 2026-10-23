@@ -1,6 +1,7 @@
 ---
 name: spec-compliance-reviewer
 model: sonnet
+tools: Read, Grep, Glob, Bash
 description: Use for Stage 1 post-todo review to verify implementation matches spec.
 ---
 

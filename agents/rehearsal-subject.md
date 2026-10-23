@@ -1,6 +1,7 @@
 ---
 name: rehearsal-subject
 model: sonnet
+tools: Read, Grep, Glob, Bash, Edit, Write, Agent
 description: Use when an agent must act as the coordinator under test in a behavioral rehearsal of skill or agent text.
 ---
 

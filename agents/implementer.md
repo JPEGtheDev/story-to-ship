@@ -1,6 +1,7 @@
 ---
 name: implementer
 model: sonnet
+tools: Read, Grep, Glob, Bash, Edit, Write, Skill
 description: Use when implementing a feature task in a git worktree.
 ---
 

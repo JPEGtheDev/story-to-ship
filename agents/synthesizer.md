@@ -1,6 +1,7 @@
 ---
 name: synthesizer
 model: sonnet
+tools: Read, Write
 description: Use when synthesizing three parallel method summaries -- Abstractive, Extractive, State/Assign/Action/Complete (SAAC) -- into a final Markdown article.
 ---
 

@@ -86,7 +86,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 ### Pipeline Safety (skip if not a workflow file)
 | Check | Result | Evidence |
 |-------|--------|----------|
-| No git commit/push in steps | [+]/[-] | ... |
+| No git commit or branch push in steps | [+]/[-] | ... |
 | Minimal permissions | [+]/[-] | ... |
 | Correct artifact retention | [+]/[-] | ... |
 | No hardcoded secrets | [+]/[-] | ... |

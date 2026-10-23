@@ -32,6 +32,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Wrap every destructor body in try/catch; never rethrow.
 
+The catch block logs the failure, and the destructor then completes the remaining cleanup, so every other resource the object owns is still released. One try/catch around the whole body is not enough, because the first throw skips every later release: guard each release step with its own try/catch, or give each resource its own owning guard member. For example, a class that owns a buffer, a texture and a shader program must still release the texture and the shader program when releasing the buffer fails or throws.
+
 ## Constructor Rule
 
 If the constructor acquires resource A then throws while acquiring resource B, A leaks -- the destructor is never called on a partially-constructed object. Each acquisition must be handed to its own scope-bound guard before the next acquisition begins.

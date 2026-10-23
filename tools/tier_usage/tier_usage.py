@@ -6,6 +6,13 @@ SESSION_DIR itself. Each dispatch is an agent-<id>.meta.json file, with an
 optional agent-<id>.jsonl transcript beside it. The model-to-tier table is
 read from tiers.json (next to this script unless --tiers is given).
 
+Runners. A top-level dispatch (no parentAgentId) whose agentType is
+story-coordinator is a runner, labelled "<id>:story-coordinator", and all of its
+descendants share that label. Every other top-level dispatch was made by the
+launcher itself and belongs to no runner, so they and their descendants share
+the label "launcher-direct"; one label keeps the summary from listing a group
+per launcher-made dispatch.
+
 Dispatch-to-todo tying. An implementer, spec-compliance-reviewer,
 code-quality-reviewer or skill-reviewer row takes its todo key from the first
 match of TODO_PATTERN in its dispatch description, lowercased ("1", "3a").
@@ -84,6 +91,11 @@ VERDICT_TABLE = {
 # Reports with one verdict per file plus a roll-up: the most severe candidate
 # wins. Every other listed type takes its last candidate line.
 MOST_SEVERE_TYPES = frozenset({"code-quality-reviewer", "skill-reviewer"})
+COORDINATOR_TYPE = "story-coordinator"
+# Label for every top-level dispatch that is not a coordinator, and their
+# descendants. Todo keys are scoped per runner, so two launcher-direct dispatches
+# that name the same todo number share one todo.
+LAUNCHER_DIRECT = "launcher-direct"
 IMPLEMENTER = "implementer"
 STAGE1_TYPE = "spec-compliance-reviewer"
 TODO_TYPES = frozenset(
@@ -261,7 +273,9 @@ def runner_for(agent_id, metas):
         meta = metas[current]
         parent = meta.get("parentAgentId")
         if not isinstance(parent, str) or not parent:
-            return f"{current}:{_agent_type(meta)}"
+            if _agent_type(meta) == COORDINATOR_TYPE:
+                return f"{current}:{COORDINATOR_TYPE}"
+            return LAUNCHER_DIRECT
         if hops == MAX_HOPS or parent in seen or parent not in metas:
             return f"orphan:{current}"
         seen.add(parent)

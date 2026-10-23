@@ -856,7 +856,7 @@ FULL_TODO_TABLE = [
     ("q2", "2", "-", "-"),
     ("f2b", "2", 2, "no"),
     ("q2b", "2", "-", "-"),
-    ("i3", "3a", 0, "no"),
+    ("i3", "3a", 0, "unreadable"),
     ("s3", "3a", "-", "-"),
     ("iu", "unattributed", "-", "-"),
     ("a2", "-", "-", "-"),
@@ -1078,6 +1078,24 @@ class FirstStage1Tests(unittest.TestCase):
         )
         self.assertEqual(row_for(rows, "i5")["first_stage1_pass"], "yes")
 
+    def test_FirstStage1_FirstReviewUnreadable_ReturnsUnreadable(self):
+        # Arrange
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i7", dispatch_meta("implementer", "Implement todo 7", "p1"), None),
+                (
+                    "s7",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 review of todo 7", "p1"),
+                    [verdict_line("VERDICT: PASS.", "2026-01-01T00:00:05.000Z")],
+                ),
+            ]
+        )
+        # Act
+        value = row_for(rows, "i7")["first_stage1_pass"]
+        # Assert
+        self.assertEqual(value, "unreadable")
+
     def test_FirstStage1_OnlyReviewerUnattributed_NotApplicable(self):
         rows = tied_rows(
             [
@@ -1141,7 +1159,7 @@ def summary_entry_for(entries, runner, tier):
 
 FULL_SUMMARY_LINES = [
     ("a1:story-coordinator", "economy", "5", "3663", NO_RATES, "66", "1221.0", NO_RATES, "1/2", "1.0", "0", "0", "1/5"),
-    ("a1:story-coordinator", "standard", "6", "6327", NO_RATES, "114", "2109.0", NO_RATES, "0/1", "0.0", "0", "0", "0/5"),
+    ("a1:story-coordinator", "standard", "6", "6327", NO_RATES, "114", "2109.0", NO_RATES, "n/a", "0.0", "0", "0", "0/5"),
     ("a1:story-coordinator", "premium", "3", "2331", NO_RATES, "42", "777.0", NO_RATES, "n/a", "n/a", "1", "0", "0/3"),
     ("a2:story-coordinator", "economy", "1", "1665", NO_RATES, "30", "1665.0", NO_RATES, "n/a", "0.0", "0", "0", "0/1"),
     ("a2:story-coordinator", "standard", "1", "1554", NO_RATES, "28", "1554.0", NO_RATES, "n/a", "n/a", "0", "0", "0/0"),

@@ -24,6 +24,11 @@ Worked example from fixtures/full, runner a1: "Implement todo 2" (i2) and
 is f2b ("Fix round 2 for todo 2"), so both implementer rows show fix_rounds 2.
 The Stage 1 reviewer for todo 2 is the earliest spec-compliance-reviewer row
 with that key, and its verdict gives first_stage1_pass.
+
+first_stage1_pass is "yes" for a PASS verdict, "no" for GAPS, and "unreadable"
+when that Stage 1 verdict is missing or is neither PASS nor GAPS. The summary
+counts only yes and no, so an unreadable verdict is in neither the numerator
+nor the denominator of first_pass_stage1.
 """
 
 import argparse
@@ -364,7 +369,11 @@ def _first_stage1_pass(reviews):
             row["agent_id"],
         ),
     )
-    return "yes" if first["verdict"] == "PASS" else "no"
+    if first["verdict"] == "PASS":
+        return "yes"
+    if first["verdict"] == "GAPS":
+        return "no"
+    return UNREADABLE
 
 
 def tie_todos(rows):

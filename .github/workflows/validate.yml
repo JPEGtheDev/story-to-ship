@@ -282,6 +282,30 @@ jobs:
           fi
           echo "[+] All agent template contracts present"
 
+      - name: Check reconcile contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/SKILL.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Reconcile text:' 'Reconcile: merged PR' 'fresh count of 3'
+          check agents/story-coordinator.md '## Reconcile' '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read'
+          check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing reconcile contract string(s)"
+            exit 1
+          fi
+          echo "[+] Reconcile contract strings present"
+
       - name: Check agent templates index matches agents/
         run: |
           set -e

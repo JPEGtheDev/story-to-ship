@@ -80,7 +80,7 @@ After all three Discovery amigos return:
 3. Is the dependency order correct? Can all todos be completed in stated order?
 4. Are there missing edge cases, error handling, or failure modes?
 5. Does the plan risk introducing breaking changes to existing behavior?
-6. Is each todo one behaviour or one reviewable change with one objective that one review can judge? A todo holding two independently verifiable objectives must be split before this plan is approved.
+6. Is each todo one behaviour or one reviewable change with one objective that one review can judge? A todo holding two independently verifiable objectives, or one that no single review could judge, must be split before this plan is approved.
 
 ---
 

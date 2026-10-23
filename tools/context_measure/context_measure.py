@@ -32,6 +32,13 @@ NOTIFICATION_PREFIX = "<task-notification>"
 HANDBACK_MARKER = "[Subagent hand-back]"
 HANDBACK_FROM = 'from="'
 NON_TEXT_KEYS = ("type", "toolUseID")
+NOT_INJECTED_SUBTYPES = (
+    "hook_success",
+    "prompt_snapshot",
+    "command_permissions",
+    "deferred_tools_record",
+    "thinking_drop",
+)
 
 
 def load_records(path):
@@ -142,6 +149,28 @@ def string_chars(value):
     if isinstance(value, list):
         return sum(string_chars(item) for item in value)
     return 0
+
+
+def rendered_chars(rendered):
+    """Characters of the text the harness rendered for the model: the content
+    string of each dict item, or the JSON length of any other item."""
+    total = 0
+    for item in rendered:
+        if isinstance(item, dict) and isinstance(item.get("content"), str):
+            total += len(item["content"])
+        else:
+            total += dumps_length(item)
+    return total
+
+
+def other_attachment_chars(record, attachment):
+    """Characters an other_harness attachment injects into the model context."""
+    rendered = record.get("rendered")
+    if isinstance(rendered, list):
+        return rendered_chars(rendered)
+    if attachment.get("type") in NOT_INJECTED_SUBTYPES:
+        return 0
+    return string_chars(attachment)
 
 
 def handback_key(text):
@@ -291,7 +320,7 @@ def count_attachment(turns, record, state):
         prompt = attachment.get("prompt")
         count_handback(turn, state, prompt if isinstance(prompt, str) else "")
         return
-    add_chars(turn, "other_harness", string_chars(attachment))
+    add_chars(turn, "other_harness", other_attachment_chars(record, attachment))
 
 
 def sum_totals(turns):

@@ -355,6 +355,32 @@ class ContextMeasureTest(unittest.TestCase):
         ]
         self.assertEqual(set(bucket_totals(records).values()), {0})
 
+    def test_rendered_attachment_counts_rendered_text_and_not_attachment_strings(self):
+        record = attachment_line({"type": "total_tokens_reminder", "text": "IGNORED TEXT"})
+        record["rendered"] = [{"content": "<system-reminder>xy"}]
+        self.assertEqual(bucket_totals([record])["other_harness"], len("<system-reminder>xy"))
+
+    def test_rendered_item_without_string_content_counts_its_json_length(self):
+        record = attachment_line({"type": "total_tokens_reminder", "text": "IGNORED TEXT"})
+        record["rendered"] = ["plain", {"content": 5}]
+        expected = len(json.dumps("plain", sort_keys=True)) + len(
+            json.dumps({"content": 5}, sort_keys=True)
+        )
+        self.assertEqual(bucket_totals([record])["other_harness"], expected)
+
+    def test_hook_success_without_rendered_counts_zero(self):
+        records = [attachment_line({"type": "hook_success", "content": "ran hook output"})]
+        self.assertEqual(bucket_totals(records)["other_harness"], 0)
+
+    def test_prompt_snapshot_without_rendered_counts_zero(self):
+        records = [attachment_line({"type": "prompt_snapshot", "text": "snapshot text"})]
+        self.assertEqual(bucket_totals(records)["other_harness"], 0)
+
+    def test_subtype_without_rendered_and_not_listed_still_walks_strings(self):
+        text = "<total_tokens>1</total_tokens>"
+        records = [attachment_line({"type": "total_tokens_reminder", "text": text})]
+        self.assertEqual(bucket_totals(records)["other_harness"], len(text))
+
 
 if __name__ == "__main__":
     unittest.main()

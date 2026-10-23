@@ -44,6 +44,30 @@ RATE_KEY_FOR_USAGE = {
 AGENT_PREFIX = "agent-"
 META_SUFFIX = ".meta.json"
 TRANSCRIPT_SUFFIX = ".jsonl"
+HANDBACK_TOOL = "SubagentHandback"
+UNREADABLE = "unreadable"
+# Verdict allowlist keyed by agent type. Each entry is (label, values), with
+# values listed from least to most severe. An agent type missing from this
+# table reads as UNREADABLE by design: its report carries no verdict line that
+# this reader is allowed to trust.
+VERDICT_TABLE = {
+    "implementer": (
+        "STATUS",
+        ("DONE", "DONE_WITH_CONCERNS", "PARTIAL", "NEEDS_CONTEXT", "BLOCKED"),
+    ),
+    "spec-compliance-reviewer": ("VERDICT", ("PASS", "GAPS")),
+    "code-quality-reviewer": (
+        "VERDICT",
+        ("APPROVE", "APPROVE WITH NITS", "REQUEST CHANGES", "REJECT"),
+    ),
+    "skill-reviewer": ("VERDICT", ("PASS", "PASS (size advisory)", "NEEDS WORK")),
+    "plan-reviewer": ("VERDICT", ("APPROVE", "REQUEST CHANGES")),
+    "skeptic": ("VERDICT", ("APPROVE", "APPROVE WITH CONDITIONS", "REJECT")),
+    "researcher": ("VERDICT", ("CONFIRMED", "REFUTED", "INCONCLUSIVE")),
+}
+# Reports with one verdict per file plus a roll-up: the most severe candidate
+# wins. Every other listed type takes its last candidate line.
+MOST_SEVERE_TYPES = frozenset({"code-quality-reviewer", "skill-reviewer"})
 
 
 def load_tiers(path):
@@ -88,6 +112,9 @@ def read_transcript(path):
     model_ids = set()
     timestamps = []
     malformed = 0
+    handback_seen = False
+    handback_text = None
+    text_report = None
     with open(path, encoding="utf-8", errors="replace") as handle:
         for line_no, raw in enumerate(handle):
             text = raw.strip()
@@ -111,6 +138,29 @@ def read_transcript(path):
                 model = ""
             if model == SYNTHETIC_MODEL:
                 continue
+            content = message.get("content")
+            if isinstance(content, list):
+                for block in content:
+                    if not isinstance(block, dict):
+                        continue
+                    if (
+                        block.get("type") == "tool_use"
+                        and block.get("name") == HANDBACK_TOOL
+                    ):
+                        handback_seen = True
+                        tool_input = block.get("input")
+                        handed_back = (
+                            tool_input.get("message")
+                            if isinstance(tool_input, dict)
+                            else None
+                        )
+                        handback_text = (
+                            handed_back if isinstance(handed_back, str) else None
+                        )
+                    elif block.get("type") == "text" and isinstance(
+                        block.get("text"), str
+                    ):
+                        text_report = block["text"]
             model_ids.add(model)
             timestamp = obj.get("timestamp")
             if isinstance(timestamp, str):
@@ -126,7 +176,35 @@ def read_transcript(path):
         "usages": list(usage_by_message.values()),
         "first_ts": min(timestamps) if timestamps else None,
         "malformed": malformed,
+        "final_text": handback_text if handback_seen else text_report,
     }
+
+
+def _candidate_values(report, label, values):
+    """Return the allowlisted values of every column-0 `label: value` line."""
+    prefix = label + ": "
+    found = []
+    for line in report.splitlines():
+        if not line.startswith(prefix):
+            continue
+        remainder = line[len(prefix) :].rstrip()
+        if remainder in values:
+            found.append(remainder)
+    return found
+
+
+def read_verdict(agent_type, final_text):
+    """Return the verdict the final report states, exactly as spelled, or UNREADABLE."""
+    entry = VERDICT_TABLE.get(agent_type)
+    if entry is None or final_text is None:
+        return UNREADABLE
+    label, values = entry
+    candidates = _candidate_values(final_text, label, values)
+    if not candidates:
+        return UNREADABLE
+    if agent_type in MOST_SEVERE_TYPES:
+        return max(candidates, key=values.index)
+    return candidates[-1]
 
 
 def _read_meta(path):
@@ -223,7 +301,9 @@ def collect(session_dir, tiers):
             "agent_type": _agent_type(meta),
             "tier": tier,
             "runner": runner_for(agent_id, metas),
-            "verdict": NO_VALUE,
+            "verdict": read_verdict(
+                _agent_type(meta), stats["final_text"] if stats else None
+            ),
             "first_ts": stats["first_ts"] if stats else None,
         }
         if stats and stats["usages"]:

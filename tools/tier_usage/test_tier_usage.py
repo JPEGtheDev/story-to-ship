@@ -14,6 +14,7 @@ import tier_usage  # noqa: E402
 FIXTURES = os.path.join(HERE, "fixtures")
 BASIC = os.path.join(FIXTURES, "basic")
 DUP_USAGE = os.path.join(FIXTURES, "dup_usage")
+VERDICTS = os.path.join(FIXTURES, "verdicts")
 TIERS_FILE = os.path.join(HERE, "tiers.json")
 
 # Family names are assembled at runtime so this file never spells them out.
@@ -428,6 +429,218 @@ class VendorNameTests(unittest.TestCase):
                 if any(vendor in lowered for vendor in VENDOR_NAMES):
                     found.add(os.path.relpath(path, HERE))
         self.assertEqual(found, {"tiers.json"})
+
+
+def text_block(text):
+    return {"type": "text", "text": text}
+
+
+def handback_block(message):
+    return {
+        "type": "tool_use",
+        "name": "SubagentHandback",
+        "input": {"message": message},
+    }
+
+
+def reply(*blocks, model=None):
+    """Return one assistant transcript line holding the given content blocks."""
+    if model is None:
+        model = "claude-%s-4-5" % FAMILY_B
+    message = {"model": model, "content": list(blocks)}
+    return {"type": "assistant", "timestamp": STAMP, "message": message}
+
+
+def verdict_of(agent_type, lines):
+    with tempfile.TemporaryDirectory() as tmp:
+        write_dispatch(tmp, "x1", meta={"agentType": agent_type}, lines=lines)
+        rows, _ = collect_rows(tmp)
+        return row_for(rows, "x1")["verdict"]
+
+
+class VerdictFixtureTests(unittest.TestCase):
+    def test_Collect_VerdictsFixture_RowsCarryStatedVerdicts(self):
+        rows, _ = collect_rows(VERDICTS)
+        got = {row["agent_id"]: row["verdict"] for row in rows}
+        self.assertEqual(
+            got,
+            {"v1": "DONE_WITH_CONCERNS", "v2": "GAPS", "v3": "NEEDS WORK"},
+        )
+
+    def test_ReadTranscript_HandbackFixture_FinalTextIsHandbackMessage(self):
+        stats = tier_usage.read_transcript(
+            os.path.join(VERDICTS, "subagents", "agent-v1.jsonl")
+        )
+        self.assertEqual(
+            stats["final_text"],
+            "STATUS: DONE_WITH_CONCERNS\nWorktree: x\nLimitations: none",
+        )
+
+    def test_Collect_BasicFixture_VerdictsAreUnreadable(self):
+        rows, _ = collect_rows(BASIC)
+        self.assertEqual({row["verdict"] for row in rows}, {"unreadable"})
+
+
+class VerdictReportSourceTests(unittest.TestCase):
+    def test_Verdict_HandbackBeforeLaterText_HandbackWins(self):
+        verdict = verdict_of(
+            "implementer",
+            [
+                reply(handback_block("STATUS: BLOCKED")),
+                reply(text_block("STATUS: DONE")),
+            ],
+        )
+        self.assertEqual(verdict, "BLOCKED")
+
+    def test_Verdict_TwoHandbacks_LastHandbackWins(self):
+        verdict = verdict_of(
+            "implementer",
+            [
+                reply(handback_block("STATUS: BLOCKED")),
+                reply(handback_block("STATUS: DONE")),
+            ],
+        )
+        self.assertEqual(verdict, "DONE")
+
+    def test_Verdict_NoHandback_LastTextBlockUsed(self):
+        verdict = verdict_of(
+            "implementer",
+            [
+                reply(text_block("STATUS: BLOCKED")),
+                reply(text_block("STATUS: PARTIAL"), text_block("STATUS: DONE")),
+            ],
+        )
+        self.assertEqual(verdict, "DONE")
+
+    def test_Verdict_SyntheticLineIgnored_EarlierReportUsed(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [
+                reply(text_block("VERDICT: GAPS")),
+                reply(text_block("VERDICT: PASS"), model="<synthetic>"),
+            ],
+        )
+        self.assertEqual(verdict, "GAPS")
+
+    def test_Verdict_NoAssistantLines_Unreadable(self):
+        self.assertEqual(verdict_of("implementer", []), "unreadable")
+
+    def test_Verdict_MetaWithoutTranscript_Unreadable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            write_dispatch(tmp, "x1", meta={"agentType": "spec-compliance-reviewer"})
+            rows, _ = collect_rows(tmp)
+        self.assertEqual(row_for(rows, "x1")["verdict"], "unreadable")
+
+
+class VerdictSpellingTests(unittest.TestCase):
+    def test_Verdict_MisspelledOrPunctuatedValue_Unreadable(self):
+        for line in ["VERDICT: Approved", "VERDICT: pass", "VERDICT: PASS."]:
+            with self.subTest(line=line):
+                verdict = verdict_of(
+                    "spec-compliance-reviewer", [reply(text_block(line))]
+                )
+                self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_MarkdownWrappedLine_Unreadable(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("**VERDICT: PASS**"))],
+        )
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_IndentedLine_Unreadable(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("  VERDICT: PASS"))],
+        )
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_WrongLabelForType_Unreadable(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("STATUS: PASS"))],
+        )
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_AnotherTypesValue_Unreadable(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("VERDICT: APPROVE"))],
+        )
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_QuotedTemplateAlternatives_Unreadable(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("VERDICT: PASS | GAPS"))],
+        )
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_UnlistedAgentType_Unreadable(self):
+        verdict = verdict_of("explorer", [reply(text_block("VERDICT: PASS"))])
+        self.assertEqual(verdict, "unreadable")
+
+    def test_Verdict_TrailingWhitespace_Accepted(self):
+        verdict = verdict_of(
+            "spec-compliance-reviewer",
+            [reply(text_block("VERDICT: PASS   "))],
+        )
+        self.assertEqual(verdict, "PASS")
+
+
+class VerdictRollupTests(unittest.TestCase):
+    def test_Verdict_CodeQualityPerFileAndRollup_MostSevereWins(self):
+        report = "\n".join(
+            [
+                "FILE: a.py",
+                "VERDICT: APPROVE",
+                "FILE: b.py",
+                "VERDICT: REQUEST CHANGES",
+                "VERDICT: REQUEST CHANGES",
+            ]
+        )
+        verdict = verdict_of("code-quality-reviewer", [reply(text_block(report))])
+        self.assertEqual(verdict, "REQUEST CHANGES")
+
+    def test_Verdict_CodeQualityNitsThenApprove_MostSevereWins(self):
+        report = "VERDICT: APPROVE WITH NITS\nVERDICT: APPROVE"
+        verdict = verdict_of("code-quality-reviewer", [reply(text_block(report))])
+        self.assertEqual(verdict, "APPROVE WITH NITS")
+
+    def test_Verdict_SkillReviewerNeedsWorkThenPass_MostSevereWins(self):
+        report = "FILE: a.md\nVERDICT: NEEDS WORK\nFILE: b.md\nVERDICT: PASS"
+        verdict = verdict_of("skill-reviewer", [reply(text_block(report))])
+        self.assertEqual(verdict, "NEEDS WORK")
+
+    def test_Verdict_SkillReviewerAdvisoryThenPass_MostSevereWins(self):
+        report = "VERDICT: PASS (size advisory)\nVERDICT: PASS"
+        verdict = verdict_of("skill-reviewer", [reply(text_block(report))])
+        self.assertEqual(verdict, "PASS (size advisory)")
+
+
+class VerdictOtherTypesTests(unittest.TestCase):
+    def test_Verdict_ImplementerBlockedThenDone_LastWins(self):
+        report = "STATUS: BLOCKED\nWorktree: x\nSTATUS: DONE"
+        verdict = verdict_of("implementer", [reply(text_block(report))])
+        self.assertEqual(verdict, "DONE")
+
+    def test_Verdict_PlanReviewerRequestChanges_Read(self):
+        verdict = verdict_of(
+            "plan-reviewer", [reply(text_block("VERDICT: REQUEST CHANGES"))]
+        )
+        self.assertEqual(verdict, "REQUEST CHANGES")
+
+    def test_Verdict_SkepticApproveWithConditions_Read(self):
+        verdict = verdict_of(
+            "skeptic", [reply(text_block("VERDICT: APPROVE WITH CONDITIONS"))]
+        )
+        self.assertEqual(verdict, "APPROVE WITH CONDITIONS")
+
+    def test_Verdict_ResearcherInconclusive_Read(self):
+        verdict = verdict_of(
+            "researcher", [reply(text_block("VERDICT: INCONCLUSIVE"))]
+        )
+        self.assertEqual(verdict, "INCONCLUSIVE")
 
 
 if __name__ == "__main__":

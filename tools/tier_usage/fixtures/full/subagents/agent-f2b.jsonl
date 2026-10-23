@@ -1,0 +1,2 @@
+{"type":"user","timestamp":"2026-01-01T00:00:00.000Z","message":{"role":"user","content":"x"}}
+{"type":"assistant","timestamp":"2026-01-01T00:00:09.000Z","message":{"id":"m_f2b_1","model":"claude-haiku-4-5","usage":{"input_tokens":9,"cache_creation_input_tokens":90,"cache_read_input_tokens":900,"output_tokens":18},"content":[{"type":"tool_use","name":"SubagentHandback","input":{"message":"STATUS: DONE"}}]}}

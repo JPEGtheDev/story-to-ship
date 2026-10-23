@@ -8,7 +8,7 @@
 ### Pipeline Safety
 | Check | Result | Notes |
 |-------|--------|-------|
-| No git commit/push in steps | [+]/[-] | ... |
+| No git commit or branch push in steps | [+]/[-] | ... |
 | Minimal permissions | [+]/[-] | ... |
 | Correct artifact retention | [+]/[-] | ... |
 | No hardcoded secrets | [+]/[-] | ... |

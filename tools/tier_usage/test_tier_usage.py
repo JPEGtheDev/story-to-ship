@@ -176,7 +176,7 @@ class BasicFixtureTests(unittest.TestCase):
         header = out.splitlines()[0].split("\t")
         self.assertIn("est_output_tokens", header)
 
-    def test_Main_BasicFixtureRows_HaveTenColumns(self):
+    def test_Main_BasicFixtureRows_HaveThirteenColumns(self):
         code, out, _ = run_main([BASIC])
         self.assertEqual(code, 0)
         table_lines = [
@@ -184,7 +184,7 @@ class BasicFixtureTests(unittest.TestCase):
         ]
         self.assertGreater(len(table_lines), 1)
         for line in table_lines:
-            self.assertEqual(len(line.split("\t")), 10, line)
+            self.assertEqual(len(line.split("\t")), 13, line)
 
 
 class DupUsageTests(unittest.TestCase):
@@ -641,6 +641,269 @@ class VerdictOtherTypesTests(unittest.TestCase):
             "researcher", [reply(text_block("VERDICT: INCONCLUSIVE"))]
         )
         self.assertEqual(verdict, "INCONCLUSIVE")
+
+
+FULL = os.path.join(FIXTURES, "full")
+FULL_TODO_TABLE = [
+    ("a1", "-", "-", "-"),
+    ("i1", "1", 0, "yes"),
+    ("s1", "1", "-", "-"),
+    ("q1", "1", "-", "-"),
+    ("i2", "2", 2, "no"),
+    ("s2", "2", "-", "-"),
+    ("f2", "2", 2, "no"),
+    ("s2b", "2", "-", "-"),
+    ("q2", "2", "-", "-"),
+    ("f2b", "2", 2, "no"),
+    ("q2b", "2", "-", "-"),
+    ("i3", "3a", 0, "no"),
+    ("s3", "3a", "-", "-"),
+    ("iu", "unattributed", "-", "-"),
+    ("a2", "-", "-", "-"),
+    ("i4", "1", 0, "n/a"),
+    ("q4", "1", "-", "-"),
+]
+
+
+def verdict_line(text, timestamp=STAMP):
+    return {
+        "type": "assistant",
+        "timestamp": timestamp,
+        "message": {
+            "model": "claude-%s-4-5" % FAMILY_B,
+            "content": [text_block(text)],
+        },
+    }
+
+
+def dispatch_meta(agent_type, description, parent=None):
+    meta = {"agentType": agent_type, "description": description}
+    if parent is not None:
+        meta["parentAgentId"] = parent
+    return meta
+
+
+def runner_meta():
+    return {"agentType": "story-coordinator", "description": "runner"}
+
+
+def tied_rows(dispatches):
+    """Collect rows for (agent_id, meta, lines-or-None) entries in one folder."""
+    with tempfile.TemporaryDirectory() as tmp:
+        for agent_id, meta, lines in dispatches:
+            write_dispatch(tmp, agent_id, meta=meta, lines=lines)
+        rows, _ = collect_rows(tmp)
+    return rows
+
+
+def todo_of(description, agent_type="implementer"):
+    meta = {"agentType": agent_type}
+    if description is not None:
+        meta["description"] = description
+    rows = tied_rows([("x1", meta, None)])
+    return row_for(rows, "x1")["todo"]
+
+
+def fix_rounds_of(description):
+    rows = tied_rows(
+        [
+            ("p1", runner_meta(), None),
+            ("x1", dispatch_meta("implementer", description, "p1"), None),
+        ]
+    )
+    return row_for(rows, "x1")["fix_rounds"]
+
+
+class TodoFixtureTests(unittest.TestCase):
+    def test_Collect_FullFixture_TodoFixRoundsAndStage1MatchExpectedTable(self):
+        rows, _ = collect_rows(FULL)
+        got = [
+            (row["agent_id"], row["todo"], row["fix_rounds"], row["first_stage1_pass"])
+            for row in rows
+        ]
+        self.assertEqual(got, FULL_TODO_TABLE)
+
+    def test_Main_FullFixtureHeader_EndsWithTodoColumns(self):
+        code, out, _ = run_main([FULL])
+        self.assertEqual(code, 0)
+        header = out.splitlines()[0].split("\t")
+        self.assertEqual(header[-3:], ["todo", "fix_rounds", "first_stage1_pass"])
+
+
+class TodoKeyTests(unittest.TestCase):
+    def test_TodoKey_ImplementTodoOne_KeyIsOne(self):
+        self.assertEqual(todo_of("Implement todo 1"), "1")
+
+    def test_TodoKey_TodoOneA_KeyIsOneA(self):
+        self.assertEqual(todo_of("Todo 1a"), "1a")
+
+    def test_TodoKey_TodoOneB_KeyIsOneB(self):
+        self.assertEqual(todo_of("Todo 1b"), "1b")
+
+    def test_TodoKey_StageTwoT18Checklist_KeyIsEighteen(self):
+        self.assertEqual(
+            todo_of("Stage 2 review T18 checklist", "code-quality-reviewer"), "18"
+        )
+
+    def test_TodoKey_HashAfterT_KeyIsFour(self):
+        self.assertEqual(todo_of("T#4 x"), "4")
+
+    def test_TodoKey_FirstOfTwoTodos_KeyIsThirteen(self):
+        self.assertEqual(todo_of("Fix round: todo 13 nits + todo 14 concern"), "13")
+
+    def test_TodoKey_ReviewOfLetterSuffixId_Unattributed(self):
+        self.assertEqual(todo_of("Stage 1 review of A3a", "spec-compliance-reviewer"), "unattributed")
+
+    def test_TodoKey_RerunAfterFixRound_Unattributed(self):
+        self.assertEqual(todo_of("Stage 1 re-run after fix round"), "unattributed")
+
+    def test_TodoKey_NoNumber_Unattributed(self):
+        self.assertEqual(todo_of("Implement the thing"), "unattributed")
+
+    def test_TodoKey_DescriptionMissing_Unattributed(self):
+        self.assertEqual(todo_of(None), "unattributed")
+
+    def test_TodoKey_SpecReviewTodoFifteen_KeyIsFifteen(self):
+        self.assertEqual(
+            todo_of("Stage 1 spec review, todo 15", "spec-compliance-reviewer"), "15"
+        )
+
+
+class FixRoundDetectionTests(unittest.TestCase):
+    def test_FixRound_FixRoundOneForTodoTwo_Counts(self):
+        self.assertEqual(fix_rounds_of("Fix round 1 for todo 2"), 1)
+
+    def test_FixRound_RoundOneWithoutFixWord_Counts(self):
+        self.assertEqual(fix_rounds_of("T5 round 1 add rationale pins"), 1)
+
+    def test_FixRound_ImplementRerun_DoesNotCount(self):
+        self.assertEqual(fix_rounds_of("Implement todo 4 re-run"), 0)
+
+    def test_FixRound_FixWithRerun_Counts(self):
+        self.assertEqual(fix_rounds_of("Fix: re-run todo 4"), 1)
+
+    def test_FixRound_ReviewerDescriptionSaysFix_DoesNotCount(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i1", dispatch_meta("implementer", "Implement todo 3", "p1"), None),
+                (
+                    "s1",
+                    dispatch_meta("spec-compliance-reviewer", "Fix stage 1 todo 3", "p1"),
+                    None,
+                ),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i1")["fix_rounds"], 0)
+
+    def test_FixRound_TwoFixDispatches_OriginalShowsTwo(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i1", dispatch_meta("implementer", "Implement todo 2", "p1"), None),
+                ("f1", dispatch_meta("implementer", "Fix round 1 for todo 2", "p1"), None),
+                ("f2", dispatch_meta("implementer", "Fix round 2 for todo 2", "p1"), None),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i1")["fix_rounds"], 2)
+
+
+class PerRunnerScopingTests(unittest.TestCase):
+    def test_FixRound_SameTodoInTwoRunners_FixInOneDoesNotRaiseOther(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("p2", runner_meta(), None),
+                ("i1", dispatch_meta("implementer", "Implement todo 1", "p1"), None),
+                ("i2", dispatch_meta("implementer", "Implement todo 1", "p2"), None),
+                ("f2", dispatch_meta("implementer", "Fix round 1 for todo 1", "p2"), None),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i1")["fix_rounds"], 0)
+        self.assertEqual(row_for(rows, "i2")["fix_rounds"], 1)
+
+
+class FirstStage1Tests(unittest.TestCase):
+    def test_FirstStage1_EarlierReviewerWinsOverLaterAgentId(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i5", dispatch_meta("implementer", "Implement todo 5", "p1"), None),
+                (
+                    "zz",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 review of todo 5", "p1"),
+                    [verdict_line("VERDICT: PASS", "2026-01-01T00:00:05.000Z")],
+                ),
+                (
+                    "aa",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 re-check, todo 5", "p1"),
+                    [verdict_line("VERDICT: GAPS", "2026-01-01T00:00:09.000Z")],
+                ),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i5")["first_stage1_pass"], "yes")
+
+    def test_FirstStage1_ReviewerWithoutFirstTsIsLast(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i5", dispatch_meta("implementer", "Implement todo 5", "p1"), None),
+                (
+                    "aa",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 review of todo 5", "p1"),
+                    None,
+                ),
+                (
+                    "zz",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 re-check, todo 5", "p1"),
+                    [verdict_line("VERDICT: PASS", "2026-01-01T00:00:05.000Z")],
+                ),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i5")["first_stage1_pass"], "yes")
+
+    def test_FirstStage1_OnlyReviewerUnattributed_NotApplicable(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("i6", dispatch_meta("implementer", "Implement todo 6", "p1"), None),
+                (
+                    "s6",
+                    dispatch_meta("spec-compliance-reviewer", "Stage 1 review of A3a", "p1"),
+                    [verdict_line("VERDICT: PASS", "2026-01-01T00:00:05.000Z")],
+                ),
+            ]
+        )
+        self.assertEqual(row_for(rows, "i6")["first_stage1_pass"], "n/a")
+
+
+class OtherTypesTests(unittest.TestCase):
+    def test_OtherTypes_ExplorerAndCoordinator_AllDashes(self):
+        rows = tied_rows(
+            [
+                ("e1", dispatch_meta("explorer", "Fix todo 9 survey"), None),
+                ("a1", dispatch_meta("story-coordinator", "Stage 1 review of todo 9"), None),
+            ]
+        )
+        for agent_id in ("e1", "a1"):
+            row = row_for(rows, agent_id)
+            self.assertEqual(
+                (row["todo"], row["fix_rounds"], row["first_stage1_pass"]),
+                ("-", "-", "-"),
+            )
+
+    def test_Unattributed_ImplementerRow_FixRoundsAndFirstStage1Dashes(self):
+        rows = tied_rows(
+            [
+                ("p1", runner_meta(), None),
+                ("iu", dispatch_meta("implementer", "Fix README nit", "p1"), None),
+            ]
+        )
+        row = row_for(rows, "iu")
+        self.assertEqual(
+            (row["todo"], row["fix_rounds"], row["first_stage1_pass"]),
+            ("unattributed", "-", "-"),
+        )
 
 
 if __name__ == "__main__":

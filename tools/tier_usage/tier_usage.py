@@ -5,11 +5,24 @@ The input is SESSION_DIR/subagents when that folder exists, otherwise
 SESSION_DIR itself. Each dispatch is an agent-<id>.meta.json file, with an
 optional agent-<id>.jsonl transcript beside it. The model-to-tier table is
 read from tiers.json (next to this script unless --tiers is given).
+
+Dispatch-to-todo tying. An implementer, spec-compliance-reviewer,
+code-quality-reviewer or skill-reviewer row takes its todo key from the first
+match of TODO_PATTERN in its dispatch description, lowercased ("1", "3a").
+No match gives "unattributed". Keys are scoped per runner. Every other row
+shows "-" in the todo, fix_rounds and first_stage1_pass columns.
+
+Worked example from fixtures/full, runner a1: "Implement todo 2" (i2) and
+"Fix round 1 for todo 2" (f2) both key to todo 2. f2 is a fix dispatch, and so
+is f2b ("Fix round 2 for todo 2"), so both implementer rows show fix_rounds 2.
+The Stage 1 reviewer for todo 2 is the earliest spec-compliance-reviewer row
+with that key, and its verdict gives first_stage1_pass.
 """
 
 import argparse
 import json
 import os
+import re
 import sys
 
 DEFAULT_TIERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiers.json")
@@ -24,6 +37,9 @@ COLUMNS = [
     "est_output_tokens",
     "cost_usd",
     "verdict",
+    "todo",
+    "fix_rounds",
+    "first_stage1_pass",
 ]
 NO_RATES = "n/a (no rates)"
 NO_VALUE = "-"
@@ -68,6 +84,17 @@ VERDICT_TABLE = {
 # Reports with one verdict per file plus a roll-up: the most severe candidate
 # wins. Every other listed type takes its last candidate line.
 MOST_SEVERE_TYPES = frozenset({"code-quality-reviewer", "skill-reviewer"})
+IMPLEMENTER = "implementer"
+STAGE1_TYPE = "spec-compliance-reviewer"
+TODO_TYPES = frozenset(
+    {IMPLEMENTER, STAGE1_TYPE, "code-quality-reviewer", "skill-reviewer"}
+)
+UNATTRIBUTED = "unattributed"
+NOT_APPLICABLE = "n/a"
+TODO_PATTERN = re.compile(r"(?i)\b(?:todo|t)\s*#?(\d+[a-z]?)\b")
+FIX_PATTERN = re.compile(r"(?i)\bfix\w*")
+ROUND_PATTERN = re.compile(r"(?i)\bround\s*\d+")
+RERUN_PATTERN = re.compile(r"(?i)\bre-?(?:check|run)\b")
 
 
 def load_tiers(path):
@@ -253,6 +280,72 @@ def cost_for(totals, spec):
     return round(total / 1000000, 4)
 
 
+def _description(meta):
+    value = meta.get("description")
+    return value if isinstance(value, str) else ""
+
+
+def _todo_key(agent_type, description):
+    if agent_type not in TODO_TYPES:
+        return NO_VALUE
+    match = TODO_PATTERN.search(description)
+    if match is None:
+        return UNATTRIBUTED
+    return match.group(1).lower()
+
+
+def _is_fix_dispatch(description):
+    # Approximation: fix rounds really count across both review stages, but a
+    # dispatch that only says "round N" is taken as a fix round here.
+    if FIX_PATTERN.search(description):
+        return True
+    if RERUN_PATTERN.search(description):
+        return False
+    return ROUND_PATTERN.search(description) is not None
+
+
+def _first_stage1_pass(reviews):
+    if not reviews:
+        return NOT_APPLICABLE
+    first = min(
+        reviews,
+        key=lambda row: (
+            row["first_ts"] is None,
+            row["first_ts"] or "",
+            row["agent_id"],
+        ),
+    )
+    return "yes" if first["verdict"] == "PASS" else "no"
+
+
+def tie_todos(rows):
+    """Fill todo, fix_rounds and first_stage1_pass on every row, in place.
+
+    Each row's "description" key is read and then removed.
+    """
+    fix_counts = {}
+    stage1_reviews = {}
+    implementers = []
+    for row in rows:
+        description = row.pop("description", "")
+        row["todo"] = _todo_key(row["agent_type"], description)
+        row["fix_rounds"] = NO_VALUE
+        row["first_stage1_pass"] = NO_VALUE
+        if row["todo"] in (NO_VALUE, UNATTRIBUTED):
+            continue
+        scope = (row["runner"], row["todo"])
+        if row["agent_type"] == IMPLEMENTER:
+            implementers.append(row)
+            if _is_fix_dispatch(description):
+                fix_counts[scope] = fix_counts.get(scope, 0) + 1
+        elif row["agent_type"] == STAGE1_TYPE:
+            stage1_reviews.setdefault(scope, []).append(row)
+    for row in implementers:
+        scope = (row["runner"], row["todo"])
+        row["fix_rounds"] = fix_counts.get(scope, 0)
+        row["first_stage1_pass"] = _first_stage1_pass(stage1_reviews.get(scope, []))
+
+
 def collect(session_dir, tiers):
     """Return (rows, counts) for every dispatch in the session folder."""
     subagents = os.path.join(session_dir, "subagents")
@@ -305,6 +398,7 @@ def collect(session_dir, tiers):
                 _agent_type(meta), stats["final_text"] if stats else None
             ),
             "first_ts": stats["first_ts"] if stats else None,
+            "description": _description(meta),
         }
         if stats and stats["usages"]:
             totals = {key: 0 for key in USAGE_KEYS}
@@ -324,6 +418,7 @@ def collect(session_dir, tiers):
             row["cost_usd"] = None
         rows.append(row)
 
+    tie_todos(rows)
     rows.sort(
         key=lambda row: (
             row["runner"],

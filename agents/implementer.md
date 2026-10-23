@@ -97,7 +97,7 @@ objective before dispatching. Suggested split:
   - Subtask B: [description, files, objective]
 ```
 
-Do NOT proceed with a task that holds more than one objective or that no single review could judge. Return the split recommendation and stop. A large tool-call estimate or a long file list alone never triggers this return; an estimate far above a typical todo is only a prompt to re-check the task for a second objective.
+Do NOT proceed with a task that holds two independently verifiable objectives or that no single review could judge. Return the split recommendation and stop. A large tool-call estimate or a long file list alone never triggers this return; an unusually large estimate is only a prompt to re-check the task for a second objective.
 
 ---
 

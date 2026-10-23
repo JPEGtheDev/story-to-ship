@@ -45,7 +45,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 ### 1. CI/CD Pipeline -- applies to `.github/workflows/*.yml` and `.github/workflows/*.yaml`
 
-- [ ] No `git commit` or `git push` in any workflow step -- pipelines are read-only
+- [ ] No `git commit` and no branch `git push` in any workflow step -- pipelines are read-only; a job that creates a release may run `git tag` and `git push origin <tag>` with `contents: write` on that job only
 - [ ] All `permissions:` blocks are minimal -- `contents: read` unless a step writes: `checks: write` for check results, `pull-requests: write` for PR comments, `contents: write` only on a release job that pushes a tag; each write scope justified in a comment
 - [ ] Artifacts set `retention-days:` per the `workflow` skill's retention rule
 - [ ] No secrets hardcoded -- all sensitive values via `${{ secrets.X }}` only

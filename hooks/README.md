@@ -35,6 +35,12 @@ The full rules live in `skills/session-bootstrap/SKILL.md`, `skills/honesty/SKIL
 
 One file from each per-turn pair is injected on every user prompt, so their size is a recurring token cost. CI (`.github/workflows/validate.yml`) enforces a combined budget of 495 words for `pre-message-gates.md` + `pre-message.md`: the full pair is the worst-case turn, injected while the pending flags exist. CI also requires each `-loaded` variant to have fewer words than its full file, and to match its full file with the gate section removed, so changing a shared section in one file but not the other fails CI. `session-start.md` fires on each SessionStart event, not per turn, and is outside the budget.
 
+## Measuring the injected text
+
+The measure lives at `tools/context_measure/context_measure.py` ([its README](../tools/context_measure/README.md)). It reports the characters the hooks add (the `hook_session_start` and `hook_user_prompt` sources) next to every other source in a transcript.
+
+Current per-prompt behaviour: once the skills are loaded, each prompt still injects `pre-message-loaded.md` (937 bytes) and `pre-message-gates-loaded.md` (1309 bytes). Cutting that text is tracked as a separate follow-up story. It has not been done in this change.
+
 ## Mirror in .claude/hooks
 
 `.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.

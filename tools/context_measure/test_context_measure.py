@@ -49,6 +49,34 @@ def tool_use_block(block_id, name, tool_input):
     return {"type": "tool_use", "id": block_id, "name": name, "input": tool_input}
 
 
+def attachment_line(attachment, uuid=None):
+    record = {"type": "attachment", "attachment": attachment}
+    if uuid is not None:
+        record["uuid"] = uuid
+    return record
+
+
+def user_record(content, uuid=None, origin=None, is_meta=False, compact=False):
+    record = {"type": "user", "message": {"role": "user", "content": content}}
+    if uuid is not None:
+        record["uuid"] = uuid
+    if origin is not None:
+        record["origin"] = origin
+    if is_meta:
+        record["isMeta"] = True
+    if compact:
+        record["isCompactSummary"] = True
+    return record
+
+
+def bucket_totals(records):
+    return context_measure.measure(records)["totals"]["buckets"]
+
+
+HANDBACK_TEXT = '<agent-message from="agent_a">\n[Subagent hand-back] result one'
+OTHER_HANDBACK_TEXT = '<agent-message from="agent_a">\n[Subagent hand-back] result two'
+
+
 class ContextMeasureTest(unittest.TestCase):
     def write_lines(self, lines):
         handle = tempfile.NamedTemporaryFile(
@@ -208,6 +236,124 @@ class ContextMeasureTest(unittest.TestCase):
         measured = context_measure.measure(records)
         self.assertEqual(len(measured["turns"]), 1)
         self.assertEqual(measured["totals"]["buckets"]["user_text"], 0)
+
+    def test_session_start_hook_counts_in_hook_session_start(self):
+        records = [
+            attachment_line(
+                {"type": "hook_additional_context", "content": ["aaa"], "hookEvent": "SessionStart"}
+            )
+        ]
+        self.assertEqual(bucket_totals(records)["hook_session_start"], 3)
+
+    def test_user_prompt_submit_hook_counts_in_hook_user_prompt(self):
+        records = [
+            attachment_line(
+                {"type": "hook_additional_context", "content": ["bb"], "hookEvent": "UserPromptSubmit"}
+            )
+        ]
+        self.assertEqual(bucket_totals(records)["hook_user_prompt"], 2)
+
+    def test_other_hook_event_counts_in_hook_other(self):
+        records = [
+            attachment_line(
+                {"type": "hook_additional_context", "content": ["c"], "hookEvent": "PreToolUse"}
+            )
+        ]
+        self.assertEqual(bucket_totals(records)["hook_other"], 1)
+
+    def test_hook_without_hook_event_counts_in_hook_other(self):
+        records = [attachment_line({"type": "hook_additional_context", "content": ["abc"]})]
+        self.assertEqual(bucket_totals(records)["hook_other"], 3)
+
+    def test_hook_content_list_of_two_strings_sums_both(self):
+        records = [
+            attachment_line(
+                {"type": "hook_additional_context", "content": ["abc", "de"], "hookEvent": "SessionStart"}
+            )
+        ]
+        self.assertEqual(bucket_totals(records)["hook_session_start"], 5)
+
+    def test_total_tokens_reminder_counts_text_and_not_type_value(self):
+        text = "<total_tokens>1</total_tokens>"
+        records = [attachment_line({"type": "total_tokens_reminder", "text": text})]
+        other = bucket_totals(records)["other_harness"]
+        self.assertEqual(other, len(text))
+
+    def test_peer_user_record_counts_in_handbacks(self):
+        records = [user_record(HANDBACK_TEXT, uuid="p1", origin={"kind": "peer", "handback": True})]
+        measured = context_measure.measure(records)
+        self.assertEqual(measured["totals"]["buckets"]["handbacks"], len(HANDBACK_TEXT))
+        self.assertEqual(len(measured["turns"]), 1)
+
+    def test_same_handback_as_peer_record_and_queued_command_counts_once(self):
+        records = [
+            user_record(HANDBACK_TEXT, uuid="p1", origin={"kind": "peer", "handback": True}),
+            attachment_line(
+                {
+                    "type": "queued_command",
+                    "prompt": HANDBACK_TEXT,
+                    "origin": {"kind": "peer", "handback": True},
+                },
+                uuid="a1",
+            ),
+        ]
+        self.assertEqual(bucket_totals(records)["handbacks"], len(HANDBACK_TEXT))
+
+    def test_two_different_handbacks_both_count(self):
+        records = [
+            user_record(HANDBACK_TEXT, uuid="p1", origin={"kind": "peer", "handback": True}),
+            user_record(OTHER_HANDBACK_TEXT, uuid="p2", origin={"kind": "peer", "handback": True}),
+        ]
+        expected = len(HANDBACK_TEXT) + len(OTHER_HANDBACK_TEXT)
+        self.assertEqual(bucket_totals(records)["handbacks"], expected)
+
+    def test_queued_command_without_peer_origin_counts_in_other_harness(self):
+        records = [attachment_line({"type": "queued_command", "prompt": "do this"})]
+        measured = context_measure.measure(records)["totals"]["buckets"]
+        self.assertEqual(measured["other_harness"], len("do this"))
+        self.assertEqual(measured["handbacks"], 0)
+
+    def test_task_notification_by_origin_counts_in_notifications(self):
+        body = "<task-notification>done</task-notification>"
+        records = [user_record(body, uuid="n1", origin={"kind": "task-notification"})]
+        self.assertEqual(bucket_totals(records)["notifications"], len(body))
+
+    def test_task_notification_by_string_prefix_counts_in_notifications(self):
+        body = "<task-notification>done</task-notification>"
+        records = [user_record(body, uuid="n2")]
+        self.assertEqual(bucket_totals(records)["notifications"], len(body))
+
+    def test_skill_body_counts_in_skill_bodies(self):
+        body = "Base directory for this skill: /x"
+        records = [user_record(body, uuid="s1", is_meta=True)]
+        self.assertEqual(bucket_totals(records)["skill_bodies"], len(body))
+
+    def test_other_meta_string_counts_in_other_harness(self):
+        records = [user_record("harness text", uuid="m1", is_meta=True)]
+        self.assertEqual(bucket_totals(records)["other_harness"], len("harness text"))
+
+    def test_compaction_summary_counts_in_compaction_summary_and_not_user_text(self):
+        records = [user_record("summary text", uuid="c1", compact=True)]
+        buckets = bucket_totals(records)
+        self.assertEqual(buckets["compaction_summary"], len("summary text"))
+        self.assertEqual(buckets["user_text"], 0)
+
+    def test_mode_and_other_record_types_add_nothing(self):
+        records = [
+            {"type": "mode", "uuid": "x1", "value": "plan"},
+            {"type": "last-prompt", "uuid": "x2", "text": "abc"},
+        ]
+        measured = context_measure.measure(records)
+        self.assertEqual(set(measured["totals"]["buckets"].values()), {0})
+        self.assertEqual(len(measured["turns"]), 1)
+
+    def test_attachment_without_dict_or_non_dict_does_not_crash(self):
+        records = [
+            {"type": "attachment"},
+            {"type": "attachment", "attachment": "oops"},
+            {"type": "attachment", "attachment": ["x"]},
+        ]
+        self.assertEqual(set(bucket_totals(records).values()), {0})
 
 
 if __name__ == "__main__":

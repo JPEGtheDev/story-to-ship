@@ -109,11 +109,46 @@ ROUND_PATTERN = re.compile(r"(?i)\bround\s*\d+")
 RERUN_PATTERN = re.compile(r"(?i)\bre-?(?:check|run)\b")
 
 
+def _check_tier(name, spec):
+    """Raise ValueError naming the tier and field when a spec has the wrong shape."""
+    if not isinstance(spec, dict):
+        raise ValueError(f"tier {name!r} must be an object")
+    match = spec.get("match", [])
+    if not isinstance(match, list) or not all(
+        isinstance(fragment, str) and fragment for fragment in match
+    ):
+        raise ValueError(
+            f"tier {name!r} field 'match' must be a list of non-empty strings"
+        )
+    rates = spec.get("rates_per_million")
+    if rates is None:
+        return
+    if not isinstance(rates, dict):
+        raise ValueError(
+            f"tier {name!r} field 'rates_per_million' must be null or an object"
+        )
+    for key, value in rates.items():
+        if not _is_number(value):
+            raise ValueError(
+                f"tier {name!r} field 'rates_per_million' key {key!r} must be a number"
+            )
+
+
 def load_tiers(path):
-    """Return the tiers mapping (name -> spec) in file order."""
+    """Return the tiers mapping (name -> spec) in file order.
+
+    Raises ValueError when the "tiers" value is not an object of objects, when a
+    "match" is not a list of non-empty strings, or when "rates_per_million" is
+    neither null nor an object whose values are all numbers (bool excluded).
+    """
     with open(path, encoding="utf-8") as handle:
         data = json.load(handle)
-    return data["tiers"]
+    tiers = data["tiers"]
+    if not isinstance(tiers, dict):
+        raise ValueError("field 'tiers' must be an object of tier objects")
+    for name, spec in tiers.items():
+        _check_tier(name, spec)
+    return tiers
 
 
 def tier_for_model(model_id, tiers):

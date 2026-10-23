@@ -39,7 +39,7 @@ One file from each per-turn pair is injected on every user prompt, so their size
 
 The measure lives at `tools/context_measure/context_measure.py` ([its README](../tools/context_measure/README.md)). It reports the characters the hooks add (the `hook_session_start` and `hook_user_prompt` sources) next to every other source in a transcript.
 
-Current per-prompt behaviour: once the skills are loaded, each prompt still injects `pre-message-loaded.md` (937 bytes) and `pre-message-gates-loaded.md` (1309 bytes). Cutting that text is tracked as a separate follow-up story. It has not been done in this change.
+Current per-prompt behaviour: once the skills are loaded, each prompt still injects `pre-message-loaded.md` (937 bytes) and `pre-message-gates-loaded.md` (1309 bytes). Cutting that text is tracked in issue 335. It has not been done yet.
 
 ## Mirror in .claude/hooks
 

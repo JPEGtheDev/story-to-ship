@@ -3,8 +3,10 @@
 Reads a session transcript (JSON Lines) and reports characters per bucket.
 Subagent records (isSidechain true) are excluded. Turn 0 holds everything
 before the first human prompt; turn N starts at the Nth human prompt."""
+import argparse
 import hashlib
 import json
+import os
 import sys
 
 BUCKETS = (
@@ -365,17 +367,136 @@ def measure(records):
     return {"turns": turns, "totals": sum_totals(turns)}
 
 
-def main(argv):
-    if len(argv) != 2:
-        sys.stderr.write("usage: context_measure.py TRANSCRIPT.jsonl\n")
-        return 2
-    records, malformed = load_records(argv[1])
+def ascii_text(value):
+    """The value as ASCII-only text: non-ASCII characters become escapes."""
+    return ascii(value)[1:-1]
+
+
+def percent(part, whole):
+    if whole == 0:
+        return "0.0%"
+    return "%.1f%%" % (100.0 * part / whole)
+
+
+def render_row(cells, widths):
+    padded = [cells[0].ljust(widths[0])]
+    padded.extend(cell.rjust(width) for cell, width in zip(cells[1:], widths[1:]))
+    return "  ".join(padded)
+
+
+def render_table(headers, rows):
+    """Header line then one line per row; first column left-aligned, others right-aligned."""
+    widths = [len(cell) for cell in headers]
+    for row in rows:
+        widths = [max(width, len(cell)) for width, cell in zip(widths, row)]
+    lines = [render_row(headers, widths)]
+    lines.extend(render_row(row, widths) for row in rows)
+    return lines
+
+
+def turn_total(turn):
+    return sum(turn["buckets"].values())
+
+
+def top_buckets(turn, count=3):
+    """The largest nonzero buckets of a turn; ties keep BUCKETS order."""
+    nonzero = [(name, turn["buckets"][name]) for name in BUCKETS if turn["buckets"][name] > 0]
+    nonzero.sort(key=lambda item: -item[1])
+    return nonzero[:count]
+
+
+def format_report(path, records_count, malformed, result, top):
+    totals = result["totals"]["buckets"]
+    grand_total = sum(totals[name] for name in BUCKETS)
+    lines = [
+        "Transcript: %s" % ascii_text(path),
+        "Records: %d" % records_count,
+        "Malformed lines: %d" % malformed,
+        "Turns: %d" % len(result["turns"]),
+        "",
+        "Totals by source",
+    ]
+    source_rows = [
+        [name, str(totals[name]), percent(totals[name], grand_total)] for name in BUCKETS
+    ]
+    source_rows.append(["all sources", str(grand_total), percent(grand_total, grand_total)])
+    lines.extend(render_table(["Source", "Characters", "Percent"], source_rows))
+
+    lines.append("")
+    lines.append("Tool results by tool")
+    tool_total = totals["tool_results"]
+    tools = sorted(result["totals"]["tools"].items(), key=lambda item: (-item[1], item[0]))
+    tool_rows = [
+        [ascii_text(name), str(count), percent(count, tool_total)] for name, count in tools
+    ]
+    lines.extend(render_table(["Tool", "Characters", "Percent"], tool_rows))
+
+    lines.append("")
+    lines.append("Top %d turns by size" % top)
+    ranked = sorted(result["turns"], key=lambda turn: (-turn_total(turn), turn["turn"]))
+    for turn in ranked[:top]:
+        details = ", ".join("%s=%d" % item for item in top_buckets(turn)) or "no characters"
+        lines.append(
+            "  turn %4d  %10d chars  %s" % (turn["turn"], turn_total(turn), details)
+        )
+    return "\n".join(lines) + "\n"
+
+
+def positive_int(text):
+    try:
+        value = int(text)
+    except ValueError:
+        value = 0
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer, got %r" % text)
+    return value
+
+
+def fail(message):
+    sys.stderr.write("error: %s\n" % message)
+    return 2
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        prog="context_measure.py",
+        description="Measure what fills a session's main-thread context, per turn.",
+    )
+    parser.add_argument("transcript", help="path to one transcript (JSON Lines) file")
+    parser.add_argument(
+        "--top", type=positive_int, default=5, help="how many turns to list by size (default 5)"
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="print the full measurement as one JSON object"
+    )
+    args = parser.parse_args(argv)
+    path = args.transcript
+    if not os.path.isfile(path):
+        return fail("not an existing regular file: %s" % ascii_text(path))
+    if os.path.getsize(path) == 0:
+        return fail("file is empty: %s" % ascii_text(path))
+    try:
+        records, malformed = load_records(path)
+    except OSError as error:
+        return fail("cannot read %s: %s" % (ascii_text(path), error.strerror))
+    if not records:
+        return fail("no parseable JSON object line in %s" % ascii_text(path))
     result = measure(records)
-    result["malformed_lines"] = malformed
-    json.dump(result, sys.stdout, indent=2, sort_keys=True)
-    sys.stdout.write("\n")
+    if args.json:
+        data = {
+            "path": path,
+            "records": len(records),
+            "malformed_lines": malformed,
+            "totals": result["totals"],
+            "turns": result["turns"],
+        }
+        sys.stdout.write(json.dumps(data, sort_keys=True, indent=2) + "\n")
+    else:
+        sys.stdout.write(format_report(path, len(records), malformed, result, args.top))
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main())

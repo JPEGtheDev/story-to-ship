@@ -526,7 +526,7 @@ class CliTest(unittest.TestCase):
         self.assertIn("Malformed lines: 1", out)
 
     def test_text_report_is_ascii_even_with_non_ascii_tool_name(self):
-        name = "Résumé"
+        name = "R" + chr(0xE9) + "sum" + chr(0xE9)
         path = self.write_lines(
             [
                 json.dumps(assistant_line("msg_1", [tool_use_block("toolu_1", name, {})])),

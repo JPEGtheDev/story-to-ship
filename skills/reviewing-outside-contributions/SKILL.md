@@ -45,7 +45,7 @@ The distinguishing test: PERMITTED names one artifact and the change that resolv
 2. No praise opener, no apology framing around a finding, no attribution of intent, honesty, or competence
 3. Every negative finding names the evidence and the change that resolves it
 4. Any closer names a specific artifact change, or is omitted
-5. All output is ASCII
+5. All output is ASCII-only (no Unicode arrows, dashes, or curly quotes)
 
 [+] All met -> post the comment
 [-] Any unmet -> rewrite the offending sentence before posting

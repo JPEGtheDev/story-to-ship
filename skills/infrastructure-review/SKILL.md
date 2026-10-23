@@ -9,7 +9,7 @@ description: Use when adding CI/CD workflows, modifying build configuration, or 
 
 ```
 PIPELINES MUST BE REPRODUCIBLE AND READ-ONLY -- INFRASTRUCTURE CHANGES NEED REVIEW
-YOU MUST review every change to CI/CD workflow files, build configuration files, and sandboxed/packaging manifests before merge. A pipeline that commits, pushes, or uses unpinned dependencies is NOT mergeable. No exceptions.
+YOU MUST review every change to CI/CD workflow files, build configuration files, and sandboxed/packaging manifests before merge. A pipeline that commits, pushes to a branch, or uses unpinned dependencies is NOT mergeable. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.

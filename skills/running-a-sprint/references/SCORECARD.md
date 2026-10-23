@@ -78,6 +78,12 @@ bash tools/first_action_audit/first-action-audit.sh /tmp/sidechain-cleared.jsonl
 
 The script prints one BOUNDARY block per window, a window being the span after a compaction boundary (or one window tagged none). CLEAN means the window's first main-thread assistant message made exactly one tool call, Skill session-bootstrap. MISS names the first other call and exits 1. NO_TOOL_CALLS means the window held no tool call.
 
+## Per-tier usage at close-out
+
+Run `python3 tools/tier_usage/tier_usage.py "$D"` on the launcher session folder D. It prints one row per subagent dispatch, then a summary with one line per runner and model tier (economy, standard, premium). Copy the summary lines whose runner column starts with the runner's id into the row's per-tier usage line; dispatches the launcher made itself sit under the label launcher-direct and belong to no runner.
+
+Read the figures as follows. Cost is in tokens, and dollars print only when tools/tier_usage/tiers.json holds rates. The est_output_tokens column is estimated, because transcripts record placeholder output counts. A dispatch whose description names no todo is counted in the unattributed column and left out of fix rounds and the first-pass Stage 1 rate, so read every rate next to its unattributed count.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.
@@ -95,5 +101,6 @@ Copy one row per runner into the sprint ledger.
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
+- Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>

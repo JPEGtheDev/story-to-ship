@@ -71,7 +71,7 @@ unless the record carries a `rendered` list.
   written again under the same message id is not counted twice.
 - User and attachment records are counted once per `uuid`.
 - A hand-back can arrive in two forms: a peer-origin user record, or a peer-origin
-  queued-command attachment. It is counted once per (sender, SHA-1 of the body). The
+  queued-command attachment. It is counted once per (sender, hash of the body). The
   sender is the text between `from="` and the next quote. The body is the text after
   the `[Subagent hand-back]` marker, or the whole text when the marker is missing.
   The characters counted are those of the first arrival.
@@ -81,8 +81,8 @@ unless the record carries a `rendered` list.
 `--behaviour` reads the main thread only (sub-agent records excluded).
 
 - Banned phrases. The list is a fixed constant in the module. The first six phrases come
-  from the honesty skill (`skills/honesty/SKILL.md`); the rest come from the
-  communication skill (`skills/communication/SKILL.md`). Matching is case-insensitive,
+  from the honesty skill; the rest come from the communication skill. Matching is
+  case-insensitive,
   a straight or curly apostrophe matches, and a hit must not touch a letter or digit
   on either side. Fenced code blocks are removed before matching.
 - Rate. Banned hits per 10 000 characters of assistant text (text blocks only).

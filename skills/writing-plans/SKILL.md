@@ -175,7 +175,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 | "I'll update todos later" | Later never comes -- update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
 | "We'll probably need this later" | YAGNI -- not in criteria means not in this plan |
-| "This todo touches multiple files but they're closely related" | Related files may stay one todo when they serve one objective. A second objective splits the todo however related the files are, before the plan is presented. Test: name the objective in one sentence; if the sentence needs "and", it is two objectives. |
+| "This todo touches multiple files but they're closely related" | Related files may stay one todo when they serve one objective. A second objective splits the todo however related the files are, before the plan is presented. Test: name the objective in one sentence; if each half of an "and" could pass review while the other half is missing, it is two objectives. |
 | "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |

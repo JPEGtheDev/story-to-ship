@@ -33,6 +33,7 @@ nor the denominator of first_pass_stage1.
 
 import argparse
 import json
+import math
 import os
 import re
 import sys
@@ -109,7 +110,7 @@ TODO_TYPES = frozenset(
 UNATTRIBUTED = "unattributed"
 NOT_APPLICABLE = "n/a"
 TODO_PATTERN = re.compile(r"(?i)\b(?:todo|t)\s*#?(\d+[a-z]?)\b")
-FIX_PATTERN = re.compile(r"(?i)\b(?:fix|fixes|fixed)\b")
+FIX_PATTERN = re.compile(r"(?i)\b(?:fix|fixes|fixed|fixing)\b")
 ROUND_PATTERN = re.compile(r"(?i)\bround\s*\d+")
 RERUN_PATTERN = re.compile(r"(?i)\bre-?(?:check|run)\b")
 
@@ -133,9 +134,10 @@ def _check_tier(name, spec):
             f"tier {name!r} field 'rates_per_million' must be null or an object"
         )
     for key, value in rates.items():
-        if not _is_number(value):
+        if not _is_number(value) or not math.isfinite(value):
             raise ValueError(
-                f"tier {name!r} field 'rates_per_million' key {key!r} must be a number"
+                f"tier {name!r} field 'rates_per_million' key {key!r} "
+                "must be a finite number"
             )
 
 
@@ -144,7 +146,8 @@ def load_tiers(path):
 
     Raises ValueError when the "tiers" value is not an object of objects, when a
     "match" is not a list of non-empty strings, or when "rates_per_million" is
-    neither null nor an object whose values are all numbers (bool excluded).
+    neither null nor an object whose values are all finite numbers (bool and
+    NaN or infinity excluded).
     """
     with open(path, encoding="utf-8") as handle:
         data = json.load(handle)

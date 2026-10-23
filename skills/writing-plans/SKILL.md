@@ -83,7 +83,7 @@ Each task MUST be one todo of ordered steps (2-5 minutes each).
 
 A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
 
-**Context:** A todo sized by file or tool-call counts was cut into pieces no single review could judge whole. Those counts say little about size or risk.
+**Context:** Applies to every todo in a plan. File and tool-call counts do not predict whether one review can judge a todo: cutting by count splits one objective across reviews, none of which can judge it whole.
 
 **Forces:** Sizing by objective keeps each review meaningful and lets a coherent change stay one todo. A tool-call estimate is advisory: far above the other todos, it prompts a check for a second objective, never a refusal or stop.
 

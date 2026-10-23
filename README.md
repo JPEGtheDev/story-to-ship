@@ -97,7 +97,7 @@ without an OpenCode equivalent remain Claude Code-only.
 |-------|---------|
 | `requesting-code-review` | PR preparation and review request protocol |
 | `receiving-code-review` | Acting on feedback without rationalization |
-| `reviewing-outside-contributions` | Register for review comments to non-owner contributors on public PR and issue threads |
+| `reviewing-outside-contributions` | Tone and wording rules for review comments to non-owner contributors on public PR and issue threads |
 
 ### CI/CD and Release
 | Skill | Purpose |

@@ -830,6 +830,22 @@ class FixRoundDetectionTests(unittest.TestCase):
     def test_FixRound_RoundOneWithoutFixWord_Counts(self):
         self.assertEqual(fix_rounds_of("T5 round 1 add rationale pins"), 1)
 
+    def test_FixRound_FixtureWordInImplementDescription_DoesNotCount(self):
+        # Arrange
+        description = "Implement fixture loader for todo 3"
+        # Act
+        rounds = fix_rounds_of(description)
+        # Assert
+        self.assertEqual(rounds, 0)
+
+    def test_FixRound_FixesWordForTodoTwo_Counts(self):
+        # Arrange
+        description = "Fixes for todo 2"
+        # Act
+        rounds = fix_rounds_of(description)
+        # Assert
+        self.assertEqual(rounds, 1)
+
     def test_FixRound_ImplementRerun_DoesNotCount(self):
         self.assertEqual(fix_rounds_of("Implement todo 4 re-run"), 0)
 

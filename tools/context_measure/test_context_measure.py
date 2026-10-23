@@ -539,5 +539,221 @@ class CliTest(unittest.TestCase):
         self.assertIn(ascii(name)[1:-1], out)
 
 
+def system_record(subtype, uuid=None, sidechain=False):
+    record = {"type": "system", "subtype": subtype}
+    if uuid is not None:
+        record["uuid"] = uuid
+    if sidechain:
+        record["isSidechain"] = True
+    return record
+
+
+def compact_boundary(uuid=None):
+    return system_record("compact_boundary", uuid)
+
+
+def skill_block(block_id, skill_name):
+    return tool_use_block(block_id, "Skill", {"skill": skill_name})
+
+
+def text_block(text):
+    return {"type": "text", "text": text}
+
+
+class BehaviourTest(unittest.TestCase):
+    def test_every_banned_phrase_is_reported_with_zero_on_empty_input(self):
+        behaviour = context_measure.behaviour([])
+        self.assertEqual(
+            behaviour["banned"], {phrase: 0 for phrase in context_measure.BANNED_PHRASES}
+        )
+        self.assertEqual(behaviour["banned_total"], 0)
+        self.assertEqual(behaviour["assistant_text_chars"], 0)
+        self.assertEqual(behaviour["banned_per_10k_chars"], 0.0)
+        self.assertEqual(behaviour["skill_calls"], 0)
+        self.assertEqual(behaviour["skills"], {})
+        self.assertEqual(behaviour["compactions"], 0)
+        self.assertEqual(behaviour["reload_checks"], [])
+        self.assertEqual(behaviour["reload_misses"], 0)
+
+    def test_phrase_counts_case_insensitively_on_word_boundaries(self):
+        records = [assistant_line("msg_1", [text_block("Should work. unshould worked")])]
+        banned = context_measure.behaviour(records)["banned"]
+        self.assertEqual(banned["should work"], 1)
+        self.assertEqual(banned["that should do it"], 0)
+
+    def test_phrase_inside_fenced_code_is_skipped_and_outside_is_counted(self):
+        text = "```\nshould work\n```\nand should work here"
+        records = [assistant_line("msg_1", [text_block(text)])]
+        self.assertEqual(context_measure.behaviour(records)["banned"]["should work"], 1)
+
+    def test_curly_apostrophe_matches_straight_apostrophe_phrase(self):
+        records = [assistant_line("msg_1", [text_block("I’m sure")])]
+        self.assertEqual(context_measure.behaviour(records)["banned"]["i'm sure"], 1)
+
+    def test_load_bearing_and_hyphenated_are_counted_separately(self):
+        records = [assistant_line("msg_1", [text_block("load bearing and load-bearing")])]
+        banned = context_measure.behaviour(records)["banned"]
+        self.assertEqual(banned["load bearing"], 1)
+        self.assertEqual(banned["load-bearing"], 1)
+
+    def test_rate_is_hand_computed_per_ten_thousand_characters(self):
+        records = [assistant_line("msg_1", [text_block("should work")])]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["assistant_text_chars"], 11)
+        self.assertEqual(behaviour["banned_total"], 1)
+        self.assertEqual(behaviour["banned_per_10k_chars"], 909.09)
+
+    def test_skill_calls_strip_plugin_prefix_and_skip_blocks_without_skill_name(self):
+        records = [
+            assistant_line("msg_1", [skill_block("t1", "anthropic-skills:pdf")]),
+            assistant_line("msg_2", [tool_use_block("t2", "Skill", {})]),
+            assistant_line("msg_3", [skill_block("t3", "pdf")]),
+        ]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["skill_calls"], 3)
+        self.assertEqual(behaviour["skills"], {"pdf": 2})
+
+    def test_repeated_assistant_block_counts_once(self):
+        records = [
+            assistant_line("msg_1", [text_block("hello")]),
+            assistant_line("msg_1", [text_block("hello")]),
+            assistant_line("msg_2", [skill_block("t1", "honesty")]),
+            assistant_line("msg_2", [skill_block("t1", "honesty")]),
+        ]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["assistant_text_chars"], 5)
+        self.assertEqual(behaviour["skill_calls"], 1)
+
+    def test_two_compactions_with_reload_checks_and_one_miss(self):
+        records = [
+            compact_boundary("c1"),
+            assistant_line("msg_1", [skill_block("t1", "honesty")]),
+            assistant_line("msg_2", [skill_block("t2", "communication")]),
+            assistant_line("msg_3", [tool_use_block("t3", "Edit", {})]),
+            compact_boundary("c2"),
+            assistant_line("msg_4", [skill_block("t4", "honesty")]),
+            assistant_line("msg_5", [tool_use_block("t5", "Agent", {})]),
+        ]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["compactions"], 2)
+        self.assertEqual(
+            behaviour["reload_checks"],
+            [
+                {
+                    "compaction": 1,
+                    "honesty": True,
+                    "communication": True,
+                    "first_gated_tool": "Edit",
+                },
+                {
+                    "compaction": 2,
+                    "honesty": True,
+                    "communication": False,
+                    "first_gated_tool": "Agent",
+                },
+            ],
+        )
+        self.assertEqual(behaviour["reload_misses"], 1)
+
+    def test_skill_after_first_gated_tool_does_not_count_for_reload(self):
+        records = [
+            compact_boundary("c1"),
+            assistant_line("msg_1", [tool_use_block("t1", "Write", {})]),
+            assistant_line("msg_2", [skill_block("t2", "honesty")]),
+            assistant_line("msg_3", [skill_block("t3", "communication")]),
+        ]
+        check = context_measure.behaviour(records)["reload_checks"][0]
+        self.assertFalse(check["honesty"])
+        self.assertFalse(check["communication"])
+        self.assertEqual(check["first_gated_tool"], "Write")
+
+    def test_compaction_as_last_record_reports_end_of_transcript_and_misses(self):
+        behaviour = context_measure.behaviour([compact_boundary("c1")])
+        self.assertEqual(
+            behaviour["reload_checks"],
+            [
+                {
+                    "compaction": 1,
+                    "honesty": False,
+                    "communication": False,
+                    "first_gated_tool": "end_of_transcript",
+                }
+            ],
+        )
+        self.assertEqual(behaviour["reload_misses"], 1)
+
+    def test_no_compaction_gives_empty_reload_checks(self):
+        records = [assistant_line("msg_1", [skill_block("t1", "honesty")])]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["compactions"], 0)
+        self.assertEqual(behaviour["reload_checks"], [])
+        self.assertEqual(behaviour["reload_misses"], 0)
+
+    def test_sidechain_assistant_and_compaction_records_are_excluded(self):
+        records = [
+            assistant_line(
+                "msg_1",
+                [text_block("secret"), skill_block("t1", "honesty")],
+                sidechain=True,
+            ),
+            system_record("compact_boundary", "c1", sidechain=True),
+        ]
+        behaviour = context_measure.behaviour(records)
+        self.assertEqual(behaviour["assistant_text_chars"], 0)
+        self.assertEqual(behaviour["skill_calls"], 0)
+        self.assertEqual(behaviour["compactions"], 0)
+
+
+class BehaviourCliTest(unittest.TestCase):
+    def write_lines(self, lines):
+        path = write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
+        self.addCleanup(os.remove, path)
+        return path
+
+    def run_main(self, argv):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = context_measure.main(argv)
+        return code, out.getvalue()
+
+    def sample_path(self):
+        return self.write_lines(
+            [
+                json.dumps(human_prompt("should work", uuid="p1")),
+                json.dumps(assistant_line("msg_1", [text_block("I'm sure")])),
+                json.dumps(assistant_line("msg_2", [skill_block("t1", "honesty")])),
+                json.dumps(compact_boundary("c1")),
+                json.dumps(assistant_line("msg_3", [tool_use_block("t2", "Edit", {})])),
+            ]
+        )
+
+    def test_behaviour_flag_adds_text_section(self):
+        code, out = self.run_main([self.sample_path(), "--behaviour"])
+        self.assertEqual(code, 0)
+        self.assertIn("Behaviour baseline", out)
+        self.assertIn("Banned phrases: ", out)
+        self.assertIn("compaction 1: honesty=yes communication=no first_gated_tool=Edit", out)
+        self.assertTrue(out.isascii())
+
+    def test_behaviour_flag_adds_key_to_json(self):
+        code, out = self.run_main([self.sample_path(), "--json", "--behaviour"])
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertIn("behaviour", data)
+        self.assertIn("turns", data)
+        self.assertEqual(data["behaviour"]["compactions"], 1)
+
+    def test_default_output_without_flag_has_no_behaviour_section(self):
+        path = self.sample_path()
+        code, out = self.run_main([path])
+        self.assertEqual(code, 0)
+        records, malformed = context_measure.load_records(path)
+        expected = context_measure.format_report(
+            path, len(records), malformed, context_measure.measure(records), 5
+        )
+        self.assertEqual(out, expected)
+        self.assertNotIn("Behaviour baseline", out)
+
+
 if __name__ == "__main__":
     unittest.main()

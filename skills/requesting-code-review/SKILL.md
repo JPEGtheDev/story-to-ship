@@ -150,4 +150,4 @@ If a reviewer approves without commenting on the specific concerns you listed:
 
 ## Related Skills
 
-- `reviewing-outside-contributions` -- register for the review request text when it is posted to a non-owner contributor on a public thread
+- `reviewing-outside-contributions` -- tone and wording rules for the review request text when it is posted to a non-owner contributor on a public thread

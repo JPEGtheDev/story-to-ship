@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import sys
@@ -380,6 +382,161 @@ class ContextMeasureTest(unittest.TestCase):
         text = "<total_tokens>1</total_tokens>"
         records = [attachment_line({"type": "total_tokens_reminder", "text": text})]
         self.assertEqual(bucket_totals(records)["other_harness"], len(text))
+
+
+def write_bytes(data):
+    handle = tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False)
+    handle.write(data)
+    handle.close()
+    return handle.name
+
+
+class CliTest(unittest.TestCase):
+    def write_lines(self, lines):
+        return self.write_file(("\n".join(lines) + "\n").encode("utf-8"))
+
+    def write_file(self, data):
+        path = write_bytes(data)
+        self.addCleanup(os.remove, path)
+        return path
+
+    def run_main(self, argv):
+        out = io.StringIO()
+        err = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = context_measure.main(argv)
+        return code, out.getvalue(), err.getvalue()
+
+    def sample_path(self):
+        return self.write_lines(
+            [
+                json.dumps(human_prompt("hello", uuid="p1")),
+                json.dumps(
+                    assistant_line(
+                        "msg_1", [tool_use_block("toolu_1", "Read", {"file": "a"})]
+                    )
+                ),
+                json.dumps(tool_result_record("toolu_1", "file body", uuid="r1")),
+                "{broken",
+                json.dumps(assistant_line("msg_2", [{"type": "text", "text": "done"}])),
+            ]
+        )
+
+    def test_default_report_has_header_buckets_tools_and_top_turns(self):
+        code, out, _ = self.run_main([self.sample_path()])
+        self.assertEqual(code, 0)
+        self.assertIn("Records: 4", out)
+        self.assertIn("Malformed lines: 1", out)
+        self.assertIn("Turns: 2", out)
+        for name in context_measure.BUCKETS:
+            self.assertIn(name, out)
+        self.assertIn("all sources", out)
+        self.assertIn("Tool results by tool", out)
+        self.assertRegex(out, r"(?m)^Read\s+\d+")
+        self.assertIn("Top 5 turns by size", out)
+
+    def test_percent_column_uses_one_decimal_of_grand_total(self):
+        path = self.write_lines(
+            [
+                json.dumps(human_prompt("a")),
+                json.dumps(assistant_line("msg_1", [{"type": "text", "text": "bbb"}])),
+            ]
+        )
+        code, out, _ = self.run_main([path])
+        self.assertEqual(code, 0)
+        rows = {line.split()[0]: line.split() for line in out.splitlines() if line.strip()}
+        self.assertEqual(rows["user_text"][-2:], ["1", "25.0%"])
+        self.assertEqual(rows["assistant_text"][-2:], ["3", "75.0%"])
+        self.assertEqual(rows["all"][-2:], ["4", "100.0%"])
+
+    def test_zero_grand_total_reports_zero_percent(self):
+        path = self.write_lines(
+            [json.dumps({"type": "mode", "uuid": "m1", "value": "plan"})]
+        )
+        code, out, _ = self.run_main([path])
+        self.assertEqual(code, 0)
+        rows = {line.split()[0]: line.split() for line in out.splitlines() if line.strip()}
+        self.assertEqual(rows["all"][-2:], ["0", "0.0%"])
+
+    def test_top_two_lists_exactly_two_turns(self):
+        lines = []
+        for index in range(4):
+            lines.append(json.dumps(human_prompt("p" * (index + 1), uuid="p%d" % index)))
+            lines.append(
+                json.dumps(
+                    assistant_line(
+                        "msg_%d" % index, [{"type": "text", "text": "x" * (index * 10)}]
+                    )
+                )
+            )
+        path = self.write_lines(lines)
+        code, out, _ = self.run_main([path, "--top", "2"])
+        self.assertEqual(code, 0)
+        self.assertIn("Top 2 turns by size", out)
+        turn_rows = [line for line in out.splitlines() if line.strip().startswith("turn ")]
+        self.assertEqual(len(turn_rows), 2)
+
+    def test_top_zero_and_non_integer_exit_two(self):
+        path = self.sample_path()
+        for bad in ("0", "abc", "-3"):
+            with self.subTest(top=bad):
+                with contextlib.redirect_stderr(io.StringIO()):
+                    with self.assertRaises(SystemExit) as ctx:
+                        context_measure.main([path, "--top", bad])
+                self.assertEqual(ctx.exception.code, 2)
+
+    def test_json_output_has_five_keys_and_matches_measure_totals(self):
+        path = self.sample_path()
+        code, out, _ = self.run_main([path, "--json"])
+        self.assertEqual(code, 0)
+        data = json.loads(out)
+        self.assertEqual(
+            set(data), {"path", "records", "malformed_lines", "totals", "turns"}
+        )
+        records, _ = context_measure.load_records(path)
+        self.assertEqual(data["totals"], context_measure.measure(records)["totals"])
+        self.assertEqual(data["records"], 4)
+        self.assertEqual(data["malformed_lines"], 1)
+
+    def test_missing_path_exits_two_with_error_on_stderr(self):
+        gone = write_bytes(b"")
+        os.remove(gone)
+        code, out, err = self.run_main([gone])
+        self.assertEqual(code, 2)
+        self.assertEqual(out, "")
+        self.assertTrue(err.startswith("error:"))
+
+    def test_zero_byte_file_exits_two(self):
+        code, out, err = self.run_main([self.write_file(b"")])
+        self.assertEqual(code, 2)
+        self.assertEqual(out, "")
+        self.assertTrue(err.startswith("error:"))
+
+    def test_file_of_only_malformed_lines_exits_two(self):
+        path = self.write_lines(["{not json", "also not json"])
+        code, out, err = self.run_main([path])
+        self.assertEqual(code, 2)
+        self.assertEqual(out, "")
+        self.assertTrue(err.startswith("error:"))
+
+    def test_one_good_record_and_one_malformed_line_exits_zero(self):
+        path = self.write_lines([json.dumps(human_prompt("hi")), "{bad"])
+        code, out, _ = self.run_main([path])
+        self.assertEqual(code, 0)
+        self.assertIn("Malformed lines: 1", out)
+
+    def test_text_report_is_ascii_even_with_non_ascii_tool_name(self):
+        name = "Résumé"
+        path = self.write_lines(
+            [
+                json.dumps(assistant_line("msg_1", [tool_use_block("toolu_1", name, {})])),
+                json.dumps(tool_result_record("toolu_1", "body")),
+            ]
+        )
+        code, out, _ = self.run_main([path])
+        self.assertEqual(code, 0)
+        self.assertTrue(out.isascii())
+        self.assertIn(ascii(name)[1:-1], out)
 
 
 if __name__ == "__main__":

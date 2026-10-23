@@ -31,13 +31,12 @@ These rows are present in the session-bootstrap "On Start" table:
 
 ## Dispatch Rows (routed from a parent skill)
 
-The following row is NOT in the session-bootstrap "On Start" table. Its route is the
-Definition of Done canon item in the BEFORE PROCEEDING section of the
-`verification-before-completion` skill, which names the skill to load:
+The following rows are NOT in the session-bootstrap "On Start" table. Each route is a BEFORE PROCEEDING item of a parent skill, which names the skill to load: `dod-canon-check` from the Definition of Done canon item in `verification-before-completion`, and `reviewing-outside-contributions` from item 4 in `communication`:
 
 | Task type | Skill | Tier |
 |-----------|-------|------|
 | Making a completion claim in a repo that has a ratified `docs/DOD.md` | `dod-canon-check` | domain |
+| Writing to a non-owner contributor on a public PR or issue thread | `reviewing-outside-contributions` | domain |
 
 ## Core Skill Tags (per-turn routing block source)
 

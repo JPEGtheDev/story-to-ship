@@ -67,7 +67,7 @@ Before todos, apply `references/DECISION_DEFERRAL.md` to each significant archit
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
 7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval.
 8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
-9. **Seams first:** for a code story, name the seams (table in `references/TODO_TEMPLATES.md`) before any todo and check them with architecture-review; an unnamed seam blocks its todo. Behaviour-changing code todos run the three-role loop defined in the three-role loop reference of the subagent-driven-development skill; others keep one implementer.
+9. **Seams first:** for a code story, name each seam before any todo (`references/TODO_TEMPLATES.md`).
 
 ### No-Placeholder Rule
 

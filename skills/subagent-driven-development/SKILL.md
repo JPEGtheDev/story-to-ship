@@ -28,7 +28,7 @@ Pick up todo -> Dispatch implementer (or, for a todo that fits the Dispatch Deci
 
 **Do not advance past any todo until Stage 1 (spec review) returns PASS and every file the todo changed has a Stage 2 (quality review) verdict block that advances under the `two-stage-review` skill's Stage 2 rule -- both stages are run under that skill.**
 
-A batch of independent todos (the story coordinator agent's Parallel todos section) is reviewed per todo before its branches merge; the next batch waits for the whole batch.
+A batch of independent todos (the story coordinator agent's Parallel todos section) passes each todo's Stage 1 review before its branch merges, runs Stage 2 once on the merged branch, and starts the next batch only after every todo in it is merged.
 
 See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow.
 

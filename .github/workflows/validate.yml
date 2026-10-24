@@ -311,6 +311,41 @@ jobs:
           fi
           echo "[+] All agent template contracts present"
 
+      - name: Check reconcile contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          checkx() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qxF -- "$s" "$file"; then
+                printf 'FAILED: %s has no line equal to: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/SKILL.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text' 'A reconcile in progress finishes before' 'gh pr list --state open --json number' 'is not a sprint PR' 'reconcile pending after PR <merged PR number>' 'Whenever a Reconcile text is sent, set the state to `reconciling <merged PR number>`' 'exempt from the limit and the overlap rule' 'then tell the owner in one line that the PR head changed' 'set the ledger state to `reconciling <merged PR number>`' 'is the one launch the limit and the overlap rule do not gate' 'A reconcile replacement is exempt from the overlap check' 'A reconcile replacement (Close-out step 7) is exempt.' 'is not to be merged before the reconcile finishes' 'open question and without replacing it' 'for a reconcile replacement do this for the dead runner' 'and `reconcile-<prefix>` for a reconcile replacement'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Reconcile text:' 'Reconcile: merged PR' 'fresh count of 3' 'run `gh pr view <PR number> --json body`' 'a fresh count of 3 for that reconcile' 'each statement that now contradicts another statement' 'then send any queued Reconcile text' 'or is a fresh reconcile runner' 'or is a fresh reconcile runner, also check the Reconcile: line' 'report the PR as waiting on a reconcile and not to be merged yet' 'then send any queued Reconcile text and record the line'
+          checkx agents/story-coordinator.md '## Reconcile'
+          check agents/story-coordinator.md '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read' 'rev-parse origin/<branch>' 'each statement that now contradicts another statement' 'worktree add .worktrees/{{WORKTREE_PREFIX}} -b reconcile-{{WORKTREE_PREFIX}}' 'never replace an earlier one' 'Reconcile text (it names a merged PR' 'origin HEAD:<branch>' 'for a mechanical reason'
+          check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()' 'Reconciles (per merge that triggered one)' 'Reconciles: <PRs reconciled>' 'one `Reconciles:` entry per reconcile'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing reconcile contract string(s)"
+            exit 1
+          fi
+          echo "[+] Reconcile contract strings present"
+
       - name: Check agent templates index matches agents/
         run: |
           set -e

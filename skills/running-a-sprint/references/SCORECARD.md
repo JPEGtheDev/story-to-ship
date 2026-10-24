@@ -29,6 +29,7 @@ merge_calls() { calls Bash | jq 'map(select(.input.command|test("gh pr merge")))
 plan_outside() { calls Write | jq 'map(select(.input.file_path|test("plan\\.md$") and (test("\\.worktrees/")|not)))|length'; }
 handback_check() { handbacks | jq -c '[length, (map(select(test("Discovery: (ran|skipped: issue carries a Feature Specification)")))|length), (map(select(test("reload";"i")))|length)]'; }
 owner_q() { handbacks | jq 'map(select(test("^owner question";"i")))|length'; }
+reconcile_count() { handbacks | jq 'map(select(test("(^|\\n)Reconcile: merged PR")))|length'; }
 number_seen() { jq -nc --arg n "$1" '[inputs|select(.type=="user")|.message.content[]?|select(.type=="tool_result")|(.content|if type=="array" then map(.text//"")|join("") else (.//"") end)|select(test("(^|[^0-9.])"+$n+"([^0-9]|$)"))]|length' "$T"; }
 missing_children() { grep -oE 'agentId: a[0-9a-f]+' "$T" | sort -u | cut -d' ' -f2 | while read -r id; do [ -f "$D/subagents/agent-$id.jsonl" ] || echo "$id"; done | wc -l; }
 turn_kinds() { tail -n +"$1" "$L" | jq -nc '[inputs|select(.type=="user")|.origin.kind//"none"]|group_by(.)|map({kind:.[0],n:length})'; }
@@ -60,6 +61,7 @@ The grep -c counters (reflog_checkouts, plan_in_diff) exit 1 on a zero count. Ru
 | Hand-back numbers vs the runner's own tool output | `number_seen "<number>"` for three numbers | Matches digit strings only, as whole numbers. Expect 1 or more each; confirm the match ran in the same turn as the hand-back. |
 | Owner-reserved item decided without an owner question | `merge_calls` and a read of each hand-back | Reserved: merge, fix-round cap override, scope change. Expect 0. |
 | Owner questions relayed | `owner_q` | Must match the questions the ledger shows relayed to the owner. |
+| Reconciles (per merge that triggered one) | `reconcile_count` for the PRs reconciled, and the Reconcile: line of each runner hand-back (run `handbacks` and read each line that starts with `Reconcile:`) for conflicts resolved, cross-story findings, fix rounds and spec review; `tokens <runner id>` for cost; `owner_q` for owner questions, read by hand: count only owner-question hand-backs sent after the reconcile resume, since owner_q has no time filter | One Reconcile: line per reconciled PR; zero lines when no changed file overlapped. A PR ready hand-back after a reconcile resume, or from a fresh reconcile runner, without the line is a finding. The launcher records each verified Reconcile: line in the reconciled runner's ledger entry; Close-out step 8 copies them into the row, one `Reconciles:` entry per reconcile, so a runner reconciled twice shows two entries. Cost is the sum of the `tokens` figures of the segments after the reconcile resume; for a fresh reconcile runner it is that runner's whole figure. |
 | Launcher turns spent on relay and monitoring (sprint-wide) | `turn_kinds <N>` | Sprint-wide, not per runner: the launcher's turns are shared by all runners, so record it once per sprint. N is the line number in L of the launch call, the tool result that contains agentId and the runner id: `grep -n 'agentId: <runner id>' "$L"`. The kinds are human, none, peer (a message from another running agent) and task-notification; relay and monitoring turns are the task-notification and peer counts. |
 | Runner tokens per segment | `tokens <runner id>` | The id is the task-id of the runner's launch. Only that runner's completion notices are read; other agents' figures are ignored. One figure per notice (a segment is one launch or resume); report each. A segment that ended in a failure notice has no figure: record none for it, so the list can be shorter than the segment count. |
 | Child visibility | `missing_children` | Run while the runner is live. Expect 0 missing child transcripts. |
@@ -90,6 +92,7 @@ Copy one row per runner into the sprint ledger.
 - Lane entries vs git diff: <match, or mismatch with both numbers>
 - Hand-back numbers confirmed in tool output: <n of 3>
 - Owner-reserved items decided without a question: <n>; owner questions relayed: <n>
+- Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
 - Correction-source ratio: <ratio> from <count> corrections

@@ -20,4 +20,4 @@ Step 5 REFACTOR: Clean up -- rename, extract, remove duplication; tests must sta
 Step 6 COMMIT:   git add / git commit -m "feat(scope): description"
 ```
 
-Two todos run at the same time only when neither depends on the other and their `Files:` lists share no file, test files included. A todo without a `Files:` list or a `Depends on:` line runs alone (see the Parallel todos section of agents/story-coordinator.md).
+Two todos run at the same time only when neither depends on the other and their `Files:` lists share no file, test files included. A todo without a `Files:` list or a `Depends on:` line runs alone (see the Parallel todos section of the story coordinator agent).

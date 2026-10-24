@@ -526,3 +526,8 @@ jobs:
         run: |
           python3 -m unittest discover -s tools/session_events -p 'test_*.py'
           echo "[+] session-events converter unit tests pass"
+
+      - name: Run context-measure unit tests
+        run: |
+          python3 -m unittest discover -s tools/context_measure -p 'test_*.py'
+          echo "[+] context-measure unit tests pass"

@@ -61,9 +61,17 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 ## Working directory
 {{WORKTREE_PATH}}
 
+## Role
+Your role is `{{ROLE}}`: `test-writer`, `pass-maker`, `refactorer`, or `single` (one implementer runs every step; the default). The per-role rules are owned by the three-role loop reference of the subagent-driven-development skill; this section is the in-template summary. A role-restricted run must not touch files its role forbids.
+
+- **test-writer**: Changes test files only (test helpers and fixtures under test paths count). Writes one failing test against the seam the plan names. Runs the suite: the new test must FAIL with a run-time assertion failure, not a compile or import error, and no other test may fail. Pastes that failure output. If the test passes at once, return BLOCKED. Commit type: `test(scope): ...`. For a revert dispatch, which the task names as such, commits only the revert of the earlier failing-test commit and expects the suite green.
+- **pass-maker**: Changes non-test files only. Writes the least code that makes the failing test pass; never hardcodes the expected value. Editing, deleting or skipping a test is a finding. Runs the full suite, keeps it green and pastes the run. Commit type: `feat(scope): ...` or `fix(scope): ...`. If the test is wrong or a case is missing, return BLOCKED; never write the test. For a stub commit (the task says so), it writes type or signature stubs and build-registration files only, with no behaviour; it keeps the build and the suite as they were, and commits `chore(scope): ...`.
+- **refactorer**: Improves names, function size, duplication and dependency direction. May edit a test for readability only; never add, delete or rename a test file. A behaviour change is a finding. Keeps the suite green and pastes the run; if it turns red, reverts its changes before reporting. Commit type: `refactor(scope): ...`, or report `no refactor needed: <reason>` and commit nothing.
+- **single**: For a code todo, writes the failing test first, watches it fail for the expected reason, implements, refactors, and runs the full suite green. Commit type: `feat(scope): ...` or `fix(scope): ...`. For a prose, config, pure refactor or deletion todo, no test is written first: run the todo's own checks and use the conventional commit type that fits (`docs`, `chore`, `refactor`, `ci`, and so on).
+
 ## Constraints
 - Follow the code-quality skill: `clang-format` before every commit, naming conventions, no raw `new`
-- Follow the testing skill: write a failing test FIRST, then implement
+- Follow the testing skill for your role (see `## Role`): `single` (for a code todo) and `test-writer` write a failing test FIRST; `pass-maker` and `refactorer` work against the existing test
 - Follow the cpp-patterns skill: RAII, no resource leaks, docs-same-commit rule
 - Conventional commits: `<type>[scope]: <description>`
 - Do NOT push to main or the parent branch
@@ -147,9 +155,11 @@ Removing content from the source without a verified paste in the target is a spe
 
 ## Verification gate before marking done
 1. Run the host project's build command (as its docs define it) -- must succeed
-2. Run the host project's test suite -- all tests green
+2. Run the host project's test suite, by role:
+   - `test-writer`: the new test FAILS at run time with an assertion failure, and only that test fails; for a revert dispatch, which the task names as such, the suite is green and no new test is added
+   - `pass-maker`, `refactorer`, `single`: all tests green
 3. Run the host project's formatter -- format clean
-4. `git diff HEAD~1` -- diff reviewed, no accidental changes
+4. `git diff HEAD~1` -- diff reviewed, no accidental changes; `refactorer` also confirms no test file was added, deleted or renamed; a `refactorer` that commits nothing reviews `git -C {{WORKTREE_PATH}} diff` and `git status` instead
 
 ## Fix Agent Rules
 
@@ -164,6 +174,7 @@ When acting as a fix agent (correcting issues flagged by a Stage 1 or Stage 2 re
 STATUS: [DONE | DONE_WITH_CONCERNS | PARTIAL | NEEDS_CONTEXT | BLOCKED]
 Worktree: [output of: git -C {{WORKTREE_PATH}} rev-parse --show-toplevel]
 Branch: agent/{{AGENT_NAME}}
+Role: [test-writer | pass-maker | refactorer | single]
 Tests: [X passed, 0 failures]
 Files changed: [list]
 Completed: [if PARTIAL -- what was finished and verified]

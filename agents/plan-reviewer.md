@@ -97,6 +97,7 @@ problems, say so explicitly -- do not omit the dimension.
    `none` when empty)? Is there an architecture-review verdict line and a `Test paths` line?
    Does each plan entry carry a `loop:` marker with a one-line reason? Is any todo one that mixes code and prose (it must be split)? A `TBD` cell counts as blank. Cite the todo number or the
    seam table row for each finding.
+   TBD means to be determined.
 
 ## Tone
 

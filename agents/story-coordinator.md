@@ -40,9 +40,15 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Do not widen the scope; list anything outside it under Follow-ups in the pull request body.
 - Rule: never load running-a-sprint, and never launch coordinators, because a nested coordinator adds a second hand-back layer between the owner and the pull request.
 - Before dispatching a code todo, check its row in the seam table: the type or interface, module, and dependencies cells must all be filled, and the `Test paths` and architecture-review verdict lines must be present. A blank cell or a `TBD` cell means the todo is not dispatched and goes back to planning.
+- A cell reading TBD (to be determined) counts as blank.
 - Every plan entry records `loop: three-role` or `loop: single` with a one-line reason, chosen by the rule in the loop-marker section of the writing-plans skill's todo templates: a behaviour change in a non-prose source file of a repo with a runnable suite is three-role; prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds, and reconcile fix rounds are single. A todo that mixes code and prose is split into two todos before dispatch.
 - A `loop: three-role` todo is three role dispatches, in the order the three-role loop reference of the subagent-driven-development skill gives: an optional stub, then test-writer, pass-maker, and refactorer. Each role is a fresh child at the Standard tier, in its own worktree based on the previous role's commit, with one commit per role. The refactorer may commit nothing when it reports `no refactor needed: <reason>`.
+- When dispatching an implementer, set its `{{ROLE}}` input to test-writer, pass-maker or refactorer for a `loop: three-role` todo, and to single for every other todo.
 - After each role returns, run the role-boundary detector from that reference on the role's commit, from inside the feature worktree, and re-run the role's pasted command yourself. A violation returns the todo for a fresh dispatch of the same role. A second violation for the same role in the same todo is kind cap reached for that todo. The spec review runs once over the three commits.
+- Before the detector runs on a role, confirm the role made exactly one commit: `git -C <feature worktree> rev-list --count <previous role commit>..<role head>` must print 1. Any other number is a boundary finding.
+- If the detector exits 2 (merge commit, root commit, a path that git must C-quote, or bad input), check that commit by hand with `git -C <feature worktree> diff --name-status` over its range, and record in the plan entry that you did.
+- A violation that you judge a false positive of a heuristic (the skip-marker scan or the assertion count) does not count toward the cap; record why in the plan entry.
+- If the single spec review over the three commits fails, send each finding to a fresh implementer of the role whose commit holds it, as one new commit, and run the detector on that new commit again.
 
 ## Discovery and acceptance criteria
 
@@ -64,6 +70,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Use PR ready when the pull request is open and CI is green.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
+- Use cap reached also for a role cap: a second boundary finding for one role in one todo.
 - Use interim when you were resumed or asked for status and the work is still in progress.
 - A hand-back with a pull request carries the PR number, CI state, review verdicts, the Discovery line, the reloaded skills, and a `Limitations:` line.
 - `Limitations:` is on every hand-back.

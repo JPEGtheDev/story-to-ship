@@ -29,7 +29,7 @@ Every plan entry carries one marker line, `loop: three-role` or `loop: single`, 
 4. refactorer dispatch: one commit, `refactor(scope): ...`, or no commit.
 5. One spec review over the commits.
 
-The optional stub commit comes before step 2. Type or signature stubs, and build-registration files that RED needs in order to fail at run time rather than at compile time, are committed by a pass-maker-role implementer before the test is written. The stub commit is checked as pass-maker. It is a dispatch of its own, so the test-writer still starts from the stub commit.
+The optional stub commit comes before step 2. Type or signature stubs, and build-registration files that the failing-test step (RED) needs in order to fail at run time rather than at compile time, are committed by a pass-maker-role implementer before the test is written. The stub commit is checked as pass-maker. It is a dispatch of its own, so the test-writer still starts from the stub commit.
 
 Rules that hold for the whole sequence:
 

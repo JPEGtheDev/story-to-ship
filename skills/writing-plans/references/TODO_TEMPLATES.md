@@ -2,7 +2,9 @@
 
 Template for one implementation task in a writing-plans plan. The task is one todo; Steps 1-6 are its ordered steps, reviewed once at the end.
 
-## Test-Driven Development (TDD) todo template
+## Single-implementer template (`loop: single`)
+
+Use for a todo marked `loop: single`: one implementer runs Steps 1-6. Rule for choosing the loop is under "Loop marker" below.
 
 ```
 Task N: [Feature or component name]
@@ -18,3 +20,59 @@ Step 4 GREEN:    Run full suite -- verify all tests pass
 Step 5 REFACTOR: Clean up -- rename, extract, remove duplication; tests must stay green
 Step 6 COMMIT:   git add / git commit -m "feat(scope): description"
 ```
+
+## Seam table (before todo 1 of a code story)
+
+Name the seams before any todo starts. One row per code todo:
+
+```
+Seams:
+| Todo | Type or interface (signature) | Module (path) | Dependencies |
+|------|-------------------------------|---------------|--------------|
+| 1 | parseRecord(text: string) -> Record | exact/path/to/Parser.<ext> | none |
+| 2 | formatRecord(record: Record) -> string | exact/path/to/Formatter.<ext> | 1 |
+Test paths: <globs, or "default">
+Architecture review: <verdict line from the architecture-review skill>
+```
+
+- `Dependencies` writes `none` when there are none; otherwise it names the todo numbers the row depends on.
+- A todo whose row has a blank cell is not dispatched; it returns to planning.
+- `TBD` is not a value. A cell that reads `TBD` counts as blank.
+
+## Loop marker (every plan entry)
+
+Every plan entry carries one marker line, with a one-line reason:
+
+```
+loop: three-role -- reason: adds parseRecord to a non-prose source file with a runnable suite
+loop: single -- reason: prose-only change to the template
+```
+
+Rule for choosing:
+
+- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.
+- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, and fix rounds.
+- A todo mixing code and prose is split into a code todo and a prose todo.
+
+## Three-role todo template (`loop: three-role`)
+
+Three dispatches, each by a different implementer, against the seam named in the seam table:
+
+```
+Todo N: [Behaviour name]
+loop: three-role -- reason: [one line]
+Seam: [row from the seam table]
+
+Role 1 test-writer: Write one failing test against the named seam. Touch test files only.
+  Run it and confirm it fails for the right reason. Commit `test(scope): description`
+  with the failure output pasted.
+Role 2 pass-maker: A different implementer. Touch non-test files only. Write the least
+  code this todo can justify. Run the full suite. Commit `feat(scope): description` or
+  `fix(scope): description` with the full suite run pasted.
+Role 3 refactorer: A different implementer. Improve names, function size, duplication
+  and dependency direction; the suite stays green. Commit `refactor(scope): description`,
+  or record `no refactor needed: <reason>` and commit nothing.
+Review: One spec review over the three commits.
+```
+
+One commit per role; the refactorer may commit nothing, as stated above.

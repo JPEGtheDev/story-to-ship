@@ -382,6 +382,32 @@ jobs:
           fi
           echo "[+] agent templates index matches agents/"
 
+      # A pin proves its line exists somewhere in the file, not that it sits under Ceremony 1;
+      # a rule change must be a deliberate edit here too. Moving the lines elsewhere in the file is not detected.
+      - name: Check Discovery example map is pinned
+        run: |
+          missing=0
+          f=skills/three-amigos/references/CEREMONIES.md
+          for s in \
+            '### Example map -- MANDATORY' \
+            '### Stopping rule and timebox' \
+            '- `Story:` one sentence naming the behavior.' \
+            '- `Rules:` the business rules, one per line, numbered R1, R2.' \
+            '- `Examples:` at least one concrete example per rule, a named case with real values, numbered R1-E1, R1-E2.' \
+            '- `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.' \
+            '- `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.'
+          do
+            if ! grep -qxF -- "$s" "$f"; then
+              printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing Discovery example-map pin(s)"
+            exit 1
+          fi
+          echo "[+] Discovery example-map heading and field lines are present"
+
       # This 20,000-character cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it

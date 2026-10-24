@@ -22,7 +22,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 | # | Signal | Ceremony | Output |
 |---|--------|----------|--------|
-| 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification written to plan.md |
+| 1 | New or unclear Acceptance Criteria (AC) | Discovery | Feature Specification with example map written to plan.md (a BACK TO OWNER map goes under `## Discovery Open Items`) |
 | 2 | Plan 2+ todos AND Discovery ran | Refinement | APPROVE / CONDITIONS / REJECT |
 | 3 | Mid-implementation milestone | Progress Check | ON TRACK / AT RISK / PIVOT NEEDED |
 | 4 | BLOCKED, or DONE_WITH_CONCERNS carrying a correctness or scope risk (owner prompted first) | Pivot Assessment | CONTINUE / REVISE AC / REVISE PLAN / ABANDON |
@@ -43,6 +43,7 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
    [+] Ceremony named from the When to Invoke table -> go to item 2
    [-] No ceremony named -> pick one from the table before dispatching
 2. Did Discovery run? Check plan.md for `## Feature Specification`.
+   If plan.md has `## Discovery Open Items` and no `## Feature Specification`, STOP until the map is updated from the owner's answer and passes the stopping rule; do not plan.
    [+] -> Three Amigos for Ceremonies 2, 5, 6
    [-] -> Skeptic + plan-reviewer pair for Ceremony 2 (see `writing-plans`)
 3. 3 worktrees, one per amigo. Inject `{{PERSONA}}` + `{{READ_FIRST}}` + `{{CEREMONY}}` + `{{AGENDA}}` into amigo.md.
@@ -61,10 +62,12 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
 
 When dispatching Ceremony 1 (Discovery), each amigo MUST address ALL of the following in addition to the standard agenda in `references/CEREMONIES.md`:
 
-1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labelled `[UNCLEAR: optional?]` in the Feature Specification. Never assume required unless the AC explicitly states it.
-2. **UI dialog entry paths:** For any UI dialog or panel in the acceptance criteria: enumerate every menu path and keyboard shortcut that opens it. Any path not mentioned in the ACs MUST be flagged as `[UNPLANNED: entry-path]` in the Feature Specification.
+1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labelled `[UNCLEAR: optional?]` in the example map (Questions line). Never assume required unless the AC explicitly states it.
+2. **UI dialog entry paths:** For any UI dialog or panel in the acceptance criteria: enumerate every menu path and keyboard shortcut that opens it. Any path not mentioned in the ACs MUST be flagged as `[UNPLANNED: entry-path]` in the example map (Questions line).
 
 A Feature Specification that does not address both questions is incomplete and MUST be revised before Ceremony 2 (Refinement).
+
+A map whose Verdict is `BACK TO OWNER` is written under `## Discovery Open Items`, not `## Feature Specification`, and stops the run at Discovery: do not plan, send the rules with no example and open questions to the owner. The example map fields and stopping rule are defined in `references/CEREMONIES.md`, Ceremony 1.
 
 ---
 
@@ -126,6 +129,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 | "Signoff is a formality" | Signoff is whole-feature behavioral review. Both required. |
 | "Retrospective is optional" | Required for multi-session work; optional only for single-session work. Skipped retrospectives let process debt accumulate. |
 | "Not fully blocked, skip Pivot Assessment" | A DONE_WITH_CONCERNS result carrying a correctness or scope risk also triggers the owner prompt, then Pivot Assessment. |
+| "The owner answered in chat, so move the map and plan" | The answer can change rules and examples; only a map that passes the stopping rule again is a Feature Specification. Update the map, re-apply the stopping rule, then move it. |
 
 ---
 

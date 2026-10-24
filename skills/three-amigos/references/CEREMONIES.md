@@ -10,7 +10,7 @@ Full ceremony definitions for all 6 ceremonies. Orchestrator reads this file to 
 ## Ceremony 1: Discovery
 
 **Trigger:** New feature with new or unclear acceptance criteria.  
-**Output:** Feature Specification written into `## Feature Specification` in plan.md.  
+**Output:** Feature Specification written into `## Feature Specification` in plan.md; it contains the example map and a verdict; a `BACK TO OWNER` map goes under `## Discovery Open Items` instead (see the stopping rule).  
 **Required:** YES for any feature with 2+ todos and unclear Acceptance Criteria (AC).
 
 ### Feature Specification grain -- MANDATORY
@@ -22,7 +22,7 @@ The Feature Specification is written at **user behavior and outcome** level only
 - What the user receives or observes (outcomes)
 - Numbered acceptance criteria in behavioral terms (Given/When/Then or plain language)
 - What is explicitly OUT of scope
-- Unresolved questions for the user
+- Unresolved questions: listed only in the example map's Questions line
 
 **Exclude -- these NEVER appear in the Feature Specification:**
 - Class names, struct names, method names, file references
@@ -31,12 +31,30 @@ The Feature Specification is written at **user behavior and outcome** level only
 
 **Developer amigo findings in Discovery** (API gaps, missing setters, class constraints) are implementation constraints that inform todo planning -- they do NOT appear in the Feature Specification. The orchestrator records them separately (e.g., in a `## Implementation Notes` section or as initial todos) after the Feature Specification is written.
 
+### Example map -- MANDATORY
+
+The example map lives in the Feature Specification, or under `## Discovery Open Items` when the verdict is `BACK TO OWNER`; each field is its own line, in this order:
+- `Story:` one sentence naming the behavior.
+- `Rules:` the business rules, one per line, numbered R1, R2.
+- `Examples:` at least one concrete example per rule, a named case with real values, numbered R1-E1, R1-E2.
+- `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.
+- `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.
+
+Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
+
+### Stopping rule and timebox
+
+Verdict is `BACK TO OWNER` when any rule has no example or Questions is not `none`; the owner then receives the rules without examples and the open questions and answers them before any planning. Otherwise the verdict is `READY FOR PLANNING`. Only a `READY FOR PLANNING` map is written under `## Feature Specification`; a `BACK TO OWNER` map is written under `## Discovery Open Items` instead, so planning routes that look for the Feature Specification heading do not treat it as ready. After the owner answers, update Rules, Examples and Questions from the answer, re-apply this rule, and move the map under `## Feature Specification` only when the verdict is `READY FOR PLANNING`. Each `[UNCLEAR: optional?]` or `[UNPLANNED: entry-path]` label is also listed under Questions.
+
+Timebox: each amigo runs in one dispatch; there is no second dispatch round to answer questions in the same Discovery. This replaces the roughly 25-minute human session time.
+
 ### Synthesis step (orchestrator)
 
 After all three Discovery amigos return:
-1. Write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios, out-of-scope items, open questions.
-2. Record Developer implementation findings separately under `## Implementation Notes` -- these become inputs to todo planning.
-3. Do NOT mix the two. Implementation details in the Feature Specification defeat the purpose of the ceremony.
+1. Build the example map (see `### Example map -- MANDATORY`) from the **Business and Tester findings only**: rules from Business, examples from both Business scenarios and Tester failure cases. Set the verdict by the stopping rule. Developer findings stay in Implementation Notes.
+2. Write the output by verdict. With `READY FOR PLANNING`, write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios, out-of-scope items; open questions stay in the map's Questions line (`none` when ready). With `BACK TO OWNER`, write the example map and open questions under `## Discovery Open Items` and write no `## Feature Specification` heading.
+3. Record Developer implementation findings separately under `## Implementation Notes` -- these become inputs to todo planning.
+4. Do NOT mix Developer findings into the Feature Specification. Implementation details in the Feature Specification defeat the purpose of the ceremony.
 
 ### Read First
 
@@ -51,10 +69,13 @@ After all three Discovery amigos return:
 3. What does "done" look like? State 3-5 testable acceptance criteria.
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
+6. For each rule, give at least one concrete example with real values; list every rule that has none.
+
+Source analysis: the Discovery practice analysis in the repo's bdd-books documentation records the public practices behind these steps and lists where this ceremony departs from them.
 
 ### Non-UI Adaptation of the Mandatory Questions
 
-`SKILL.md` mandates two extra Discovery agenda questions on top of the five above: field optionality, and UI dialog entry paths (menu paths and keyboard shortcuts that open a dialog). Both are written assuming a UI feature. For a non-UI or developer-facing feature (skills, tooling, engines, plugins), adapt the two mandatory questions instead of dropping them -- dropping a mandatory question because "there is no UI" silently loses its intent, which generalizes to: enumerate every entry path and flag any not covered.
+`SKILL.md` mandates two extra Discovery agenda questions on top of the six above: field optionality, and UI dialog entry paths (menu paths and keyboard shortcuts that open a dialog). Both are written assuming a UI feature. For a non-UI or developer-facing feature (skills, tooling, engines, plugins), adapt the two mandatory questions instead of dropping them -- dropping a mandatory question because "there is no UI" silently loses its intent, which generalizes to: enumerate every entry path and flag any not covered.
 
 - Field optionality -> optionality of each field in the feature's data contract (spec or config schema): required, optional, or conditional. Label ambiguous fields `[UNCLEAR: optional?]`.
 - UI dialog entry paths -> every invocation or API entry path (namespaced skill invocation, description-match auto-invocation, direct script or command-line launch, allowed-tools surface). Flag any entry path the design does not cover as `[UNPLANNED: entry-path]`.

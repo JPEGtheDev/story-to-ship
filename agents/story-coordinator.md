@@ -40,6 +40,21 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Do not widen the scope; list anything outside it under Follow-ups in the pull request body.
 - Rule: never load running-a-sprint, and never launch coordinators, because a nested coordinator adds a second hand-back layer between the owner and the pull request.
 
+## Parallel todos
+
+- Parallel limit: 3. This is the only place the limit is stated; change it here and nowhere else.
+- A batch is the todos you run at the same time. Put two todos in one batch only when neither depends on the other and their `Files:` lists share no file, test files included.
+- A todo with no `Files:` list or no `Depends on:` line runs alone, and so does an inline-lane todo.
+- When more todos are ready than the parallel limit allows, run up to the parallel limit in plan order and hold the rest for the next batch.
+- Send the batch's implementer dispatches in one message with run_in_background false, each in its own child worktree made from the same feature-branch commit.
+- Run each todo's Stage 1 spec review before merging its branch (the batch's reviews may also go in one message); no review is skipped because a todo ran in a batch.
+- Merge the passing child branches into the feature branch in plan order, one at a time and run the suite after each merge.
+- Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child.
+- A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix.
+- A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
+- The review of the whole branch runs once, after the last merge.
+- A reconcile, or a fresh runner with no plan file, never runs a batch.
+
 ## Discovery and acceptance criteria
 
 - When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip.

@@ -151,12 +151,12 @@ jobs:
           check agents/implementer.md 'Editing, deleting or skipping a test is a finding.'
           check agents/implementer.md 'A behaviour change is a finding.'
           check agents/implementer.md 'Role: [test-writer | pass-maker | refactorer | single]'
-          check agents/story-coordinator.md 'the type or interface, module, and dependencies cells must all be filled'
-          check agents/story-coordinator.md 'A second violation for the same role in the same todo is kind cap reached for that todo.'
+          check agents/story-coordinator.md 'the type or interface, module, and collaborators cells must all be filled'
+          check agents/story-coordinator.md 'is a cap reached hand-back for that todo.'
           check agents/story-coordinator.md 'A todo that mixes code and prose is split into two todos before dispatch.'
           check agents/plan-reviewer.md '8. **Seams and loop marker.**'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if git rev-parse --verify -q "$commit^2" >/dev/null; then echo "merge commit: check by hand" >&2; exit 2; fi'
-          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'which must print 1.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'which must print 1, except 0 for a refactorer that reports `no refactor needed`.'
           check skills/testing/SKILL.md 'A test-writer whose test passes at once returns BLOCKED and does not fix the test itself.'
           check skills/testing/SKILL.md 'The one commit allowed before the failing test is the stub commit'
           check skills/writing-plans/references/TODO_TEMPLATES.md 'Architecture review: <verdict line from the architecture-review skill>'
@@ -166,6 +166,10 @@ jobs:
           check agents/story-coordinator.md 'Any other number is a boundary finding.'
           check agents/story-coordinator.md 'does not count toward the cap; record why in the plan entry.'
           check agents/plan-reviewer.md 'Is any todo one that mixes code and prose (it must be split)?'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'bad test-path pattern: $test_re'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The new failing test is a second, separate test-writer dispatch'
+          check agents/story-coordinator.md 'a fresh pass-maker dispatch (one commit, detector run) follows it'
+          check agents/implementer.md 'it writes type or signature stubs and build-registration files only, with no behaviour'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing three-role loop contract string(s)"
             exit 1

@@ -1,0 +1,16 @@
+{
+  "tiers": {
+    "economy": {
+      "match": ["haiku"],
+      "rates_per_million": null
+    },
+    "standard": {
+      "match": ["sonnet"],
+      "rates_per_million": null
+    },
+    "premium": {
+      "match": ["opus"],
+      "rates_per_million": null
+    }
+  }
+}

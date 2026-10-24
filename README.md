@@ -51,7 +51,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | Skill | Purpose |
 |-------|---------|
 | `honesty` | Evidence gate -- bans unverified completion claims, enforces inline verification |
-| `communication` | Plain-language gate -- defines jargon in user-facing text, treats hedged agreement as unclear writing not approval, keeps reasoning terse, requires evidence before conceding to a correction, and keeps public PR/issue review comments factual and neutral in tone |
+| `communication` | Plain-language gate -- defines jargon in user-facing text, treats hedged agreement as unclear writing not approval, keeps reasoning terse, and requires evidence before conceding to a correction |
 | `verification-before-completion` | Hard stop before any "done" claim |
 
 ### Requirements and Discovery
@@ -97,6 +97,7 @@ without an OpenCode equivalent remain Claude Code-only.
 |-------|---------|
 | `requesting-code-review` | PR preparation and review request protocol |
 | `receiving-code-review` | Acting on feedback without rationalization |
+| `reviewing-outside-contributions` | Tone and wording rules for review comments to non-owner contributors on public PR and issue threads |
 
 ### CI/CD and Release
 | Skill | Purpose |
@@ -156,7 +157,7 @@ without an OpenCode equivalent remain Claude Code-only.
 ## How It Works
 
 Installing this plugin adds:
-- 41 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
+- 42 skills to `.claude/skills/` (Claude Code) or as `Skill` tool definitions (OpenCode) -- invoked via the `Skill` tool or loaded on demand
 - 18 agents to `.claude/agents/` (Claude Code only; OpenCode has no agent-dispatch tool in the plugin API yet)
 - Hooks from `hooks/hooks.json` (the shipped plugin wiring), registering four events: `SessionStart` (injects the Honesty Gate and Iron Laws at every startup), `UserPromptSubmit` (active per-turn enforcement), `PreToolUse` (the bootstrap gate, which holds tools until `session-bootstrap` loads and holds edits and subagent dispatches after a compaction or resume until the skills loaded before it are re-invoked; the shell-write guard; the inline-edit guard; and the workflow model guard), and `PostToolUse` (records each completed `Skill` call for the bootstrap gate)
 

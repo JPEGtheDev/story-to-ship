@@ -187,3 +187,7 @@ preference if it is a defect.
 | "The reviewer asked why -- I need to change something" | A why-question is a request for rationale, not a change request. Answering with a defensive edit or revert destroys correct work and dodges the actual question. Reply with the reasoning and evidence; edit only if the rationale fails re-examination. |
 | "The comment names a real defect, so fixing it now is the responsive thing" | The user's comment opens a discussion; a same-turn commit closes it before the user has spoken and hides disagreement behind a diff. Reply with the check, the assessment, and the proposal; end the turn; fix after the answer. |
 **Review principles (The Core Problem, EgolessProgramming, PeerReview ownership, Structured Walkthroughs, Attack Ideas Not People):** `references/REVIEW_PRINCIPLES.md`
+
+## Related Skills
+
+- `reviewing-outside-contributions` -- tone and wording rules for replies and review comments addressed to a non-owner contributor on a public PR or issue thread

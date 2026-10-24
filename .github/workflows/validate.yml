@@ -297,7 +297,7 @@ jobs:
           check skills/communication/SKILL.md "if you have to parse the reply's wording to decide whether it counts as approval, it is not approval"
           check skills/communication/SKILL.md "Define every term of art in one plain clause at its first use"
           check skills/communication/SKILL.md "The first sentence of a reply to a correction states the evidence examined or the check being run"
-          check skills/communication/SKILL.md "a finding states what the code does, never what the author must not know, understand, or have tested"
+          check skills/reviewing-outside-contributions/SKILL.md "a finding states what the code does, never what the author must not know, understand, or have tested"
           check skills/self-evaluation/SKILL.md "Failure-instance evidence bar" "first-action-audit.sh"
           check skills/versioning/SKILL.md "Merging is the user's gate."
           check skills/execution/SKILL.md "State a guard denial in the next message you write, before the next tool call: what was denied and what runs instead."

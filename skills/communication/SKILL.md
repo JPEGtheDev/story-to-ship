@@ -110,27 +110,6 @@ Rules:
 | "it is worth noting" / "let us consider" | State the note or option directly |
 | Re-deriving a conclusion whose evidence is still in context | Cite it (msg # or file:line); re-derive only when the evidence did not survive compaction |
 
-### Reviewing Outside Contributions
-
-**Context:** Text addressed to a non-owner contributor on a public PR or issue thread -- a review comment, a requested change, a closing note.
-**Forces:** Evidence-discipline directness (the honesty skill) is calibrated to internal work; left unmodulated for a public audience it degrades into bluntness and attribution about the author instead of the artifact. Correcting for that risk in the other direction degrades into warmth performance, where the finding gets buried under politeness. Public threads are permanent, are read by people outside this conversation, and represent the project -- the register has to survive both failure modes at once.
-
-Rules:
-
-- The review register is informational: every sentence is an observation, its evidence, or its resolution. No emotional decoration in either direction -- not flowery, not harsh.
-- No apology framing around findings ("sorry, but...", "unfortunately...", "I hate to say..."). An apology is repair for the reviewer's own error, not packaging for information about the artifact. If the review itself was wrong, correct it plainly -- that is the only apology context on a review thread.
-- Banned attribution classes are intent, honesty, and competence/knowledge -- a finding states what the code does, never what the author must not know, understand, or have tested.
-- Every negative finding pairs an observation with its evidence and what resolves it.
-- No praise openers. No closers that mock or gatekeep. Imperatives target the artifact, not the person.
-- A closing condition is permitted when it names the specific artifact change and what resolves it. It is banned when it conditions the reviewer's attention or goodwill on the author, or replaces the named change with a characterization of the author's work.
-
-BAD: "The testing claim (\"all 33 skills discoverable via `opencode run`\") cannot be true of this diff, since no code path registers a skill. Please re-test for real and paste the actual output."
-GOOD: "The testing claim states all 33 skills are discoverable via `opencode run`. I looked at the skill-loader module and found no code path that registers a skill with that command. A pasted transcript of the actual run would resolve the discrepancy."
-
-PERMITTED: "Fix the migration function at line 42 before this can merge."
-BANNED: "Happy to re-review once the code, README, and PR description agree with each other."
-The distinguishing test: PERMITTED names one artifact and the change that resolves it; BANNED names no artifact change and instead makes the reviewer's continued attention conditional on the author's general effort.
-
 ---
 
 ## BEFORE PROCEEDING
@@ -138,10 +117,10 @@ The distinguishing test: PERMITTED names one artifact and the change that resolv
 1. No forbidden phrasing from the Talk Straight table is present
 2. No non-ASCII characters are present in ANY output (chat responses, PR comments, commit messages, command-line tool text); use ASCII equivalents: -> for arrows, -- or - for dashes, <= >= != for math operators, [+] [-] for status marks. Exception: non-ASCII is permitted ONLY inside a clearly-marked verbatim quotation of external source material (e.g. a code block or block quote reproducing the source exactly) -- it MUST NOT appear in your own prose, arrows, dashes, or status marks
 3. Every project-internal term in the outgoing text is defined at its first use in this conversation, and any update leads with the decision rather than the research trail (Plain Language rule above)
-4. Any text bound for a public PR or issue thread passes the Reviewing Outside Contributions rules -- informational register, no author attribution, no apology framing, closer names the artifact change
+4. Any text addressed to a non-owner contributor on a public PR or issue thread: load the `reviewing-outside-contributions` skill now; do not post until it is loaded.
 
 [+] All met -> send the response
-[-] Any unmet -> rewrite the offending phrase or run the required verification before sending
+[-] Any unmet -> rewrite the offending phrase, run the required verification, or load the skill item 4 names, before sending
 
 ---
 
@@ -153,7 +132,6 @@ The distinguishing test: PERMITTED names one artifact and the change that resolv
 - User replied with hedged assent ("I guess", "sure, I think") and you are about to treat it as approval -- **STOP. Hedged assent means the presentation was too opaque. Simplify and re-present; proceed only on plain approval.**
 - About to ask the owner to "ratify" something, or to approve a labeled item without saying what changes and what it does -- **STOP. Name the change and its effect; "ratify" applies only to a change to the Definition of Done or Definition of Ready document itself, never to a decision that merely serves or satisfies one.**
 - A reasoning paragraph forming around a mechanical step, or a coined framework or self-commentary appearing in your thinking -- **STOP. One line: fact, decision, next action. Delete the performance; keep every required check.**
-- About to post text to a public PR/issue thread containing a praise opener, an author attribution (intent, honesty, or competence), or an apology-framed finding -- **STOP. Apply the Reviewing Outside Contributions rules: state the observation, its evidence, and what resolves it.**
 - A reply to a correction or pushback is about to open with agreement, concession, apology, or praise -- or to act on the correction with no stated check (silent compliance) -- **STOP. State the evidence examined or the check being run first; the correction is a hypothesis until the check returns.**
 
 **Any of the above phrases = incomplete response. DO NOT send it.**
@@ -169,7 +147,6 @@ The distinguishing test: PERMITTED names one artifact and the change that resolv
 | "The user said 'I guess' -- that is a yes" | Hedge words on an assent are the reader saying they could not evaluate it -- the counterfeit of approval. Simplify and re-present; only plain approval authorizes. | Re-present in plainer terms and wait for plain approval. |
 | "I defined that term in an earlier session" | Definitions do not persist for the reader across conversations. Define at first use in EVERY conversation. | Restate the definition at first use in this conversation. |
 | "Thorough-sounding reasoning proves rigor -- longer is safer" | Elaborate register is not rigor -- unneeded sentences burn budget and bury the actual checks. It is the counterfeit of diligence: the form of care without the checks that constitute it. | Keep every required check; delete the performance. One line per mechanical step. |
-| "Being direct means saying it bluntly" | Directness governs content (state the finding, name the fix); register governs delivery (informational, no attribution, no decoration). Bluntness at a contributor is not directness, it is attribution. | Apply the Reviewing Outside Contributions register: observation, evidence, resolution. |
 | "The user corrected me, so they must be right" | A correction is a hypothesis; the audited record found every reply that opened with acceptance was unfounded. | Run the check first; the opener states the check. |
 | "The phrase is vivid, it helps the reader" | A phrase that adds no fact costs the reader a parse and, repeated, becomes a tic the reader notices instead of the content -- the counterfeit of emphasis. | Delete it or replace it with the fact it stood for. |
 
@@ -178,3 +155,4 @@ The distinguishing test: PERMITTED names one artifact and the change that resolv
 ## Related Skills
 
 - `honesty` -- evidence discipline: confidence vocabulary and verification claims; always-active peer of this skill
+- `reviewing-outside-contributions` -- rules for text posted to a non-owner contributor on a public PR or issue thread

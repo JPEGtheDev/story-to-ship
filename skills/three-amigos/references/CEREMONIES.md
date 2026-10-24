@@ -40,7 +40,7 @@ The example map lives in the Feature Specification, or under `## Discovery Open 
 - `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.
 - `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.
 
-Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
+A rule summarises its examples: state each rule in one sentence and put the detail in its examples. Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
 
 ### Stopping rule and timebox
 
@@ -70,8 +70,6 @@ After all three Discovery amigos return:
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
 6. For each rule, give at least one concrete example with real values; list every rule that has none.
-
-Source analysis: the Discovery practice analysis in the repo's bdd-books documentation records the public practices behind these steps and lists where this ceremony departs from them.
 
 ### Non-UI Adaptation of the Mandatory Questions
 

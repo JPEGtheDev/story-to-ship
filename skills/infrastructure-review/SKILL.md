@@ -9,7 +9,7 @@ description: Use when adding CI/CD workflows, modifying build configuration, or 
 
 ```
 PIPELINES MUST BE REPRODUCIBLE AND READ-ONLY -- INFRASTRUCTURE CHANGES NEED REVIEW
-YOU MUST review every change to CI/CD workflow files, build configuration files, and sandboxed/packaging manifests before merge. A pipeline that commits, pushes, or uses unpinned dependencies is NOT mergeable. No exceptions.
+YOU MUST review every change to CI/CD workflow files, build configuration files, and sandboxed/packaging manifests before merge. A pipeline that commits, pushes to a branch, or uses unpinned dependencies is NOT mergeable. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -39,7 +39,7 @@ Before reviewing any infrastructure change:
 
 Run every item for each changed `.github/workflows/*.yml` or `.github/workflows/*.yaml` file:
 
-1. No `git commit` or `git push` in any workflow step -- pipelines are read-only (see `workflow` skill)
+1. No `git commit` and no branch `git push` in any workflow step -- pipelines are read-only; a job that creates a release may run `git tag` and `git push origin <tag>` with `contents: write` on that job only (see `workflow` skill)
 2. All `permissions:` blocks are minimal -- `contents: read` unless a step writes: `checks: write` for check results, `pull-requests: write` for PR comments, `contents: write` only on a release job that pushes a tag; each write scope justified in a comment
 3. Artifacts set `retention-days:` per the `workflow` skill's retention rule
 4. No secrets hardcoded -- all sensitive values via `${{ secrets.X }}` only

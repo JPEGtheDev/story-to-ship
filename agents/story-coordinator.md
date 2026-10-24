@@ -53,7 +53,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child.
 - A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix, and the fix child starts from the current head of the feature branch.
 - A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
-- Stage 2 quality review runs once, on the whole branch after the last merge, in place of a per-todo Stage 2 for batched todos.
+- Stage 2 quality review runs once, on the whole branch after the story's last merge and before the pull request opens, in place of a per-todo Stage 2 for batched todos; list the branch diff's files under the Stage 2 grouping rule, and a finding charges the fix-round count of the todo whose file it names.
 - A reconcile, or a fresh runner with no plan file, never runs a batch.
 
 ## Discovery and acceptance criteria

@@ -25,7 +25,7 @@ Every plan entry carries one marker line, `loop: three-role` or `loop: single`, 
 
 1. Optional stub commit (see below).
 2. test-writer dispatch: one commit, `test(scope): ...`.
-3. pass-maker dispatch: one commit, `feat(scope): ...` or `fix(scope): ...`.
+3. pass-maker dispatch: one commit, `feat(scope): ...` or `fix(scope): ...`, that makes the failing test pass, the passing step (GREEN).
 4. refactorer dispatch: one commit, `refactor(scope): ...`, or no commit.
 5. One spec review over the commits.
 
@@ -54,13 +54,13 @@ Rules that hold for the whole sequence:
 - Editing, deleting or skipping a test is a finding.
 - Runs the full suite and pastes the run.
 - Commits `feat(scope): ...` or `fix(scope): ...`.
-- If the test is wrong or a case is missing, return BLOCKED to the coordinator. The coordinator opens a new todo with its own test-writer. The pass-maker never writes the test.
+- If the test is wrong or a case is missing, return BLOCKED to the coordinator. The coordinator opens a new todo with its own test-writer. The pass-maker never writes the test. The new todo's test-writer reverts the earlier failing-test commit as its first commit, so the earlier failing test is reverted and a todo never ends on a failing suite.
 
 ### refactorer
 
 - A different implementer from the test-writer and the pass-maker.
 - Improves names, function size, duplication and dependency direction.
-- May edit a test for readability only.
+- The refactorer never adds, deletes or renames a test file; it may edit an existing test for readability only.
 - Keeps the suite green and pastes the run.
 - Commits `refactor(scope): ...`, or reports `no refactor needed: <reason>` and commits nothing.
 - A behaviour change is a finding.
@@ -68,7 +68,9 @@ Rules that hold for the whole sequence:
 
 ## 4. Test-path predicate
 
-The default test-path predicate is the extended regular expression (ERE) in the detector script in section 5, matched case-insensitively. The plan's `Test paths:` line may override it with one ERE, which the dispatcher passes to the detector as its third argument unchanged.
+The plan's `Test paths:` line reads `default` or gives one extended regular expression (ERE). When it reads `default`, the dispatcher omits the third argument; the script also accepts the word `default` as the third argument and treats it as no override. When the line gives an ERE, the dispatcher passes it to the detector as its third argument unchanged, and the script matches it case-insensitively.
+
+The default predicate is the one in the detector script in section 5. It matches directory names (tests, test, __tests__, spec, testdata, fixtures), test_ prefixes, _test and _spec suffixes, .test and .spec infixes, conftest.py, and the CamelCase suffixes Test, Tests and Spec after a lower-case letter or digit (FooTest.java matches, latest.c does not). It is case-sensitive. Matching is by name, so a source file that is named like a test is misread as a test; the plan's override is the fix.
 
 ## 5. Boundary detector
 
@@ -77,21 +79,32 @@ Run the detector as `sh <script> <role> <commit> [test-path ERE]`:
 - `role` is `test-writer`, `pass-maker` or `refactorer`.
 - `commit` is one role commit. Its parent is the base for the diff.
 - The script reads the repository from its current directory, so run it from inside the feature worktree that holds the commit. The `git -C` form does not apply to it.
-- Exit codes: 0 means the boundary held and prints `OK <role>`. 1 means a violation and prints one `VIOLATION` line per finding. 2 means bad input (unknown role or unknown commit).
+- Exit codes: 0 means the boundary held and prints `OK <role>`. 1 means a violation and prints one `VIOLATION` line per finding. 2 means an input the script cannot judge: an unknown role, an unknown or bad commit, a root commit, a merge commit, or a path that git must C-quote (a tab, double quote or backslash in the name). The reviewer checks those by hand with `git diff --name-status`.
+- The dispatcher also confirms that each role made one commit with `git rev-list --count <previous role commit>..<role head>`, which must print 1. Any other number is a boundary finding.
 
-Save the script below to a file and run it as shown. The block is built from the script file, not retyped.
+Save the script below to a file and run it as shown. The block is the script file byte for byte, not retyped.
 
 ```sh
 #!/bin/sh
-# usage: role-check.sh <role> <commit> [test-path-ERE]
+# usage: role-check.sh <role> <commit> [test-path ERE]
 # role: test-writer | pass-maker | refactorer. The commit is one role commit; its parent is the base.
-# Exit 0 = boundary held, 1 = violation, 2 = bad input. Needs git and a POSIX grep.
-role=$1; commit=$2
-test_re=${3:-'(^|/)(tests?|__tests__|spec|testdata|fixtures)/|(^|/)test_[^/]*$|(^|/)conftest\.py$|_(test|spec)\.[^/]*$|(Tests?|Spec)\.[^/]*$|\.(spec|test)\.[^/]*$'}
+# Exit 0 = boundary held, 1 = violation, 2 = input this script cannot judge (check by hand).
+# Needs git and a POSIX grep. The test-path ERE argument is optional; "default" means omitted.
+role=$1; commit=$2; test_re=$3
+[ "$test_re" = default ] && test_re=
+dir_re='(^|/)(tests?|__tests__|spec|testdata|fixtures)/|(^|/)test_[^/]*$|(^|/)conftest\.py$|_(test|spec)\.[^/]*$|\.(spec|test)\.[^/]*$'
+camel_re='[a-z0-9](Test|Tests|Spec)\.[^/]*$'
 case $role in test-writer | pass-maker | refactorer) ;; *) echo "unknown role: $role" >&2; exit 2 ;; esac
+git rev-parse --verify -q "$commit^{commit}" >/dev/null || { echo "bad commit: $commit" >&2; exit 2; }
+git rev-parse --verify -q "$commit^" >/dev/null || { echo "root commit has no parent to compare with" >&2; exit 2; }
+if git rev-parse --verify -q "$commit^2" >/dev/null; then echo "merge commit: check by hand" >&2; exit 2; fi
 base="$commit^"
-git rev-parse --verify -q "$commit" >/dev/null || { echo "bad commit: $commit" >&2; exit 2; }
 status=$(git -c core.quotePath=false diff --name-status "$base" "$commit") || exit 2
+if printf '%s\n' "$status" | grep -Eq "$(printf '\t')\""; then echo "a path needs C-quoting (tab, quote or backslash): check by hand" >&2; exit 2; fi
+is_test() {
+  if [ -n "$test_re" ]; then printf '%s\n' "$1" | grep -Eiq "$test_re"; return; fi
+  printf '%s\n' "$1" | grep -Eiq "$dir_re" || printf '%s\n' "$1" | grep -Eq "$camel_re"
+}
 bad=0
 if [ -z "$status" ] && [ "$role" != refactorer ]; then echo "VIOLATION $role commit changes nothing"; bad=1; fi
 tab=$(printf '\t')
@@ -100,13 +113,13 @@ while IFS="$tab" read -r code path rest; do
   [ -n "$code" ] || continue
   for p in "$path" "$rest"; do
     [ -n "$p" ] || continue
-    if printf '%s\n' "$p" | grep -Eiq "$test_re"; then is_test=1; else is_test=0; fi
+    if is_test "$p"; then t=1; else t=0; fi
     case $role in
-      test-writer) [ "$is_test" = 1 ] || { echo "VIOLATION test-writer touched non-test file: $code $p"; bad=1; } ;;
-      pass-maker)  [ "$is_test" = 0 ] || { echo "VIOLATION pass-maker touched test file: $code $p"; bad=1; } ;;
-      refactorer)  if [ "$is_test" = 1 ] && [ "$code" != M ]; then echo "VIOLATION refactorer added, deleted or renamed a test file: $code $p"; bad=1; fi ;;
+      test-writer) [ "$t" = 1 ] || { echo "VIOLATION test-writer touched non-test file: $code $p"; bad=1; } ;;
+      pass-maker)  [ "$t" = 0 ] || { echo "VIOLATION pass-maker touched test file: $code $p"; bad=1; } ;;
+      refactorer)  if [ "$t" = 1 ] && [ "$code" != M ]; then echo "VIOLATION refactorer added, deleted or renamed a test file: $code $p"; bad=1; fi ;;
     esac
-    if [ "$is_test" = 1 ] && [ "$code" != D ]; then tests_changed="$tests_changed
+    if [ "$t" = 1 ] && [ "$code" != D ]; then tests_changed="$tests_changed
 $p"; fi
   done
 done <<LIST
@@ -114,13 +127,13 @@ $status
 LIST
 if [ "$role" != pass-maker ]; then
   # heuristic: added lines in changed test files that disable a test, and (refactorer) net loss of assertions
-  skip_re='(^|[^[:alnum:]_])(skip|xit|xtest|xfail|pending|todo)([^[:alnum:]_]|$)|@Ignore|#\[ignore\]|t\.Skip|DISABLED_|expectedFailure|\.only\('
+  skip_re='(^|[^[:alnum:]_])(it|test|describe)\.(skip|only|todo)\(|(^|[^[:alnum:]_])(xit|xtest|xdescribe)\(|(^|[^[:alnum:]_])(pytest\.)?skip\(|@pytest\.mark\.(skip|xfail)|@(Ignore|Disabled)|#\[ignore\]|t\.Skip(Now)?\(|DISABLED_|expectedFailure|\.only\('
   assert_re='assert|expect|EXPECT_|ASSERT_|CHECK'
   added=0; removed=0
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     d=$(git -c core.quotePath=false diff "$base" "$commit" -- "$f")
-    hit=$(printf '%s\n' "$d" | grep -E '^\+' | grep -vE '^\+\+\+' | grep -Ei "$skip_re" || true)
+    hit=$(printf '%s\n' "$d" | grep -E '^\+' | grep -vE '^\+\+\+' | grep -E "$skip_re" || true)
     if [ -n "$hit" ]; then echo "VIOLATION $role added a skip marker in $f: $hit"; bad=1; fi
     a=$(printf '%s\n' "$d" | grep -E '^\+' | grep -vE '^\+\+\+' | grep -Eic "$assert_re" || true)
     r=$(printf '%s\n' "$d" | grep -E '^-' | grep -vE '^---' | grep -Eic "$assert_re" || true)
@@ -149,10 +162,13 @@ The detector checks which paths each role changed and a few text heuristics. It 
 - skip markers beyond the heuristic list
 - whether the seam in the plan is the one the test targets
 
+The text heuristics have known limits. The skip scan lists annotation and call forms only (it.skip, pytest.skip, xit, @Ignore, #[ignore], t.Skip, DISABLED_ and similar), not every spelling. The refactorer assertion count compares lines that mention assert, expect or check, so pulling repeated assertions into a helper can be flagged. A violation that a reviewer judges a false positive of a heuristic does not count toward the cap in section 7; the reviewer records why.
+
 A pinned CI line proves that this wording exists in the file. It does not prove that anyone follows it.
 
 ## 7. Failure routing
 
 - A role boundary finding (a `VIOLATION` line, exit 1) means one fresh dispatch of the same role, based on the commit that the role's first dispatch started from.
 - A second finding for the same role in the same todo means the cap reached for that todo. The open findings are stated to the owner.
-- Each fresh dispatch prompt is a file. Before the prompt is sent, the dispatcher runs every check the prompt asks the role to run on a must-pass input and on a must-fail input, and pastes both outputs. The prompt carries that paired pass/fail run for each check.
+- Each fresh dispatch prompt is a file. Before the prompt is sent, the dispatcher runs every check the prompt asks the role to run on a must-pass input and on a must-fail input, and pastes both outputs. For a check that runs the suite, the must-pass input is the commit with the code, and the must-fail input is the commit before it, which holds the test alone. The prompt carries that paired pass/fail run for each check.
+- When the single spec review over the three commits fails, the finding goes to a fresh implementer of the role whose commit holds the finding, as one new commit. The detector runs again on that commit. This is a fix round of the todo.

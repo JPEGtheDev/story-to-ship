@@ -31,7 +31,7 @@ Seams:
 |------|-------------------------------|---------------|--------------|
 | 1 | parseRecord(text: string) -> Record | exact/path/to/Parser.<ext> | none |
 | 2 | formatRecord(record: Record) -> string | exact/path/to/Formatter.<ext> | 1 |
-Test paths: <globs, or "default">
+Test paths: <one extended regular expression (ERE) matching test file paths, or "default">
 Architecture review: <verdict line from the architecture-review skill>
 ```
 

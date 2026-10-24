@@ -79,7 +79,13 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 ### Task Granularity (TDD: Test-Driven Development Steps)
 
-Each task MUST be one todo of ordered steps (2-5 minutes each), touch <=2 non-test files (test files do not count), and be estimated at <=25 tool calls in total. Any todo exceeding any limit MUST be split before the plan is presented.
+Each task MUST be one todo of ordered steps (2-5 minutes each).
+
+A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
+
+**Context:** Applies to every todo in a plan. File and tool-call counts do not predict whether one review can judge a todo: cutting by count splits one objective across reviews, none of which can judge it whole.
+
+**Forces:** Sizing by objective keeps each review meaningful and lets a coherent change stay one todo. A tool-call estimate is advisory: far above the other todos, it prompts a check for a second objective, never a refusal or stop.
 
 For implementation tasks, the TDD steps are the ordered steps of the task's one todo, reviewed once at the end: RED failing test, RED confirm it fails for the right reason, GREEN minimal code, GREEN full suite, REFACTOR, COMMIT. Template: `references/TODO_TEMPLATES.md`.
 
@@ -93,7 +99,7 @@ Before building or presenting any plan:
 2. Every acceptance criterion is mapped to a verifiable checkpoint
 3. Todo list has no placeholders -- every item is concrete and executable
 4. A plan with 2+ todos or an architectural decision has been reviewed by BOTH a Skeptic Agent AND the plan-reviewer agent, dispatched in parallel (or Three Amigos Refinement if Discovery ran)
-5. No todo touches 3+ non-test files or exceeds 25 tool calls without being split
+5. Every todo has one objective that one review can judge; split any todo holding two independently verifiable objectives or one review could not judge
 6. Every claim, in the plan file or the presentation message, that a cut or moved passage repeats, restates, duplicates, or is redundant with other text carries the pasted search output (grep or diff) that shows that other text, in the same message. A cut justified by an unproven restatement claim is a placeholder.
 
 [+] All met -> present the plan and wait for explicit user approval
@@ -126,25 +132,7 @@ Invoke the `three-amigos` skill for a Refinement review. Three amigos review rep
 **Otherwise (no Discovery):**
 Dispatch BOTH agents in parallel: a **Skeptic Agent** and the **plan-reviewer agent**. Read both verdicts before presenting the plan as final.
 
-Skeptic Agent prompt:
-
-```
-You are a Skeptic Agent. Find what this plan is missing.
-Do not validate what looks correct -- find what is wrong.
-
-Requirements: [FULL TEXT]
-Plan: [FULL PLAN WITH TODOS]
-
-Answer only these six questions:
-1. What is the plan NOT addressing that the requirements ask for?
-2. What assumptions must be true for this plan to work? (name assumption + what must hold)
-3. Strongest argument against this approach?
-4. Most likely way this fails in practice?
-5. Does any claim that two competing constraints are both satisfied come with a worked example carried end-to-end? If not, name the missing example.
-6. Does every claim that a cut or moved passage is restated elsewhere carry pasted search output showing the other text? If not, name the claim.
-
-If you genuinely find no gaps after thorough analysis, state that explicitly.
-```
+The Skeptic Agent prompt is `references/SKEPTIC_PROMPT.md`; pass it to the Skeptic Agent verbatim.
 
 Also dispatch the **plan-reviewer agent** using the `agents/plan-reviewer.md` template, passing it the plan path and a worktree. Its role is complementary to the Skeptic's: the Skeptic finds what is MISSING from the plan; the plan-reviewer judges whether what IS in the plan is sound, correctly sequenced, and enforceable. Both verdicts are mandatory reads before the plan is presented as final -- neither agent substitutes for the other.
 
@@ -187,7 +175,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 | "I'll update todos later" | Later never comes -- update before starting, after finishing |
 | "I understand the requirements" | Misunderstood requirements are the most expensive bug |
 | "We'll probably need this later" | YAGNI -- not in criteria means not in this plan |
-| "This todo touches multiple files but they're closely related" | Related does not mean atomic. 3+ non-test files = compounding scope. Split on file boundaries before the plan is presented. |
+| "This todo touches multiple files but they're closely related" | Related files may stay one todo when they serve one objective. A second objective splits the todo however related the files are, before the plan is presented. Test: name the objective in one sentence; if each half of an "and" could pass review while the other half is missing, it is two objectives. |
 | "The plan looks good -- I'll just start" | A plan presented is not a plan approved. Wait for explicit instruction. |
 | "The user implied I should proceed" | Implied is not explicit. "Looks good", "go ahead", or "start" are approval. Silence is not. |
 | "The user said 'autopilot' / 'just go' -- that overrides plan-first" | When a message says both "autopilot/just go" and "show me first / I want to know your flow," the show-first instruction wins. Explicit plan presentation is the PLAN BEFORE CODE law. "Autopilot" is not an explicit override unless the user also says "skip the plan." |
@@ -220,7 +208,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 - **HARD-GATE:** Plan has 2+ todos, review not dispatched -- **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). No first edit until review result is read.**
 - **HARD-GATE:** About to send a message presenting a design or plan as final -- review not yet dispatched? **STOP. Check plan.md for `## Feature Specification`. If present: invoke three-amigos Refinement. If absent: dispatch Skeptic + plan-reviewer (both, in parallel). The review must be in-flight or complete before the plan is presented as finished.**
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
-- A single todo touches 3+ non-test files or is estimated at 26+ tool calls -- **STOP. Split the todo before presenting the plan. A todo that wide is a phase, not a task.**
+- A todo holds two independently verifiable objectives or one no single review could judge -- **STOP. Split it before presenting the plan. Two objectives make a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
 - Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.**
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**

@@ -232,6 +232,27 @@ jobs:
               fi
             done
           }
+          checkabsent() {
+            file="$1"
+            pattern="$2"
+            if [ ! -f "$file" ]; then
+              printf 'FAILED: %s not found\n' "$file"
+              missing=$((missing + 1))
+              return 0
+            fi
+            rc=0
+            hits=$(grep -iE -- "$pattern" "$file") || rc=$?
+            if [ "$rc" -gt 1 ]; then
+              printf 'FAILED: could not scan %s for the sizing pattern (grep exit %s)\n' "$file" "$rc"
+              missing=$((missing + 1))
+              return 0
+            fi
+            while IFS= read -r line; do
+              [ -n "$line" ] || continue
+              printf 'FAILED: %s still contains a file-count or tool-call sizing limit: %s\n' "$file" "$line"
+              missing=$((missing + 1))
+            done <<< "$hits"
+          }
           check agents/implementer.md "FINAL reply message" "Limitations:" "ASCII"
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
@@ -241,6 +262,14 @@ jobs:
           check agents/rehearsal-subject.md "Dispatches made:" "Limitations:" "ASCII" "{{SKILL_TEXT_PATHS}}" "{{FIXTURE_PATH}}" "{{DISPATCH_BUDGET}}"
           check skills/subagent-driven-development/SKILL.md "Spend-bearing launches need explicit consent PER INVOCATION"
           check skills/writing-plans/SKILL.md "ask the owner, or run Discovery) before presenting the plan"
+          # These pins prove presence and absence of wording only, not that a todo is sized correctly.
+          checkx skills/writing-plans/SKILL.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          checkx agents/implementer.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          # Floor, not a full list: catches the known old sizing wording and close paraphrases, not every possible rewording.
+          sizing_ban='(at most|no more than|max|<=) ?(2|two) (non-test )?files|(3|three)(\+| or more) (non-test )?files|(25|twenty-five)\+? tool[- ]calls|tool calls? *> *25|<=2 (non-test )?files|3\+ non-test|2 non-test|26\+|25 tool|<=25|exceeds 25|file count|sizing limit'
+          checkabsent skills/writing-plans/SKILL.md "$sizing_ban"
+          checkabsent agents/implementer.md "$sizing_ban"
+          checkabsent skills/three-amigos/references/CEREMONIES.md "$sizing_ban"
           # The checkx lines below copy the deferral gate (SKILL.md) and the whole deferral reference word for word, on purpose:
           # a rule change must be a deliberate edit here too. checkx needs a line equal to the pin, so text added to a pinned line fails.
           # Known limit: a pin only proves its line exists somewhere in the file; added, wrapped or moved text is not detected.

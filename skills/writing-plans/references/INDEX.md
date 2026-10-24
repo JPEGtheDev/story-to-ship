@@ -19,6 +19,7 @@ These references let a planner scope a plan to the simplest design, decide which
 | `SIMPLICITY_PRINCIPLES.md` | Beck's four rules, You Ain't Gonna Need It (YAGNI), Three Forces pattern rule, refactoring stop rules and spectrum, simplest-thing and requirements principles, gate rationale, and a planning quick-reference flow. |
 | `DECISION_DEFERRAL.md` | The significant-component criterion, the three-question deferral diagnostic (Blocked, Needed, Costly), the ordered verdict table (`[UNCLEAR:]`, DEFER, DECIDE NOW), the DEFER measurability rubric, failure-path rules, and the verdict recording format. |
 | `TODO_TEMPLATES.md` | The Test-Driven Development (TDD) todo template: Files list plus RED, GREEN, REFACTOR, and COMMIT todos. |
+| `SKEPTIC_PROMPT.md` | The prompt passed verbatim to the Skeptic Agent when a plan with 2+ todos is reviewed. |
 
 ---
 

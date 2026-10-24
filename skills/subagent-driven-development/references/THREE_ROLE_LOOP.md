@@ -68,7 +68,7 @@ Rules that hold for the whole sequence:
 
 ## 4. Test-path predicate
 
-The default test-path predicate is the ERE in the detector script in section 5, matched case-insensitively. The plan's `Test paths:` line may override it. The dispatcher writes the override as one ERE and passes it to the detector as its third argument.
+The default test-path predicate is the extended regular expression (ERE) in the detector script in section 5, matched case-insensitively. The plan's `Test paths:` line may override it with one ERE, which the dispatcher passes to the detector as its third argument unchanged.
 
 ## 5. Boundary detector
 

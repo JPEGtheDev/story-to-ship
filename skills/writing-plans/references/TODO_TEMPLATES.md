@@ -27,17 +27,17 @@ Name the seams before any todo starts. One row per code todo:
 
 ```
 Seams:
-| Todo | Type or interface (signature) | Module (path) | Dependencies |
-|------|-------------------------------|---------------|--------------|
+| Todo | Type or interface (signature) | Module (path) | Collaborators |
+|------|-------------------------------|---------------|---------------|
 | 1 | parseRecord(text: string) -> Record | exact/path/to/Parser.<ext> | none |
-| 2 | formatRecord(record: Record) -> string | exact/path/to/Formatter.<ext> | 1 |
+| 2 | formatRecord(record: Record) -> string | exact/path/to/Formatter.<ext> | Locale |
 Test paths: <one extended regular expression (ERE) matching test file paths, or "default">
 Architecture review: <verdict line from the architecture-review skill>
 ```
 
-- `Dependencies` writes `none` when there are none; otherwise it names the todo numbers the row depends on.
+- `Collaborators` writes `none` when the seam has no collaborators; otherwise it names the collaborator types, which are the types or interfaces the unit under test talks to and the test-writer must fake or inject. Todo order is a planning matter, not a seam cell.
 - A todo whose row has a blank cell is not dispatched; it returns to planning.
-- `TBD` is not a value. A cell that reads `TBD` counts as blank.
+- A cell that reads TBD (to be determined) counts as blank.
 
 ## Loop marker (every plan entry)
 
@@ -51,7 +51,7 @@ loop: single -- reason: prose-only change to the template
 Rule for choosing:
 
 - `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.
-- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, and fix rounds.
+- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
 - A todo mixing code and prose is split into a code todo and a prose todo.
 
 ## Three-role todo template (`loop: three-role`)

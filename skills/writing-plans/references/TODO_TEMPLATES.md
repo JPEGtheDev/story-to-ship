@@ -64,7 +64,7 @@ loop: three-role -- reason: [one line]
 Seam: [row from the seam table]
 
 Role 1 test-writer: Write one failing test against the named seam. Touch test files only.
-  Run it and confirm it fails for the right reason. Commit `test(scope): description`
+  Run it and confirm it fails at run time with an assertion failure, not a compile or import error. Commit `test(scope): description`
   with the failure output pasted.
 Role 2 pass-maker: A different implementer. Touch non-test files only. Write the least
   code this todo can justify. Run the full suite. Commit `feat(scope): description` or

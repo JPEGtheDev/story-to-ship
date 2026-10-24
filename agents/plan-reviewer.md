@@ -93,11 +93,10 @@ problems, say so explicitly -- do not omit the dimension.
    template, or CI gate? Read the file(s) the plan claims to be consistent with and confirm.
 
 8. **Seams and loop marker.** For a plan with code todos: is every code todo's seam row
-   complete (type or interface, module path, and dependencies, with dependencies written as
+   complete (type or interface, module path, and collaborators, with collaborators written as
    `none` when empty)? Is there an architecture-review verdict line and a `Test paths` line?
-   Does each plan entry carry a `loop:` marker with a one-line reason? Is any todo one that mixes code and prose (it must be split)? A `TBD` cell counts as blank. Cite the todo number or the
+   Does each plan entry carry a `loop:` marker with a one-line reason? Is any todo one that mixes code and prose (it must be split)? A `TBD` (to be determined) cell counts as blank. Cite the todo number or the
    seam table row for each finding.
-   TBD means to be determined.
 
 ## Tone
 

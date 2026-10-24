@@ -35,6 +35,8 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 - **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
 - **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
 
+**Three-role loop:** when the plan marks a todo `loop: three-role`, RED, GREEN and REFACTOR are done by three different implementers. The test-writer writes the RED test, touching test files only, and commits it only once the failure is a run-time assertion failure (not a compile or import error). The pass-maker writes the GREEN code, touching non-test files only, and keeps the full suite green. The refactorer cleans up, keeps the suite green, and changes no behaviour. The role rules are in the three-role loop reference of the subagent-driven-development skill.
+
 ---
 
 ## Step 1: Determine Test Type

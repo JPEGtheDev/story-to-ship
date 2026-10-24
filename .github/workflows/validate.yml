@@ -123,6 +123,44 @@ jobs:
           fi
           echo "[+] Each loaded pre-message variant is its full file minus the gate section"
 
+      - name: Check three-role loop contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          # These pins prove the wording exists in the file, not that a coordinator follows it.
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'A change to any other file is a finding, and the todo returns for a fresh test-writer.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The dispatcher never reuses or resumes a role child.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'case $role in test-writer | pass-maker | refactorer) ;; *) echo "unknown role: $role" >&2; exit 2 ;; esac'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if [ -z "$status" ] && [ "$role" != refactorer ]; then echo "VIOLATION $role commit changes nothing"; bad=1; fi'
+          check skills/subagent-driven-development/SKILL.md 'references/THREE_ROLE_LOOP.md'
+          check skills/writing-plans/SKILL.md '9. **Seams first:**'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'A todo whose row has a blank cell is not dispatched; it returns to planning.'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'loop: three-role'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'loop: single'
+          check skills/testing/SKILL.md '**Three-role loop:**'
+          check agents/implementer.md 'Editing, deleting or skipping a test is a finding.'
+          check agents/implementer.md 'A behaviour change is a finding.'
+          check agents/implementer.md 'Role: [test-writer | pass-maker | refactorer | single]'
+          check agents/story-coordinator.md 'the type or interface, module, and dependencies cells must all be filled'
+          check agents/story-coordinator.md 'A second violation for the same role in the same todo is kind cap reached for that todo.'
+          check agents/story-coordinator.md 'A todo that mixes code and prose is split into two todos before dispatch.'
+          check agents/plan-reviewer.md '8. **Seams and loop marker.**'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing three-role loop contract string(s)"
+            exit 1
+          fi
+          echo "[+] Three-role loop contract strings present"
+
       - name: Check for broken references in skill files
         run: |
           set -e

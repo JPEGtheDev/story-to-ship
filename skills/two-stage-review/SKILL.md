@@ -23,7 +23,7 @@ Read status code -> Canary confirmed -> Limitations present -> Stage 1 spec revi
 
 **Do not advance past any todo until Stage 1 returns PASS and every Stage 2 verdict block advances under the Stage 2 rule below.**
 
-A batch of independent todos (the story coordinator agent's Parallel todos section) is reviewed per todo before its branches merge; the next batch waits for the whole batch.
+A batch of independent todos (the story coordinator agent's Parallel todos section) passes each todo's Stage 1 review before its branch merges, runs Stage 2 once on the merged branch, and starts the next batch only after every todo in it is merged.
 
 See `references/REVIEW_LOOP.md` for the full decision tree with complete ASCII flow.
 

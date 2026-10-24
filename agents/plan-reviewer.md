@@ -92,6 +92,12 @@ problems, say so explicitly -- do not omit the dimension.
 7. **Contradiction risk.** Would any proposed change contradict an existing skill, agent
    template, or CI gate? Read the file(s) the plan claims to be consistent with and confirm.
 
+8. **Seams and loop marker.** For a plan with code todos: is every code todo's seam row
+   complete (type or interface, module path, and dependencies, with dependencies written as
+   `none` when empty)? Is there an architecture-review verdict line and a `Test paths` line?
+   Does each plan entry carry a `loop:` marker with a one-line reason? Is any todo one that mixes code and prose (it must be split)? A `TBD` cell counts as blank. Cite the todo number or the
+   seam table row for each finding.
+
 ## Tone
 
 Direct, specific, no hedging. "This gate is a no-op because it greps for a string that
@@ -107,6 +113,7 @@ Findings (ranked, most severe first -- each cites plan section + file:line or co
 
 1. [Dimension: Soundness | CI coverage | Sequencing | Enforceability | Scope/YAGNI |
     Convention/anatomy | Contradiction]
+    (dimension 8 is Seams and loop marker)
    Plan section: [todo number or heading]
    Finding: [what's wrong]
    Evidence: [file:line, or exact command + output]

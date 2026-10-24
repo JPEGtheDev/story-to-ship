@@ -41,7 +41,7 @@ Rules that hold for the whole sequence:
 ### test-writer
 
 - Writes one failing test against the seam named in the plan's seam table.
-- Changes test files only. Test helpers and fixtures under test paths count as test files.
+- Changes test files only. Test helpers and fixtures under test paths count as test files. A change to any other file is a finding, and the todo returns for a fresh test-writer.
 - Runs the test. The failure must be a run-time assertion failure, not a compile or import error. A compile or import error is not a valid RED.
 - Commits `test(scope): ...` with the failure output pasted in the reply.
 - If the test passes at once, return BLOCKED: the behaviour already exists or the test is wrong. The todo goes back to planning.

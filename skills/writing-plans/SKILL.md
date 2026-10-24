@@ -59,7 +59,7 @@ Before todos, apply `references/DECISION_DEFERRAL.md` to each significant archit
 
 ## Building the Plan
 
-1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch, one review pair (the spec-compliance review, then the quality review, run under the `two-stage-review` skill), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.
+1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch (a three-role todo takes three), one review pair (the spec-compliance review, then the quality review, run under the `two-stage-review` skill), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.
 2. Specify expected file changes up front -- files, functions, test additions
 3. Bake in proof steps -- plan how to verify each change
 4. Sanity-check: does the plan address every acceptance criterion?
@@ -67,6 +67,7 @@ Before todos, apply `references/DECISION_DEFERRAL.md` to each significant archit
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
 7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval.
 8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
+9. **Seams first:** for a code story, name the seams (table in `references/TODO_TEMPLATES.md`) before any todo and check them with architecture-review; an unnamed seam blocks its todo. Behaviour-changing code todos run the three-role loop of `references/THREE_ROLE_LOOP.md` in subagent-driven-development; others keep one implementer.
 
 ### No-Placeholder Rule
 

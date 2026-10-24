@@ -367,6 +367,35 @@ jobs:
           fi
           echo "[+] Hand-back size contract strings present"
 
+      - name: Check parallel todo contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/story-coordinator.md 'Parallel limit: 3' 'share no file, test files included' 'runs alone' 'and so does an inline-lane todo' 'same feature-branch commit' 'in plan order, one at a time and run the suite after each merge' 'never a re-run of the whole batch' 'Stage 1 gap and goes to a fix child'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'Depends on:' 'share no file, test files included' 'runs alone'
+          check skills/two-stage-review/SKILL.md 'A batch of independent todos'
+          check skills/subagent-driven-development/SKILL.md 'A batch of independent todos'
+          parallel_files=$(grep -rl 'Parallel limit' agents skills | wc -l)
+          if [ "$parallel_files" -ne 1 ]; then
+            printf 'FAILED: expected exactly one file containing Parallel limit, found %s\n' "$parallel_files"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing parallel todo contract string(s)"
+            exit 1
+          fi
+          echo "[+] Parallel todo contract strings present"
+
       - name: Check agent templates index matches agents/
         run: |
           set -e

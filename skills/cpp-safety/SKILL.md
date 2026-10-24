@@ -9,7 +9,7 @@ description: Use when writing or reviewing any C++ class that owns resources, ha
 
 ```
 DESTRUCTORS NEVER THROW -- EVERY RESOURCE IS OWNED BY A SCOPE-BOUND GUARD
-YOU MUST wrap every destructor body in try/catch and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
+YOU MUST guard each destructor release step with its own try/catch (or give each resource its own owning guard), log the failure, never rethrow, and ensure every resource acquisition is handed to an owning guard before the next acquisition begins. No exceptions.
 ```
 
 Violating the letter of this rule is violating the spirit of this rule.
@@ -30,7 +30,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## Destructor Rule
 
-Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Wrap every destructor body in try/catch; never rethrow.
+Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Catch inside the destructor; never rethrow.
+
+The catch block logs the failure, and the destructor then completes the remaining cleanup, so every other resource the object owns is still released. One try/catch around the whole body is not enough, because the first throw skips every later release: guard each release step with its own try/catch, or give each resource its own owning guard member. For example, a class that owns a buffer, a texture and a shader program must still release the texture and the shader program when releasing the buffer fails or throws.
 
 ## Constructor Rule
 
@@ -52,7 +54,7 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 | Excuse | Reality |
 |---|---|
-| "The cleanup is simple, it won't throw" | Wrap now -- that property must hold for all future edits. |
+| "The cleanup is simple, it won't throw" | Guard each release step now -- that property must hold for all future edits. |
 | "`std::terminate` is acceptable here" | Since C++11 destructors are implicitly noexcept; any escaping throw terminates the process. Termination may skip pending cleanup; catch and log inside the destructor instead. |
 | "The second allocation almost never fails" | "Almost never" is not a safety guarantee. Wrap in a scope-bound guard. |
 | "Owning guards add boilerplate" | The boilerplate is the guarantee. Inline cleanup is a future leak. |
@@ -62,7 +64,7 @@ See the `cpp-patterns` skill for ownership patterns and OpenGL-specific examples
 
 ## Red Flags -- STOP
 
-- About to write a destructor that can throw -- **STOP. Wrap the entire body in try/catch. Never rethrow.**
+- About to write a destructor that can throw -- **STOP. Guard each release step with its own try/catch (or give each resource its own owning guard); log, never rethrow.**
 - Constructor acquires two or more resources without scope-bound guards between each acquisition -- **STOP. Assign each resource to its own guard before the next `new` or open call.**
 - About to use raw `delete` instead of a scope-bound guard -- **STOP. Replace with `unique_ptr` or a custom Resource Acquisition Is Initialization (RAII) wrapper.**
 - "This resource is always released before the destructor runs" -- **STOP. Prove it structurally with a guard, not by argument.**

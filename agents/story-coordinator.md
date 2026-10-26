@@ -64,7 +64,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child.
 - A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix, and the fix child starts from the current head of the feature branch.
 - A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
-- Stage 2 quality review runs once, on the whole branch after the story's last merge and before the pull request opens, in place of a per-todo Stage 2 for batched todos; list the branch diff's files under the Stage 2 grouping rule, and a finding charges the fix-round count of the todo whose file it names.
+- Every story run reviews as the two-stage-review skill's Review Cadence says: Stage 1 after every todo; after the story's last merge, rebase onto origin/main, push and open the pull request, wait for CI green, then run Stage 2 over the branch diff in at most 3 whole-branch cycles. List the branch diff's files under the Stage 2 grouping rule and charge each finding as that skill's Whole-Branch Pass says. A risky todo (as that skill defines it) gets its Stage 2 right after its Stage 1, before its branch merges. The pull request is handed back after the last cycle passes and CI is green on the final head.
 - A reconcile, or a fresh runner with no plan file, never runs a batch.
 
 ## Discovery and acceptance criteria
@@ -87,6 +87,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Use PR ready when the pull request is open and CI is green.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
+- Use cap reached also when a fourth whole-branch Stage 2 cycle would be needed; it states the open findings.
 - Use cap reached also for a role cap: a second boundary finding for one role in one todo.
 - Use interim when you were resumed or asked for status and the work is still in progress.
 - A hand-back with a pull request carries the PR number, CI state, review verdicts, the Discovery line, the reloaded skills, and a `Limitations:` line.
@@ -117,7 +118,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
 - CI failing on the updated head is also a fix round.
 - Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
-- The Stage 2 review stays as the two-stage-review skill requires for the changed parts.
+- Stage 2 runs once, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files (a reconcile is not a new whole-branch pass over the story).
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.

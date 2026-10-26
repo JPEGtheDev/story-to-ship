@@ -64,7 +64,7 @@ A launch card also states, for each story it names:
 
 - Each change to the page gets one chat line.
 - When a question is added, the chat line is the question number, the topic and a pointer to the page. The question text is not repeated in chat, except in the fallback under Failure handling.
-- A card removed after its answer needs no chat line beyond the one that confirms the action.
+- Removing a card after its answer is acted on is a change too, and gets one chat line that confirms the action.
 
 ## Ledger
 
@@ -108,7 +108,7 @@ The values below run through every step of this file.
 4. The launcher republishes the page, re-reads it, and finds Q7 as the newest card.
 5. Chat line: "Q7 added: merge PR 131? See the page."
 6. The owner replies in chat: "Q7 merge".
-7. The launcher carries out the merge, runs the Close-out section of `../SKILL.md`, and removes card Q7 from the page.
+7. The owner merges PR 131 and says so in chat. The launcher runs the Close-out section of `../SKILL.md`, then removes card Q7 from the page.
 8. The next card the launcher adds is Q8, because Q7 is used and the counter stands at 7.
 
 ## Related

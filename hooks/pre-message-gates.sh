@@ -3,15 +3,16 @@
 #
 # Emits the full pre-message-gates.md (including its "## Bootstrap Gate"
 # section) while .bootstrap-pending-<session_id> exists in the state dir;
-# otherwise emits the shorter pre-message-gates-loaded.md. The state dir is
-# resolved as ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}. Any
-# ambiguity -- jq missing, empty or invalid stdin JSON, a missing or
-# malformed session_id, an unresolved state dir, a state dir that does not
-# exist, or a missing loaded file -- falls back to the full text. Some cases
-# go the other way (see Documented limitation in README.md in this
-# directory); one is a state dir that exists but cannot be written: it gets
-# no flag from session-start.sh, so this hook emits the loaded text from the
-# first turn.
+# otherwise emits the shorter pre-message-gates-loaded.md, or nothing at all
+# when that file has no non-whitespace content. The state dir is resolved as
+# ${BOOTSTRAP_GATE_STATE_DIR:-$CLAUDE_PROJECT_DIR/.claude}. Any ambiguity --
+# jq missing, empty or invalid stdin JSON, a missing or malformed
+# session_id, an unresolved state dir, a state dir that does not exist, or
+# a missing loaded file -- falls back to the full text. Some cases go the
+# other way (see Documented limitation in README.md in this directory); one
+# is a state dir that exists but cannot be written: it gets no flag from
+# session-start.sh, so this hook stays silent (or emits the loaded text) from
+# the first turn.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MD_FILE="$SCRIPT_DIR/pre-message-gates.md"
 LOADED_FILE="$SCRIPT_DIR/pre-message-gates-loaded.md"
@@ -57,6 +58,11 @@ fi
 
 if [[ ! -f "$MD_FILE" ]]; then
   printf '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"[ERROR: pre-message-gates.md not found at %s]"}}\n' "$MD_FILE"
+  exit 0
+fi
+
+# The loaded text is empty or whitespace only: inject nothing.
+if [[ "$TARGET_FILE" == "$LOADED_FILE" && -r "$LOADED_FILE" ]] && ! grep -q '[^[:space:]]' "$LOADED_FILE"; then
   exit 0
 fi
 

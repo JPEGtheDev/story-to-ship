@@ -78,6 +78,12 @@ bash tools/first_action_audit/first-action-audit.sh /tmp/sidechain-cleared.jsonl
 
 The script prints one BOUNDARY block per window, a window being the span after a compaction boundary (or one window tagged none). CLEAN means the window's first main-thread assistant message made exactly one tool call, Skill session-bootstrap. MISS names the first other call and exits 1. NO_TOOL_CALLS means the window held no tool call.
 
+## Per-tier usage at close-out
+
+Run `python3 tools/tier_usage/tier_usage.py "$D"` at close-out. D is the launcher session folder: the folder named by the launcher's session id that holds a subagents folder. The script prints one row per subagent dispatch, then a summary. The summary is the block under the line that begins with `# summary per runner per tier`. Copy the column-name line right under that marker, plus every summary line whose first field starts with `<runner id>:story-coordinator`. The runner id is the task id of the runner's launch. Match the full prefix: a plain match on the runner id alone also catches that runner's own per-dispatch row. The summary has one line per runner and model tier. The tier is economy, standard, premium, mixed for a dispatch whose models fall in more than one tier, or unmapped for a model that tiers.json does not match. Dispatches the launcher made itself sit under the label launcher-direct and belong to no runner.
+
+Read the figures as follows. Cost is in tokens, and dollars print only when tools/tier_usage/tiers.json holds rates. The est_output_tokens column is estimated, because transcripts record placeholder output counts. A dispatch whose description names no todo is counted in the unattributed column when it is an implementer, spec-compliance-reviewer, code-quality-reviewer or skill-reviewer dispatch, and left out of fix rounds (the passes in which a not-passed review sends the todo back to an implementer, the avg_fix_rounds column) and the first-pass Stage 1 rate, so read every rate next to its unattributed count. The input_side_tokens column adds input, cache-write and cache-read tokens without weights and leaves output out. The cost_per_todo_tokens and cost_per_todo_usd columns divide each tier's figure by the runner's whole todo count, so the per-tier figures add up to the runner's per-todo cost. A todo whose first Stage 1 verdict is unreadable is left out of the first-pass rate, so check the per-dispatch rows for first_stage1_pass holding unreadable before treating a low rate as review failures.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.
@@ -95,5 +101,6 @@ Copy one row per runner into the sprint ledger.
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
+- Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>

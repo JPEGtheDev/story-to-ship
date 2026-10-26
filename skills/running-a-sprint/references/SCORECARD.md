@@ -9,7 +9,7 @@ Copy these lines into the sprint ledger before launch. After the merge, append `
 - The first call is session-bootstrap alone, then honesty, then communication.
 - Worktree isolation holds: the main checkout stays on main, with no checkout, switch or stash in its reflog.
 - The plan file stays out of the main checkout and out of the PR.
-- Dispatch count is at least the children the story needs: an implementer, a Stage 1 reviewer and a Stage 2 reviewer per todo.
+- Dispatch count is at least the children the story needs: an implementer and a Stage 1 reviewer per todo, plus the Stage 2 reviewers of the whole-branch pass and of each risky todo.
 - Review verdicts are present in the PR body.
 - Child visibility holds: while the runner is live, every child's transcript is readable from the launcher.
 

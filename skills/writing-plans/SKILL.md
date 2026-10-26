@@ -59,7 +59,7 @@ Before todos, apply `references/DECISION_DEFERRAL.md` to each significant archit
 
 ## Building the Plan
 
-1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch, one spec-compliance review (run under the `two-stage-review` skill, whose Review Cadence says when the quality review runs), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.
+1. Write the todo list into the plan file (plan.md) with concrete, verifiable items. A todo is one numbered item of that list, sized per Task Granularity below; it is the unit that one implementer dispatch, one spec-compliance review (`two-stage-review` skill, Review Cadence), and one token-cost estimate each attach to. No harness todo or task tool is assumed -- the plan file is the list.
 2. Specify expected file changes up front -- files, functions, test additions; each todo's `Depends on:`
 3. Bake in proof steps -- plan how to verify each change
 4. Sanity-check: does the plan address every acceptance criterion?
@@ -210,7 +210,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
 - A todo holds two independently verifiable objectives or one no single review could judge -- **STOP. Split it before presenting the plan. Two objectives make a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
-- Next todo started without prior todo's Stage 1 passing, or a risky todo's Stage 2 -- **STOP. Stage 1 is required before advancing; a risky todo also needs its Stage 2.** A parallel batch starts together; the next waits for its merge.
+- Next todo started before the prior todo's Stage 1 (and a risky todo's Stage 2) passed -- **STOP. Wait for those reviews.** A parallel batch starts together; the next waits for its merge.
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
 - A reviewer spec bans terms as a blanket exclusion list ("must NOT contain X, Y, Z") -- **STOP. Reviewers apply lists literally, so a term that can also appear as a valid generic example causes a false GAPS verdict. Scope the ban to the prescription or location instead: "must NOT prescribe X as the required taxonomy," not "must not contain the word X."**

@@ -101,7 +101,6 @@ jobs:
       # Each loaded pre-message variant is either silent (no non-whitespace
       # content, any number of lines) or exactly one line, counted with
       # grep -c '' so a last line without a trailing newline still counts.
-      # A missing file fails with a named message.
       - name: Check loaded pre-message variants are empty or a single line
         run: |
           set -e

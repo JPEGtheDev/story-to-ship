@@ -33,6 +33,8 @@
 #                              beside them
 #   loaded_file_whitespace   - as loaded_file_empty, but the -loaded .md holds
 #                              only blank lines, spaces and tabs
+#   loaded_file_one_line     - as loaded_file_empty, but the -loaded .md holds
+#                              one line, "Reload skills on a new todo."
 #   state_via_project_dir    - if present (contents ignored), the hook runs
 #                              with CLAUDE_PROJECT_DIR set to a "project"
 #                              dir inside the per-case temp dir and with
@@ -45,7 +47,10 @@
 #                              0 and write nothing to stdout; stdout goes to a
 #                              file (not command substitution, which would
 #                              strip newlines), and the JSON and expect_stdout_*
-#                              checks are skipped
+#                              checks are skipped. Cases that use the shipped
+#                              -loaded files assume those files stay empty;
+#                              changing a shipped -loaded file to one line
+#                              means updating those cases
 #   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
@@ -77,6 +82,7 @@ run_case() {
   local loaded_file_missing_file="$case_dir/loaded_file_missing"
   local loaded_file_empty_file="$case_dir/loaded_file_empty"
   local loaded_file_whitespace_file="$case_dir/loaded_file_whitespace"
+  local loaded_file_one_line_file="$case_dir/loaded_file_one_line"
   local state_via_project_dir_file="$case_dir/state_via_project_dir"
   local expect_silent_file="$case_dir/expect_silent"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
@@ -140,7 +146,7 @@ run_case() {
     hook_state_dir="$state_dir/absent"
   fi
 
-  if [[ -f "$loaded_file_missing_file" || -f "$loaded_file_empty_file" || -f "$loaded_file_whitespace_file" ]]; then
+  if [[ -f "$loaded_file_missing_file" || -f "$loaded_file_empty_file" || -f "$loaded_file_whitespace_file" || -f "$loaded_file_one_line_file" ]]; then
     local hook_copy_dir="$state_dir/hook-copy"
     if ! mkdir "$hook_copy_dir" || ! cp "$hook_bin" "${hook_bin%.sh}.md" "$hook_copy_dir/"; then
       echo "FAIL: $name -- could not copy the hook into $hook_copy_dir"
@@ -154,6 +160,8 @@ run_case() {
       : >"$loaded_copy"
     elif [[ -f "$loaded_file_whitespace_file" ]]; then
       printf ' \n\t\n\n   \n' >"$loaded_copy"
+    elif [[ -f "$loaded_file_one_line_file" ]]; then
+      printf 'Reload skills on a new todo.\n' >"$loaded_copy"
     fi
     hook_bin="$hook_copy_dir/$(basename "$hook_bin")"
   fi

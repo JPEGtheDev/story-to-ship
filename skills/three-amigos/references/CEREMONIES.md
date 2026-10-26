@@ -52,7 +52,7 @@ Timebox: each amigo runs in one dispatch; there is no second dispatch round to a
 
 After all three Discovery amigos return:
 1. Build the example map (see `### Example map -- MANDATORY`) from the **Business and Tester findings only**: rules from Business, examples from both Business scenarios and Tester failure cases. Set the verdict by the stopping rule. Developer findings stay in Implementation Notes.
-2. Write the output by verdict. With `READY FOR PLANNING`, write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios, out-of-scope items; open questions stay in the map's Questions line (`none` when ready). With `BACK TO OWNER`, write the example map and open questions under `## Discovery Open Items` and write no `## Feature Specification` heading. The write happens only after the skeptic check's routing has finished (see the `### Skeptic check -- PILOT` subsection), because that routing can change the verdict.
+2. Write the output by verdict. With `READY FOR PLANNING`, write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios (written per FORMULATION.md in this directory), out-of-scope items; open questions stay in the map's Questions line (`none` when ready). With `BACK TO OWNER`, write the example map and open questions under `## Discovery Open Items` and write no `## Feature Specification` heading. The write happens only after the skeptic check's routing has finished (see the `### Skeptic check -- PILOT` subsection), because that routing can change the verdict.
 3. Record Developer implementation findings separately under `## Implementation Notes` -- these become inputs to todo planning.
 4. Do NOT mix Developer findings into the Feature Specification. Implementation details in the Feature Specification defeat the purpose of the ceremony.
 
@@ -87,9 +87,9 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 ### Read First
 
-- Business Amigo: GitHub issues, README, user stories, existing feature specs.
+- Business Amigo: GitHub issues, README, user stories, existing feature specs; FORMULATION.md in this directory (the orchestrator passes its path).
 - Developer Amigo: Architecture docs, relevant existing source files, dependency list.
-- Tester Amigo: Existing test files for similar features, testing standards doc.
+- Tester Amigo: Existing test files for similar features, testing standards doc; FORMULATION.md in this directory (the orchestrator passes its path).
 
 **Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). On an amigo's first dispatch, a brief contains nothing else; a return dispatch adds only that amigo's batched skeptic findings. Do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
@@ -97,7 +97,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 1. What does the user want to be able to DO? (observable behavior, not technical steps)
 2. What are the boundaries? What is explicitly OUT of scope?
-3. What does "done" look like? State 3-5 testable acceptance criteria (scenario wording: FORMULATION.md).
+3. What does "done" look like? State 3-5 testable acceptance criteria (scenario wording: the formulation rules in your read list).
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
 6. For each rule, give at least one concrete example with real values; list every rule that has none.

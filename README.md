@@ -79,7 +79,7 @@ without an OpenCode equivalent remain Claude Code-only.
 | `exception-philosophy` | Challenges each planned catch block: surface, log and rethrow, or handle |
 | `session-bootstrap` | Session initialization -- loads context and routing table |
 | `subagent-driven-development` | Delegation protocol for dispatching subagents |
-| `two-stage-review` | Mandatory 2-stage post-todo review (spec compliance, then quality) |
+| `two-stage-review` | Spec compliance review after each todo, quality review once over the whole branch (per todo for a risky todo) |
 | `dispatching-parallel-agents` | Fan-out investigation across multiple files |
 | `using-git-worktrees` | Parallel agent isolation via git worktrees |
 | `running-a-sprint` | Launcher loop that runs several story issues through coordinator subagents, one pull request each |

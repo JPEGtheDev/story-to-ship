@@ -118,6 +118,48 @@ bad-ere|pass-maker|change|src/foo.c|2|bad test-path pattern|(
 tab-path|pass-maker|tabfile|-|2|needs C-quoting
 CASES
 
+# plan_write <file> <line>...: write a plan file, one argument per line.
+plan_write() {
+  mkdir -p "$(dirname "$1")" || exit 2
+  plan_file=$1
+  shift
+  printf '%s\n' "$@" > "$plan_file" || exit 2
+}
+
+# plan_run <name> <plan-file> <expected-exit> <expected-text>: plan-check.sh cases.
+plan_run() {
+  out=$(sh "$ROOT/plan-check.sh" "$2" 2>&1 </dev/null)
+  got=$?
+  if [ "$got" -ne "$3" ]; then
+    printf 'FAIL %s: expected exit %s got %s\n%s\n' "$1" "$3" "$got" "$out"
+    failed=$((failed + 1))
+  elif ! printf '%s\n' "$out" | grep -qF -e "$4"; then
+    printf 'FAIL %s: output lacks expected text: %s\n%s\n' "$1" "$4" "$out"
+    failed=$((failed + 1))
+  else
+    printf 'ok %s\n' "$1"
+  fi
+  cases=$((cases + 1))
+}
+
+# Plan-marker checker cases: plan-check.sh <planfile>.
+PLANS=$GEN/plans
+plan_write "$PLANS/plan-ok.md" 'Todo 1: first' 'loop: single -- reason: prose' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: code' 'Depends on: Todo 1'
+plan_run plan-ok "$PLANS/plan-ok.md" 0 'OK plan-check: 2 entries'
+plan_write "$PLANS/plan-task-ok.md" 'Task 1: x' 'loop: single -- reason: y' 'Files: a'
+plan_run plan-task-ok "$PLANS/plan-task-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/plan-first-bare.md" 'Todo 1: first' 'Files: a' 'Todo 2: second' 'loop: single -- reason: y'
+plan_run plan-first-bare "$PLANS/plan-first-bare.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/plan-last-bare.md" 'Todo 1: first' 'loop: single -- reason: y' 'Todo 2: second' 'Files: b'
+plan_run plan-last-bare "$PLANS/plan-last-bare.md" 1 'VIOLATION Todo 2: second has no loop: marker'
+plan_write "$PLANS/plan-bad-form.md" 'Todo 1: first' 'loop: both -- reason: y'
+plan_run plan-bad-form "$PLANS/plan-bad-form.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/plan-marker-before-header.md" 'loop: single -- reason: y' 'Todo 1: first' 'Files: a'
+plan_run plan-marker-before-header "$PLANS/plan-marker-before-header.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/plan-no-entries.md" 'just some text'
+plan_run plan-no-entries "$PLANS/plan-no-entries.md" 2 'no entries in plan'
+plan_run plan-missing-file "$PLANS/does-not-exist.md" 2 'cannot read plan'
+
 printf '%s cases, %s failed\n' "$cases" "$failed"
 if [ "$failed" -eq 0 ]; then
   exit 0

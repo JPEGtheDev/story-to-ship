@@ -14,6 +14,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - {{STORY_NUMBER}}: the story issue you run.
 - {{REPO_ROOT}}: the absolute path of the main checkout.
 - {{WORKTREE_PREFIX}}: the name stem for every worktree you create.
+- {{PARALLEL_LIMIT}}: the most implementers you run at the same time, set by the launcher; the Parallel todos section says what to do when it is absent.
 
 ## Bootstrap
 
@@ -42,7 +43,8 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Parallel todos
 
-- Parallel limit: 3. This is the only place the limit is stated; change it here and nowhere else.
+- Parallel limit: {{PARALLEL_LIMIT}}, the most implementers you run at once. The launcher sets it in the launch prompt; with no value in the launch prompt it is 1, so todos run one at a time. The number comes from the launch prompt and from nowhere else.
+- Session cap: at most 20 subagents run at once in one session, counting every runner and every child. The launcher sets each runner's parallel limit so that all runners busy at once stay inside that cap.
 - A batch is the todos you run at the same time. Put two todos in one batch only when neither depends on the other and their `Files:` lists share no file, test files included.
 - A todo with no `Files:` list or no `Depends on:` line runs alone, and so does an inline-lane todo.
 - A todo is ready when every todo in its `Depends on:` line is merged into the feature branch; the next batch starts only after every todo of the current batch is merged.

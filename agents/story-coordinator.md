@@ -84,7 +84,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Compare the numstat sum with that `<n>`, and on a mismatch report both numbers in the hand-back.
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim.
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.
-- Use PR ready when the pull request is open and CI is green.
+- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
 - Use cap reached also when a fourth whole-branch Stage 2 cycle would be needed; it states the open findings.
@@ -118,7 +118,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
 - CI failing on the updated head is also a fix round.
 - Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
-- Stage 2 runs once, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files (a reconcile is not a new whole-branch pass over the story).
+- Stage 2 runs as one pass, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files, with a re-check after each fix round (a reconcile is not a new whole-branch pass over the story).
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.

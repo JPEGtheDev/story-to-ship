@@ -79,3 +79,4 @@ Review: One spec review over the three commits.
 ```
 
 One commit per role; the refactorer may commit nothing, as stated above.
+A `loop: three-role` todo runs alone and is never put in a batch of todos that run at the same time.

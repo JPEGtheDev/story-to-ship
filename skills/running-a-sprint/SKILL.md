@@ -79,7 +79,7 @@ Verify before relaying anything to the owner:
 - Compare the runner's inline-edit count (the number of lines it edited itself rather than through a child) with `git diff --numstat` of its inline commits against the lane entries in its plan file (its per-todo lane lines); `references/SCORECARD.md` carries the counting command. Report any mismatch.
 - While a runner is live, run the child visibility count (`missing_children`) from `references/SCORECARD.md`.
 - For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back is relayed as its row in `references/HANDBACK_ROUTING.md` says, with the options and the runner's recommendation. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
-- Add every question for the owner to the owner questions page as a card, in `references/OWNER_QUESTIONS.md`: a merge question, an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question and a reconcile question. Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added.
+- Add every question for the owner to the owner questions page as a card, in `references/OWNER_QUESTIONS.md`: a merge question, an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question and a reconcile question. Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay: it carries the options and the recommendation, and chat does not repeat them, except in the fallback that `OWNER_QUESTIONS.md` gives for a failed republish.
 
 **Context:** A hand-back reports green CI and clean counts.
 **Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
@@ -173,6 +173,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 ## References
 
 - [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, the required hand-back lines, the hand-back size contract and the resume texts
+- [references/OWNER_QUESTIONS.md](references/OWNER_QUESTIONS.md) -- the owner questions page: card fields, context section, layout, numbering, ledger fields, failure handling and a worked example
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
 - [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

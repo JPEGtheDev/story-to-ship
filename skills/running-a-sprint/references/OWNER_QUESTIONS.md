@@ -33,7 +33,7 @@ Every card carries these fields, with these exact names:
 - `story or topic`: the story number and a short name in words, or the topic in words when no story applies.
 - `question`: the question itself, in one line.
 - `options`: the answers the owner may give. A merge card's options are exactly merge or hold.
-- `recommendation`: the runner's recommendation, or the launcher's when the runner gave none. Write "none given" when the runner gave none.
+- `recommendation`: the runner's recommendation. For a question the launcher raises itself (a launch over the limit, an intake gap), the launcher's recommendation. Write "none given" when there is none.
 - `status`: only when relevant, for example the CI state of a PR. Leave the field out when it does not apply.
 
 Required: `number`, `story or topic`, `question`, `options` and `recommendation`. Optional: `status`.
@@ -51,7 +51,7 @@ A launch card also states, for each story it names:
 
 - The page has one context section per card, placed at the bottom of the page.
 - The card's number links to its context section, and the section links back to the card.
-- A context section carries the PR link and the issue link. Give the issue link only when no PR exists yet.
+- A context section carries the PR link, or the issue link when no PR exists yet.
 
 ## Layout
 
@@ -88,7 +88,7 @@ If the question counter is missing from the ledger, the launcher takes the highe
 
 - **No page yet.** The launcher publishes the first page with the tool named in the ledger. When the ledger names no tool, the launcher keeps the questions in chat and asks the owner for a tool.
 - **Failed republish.** The question that could not be published goes to chat in full, with its number and the options. It stays in chat until the page works, and the launcher republishes the page before its next change.
-- **Silent failure.** After each republish, the launcher re-reads the page and checks that the newest card number is on it. When the newest number is missing, the republish counts as failed.
+- **Silent failure.** After each republish, the launcher re-reads the page and checks that the newest card number is on it. When the newest number is missing, the republish counts as failed. After a removal, it also checks that the removed card is gone.
 - **Stale page.** The page carries a line "as of Q<n>", where n is the highest question number published on it, so the owner can see how current it is.
 
 ## Comments
@@ -100,15 +100,15 @@ If the question counter is missing from the ledger, the launcher takes the highe
 
 ## Worked example
 
-The values below run through every step of this file.
+The values below run through the main steps of this file.
 
 1. Runner for story 120 hands back "PR ready" with PR 131. The launcher re-runs `gh pr view` for PR 131 and confirms the CI state is green.
 2. The launcher adds card Q7 to the page: story or topic "story 120, scope check of the new skill", question "merge PR 131?", options "merge" or "hold", recommendation "merge", status "CI green", and a context section with the PR 131 link and no issue link, since a PR exists.
 3. The launcher writes the card's number into the runner entry's pending question field and sets the ledger's highest question number to 7.
 4. The launcher republishes the page, re-reads it, and finds Q7 as the newest card.
-5. Chat line: "Q7 added: merge PR 131? See the page."
+5. Chat line: "Q7 added: story 120, scope check of the new skill. See the page."
 6. The owner replies in chat: "Q7 merge".
-7. The owner merges PR 131 and says so in chat. The launcher runs the Close-out section of `../SKILL.md`, then removes card Q7 from the page.
+7. The owner merges PR 131 and says so in chat. The launcher runs the Close-out section of `../SKILL.md`, then removes card Q7 from the page, republishes the page, re-reads it, and sends the chat line "Q7 done: PR 131 merged, card removed."
 8. The next card the launcher adds is Q8, because Q7 is used and the counter stands at 7.
 
 ## Related

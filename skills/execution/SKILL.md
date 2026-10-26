@@ -74,7 +74,7 @@ For every planned item, before writing code:
 3. Make the change, or dispatch the implementer for it
 4. Prove it works (compile, test, inspect diff)
 5. Flag it as done
-6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md for this todo. Stage 2 (skill-reviewer.md or code-quality-reviewer.md by file type) runs here only for a risky todo; otherwise Stage 2 runs over the whole branch diff after CI is green (see the `two-stage-review` skill, Review Cadence)
+6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md for this todo. Stage 2 (skill-reviewer.md or code-quality-reviewer.md by file type) runs here only for a risky todo; otherwise Stage 2 runs over the whole branch diff after CI is green (see the `two-stage-review` skill, Review Cadence).
    Do NOT pick up the next todo until Stage 1 passes (and Stage 2 too, for a risky todo).
 7. Commit when you reach a logical boundary
 8. Advance to the next item

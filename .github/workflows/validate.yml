@@ -461,8 +461,9 @@ jobs:
           echo "[+] Discovery example-map heading and field lines are present"
 
       # A pin proves the text exists in the file, not where it sits in that file.
-      # Pins 1 and 2 are whole-line matches copied verbatim from their source files;
-      # pin 3 is a substring match because its source is one long paragraph line.
+      # The skeptic heading is a whole-line match copied verbatim from its source file;
+      # the two table rows and the Exception sentence are substring matches, because their
+      # sources are long table or paragraph lines. Routing text is not pinned.
       - name: Check Discovery skeptic check and economy tier are pinned
         run: |
           missing=0
@@ -473,12 +474,17 @@ jobs:
             printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
             missing=$((missing + 1))
           fi
-          s='| Three Amigos Ceremony 1 (Discovery) | Economy | Pilot: each amigo reads source documents (issues, specs, architecture docs, tests) and synthesizes them into acceptance criteria and a Feature Specification -- content-touching, so Economy is the pilot exception stated in the floor paragraph; the Standard-tier skeptic check that follows the amigos is the compensating control. The explicit `model` on each amigo call governs over the amigo template pin |'
-          if ! grep -qxF -- "$s" "$g"; then
-            printf 'FAILED: %s has no line equal to: %s\n' "$g" "$s"
+          s='| Three Amigos Ceremony 1 (Discovery) | Economy |'
+          if ! grep -qF -- "$s" "$g"; then
+            printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
             missing=$((missing + 1))
           fi
-          s='Exception: during the Discovery pilot, Three Amigos Ceremony 1 (Discovery) amigos run at Economy tier'
+          s='| Three Amigos Ceremony 1 skeptic check (pilot) | Standard |'
+          if ! grep -qF -- "$s" "$g"; then
+            printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
+            missing=$((missing + 1))
+          fi
+          s='Exception: until the owner rules on the Discovery pilot, Three Amigos Ceremony 1 (Discovery) amigos run at Economy tier'
           if ! grep -qF -- "$s" "$g"; then
             printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
             missing=$((missing + 1))

@@ -51,7 +51,7 @@ Every generated story MUST be:
 - **Valuable** - clear benefit stated in "So that" clause
 - **Estimable** - team can size it (provide S/M/L estimate)
 - **Small** - doable in one sprint
-- **Testable** - acceptance criteria are verifiable
+- **Testable** - acceptance criteria are verifiable; for Given/When/Then wording, load the three-amigos skill and follow its Formulation reference
 
 If a story violates INVEST, fix it or break it down.
 
@@ -148,7 +148,7 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 
 ## Red Flags -- STOP
 
-- Story has no acceptance criteria -> STOP. Write at least one testable acceptance criterion before generating.
+- Story has no acceptance criteria -> STOP. Write at least one testable acceptance criterion before generating (Given/When/Then wording: the Formulation reference of the three-amigos skill; plain-language criteria stay allowed).
 - Story requires another story to be done first ("depends on #X") -> STOP. Redesign the split so this story can be delivered independently.
 - Story spans multiple unrelated components or layers -> STOP. Split by user-visible outcome (a vertical slice that may cross layers), never into one story per layer.
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.

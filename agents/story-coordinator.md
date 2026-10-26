@@ -84,7 +84,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Compare the numstat sum with that `<n>`, and on a mismatch report both numbers in the hand-back.
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim.
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.
-- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed.
+- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below).
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
 - Use cap reached also when a fourth whole-branch Stage 2 cycle would be needed; it states the open findings.

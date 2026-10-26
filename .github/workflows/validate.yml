@@ -142,7 +142,7 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The dispatcher never reuses or resumes a role child.'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'case $role in test-writer | pass-maker | refactorer) ;; *) echo "unknown role: $role" >&2; exit 2 ;; esac'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if [ -z "$status" ] && [ "$role" != refactorer ]; then echo "VIOLATION $role commit changes nothing"; bad=1; fi'
-          check skills/subagent-driven-development/SKILL.md 'references/THREE_ROLE_LOOP.md'
+          check skills/subagent-driven-development/SKILL.md 'see `references/THREE_ROLE_LOOP.md` (three role dispatches, role rules, boundary detector)'
           check skills/writing-plans/SKILL.md '9. **Seams first:**'
           check skills/writing-plans/references/TODO_TEMPLATES.md 'A todo whose row has a blank cell is not dispatched; it returns to planning.'
           check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.'
@@ -173,7 +173,9 @@ jobs:
           check agents/story-coordinator.md 'a fresh pass-maker dispatch (one commit, detector run) follows it'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'it writes type or signature stubs and build-registration files only, with no behaviour'
           check skills/subagent-driven-development/SKILL.md 'every implementer dispatch fills `{{ROLE_RULES}}`'
-          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit (a refactorer that reports `no refactor needed` makes none); no WIP commit.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the test commit; no WIP commit.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the passing commit; no WIP commit.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes at most one commit, the refactor commit (none when it reports `no refactor needed`); no WIP commit.'
           check agents/implementer.md 'The commit rules in your role block override the commit advice under Constraints.'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing three-role loop contract string(s)"

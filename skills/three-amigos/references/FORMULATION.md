@@ -42,6 +42,18 @@ Apply the nine rules below to every scenario written in Given/When/Then form. Ea
    Source: Writing better Gherkin
    Good: Given the owner has answered every open question. Weak: Given the owner clicks the Verdict dropdown and selects BACK TO OWNER.
 
+## Proof kinds
+
+Every acceptance criterion is proven by one of three proof kinds. A criterion with no stated proof kind is proven by an automated test. Skill and prompt text is documentation, not shipped code.
+
+1. Automated test -- a test kept in the repository that fails before the change and passes after it. It applies to a criterion about behaviour of shipped code (anything a user or another program runs, such as a hook, a tool script or a CI step). Its proof is the test name and its run output.
+2. Documentation evidence -- it applies to a criterion about the text of a document or skill file. Its proof is the file and line, or a command whose output shows the text.
+3. Throwaway spike -- it applies to a criterion about a one-off investigation whose code is discarded. Its proof is the run command and its output, kept in the pull request or, when there is no pull request, in the issue; the spike code is not merged.
+
+A criterion about behaviour of shipped code still requires an automated test; "the test is hard to write" is not a reason to choose another proof kind.
+A criterion that fits none of the three proof kinds is proven by an automated test.
+A criterion proven by documentation evidence or a throwaway spike ends with `Proof: documentation` or `Proof: spike`; the label applies to Given/When/Then and plain-language criteria alike.
+
 ## Unverified
 
 - BRIEF -- the Behavior-Driven Development (BDD) book names a guideline set called BRIEF; its expansion is unconfirmed and no rule here is taken from it.

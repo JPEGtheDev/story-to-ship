@@ -36,7 +36,7 @@ Check these before acting on any hand-back:
 
 ## Hand-back size contract
 
-**Context:** A hand-back enters the launcher's context in full, and the launcher cannot shorten it, so the runner's text is the only lever. Measured on two launcher sessions, hand-backs were 8.6% and 5.2% of the characters added to the launcher's main thread, with median hand-backs of 5,263 and 6,872 characters.
+**Context:** A hand-back enters the launcher's context in full, and the launcher cannot shorten it, so the runner's text is the only lever. Measured on two launcher sessions, hand-backs were 8.5% and 5.2% of the characters added to the launcher's main thread, with median hand-backs of 5,263 and 6,872 characters.
 **Forces:** The launcher needs the decision lines to act. The detail (status per acceptance criterion, commit and hash lists, review narrative, slips, cleanup, follow-ups) already lives in the pull request body and the runner's plan file, so repeating it in the hand-back costs launcher context and adds no information.
 
 This section is the one place the cap is stated.

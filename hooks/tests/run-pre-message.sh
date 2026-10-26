@@ -148,7 +148,8 @@ run_case() {
       rm -rf "$state_dir"
       return
     fi
-    local loaded_copy="$hook_copy_dir/$(basename "${hook_bin%.sh}")-loaded.md"
+    local loaded_copy
+    loaded_copy="$hook_copy_dir/$(basename "${hook_bin%.sh}")-loaded.md"
     if [[ -f "$loaded_file_empty_file" ]]; then
       : >"$loaded_copy"
     elif [[ -f "$loaded_file_whitespace_file" ]]; then

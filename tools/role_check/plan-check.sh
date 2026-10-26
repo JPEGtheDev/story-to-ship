@@ -16,6 +16,12 @@ fi
 # Keep only header and marker lines, numbered, in file order.
 found=$(grep -nE -e '^(Todo|Task) [0-9]+:' -e '^loop: (three-role|single)( |$)' -- "$plan")
 
+# report_unmarked <header>: print the violation for an entry that has no marker.
+report_unmarked() {
+  printf 'VIOLATION %s has no loop: marker\n' "$1"
+  violations=$((violations + 1))
+}
+
 entries=0
 violations=0
 header=
@@ -28,8 +34,7 @@ while IFS= read -r entry; do
       marked=1 ;;
     *)
       if [ "$entries" -gt 0 ] && [ "$marked" -eq 0 ]; then
-        printf 'VIOLATION %s has no loop: marker\n' "$header"
-        violations=$((violations + 1))
+        report_unmarked "$header"
       fi
       entries=$((entries + 1))
       header=$text
@@ -44,8 +49,7 @@ if [ "$entries" -eq 0 ]; then
   exit 2
 fi
 if [ "$marked" -eq 0 ]; then
-  printf 'VIOLATION %s has no loop: marker\n' "$header"
-  violations=$((violations + 1))
+  report_unmarked "$header"
 fi
 if [ "$violations" -gt 0 ]; then
   exit 1

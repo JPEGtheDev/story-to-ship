@@ -18,17 +18,29 @@ If Stage 1 returns GAPS: implementer fixes gaps. Re-run Stage 1 before proceedin
 
 For skill `.md` files (in `skills/`): use the `skill-reviewer.md` agent.
 For all other code and config files: use the `code-quality-reviewer.md` agent.
-For each template, one dispatch per group of at most two files that implement one change (a todo with more files gets more dispatches) -- two files share a dispatch only when a changed line in one names the other by path or filename, or a changed line in each names the same skill or file, and files that share only the todo get separate dispatches; the reviewer returns one verdict block per file listed in the dispatch, and a return with fewer blocks than the dispatch listed is re-dispatched.
+For each template, one dispatch per group of at most two files that implement one change (a scope with more files gets more dispatches) -- two files share a dispatch only when a changed line in one names the other by path or filename, or a changed line in each names the same skill or file, and files that share only the todo get separate dispatches; the reviewer returns one verdict block per file listed in the dispatch, and a return with fewer blocks than the dispatch listed is re-dispatched.
 
 Provide to the Stage 2 reviewer:
 - Full diff or file contents of the implementation
 - The implementer's pasted verification output as the {{IMPLEMENTER_EVIDENCE}} value. The reviewer re-runs at least one command from it and reports MATCH or MISMATCH. If the implementer pasted no runnable command, state that explicitly so the reviewer records the spot-check as not possible.
 
-Adversarial-scenario gate: the Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` in every verdict block: filled with one unscripted real-world case checked against the clause wording for each file whose diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, and with exactly `trigger not matched` otherwise; a block without that line is an incomplete review -- re-dispatch. The canonical statement of this gate (including the case-sensitivity rationale and the accepted over-firing) is the Stage 2 paragraph of SKILL.md; on any wording divergence, SKILL.md governs.
+Adversarial-scenario gate: the Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` in every verdict block: filled with one unscripted real-world case checked against the clause wording for each file whose diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, and with exactly `trigger not matched` otherwise; a block without that line is an incomplete review -- re-dispatch. The trigger is case-sensitive on purpose: uppercase EXCEPTION is the template convention, lowercase 'No exceptions.' boilerplate does not match, and residual false positives are accepted because the gate favors over-firing. The Stage 2 paragraph of SKILL.md states the gate; on any wording divergence, SKILL.md governs.
 
 If any per-file block returns REQUEST CHANGES, REJECT, or NEEDS WORK: implementer fixes. Re-run Stage 2 before proceeding (see "Who Re-Checks a Fix Round" below). This re-run is bounded by the fix-round cap and the unreadable-verdict rule, which live in SKILL.md.
 
 **Why one dispatch per change, on the Premium tier:** a reviewer that sees only one of a todo's files cannot see a contradiction between two of them, a reference one file leaves dangling in another, or a rule stated in one file and broken in the next; those findings fall between per-file dispatches. Grouping the files that implement one change into one dispatch keeps those findings inside a single review, and the per-file verdict blocks keep the per-file accountability that one-agent-per-file provided. The two-file cap follows the skill-reviewer template, which takes exactly two path slots, and binds the code-quality-reviewer template as well so both templates return the same dispatch shape; above it, the grouping rule, not the cap, is what keeps a contradiction visible. The two Stage 2 templates are pinned to the Premium tier; the tier table, the reason, and the measurement record are in the model-selection reference of the subagent-driven-development skill.
+
+## Whole-Branch Pass
+
+The cadence rule is in `SKILL.md`, section Review Cadence. This section holds the mechanics of one whole-branch Stage 2 cycle.
+
+- **Wait for CI:** the pass starts only when CI is green on the feature branch head. While CI is red, fix CI first (a CI fix is not a Stage 2 cycle); a CI failure after a cycle's fixes is repaired before the next cycle starts.
+- **Input:** list the files from `git diff --name-only origin/main...HEAD` and group them under the Stage 2 grouping rule in `SKILL.md` (at most two files per dispatch, one verdict block per file); the pass covers every changed file, including files a risky todo already had reviewed, because later todos can change them again. The tier is unchanged.
+- **Evidence:** `{{IMPLEMENTER_EVIDENCE}}` is the dispatcher's own run of the repository's test command on the branch head, pasted into the dispatch; when the repository has no test command, it is the CI result plus the CI check steps run locally. No single implementer produced the branch, so no implementer output stands in.
+- **Charging:** a finding charges the fix-round count of the todo whose `Files:` list names the file. A file that no todo names, or that two or more todos name, is charged to the cycle only.
+- **Fix and re-check:** a fresh implementer fixes the findings. The re-check covers the fix round's changed hunks plus the CI result on the updated head, not the whole branch, and CI must be green again before the next cycle.
+- **Unreadable verdict:** the unreadable-verdict rule in `SKILL.md` applies to each dispatch of the pass.
+- **Edge cases:** a branch diff with one file is one dispatch; a story with no risky todo has no Stage 2 before this pass.
 
 ## Who Re-Checks a Fix Round
 

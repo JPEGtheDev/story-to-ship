@@ -57,10 +57,10 @@ Launch with one Agent call per story:
 - `subagent_type` is `story-coordinator`.
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
 - `run_in_background` is true, so the launcher receives completion notices. The runner's own children run in the foreground inside it.
-- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text, with one exception: one pointer line, `Hand-back contract: read skills/running-a-sprint/references/HANDBACK_ROUTING.md in REPO_ROOT, section Hand-back size contract, before sending your final message.`
+- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text, with one exception: one pointer line, `Hand-back contract: read skills/running-a-sprint/references/HANDBACK_ROUTING.md in REPO_ROOT, section Hand-back size contract, before sending your final message. Reading that section is not loading the skill.`
 
 **Context:** The launch prompt is where the launcher is tempted to add the rules.
-**Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. The one pointer line repeats no rule, so it cannot drift; it exists because the template does not yet state the hand-back cap, and the cap lives only in the Hand-back size contract section. An omitted `model` makes the runner inherit the launcher's tier.
+**Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. The one pointer line repeats no rule, so it cannot drift; it exists so the runner learns the cap from the one section that states it. An omitted `model` makes the runner inherit the launcher's tier.
 
 The launcher creates no worktree for a runner, because the runner creates the tree named by its own `WORKTREE_PREFIX`. Record the runner in the ledger at launch.
 
@@ -75,7 +75,7 @@ Verify before relaying anything to the owner:
 - Re-run `gh pr view <PR number> --json number,state,statusCheckRollup` and report the PR number and continuous integration (CI) state from that output, not from the hand-back.
 - Compare the runner's inline-edit count (the number of lines it edited itself rather than through a child) with `git diff --numstat` of its inline commits against the lane entries in its plan file (its per-todo lane lines); `references/SCORECARD.md` carries the counting command. Report any mismatch.
 - While a runner is live, run the child visibility count (`missing_children`) from `references/SCORECARD.md`.
-- For a PR ready hand-back, relay only its decision sentence, plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back is relayed as its row in `references/HANDBACK_ROUTING.md` says, with the options and the runner's recommendation. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
+- For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back is relayed as its row in `references/HANDBACK_ROUTING.md` says, with the options and the runner's recommendation. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
 
 **Context:** A hand-back reports green CI and clean counts.
 **Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
@@ -118,7 +118,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 1. The ledger was re-read this turn and the runner or story is in it.
 2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text beyond the one pointer line; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request. A reconcile replacement is exempt from the overlap check (Close-out step 7).
-3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, and the PR number and CI state were re-checked with `gh pr view`.
+3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, apart from the ledger note for an over-cap hand-back, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after the owner reported the merge, and runs in the order of the Close-out section.
 
 [+] All 4 met -> proceed

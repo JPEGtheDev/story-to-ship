@@ -45,8 +45,8 @@ This section is the one place the cap is stated.
 - Order: the first line is the kind line. The second line is one plain sentence naming what the owner or launcher must decide or confirm, or "no decision needed". The required lines follow.
 - Detail: everything beyond the required lines goes in the pull request body, or in the runner's plan file when no pull request exists, never in a new report file. When anything was left out, the hand-back carries one line, `Detail: PR <n> body` or `Detail: <absolute plan file path>`; when nothing was left out it carries no Detail line.
 - An owner question keeps its options and its recommendation inside the cap and never moves them to Detail.
-- A hand-back over the cap is not a missing line. The launcher does not resume a runner to shorten it, because the resume produces a second hand-back. It relays only the decision sentence, the pull request number, the CI state and the review verdicts, and notes the overrun in the ledger.
-- Before sending, the runner counts its final message with `printf '%s' "$MESSAGE" | wc -m` (the message held in a shell variable or a file under /tmp/fl) and shortens it when the count is over the cap. A resend that the missing-line text asks for stays inside the cap too.
+- A hand-back over the cap is not a missing line. The launcher does not resume a runner to shorten it, because the resume produces a second hand-back. For a PR ready hand-back it relays only the decision sentence, the pull request number, the CI state and the review verdicts; every other kind is relayed as its row above says. It notes the overrun in the ledger.
+- Before sending, the runner counts its final message with `printf '%s' "$MESSAGE" | wc -m` (the message held in a shell variable) and shortens it when the count is over the cap. A resend that the missing-line text asks for stays inside the cap too.
 - The launcher reads the Detail target only when a decision needs it.
 
 ## Resume texts

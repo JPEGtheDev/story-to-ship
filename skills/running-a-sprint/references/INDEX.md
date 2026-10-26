@@ -18,7 +18,7 @@ These files back the Launch, Watch loop and Close-out sections of `../SKILL.md`,
 
 | File | Covers |
 |------|--------|
-| `HANDBACK_ROUTING.md` | Routing table mapping each runner hand-back kind (owner question, PR ready, blocked, cap reached, interim) and each runner event (rate-limit kill, child result while the runner is live, premature turn-end, missing required line, owner-reported merge, owner-reserved item reported as decided) to how the launcher recognizes it, its response and its prohibitions; the required lines in a hand-back; the three resume texts (validate-first, child-result, missing-line) |
+| `HANDBACK_ROUTING.md` | Routing table mapping each runner hand-back kind (owner question, PR ready, blocked, cap reached, interim) and each runner event (rate-limit kill, child result while the runner is live, premature turn-end, missing required line, owner-reported merge, owner-reserved item reported as decided) to how the launcher recognizes it, its response and its prohibitions; the required lines in a hand-back; the hand-back size contract (cap, order, Detail line); the three resume texts (validate-first, child-result, missing-line) |
 | `SCORECARD.md` | The six predictions to record before launch; the measures table with the shell counting commands and how to read each figure; how to audit a subagent transcript with the first-action script on a sidechain-cleared copy; the close-out step that runs the per-tier usage script; the per-runner scorecard row to copy into the sprint ledger |
 | `REHEARSAL.md` | The procedure for rehearsing the story-coordinator template as a coordinator under test: the purpose, the fixture to rebuild (it is not shipped), the GREEN and RED arms, how to run and count, how to read the result, and the limits |
 

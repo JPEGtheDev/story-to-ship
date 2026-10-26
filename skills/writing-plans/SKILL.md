@@ -210,7 +210,7 @@ If a Definition of Done (DoD)-specified behavioral branch has had N>=2 fixture a
 - Any todo lacks a concrete description -- **STOP. Fill every description before starting.**
 - A todo holds two independently verifiable objectives or one no single review could judge -- **STOP. Split it before presenting the plan. Two objectives make a phase, not a task.**
 - Plan states a numerical estimate without a `wc` measurement -- **STOP. Measure first. Run `wc -w` or `wc -l`.**
-- Next todo started without prior todo's 2-stage review passing -- **STOP. Both stages required before advancing.** A parallel batch starts together; the next waits for its merge.
+- Next todo started without prior todo's Stage 1 passing, or a risky todo's Stage 2 -- **STOP. Stage 1 is required before advancing; a risky todo also needs its Stage 2.** A parallel batch starts together; the next waits for its merge.
 - Implementation started before user gives explicit plan approval -- **STOP. Wait for "go ahead."**
 - About to dispatch audit or research agents without listing every dimension the agent must check -- **STOP. Enumerate every file, section, rule, and reference in the prompt before dispatching. Label any dimension you cannot enumerate [UNCLEAR:] and resolve it first.**
 - A reviewer spec bans terms as a blanket exclusion list ("must NOT contain X, Y, Z") -- **STOP. Reviewers apply lists literally, so a term that can also appear as a valid generic example causes a false GAPS verdict. Scope the ban to the prescription or location instead: "must NOT prescribe X as the required taxonomy," not "must not contain the word X."**

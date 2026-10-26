@@ -97,6 +97,7 @@ pm-ok|pass-maker|change|src/foo.c|0|OK pass-maker
 rf-bad|refactorer|add|tests/new_test.c|1|VIOLATION refactorer added, deleted or renamed a test file
 rf-ok|refactorer|change|src/foo.c|0|OK refactorer
 space-ok|pass-maker|add|src/my file.py|0|OK pass-maker
+space-tw-ok|test-writer|add|src/my file_test.py|0|OK test-writer
 nonascii-ok|test-writer|add|tests/caf\0303\0251_test.py|0|OK test-writer
 java-test-ok|test-writer|add|src/FooTest.java|0|OK test-writer
 cs-test-ok|test-writer|add|src/FooTests.cs|0|OK test-writer
@@ -107,7 +108,7 @@ skip-tw|test-writer|skipline|tests/foo_test.c|1|added a skip marker
 # Documented miss: swapping one assertion for another keeps the assertion count equal, so only a reviewer can judge it.
 weaken-rf-MISS|refactorer|swap|tests/foo_test.c|0|OK refactorer
 drop-rf|refactorer|drop|tests/foo_test.c|1|removed 2 assertion lines and added 0
-# Documented miss: an empty refactor commit is caught only by the dispatcher's commit count, not by the detector.
+# Documented miss: an empty refactor commit passes the detector; the dispatcher's commit count catches it only when the refactorer reported no refactor needed, otherwise the reviewer judges it.
 empty-rf-MISS|refactorer|empty|-|0|OK refactorer
 # Documented miss: the skip scan has no C# attribute pattern, so a [Ignore] line passes; a reviewer must judge it.
 csharp-skip-MISS|test-writer|csskip|tests/foo_test.c|0|OK test-writer

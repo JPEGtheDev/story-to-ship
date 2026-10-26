@@ -385,6 +385,8 @@ jobs:
           check skills/writing-plans/references/TODO_TEMPLATES.md 'Depends on:' 'share no file, test files included' 'runs alone'
           check skills/two-stage-review/SKILL.md 'A batch of independent todos'
           check skills/subagent-driven-development/SKILL.md 'A batch of independent todos'
+          check agents/story-coordinator.md 'whole-branch review fan-out'
+          check skills/running-a-sprint/SKILL.md 'PARALLEL_LIMIT = <n>' 'floor((20 - L) / L)' '`WORKTREE_PREFIX` and `PARALLEL_LIMIT`' 'Name the four inputs'
           parallel_files=$(grep -rl 'Parallel limit' agents skills | wc -l)
           if [ "$parallel_files" -ne 1 ]; then
             printf 'FAILED: expected exactly one file containing Parallel limit, found %s\n' "$parallel_files"

@@ -35,11 +35,11 @@ write_base() {
 #   drop:     delete the first two lines of <path>
 #   swap:     replace the first line of <path> with an assertTrue(1) line
 #   tabfile:  create a file whose name is src/a<TAB>b.c (<path> is unused)
-#   The path column may use printf octal escapes (for example caf\303\251); it is decoded first.
+#   The path column may use %b octal escapes with a leading zero (for example caf\0303\0251); it is decoded first.
 #   The base commit is written first; the role change is the second commit.
 make_case() {
   dir=$GEN/$1
-  dest=$(printf "$3")
+  dest=$(printf '%b' "$3")
   git init -q -b main "$dir" || exit 2
   write_base "$dir" || exit 2
   git -C "$dir" add -A || exit 2
@@ -97,7 +97,7 @@ pm-ok|pass-maker|change|src/foo.c|0|OK pass-maker
 rf-bad|refactorer|add|tests/new_test.c|1|VIOLATION refactorer added, deleted or renamed a test file
 rf-ok|refactorer|change|src/foo.c|0|OK refactorer
 space-ok|pass-maker|add|src/my file.py|0|OK pass-maker
-nonascii-ok|test-writer|add|tests/caf\303\251_test.py|0|OK test-writer
+nonascii-ok|test-writer|add|tests/caf\0303\0251_test.py|0|OK test-writer
 java-test-ok|test-writer|add|src/FooTest.java|0|OK test-writer
 cs-test-ok|test-writer|add|src/FooTests.cs|0|OK test-writer
 java-main-bad|test-writer|add|src/Foo.java|1|VIOLATION test-writer touched non-test file

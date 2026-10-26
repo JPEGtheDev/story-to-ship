@@ -60,7 +60,7 @@ After all three Discovery amigos return:
 
 This check is part of the Discovery pilot. It runs once per Discovery, after all three amigos return and before the map's verdict is final. Its enforcement is procedural: the orchestrator checks its own routing before writing the verdict; no tool enforces it.
 
-**Inputs (read by path, not pasted into the prompt):** the story file, the answers of all three amigos (Business, Developer, Tester), and the example map.
+**Inputs (read by path, not pasted into the prompt):** the story file, the answers of all three amigos (Business, Developer, Tester), and the example map. The orchestrator saves the three amigo answers and the draft map to scratch files outside the repository (never plan.md, because the Feature Specification heading is append-only) and passes those paths; the draft map is written under its final heading only after routing finishes.
 
 **Report:** findings only. The skeptic reports four classes and nothing else:
 - rule with no example: a rule in the map has no example
@@ -72,18 +72,18 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 **Prompt overrides:** the plan-review framing of the skeptic template does not apply to this check. Developer answers are inputs; Developer content absent from the map is not a finding.
 
-**Tier and model:** the skeptic runs at the tier that the Model Selection reference of the `subagent-driven-development` skill (Tier Assignments table) names for the Discovery skeptic check. Every skeptic call and every amigo return dispatch passes `model` explicitly (an amigo return dispatch uses the amigo's own tier), because a resumed call can fall back to the template pin.
+**Tier and model:** the skeptic runs at the tier that the Model Selection reference of the `subagent-driven-development` skill (Tier Assignments table) names for the row `Three Amigos Ceremony 1 skeptic check (pilot)`. Every skeptic call and every amigo return dispatch passes `model` explicitly (an amigo return dispatch uses the amigo's own tier), because a resumed call can fall back to the template pin.
 
 **Routing** (the orchestrator routes each finding; the skeptic never edits the map):
 - Zero findings: the map stands.
 - Skeptic run failed, BLOCKED, NEEDS_CONTEXT, or its report is unreadable: add a Question and set the verdict to `BACK TO OWNER`.
 - A rule with no example goes back to the Tester amigo; an example that tests no rule goes back to the amigo that wrote it. Each owning amigo gets one return dispatch, with all of that amigo's findings batched into the one dispatch.
-- If the return dispatch fails, or the finding is still open after the return: add a Question and set the verdict to `BACK TO OWNER`.
+- If the return dispatch fails (including a NEEDS_CONTEXT or BLOCKED reply), or the finding is still open after the return: add a Question and set the verdict to `BACK TO OWNER`.
 - A question left out and a statement the source does not support become a Question and the verdict is `BACK TO OWNER`, with no return dispatch. A finding whose owner the source does not show gets the same routing: a Question and `BACK TO OWNER`, never a guessed amigo.
 - At most one return dispatch per owning amigo. The skeptic is not re-run after a return.
 - Findings never become `none` by omission: the Questions line reads `none` only when there are no unresolved findings and no Questions, and every finding is either resolved by a return or listed as a Question.
 
-**Pilot status:** the Discovery economy tier and this skeptic check are a pilot. The pilot covers the next three stories that run Discovery. Each of them records, in its PR body, the amigo cost, the skeptic cost, the skeptic finding count, and the findings that changed the map. At least one of the three is compared against a standard-tier amigo run of the same inputs. The pilot result goes to the owner as keep / revert / adjust. The pilot ends when the owner rules on it, and the three stories' PR-body records are the input to that ruling.
+**Pilot status:** the Discovery economy tier and this skeptic check are a pilot. The first three stories that run Discovery under the pilot record, in their PR bodies, the amigo cost, the skeptic cost, the skeptic finding count, and the findings that changed the map; stories after them keep the Economy tier and the skeptic check without those records until the owner's keep / revert / adjust ruling is applied to this file and to the Model Selection reference of the `subagent-driven-development` skill. At least one of the three is compared against a standard-tier amigo run of the same inputs. The pilot result goes to the owner as keep / revert / adjust. The pilot ends when the owner rules on it, and the three stories' PR-body records are the input to that ruling.
 
 ### Read First
 
@@ -91,7 +91,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 - Developer Amigo: Architecture docs, relevant existing source files, dependency list.
 - Tester Amigo: Existing test files for similar features, testing standards doc.
 
-**Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). A brief contains nothing else; do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
+**Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). On an amigo's first dispatch, a brief contains nothing else; a return dispatch adds only that amigo's batched skeptic findings. Do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
 ### Agenda -- Questions
 

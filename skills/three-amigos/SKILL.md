@@ -89,7 +89,7 @@ A map whose Verdict is `BACK TO OWNER` is written under `## Discovery Open Items
 
 - 3 simultaneous worktrees, branches: `amigo/<ceremony>-<persona>`.
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
-- After all verdicts: delete worktrees and branches.
+- After all verdicts and, in Discovery, after the skeptic check routing (including any amigo return dispatch) has finished: delete worktrees and branches.
 - Discovery only: after all three amigo verdicts, a skeptic check runs once, sequentially, read-only, with `model` passed explicitly. Its procedure is in `references/CEREMONIES.md`, Ceremony 1, `### Skeptic check -- PILOT`.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
 - If a stop hook fires during an active amigo wait: respond to the hook only if the hook action does not modify any file that running amigos are currently reading. Committing a previously untracked file that amigos have not opened is safe. Staging or modifying plan.md, SKILL.md, or any reference file an amigo may be reading is not safe. Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.

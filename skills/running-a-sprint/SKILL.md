@@ -58,6 +58,7 @@ Launch with one Agent call per story:
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
 - `run_in_background` is true, so the launcher receives completion notices. The runner's own children run in the foreground inside it.
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text, with one exception: one pointer line, `Hand-back contract: read skills/running-a-sprint/references/HANDBACK_ROUTING.md in REPO_ROOT, section Hand-back size contract, before sending your final message. Reading that section is not loading the skill.`
+- The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session (L = 6 gives 2); a result below 1 is passed as 1.
 
 **Context:** The launch prompt is where the launcher is tempted to add the rules.
 **Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. The one pointer line repeats no rule, so it cannot drift; it exists so the runner learns the cap from the one section that states it. An omitted `model` makes the runner inherit the launcher's tier.

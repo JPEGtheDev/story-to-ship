@@ -346,6 +346,27 @@ jobs:
           fi
           echo "[+] Reconcile contract strings present"
 
+      - name: Check hand-back size contract strings
+        run: |
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md '## Hand-back size contract' 'This section is the one place the cap is stated.' 'Cap: 3,000 characters' 'A hand-back over the cap is not a missing line.' 'Detail: PR <n> body' 'wc -m'
+          check skills/running-a-sprint/SKILL.md 'Hand-back contract: read skills/running-a-sprint/references/HANDBACK_ROUTING.md' 'one pointer line'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing hand-back size contract string(s)"
+            exit 1
+          fi
+          echo "[+] Hand-back size contract strings present"
+
       - name: Check agent templates index matches agents/
         run: |
           set -e

@@ -38,7 +38,7 @@ Apply the nine rules below to every scenario written in Given/When/Then form. Ea
    Source: Writing better Gherkin
    Good: Then plan.md has no `## Feature Specification` heading while the verdict is BACK TO OWNER. Weak: Then the synthesis step calls the write function after the skeptic check.
 
-9. MUST write steps as business facts. DO NOT write keystrokes, field positions or button names in a step; when the scenario is automated, they belong in the step definitions.
+9. MUST write steps as business facts. DO NOT write keystrokes, field positions or button names in a step; when the scenario is automated, they belong in the step definitions (the code that runs each step).
    Source: Writing better Gherkin
    Good: Given the owner has answered every open question. Weak: Given the owner clicks the Verdict dropdown and selects BACK TO OWNER.
 

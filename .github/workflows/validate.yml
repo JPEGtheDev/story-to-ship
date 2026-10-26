@@ -460,6 +460,35 @@ jobs:
           fi
           echo "[+] Discovery example-map heading and field lines are present"
 
+      # A pin proves the text exists in the file, not where it sits in that file.
+      # Pins 1 and 2 are whole-line matches copied verbatim from their source files;
+      # pin 3 is a substring match because its source is one long paragraph line.
+      - name: Check Discovery skeptic check and economy tier are pinned
+        run: |
+          missing=0
+          f=skills/three-amigos/references/CEREMONIES.md
+          g=skills/subagent-driven-development/references/MODEL_SELECTION.md
+          s='### Skeptic check -- PILOT'
+          if ! grep -qxF -- "$s" "$f"; then
+            printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
+            missing=$((missing + 1))
+          fi
+          s='| Three Amigos Ceremony 1 (Discovery) | Economy | Pilot: each amigo reads source documents (issues, specs, architecture docs, tests) and synthesizes them into acceptance criteria and a Feature Specification -- content-touching, so Economy is the pilot exception stated in the floor paragraph; the Standard-tier skeptic check that follows the amigos is the compensating control. The explicit `model` on each amigo call governs over the amigo template pin |'
+          if ! grep -qxF -- "$s" "$g"; then
+            printf 'FAILED: %s has no line equal to: %s\n' "$g" "$s"
+            missing=$((missing + 1))
+          fi
+          s='Exception: during the Discovery pilot, Three Amigos Ceremony 1 (Discovery) amigos run at Economy tier'
+          if ! grep -qF -- "$s" "$g"; then
+            printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing Discovery skeptic-check/economy-tier pin(s)"
+            exit 1
+          fi
+          echo "[+] Discovery skeptic check and economy tier pins are present"
+
       # This 20,000-character cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it

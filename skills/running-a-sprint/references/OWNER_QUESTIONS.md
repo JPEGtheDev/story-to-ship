@@ -95,8 +95,12 @@ If the question counter is missing from the ledger, the launcher takes the highe
 
 - Comments on the page may not reach the launcher session.
 - The page tells the owner to answer in chat, by card number.
-- The launcher reads a card's comment thread only when the owner says they answered there.
-- An answer given only outside chat is not acted on until the owner restates it in chat.
+- The launcher reads a card's comment thread only when the owner says in chat that they answered there.
+- The launcher then quotes the answer from the thread in chat and acts only after the owner replies in chat with the card number and the answer, for example "Q8 merge".
+- An answer given only outside chat is never acted on.
+
+**Context:** The owner answers on the page, where the launcher cannot see who wrote the comment.
+**Forces:** A page comment alone does not show that the owner decided, while chat is the one channel the launcher can attribute to the owner. Quoting the answer back and waiting for the owner's reply costs one message and keeps every decision attributable.
 
 ## Worked example
 

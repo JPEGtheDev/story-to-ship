@@ -42,13 +42,13 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 
 ### test-writer
 
+- Except in a revert dispatch, which the task names as such, a test-writer writes one failing test; a revert dispatch commits only the revert of the earlier failing-test commit and expects the suite green with no new test.
 - Writes one failing test against the seam named in the plan's seam table.
 - Changes test files only. Test helpers and fixtures under test paths count as test files. A change to any other file is a finding, and the todo returns for a fresh test-writer.
-- Runs the test. The failure must be a run-time assertion failure, not a compile or import error. A compile or import error is not a valid RED.
-- Runs the suite: the new test must FAIL with a run-time assertion failure, and no other test may fail.
+- Runs the suite: the new test must FAIL with a run-time assertion failure, and no other test may fail. A compile or import error is not a valid RED.
 - Commits `test(scope): ...` with the failure output pasted in the reply.
+- Makes exactly one commit (a refactorer that reports `no refactor needed` makes none); no WIP commit.
 - If the test passes at once, return BLOCKED: the behaviour already exists or the test is wrong. The todo goes back to planning.
-- A revert dispatch, which the task names as such, commits only the revert of the earlier failing-test commit and expects the suite green with no new test.
 
 ### pass-maker
 
@@ -59,6 +59,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Runs the full suite and pastes the run.
 - Keeps the suite green.
 - Commits `feat(scope): ...` or `fix(scope): ...`.
+- Makes exactly one commit (a refactorer that reports `no refactor needed` makes none); no WIP commit.
 - For a stub commit (the task says so), it writes type or signature stubs and build-registration files only, with no behaviour, keeps the build and the suite as they were, and commits `chore(scope): ...`.
 - If the test is wrong or a case is missing, return BLOCKED to the coordinator. The coordinator opens a new todo with its own test-writer. The pass-maker never writes the test. The new todo's first dispatch is a test-writer dispatch whose one commit reverts the earlier failing-test commit; the detector checks that commit as test-writer. The new failing test is a second, separate test-writer dispatch based on that revert commit. A todo never ends on a failing suite.
 
@@ -69,6 +70,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - The refactorer never adds, deletes or renames a test file; it may edit an existing test for readability only.
 - Keeps the suite green and pastes the run.
 - Commits `refactor(scope): ...`, or reports `no refactor needed: <reason>` and commits nothing.
+- Makes exactly one commit (a refactorer that reports `no refactor needed` makes none); no WIP commit.
 - A behaviour change is a finding.
 - If the suite turns red, the refactorer reverts its changes before reporting.
 - Before reporting, confirms from the diff that no test file was added, deleted or renamed; a refactorer that commits nothing reviews `git diff` and `git status` instead of `git diff HEAD~1`.

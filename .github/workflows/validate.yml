@@ -172,6 +172,9 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The new failing test is a second, separate test-writer dispatch'
           check agents/story-coordinator.md 'a fresh pass-maker dispatch (one commit, detector run) follows it'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'it writes type or signature stubs and build-registration files only, with no behaviour'
+          check skills/subagent-driven-development/SKILL.md 'every implementer dispatch fills `{{ROLE_RULES}}`'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit (a refactorer that reports `no refactor needed` makes none); no WIP commit.'
+          check agents/implementer.md 'The commit rules in your role block override the commit advice under Constraints.'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing three-role loop contract string(s)"
             exit 1

@@ -62,7 +62,7 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 {{WORKTREE_PATH}}
 
 ## Role
-The role rules for this dispatch are the ROLE_RULES block below. The dispatcher fills it from the three-role loop reference of the subagent-driven-development skill, with the line `Role: <role>` and that role's rules only. A role-restricted run must not touch files its role forbids. If the block is empty or missing, return NEEDS_CONTEXT.
+The role rules for this dispatch are the ROLE_RULES block below. The dispatcher fills it from the three-role loop reference of the subagent-driven-development skill, with the line `Role: <role>` and that role's rules only. A role-restricted run must not touch files its role forbids. If the block is empty or missing, return NEEDS_CONTEXT. The commit rules in your role block override the commit advice under Constraints.
 
 {{ROLE_RULES}}
 
@@ -152,7 +152,7 @@ Removing content from the source without a verified paste in the target is a spe
 
 ## Verification gate before marking done
 1. Run the host project's build command (as its docs define it) -- must succeed
-2. Run the host project's test suite -- the result your role rules require (all green, or the one new failing test for a test-writer)
+2. Run the host project's test suite -- the result your role rules require (all green, or the one new failing test for a test-writer; green for a revert dispatch)
 3. Run the host project's formatter -- format clean
 4. `git diff HEAD~1` -- diff reviewed, no accidental changes (a run that committed nothing reviews `git diff` and `git status` instead)
 

@@ -27,6 +27,14 @@
 #                              from a copy of its script and its full .md
 #                              file in the per-case temp dir, with no
 #                              -loaded .md file beside them
+#   loaded_file_empty        - if present (contents ignored), the hook runs
+#                              from a copy of its script and full .md in the
+#                              per-case temp dir, with a 0-byte -loaded .md
+#                              beside them
+#   loaded_file_whitespace   - as loaded_file_empty, but the -loaded .md holds
+#                              only blank lines, spaces and tabs
+#   loaded_file_one_line     - as loaded_file_empty, but the -loaded .md holds
+#                              one line, "Reload skills on a new todo."
 #   state_via_project_dir    - if present (contents ignored), the hook runs
 #                              with CLAUDE_PROJECT_DIR set to a "project"
 #                              dir inside the per-case temp dir and with
@@ -35,6 +43,14 @@
 #                              the path real sessions use; that dir is
 #                              created and pre_flags are touched there.
 #                              state_dir_missing is ignored in such a case
+#   expect_silent            - if present (contents ignored), the hook must exit
+#                              0 and write nothing to stdout; stdout goes to a
+#                              file (not command substitution, which would
+#                              strip newlines), and the JSON and expect_stdout_*
+#                              checks are skipped. Cases that use the shipped
+#                              -loaded files assume those files stay empty;
+#                              changing a shipped -loaded file to one line
+#                              means updating those cases
 #   expect_stdout_grep       - newline list; every line must appear
 #                              (fixed-string) in the additionalContext value
 #   expect_stdout_not_grep   - newline list; no line may appear in the
@@ -64,7 +80,11 @@ run_case() {
   local pre_flags_file="$case_dir/pre_flags"
   local state_dir_missing_file="$case_dir/state_dir_missing"
   local loaded_file_missing_file="$case_dir/loaded_file_missing"
+  local loaded_file_empty_file="$case_dir/loaded_file_empty"
+  local loaded_file_whitespace_file="$case_dir/loaded_file_whitespace"
+  local loaded_file_one_line_file="$case_dir/loaded_file_one_line"
   local state_via_project_dir_file="$case_dir/state_via_project_dir"
+  local expect_silent_file="$case_dir/expect_silent"
   local expect_stdout_grep_file="$case_dir/expect_stdout_grep"
   local expect_stdout_not_grep_file="$case_dir/expect_stdout_not_grep"
 
@@ -126,7 +146,7 @@ run_case() {
     hook_state_dir="$state_dir/absent"
   fi
 
-  if [[ -f "$loaded_file_missing_file" ]]; then
+  if [[ -f "$loaded_file_missing_file" || -f "$loaded_file_empty_file" || -f "$loaded_file_whitespace_file" || -f "$loaded_file_one_line_file" ]]; then
     local hook_copy_dir="$state_dir/hook-copy"
     if ! mkdir "$hook_copy_dir" || ! cp "$hook_bin" "${hook_bin%.sh}.md" "$hook_copy_dir/"; then
       echo "FAIL: $name -- could not copy the hook into $hook_copy_dir"
@@ -134,11 +154,21 @@ run_case() {
       rm -rf "$state_dir"
       return
     fi
+    local loaded_copy
+    loaded_copy="$hook_copy_dir/$(basename "${hook_bin%.sh}")-loaded.md"
+    if [[ -f "$loaded_file_empty_file" ]]; then
+      : >"$loaded_copy"
+    elif [[ -f "$loaded_file_whitespace_file" ]]; then
+      printf ' \n\t\n\n   \n' >"$loaded_copy"
+    elif [[ -f "$loaded_file_one_line_file" ]]; then
+      printf 'Reload skills on a new todo.\n' >"$loaded_copy"
+    fi
     hook_bin="$hook_copy_dir/$(basename "$hook_bin")"
   fi
 
-  local actual_stdout actual_exit
-  actual_stdout="$(
+  local stdout_file="$state_dir/hook-stdout"
+  local actual_exit
+  (
     if [[ -f "$state_via_project_dir_file" ]]; then
       unset BOOTSTRAP_GATE_STATE_DIR
       export CLAUDE_PROJECT_DIR="$project_dir"
@@ -146,9 +176,19 @@ run_case() {
       export BOOTSTRAP_GATE_STATE_DIR="$hook_state_dir"
       unset CLAUDE_PROJECT_DIR
     fi
-    bash "$hook_bin" <"$input_file"
-  )"
+    bash "$hook_bin" <"$input_file" >"$stdout_file"
+  )
   actual_exit=$?
+
+  local actual_stdout=""
+  if [[ ! -f "$expect_silent_file" ]]; then
+    actual_stdout="$(cat "$stdout_file")"
+  fi
+
+  local silent=0
+  if [[ -f "$expect_silent_file" ]]; then
+    silent=1
+  fi
 
   local ok=1
   local reason=""
@@ -158,17 +198,22 @@ run_case() {
     reason="exit code mismatch: expected 0 got $actual_exit"
   fi
 
-  if [[ "$ok" -eq 1 ]] && ! jq -e '.hookSpecificOutput.additionalContext' <<<"$actual_stdout" >/dev/null 2>&1; then
+  if [[ "$ok" -eq 1 && "$silent" -eq 1 && -s "$stdout_file" ]]; then
+    ok=0
+    reason="expected no stdout, got: $(cat "$stdout_file")"
+  fi
+
+  if [[ "$ok" -eq 1 && "$silent" -eq 0 ]] && ! jq -e '.hookSpecificOutput.additionalContext' <<<"$actual_stdout" >/dev/null 2>&1; then
     ok=0
     reason="stdout did not parse as JSON with .hookSpecificOutput.additionalContext (got [$actual_stdout])"
   fi
 
   local additional_context=""
-  if [[ "$ok" -eq 1 ]]; then
+  if [[ "$ok" -eq 1 && "$silent" -eq 0 ]]; then
     additional_context="$(jq -r '.hookSpecificOutput.additionalContext' <<<"$actual_stdout")"
   fi
 
-  if [[ "$ok" -eq 1 && -f "$expect_stdout_grep_file" ]]; then
+  if [[ "$ok" -eq 1 && "$silent" -eq 0 && -f "$expect_stdout_grep_file" ]]; then
     while IFS= read -r pattern; do
       [[ -z "$pattern" ]] && continue
       if ! grep -qF "$pattern" <<<"$additional_context"; then
@@ -179,7 +224,7 @@ run_case() {
     done <"$expect_stdout_grep_file"
   fi
 
-  if [[ "$ok" -eq 1 && -f "$expect_stdout_not_grep_file" ]]; then
+  if [[ "$ok" -eq 1 && "$silent" -eq 0 && -f "$expect_stdout_not_grep_file" ]]; then
     while IFS= read -r pattern; do
       [[ -z "$pattern" ]] && continue
       if grep -qF "$pattern" <<<"$additional_context"; then

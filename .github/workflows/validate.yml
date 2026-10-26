@@ -98,30 +98,34 @@ jobs:
           fi
           echo "[+] Each loaded pre-message variant is smaller than its full file"
 
-      # Each loaded variant is its full file with the gate section removed.
-      # The gate section is the first "## " section of the full file, so the
-      # expected loaded file is line 1 of the full file (the opening tag)
-      # followed by the full file from its second "## " heading to the end.
-      # Line 2 of the full file must be the gate heading, so no text can sit
-      # above the gate section unchecked. Changing a shared section in one
-      # file but not the other fails here; an edit inside the gate section
-      # alone does not.
-      - name: Check loaded pre-message variants match their full files
+      # Each loaded pre-message variant is either silent (no non-whitespace
+      # content, any number of lines) or exactly one line, counted with
+      # grep -c '' so a last line without a trailing newline still counts.
+      - name: Check loaded pre-message variants are empty or a single line
         run: |
           set -e
-          drift=0
-          for pair in pre-message-gates pre-message; do
-            full="hooks/$pair.md"
-            loaded="hooks/$pair-loaded.md"
-            if ! diff -u "$loaded" <(awk 'FNR == 1 { print; next } FNR == 2 && !/^## / { print "(line 2 of the full file is not a ## heading)" } /^## / { headings++ } headings >= 2' "$full"); then
-              echo "DRIFT: $loaded is not line 1 of $full followed by $full from its second '## ' heading (diff above: - is the loaded file, + is the expected text)"
-              drift=$((drift + 1))
+          failed=0
+          for name in pre-message-gates-loaded pre-message-loaded; do
+            file="hooks/$name.md"
+            if [ ! -f "$file" ]; then
+              echo "FAILED: $file is missing"
+              failed=$((failed + 1))
+              continue
+            fi
+            if [ -z "$(tr -d '[:space:]' < "$file")" ]; then
+              echo "$file: silent (no non-whitespace content)"
+              continue
+            fi
+            lines=$(grep -c '' "$file")
+            if [ "$lines" -ne 1 ]; then
+              echo "FAILED: $file has $lines lines; a loaded variant must be empty or exactly one line"
+              failed=$((failed + 1))
             fi
           done
-          if [ "$drift" -gt 0 ]; then
+          if [ "$failed" -gt 0 ]; then
             exit 1
           fi
-          echo "[+] Each loaded pre-message variant is its full file minus the gate section"
+          echo "[+] Each loaded pre-message variant is empty or a single line"
 
       - name: Check for broken references in skill files
         run: |

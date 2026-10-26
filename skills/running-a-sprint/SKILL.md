@@ -57,10 +57,10 @@ Launch with one Agent call per story:
 - `subagent_type` is `story-coordinator`.
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
 - `run_in_background` is true, so the launcher receives completion notices. The runner's own children run in the foreground inside it.
-- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text.
+- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text, with one exception: one pointer line, `Hand-back contract: read skills/running-a-sprint/references/HANDBACK_ROUTING.md in REPO_ROOT, section Hand-back size contract, before sending your final message. Reading that section is not loading the skill.`
 
 **Context:** The launch prompt is where the launcher is tempted to add the rules.
-**Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. An omitted `model` makes the runner inherit the launcher's tier.
+**Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. The one pointer line repeats no rule, so it cannot drift; it exists so the runner learns the cap from the one section that states it. An omitted `model` makes the runner inherit the launcher's tier.
 
 The launcher creates no worktree for a runner, because the runner creates the tree named by its own `WORKTREE_PREFIX`. Record the runner in the ledger at launch.
 
@@ -75,6 +75,7 @@ Verify before relaying anything to the owner:
 - Re-run `gh pr view <PR number> --json number,state,statusCheckRollup` and report the PR number and continuous integration (CI) state from that output, not from the hand-back.
 - Compare the runner's inline-edit count (the number of lines it edited itself rather than through a child) with `git diff --numstat` of its inline commits against the lane entries in its plan file (its per-todo lane lines); `references/SCORECARD.md` carries the counting command. Report any mismatch.
 - While a runner is live, run the child visibility count (`missing_children`) from `references/SCORECARD.md`.
+- For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back is relayed as its row in `references/HANDBACK_ROUTING.md` says, with the options and the runner's recommendation. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
 
 **Context:** A hand-back reports green CI and clean counts.
 **Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
@@ -100,7 +101,7 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
    - A runner still working has `reconcile pending after PR <merged PR number>` added to its pending question field, and gets the Reconcile text when it hands back PR ready; a hand-back of owner question, blocked or cap reached follows the next bullet. The launcher's one-line message to the owner says the PR is waiting on a reconcile and is not to be merged before the reconcile finishes.
    - A runner held on an owner question, blocked or cap reached has `reconcile pending after PR <merged PR number>` added to its pending question field, after the owner's open question and without replacing it, until the owner has answered and the runner hands back PR ready. The launcher's one-line message to the owner says the PR is waiting on a reconcile.
    - A killed runner is resumed, after the limit resets, with the validate-first text from `references/HANDBACK_ROUTING.md` and then treated as a working runner (`reconcile pending after PR <merged PR number>`).
-   - A runner that cannot be resumed (the resume errors, or no runner id is recorded) is replaced by a fresh runner launched like any other: the three inputs and the scope "reconcile PR <n> after PR <m> merged, branch <branch>"; it counts toward capacity. The fresh runner fetches both stories, both diffs and the PR body itself, works in a worktree made from `origin/<branch>`, and opens no new PR. A reconcile replacement is exempt from the limit and the overlap rule, because it takes over a story that already holds its slot and branch. The launcher adds the merge commit and the overlapping files to the scope. The ledger entry gets the new runner id, the fresh runner's worktree prefix, and its local branch `reconcile-<prefix>`.
+   - A runner that cannot be resumed (the resume errors, or no runner id is recorded) is replaced by a fresh runner launched like any other: the three inputs, the scope "reconcile PR <n> after PR <m> merged, branch <branch>" and the one pointer line; it counts toward capacity. The fresh runner fetches both stories, both diffs and the PR body itself, works in a worktree made from `origin/<branch>`, and opens no new PR. A reconcile replacement is exempt from the limit and the overlap rule, because it takes over a story that already holds its slot and branch. The launcher adds the merge commit and the overlapping files to the scope. The ledger entry gets the new runner id, the fresh runner's worktree prefix, and its local branch `reconcile-<prefix>`.
    - A reconcile in progress finishes before the next one is sent to the same runner: a second merge adds another `reconcile pending after PR <merged PR number>` entry to the pending question field, and the queued Reconcile text goes out when the running reconcile's PR ready hand-back is verified. Whenever a Reconcile text is sent, set the state to `reconciling <merged PR number>`. When a PR itself merges, drop its reconcile entries from the ledger.
    - Find open PRs outside the ledger with `gh pr list --state open --json number`. A PR with no ledger entry is not reconciled; when `gh pr diff <n> --name-only` shows an overlap, tell the owner in one line "PR <n> overlaps the merged change but is not a sprint PR".
    - The runner answers with a PR ready hand-back that carries a `Reconcile:` line. Verify it like any other PR ready (`references/HANDBACK_ROUTING.md`), then tell the owner in one line that the PR head changed and needs a fresh look.
@@ -116,8 +117,8 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 Before dispatching any runner, answering any hand-back, or closing out any merge:
 
 1. The ledger was re-read this turn and the runner or story is in it.
-2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request. A reconcile replacement is exempt from the overlap check (Close-out step 7).
-3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, and the PR number and CI state were re-checked with `gh pr view`.
+2. A launch names `STORY_NUMBER`, `REPO_ROOT` and `WORKTREE_PREFIX`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text beyond the one pointer line; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request. A reconcile replacement is exempt from the overlap check (Close-out step 7).
+3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, apart from the ledger note for an over-cap hand-back, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after the owner reported the merge, and runs in the order of the Close-out section.
 
 [+] All 4 met -> proceed
@@ -135,7 +136,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the overlap, and launch only on an answer that names the new limit or that launch.
 - About to close out before the owner reported the merge, or in a different order -- STOP. Confirm the merge on origin and follow the Close-out steps in order.
 - About to resolve a reconcile conflict myself, merge a reconciled PR, or resume a runner held on an owner question, blocked or cap reached before the owner answers -- STOP. The runner resolves, the owner merges, and a held runner waits; check the PR state with `gh pr view` and the ledger state before acting.
-- About to put rule text, a vendor model name or a worktree path for the runner into the launch prompt -- STOP. Name the three inputs and the scope only.
+- About to put rule text, a vendor model name or a worktree path for the runner into the launch prompt -- STOP. Name the three inputs, the scope and the one pointer line only.
 
 ---
 
@@ -167,7 +168,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 ## References
 
-- [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, the required hand-back lines and the resume texts
+- [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, the required hand-back lines, the hand-back size contract and the resume texts
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
 - [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

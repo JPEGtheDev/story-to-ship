@@ -52,7 +52,7 @@ loop: three-role -- reason: adds parseRecord to a non-prose source file with a r
 loop: single -- reason: prose-only change to the template
 ```
 
-CI runs tools/role_check/plan-check.sh on generated plans: an entry header is a line starting `Todo N:` or `Task N:` (digits, then a colon), and each entry needs a `loop: three-role` or `loop: single` line before the next header.
+A CI fixture test exercises tools/role_check/plan-check.sh; CI does not check live plans, so run `sh tools/role_check/plan-check.sh <plan file>` on a plan to check it. An entry header is a line starting `Todo N:` or `Task N:` (digits, then a colon), and each entry needs a `loop: three-role` or `loop: single` line before the next header.
 
 Rule for choosing:
 

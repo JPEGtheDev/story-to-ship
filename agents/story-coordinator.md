@@ -14,6 +14,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - {{STORY_NUMBER}}: the story issue you run.
 - {{REPO_ROOT}}: the absolute path of the main checkout.
 - {{WORKTREE_PREFIX}}: the name stem for every worktree you create.
+- {{PARALLEL_LIMIT}}: the most implementers you run at the same time, set by the launcher; the Parallel todos section says what to do when it is absent.
 
 ## Bootstrap
 
@@ -48,6 +49,23 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - If the detector exits 2 (merge commit, root commit, a path that git must C-quote, or bad input), check that commit by hand with `git -C <feature worktree> diff --name-status` over its range, and record in the plan entry that you did. A pass-maker commit that must change a manifest shared by tests and sources, which the Test paths override makes a test file, is checked the same way by hand and recorded in the plan entry.
 - A violation that you judge a false positive of a heuristic (the skip-marker scan or the assertion count) does not count toward the cap; record why in the plan entry.
 - If the single spec review over the three commits fails, send each finding to a fresh implementer of the role whose commit holds it, as one new commit, and run the detector on that new commit again. A fix routed to a test-writer leaves a failing test, so a fresh pass-maker dispatch (one commit, detector run) follows it before the todo is reviewed again. When a pass-maker returns BLOCKED because the test is wrong or a case is missing, the revert of the failing-test commit is its own test-writer dispatch and commit, the new test is a second test-writer dispatch based on the revert, and each is checked by the detector and the one-commit count.
+
+## Parallel todos
+
+- Parallel limit: {{PARALLEL_LIMIT}}, the most implementers you run at once. The launcher sets it in the launch prompt; with no value in the launch prompt it is 1, so todos run one at a time. The number comes from the launch prompt and from nowhere else.
+- Session cap: at most 20 subagents run at once in one session, counting every runner and every child. The launcher sets each runner's parallel limit from the sprint limit so that busy runners fit inside that cap when they run only implementers and their batch reviews; Discovery fan-out, the whole-branch review fan-out, resumes above the sprint limit and a mid-sprint raise of the limit can still exceed it.
+- A batch is the todos you run at the same time. Put two todos in one batch only when neither depends on the other and their `Files:` lists share no file, test files included.
+- A todo with no `Files:` list or no `Depends on:` line runs alone, and so does an inline-lane todo.
+- A todo is ready when every todo in its `Depends on:` line is merged into the feature branch; the next batch starts only after every todo of the current batch is merged.
+- When more todos are ready than the parallel limit allows, run up to the parallel limit in plan order and hold the rest for the next batch.
+- Send the batch's implementer dispatches in one message with run_in_background false, each in its own child worktree made from the same feature-branch commit.
+- Run each todo's Stage 1 spec review before merging its branch (the batch's reviews may also go in one message); no review is skipped because a todo ran in a batch.
+- Merge the passing child branches into the feature branch in plan order, one at a time and run the suite after each merge.
+- Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child.
+- A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix, and the fix child starts from the current head of the feature branch.
+- A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
+- Stage 2 quality review runs once, on the whole branch after the story's last merge and before the pull request opens, in place of a per-todo Stage 2 for batched todos; list the branch diff's files under the Stage 2 grouping rule, and a finding charges the fix-round count of the todo whose file it names.
+- A reconcile, or a fresh runner with no plan file, never runs a batch.
 
 ## Discovery and acceptance criteria
 

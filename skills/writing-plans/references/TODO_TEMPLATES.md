@@ -12,6 +12,7 @@ Files:
   - Create: exact/path/to/NewFile.<ext>
   - Modify: exact/path/to/ExistingFile.<ext>
   - Test:   tests/path/to/TestFile.<ext>
+Depends on: none | Task numbers (required on every todo)
 
 Step 1 RED:      Write the failing test for [behavior]
 Step 2 RED:      Run test -- verify it fails for the right reason
@@ -20,6 +21,8 @@ Step 4 GREEN:    Run full suite -- verify all tests pass
 Step 5 REFACTOR: Clean up -- rename, extract, remove duplication; tests must stay green
 Step 6 COMMIT:   git add / git commit -m "feat(scope): description"
 ```
+
+Two todos run at the same time only when neither depends on the other and their `Files:` lists share no file, test files included. A todo without a `Files:` list or a `Depends on:` line runs alone (see the Parallel todos section of the story coordinator agent).
 
 ## Seam table (before todo 1 of a code story)
 

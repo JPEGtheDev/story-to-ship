@@ -28,6 +28,8 @@ Pick up todo -> Dispatch implementer (or, for a todo that fits the Dispatch Deci
 
 **Do not advance past any todo until Stage 1 (spec review) returns PASS and every file the todo changed has a Stage 2 (quality review) verdict block that advances under the `two-stage-review` skill's Stage 2 rule -- both stages are run under that skill.**
 
+A batch of independent todos (the story coordinator agent's Parallel todos section) is the one scoped exception to the rule above: each todo passes Stage 1 before its branch merges, the next batch starts once every todo in it is merged, and Stage 2 runs once on the whole branch after the story's last merge.
+
 See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow. For a todo marked `loop: three-role`, see `references/THREE_ROLE_LOOP.md` (three role dispatches, role rules, boundary detector). The dispatcher fills the template's slot: every implementer dispatch fills `{{ROLE_RULES}}` with `Role: <role>` and that role's subsection of section 3 of `references/THREE_ROLE_LOOP.md`, using `single` for every todo not marked `loop: three-role`; slot values copied verbatim from that reference are not injected rules.
 
 ---

@@ -74,8 +74,8 @@ For every planned item, before writing code:
 3. Make the change, or dispatch the implementer for it
 4. Prove it works (compile, test, inspect diff)
 5. Flag it as done
-6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md, then Stage 2: skill-reviewer.md or code-quality-reviewer.md by file type
-   Do NOT pick up the next todo until both stages pass.
+6. DISPATCH REVIEWERS -- load `two-stage-review`; Stage 1: spec-compliance-reviewer.md for this todo. Stage 2 (skill-reviewer.md or code-quality-reviewer.md by file type) runs here only for a risky todo; otherwise Stage 2 runs over the whole branch diff after CI is green (see the `two-stage-review` skill, Review Cadence)
+   Do NOT pick up the next todo until Stage 1 passes (and Stage 2 too, for a risky todo).
 7. Commit when you reach a logical boundary
 8. Advance to the next item
 ```
@@ -257,10 +257,10 @@ For the domain-to-skill dispatch lookup, see `references/EXECUTION_PATTERNS.md`.
 | Excuse | Reality |
 |--------|---------|
 | "I already know what to do, the plan step is obvious" | Obvious steps fail in unexpected ways. YOU MUST execute the full PPP gate for every todo -- no shortcuts. |
-| "The todo is small, no review needed" | Small todos introduce the same bugs as large ones. YOU MUST dispatch both reviewer stages after every todo without exception. |
+| "The todo is small, no review needed" | Small todos introduce the same bugs as large ones. YOU MUST dispatch Stage 1 spec compliance after every todo without exception; Stage 2 code quality runs per Review Cadence (over the whole branch, or right after a risky todo's Stage 1). |
 | "I'll review the spec compliance myself, no need to dispatch" | You wrote the code -- you will rationalize away the gaps. Dispatch spec-compliance-reviewer.md every time. |
 | "The previous todo had no issues, this one is probably fine too" | Each todo is independent. Prior clean reviews do not carry over. Dispatch reviewers after this todo. |
-| "I'm close to the end, I'll skip Stage 1/Stage 2 for this todo" | End-of-plan todos drift most. Both review stages run on every todo (see the `two-stage-review` skill). |
+| "I'm close to the end, I'll skip Stage 1/Stage 2 for this todo" | End-of-plan todos drift most. The end-of-plan todo still gets Stage 1, and a risky one its Stage 2 right after; the whole-branch Stage 2 is not skippable (see the `two-stage-review` skill, Review Cadence). |
 | "Inline nit fix is trivial, no review needed" | Inline fixes are unverified by default. Structural changes (heading, path, sentence replacement) require a dispatched re-review -- same-view-call self-verification is not a substitute (see "Re-review required for review-covered territory" in the `two-stage-review` skill; exemption is only an explicit same-turn user waiver). |
 | "After a rate limit, I can resume dispatching immediately -- my last checkpoint shows what was in flight" | A rate limit severs the agent's awareness of what agents completed, errored, or were interrupted. Dispatch a validation-only batch first and wait for the result before dispatching any continuation agents. |
 | "User correction deferred 'for the self-review later' -- I'll remember it" | Memory does not survive rate limits, context compactions, or session summaries. File deferred corrections immediately as a todo in the plan file or as a session note. "I'll remember" is not a commitment mechanism. |

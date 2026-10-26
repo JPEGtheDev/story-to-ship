@@ -89,8 +89,8 @@ To evaluate a skill against a specific model without the full test harness, use 
 
 ### 2. "After every todo" rules
 **Skill:** `two-stage-review` (2-stage review), `execution` (work loop step 6)
-**Risk:** Model completes todos and skips reviewer dispatch -- moves to next item silently
-**Mitigation:** The `two-stage-review` skill's Iron Law ("YOU MUST DISPATCH REVIEWERS AFTER EVERY TODO"), which the SessionStart hook's Iron Law table also lists, + explicit STOP in work loop. Test by observing whether model dispatches reviewers without being reminded.
+**Risk:** Model completes todos and skips the per-todo Stage 1 dispatch, or skips the end-of-branch Stage 2 dispatch -- moves to next item or to completion silently
+**Mitigation:** The `two-stage-review` skill's Iron Law ("YOU MUST DISPATCH SPEC COMPLIANCE AFTER EVERY TODO AND CODE QUALITY OVER THE WHOLE BRANCH -- SPEC COMPLIANCE FIRST, THEN CODE QUALITY."), which the SessionStart hook's Iron Law table also lists (same rule), + explicit STOP in work loop. Test by observing whether model dispatches Stage 1 after each todo and Stage 2 over the whole branch without being reminded.
 
 ### 3. Announcement declarations
 **Skill:** All skills require "I am using the [skill] to [purpose]"

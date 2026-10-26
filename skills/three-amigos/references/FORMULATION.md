@@ -1,6 +1,6 @@
 # Formulation -- writing Given/When/Then scenarios
 
-This guidance applies when a criterion or a Feature Specification scenario is written as Given/When/Then. Plain-language criteria stay allowed, and the Feature Specification format does not change.
+This guidance applies when a criterion or a Feature Specification scenario is written as Given/When/Then. Plain-language criteria stay allowed, and the Feature Specification format does not change. The Proof kinds section applies to every acceptance criterion, Given/When/Then or plain language.
 
 ## Formulation
 

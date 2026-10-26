@@ -46,7 +46,7 @@ A rule summarises its examples: state each rule in one sentence and put the deta
 
 Verdict is `BACK TO OWNER` when any rule has no example or Questions is not `none`; the owner then receives the rules without examples and the open questions and answers them before any planning. Otherwise the verdict is `READY FOR PLANNING`. Only a `READY FOR PLANNING` map is written under `## Feature Specification`; a `BACK TO OWNER` map is written under `## Discovery Open Items` instead, so planning routes that look for the Feature Specification heading do not treat it as ready. After the owner answers, update Rules, Examples and Questions from the answer, re-apply this rule, and move the map under `## Feature Specification` only when the verdict is `READY FOR PLANNING`. Each `[UNCLEAR: optional?]` or `[UNPLANNED: entry-path]` label is also listed under Questions.
 
-Timebox: each amigo runs in one dispatch; there is no second dispatch round to answer questions in the same Discovery. This replaces the roughly 25-minute human session time.
+Timebox: each amigo runs in one dispatch; there is no second dispatch round to answer questions in the same Discovery, except one return dispatch per owning amigo after the skeptic check (see `### Skeptic check -- PILOT`), and nothing else. This replaces the roughly 25-minute human session time.
 
 ### Synthesis step (orchestrator)
 
@@ -56,11 +56,42 @@ After all three Discovery amigos return:
 3. Record Developer implementation findings separately under `## Implementation Notes` -- these become inputs to todo planning.
 4. Do NOT mix Developer findings into the Feature Specification. Implementation details in the Feature Specification defeat the purpose of the ceremony.
 
+### Skeptic check -- PILOT
+
+This check is part of the Discovery pilot. It runs once per Discovery, after all three amigos return and before the map's verdict is final. Its enforcement is procedural: the orchestrator checks its own routing before writing the verdict; no tool enforces it.
+
+**Inputs (read by path, not pasted into the prompt):** the story file, the answers of all three amigos (Business, Developer, Tester), and the example map.
+
+**Report:** findings only. The skeptic reports four classes and nothing else:
+- rule with no example: a rule in the map has no example
+- example that tests no rule: an example in the map matches no rule
+- question left out: an amigo answer raises an open question that is not in the map's Questions line
+- statement the source does not support: a map statement the story does not make
+
+The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR PLANNING` or `BACK TO OWNER`. The report lists one finding per line, naming its class and item, and ends with the line `FINDINGS: <n>`, where `<n>` is the finding count (`FINDINGS: 0` when there are none).
+
+**Prompt overrides:** the plan-review framing of the skeptic template does not apply to this check. Developer answers are inputs; Developer content absent from the map is not a finding.
+
+**Tier and model:** the skeptic runs at the tier MODEL_SELECTION.md names for the Discovery skeptic check. Every call to the skeptic, including any return dispatch, passes `model` explicitly, because a resumed call can fall back to the template pin.
+
+**Routing** (the orchestrator routes each finding; the skeptic never edits the map):
+- Zero findings: the map stands.
+- Skeptic run failed, BLOCKED, NEEDS_CONTEXT, or its report is unreadable: add a Question and set the verdict to `BACK TO OWNER`.
+- A finding the owning amigo can fix from the source goes back to that amigo in one return dispatch, with all of that amigo's findings batched into the one dispatch. Examples belong to the Tester amigo for a rule with no example.
+- If the return dispatch fails, or the finding is still open after the return: add a Question and set the verdict to `BACK TO OWNER`.
+- Any other finding, including one where the source does not show who owns it, becomes a Question and the verdict is `BACK TO OWNER`, with no return dispatch. A finding of unclear ownership is never sent to a guessed amigo.
+- At most one return dispatch per owning amigo. The skeptic is not re-run after a return.
+- Findings never become `none` by omission: the Questions line reads `none` only when there are no findings and no Questions, and every finding is either resolved by a return or listed as a Question.
+
+**Pilot status:** the Discovery economy tier and this skeptic check are a pilot. The pilot covers the next three stories that run Discovery. Each of them records, in its PR body, the amigo cost, the skeptic cost, the skeptic finding count, and the findings that changed the map. At least one of the three is compared against a standard-tier amigo run of the same inputs. The pilot result goes to the owner as keep / revert / adjust.
+
 ### Read First
 
 - Business Amigo: GitHub issues, README, user stories, existing feature specs.
 - Developer Amigo: Architecture docs, relevant existing source files, dependency list.
 - Tester Amigo: Existing test files for similar features, testing standards doc.
+
+**Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). A brief contains nothing else; do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
 ### Agenda -- Questions
 

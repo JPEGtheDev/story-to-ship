@@ -127,6 +127,66 @@ jobs:
           fi
           echo "[+] Each loaded pre-message variant is empty or a single line"
 
+      - name: Check three-role loop contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          # These pins prove the wording exists in the file, not that a coordinator follows it.
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'A change to any other file is a finding, and the todo returns for a fresh test-writer.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The dispatcher never reuses or resumes a role child.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'case $role in test-writer | pass-maker | refactorer) ;; *) echo "unknown role: $role" >&2; exit 2 ;; esac'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if [ -z "$status" ] && [ "$role" != refactorer ]; then echo "VIOLATION $role commit changes nothing"; bad=1; fi'
+          check skills/subagent-driven-development/SKILL.md 'see `references/THREE_ROLE_LOOP.md` (three role dispatches, role rules, boundary detector)'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'A todo whose row has a blank cell is not dispatched; it returns to planning.'
+          check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.'
+          check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.'
+          check skills/testing/SKILL.md '**Three-role loop:**'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Editing, deleting or skipping a test is a finding.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'A behaviour change is a finding.'
+          check agents/implementer.md 'Role: [test-writer | pass-maker | refactorer | single]'
+          check agents/implementer.md '{{ROLE_RULES}}'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'the dispatcher fills it with the line `Role: <role>`'
+          check agents/story-coordinator.md 'the type or interface, module, and collaborators cells must all be filled'
+          check agents/story-coordinator.md 'is a cap reached hand-back for that todo.'
+          check agents/story-coordinator.md 'A todo that mixes code and prose is split into two todos before dispatch.'
+          check agents/plan-reviewer.md '8. **Seams and loop marker.**'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if git rev-parse --verify -q "$commit^2" >/dev/null; then echo "merge commit: check by hand" >&2; exit 2; fi'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'which must print 1, except 0 for a refactorer that reports `no refactor needed`.'
+          check skills/testing/SKILL.md 'A test-writer whose test passes at once returns BLOCKED and does not fix the test itself.'
+          check skills/testing/SKILL.md 'The one commit allowed before the failing test is the stub commit'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'Architecture review: <verdict line from the architecture-review skill>'
+          check skills/writing-plans/references/TODO_TEMPLATES.md '- A todo mixing code and prose is split into a code todo and a prose todo.'
+          check skills/writing-plans/references/TODO_TEMPLATES.md 'A `loop: three-role` todo runs alone and is never put in a batch of todos that run at the same time.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'the new test must FAIL with a run-time assertion failure'
+          check agents/story-coordinator.md 'set its `{{ROLE_RULES}}` input to the `Role: <role>` line'
+          check agents/story-coordinator.md 'Any other number is a boundary finding.'
+          check agents/story-coordinator.md 'does not count toward the cap; record why in the plan entry.'
+          check agents/plan-reviewer.md 'Is any todo one that mixes code and prose (it must be split)?'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'bad test-path pattern: $test_re'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The new failing test is a second, separate test-writer dispatch'
+          check agents/story-coordinator.md 'a fresh pass-maker dispatch (one commit, detector run) follows it'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'it writes type or signature stubs and build-registration files only, with no behaviour'
+          check skills/subagent-driven-development/SKILL.md 'Every implementer dispatch fills `{{ROLE_RULES}}`'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the test commit; no WIP commit.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the passing commit; no WIP commit.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes at most one commit, the refactor commit (none when it reports `no refactor needed`); no WIP commit.'
+          check agents/implementer.md 'The commit rules in your role block override the commit advice under Constraints.'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing three-role loop contract string(s)"
+            exit 1
+          fi
+          echo "[+] Three-role loop contract strings present"
+
       - name: Check for broken references in skill files
         run: |
           set -e

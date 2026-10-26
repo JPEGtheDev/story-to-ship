@@ -61,9 +61,14 @@ All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= 
 ## Working directory
 {{WORKTREE_PATH}}
 
+## Role
+The role rules for this dispatch are the ROLE_RULES block below. The dispatcher fills it from the three-role loop reference of the subagent-driven-development skill, with the line `Role: <role>` and that role's rules only. A role-restricted run must not touch files its role forbids. If the block is empty or missing, return NEEDS_CONTEXT. The commit rules in your role block override the commit advice under Constraints.
+
+{{ROLE_RULES}}
+
 ## Constraints
 - Follow the code-quality skill: `clang-format` before every commit, naming conventions, no raw `new`
-- Follow the testing skill: write a failing test FIRST, then implement
+- Follow the testing skill; the role rules above say whether you write the failing test or work against an existing one
 - Follow the cpp-patterns skill: RAII, no resource leaks, docs-same-commit rule
 - Conventional commits: `<type>[scope]: <description>`
 - Do NOT push to main or the parent branch
@@ -147,9 +152,9 @@ Removing content from the source without a verified paste in the target is a spe
 
 ## Verification gate before marking done
 1. Run the host project's build command (as its docs define it) -- must succeed
-2. Run the host project's test suite -- all tests green
+2. Run the host project's test suite -- the result your role rules require (all green, or the one new failing test for a test-writer; green for a revert dispatch)
 3. Run the host project's formatter -- format clean
-4. `git diff HEAD~1` -- diff reviewed, no accidental changes
+4. `git diff HEAD~1` -- diff reviewed, no accidental changes (a run that committed nothing reviews `git diff` and `git status` instead)
 
 ## Fix Agent Rules
 
@@ -164,6 +169,7 @@ When acting as a fix agent (correcting issues flagged by a Stage 1 or Stage 2 re
 STATUS: [DONE | DONE_WITH_CONCERNS | PARTIAL | NEEDS_CONTEXT | BLOCKED]
 Worktree: [output of: git -C {{WORKTREE_PATH}} rev-parse --show-toplevel]
 Branch: agent/{{AGENT_NAME}}
+Role: [test-writer | pass-maker | refactorer | single]
 Tests: [X passed, 0 failures]
 Files changed: [list]
 Completed: [if PARTIAL -- what was finished and verified]

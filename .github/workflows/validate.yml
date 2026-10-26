@@ -583,7 +583,7 @@ jobs:
           done
           f=skills/user-story-generator/SKILL.md
           for s in \
-            '- Can'\''t name a proof kind for an acceptance criterion (automated test, documentation evidence or throwaway spike, under the Proof kinds section of the Formulation reference of the three-amigos skill) -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behaviour of shipped code always needs an automated test.' \
+            '- Can'\''t name a proof kind that fits an acceptance criterion under the Proof kinds section of the Formulation reference of the three-amigos skill, or the criterion is about behaviour of shipped code and no failing test can be written for it -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behaviour of shipped code always needs an automated test.' \
             '- **Testable** - acceptance criteria are verifiable; for Given/When/Then wording and the proof kinds (automated test, documentation evidence, throwaway spike), load the three-amigos skill and follow its Formulation reference; a criterion proven by documentation evidence or a throwaway spike ends with `Proof: documentation` or `Proof: spike`'
           do
             if ! grep -qxF -- "$s" "$f"; then

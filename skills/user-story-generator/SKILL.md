@@ -153,7 +153,7 @@ See `references/OUTPUT_ROUTING.md` for the full routing rule with context and fo
 - Story spans multiple unrelated components or layers -> STOP. Split by user-visible outcome (a vertical slice that may cross layers), never into one story per layer.
 - "We'll know it's done when it feels right" -> STOP. Write a concrete, testable acceptance criterion before proceeding.
 - Story takes more than one sprint to deliver -> STOP. Split the story until each piece fits in one sprint.
-- Can't name a proof kind for an acceptance criterion (automated test, documentation evidence or throwaway spike, under the Proof kinds section of the Formulation reference of the three-amigos skill) -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behaviour of shipped code always needs an automated test.
+- Can't name a proof kind that fits an acceptance criterion under the Proof kinds section of the Formulation reference of the three-amigos skill, or the criterion is about behaviour of shipped code and no failing test can be written for it -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behaviour of shipped code always needs an automated test.
 - Generating 2+ stories with new Acceptance Criteria without running Three Amigos Discovery first -> STOP. Acceptance Criteria written before Discovery are unvalidated. Run `three-amigos` Ceremony 1 before finalizing any acceptance criterion.
 - Canon present but fails to parse, tempted to fall back to the generic template -> STOP. "Present but unreadable" is not "absent" -- refuse and name what failed.
 - About to omit an ALWAYS-ruled checklist item with no category-tagged N/A line -> STOP. Add the N/A line or refuse.

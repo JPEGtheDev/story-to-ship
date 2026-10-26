@@ -65,6 +65,8 @@ When dispatching Ceremony 1 (Discovery), each amigo MUST address ALL of the foll
 1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labelled `[UNCLEAR: optional?]` in the example map (Questions line). Never assume required unless the AC explicitly states it.
 2. **UI dialog entry paths:** For any UI dialog or panel in the acceptance criteria: enumerate every menu path and keyboard shortcut that opens it. Any path not mentioned in the ACs MUST be flagged as `[UNPLANNED: entry-path]` in the example map (Questions line).
 
+These two questions are part of every Discovery amigo brief's agenda items (the focused-brief rule in Ceremony 1 of `references/CEREMONIES.md`).
+
 A Feature Specification that does not address both questions is incomplete and MUST be revised before Ceremony 2 (Refinement).
 
 A map whose Verdict is `BACK TO OWNER` is written under `## Discovery Open Items`, not `## Feature Specification`, and stops the run at Discovery: do not plan, send the rules with no example and open questions to the owner. The example map fields and stopping rule are defined in `references/CEREMONIES.md`, Ceremony 1.
@@ -88,6 +90,7 @@ A map whose Verdict is `BACK TO OWNER` is written under `## Discovery Open Items
 - 3 simultaneous worktrees, branches: `amigo/<ceremony>-<persona>`.
 - Source `{{READ_FIRST}}` and `{{AGENDA}}` from `references/CEREMONIES.md`.
 - After all verdicts: delete worktrees and branches.
+- Discovery only: after all three amigo verdicts, a skeptic check runs once, sequentially, read-only, with `model` passed explicitly. Its procedure is in `references/CEREMONIES.md`, Ceremony 1, `### Skeptic check -- PILOT`.
 - NEEDS_CONTEXT from any amigo -> re-dispatch that amigo only.
 - If a stop hook fires during an active amigo wait: respond to the hook only if the hook action does not modify any file that running amigos are currently reading. Committing a previously untracked file that amigos have not opened is safe. Staging or modifying plan.md, SKILL.md, or any reference file an amigo may be reading is not safe. Log the interruption. Do not synthesize amigo results until all verdicts are received. Resume the wait after handling the hook.
 
@@ -135,7 +138,7 @@ This output proves the ceremony was identified before dispatch. It does not prov
 
 ## Related Skills
 
-- the `skeptic` agent (`agents/skeptic.md`) -- plan validation without Three Amigos ceremony; use when Discovery did not run and a single-todo feature needs review
+- the `skeptic` agent (`agents/skeptic.md`) -- plan validation without Three Amigos ceremony; use when Discovery did not run and a single-todo feature needs review; also the Discovery map check
 - `brainstorming` -- design exploration; referenced by the Discovery Tracking Mechanism as a reader of the Feature Specification
 
 ## References

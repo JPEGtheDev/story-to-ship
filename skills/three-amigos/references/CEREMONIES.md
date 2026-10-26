@@ -72,7 +72,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 **Prompt overrides:** the plan-review framing of the skeptic template does not apply to this check. Developer answers are inputs; Developer content absent from the map is not a finding.
 
-**Tier and model:** the skeptic runs at the tier MODEL_SELECTION.md names for the Discovery skeptic check. Every call to the skeptic, including any return dispatch, passes `model` explicitly, because a resumed call can fall back to the template pin.
+**Tier and model:** the skeptic runs at the tier that the Model Selection reference of the `subagent-driven-development` skill (Tier Assignments table) names for the Discovery skeptic check. Every call to the skeptic, including any return dispatch, passes `model` explicitly, because a resumed call can fall back to the template pin.
 
 **Routing** (the orchestrator routes each finding; the skeptic never edits the map):
 - Zero findings: the map stands.

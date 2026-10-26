@@ -9,3 +9,4 @@ node_modules/
 .claude/.inline-edit-ledger-*
 .claude/.*-pending-*
 .claude/.skills-loaded-*
+tools/role_check/tests/generated/

@@ -12,7 +12,7 @@ Define your domains using Domain-Driven Design (DDD) Bounded Contexts: one direc
 1. Identify your top-level bounded contexts (e.g., `payments`, `catalog`, `delivery`). Each becomes a `docs/<domain>/` directory.
 2. Within each context, identify subdomains -- cohesive sub-concerns that share terminology. Each becomes `docs/<domain>/<subdomain>/`.
 3. When a subdomain needs further splitting, add a third level: `docs/<domain>/<subdomain>/<subdomain2>/`. Use sparingly -- three levels is the maximum.
-4. A standard that spans domains still sits in the one domain and one subdomain that governs it (e.g., `docs/payments/standards/`); when no domain governs it, give it its own domain (e.g., `docs/standards/<subdomain>/`). Other domains link to it, and no flat standards files sit directly under `docs/`.
+4. A standard that spans domains still sits in the one domain and one subdomain that governs it (e.g., `docs/payments/standards/`); when no domain governs it, give it its own domain (e.g., `docs/standards/<subdomain>/`). Other domains link to it. No flat standards files sit directly under `docs/`; the only files outside `docs/<domain>/<subdomain>/` are the three named files `docs/DOD.md`, `docs/INDEX.md` and `docs/<domain>/INDEX.md`.
 
 **Example structure (replace with your actual bounded contexts):**
 
@@ -45,6 +45,8 @@ related:
 - `tags` -- MUST include the domain and subdomain as the first two entries
 - `related` -- relative paths from the file's own directory; verified to exist before adding
 - `subdomain2` -- omit this field entirely when not using a third level. Do NOT write `subdomain2: ""`. Only add it when a value exists: `subdomain2: <value>`
+
+**Cross-cutting standard files:** `docs/DOD.md`, `docs/INDEX.md` and `docs/<domain>/INDEX.md` (this note also covers the domain index) use the field set `title`, `description`, `domain`, `tags`, `related` and carry no `subdomain` field. The first tag is the domain, and no subdomain tag follows: for `docs/DOD.md` and `docs/INDEX.md` the tags start `[cross-cutting, standards, ...]`; for `docs/<domain>/INDEX.md` they start with that domain.
 
 ---
 

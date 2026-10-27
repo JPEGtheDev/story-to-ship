@@ -14,7 +14,7 @@ related:
 
 ## Case fields
 - Benchmark case in evals/evals.json: id, prompt, expected_output, files. Assertions are added after the first runs (schemas.md L14-35; SKILL.md L145-161).
-- Trigger case: query and should_trigger (run_loop.py L25-30).
+- Trigger case: query and should_trigger (run_eval.py L217, L230).
 
 ## Grading (which part does what)
 - Script: checkable assertions are checked by a script the agent writes and runs (SKILL.md L225).

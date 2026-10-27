@@ -52,7 +52,7 @@ loop: three-role -- reason: adds parseRecord to a non-prose source file with a r
 loop: single -- reason: prose-only change to the template
 ```
 
-A CI fixture test exercises tools/role_check/plan-check.sh; CI does not check live plans, so run `sh tools/role_check/plan-check.sh <plan file>` on a plan to check it. An entry header is a line starting `Todo N:` or `Task N:` (digits, then a colon), and each entry needs a `loop: three-role` or `loop: single` line before the next header.
+A CI fixture test exercises tools/role_check/plan-check.sh; CI does not check live plans, so run `sh tools/role_check/plan-check.sh <plan file>` on a plan to check it. An entry header is a line starting `Todo N` or `Task N` (digits, then any character other than a letter or digit, or the end of the line), with or without a leading markdown heading prefix such as `##`. Lines inside a code fence are ignored. Each entry needs exactly one `loop: three-role` or `loop: single` line before the next header; two or more fail. Known limits are listed in the three-role loop reference of the subagent-driven-development skill.
 
 Rule for choosing:
 

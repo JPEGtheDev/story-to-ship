@@ -49,7 +49,7 @@ A story whose "Files to Create/Modify" list overlaps the list of a working runne
 
 Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. State value `reconciling <merged PR number>` means a Reconcile text is out; a reconcile waiting to be sent (for the runner to hand back or for the owner to answer) is recorded in the pending question field as `reconcile pending after PR <merged PR number>`. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason, because it has no runner and a reload would lose it. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch.
 
-The owner questions page adds three ledger fields: the page address, the tool that publishes it, and the highest question number used; `references/OWNER_QUESTIONS.md` (Ledger) defines them.
+The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
 **Context:** The launcher compacts or restarts mid-sprint.
 **Forces:** The runners keep working while the launcher forgets, and a lost runner id means a runner nobody can resume. The plan file survives; the launcher's memory does not.
@@ -75,11 +75,11 @@ End the turn while runners work. When a hand-back or event arrives, look it up i
 
 Verify before relaying anything to the owner:
 
-- Re-run `gh pr view <PR number> --json number,state,statusCheckRollup` and report the PR number and continuous integration (CI) state from that output, not from the hand-back.
+- Re-run `gh pr view <PR number> --json number,state,mergeable,headRefOid,statusCheckRollup` and report the PR number and continuous integration (CI) state from that output, not from the hand-back.
 - Compare the runner's inline-edit count (the number of lines it edited itself rather than through a child) with `git diff --numstat` of its inline commits against the lane entries in its plan file (its per-todo lane lines); `references/SCORECARD.md` carries the counting command. Report any mismatch.
 - While a runner is live, run the child visibility count (`missing_children`) from `references/SCORECARD.md`.
 - For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
-- Add every question for the owner to the owner questions page as a card, in `references/OWNER_QUESTIONS.md`: a merge question, an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question and a reconcile question. Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay: it carries the options and the recommendation, and chat does not repeat them, except in the fallback that `OWNER_QUESTIONS.md` gives for a failed republish.
+- Add every question for the owner to the owner questions page as a card: an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question and a reconcile question. A merge-ready PR is a Ready to merge entry on the same page, not a card (see `references/OWNER_QUESTIONS.md`). Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay.
 
 **Context:** A hand-back reports green CI and clean counts.
 **Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
@@ -126,7 +126,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 - About to launch a story with no acceptance criteria, or draft the criteria myself -- STOP. Relay the gap to the owner and route the story through `user-story-generator`.
 - About to answer a runner's question, or a child's result, myself -- STOP. Look up the row in `references/HANDBACK_ROUTING.md`; owner-reserved questions go to the owner.
-- About to merge, override the fix-round cap or change a story's scope -- STOP. These are the owner's: relay the question with the runner's recommendation and end the turn.
+- About to merge, override the fix-round cap or change a story's scope -- STOP. These are the owner's. For a merge, the owner decides from the Ready to merge entry and the launcher never merges; for a cap override or scope change, relay the question with the runner's recommendation and end the turn.
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
 - About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until the working count is below the limit (or an owner answer names the new limit or that launch, under the rule on launch questions in Capacity) or the overlapping story's pull request merges, or run it alone when the list is absent. A reconcile replacement (Close-out step 7) is exempt.
 - About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the overlap, and launch only on an answer that names the new limit or that launch.

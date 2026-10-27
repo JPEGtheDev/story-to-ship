@@ -75,7 +75,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Plan check
 
-- After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <skill dir>/scripts/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<skill dir>` is the base directory the Skill tool prints when you load the subagent-driven-development skill.
+- After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <skill dir>/scripts/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<skill dir>` is the base directory the Skill tool prints when you load the subagent-driven-development skill. Load it first, or reload it after a compaction, when its base directory is not in your context.
 - Paste the command and its exit code in the pull request body, from a run of the command made in the turn that writes the body.
 - Exit 0: go on to the first dispatch.
 - Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries. The count of 2 re-runs starts again after a re-plan.

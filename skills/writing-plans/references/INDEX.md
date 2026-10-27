@@ -20,6 +20,7 @@ These references let a planner scope a plan to the simplest design, decide which
 | `DECISION_DEFERRAL.md` | The significant-component criterion, the three-question deferral diagnostic (Blocked, Needed, Costly), the ordered verdict table (`[UNCLEAR:]`, DEFER, DECIDE NOW), the DEFER measurability rubric, failure-path rules, and the verdict recording format. |
 | `TODO_TEMPLATES.md` | The single-implementer Test-Driven Development (TDD) todo template, the seam table, the `loop:` marker and its choosing rule, and the three-role todo template. |
 | `SKEPTIC_PROMPT.md` | The prompt passed verbatim to the Skeptic Agent when a plan with 2+ todos is reviewed. |
+| `PLAN_REVIEW.md` | The plan-review routing (three-amigos Refinement, or the Skeptic Agent plus plan-reviewer pair), their dispatch, and the Review-Round Cap. |
 
 ---
 

@@ -75,6 +75,7 @@ fi
 # added here only skips the stamping itself, never the whole script. The
 # agent_id rule is the same: it skips this block only, so a subagent payload
 # still gets the banner and session-start.md text from the section below.
+# The diagnostic capture block further down must likewise stay above those early exits.
 RELOAD_PENDING_WRITTEN=""
 RELOAD_PENDING_ROLE=""
 RELOAD_ROLE_NAMES=(running-a-sprint)
@@ -92,7 +93,7 @@ fi
 # stamping block so it also covers payloads with agent_id or without session_id.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
   if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
-    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys}' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl" 2>/dev/null
+    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys}' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
   fi
 fi
 

@@ -33,7 +33,7 @@ A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge s
 
 - **Placement.** The section has the heading "Ready to merge" and sits above the open question cards. Its entries are listed newest first.
 - **Entry.** One statement per merge-ready PR: the PR link, the story, one line on what the PR does, and the verification line. An entry has no question number, no options and no recommendation.
-- **Verification line.** One line, written by the launcher from its own `gh pr view <n> --json number,state,mergeable,headRefOid,statusCheckRollup,body`. It states the PR state, mergeable, the CI state on the head, whether the head equals the runner worktree head (`git -C <runner worktree> rev-parse HEAD` equals headRefOid), the closing keyword in the body, the footer in the body, the inline-edit comparison, and the reconcile checks in `RECONCILE.md`.
+- **Verification line.** One line, written by the launcher from its own `gh pr view <n> --json number,state,mergeable,headRefOid,statusCheckRollup,body`. It states the PR state, mergeable, the CI state on the head, whether the head equals the runner worktree head (`git -C <runner worktree> rev-parse HEAD` equals headRefOid), the closing keyword in the body, the footer in the body, the inline-edit comparison, and the reconcile checks in the PR ready row of `HANDBACK_ROUTING.md`.
 - **Optional checks.** The inline-edit comparison applies only when the runner made inline commits. The reconcile checks apply only when a reconcile was queued or sent. Every other check is required.
 - **Owner action.** The owner acts on an entry by saying "merged", either in chat or as a comment on the entry on the page. Entries have no number to answer by.
 - **Stale.** Before each republish the launcher re-runs `gh pr view` for every entry. When CI is not green or the head differs from the head last checked, the entry is removed and returns only after the PR ready checks in `HANDBACK_ROUTING.md` pass again.
@@ -76,6 +76,13 @@ A launch card also states, for each story it names:
 - A card is removed once its question is answered and the answer is acted on. Removing it before the action is done is a defect.
 - Question numbers start at Q1. The owner may ask for numbering to restart; when it does, the page says when numbering restarted, and the ledger records the restart and the highest number used since.
 
+## Numbering restart
+
+- A card that is open at the restart keeps its number, and a new card never takes a number held by an open card.
+
+**Context:** The owner may restart numbering while cards are still open, and a restarted counter would otherwise reuse a number a card already shows.
+**Forces:** Two cards with one number make "Q12 split" ambiguous, while keeping open numbers fixed costs only a gap in the sequence.
+
 ## Chat
 
 - Each change to the page gets one chat line. An entry added to or removed from Ready to merge gets one chat line, which names the PR and the story.
@@ -94,7 +101,7 @@ The sprint ledger (the launcher's plan file, see the Launch section of `../SKILL
 
 Each card's number is also recorded in the pending question field of the runner entry it belongs to, next to any reconcile entry that is already there.
 
-If the question counter is missing from the ledger, the launcher takes the highest number on the page and in the pending question fields, and continues from the next number after it.
+If the question counter is missing from the ledger, the launcher takes the highest number on the page and in the pending question fields, and continues from the next number after it. When the ledger holds a restart record, the launcher takes the highest number used since that record instead of the highest number on the page.
 
 **Context:** The launcher compacts or restarts while cards are open or entries are listed.
 **Forces:** The page survives in the publishing tool and the ledger survives in the plan file, but the launcher's memory does not. The counter, the restart record and the pending question fields are the only record of which numbers are already used, and the entry list is the only record of which PRs are on the page.
@@ -138,7 +145,7 @@ The values below run through the main steps of this file.
 
 ## Related
 
-- [HANDBACK_ROUTING.md](HANDBACK_ROUTING.md) -- the hand-back kinds that produce these questions and entries
-- [RECONCILE.md](RECONCILE.md) -- the reconcile checks a PR waiting on a reconcile must pass before its entry is listed
+- [HANDBACK_ROUTING.md](HANDBACK_ROUTING.md) -- the hand-back kinds that produce these questions and entries, and the PR ready row that holds the PR ready checks and the reconcile checks
+- [RECONCILE.md](RECONCILE.md) -- the reconcile of other open sprint PRs (Close-out step 7) that a PR waiting on a reconcile goes through before its entry is listed
 - [SCORECARD.md](SCORECARD.md) -- the scorecard the ledger also holds
 - [SKILL.md](../SKILL.md) -- the Capacity, Launch and Close-out sections this file relies on

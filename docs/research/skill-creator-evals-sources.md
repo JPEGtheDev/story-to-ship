@@ -24,7 +24,7 @@ Repository: anthropics/skills at commit dbd4588f9e1033efb41dad4bef2f7947c8993d44
 | Blind comparison: comparator agent judges A and B without knowing the skill | agents/comparator.md L3, L7; SKILL.md L325-327 | verified from primary source; optional, needs subagents |
 | Trigger testing: run_eval.py, run_loop.py, improve_description.py | scripts/run_eval.py L266; run_loop.py L251-254; improve_description.py L26 | verified from primary source |
 | Review viewer: eval-viewer/generate_review.py | SKILL.md L236-249 names it; the file exists at that commit | path verified; contents not read |
-| Introduction date (evals, benchmark, comparator "in 2026") | commit list in research notes: b0cbd3df (2026-03-06), b9e19e6f (2026-04-20) | not established; only a third-party write-up claims it |
+| Introduction date (evals, benchmark, comparator "in 2026") | history of skills/skill-creator: b0cbd3df (2026-03-06), b9e19e6f (2026-04-20) | not established; only a third-party write-up claims it |
 | The plugin skill-creator loop and claude plugin eval use incompatible formats | code.claude.com skills page, section 'Run evals with skill-creator' and the paragraph before it, 'Two tools automate the baseline comparison' | verified from vendor doc |
 
 Commit read: dbd4588f9e1033efb41dad4bef2f7947c8993d44. Vendor docs: https://code.claude.com/docs/en/skills and https://code.claude.com/docs/en/plugin-evals (read as plain text; line numbers L<n> in the plugin-evals page refer to that plain-text rendering, so use section titles to find a passage). Date read: 2026-10-26.

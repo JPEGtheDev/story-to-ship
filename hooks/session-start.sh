@@ -75,10 +75,28 @@ fi
 # added here only skips the stamping itself, never the whole script. The
 # agent_id rule is the same: it skips this block only, so a subagent payload
 # still gets the banner and session-start.md text from the section below.
+# The diagnostic capture block further down must likewise stay above those early exits.
 RELOAD_PENDING_WRITTEN=""
 RELOAD_PENDING_ROLE=""
 RELOAD_ROLE_NAMES=(running-a-sprint)
 RELOAD_ACTION_NAMES=(subagent-driven-development using-git-worktrees versioning verification-before-completion writing-skills)
+
+# State dir: BOOTSTRAP_GATE_STATE_DIR, else CLAUDE_PROJECT_DIR/.claude; empty when neither is set.
+BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
+if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+  BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
+fi
+
+# Diagnostic capture (side effect only, fail-open): for every valid JSON object payload,
+# append {"source":...,"keys":[...]} (source null unless a string; sorted top-level key
+# names only) to .session-start-payload-log.jsonl in the state dir. Runs before the
+# stamping block so it also covers payloads with agent_id or without session_id.
+if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
+  if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
+    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys}' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
+  fi
+fi
+
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty 2>/dev/null; then
   BOOTSTRAP_SESSION_ID="$(printf '%s' "$RAW" | jq -r '.session_id // empty' 2>/dev/null)"
   # Non-empty agent_id means a subagent payload: skip the whole block below.
@@ -89,10 +107,6 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
   # Every path built from the id appends it after a fixed file-name prefix, so
   # an id without "/" stays in the state dir.
   if [[ -z "$BOOTSTRAP_AGENT_ID" && -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
-    BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
-    if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
-      BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
-    fi
     if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
       for BOOTSTRAP_FLAG_NAME in bootstrap honesty communication; do
         { : >"$BOOTSTRAP_STATE_DIR/.$BOOTSTRAP_FLAG_NAME-pending-$BOOTSTRAP_SESSION_ID"; } 2>/dev/null

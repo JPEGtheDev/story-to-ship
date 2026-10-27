@@ -127,6 +127,14 @@ plan_write() {
   printf '%s\n' "$@" > "$plan_file" || exit 2
 }
 
+# plan_write_crlf <file> <line>...: like plan_write, but every line ends in CR LF.
+plan_write_crlf() {
+  mkdir -p "$(dirname "$1")" || exit 2
+  plan_file=$1
+  shift
+  printf '%s\r\n' "$@" > "$plan_file" || exit 2
+}
+
 # plan_run <name> <plan-file> <expected-exit> <expected-text>: plan-check.sh cases.
 plan_run() {
   out=$(sh "$ROOT/plan-check.sh" "$2" 2>&1 </dev/null)
@@ -160,6 +168,69 @@ plan_run plan-marker-before-header "$PLANS/plan-marker-before-header.md" 1 'VIOL
 plan_write "$PLANS/plan-no-entries.md" 'just some text'
 plan_run plan-no-entries "$PLANS/plan-no-entries.md" 2 'no entries in plan'
 plan_run plan-missing-file "$PLANS/does-not-exist.md" 2 'cannot read plan'
+
+# Header shapes: a header is a column-0 "Todo N" or "Task N" (optionally after "#"s and spaces) followed by a non-alphanumeric character or end of line.
+plan_write "$PLANS/hdr-nocolon-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Todo 2 second' 'Files: b'
+plan_run hdr-nocolon-bad "$PLANS/hdr-nocolon-bad.md" 1 'VIOLATION Todo 2 second has no loop: marker'
+plan_write "$PLANS/hdr-heading-bad.md" '## Todo 1: first' 'Files: a'
+plan_run hdr-heading-bad "$PLANS/hdr-heading-bad.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/hdr-heading-ok.md" '### Task 1: x' 'loop: single -- reason: y'
+plan_run hdr-heading-ok "$PLANS/hdr-heading-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/hdr-h1-ok.md" '# Todo 12: x' 'loop: single -- reason: y'
+plan_run hdr-h1-ok "$PLANS/hdr-h1-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/hdr-1a.md" 'Todo 1a x'
+plan_run hdr-1a "$PLANS/hdr-1a.md" 2 'no entries in plan'
+
+# Fences: a column-0 run of three or more backticks or tildes opens a fence; lines inside it are ignored.
+plan_write "$PLANS/fence-marker-bt.md" 'Todo 1: first' '```' 'loop: single -- reason: y' '```'
+plan_run fence-marker-bt "$PLANS/fence-marker-bt.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/fence-marker-tilde.md" 'Todo 1: first' '~~~' 'loop: single -- reason: y' '~~~'
+plan_run fence-marker-tilde "$PLANS/fence-marker-tilde.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/fence-info-string.md" 'Todo 1: first' '```sh' 'loop: single -- reason: y' '```'
+plan_run fence-info-string "$PLANS/fence-info-string.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/fence-header-ignored.md" 'Todo 1: first' 'loop: single -- reason: y' '```' 'Todo 9: sample' '```'
+plan_run fence-header-ignored "$PLANS/fence-header-ignored.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/fence-unclosed.md" 'Todo 1: first' '```' 'loop: single -- reason: y'
+plan_run fence-unclosed "$PLANS/fence-unclosed.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/fence-only-header.md" '```' 'Todo 1: first' '```'
+plan_run fence-only-header "$PLANS/fence-only-header.md" 2 'no entries in plan'
+plan_write "$PLANS/fence-mismatch-closer.md" 'Todo 1: first' '```' '~~~' 'loop: single -- reason: y'
+plan_run fence-mismatch-closer "$PLANS/fence-mismatch-closer.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write "$PLANS/fence-prev-entry.md" 'Todo 1: a' '```' 'loop: single -- reason: y' '```' 'Todo 2: b' 'loop: single -- reason: y'
+plan_run fence-prev-entry "$PLANS/fence-prev-entry.md" 1 'VIOLATION Todo 1: a has no loop: marker'
+# Documented miss: an indented fence is not recognised, so a column-0 marker inside it counts.
+plan_write "$PLANS/fence-indented-MISS.md" 'Todo 1: first' '  ```' 'loop: single' '  ```'
+plan_run fence-indented-MISS "$PLANS/fence-indented-MISS.md" 0 'OK plan-check: 1 entries'
+
+# CRLF: a CR LF file is judged exactly like an LF file, and printed text has no CR.
+plan_write_crlf "$PLANS/crlf-bare-ok.md" 'Todo 1: first' 'loop: single'
+plan_run crlf-bare-ok "$PLANS/crlf-bare-ok.md" 0 'OK plan-check: 1 entries'
+plan_write_crlf "$PLANS/crlf-unmarked.md" 'Todo 1: first' 'Files: a'
+plan_run crlf-unmarked "$PLANS/crlf-unmarked.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write_crlf "$PLANS/crlf-fence.md" 'Todo 1: first' '```' 'loop: single -- reason: y' '```'
+plan_run crlf-fence "$PLANS/crlf-fence.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+plan_write_crlf "$PLANS/crlf-heading-ok.md" '## Todo 1: first' 'loop: single'
+plan_run crlf-heading-ok "$PLANS/crlf-heading-ok.md" 0 'OK plan-check: 1 entries'
+
+# No final newline: the last line still counts as a marker.
+printf 'Todo 1: first\nloop: single -- reason: y' > "$PLANS/no-trailing-newline.md" || exit 2
+plan_run no-trailing-newline "$PLANS/no-trailing-newline.md" 0 'OK plan-check: 1 entries'
+
+# Duplicate markers: an entry must carry exactly one marker.
+plan_write "$PLANS/dup-diff.md" 'Todo 1: first' 'loop: single -- reason: x' 'loop: three-role -- reason: y'
+plan_run dup-diff "$PLANS/dup-diff.md" 1 'VIOLATION Todo 1: first has more than one loop: marker'
+plan_write "$PLANS/dup-same.md" 'Todo 1: first' 'loop: single -- reason: y' 'loop: single -- reason: y'
+plan_run dup-same "$PLANS/dup-same.md" 1 'VIOLATION Todo 1: first has more than one loop: marker'
+plan_write "$PLANS/dup-three.md" 'Todo 1: first' 'loop: single -- reason: y' 'loop: single -- reason: y' 'loop: three-role -- reason: y'
+plan_run dup-three "$PLANS/dup-three.md" 1 'VIOLATION Todo 1: first has more than one loop: marker'
+plan_write "$PLANS/dup-middle.md" 'Todo 1: a' 'loop: single -- reason: y' 'loop: single -- reason: y' 'Todo 2: b' 'loop: single -- reason: y'
+plan_run dup-middle "$PLANS/dup-middle.md" 1 'VIOLATION Todo 1: a has more than one loop: marker'
+plan_write "$PLANS/valid-plus-invalid.md" 'Todo 1: first' 'loop: single -- reason: y' 'loop: both -- reason: y'
+plan_run valid-plus-invalid "$PLANS/valid-plus-invalid.md" 0 'OK plan-check: 1 entries'
+
+# Empty file: zero bytes, no entries.
+: > "$PLANS/empty-file.md" || exit 2
+plan_run empty-file "$PLANS/empty-file.md" 2 'no entries in plan'
 
 printf '%s cases, %s failed\n' "$cases" "$failed"
 if [ "$failed" -eq 0 ]; then

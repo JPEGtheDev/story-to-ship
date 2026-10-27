@@ -77,7 +77,7 @@ Every implementation subagent must report one of these five codes: require it in
 ## Review Cadence
 
 Stage 1 runs after every todo. Stage 2 runs once over the whole branch diff, after CI is green on the feature branch and before the pull request is handed back (outside a story run: before `finishing-a-development-branch`). One Stage 2 pass plus the fixes it triggers and their re-check is one whole-branch cycle; at most 3 cycles run, a count separate from the per-todo fix-round cap below. A not-passed Stage 2 verdict that would need a fourth cycle stops the work: end the turn with a prompt to the owner that states the open findings (a story runner hands back kind cap reached).
-A todo is risky when its `Files:` list names a path under `.github/`, `hooks/` or `agents/`, or names a file that another todo's `Files:` list also names; the list is closed. A risky todo also gets Stage 2 right after its Stage 1 passes, and does not advance until it passes. Inline-lane, `PARTIAL` and `loop: three-role` todos are risky only by that test.
+A todo is risky when its `Files:` list names a path under `.github/`, `hooks/` or `agents/`; the list is closed. A risky todo also gets Stage 2 right after its Stage 1 passes, and does not advance until it passes. Inline-lane, `PARTIAL` and `loop: three-role` todos are risky only by that test.
 **Context:** A story has many todos, and the quality review is the costliest review role.
 **Forces:** A Stage 2 after every todo re-reviews each file every time a later todo touches it and cannot see a contradiction between two todos, so its cost grows with todo count. One pass over the finished diff costs in proportion to the changed files and sees all todos together; a risky todo keeps an early review.
 Pass inputs, evidence, charging, re-check scope and the red-CI case: `references/REVIEW_PROTOCOL.md`, section Whole-Branch Pass.
@@ -162,7 +162,7 @@ These thoughts mean stop immediately:
 | "This concern in the implementer result does affect behavior, so I'm treating it as a finding and fixing it in this same pass" | Judging a concern in an implementer result behavior-affecting is the trigger for the owner prompt, not a license to fix it: end the turn with the prompt before any fix or dispatch. |
 | "The subagent hit a rate limit -- I'll do the review inline instead" | Rate limits are temporary. Inline review inherits your assumptions and blind spots. The whole point of a dispatched reviewer is independence from the author's context. Wait for the reset and dispatch. |
 | "I've already verified this change through mutation testing, which is more rigorous than a re-review would be -- I'll proceed with committing" | Failure mode: an agent calling its own change "covered enough" to skip re-review. That IS the failure, not an exemption. YOU MUST re-review any change in review-covered territory. |
-| "The risky todo can wait for the whole-branch pass, because Stage 2 runs once at the end anyway" | A todo that touches `.github/`, `hooks/`, `agents/` or a file another todo names keeps its early Stage 2. The list is closed, and a deferred risky todo is a skipped gate. |
+| "The risky todo can wait for the whole-branch pass, because Stage 2 runs once at the end anyway" | A todo whose `Files:` list names a path under `.github/`, `hooks/` or `agents/` keeps its early Stage 2. The list is closed, and a deferred risky todo is a skipped gate. |
 
 ---
 

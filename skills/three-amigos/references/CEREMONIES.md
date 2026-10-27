@@ -20,7 +20,7 @@ The Feature Specification is written at **user behavior and outcome** level only
 **Include:**
 - What the user can DO (observable actions)
 - What the user receives or observes (outcomes)
-- Numbered acceptance criteria in behavioral terms (Given/When/Then or plain language; write Given/When/Then per FORMULATION.md in this directory)
+- Numbered acceptance criteria in behavioral terms (Given/When/Then or plain language; write Given/When/Then per FORMULATION.md in this directory); a criterion proven by documentation evidence or a throwaway spike ends with `Proof: documentation` or `Proof: spike`
 - What is explicitly OUT of scope
 - Unresolved questions: listed only in the example map's Questions line
 
@@ -97,7 +97,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 1. What does the user want to be able to DO? (observable behavior, not technical steps)
 2. What are the boundaries? What is explicitly OUT of scope?
-3. What does "done" look like? State 3-5 testable acceptance criteria (Business and Tester: scenario wording per the formulation rules in your read list).
+3. What does "done" look like? State 3-5 testable acceptance criteria (Business and Tester: scenario wording per the formulation rules in your read list). Tester: give each criterion's proof kind per the Proof kinds section of the formulation rules in your read list, and flag a criterion whose proof kind does not match that rule.
 4. What are the failure cases? What must happen when things go wrong?
 5. What questions remain unresolved? (Surface to user before proceeding.)
 6. For each rule, give at least one concrete example with real values; list every rule that has none.

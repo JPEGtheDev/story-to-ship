@@ -101,7 +101,7 @@ The sprint ledger (the launcher's plan file, see the Launch section of `../SKILL
 
 Each card's number is also recorded in the pending question field of the runner entry it belongs to, next to any reconcile entry that is already there.
 
-If the question counter is missing from the ledger, the launcher takes the highest number on the page and in the pending question fields, and continues from the next number after it. When the ledger holds a restart record, the launcher takes the highest number used since that record instead of the highest number on the page.
+If the question counter is missing from the ledger, the launcher takes the highest number on the page and in the pending question fields, and continues from the next number after it. When the ledger holds a restart record, the counter is the highest question number used since that record: the launcher takes the highest number that the page and the pending question fields hold for cards added since the restart (the page shows where numbering restarted), never counts a pre-restart number, and continues from the next number after it, skipping any number an open card holds.
 
 **Context:** The launcher compacts or restarts while cards are open or entries are listed.
 **Forces:** The page survives in the publishing tool and the ledger survives in the plan file, but the launcher's memory does not. The counter, the restart record and the pending question fields are the only record of which numbers are already used, and the entry list is the only record of which PRs are on the page.

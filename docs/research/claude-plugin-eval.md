@@ -40,7 +40,7 @@ Six types (grader types table, L1654-1725): regex, tool_used, tool_order and fil
 ## Credentials and cost
 Runs and judge calls use the user's credentials and count against plan usage or the API bill; reported cost is a list-price estimate (L182-186). Per suite: about cases x runs agent runs, the same again for the baseline, plus three judge calls per llm or baseline grader per run (L214-217).
 
-## Observed (story runner's verification run 1, 2026-10-26/27, listed in the pull request body)
+## Observed (verification run 1, 2026-10-26/27, listed in the pull request body)
 Command: claude plugin eval . --runs 1 --ablation none --no-publish --trust-plugin --max-cost-usd 0.5 --model <alias> --json <path> (model name elided). Claude Code 2.1.296. Regex grader passed; llm grader failed 3 of 3 votes; case score 0.5; exit 1. costUsd 0.00258339 plus judgeCostUsd 0.0000585. The JSON result has no token fields. One run; no judge-reliability conclusion.
 
 ## Related

@@ -667,13 +667,12 @@ jobs:
       # The skeptic heading is a whole-line match copied verbatim from its source file;
       # the two table rows and the Exception sentence are substring matches, because their
       # sources are long table or paragraph lines. Routing text is not pinned.
-      # Once the owner rules, update the Exception pin in the same change that applies the owner's ruling.
       - name: Check Discovery skeptic check and economy tier are pinned
         run: |
           missing=0
           f=skills/three-amigos/references/CEREMONIES.md
           g=skills/subagent-driven-development/references/MODEL_SELECTION.md
-          s='### Skeptic check -- PILOT'
+          s='### Skeptic check'
           if ! grep -qxF -- "$s" "$f"; then
             printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
             missing=$((missing + 1))
@@ -683,12 +682,12 @@ jobs:
             printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
             missing=$((missing + 1))
           fi
-          s='| Three Amigos Ceremony 1 skeptic check (pilot) | Standard |'
+          s='| Three Amigos Ceremony 1 skeptic check | Standard |'
           if ! grep -qF -- "$s" "$g"; then
             printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
             missing=$((missing + 1))
           fi
-          s='Exception: until the owner'\''s ruling on the Discovery pilot is applied to this paragraph and to the Ceremony 1 rows, Three Amigos Ceremony 1 (Discovery) amigos run at Economy tier'
+          s='Exception: Three Amigos Ceremony 1 (Discovery) amigos run at Economy tier'
           if ! grep -qF -- "$s" "$g"; then
             printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
             missing=$((missing + 1))

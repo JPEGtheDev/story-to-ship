@@ -527,6 +527,33 @@ jobs:
           fi
           echo "[+] Review cadence contract strings present, replaced wording absent"
 
+      - name: Check risky-todo rule is path-only
+        run: |
+          set -e
+          missing=0
+          absent() {
+            file="$1"
+            shift
+            if [ ! -f "$file" ]; then
+              printf 'FAILED: %s is missing, cannot check it\n' "$file"
+              missing=$((missing + 1))
+              return 0
+            fi
+            for s in "$@"; do
+              if grep -qiF -- "$s" "$file"; then
+                printf 'FAILED: %s carries the shared-file clause again (a todo is risky by path only): %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          absent skills/two-stage-review/SKILL.md 'another todo' 'also names' 'a file another'
+          absent skills/two-stage-review/references/REVIEW_LOOP.md 'another todo' 'also named' 'also names'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing shared-file clause problem(s)"
+            exit 1
+          fi
+          echo "[+] risky-todo rule is path-only in the two-stage-review skill"
+
       - name: Check agent templates index matches agents/
         run: |
           set -e

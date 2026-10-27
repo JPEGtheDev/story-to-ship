@@ -668,6 +668,24 @@ jobs:
           fi
           echo "[+] acceptance proof-kind pins are present"
 
+      - name: Check three-amigos reference list names proof kinds for the formulation reference
+        run: |
+          missing=0
+          f=skills/three-amigos/SKILL.md
+          for s in \
+            '- `references/FORMULATION.md` -- rules for writing Given/When/Then scenarios and for choosing a proof kind per acceptance criterion'
+          do
+            if ! grep -qxF -- "$s" "$f"; then
+              printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing three-amigos reference list pin(s)"
+            exit 1
+          fi
+          echo "[+] three-amigos reference list names proof kinds"
+
       # This 20,000-character cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it

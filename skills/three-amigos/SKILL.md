@@ -144,4 +144,4 @@ This output proves the ceremony was identified before dispatch. It does not prov
 ## References
 
 - `references/CEREMONIES.md` -- per-amigo sources, agenda lists, and output formats for all 6 ceremonies
-- `references/FORMULATION.md` -- rules for writing Given/When/Then scenarios
+- `references/FORMULATION.md` -- rules for writing Given/When/Then scenarios and for choosing a proof kind per acceptance criterion

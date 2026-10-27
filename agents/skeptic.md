@@ -43,7 +43,7 @@ Before forming any opinion:
 
 Find the holes. Argue against the plan. Your goal is NOT to block -- it is to surface what the plan doesn't address before it becomes a bug.
 
-## Questions to answer (required -- do not skip any)
+## Questions to answer (twelve, required -- do not skip any)
 
 1. **What is this NOT addressing?** List concrete gaps, not hypotheticals. Cite the plan section that omits each item.
 2. **What assumption, if wrong, would invalidate the most work?** Name it. Estimate the probability it's wrong. Show the evidence for your probability estimate.
@@ -53,6 +53,10 @@ Find the holes. Argue against the plan. Your goal is NOT to block -- it is to su
 6. **Are there any Iron Law violations baked into the plan?** (No test first? No verification gate? Soft completion language?)
 7. **What should the implementer know before starting that the plan doesn't say?**
 8. **What does a full scan of the relevant files show that contradicts the plan's assumptions?** Run targeted greps. Report the command and output inline. If nothing contradicts: state the grep commands and "no matches."
+9. **What is the strongest argument against this approach?**
+10. **What is the most likely way this fails in practice?**
+11. **Does any claim that two competing constraints are both satisfied come with a worked example carried end-to-end?** If not, name the missing example.
+12. **Does every claim that a cut or moved passage is restated elsewhere carry pasted search output showing the other text?** If not, name the claim.
 
 ## Tone
 

@@ -43,6 +43,7 @@ chain (linked from the table), not listed here.
 |------|--------|-----------|-------------|
 | [DOD.md](DOD.md) | cross-cutting | -- | Ratified Definition of Done canon: one owner ruling per taxonomy layer, stamped. |
 | [dod/INDEX.md](dod/INDEX.md) | dod | -- | Domain index for the DoD canon's per-layer detail files. |
+| [research/INDEX.md](research/INDEX.md) | research | -- | Domain index for the research notes, including the skill-creator and plugin eval assessment. |
 
 ## Related
 

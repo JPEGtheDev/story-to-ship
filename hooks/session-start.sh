@@ -80,16 +80,19 @@ RELOAD_PENDING_ROLE=""
 RELOAD_ROLE_NAMES=(running-a-sprint)
 RELOAD_ACTION_NAMES=(subagent-driven-development using-git-worktrees versioning verification-before-completion writing-skills)
 
+# State dir: BOOTSTRAP_GATE_STATE_DIR, else CLAUDE_PROJECT_DIR/.claude; empty when neither is set.
+BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
+if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
+  BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
+fi
+
 # Diagnostic capture (side effect only, fail-open): for every valid JSON object payload,
-# append one line {"source":...,"keys":[...]} to .session-start-payload-log.jsonl in the
-# state dir. It records the source string (null when absent or not a string) and the
-# sorted top-level key names only, never any other value. It sits before the stamping
-# block so it also covers a payload with agent_id or without session_id. Recorded because
-# the real subagent compaction payload shape is not yet known.
+# append {"source":...,"keys":[...]} (source null unless a string; sorted top-level key
+# names only) to .session-start-payload-log.jsonl in the state dir. Runs before the
+# stamping block so it also covers payloads with agent_id or without session_id.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
-  PAYLOAD_LOG_DIR="${BOOTSTRAP_GATE_STATE_DIR:-${CLAUDE_PROJECT_DIR:+$CLAUDE_PROJECT_DIR/.claude}}"
-  if [[ -n "$PAYLOAD_LOG_DIR" ]] && mkdir -p "$PAYLOAD_LOG_DIR" 2>/dev/null; then
-    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys}' 2>/dev/null >>"$PAYLOAD_LOG_DIR/.session-start-payload-log.jsonl" 2>/dev/null
+  if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
+    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys}' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl" 2>/dev/null
   fi
 fi
 
@@ -103,10 +106,6 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
   # Every path built from the id appends it after a fixed file-name prefix, so
   # an id without "/" stays in the state dir.
   if [[ -z "$BOOTSTRAP_AGENT_ID" && -n "$BOOTSTRAP_SESSION_ID" && "$BOOTSTRAP_SESSION_ID" =~ ^[A-Za-z0-9._-]+$ ]]; then
-    BOOTSTRAP_STATE_DIR="${BOOTSTRAP_GATE_STATE_DIR:-}"
-    if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
-      BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
-    fi
     if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
       for BOOTSTRAP_FLAG_NAME in bootstrap honesty communication; do
         { : >"$BOOTSTRAP_STATE_DIR/.$BOOTSTRAP_FLAG_NAME-pending-$BOOTSTRAP_SESSION_ID"; } 2>/dev/null

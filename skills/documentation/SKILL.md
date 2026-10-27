@@ -52,7 +52,7 @@ Every `docs/` file MUST begin with YAML frontmatter -- schema in `references/DOC
 Required fields: `title`, `description`, `domain`, `subdomain`, `tags`, `related`. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain (domain `cross-cutting` for docs/DOD.md and docs/INDEX.md, the owning domain for docs/<domain>/INDEX.md).
 
 - `description` MUST be one concrete sentence that answers: what exactly does this file cover?
-- `tags` MUST include domain and subdomain as the first two entries. (see Step 2)
+- `tags` MUST include domain and subdomain as the first two entries (the three files named above excepted)
 - `related` uses relative paths from the file's own directory
 
 Every doc file MUST end with a `## Related` section with at least one annotated link. Scoped exception: `docs/DOD.md`, the Definition of Done canon index, ends at its `Stamp:` line with nothing after it -- the defining-done skill's canon template states the rationale and owns the exception; detail files under `docs/dod/` keep the requirement.

@@ -83,7 +83,7 @@ Run every item for any changed sandboxed/packaging manifest:
 
 For the full report table template (Pipeline Safety, Build Reproducibility, Packaging Compliance sections) and dispatch instructions, see `references/INFRA_REVIEW_TEMPLATES.md`.
 
-A verdict of ISSUES FOUND means the PR is NOT mergeable until every INTRODUCED NO item is resolved, and an INTRODUCED failure in any area makes the PR verdict ISSUES FOUND. INTRODUCED means the PR's changed lines add the failure; PRE-EXISTING means the base already had it and a PR whose only failures are PRE-EXISTING is SAFE, with a cleanup task logged. Classify each unmet item as INTRODUCED or PRE-EXISTING by the attribution method in the infrastructure reviewer agent template before writing the verdict.
+A verdict of ISSUES FOUND means the PR is NOT mergeable until every INTRODUCED NO item is resolved, and an INTRODUCED failure in any area makes the PR verdict ISSUES FOUND. A PR whose only failures are PRE-EXISTING is SAFE, with a cleanup task logged. Classify each unmet item as INTRODUCED or PRE-EXISTING by the attribution method in the infrastructure reviewer agent template before writing the verdict.
 
 ---
 

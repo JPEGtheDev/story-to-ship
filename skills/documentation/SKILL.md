@@ -24,8 +24,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 Before writing any documentation:
 
-1. Identify the **domain** and **subdomain** (subdomain only where the file takes one) from `docs/INDEX.md` and the domain indexes; if no taxonomy exists yet, define one per `references/DOCUMENTATION_EXAMPLES.md`. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
-2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/`. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
+1. Identify the **domain** and **subdomain** from `docs/INDEX.md` and the domain indexes; if no taxonomy exists yet, define one per `references/DOCUMENTATION_EXAMPLES.md`. (see Step 2)
+2. Confirm the file belongs in `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/`. (see Step 2)
 3. Confirm no existing file already covers this concept: run `grep -rF -- "<concept-title>" docs/` -- if a match exists, link to it instead of duplicating
 
 [+] All 3 met -> proceed to write
@@ -38,7 +38,7 @@ Before writing any documentation:
 | Type | Location |
 |------|----------|
 | API/class reference | Header file comments (<=5 lines inline; longer -> `docs/`) |
-| Domain guides and standards | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain. |
+| Domain guides and standards | `docs/<domain>/<subdomain>/` or `docs/<domain>/<subdomain>/<subdomain2>/` (third level when a subdomain needs splitting) -- one concept per file, <=800 tokens. (see Step 2) |
 | Agent skills | `.claude/skills/<name>/SKILL.md` |
 | Skill reference content | `.claude/skills/<name>/references/*.md` |
 | Agent onboarding | `AGENTS.md` at the project root, when the project keeps one -- summarize only |
@@ -49,10 +49,10 @@ Before writing any documentation:
 
 Every `docs/` file MUST begin with YAML frontmatter -- schema in `references/DOCUMENTATION_EXAMPLES.md`.
 
-Required fields: `title`, `description`, `domain`, `subdomain`, `tags`, `related`. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
+Required fields: `title`, `description`, `domain`, `subdomain`, `tags`, `related`. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain (domain `cross-cutting` for docs/DOD.md and docs/INDEX.md, the owning domain for docs/<domain>/INDEX.md).
 
 - `description` MUST be one concrete sentence that answers: what exactly does this file cover?
-- `tags` MUST include domain and subdomain as the first two entries. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
+- `tags` MUST include domain and subdomain as the first two entries. (see Step 2)
 - `related` uses relative paths from the file's own directory
 
 Every doc file MUST end with a `## Related` section with at least one annotated link. Scoped exception: `docs/DOD.md`, the Definition of Done canon index, ends at its `Stamp:` line with nothing after it -- the defining-done skill's canon template states the rationale and owns the exception; detail files under `docs/dod/` keep the requirement.
@@ -88,8 +88,8 @@ Full prose: `references/DOCUMENTATION_PRINCIPLES.md`.
 
 Before presenting documentation, verify:
 
-1. YAML frontmatter is present with all required fields. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
-2. File is in the correct domain/subdomain directory. The only files outside docs/<domain>/<subdomain>/ are docs/DOD.md, docs/INDEX.md and docs/<domain>/INDEX.md (the one INDEX.md directly under each docs/<domain>/); they carry no `subdomain` field, and their `tags` start with the domain.
+1. YAML frontmatter is present with all required fields. (see Step 2)
+2. File is in the correct domain/subdomain directory. (see Step 2)
 3. File is <=800 tokens
 4. All relative links resolve correctly from the file's directory
 5. Code examples have language tags

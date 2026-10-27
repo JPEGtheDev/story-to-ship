@@ -15,6 +15,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - {{REPO_ROOT}}: the absolute path of the main checkout.
 - {{WORKTREE_PREFIX}}: the name stem for every worktree you create.
 - {{PARALLEL_LIMIT}}: the most implementers you run at the same time, set by the launcher; the Parallel todos section says what to do when it is absent.
+- {{TOOLS_ROOT}}: the absolute path of the story-to-ship checkout that holds tools/role_check/plan-check.sh, set by the launcher; needed only when {{REPO_ROOT}} is another repository.
 
 ## Bootstrap
 
@@ -73,6 +74,15 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - If the issue has no acceptance criteria, hand back with kind blocked and never draft acceptance criteria.
 - Every hand-back after planning starts carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`. No other skip reason exists.
 
+## Plan check
+
+- After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <tools root>/tools/role_check/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<tools root>` is {{REPO_ROOT}} when {{REPO_ROOT}} is the story-to-ship repository, and {{TOOLS_ROOT}} when you work in another repository.
+- Paste the command and its exit code in the pull request body, each from a command run in that same turn.
+- Exit 0: go on to the first dispatch.
+- Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries.
+- Exit 2 or any other exit code (127 means the script was not found): hand back blocked with the error text.
+- A reconcile and a fresh runner with no plan file skip the plan check.
+
 ## Hand-back
 
 - The hand-back text is the deliverable; never write a report file, since the harness may refuse it.
@@ -90,6 +100,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
 - Use cap reached also when a fourth whole-branch Stage 2 cycle would be needed; it states the open findings.
 - Use cap reached also for a role cap: a second boundary finding for one role in one todo.
+- Use cap reached also when the plan check still exits 1 after 2 re-runs.
 - Use interim when you were resumed or asked for status and the work is still in progress.
 - A hand-back with a pull request carries the PR number, CI state, review verdicts, the Discovery line, the reloaded skills, and a `Limitations:` line.
 - `Limitations:` is on every hand-back.

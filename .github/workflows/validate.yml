@@ -949,7 +949,7 @@ jobs:
               fi
             done
           }
-          check agents/story-coordinator.md '- {{TOOLS_ROOT}}: the absolute path of the story-to-ship checkout' '`sh <tools root>/tools/role_check/plan-check.sh <plan file>`' '{{TOOLS_ROOT}} when you work in another repository' 'Paste the command and its exit code in the pull request body' 'A third exit 1 (after 2 re-runs) is a cap reached hand-back' 'Exit 2 or any other exit code' 'A reconcile and a fresh runner with no plan file skip the plan check.' 'Use cap reached also when the plan check still exits 1 after 2 re-runs.' 'before the first dispatch, and again after any re-plan, run' 'of the plan file and no cd.' 'never pick a value only to pass the check' 'hand back blocked with the error text.'
+          check agents/story-coordinator.md '`sh <skill dir>/scripts/plan-check.sh <plan file>`' 'Paste the command and its exit code in the pull request body' 'A third exit 1 (after 2 re-runs) is a cap reached hand-back' 'Exit 2 or any other exit code' 'A reconcile and a fresh runner with no plan file skip the plan check.' 'Use cap reached also when the plan check still exits 1 after 2 re-runs.' 'before the first dispatch, and again after any re-plan, run' 'of the plan file and no cd.' 'never pick a value only to pass the check' 'hand back blocked with the error text.' 'the base directory the Skill tool prints when you load the subagent-driven-development skill'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing plan-check instruction string(s)"
             exit 1

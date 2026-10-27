@@ -12,14 +12,14 @@ related:
 
 # Skill-creator eval toolkit: sources
 
-Repository: anthropics/skills at commit dbd4588f9e1033efb41dad4bef2f7947c8993d44 (2026-10-09), directory skills/skill-creator/. The repository has no tags. Every repository path below was checked to exist at that commit through the public GitHub contents interface on 2026-10-26, and the files read were byte-identical to the copies the line numbers refer to. No third-party write-up is used.
+Repository: anthropics/skills at commit dbd4588f9e1033efb41dad4bef2f7947c8993d44 (2026-10-09), directory skills/skill-creator/. The repository has no tags. Every repository path below was checked to exist at that commit through the public GitHub contents interface on 2026-10-26, and the files read were byte-identical to the copies the line numbers refer to. No third-party write-up is relied on.
 
 | Claim | Primary source | Status |
 |---|---|---|
 | Test cases are saved in evals/evals.json inside the skill directory | SKILL.md L145; schemas.md L7-9 | verified from primary source |
 | Each eval has id, prompt, expected_output, files | schemas.md L14-35 | verified from primary source |
 | Eval assertion list field is named "assertions" | SKILL.md L161 | conflict: schemas.md L20 and L35 say "expectations" |
-| Graded assertions: grader subagent (or inline) writes grading.json | SKILL.md L225; agents/grader.md L1-12 | verified from primary source |
+| Graded assertions: grader subagent (or inline) writes grading.json | SKILL.md L225; agents/grader.md L83 | verified from primary source |
 | Benchmark: pass_rate, time, tokens; mean and sample stddev; delta | scripts/aggregate_benchmark.py L45-61, L130-145, L214-221; SKILL.md L231 | verified from primary source |
 | Blind comparison: comparator agent judges A and B without knowing the skill | agents/comparator.md L3, L7; SKILL.md L325-327 | verified from primary source; optional, needs subagents |
 | Trigger testing: run_eval.py, run_loop.py, improve_description.py | scripts/run_eval.py L266; run_loop.py L251-254; improve_description.py L26 | verified from primary source |

@@ -124,7 +124,9 @@ Answer before finalizing any plan. Dispatch a research subagent if you cannot an
 
 **For features with background threads or async state:** answer a 6th question before finalizing: "How will a developer diagnose this at runtime?" If no debug output path exists, add an observability todo before presenting the plan.
 
-For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. Before presenting the plan, read `references/PLAN_REVIEW.md`: it holds the routing by whether Discovery ran, the Skeptic Agent and plan-reviewer dispatch, and the Review-Round Cap.
+For any plan with 2+ todos or an architectural decision, dispatch a review agent before implementation. Before dispatching the review, read `references/PLAN_REVIEW.md`: it holds the routing by whether Discovery ran, the Skeptic Agent and plan-reviewer dispatch, and the Review-Round Cap.
+
+**Permissive-clause closure:** when a review finds an ambiguous or permissive clause, close it by deleting the clause, not rewording it -- rewording can make the bypass easier (e.g. "the user asks" -> "the user directs the change" turned a stretch into a bright-line match). If you must reword, test the new wording against the concrete evasion sentence that exploited the old wording.
 
 ### Untriggered-Branch Cap
 

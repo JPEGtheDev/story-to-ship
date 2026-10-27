@@ -18,6 +18,4 @@ Adversarial plan review is capped at round 3. Past round 3, OR as soon as plan l
 
 **Self-feeding detector:** a blocking finding located in text written in answer to the previous round -- not in the original plan -- is a manufactured defect. Treat it as the stop signal, not as something to fix with more prose. "Rounds keep finding real defects" and "the review must stop" can both be true at once; the fix is switching surfaces, not adding rounds.
 
-**Permissive-clause closure:** when a review finds an ambiguous or permissive clause, close it by deleting the clause, not rewording it -- rewording can make the bypass easier (e.g. "the user asks" -> "the user directs the change" turned a stretch into a bright-line match). If you must reword, test the new wording against the concrete evasion sentence that exploited the old wording.
-
 **Enforcement is procedural/self-check:** round count > 3 and plan-lines > target-file-lines are both countable from the transcript/plan file. No automated detector exists.

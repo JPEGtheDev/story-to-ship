@@ -431,6 +431,29 @@ jobs:
           fi
           echo "[+] Hand-back size contract strings present"
 
+      - name: Check owner questions page strings
+        run: |
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/SKILL.md 'Add every question for the owner to the owner questions page as a card' 'Only the launcher writes the page.' 'Chat carries one line per change, plus a pointer to the page when a question is added.' 'The owner questions page adds three ledger fields' 'The card is the relay' 'a cap override, a scope change, a launch over the limit'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md '- `number`:' '- `story or topic`:' '- `question`:' '- `options`:' '- `recommendation`:' '- `status`:' 'none given' 'waiting on runners, not you' 'never reused' 'Only the launcher writes the page' 'as of Q' 'quotes the answer from the thread in chat'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Add the question to the owner questions page' 'as its card' 'for PR ready the question is the merge question'
+          check skills/running-a-sprint/references/INDEX.md '`OWNER_QUESTIONS.md`'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing owner questions page string(s)"
+            exit 1
+          fi
+          echo "[+] Owner questions page strings present"
+
       - name: Check parallel todo contract strings
         run: |
           set -e

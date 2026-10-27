@@ -5,6 +5,7 @@ __pycache__/
 *.pyc
 .claude/.stop-turn-log.jsonl
 .claude/.bootstrap-gate-log.jsonl
+.claude/.session-start-payload-log.jsonl
 node_modules/
 .claude/.inline-edit-ledger-*
 .claude/.*-pending-*

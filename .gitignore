@@ -10,4 +10,4 @@ node_modules/
 .claude/.inline-edit-ledger-*
 .claude/.*-pending-*
 .claude/.skills-loaded-*
-tools/role_check/tests/generated/
+skills/subagent-driven-development/scripts/tests/generated/

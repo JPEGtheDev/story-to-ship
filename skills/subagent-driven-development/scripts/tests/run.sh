@@ -2,7 +2,7 @@
 # Generated-fixture harness for role-check.sh and plan-check.sh.
 # Role cases are git repos built under tests/generated/ (never committed) and checked
 # by the detector; plan cases are plan files written under tests/generated/plans/.
-# Usage: sh tools/role_check/tests/run.sh
+# Usage: sh skills/subagent-driven-development/scripts/tests/run.sh
 # ROLE_CHECK=<path> points the harness at another detector (used to prove it can fail).
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 export LC_ALL=C.UTF-8 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null

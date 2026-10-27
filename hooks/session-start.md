@@ -71,7 +71,7 @@ INCORRECT: "I ran the tests and they passed."
 | 7 | **CLARIFY FIRST. PLAN BEFORE CODE. NO PLACEHOLDERS.** Label `[UNCLEAR:]`. Build todos before touching code. | `writing-plans` |
 | 8 | **NO CODE UNTIL THE DESIGN GATE IS PASSED.** Unclear approach, architecture impact, or multiple valid solutions = `brainstorming` first. | `brainstorming` |
 | 9 | **DISPATCH BEFORE GUESSING.** No theory, memory, or assumption justifies action. Point to a file/line/test, or dispatch. | `subagent-driven-development` |
-| 10 | **DISPATCH REVIEWERS AFTER EVERY TODO.** Stage 1: spec compliance. Stage 2: code quality. No next todo without both. | `two-stage-review` |
+| 10 | **DISPATCH SPEC COMPLIANCE AFTER EVERY TODO. DISPATCH CODE QUALITY OVER THE WHOLE BRANCH.** Stage 1 spec compliance runs after every todo; Stage 2 code quality runs once over the whole branch after CI is green (after a todo only when that todo is risky). STOP: no next todo until Stage 1 passes, and Stage 2 too for a risky todo. | `two-stage-review` |
 | 11 | **THE BROWN M&M LAW.** Every skill with a `## Canary` section: produce that canary output when applying the skill. A missing canary is a trust violation. | `defining-done`, `subagent-driven-development`, `summarization`, `systematic-debugging`, `three-amigos`, `two-stage-review` |
 | 12 | **IF THE READER MUST PARSE IT, YOU HAVE NOT SAID IT.** Write so the reader can act without decoding; read replies without wishful decoding. | `communication` |
 

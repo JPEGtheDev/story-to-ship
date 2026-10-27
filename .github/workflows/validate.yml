@@ -352,7 +352,7 @@ jobs:
           check skills/finishing-a-development-branch/SKILL.md "Every promised item is found in the drafted body file before gh pr create runs"
           check skills/two-stage-review/SKILL.md "SPEC COMPLIANCE FIRST, THEN CODE QUALITY" "{{IMPLEMENTER_EVIDENCE}}" "Adversarial scenario tested" "Canary confirmed"
           check skills/two-stage-review/SKILL.md "A Stage 1 or Stage 2 result whose verdict is missing, or is not one of the verdict values that reviewer's template defines, counts as not passed."
-          check skills/two-stage-review/SKILL.md "After 3 fix rounds on one todo without both stages passing, stop that todo and end the turn with a prompt to the owner that states the open findings."
+          check skills/two-stage-review/SKILL.md "After 3 fix rounds on one todo without every review stage the Review Cadence runs for that todo passing, stop that todo and end the turn with a prompt to the owner that states the open findings."
           check skills/two-stage-review/SKILL.md "A verdict value that the replying reviewer's own template defines with its own qualifier, such as PASS (size advisory) in the skill-reviewer template, counts as written; among qualifiers, only one that template does not define makes a verdict unreadable."
           check skills/two-stage-review/SKILL.md "Judging a concern in an implementer result behavior-affecting is the trigger for the owner prompt, not a license to fix it: end the turn with the prompt before any fix or dispatch."
           check skills/honesty/SKILL.md "buried caveat"
@@ -470,8 +470,6 @@ jobs:
           }
           check agents/story-coordinator.md 'Parallel limit: {{PARALLEL_LIMIT}}' 'with no value in the launch prompt it is 1' 'at most 20 subagents run at once in one session' 'share no file, test files included' 'runs alone' 'and so does an inline-lane todo' 'same feature-branch commit' 'in plan order, one at a time and run the suite after each merge' 'never a re-run of the whole batch' 'Stage 1 gap and goes to a fix child'
           check skills/writing-plans/references/TODO_TEMPLATES.md 'Depends on:' 'share no file, test files included' 'runs alone'
-          check skills/two-stage-review/SKILL.md 'A batch of independent todos'
-          check skills/subagent-driven-development/SKILL.md 'A batch of independent todos'
           check agents/story-coordinator.md 'whole-branch review fan-out'
           check skills/running-a-sprint/SKILL.md 'PARALLEL_LIMIT = <n>' 'floor((20 - L) / L)' '`WORKTREE_PREFIX` and `PARALLEL_LIMIT`' 'Name the four inputs'
           parallel_files=$(grep -rl 'Parallel limit' agents skills | wc -l)
@@ -484,6 +482,50 @@ jobs:
             exit 1
           fi
           echo "[+] Parallel todo contract strings present"
+
+      - name: Check review cadence contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required cadence string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          absent() {
+            file="$1"
+            shift
+            if [ ! -f "$file" ]; then
+              printf 'FAILED: %s is missing, cannot check it\n' "$file"
+              missing=$((missing + 1))
+              return 0
+            fi
+            for s in "$@"; do
+              if grep -qiF -- "$s" "$file"; then
+                printf 'FAILED: %s still carries the replaced per-todo Stage 2 wording: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/two-stage-review/SKILL.md 'SPEC COMPLIANCE AFTER EVERY TODO AND CODE QUALITY OVER THE WHOLE BRANCH' '## Review Cadence' 'at most 3 cycles run, a count separate from the per-todo fix-round cap' 'names a path under `.github/`, `hooks/` or `agents/`' 'the list is closed' 'a story runner hands back kind cap reached'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md '## Whole-Branch Pass' 'the pass starts only when CI is green on the feature branch head' 'is charged to the cycle only'
+          check skills/subagent-driven-development/SKILL.md 'Review Cadence' 'Independent todos dispatched together'
+          check agents/story-coordinator.md 'Every story run reviews as the two-stage-review skill' 'a fourth whole-branch Stage 2 cycle'
+          check hooks/session-start.md 'DISPATCH SPEC COMPLIANCE AFTER EVERY TODO. DISPATCH CODE QUALITY OVER THE WHOLE BRANCH.'
+          absent skills/two-stage-review/SKILL.md 'after every single todo' 'runs once on the whole branch after the story'
+          absent hooks/session-start.md 'DISPATCH REVIEWERS AFTER EVERY TODO'
+          absent skills/writing-skills/references/MODEL_COMPATIBILITY.md 'YOU MUST DISPATCH REVIEWERS AFTER EVERY TODO'
+          absent skills/user-story-estimation/SKILL.md 'todos x 3'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing review cadence contract problem(s)"
+            exit 1
+          fi
+          echo "[+] Review cadence contract strings present, replaced wording absent"
 
       - name: Check agent templates index matches agents/
         run: |

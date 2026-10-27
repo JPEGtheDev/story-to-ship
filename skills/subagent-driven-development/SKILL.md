@@ -20,15 +20,13 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 ## Workflow
 
-Pick up todo -> Dispatch implementer (or, for a todo that fits the Dispatch Decision Table's Inline lane row, edit inline) -> Load `two-stage-review` for the status code and both review stages -> Mark done.
+Pick up todo -> Dispatch implementer (or, for a todo that fits the Dispatch Decision Table's Inline lane row, edit inline) -> Load `two-stage-review` for the status code and Stage 1 (Stage 2 per Review Cadence) -> Mark done.
 
 **Status code branches:** See the `two-stage-review` skill for all five codes and their required actions.
 
 **After all todos:** Check plan.md for `## Feature Specification`. Present -> **Invoke Signoff (Ceremony 5 of the `three-amigos` skill: the pre-merge whole-feature review that returns ACCEPTED or REVISIONS NEEDED)** before `finishing-a-development-branch`. Absent -> dispatch final code reviewer -> `finishing-a-development-branch`.
 
-**Do not advance past any todo until Stage 1 (spec review) returns PASS and every file the todo changed has a Stage 2 (quality review) verdict block that advances under the `two-stage-review` skill's Stage 2 rule -- both stages are run under that skill.**
-
-A batch of independent todos (the story coordinator agent's Parallel todos section) is the one scoped exception to the rule above: each todo passes Stage 1 before its branch merges, the next batch starts once every todo in it is merged, and Stage 2 runs once on the whole branch after the story's last merge.
+**Do not advance past a todo until its Stage 1 (spec review) returns PASS; a risky todo also waits for its Stage 2 verdict blocks to advance.** Stage 2 otherwise runs once over the whole branch after CI is green (`two-stage-review` skill, Review Cadence). Independent todos dispatched together (the coordinator's Parallel todos section) each merge after their Stage 1 (a risky todo after its Stage 2), and the next batch starts once the batch is merged.
 
 See `references/SDD_LOOP.md` (Subagent-Driven Development (SDD) loop) for the full decision tree with complete ASCII flow. For a todo marked `loop: three-role`, see `references/THREE_ROLE_LOOP.md` (three role dispatches, role rules, boundary detector). Every implementer dispatch fills `{{ROLE_RULES}}` with `Role: <role>` and that role's subsection of section 3 of `references/THREE_ROLE_LOOP.md`, using `single` for every todo not marked `loop: three-role`; slot values copied verbatim from that reference are not injected rules.
 
@@ -91,7 +89,7 @@ These thoughts mean stop immediately:
 | "Writing a 'fix remaining X' dispatch with a pre-listed file scope or a do-not-touch-other-files constraint" | STOP. The todo must instruct the implementer to run the unscoped sweep first and paste the command + full output in its report; scope is the adjudicated sweep output, never a pre-listed set. |
 | "Launching a spend-bearing child (claude -p, a workflow run) under a prior 'go'" | STOP. Consent is per invocation -- a prior approval covers neither retries nor new launches. Write the script; the user pulls the trigger. |
 | "Dispatching any agent without passing `model`, or general-purpose without naming the template considered" | STOP. An omitted `model` falls back to the template pin or inherits your model, and the events log labels both `inherit`. Pass `model` explicitly on every call; for general-purpose also name the template that does not fit and the tier reasoning (`references/MODEL_SELECTION.md`). |
-| "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and both review stages live there. |
+| "Implementer result received and `two-stage-review` is not loaded" | STOP. Load `two-stage-review` before reading the status code; the status-code table and the review stages live there. |
 | "About to send a dispatch prompt containing a task tag, an issue number, or a tool/CLI claim I have not run" | STOP. Dispatch text is shipped text (BEFORE PROCEEDING items 6-8). Write the prompt to a file, run the sweep on that file and paste its output, run or read the source for every tool claim, and label what you cannot verify. |
 | "Writing a verification command into a dispatch prompt that I have only seen pass" | STOP. A check that has never failed is unproven. Run it on one must-pass and one must-fail input, paste both, and redesign it if it cannot fail (BEFORE PROCEEDING item 9). |
 | "About to split one change into several inline edits, edit a code or config file inline, or call a composed change mechanical so it stays inline" | STOP. The inline lane (the Dispatch Decision Table's Inline lane row) is a literal replacement in a prose file under the guard's caps; everything else is an implementer dispatch. |
@@ -109,11 +107,11 @@ These thoughts mean stop immediately:
 | Scanning 5+ files for patterns | Yes | explore agent |
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic + plan-reviewer pair (see writing-plans skill) |
-| Code review (Stage 2) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- one dispatch per group of at most two files that implement one change, one verdict block per file (the `two-stage-review` skill, Stage 2) |
+| Code review (Stage 2) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- one dispatch per group of at most two files that implement one change, one verdict block per file (the `two-stage-review` skill, Stage 2); once over the branch diff after CI is green, per todo only if risky (Review Cadence) |
 | Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file -- the template takes one file path, so no grouping |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |
-| Inline lane: coordinator edit to a prose file (.md or .txt) where the replacement text is already literal (written out in full before the edit, not composed while editing), at most 10 changed lines in that file and 30 in the session, where a changed line is one inserted or one deleted line, so replacing a line counts 2 (the inline-edit guard hook counts each edit this way, sums the file's edits over the session, and denies past either cap or on any other file type) | No | do inline in the feature worktree; the todo's Stage 1 and Stage 2 reviews still run (the `two-stage-review` skill, Inline-lane todos) |
+| Inline lane: coordinator edit to a prose file (.md or .txt) where the replacement text is already literal (written out in full before the edit, not composed while editing), at most 10 changed lines in that file and 30 in the session, where a changed line is one inserted or one deleted line, so replacing a line counts 2 (the inline-edit guard hook counts each edit this way, sums the file's edits over the session, and denies past either cap or on any other file type) | No | do inline in the feature worktree; its Stage 1 still runs and its Stage 2 follows the Review Cadence (the `two-stage-review` skill, Inline-lane todos) |
 | Investigating a runtime behavior bug (symptom can only be observed by running the app -- see the `systematic-debugging` skill Phase 1 for definition) | Yes | researcher agent ("Build + observe" is a required method for this hypothesis type) |
 | Quick grep/glob in 1-2 files | No | do inline (read-only tasks only -- implementation todos dispatch unless they fit the inline-lane row) |
 | Reading one known file | No | do inline |

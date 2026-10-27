@@ -9,7 +9,7 @@ Copy these lines into the sprint ledger before launch. After the merge, append `
 - The first call is session-bootstrap alone, then honesty, then communication.
 - Worktree isolation holds: the main checkout stays on main, with no checkout, switch or stash in its reflog.
 - The plan file stays out of the main checkout and out of the PR.
-- Dispatch count is at least the children the story needs: an implementer, a Stage 1 reviewer and a Stage 2 reviewer per todo.
+- Dispatch count is at least the children the story needs: an implementer and a Stage 1 reviewer per todo, plus the Stage 2 reviewers of the whole-branch pass and of each risky todo.
 - Review verdicts are present in the PR body.
 - Child visibility holds: while the runner is live, every child's transcript is readable from the launcher.
 
@@ -51,7 +51,7 @@ The grep -c counters (reflog_checkouts, plan_in_diff) exit 1 on a zero count. Ru
 | First-action audit verdict | The next section | CLEAN is a pass; MISS is a miss. |
 | cd into worktrees count (the never-cd gate) | `cd_count` | The launcher counts it on the runner transcript (T), not the launcher transcript. Counts Bash calls that cd into a path under .worktrees/. Expect 0. A cd to a variable path is missed, and a commit message that contains the text cd .worktrees/ over-counts, so read any nonzero hit. |
 | Background children count | `bg_count` | Prints [explicit true, not explicitly false]; an omitted value runs in the background here. Expect [0,0]. |
-| Dispatch count | `dispatch_count` | Three children per todo; fewer means a skipped stage. |
+| Dispatch count | `dispatch_count` | An implementer and a Stage 1 reviewer per todo, plus the whole-branch Stage 2 dispatches and each risky todo's Stage 2; fewer means a skipped stage. |
 | Model passed on every dispatch | `nomodel_count` | Counts Agent calls whose input lacks a model. Expect 0. |
 | Main-checkout reflog checkout lines | `reflog_checkouts "<launch time>"`, `stash_count` | Switch logs as checkout. Expect 0 since launch and a stash count equal to the count before launch. |
 | Plan file not in the PR diff | `plan_in_diff`, `plan_outside` | Expect 0 and 0: no plan file in the merge, no plan Write outside .worktrees/. |

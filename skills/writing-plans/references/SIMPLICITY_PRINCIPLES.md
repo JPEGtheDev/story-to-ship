@@ -213,7 +213,7 @@ The root cause is usually an incorrect domain model or missed abstraction. Stop 
 
 Rationale moved out of SKILL.md to keep that file under its size limit.
 
-- Token budget gate (Building the Plan, step 7): A 14-todo epic with a full 3-agent review pipeline consumes ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
+- Token budget gate (Building the Plan, step 7): A 14-todo epic under the old three-children-per-todo review pipeline consumed ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
 - Async-state sixth question (Smart Trust Gate): A feature with invisible async state has no failure-diagnosis path.
 
 ---

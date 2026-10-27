@@ -6,7 +6,7 @@
 Pick up todo
     |
     +-- Fits the Inline lane row (SKILL.md, Dispatch Decision Table)? --> Edit inline in the feature worktree,
-    |       then load `two-stage-review`: Stage 1 and Stage 2 still run on that diff.
+    |       then load `two-stage-review`: its Stage 1 still runs on that diff, and its Stage 2 follows the Review Cadence.
     |
     v
 Dispatch implementer subagent (implementer.md)
@@ -33,12 +33,13 @@ Implementer returns status code
     +-- DONE
          |
          v
-Load two-stage-review -> handle status code, canary, Stage 1, Stage 2 -> Mark todo done
+Load two-stage-review -> handle status code, canary, Stage 1 (Stage 2 only for a risky todo) -> Mark todo done
 After each push: check for new automated review threads before picking up the next todo. Do not wait for the user to surface review feedback.
 Pick up next todo.
     |
     v
-(After all todos) -> Check plan.md for `## Feature Specification`.
+(After all todos) -> Push the branch, wait for CI green, then Stage 2 over the whole branch diff (at most 3 whole-branch cycles; `two-stage-review` skill, Review Cadence).
+    Then check plan.md for `## Feature Specification`.
     If present (Discovery ran): Invoke `three-amigos` Signoff (Ceremony 5) BEFORE finishing-a-development-branch.
     If absent: Dispatch final code reviewer -> finishing-a-development-branch
 ```
@@ -59,7 +60,7 @@ Task to delegate
     |
     +-- Needs file changes?
          |
-         +-- Fits the Inline lane row? -> edit inline in the feature worktree -> both review stages
+         +-- Fits the Inline lane row? -> edit inline in the feature worktree -> Stage 1 (Stage 2 only for a risky todo)
          |
          v
     Create worktree (ALWAYS -- never dispatch to main working tree)
@@ -77,7 +78,7 @@ Task to delegate
          +-- DONE
               |
               v
-    Load two-stage-review -> handle status code, canary, Stage 1, Stage 2 -> Mark todo done
+    Load two-stage-review -> handle status code, canary, Stage 1 (Stage 2 only for a risky todo) -> Mark todo done
     After each push: check for new automated review threads before picking up the next todo.
     Pick up next todo.
               |

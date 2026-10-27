@@ -2,7 +2,7 @@
 name: code-quality-reviewer
 model: opus
 tools: Read, Grep, Glob, Bash
-description: Use for Stage 2 post-todo review after Stage 1 passes to check code quality and standards.
+description: Use for Stage 2 review after Stage 1 passes to check code quality and standards.
 ---
 
 # Code Quality Reviewer Agent

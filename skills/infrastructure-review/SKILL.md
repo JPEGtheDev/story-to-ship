@@ -48,7 +48,7 @@ Run every item for each changed `.github/workflows/*.yml` or `.github/workflows/
 7. `actions/checkout` and other third-party actions pinned to a specific Secure Hash Algorithm (SHA), not a floating tag
 
 [+] All pass -> pipeline is safe to merge
-[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; unmet PRE-EXISTING items -> SAFE, logged as cleanup tasks -- document in review report
+[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; every unmet item PRE-EXISTING -> SAFE, each logged as a cleanup task -- document in review report
 
 ### 2. Reproducible Build Review
 
@@ -61,7 +61,7 @@ Run every item for each changed build configuration file:
 5. No hardcoded absolute paths -- all paths relative or constructed via build-tool variables
 
 [+] All pass -> build is reproducible
-[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; unmet PRE-EXISTING items -> SAFE, logged as cleanup tasks -- document in review report
+[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; every unmet item PRE-EXISTING -> SAFE, each logged as a cleanup task -- document in review report
 
 ### 3. Sandboxed/Least-Privilege Packaging Review
 
@@ -75,7 +75,7 @@ Run every item for any changed sandboxed/packaging manifest:
 6. Network access absent from the manifest unless explicitly required and documented
 
 [+] All pass -> packaging manifest is compliant
-[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; unmet PRE-EXISTING items -> SAFE, logged as cleanup tasks -- document in review report
+[-] Any unmet INTRODUCED item -> verdict: ISSUES FOUND; every unmet item PRE-EXISTING -> SAFE, each logged as a cleanup task -- document in review report
 
 ---
 
@@ -83,7 +83,7 @@ Run every item for any changed sandboxed/packaging manifest:
 
 For the full report table template (Pipeline Safety, Build Reproducibility, Packaging Compliance sections) and dispatch instructions, see `references/INFRA_REVIEW_TEMPLATES.md`.
 
-A verdict of ISSUES FOUND means the PR is NOT mergeable until every INTRODUCED NO item is resolved. INTRODUCED means the PR's changed lines add the failure; PRE-EXISTING means the base already had it and the verdict stays SAFE, with a cleanup task logged. Classify each unmet item as INTRODUCED or PRE-EXISTING by the attribution method in agents/infrastructure-reviewer.md before writing the verdict.
+A verdict of ISSUES FOUND means the PR is NOT mergeable until every INTRODUCED NO item is resolved. INTRODUCED means the PR's changed lines add the failure; PRE-EXISTING means the base already had it and a PR whose only failures are PRE-EXISTING is SAFE, with a cleanup task logged. Classify each unmet item as INTRODUCED or PRE-EXISTING by the attribution method in agents/infrastructure-reviewer.md before writing the verdict.
 
 ---
 

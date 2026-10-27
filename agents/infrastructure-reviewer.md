@@ -121,7 +121,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 ISSUES FOUND means the PR has at least one INTRODUCED issue that must be resolved before merge. SAFE means it has none. One verdict per case:
 - No findings: SAFE
-- PRE-EXISTING findings only: SAFE, each logged under Critical Issues as a separate cleanup task
+- PRE-EXISTING findings only: SAFE, each logged under Critical Issues as a separate non-blocking cleanup task
 - At least one INTRODUCED finding: ISSUES FOUND
 
 ## Keep Reasoning Terse

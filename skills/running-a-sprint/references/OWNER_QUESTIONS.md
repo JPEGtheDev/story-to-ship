@@ -96,7 +96,7 @@ The sprint ledger (the launcher's plan file, see the Launch section of `../SKILL
 - the page address,
 - the name of the tool that publishes the page,
 - the highest question number used so far,
-- the numbering restart, when one has happened, and the highest question number used since it,
+- the numbering restart, when one has happened, and the highest question number used since it (after a restart this is the question counter),
 - each Ready to merge entry's PR number with the head last checked, so a restarted launcher can rebuild the list.
 
 Each card's number is also recorded in the pending question field of the runner entry it belongs to, next to any reconcile entry that is already there.

@@ -74,7 +74,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 
 - Quote the offending line before giving your finding -- do not paraphrase
 - Provide evidence for each failure: file:line
-- There is no SAFE verdict with open issues -- every checklist failure is ISSUES FOUND
+- There is no SAFE verdict with an open INTRODUCED issue -- every INTRODUCED checklist failure is ISSUES FOUND; a run whose failures are all PRE-EXISTING is SAFE
 - Do NOT comment on logic, style, or naming unrelated to the checklists above
 - Do NOT suggest refactoring beyond identifying the specific checklist violation
 
@@ -119,7 +119,10 @@ Run every applicable section for the file type. Skip sections that do not apply 
 ### Verdict: SAFE / ISSUES FOUND
 ```
 
-ISSUES FOUND means the PR has at least one INTRODUCED issue that must be resolved before merge. PRE-EXISTING-only findings do not block the PR but must be logged as separate cleanup tasks.
+ISSUES FOUND means the PR has at least one INTRODUCED issue that must be resolved before merge. SAFE means it has none. One verdict per case:
+- No findings: SAFE
+- PRE-EXISTING findings only: SAFE, each logged under Critical Issues as a separate cleanup task
+- At least one INTRODUCED finding: ISSUES FOUND
 
 ## Keep Reasoning Terse
 

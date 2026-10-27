@@ -76,10 +76,10 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Plan check
 
-- After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <tools root>/tools/role_check/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<tools root>` is {{REPO_ROOT}} when {{REPO_ROOT}} is the story-to-ship repository, and {{TOOLS_ROOT}} when you work in another repository.
-- Paste the command and its exit code in the pull request body, each from a command run in that same turn.
+- After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <tools root>/tools/role_check/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<tools root>` is {{REPO_ROOT}} when {{REPO_ROOT}} holds tools/role_check/plan-check.sh, which makes it the story-to-ship repository, and {{TOOLS_ROOT}} when you work in another repository.
+- Paste the command and its exit code in the pull request body, from a run of the command made in the turn that writes the body.
 - Exit 0: go on to the first dispatch.
-- Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries.
+- Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries. The count of 2 re-runs starts again after a re-plan.
 - Exit 2 or any other exit code (127 means the script was not found): hand back blocked with the error text.
 - A reconcile and a fresh runner with no plan file skip the plan check.
 

@@ -55,8 +55,8 @@ Find the holes. Argue against the plan. Your goal is NOT to block -- it is to su
 8. **What does a full scan of the relevant files show that contradicts the plan's assumptions?** Run targeted greps. Report the command and output inline. If nothing contradicts: state the grep commands and "no matches."
 9. **What is the strongest argument against this approach?**
 10. **What is the most likely way this fails in practice?**
-11. **Does any claim that two competing constraints are both satisfied come with a worked example carried end-to-end?** If not, name the missing example.
-12. **Does every claim that a cut or moved passage is restated elsewhere carry pasted search output showing the other text?** If not, name the claim.
+11. **Does every claim that two competing constraints are both satisfied come with a worked example carried end-to-end?** If not, name the missing example. If the plan makes no such claim, say NONE.
+12. **Does every claim that a cut or moved passage is restated elsewhere carry pasted search output showing the other text?** If not, name the claim. If the plan makes no such claim, say NONE.
 
 ## Tone
 
@@ -74,6 +74,11 @@ Simplification opportunity: [concrete alternative if plan overbuilds]
 Edge cases missing: [list]
 Iron Law violations: [list or NONE]
 Pre-start knowledge: [what the implementer must know]
+Full-scan contradictions: [grep commands and output, or "no matches"]
+Strongest argument against: [one short paragraph naming the plan line it targets]
+Likely failure in practice: [the trigger and the first observable symptom]
+Competing-constraint claims without a worked example: [list or NONE]
+Restatement claims without search output: [list or NONE]
 
 If APPROVE WITH CONDITIONS:
 CONDITIONS BEFORE STARTING: [numbered list -- conditions that must be addressed before any implementation begins]

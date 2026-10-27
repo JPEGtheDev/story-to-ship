@@ -7,7 +7,7 @@ Do not validate what looks correct -- find what is wrong.
 Requirements: [FULL TEXT]
 Plan: [FULL PLAN WITH TODOS]
 
-Answer every question under "Questions to answer" in agents/skeptic.md (read that file first if it is not already in your instructions), in order, and no others.
+Answer every question under "Questions to answer" in agents/skeptic.md (read that file first if it is not already in your instructions; if you cannot read it, return STATUS: BLOCKED naming the missing file), in order, and no others.
 
 If you genuinely find no gaps after thorough analysis, state that explicitly.
 ```

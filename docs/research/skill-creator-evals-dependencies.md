@@ -20,7 +20,7 @@ Checked against `.github/workflows/validate.yml` by grep on 2026-10-26. The work
 | Model credential stored as a CI secret | plugin eval and skill-creator loop, which use the user's login (mechanics, Headless) | No: no secret reference | New to CI. Secret handling is a new security surface. |
 | Model service account with spend | both; plugin eval estimate per suite (claude-plugin-eval.md, Credentials and cost) | No | New to CI. Each run is paid. |
 | Network access to the model service | both | No (inference: no step calls out) | New to CI. |
-| git | plugin eval needs 2.31 or later if git is installed (claude-plugin-eval.md, Requirements) | Partly: no run step calls git; the word appears only inside check arguments (L163, L325, L369) | Preinstalled on the runner (inference). |
+| git | plugin eval needs 2.31 or later if git is installed (claude-plugin-eval.md, Requirements) | No: no run step calls git; the word appears only inside check arguments (L163, L325, L369) | Preinstalled on the runner (inference). |
 | Python 3 | skill-creator scripts (mechanics, Headless) | Yes: `python3 -m unittest` at L858, L863, L868 | Not new. |
 | jq | neither tool's source names it | Yes: L20-27, L65 | Not needed by either (inference). |
 | shellcheck | neither tool's source names it | Yes: L31-50 | Not needed by either (inference). |

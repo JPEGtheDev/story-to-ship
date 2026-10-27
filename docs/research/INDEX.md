@@ -17,7 +17,8 @@ This is the domain-level index for `docs/research/`, cataloging research notes. 
 | File | Domain | Subdomain | Description |
 |------|--------|-----------|-------------|
 | [skill-creator-evals.md](skill-creator-evals.md) | research | skill-testing | Main report: findings, recommendation and one proposed trial story. |
-| [skill-creator-evals-mapping.md](skill-creator-evals-mapping.md) | research | skill-testing | Maps the toolkits onto the coordinator rehearsal and two CI text pins. |
+| [skill-creator-evals-mapping.md](skill-creator-evals-mapping.md) | research | skill-testing | Maps claude plugin eval onto the coordinator rehearsal and two CI text pins. |
+| [skill-creator-evals-mapping-loop.md](skill-creator-evals-mapping-loop.md) | research | skill-testing | Maps the skill-creator loop onto the same three targets. |
 | [skill-creator-evals-dependencies.md](skill-creator-evals-dependencies.md) | research | skill-testing | Runtimes, packages, services and secrets adoption would add. |
 | [skill-creator-evals-sources.md](skill-creator-evals-sources.md) | research | skill-testing | Primary sources for each skill-creator claim, with verified or unverified status. |
 | [skill-creator-evals-mechanics.md](skill-creator-evals-mechanics.md) | research | skill-testing | Skill-creator case fields, grading, model call counts and headless use. |

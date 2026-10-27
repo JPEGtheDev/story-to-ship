@@ -24,9 +24,9 @@ Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
     |
     +-- PASS
          |
-         +-- Todo not risky (no Files entry under .github/, hooks/ or agents/, and no file also named by another todo's Files list) --> no Stage 2 for this todo; go to Mark todo done
+         +-- Todo not risky (no Files entry under .github/, hooks/ or agents/) --> no Stage 2 for this todo; go to Mark todo done
          |
-         +-- Todo risky (a Files entry under .github/, hooks/ or agents/, or a file another todo's Files list also names) --> Stage 2 right after Stage 1, below
+         +-- Todo risky (a Files entry under .github/, hooks/ or agents/) --> Stage 2 right after Stage 1, below
          |
          v
 Stage 2 (risky todo only; the whole-branch pass after the last todo is below): Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one dispatch per group of at most two files that implement one change; one verdict block per file listed

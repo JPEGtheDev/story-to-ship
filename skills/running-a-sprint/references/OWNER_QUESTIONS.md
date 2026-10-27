@@ -114,7 +114,7 @@ If the question counter is missing from the ledger, the launcher takes the highe
 - **No page yet.** The launcher publishes the first page with the tool named in the ledger. When the ledger names no tool, the launcher keeps the questions in chat and asks the owner for a tool.
 - **Failed republish.** The question that could not be published goes to chat in full, with its number and the options. A Ready to merge entry that could not be published goes to chat in full as a statement: the PR link, the story, the line on what the PR does and the verification line. It stays in chat until the page works, and the launcher republishes the page before its next change.
 - **Silent failure.** After each republish, the launcher re-reads the page and checks that the newest card number is on it and that the PR link of each added entry is on it. When the newest number or an added PR link is missing, the republish counts as failed. After a removal, it also checks that the removed card is gone and that the removed entry's PR link is gone.
-- **Stale page.** The page carries a line "as of Q<n>", where n is the highest question number published on it, so the owner can see how current it is.
+- **Stale page.** The page carries a line "as of Q<n>", where n is the highest question number published on it since the last restart of numbering (the highest published number when numbering has not been restarted), so the owner can see how current it is.
 
 ## Comments
 

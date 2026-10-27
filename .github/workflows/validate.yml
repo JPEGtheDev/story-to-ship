@@ -456,7 +456,7 @@ jobs:
           check agents/story-coordinator.md 'section Hand-back size contract'
           checkgone skills/running-a-sprint/SKILL.md 'pointer line' 'Hand-back contract: read'
           checkgone skills/running-a-sprint/SKILL.md "with the options and the runner's recommendation" 'is relayed as its row'
-          checkgone skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Relay the question to the owner' 'Relay the open findings' 'relay the gap to the owner' 'relay any other blocker'
+          checkgone skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Relay the question to the owner' 'Relay the open findings' 'relay the gap to the owner' 'relay any other blocker' 'every other kind is relayed as its row above says'
           checkgone agents/story-coordinator.md '3,000' 'HANDBACK_ROUTING'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing or forbidden hand-back size contract string(s)"
@@ -479,7 +479,7 @@ jobs:
           }
           check skills/running-a-sprint/SKILL.md 'Add every question for the owner to the owner questions page as a card' 'Only the launcher writes the page.' 'Chat carries one line per change, plus a pointer to the page when a question is added.' 'The owner questions page adds three ledger fields' 'The card is the relay' 'a cap override, a scope change, a launch over the limit'
           check skills/running-a-sprint/references/OWNER_QUESTIONS.md '- `number`:' '- `story or topic`:' '- `question`:' '- `options`:' '- `recommendation`:' '- `status`:' 'none given' 'waiting on runners, not you' 'never reused' 'Only the launcher writes the page' 'as of Q' 'quotes the answer from the thread in chat'
-          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Add the question to the owner questions page' 'as its card' 'for PR ready the question is the merge question' 'Put the question to the owner on the owner questions page' 'put the gap to the owner on the owner questions page' 'treat any other blocker like an owner question' 'Put the open findings and the options'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Add the question to the owner questions page' 'as its card' 'for PR ready the question is the merge question' 'Put the question to the owner as the card described below' 'put the gap to the owner as the card described below' 'treat any other blocker like an owner question' 'Put the open findings and the options' 'with a recommendation, as the card described below' 'every other kind is handled as its row above says'
           check skills/running-a-sprint/SKILL.md 'becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says.'
           check skills/running-a-sprint/references/INDEX.md '`OWNER_QUESTIONS.md`'
           if [ "$missing" -gt 0 ]; then

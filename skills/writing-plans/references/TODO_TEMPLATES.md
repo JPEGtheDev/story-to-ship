@@ -8,6 +8,7 @@ Use for a todo marked `loop: single`: one implementer runs Steps 1-6. Rule for c
 
 ```
 Task N: [Feature or component name]
+loop: single -- reason: [one line]
 Files:
   - Create: exact/path/to/NewFile.<ext>
   - Modify: exact/path/to/ExistingFile.<ext>
@@ -50,6 +51,8 @@ Every plan entry carries one marker line, with a one-line reason:
 loop: three-role -- reason: adds parseRecord to a non-prose source file with a runnable suite
 loop: single -- reason: prose-only change to the template
 ```
+
+A CI fixture test exercises tools/role_check/plan-check.sh; CI does not check live plans, so run `sh tools/role_check/plan-check.sh <plan file>` on a plan to check it. An entry header is a line starting `Todo N:` or `Task N:` (digits, then a colon), and each entry needs a `loop: three-role` or `loop: single` line before the next header.
 
 Rule for choosing:
 

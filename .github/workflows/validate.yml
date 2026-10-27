@@ -822,3 +822,24 @@ jobs:
         run: |
           python3 -m unittest discover -s tools/tier_usage -p 'test_*.py'
           echo "[+] tier usage script unit tests pass"
+
+      - name: Shellcheck role-check scripts
+        run: |
+          shellcheck tools/role_check/role-check.sh tools/role_check/plan-check.sh tools/role_check/tests/run.sh
+          echo "[+] role-check scripts pass shellcheck"
+
+      - name: Run role-boundary detector and plan-marker fixtures
+        run: |
+          set -e
+          sh tools/role_check/tests/run.sh
+          echo "[+] role-boundary detector and plan-marker fixtures pass"
+
+      - name: Check the detector in the reference matches the shipped script
+        run: |
+          set -e
+          sed -n '/^```sh$/,/^```$/p' skills/subagent-driven-development/references/THREE_ROLE_LOOP.md | sed '1d;$d' > "$RUNNER_TEMP/role-check-fence.sh"
+          if ! cmp "$RUNNER_TEMP/role-check-fence.sh" tools/role_check/role-check.sh; then
+            echo "FAILED: the fenced detector in THREE_ROLE_LOOP.md differs from tools/role_check/role-check.sh"
+            exit 1
+          fi
+          echo "[+] fenced detector and shipped script are byte-identical"

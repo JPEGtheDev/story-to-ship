@@ -74,6 +74,8 @@ Every `docs/` directory at these two levels MUST maintain an `INDEX.md` for what
 - `docs/INDEX.md` -- links to the domain-level indexes
 - `docs/<domain>/INDEX.md` -- domain-wide docs and the docs of each subdomain
 
+These two index levels and `docs/DOD.md` are the only files outside `docs/<domain>/<subdomain>/`, and they carry no `subdomain` field.
+
 Each index uses this format:
 
 ```

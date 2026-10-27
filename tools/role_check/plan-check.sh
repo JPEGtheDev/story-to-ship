@@ -18,7 +18,12 @@ if [ ! -f "$plan" ] || [ ! -r "$plan" ]; then
   exit 2
 fi
 
+# Byte-based matching: the header class [^[:alnum:]] must not depend on the caller's locale.
+LC_ALL=C
+export LC_ALL
+
 cr=$(printf '\r')
+tab=$(printf '\t')
 
 # check_entry: report the current entry unless it has exactly one marker.
 check_entry() {
@@ -40,10 +45,13 @@ flen=0
 while IFS= read -r line || [ -n "$line" ]; do
   line=${line%"$cr"}
   if [ -n "$fchar" ]; then
-    # Inside a fence: only a line of the opener character, at least as long, closes it.
-    case $line in
+    # Inside a fence: a closer is the opener character, at least as long, after leading and
+    # trailing spaces and tabs are stripped from a copy of the line.
+    trimmed=${line#"${line%%[!" $tab"]*}"}
+    trimmed=${trimmed%"${trimmed##*[!" $tab"]}"}
+    case $trimmed in
       ''|*[!"$fchar"]*) ;;
-      *) if [ "${#line}" -ge "$flen" ]; then fchar=; fi ;;
+      *) if [ "${#trimmed}" -ge "$flen" ]; then fchar=; fi ;;
     esac
     continue
   fi

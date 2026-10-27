@@ -1,7 +1,8 @@
 #!/bin/sh
-# Generated-fixture harness for role-check.sh.
-# Each case is a git repo built under tests/generated/ (never committed) and checked
-# by the detector. Usage: sh tools/role_check/tests/run.sh
+# Generated-fixture harness for role-check.sh and plan-check.sh.
+# Role cases are git repos built under tests/generated/ (never committed) and checked
+# by the detector; plan cases are plan files written under tests/generated/plans/.
+# Usage: sh tools/role_check/tests/run.sh
 # ROLE_CHECK=<path> points the harness at another detector (used to prove it can fail).
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
 export LC_ALL=C.UTF-8 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
@@ -227,6 +228,20 @@ plan_write "$PLANS/dup-middle.md" 'Todo 1: a' 'loop: single -- reason: y' 'loop:
 plan_run dup-middle "$PLANS/dup-middle.md" 1 'VIOLATION Todo 1: a has more than one loop: marker'
 plan_write "$PLANS/valid-plus-invalid.md" 'Todo 1: first' 'loop: single -- reason: y' 'loop: both -- reason: y'
 plan_run valid-plus-invalid "$PLANS/valid-plus-invalid.md" 0 'OK plan-check: 1 entries'
+
+# Fence closers: a closer may carry leading or trailing spaces or tabs, but still needs the opener character at least as many times.
+plan_write "$PLANS/fence-closer-trailing-space.md" 'Todo 1: a' 'loop: single -- reason: y' '```' 'code' '``` ' 'Todo 2: b' 'Files: x'
+plan_run fence-closer-trailing-space "$PLANS/fence-closer-trailing-space.md" 1 'VIOLATION Todo 2: b has no loop: marker'
+plan_write "$PLANS/fence-closer-indented.md" 'Todo 1: a' 'loop: single -- reason: y' '```' 'code' '  ```' 'Todo 2: b' 'Files: x'
+plan_run fence-closer-indented "$PLANS/fence-closer-indented.md" 1 'VIOLATION Todo 2: b has no loop: marker'
+plan_write "$PLANS/fence-closer-longer.md" 'Todo 1: first' '~~~' 'x' '~~~~~' 'loop: single -- reason: y'
+plan_run fence-closer-longer "$PLANS/fence-closer-longer.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/fence-closer-shorter.md" 'Todo 1: first' '````' 'loop: single -- reason: y' '```' 'z'
+plan_run fence-closer-shorter "$PLANS/fence-closer-shorter.md" 1 'VIOLATION Todo 1: first has no loop: marker'
+
+# Bare header at end of line: "Todo N" with nothing after the number is still a header.
+plan_write "$PLANS/hdr-bare-eol.md" 'Todo 1: a' 'loop: single -- reason: y' 'Todo 3'
+plan_run hdr-bare-eol "$PLANS/hdr-bare-eol.md" 1 'VIOLATION Todo 3 has no loop: marker'
 
 # Empty file: zero bytes, no entries.
 : > "$PLANS/empty-file.md" || exit 2

@@ -85,7 +85,7 @@ This governs reasoning only, never the deliverable text.
 
 Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
 The verdict block of every file listed, and every other line your format requires, stay inside the cap; a reply with two blocks counts as one message.
-You commit nothing: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
+You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
 
 In addition to the Return Format in the Review Process, end with ONE summary block
 for `{{SKILL_PATH}}` and, when `{{SECOND_PATH}}` names an existing file, ONE more for

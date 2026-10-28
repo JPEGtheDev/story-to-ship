@@ -387,7 +387,7 @@ jobs:
           check agents/postmortem-reviewer.md "{{TRANSCRIPT_PATH}}" "blame direction"
           check agents/postmortem-reviewer.md 'session_to_events.py "{{TRANSCRIPT_PATH}}" --out "{{EVENTS_JSONL_PATH}}"'
           # Discovery record contract: runner template, hand-back size contract, scorecard field and record files
-          check agents/story-coordinator.md 'Record: discovery-records/{{STORY_NUMBER}}.json' 'the one non-prose file a runner writes' 'committed before the push that opens the pull request' 'Economy tier for the Discovery amigos' 'the Discovery record file is the one exception' 'is exempt from this check.'
+          check agents/story-coordinator.md 'Record: discovery-records/{{STORY_NUMBER}}.json' 'the one non-prose file a runner writes' 'committed before the push that opens the pull request' 'Economy tier for the Discovery amigos' 'the Discovery record file is the one exception' "is not a child's file and is exempt from this check."
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Record: discovery-records/<story number>.json'
           check skills/running-a-sprint/references/SCORECARD.md '- Interventions cause:'
           set -- discovery-records/*.json
@@ -397,7 +397,7 @@ jobs:
           fi
           for f in "$@"; do
             [ -e "$f" ] || continue
-            if ! jq empty "$f" > /dev/null 2>&1; then
+            if ! jq -es 'length == 1' "$f" > /dev/null 2>&1; then
               printf 'FAILED: %s does not parse as JSON\n' "$f"
               missing=$((missing + 1))
             fi

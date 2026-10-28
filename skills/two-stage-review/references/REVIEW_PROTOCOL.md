@@ -51,6 +51,17 @@ When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANG
 
 ---
 
+## Child Report Size Cap
+
+**Context:** A child's final message enters the dispatcher's context in full and the dispatcher cannot shorten it. In two long sessions, sub-agent hand-backs were 13.0% and 18.4% of the characters added to the main thread (794,337 and 863,233 characters), and pasted diffs and long command output carried most of them (172,009 of 794,337 characters were inside code fences in the first session).
+**Forces:** The dispatcher needs the status code, the Worktree line, the Limitations line and the verdict blocks to act; the logs and diffs already live in a commit or a file. Truncating pasted output to its tail and exit status keeps the spot-check possible, because a reviewer re-runs the command and compares the tail and the exit status.
+Count: the cap counts the whole final message with `wc -m`; replies are ASCII, so the count equals `wc -c`. A reply with several verdict blocks, a whole-branch pass reply and a re-check reply each count as one message against the cap. This cap is separate from the 3,000-character runner hand-back cap, which governs the story runner's hand-back to its launcher.
+Recording an over-cap reply: the dispatcher writes the overrun and the reply's length in the status entry of the todo (in a whole-branch pass, in the cycle's note in the plan file). It does not re-dispatch to shorten the reply, because the re-dispatch would produce a second long reply. A reply that lacks a required line is the exception and follows the existing rules (resubmit, or re-dispatch).
+If this section and SKILL.md differ, SKILL.md governs.
+**Enforcement is procedural/self-check:** CI pins that the cap sentence is present in the templates and the skill; whether a reply stays under the cap is read from the transcript.
+
+---
+
 ## Moved Rationale
 
 These notes moved word for word from SKILL.md to keep the skill under the core-skill size cap; each group is labelled with the rule it belongs to.

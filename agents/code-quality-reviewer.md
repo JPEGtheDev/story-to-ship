@@ -120,8 +120,10 @@ Shipped-file hygiene: [list file:line hits, or NONE]
 Do NOT comment on style issues already handled by clang-format. Only flag things clang-format cannot catch.
 
 ## Output Contract (per-file blocks)
+
 Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
-The verdict block of every file listed, and the Evidence or Limitations lines your format requires, stay inside the cap; a reply with two blocks counts as one message.
+The verdict block of every file listed, and every other line your format requires, stay inside the cap; a reply with two blocks counts as one message.
+You commit nothing: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
 
 After the return format above, end with ONE summary block per file listed under Files under review, in the exact shape below, nothing merged across files.
 

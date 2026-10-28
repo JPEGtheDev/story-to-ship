@@ -49,9 +49,9 @@ Your FINAL reply message is the only text the dispatcher receives. Intermediate 
 
 Pasted verification: paste the command line, the last 40 lines of its output and its exit status, and save the full output to a named file under /tmp that the message names.
 
-When several commands would push the final message over the cap, shorten the output tails below 40 lines first; never shorten the command line, the exit status or the saved-file path. Detail that does not fit goes in a commit or in a named file under /tmp that the message names.
+When several commands would push the final message over the 4,000-character cap set in Return format, shorten the output tails below 40 lines first; never shorten the command line, the exit status or the saved-file path.
 
-Every demanded artifact counts as absent until it appears verbatim in the final reply. The phrase "pasted above" (or any equivalent pointer at earlier transcript output), or a summary in place of the command line, last 40 lines and exit status, without the artifact literally present in the same reply is an INCOMPLETE return -- the dispatcher will resubmit for the artifact.
+Every demanded artifact counts as absent until it appears verbatim in the final reply. The phrase "pasted above" (or any equivalent pointer at earlier transcript output), or a summary in place of the command line, output tail and exit status, without the artifact literally present in the same reply is an INCOMPLETE return -- the dispatcher will resubmit for the artifact.
 
 All reply text must be ASCII-only. Use -> for arrows, -- or - for dashes, <= >= != for math, [+] [-] for status marks. No Unicode characters.
 

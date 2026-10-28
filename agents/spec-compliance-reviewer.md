@@ -119,7 +119,7 @@ Requirements:
    Finding: FULL | PARTIAL | MISSING | CONTRADICTS
    Evidence: [file:line] or [not found in diff]
    Gap: [if PARTIAL or MISSING -- specific description of what is absent]
-   Formulation: NONE | not applicable | not checked -- reference not found | rule <number> (<title>) -- "<quoted step>", one entry per broken rule
+   Formulation: NONE | not applicable | not checked -- reference not found | rule <number> (<title>) -- "<quoted step>", one entry per broken rule, separated by semicolons
 
 2. "[verbatim quoted requirement]"
    ...

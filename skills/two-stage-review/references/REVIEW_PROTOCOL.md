@@ -51,6 +51,57 @@ When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANG
 
 ---
 
+## Child Report Size Cap
+
+**Context:** A child's final message enters the dispatcher's context in full and the dispatcher cannot shorten it. In two long sessions, sub-agent hand-backs were 13.0% and 18.4% of the characters added to the main thread (794,337 and 863,233 characters), and pasted diffs and long command output carried most of them (172,009 of 794,337 characters were inside code fences in the first session).
+**Forces:** The dispatcher needs the status code, the Worktree line, the Limitations line and the verdict blocks to act; the logs and diffs already live in a commit or a file. Truncating pasted output to its tail and exit status keeps the spot-check possible, because a reviewer re-runs the command and compares the tail and the exit status.
+Count: the cap counts the whole final message with `wc -m`; replies are ASCII, so the count equals `wc -c`. A reply with several verdict blocks, a whole-branch pass reply and a re-check reply each count as one message against the cap. This cap is separate from the 3,000-character runner hand-back cap, which governs the story runner's hand-back to its launcher.
+Recording an over-cap reply: the dispatcher writes the overrun and the reply's length in the status entry of the todo (in a whole-branch pass, in the cycle's note in the plan file). It does not re-dispatch to shorten the reply, because the re-dispatch would produce a second long reply. A reply that lacks a required line is the exception and follows the existing rules (resubmit, or re-dispatch).
+If this section and SKILL.md differ, SKILL.md governs.
+**Enforcement is procedural/self-check:** CI pins that the cap sentence is present in the templates and the skill; whether a reply stays under the cap is read from the transcript.
+
+---
+
+## Moved Rationale
+
+These notes moved word for word from SKILL.md to keep the skill under the core-skill size cap; each group is labelled with the rule it belongs to.
+
+**Stage 1 gate (Never skip Stage 1):**
+**Context:** An implementer result is in hand and the quality review looks like the faster path.
+**Forces:** Stage 2 checks how a change is written, not whether it is the change asked for, so a well-written wrong change passes it; running Stage 1 first spends the quality review only on work known to match the spec.
+
+**Inline-lane todos:**
+**Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
+**Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.
+
+**Unreadable verdict:**
+**Enforcement is procedural/self-check:** CI pins the wording only; behavior is read from the transcript.
+**Context:** A reviewer reply arrives with a missing, mis-cased, unlisted, or foreign verdict.
+**Forces:** A missing verdict reads as a finished review and becomes a silent pass; exact matching makes the check a lookup, and one resumed re-dispatch recovers a reviewer that only mis-formatted its reply.
+
+**Fix-round cap:**
+**Enforcement is procedural/self-check:** CI pins the wording only; the transcript shows whether round three stops for a prompt.
+**Context:** A todo's review loop keeps returning findings with no end point.
+**Forces:** Each round looks cheap, so the loop runs past the point where the todo has consumed the owner's budget; a fixed count makes the stop a lookup, and the prompt hands the owner the open findings when their decision is cheapest.
+
+**Implementer status codes:**
+**Context:** Reading any implementer result before deciding what to do with it.
+**Forces:** A free-form result reads as finished whether it is finished, partial, or blocked, and the dispatcher fills the gap optimistically. A fixed set of five codes makes the implementer commit to one state, and each has one required response below, so routing is a lookup.
+
+**Review Cadence:**
+**Context:** A story has many todos, and the quality review is the costliest review role.
+**Forces:** A Stage 2 after every todo re-reviews each file every time a later todo touches it and cannot see a contradiction between two todos, so its cost grows with todo count. One pass over the finished diff costs in proportion to the changed files and sees all todos together; a risky todo keeps an early review.
+
+**Worktree hygiene:**
+**Context:** Dispatching any implementer subagent.
+**Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
+
+**BEFORE PROCEEDING item 4 (reviewer routing):**
+   **Context:** Choosing the Stage 2 reviewer for a changed file.
+   **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
+
+---
+
 ## Canary Rationale
 
 `Canary confirmed: [Worktree: line from implementer output]` is the observable signal that the Worktree line was read before any reviewer dispatch; it is not evidence that items 1 and 3 ran (the numbered items of BEFORE PROCEEDING in SKILL.md). A less powerful model can produce it mechanically: copy the Worktree line, paste it.

@@ -83,6 +83,10 @@ This governs reasoning only, never the deliverable text.
 
 ## Output Contract (per-file blocks)
 
+Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
+The verdict block of every file listed, and every other line your format requires, stay inside the cap; a reply with two blocks counts as one message.
+You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
+
 In addition to the Return Format in the Review Process, end with ONE summary block
 for `{{SKILL_PATH}}` and, when `{{SECOND_PATH}}` names an existing file, ONE more for
 `{{SECOND_PATH}}`, each in this exact shape. Two files named means two blocks. Merging two
@@ -105,5 +109,5 @@ Adversarial scenario tested: <case, or "trigger not matched">
 ```
 
 End with one dispatch-level line after the blocks, in this exact shape, followed on a
-MISMATCH by both outputs verbatim: `Spot-check: <command> -> MATCH | MISMATCH`. A MISMATCH
+MISMATCH by both commands, the last 40 lines of each output and both exit statuses (each full output saved to a named file under /tmp that the reply names; shorten the output tails below 40 lines first when the reply would pass the cap, never the command lines, exit statuses or file paths): `Spot-check: <command> -> MATCH | MISMATCH`. A MISMATCH
 makes the dispatch NEEDS WORK and changes no per-file VERDICT.

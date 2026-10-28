@@ -35,8 +35,6 @@ Before dispatching Stage 1 for any implementer result:
 2. `Canary confirmed: [Worktree: line from implementer output]` is stated in your response.
 3. The implementer result contains a `Limitations:` line. Absent -> resubmit for it; never infer "none".
 4. File type identified: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`. Never invoke `/code-review` (the slash command) for skill `.md` files.
-   **Context:** Choosing the Stage 2 reviewer for a changed file.
-   **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
 
 [+] All 4 met -> dispatch Stage 1
 [-] Any unmet -> resolve it before any reviewer dispatch
@@ -61,9 +59,6 @@ Canary rationale: references/REVIEW_PROTOCOL.md.
 
 Every implementation subagent must report one of these five codes: require it in every implementer prompt and reject a response without one.
 
-**Context:** Reading any implementer result before deciding what to do with it.
-**Forces:** A free-form result reads as finished whether it is finished, partial, or blocked, and the dispatcher fills the gap optimistically. A fixed set of five codes makes the implementer commit to one state, and each has one required response below, so routing is a lookup.
-
 | Code | Meaning | Your response |
 |------|---------|---------------|
 | `DONE` | Task complete, all verification passed, no concerns | Proceed to Stage 1 review |
@@ -78,8 +73,6 @@ Every implementation subagent must report one of these five codes: require it in
 
 Stage 1 runs after every todo. Stage 2 runs once over the whole branch diff, after CI is green on the feature branch and before the pull request is handed back (outside a story run: before `finishing-a-development-branch`). One Stage 2 pass plus the fixes it triggers and their re-check is one whole-branch cycle; at most 3 cycles run, a count separate from the per-todo fix-round cap below. A not-passed Stage 2 verdict that would need a fourth cycle stops the work: end the turn with a prompt to the owner that states the open findings (a story runner hands back kind cap reached).
 A todo is risky when its `Files:` list names a path under `.github/`, `hooks/` or `agents/`; the list is closed. A risky todo also gets Stage 2 right after its Stage 1 passes, and does not advance until it passes. Inline-lane, `PARTIAL` and `loop: three-role` todos are risky only by that test.
-**Context:** A story has many todos, and the quality review is the costliest review role.
-**Forces:** A Stage 2 after every todo re-reviews each file every time a later todo touches it and cannot see a contradiction between two todos, so its cost grows with todo count. One pass over the finished diff costs in proportion to the changed files and sees all todos together; a risky todo keeps an early review.
 Pass inputs, evidence, charging, re-check scope and the red-CI case: `references/REVIEW_PROTOCOL.md`, section Whole-Branch Pass.
 
 ---
@@ -94,39 +87,32 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-**Context:** An implementer result is in hand and the quality review looks like the faster path.
-**Forces:** Stage 2 checks how a change is written, not whether it is the change asked for, so a well-written wrong change passes it; running Stage 1 first spends the quality review only on work known to match the spec.
+Context, Forces and Enforcement notes for the reviewer routing, the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
 
 **Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
-**Context:** Dispatching any implementer subagent.
-**Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
 
 **Inline-lane todos:** when the coordinator makes the todo's edit itself under the Inline lane row of the `subagent-driven-development` skill's Dispatch Decision Table, the coordinator's own report stands in for the implementer result: the `Worktree:` line is the output of `git -C <repo-root>/.worktrees/<feature> rev-parse --show-toplevel`, the status code and the `Limitations:` line are the coordinator's, and the pasted verification is the coordinator's own run. Stage 1 runs on that diff and Stage 2 follows the Review Cadence, and the coordinator applies their fixes itself under the same Inline lane row; a fix the inline-edit guard hook denies goes to an implementer. The inline lane removes the implementer dispatch, never a review. Every todo's status entry in the plan file (the todo list the `writing-plans` skill defines) names its route: `lane: dispatch`, or `lane: inline <n> lines in <file>` with one `<n> lines in <file>` clause per file edited inline and `<n>` counted the way the guard hook counts (a replaced line counts 2), or both values when the todo used both routes. An inline edit the entry does not list, or an inline value for an edit the guard hook denied, is a skipped-gate finding (a required step recorded as done that the transcript shows was skipped) for the postmortem reviewer.
-**Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
-**Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before Stage 2.
 
 **Stage 2:** Use `code-quality-reviewer.md` for code/config files; use `skill-reviewer.md` for skill `.md` files. For each template, list the files in scope (a risky todo's changed files, or the branch diff's files in the whole-branch pass), at most two files per dispatch; more than two files means more than one dispatch, grouped so the files that implement one change go together. Two files share a dispatch only when a changed line in one names the other by path or filename (for example a SKILL.md and the references file its new pointer names), or a changed line in each names the same skill or file; files that share only the todo get separate dispatches. Each dispatch returns one verdict block per file it lists (the template's Output Contract); fewer blocks, or one merged block, is an incomplete review -- re-dispatch. If any block returns REQUEST CHANGES, REJECT, or NEEDS WORK: implementer fixes, Stage 2 re-runs before proceeding. APPROVE and PASS advance; APPROVE WITH NITS advances once each nit is fixed, or declined with the reason recorded in the todo's status; PASS (size advisory) advances once the size report is recorded in the todo's status for the user's decision. When dispatching Stage 2, pass the implementer's pasted verification output as the {{IMPLEMENTER_EVIDENCE}} value so the reviewer re-runs at least one command, once per dispatch, and reports MATCH or MISMATCH (in the whole-branch pass the value is the dispatcher's own test run); a dispatch that omits it disables the spot-check and is incomplete. The Stage 2 dispatch prompt MUST require the reviewer to output a literal line `Adversarial scenario tested: <scenario>` in every block: filled with one unscripted real-world case checked against the clause wording for each file whose diff adds or edits a line matching the case-sensitive trigger `EXCEPTION|carve-out` in agents/ or skills/, and with exactly `trigger not matched` otherwise. A block without that line is an incomplete review -- re-dispatch. (Case-sensitive on purpose; rationale in references/REVIEW_PROTOCOL.md.)
+
+**Child report size cap:** every implementer and reviewer child ends with one final message under the cap below, which each template in `agents/` repeats in its return format.
+Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
+The status code, the Worktree line, the Limitations line, each verdict block and the pasted verification all count inside the cap, and none is dropped to fit it. Pasted verification: paste the command line, the last 40 lines of its output and its exit status, and save the full output to a named file under /tmp that the message names. A reply that lacks a required line is incomplete and is resubmitted, over the cap or not. An over-cap reply that has every required line is recorded in the status entry of its todo and is not re-dispatched. The inline-lane coordinator report and the explorer and skeptic children (read-only research and plan-gap checks) are outside the cap. Count and rationale: `references/REVIEW_PROTOCOL.md`, section Child Report Size Cap.
 
 **Unreadable verdict:** This rule generalizes the incomplete-review clauses above to a missing or unlisted verdict at either stage.
 A Stage 1 or Stage 2 result whose verdict is missing, or is not one of the verdict values that reviewer's template defines, counts as not passed.
 Matching is exact: a verdict counts only when spelled as the template spells it; lower case, a qualifier the template does not define, or another template's value is not one of them.
 A verdict value that the replying reviewer's own template defines with its own qualifier, such as PASS (size advisory) in the skill-reviewer template, counts as written; among qualifiers, only one that template does not define makes a verdict unreadable.
 Re-dispatch once, resuming the same reviewer instance when possible and dispatching a fresh reviewer from the same template only if the resume fails (the Who Re-Checks a Fix Round section of `references/REVIEW_PROTOCOL.md`); this re-dispatch is not a fix round. If the re-dispatched reply is also unreadable, stop that todo and end the turn with a prompt to the owner stating the reviewer's raw reply and the verdict values that were expected. Never infer a pass from the reply's prose.
-**Enforcement is procedural/self-check:** CI pins the wording only; behavior is read from the transcript.
-**Context:** A reviewer reply arrives with a missing, mis-cased, unlisted, or foreign verdict.
-**Forces:** A missing verdict reads as a finished review and becomes a silent pass; exact matching makes the check a lookup, and one resumed re-dispatch recovers a reviewer that only mis-formatted its reply.
 
 **Fix-round cap:** A fix round is one pass in which the findings of a not-passed stage go back to the implementer (in the inline lane, to the coordinator) for a fix, followed by the re-check. Rounds are counted per todo across both stages. A Stage 1 re-run forced by a Stage 2 fix belongs to the same round, not a new one. Nit fixes after APPROVE WITH NITS and the size report after a size advisory are not rounds, because those verdicts advance the todo.
 The stop applies only when a not-passed verdict would need a fourth fix round; a stage not yet run runs first, and an unreadable verdict gets its one re-dispatch first.
 After 3 fix rounds on one todo without every review stage the Review Cadence runs for that todo passing, stop that todo and end the turn with a prompt to the owner that states the open findings.
 The owner's answer decides how the todo continues.
-**Enforcement is procedural/self-check:** CI pins the wording only; the transcript shows whether round three stops for a prompt.
-**Context:** A todo's review loop keeps returning findings with no end point.
-**Forces:** Each round looks cheap, so the loop runs past the point where the todo has consumed the owner's budget; a fixed count makes the stop a lookup, and the prompt hands the owner the open findings when their decision is cheapest.
 
 See `references/REVIEW_PROTOCOL.md` for full protocol details.
 

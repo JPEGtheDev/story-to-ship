@@ -100,8 +100,8 @@ Implementer's pasted verification output:
 {{IMPLEMENTER_EVIDENCE}}
 ```
 
-- Re-run at least one verification command the implementer pasted, exactly as written, inside {{WORKTREE_PATH}} (the pre-merge review worktree -- this is the current state). Compare your output to the implementer's pasted output.
-- A material mismatch -- a different result, a different count, or a command that now fails -- is a REQUEST CHANGES verdict regardless of any other findings. Report both outputs verbatim.
+- Re-run at least one verification command the implementer pasted, exactly as written, inside {{WORKTREE_PATH}} (the pre-merge review worktree -- this is the current state). Compare the last 40 lines and the exit status of your output to the command line, last 40 lines and exit status the implementer pasted.
+- A material mismatch -- a different result, a different count, or a command that now fails -- is a REQUEST CHANGES verdict regardless of any other findings. Report both commands, the last 40 lines of each output and both exit statuses, and save each full output to a named file under /tmp that the reply names; when the reply would pass the cap, shorten the output tails below 40 lines first, and never the command lines, exit statuses or file paths.
 - If {{IMPLEMENTER_EVIDENCE}} contains no runnable command, state that explicitly in your verdict and note that no spot-check was possible.
 
 ## Return format
@@ -120,6 +120,10 @@ Shipped-file hygiene: [list file:line hits, or NONE]
 Do NOT comment on style issues already handled by clang-format. Only flag things clang-format cannot catch.
 
 ## Output Contract (per-file blocks)
+
+Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
+The verdict block of every file listed, and every other line your format requires, stay inside the cap; a reply with two blocks counts as one message.
+You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
 
 After the return format above, end with ONE summary block per file listed under Files under review, in the exact shape below, nothing merged across files.
 

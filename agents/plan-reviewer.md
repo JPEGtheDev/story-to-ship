@@ -106,6 +106,10 @@ incomplete."
 
 ## Return format
 
+Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
+Every verdict line and block your format requires stays inside the cap.
+You are read-only, so the commit-or-file option above does not apply: when findings do not fit, keep the highest-ranked ones and say how many you dropped.
+
 ```
 VERDICT: [APPROVE | REQUEST CHANGES]
 

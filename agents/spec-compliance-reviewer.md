@@ -79,7 +79,7 @@ Include this comparison in your verdict for every new section, even if the overa
 
 ## Scenario Formulation Check (advisory)
 
-For each requirement that contains Given/When/Then steps, read in full the formulation reference of the three-amigos skill (find it with Glob: the file in that skill's references directory whose Formulation section holds the nine numbered rules). Check the requirement against rules 1, 2, 3, 5, 8 and 9; check rules 4, 6 and 7 only when the requirement itself holds several scenarios. A requirement that mixes Given/When/Then with plain text is checked on its Given/When/Then part. Add one Formulation line to that requirement's block:
+For each requirement that contains Given/When/Then steps, read in full the formulation reference of the three-amigos skill (Glob that skill's references directory, then Read the file whose Formulation section holds the nine numbered rules). Check the requirement against rules 1, 2, 3, 5, 8 and 9; check rules 4, 6 and 7 only when the requirement itself holds several scenarios. A requirement that mixes Given/When/Then with plain text is checked on its Given/When/Then part. Add one Formulation line to that requirement's block:
 - `Formulation: NONE` when no rule is broken.
 - `Formulation: not applicable` when the requirement has no Given/When/Then steps.
 - `Formulation: not checked -- reference not found` when the reference cannot be found or read.

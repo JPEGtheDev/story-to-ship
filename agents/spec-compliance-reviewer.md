@@ -83,7 +83,7 @@ For each requirement that contains Given/When/Then steps, read in full the formu
 - `Formulation: NONE` when no rule is broken.
 - `Formulation: not applicable` when the requirement has no Given/When/Then steps.
 - `Formulation: not checked -- reference not found` when the reference cannot be found or read.
-- Otherwise one entry per broken rule: `rule <number> (<title>) -- "<quoted offending step>"`, with the title taken from this list: 1 only starting state in Given; 2 one action per When; 3 observable Then; 4 one rule per group; 5 three to five steps; 6 shared Given in Background; 7 Scenario Outline for near-duplicates; 8 behavior not procedure; 9 business facts not keystrokes.
+- Otherwise one entry per broken rule, separated by semicolons on the same line: `rule <number> (<title>) -- "<quoted offending step>"`, with the title taken from this list: 1 only starting state in Given; 2 one action per When; 3 observable Then; 4 one rule per group; 5 three to five steps; 6 shared Given in Background; 7 Scenario Outline for near-duplicates; 8 behavior not procedure; 9 business facts not keystrokes.
 
 The Formulation line is advisory: it never changes VERDICT or Finding.
 

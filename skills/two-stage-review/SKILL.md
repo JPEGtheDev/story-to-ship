@@ -35,8 +35,6 @@ Before dispatching Stage 1 for any implementer result:
 2. `Canary confirmed: [Worktree: line from implementer output]` is stated in your response.
 3. The implementer result contains a `Limitations:` line. Absent -> resubmit for it; never infer "none".
 4. File type identified: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`. Never invoke `/code-review` (the slash command) for skill `.md` files.
-   **Context:** Choosing the Stage 2 reviewer for a changed file.
-   **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
 
 [+] All 4 met -> dispatch Stage 1
 [-] Any unmet -> resolve it before any reviewer dispatch
@@ -89,7 +87,7 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-Context, Forces and Enforcement notes for the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
+Context, Forces and Enforcement notes for the reviewer routing, the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
 
 **Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
 

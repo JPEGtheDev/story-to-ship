@@ -96,6 +96,10 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 **Context:** Dispatching any implementer subagent.
 **Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
 
+**BEFORE PROCEEDING item 4 (reviewer routing):**
+   **Context:** Choosing the Stage 2 reviewer for a changed file.
+   **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
+
 ---
 
 ## Canary Rationale

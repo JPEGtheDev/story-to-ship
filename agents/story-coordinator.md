@@ -61,7 +61,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Send the batch's implementer dispatches in one message with run_in_background false, each in its own child worktree made from the same feature-branch commit.
 - Run each todo's Stage 1 spec review before merging its branch (the batch's reviews may also go in one message); no review is skipped because a todo ran in a batch.
 - Merge the passing child branches into the feature branch in plan order, one at a time and run the suite after each merge.
-- Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child.
+- Before each merge compare `git -C <child worktree> diff --name-only <feature branch>...HEAD` with the todo's `Files:` list; a file outside the list is a Stage 1 gap and goes to a fix child. The runner's own Discovery record `discovery-records/{{STORY_NUMBER}}.json` is not a child's file and is exempt from this check.
 - A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix, and the fix child starts from the current head of the feature branch.
 - A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
 - Every story run reviews as the two-stage-review skill's Review Cadence says: Stage 1 after every todo; after the story's last merge, rebase onto origin/main, push and open the pull request, wait for CI green, then run Stage 2 over the branch diff in at most 3 whole-branch cycles. List the branch diff's files under the Stage 2 grouping rule and charge each finding as that skill's Whole-Branch Pass says. A risky todo (as that skill defines it) gets its Stage 2 right after its Stage 1, before its branch merges. The pull request is handed back after the last cycle passes and CI is green on the final head.
@@ -72,6 +72,10 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip.
 - If the issue has no acceptance criteria, hand back with kind blocked and never draft acceptance criteria.
 - Every hand-back after planning starts carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`. No other skip reason exists.
+- When Discovery ran, write the Discovery record yourself, since it is the one non-prose file a runner writes and the Inline lane row does not apply to it: one JSON file at `discovery-records/{{STORY_NUMBER}}.json` in the feature worktree, committed before the push that opens the pull request.
+- The record has eight required fields: `story` (the story number), `date` (YYYY-MM-DD, the day the pull request opens), `amigo_tier` and `skeptic_tier` (tier names in lower case: economy, standard or premium; never a vendor model), `skeptic_findings` (the FINDINGS count of the skeptic check), `verdict` (the first Discovery verdict, READY FOR PLANNING or BACK TO OWNER), `questions_sent` (the entries of the example map's Questions line that went to the owner, 0 when none) and `answers_changed` (the rules or examples whose text differs after the owner's answer, 0 when there was no owner round).
+- Write the record only when the pull request opens: a stop before a pull request, a skipped Discovery and a reconcile write none, and a rerun overwrites the same file.
+- Keep the record's numbers out of the hand-back and the pull request body; the hand-back carries at most the line `Record: discovery-records/{{STORY_NUMBER}}.json`.
 
 ## Plan check
 
@@ -84,7 +88,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Hand-back
 
-- The hand-back text is the deliverable; never write a report file, since the harness may refuse it.
+- The hand-back text is the deliverable; never write a report file, since the harness may refuse it; the Discovery record file is the one exception.
 - Every number in a hand-back is pasted from a command run in that same turn.
 - Before sending your final message, read the hand-back routing reference of the running-a-sprint skill under {{REPO_ROOT}}, section Hand-back size contract; it states the length cap, the line order and the Detail line. Reading that section is not loading the skill.
 - The inline-edit guard exempts every subagent call and neither counts nor denies its edits, so before each inline edit apply the Inline lane row of the subagent-driven-development skill yourself: the file is a prose file (.md or .txt), the replacement text is literal (written out in full before the edit), and the edit passes both cap checks below; otherwise the edit goes to an implementer.

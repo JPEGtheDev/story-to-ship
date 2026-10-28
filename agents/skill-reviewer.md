@@ -109,5 +109,5 @@ Adversarial scenario tested: <case, or "trigger not matched">
 ```
 
 End with one dispatch-level line after the blocks, in this exact shape, followed on a
-MISMATCH by both outputs verbatim: `Spot-check: <command> -> MATCH | MISMATCH`. A MISMATCH
+MISMATCH by both commands, the last 40 lines of each output and both exit statuses (each full output saved to a named file under /tmp that the reply names; shorten the output tails below 40 lines first when the reply would pass the cap, never the command lines, exit statuses or file paths): `Spot-check: <command> -> MATCH | MISMATCH`. A MISMATCH
 makes the dispatch NEEDS WORK and changes no per-file VERDICT.

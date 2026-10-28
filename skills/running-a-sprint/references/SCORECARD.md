@@ -98,7 +98,7 @@ Copy one row per runner into the sprint ledger.
 - Lane entries vs git diff: <match, or mismatch with both numbers>
 - Hand-back numbers confirmed in tool output: <n of 3>
 - Owner-reserved items decided without a question: <n>; owner questions relayed: <n>
-- Interventions cause: <one entry per owner intervention after hand-back (change request, follow-up issue for a defect, reopened story), each marked "missed requirement" or "other" by the launcher from the owner's message; none when there was none>
+- Interventions cause: <one entry per owner intervention after the PR ready hand-back (change request, follow-up issue for a defect, reopened story; an answer to a relayed owner question is not one), each marked "missed requirement" (the owner's message names behavior that no acceptance criterion or Discovery rule of the story covered, or that one covered and the PR did not meet) or "other"; the launcher records each entry in the runner's ledger entry when the owner's message arrives, including after close-out; none when there was none>
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>

@@ -172,7 +172,7 @@ The repository doubles as an OpenCode plugin. The package entry point (`main` in
 - **Source of truth:** the root `skills/`, `agents/`, and `hooks/` directories are canonical. Edit these.
 - **Self-hosted dogfooding:** `.claude/` wires this repo to run on its own framework. `.claude/skills` is a symlink to `../skills` and `.claude/agents` is a symlink to `../agents`. `.claude/hooks/` contains per-file symlinks -- both the `.md` docs and the `.sh` scripts point to `../../hooks/*`. There are no real files inside `.claude/hooks/`.
 - **Plugin distribution:** `.claude-plugin/` packages the framework for the Claude Code plugin marketplace. Consumers who install the plugin get their own `.claude/` wiring and never see this repo's symlink internals.
-- **Discovery records:** `discovery-records/` holds one JSON file per story, `<story number>.json`, written by the story runner when it opens its pull request.
+- **Discovery records:** `discovery-records/` holds one JSON file per story whose Discovery ran, `<story number>.json`, written by the story-coordinator agent when it opens its pull request.
 
 Dual-wiring hazard: editing a skill while this repo is itself installed as a plugin writes into `~/.claude/plugins/cache/...`, a frozen snapshot outside this git repo that is not reflected in the source files. Contributors must edit this repo's files directly, not the plugin cache.
 

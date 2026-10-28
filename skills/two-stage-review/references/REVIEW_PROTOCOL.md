@@ -84,6 +84,18 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 **Context:** A todo's review loop keeps returning findings with no end point.
 **Forces:** Each round looks cheap, so the loop runs past the point where the todo has consumed the owner's budget; a fixed count makes the stop a lookup, and the prompt hands the owner the open findings when their decision is cheapest.
 
+**Implementer status codes:**
+**Context:** Reading any implementer result before deciding what to do with it.
+**Forces:** A free-form result reads as finished whether it is finished, partial, or blocked, and the dispatcher fills the gap optimistically. A fixed set of five codes makes the implementer commit to one state, and each has one required response below, so routing is a lookup.
+
+**Review Cadence:**
+**Context:** A story has many todos, and the quality review is the costliest review role.
+**Forces:** A Stage 2 after every todo re-reviews each file every time a later todo touches it and cannot see a contradiction between two todos, so its cost grows with todo count. One pass over the finished diff costs in proportion to the changed files and sees all todos together; a risky todo keeps an early review.
+
+**Worktree hygiene:**
+**Context:** Dispatching any implementer subagent.
+**Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
+
 ---
 
 ## Canary Rationale

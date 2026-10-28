@@ -61,9 +61,6 @@ Canary rationale: references/REVIEW_PROTOCOL.md.
 
 Every implementation subagent must report one of these five codes: require it in every implementer prompt and reject a response without one.
 
-**Context:** Reading any implementer result before deciding what to do with it.
-**Forces:** A free-form result reads as finished whether it is finished, partial, or blocked, and the dispatcher fills the gap optimistically. A fixed set of five codes makes the implementer commit to one state, and each has one required response below, so routing is a lookup.
-
 | Code | Meaning | Your response |
 |------|---------|---------------|
 | `DONE` | Task complete, all verification passed, no concerns | Proceed to Stage 1 review |
@@ -78,8 +75,6 @@ Every implementation subagent must report one of these five codes: require it in
 
 Stage 1 runs after every todo. Stage 2 runs once over the whole branch diff, after CI is green on the feature branch and before the pull request is handed back (outside a story run: before `finishing-a-development-branch`). One Stage 2 pass plus the fixes it triggers and their re-check is one whole-branch cycle; at most 3 cycles run, a count separate from the per-todo fix-round cap below. A not-passed Stage 2 verdict that would need a fourth cycle stops the work: end the turn with a prompt to the owner that states the open findings (a story runner hands back kind cap reached).
 A todo is risky when its `Files:` list names a path under `.github/`, `hooks/` or `agents/`; the list is closed. A risky todo also gets Stage 2 right after its Stage 1 passes, and does not advance until it passes. Inline-lane, `PARTIAL` and `loop: three-role` todos are risky only by that test.
-**Context:** A story has many todos, and the quality review is the costliest review role.
-**Forces:** A Stage 2 after every todo re-reviews each file every time a later todo touches it and cannot see a contradiction between two todos, so its cost grows with todo count. One pass over the finished diff costs in proportion to the changed files and sees all todos together; a risky todo keeps an early review.
 Pass inputs, evidence, charging, re-check scope and the red-CI case: `references/REVIEW_PROTOCOL.md`, section Whole-Branch Pass.
 
 ---
@@ -94,13 +89,11 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-Context, Forces and Enforcement notes for the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
+Context, Forces and Enforcement notes for the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
 
 **Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
-**Context:** Dispatching any implementer subagent.
-**Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
 
 **Inline-lane todos:** when the coordinator makes the todo's edit itself under the Inline lane row of the `subagent-driven-development` skill's Dispatch Decision Table, the coordinator's own report stands in for the implementer result: the `Worktree:` line is the output of `git -C <repo-root>/.worktrees/<feature> rev-parse --show-toplevel`, the status code and the `Limitations:` line are the coordinator's, and the pasted verification is the coordinator's own run. Stage 1 runs on that diff and Stage 2 follows the Review Cadence, and the coordinator applies their fixes itself under the same Inline lane row; a fix the inline-edit guard hook denies goes to an implementer. The inline lane removes the implementer dispatch, never a review. Every todo's status entry in the plan file (the todo list the `writing-plans` skill defines) names its route: `lane: dispatch`, or `lane: inline <n> lines in <file>` with one `<n> lines in <file>` clause per file edited inline and `<n>` counted the way the guard hook counts (a replaced line counts 2), or both values when the todo used both routes. An inline edit the entry does not list, or an inline value for an edit the guard hook denied, is a skipped-gate finding (a required step recorded as done that the transcript shows was skipped) for the postmortem reviewer.
 

@@ -75,7 +75,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - When Discovery ran, write the Discovery record yourself, since it is the one non-prose file a runner writes and the Inline lane row does not apply to it: one JSON file at `discovery-records/{{STORY_NUMBER}}.json` in the feature worktree, committed before the push that opens the pull request.
 - The record has eight required fields: `story` (the story number), `date` (YYYY-MM-DD, the day the pull request opens), `amigo_tier` and `skeptic_tier` (tier names in lower case: economy, standard or premium; never a vendor model), `skeptic_findings` (the FINDINGS count of the skeptic check), `verdict` (the first Discovery verdict, READY FOR PLANNING or BACK TO OWNER; save it as a line in the plan file when Discovery ends, so it survives the owner round), `questions_sent` (the count of entries of the example map's Questions line that went to the owner, 0 when none) and `answers_changed` (the count of rules or examples whose text differs after the owner's answer, 0 when there was no owner round).
 - Write the record only when the pull request opens: a stop before a pull request, a skipped Discovery and a reconcile write none, and a rerun overwrites the same file.
-- Keep the record's numbers out of the hand-back and the pull request body; the hand-back carries at most the line `Record: discovery-records/{{STORY_NUMBER}}.json`.
+- Keep the record's numbers out of the hand-back and the pull request body; a hand-back sent after the pull request opens carries at most the line `Record: discovery-records/{{STORY_NUMBER}}.json`, and a hand-back sent before it carries no Record line.
 
 ## Plan check
 

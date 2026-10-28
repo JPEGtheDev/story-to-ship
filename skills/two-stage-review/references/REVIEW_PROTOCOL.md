@@ -51,6 +51,30 @@ When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANG
 
 ---
 
+## Moved Rationale
+
+These notes moved word for word from SKILL.md to keep the skill under the core-skill size cap; each group is labelled with the rule it belongs to.
+
+**Stage 1 gate (Never skip Stage 1):**
+**Context:** An implementer result is in hand and the quality review looks like the faster path.
+**Forces:** Stage 2 checks how a change is written, not whether it is the change asked for, so a well-written wrong change passes it; running Stage 1 first spends the quality review only on work known to match the spec.
+
+**Inline-lane todos:**
+**Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
+**Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.
+
+**Unreadable verdict:**
+**Enforcement is procedural/self-check:** CI pins the wording only; behavior is read from the transcript.
+**Context:** A reviewer reply arrives with a missing, mis-cased, unlisted, or foreign verdict.
+**Forces:** A missing verdict reads as a finished review and becomes a silent pass; exact matching makes the check a lookup, and one resumed re-dispatch recovers a reviewer that only mis-formatted its reply.
+
+**Fix-round cap:**
+**Enforcement is procedural/self-check:** CI pins the wording only; the transcript shows whether round three stops for a prompt.
+**Context:** A todo's review loop keeps returning findings with no end point.
+**Forces:** Each round looks cheap, so the loop runs past the point where the todo has consumed the owner's budget; a fixed count makes the stop a lookup, and the prompt hands the owner the open findings when their decision is cheapest.
+
+---
+
 ## Canary Rationale
 
 `Canary confirmed: [Worktree: line from implementer output]` is the observable signal that the Worktree line was read before any reviewer dispatch; it is not evidence that items 1 and 3 ran (the numbered items of BEFORE PROCEEDING in SKILL.md). A less powerful model can produce it mechanically: copy the Worktree line, paste it.

@@ -94,8 +94,7 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-**Context:** An implementer result is in hand and the quality review looks like the faster path.
-**Forces:** Stage 2 checks how a change is written, not whether it is the change asked for, so a well-written wrong change passes it; running Stage 1 first spends the quality review only on work known to match the spec.
+Context, Forces and Enforcement notes for the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
 
 **Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
 
@@ -104,8 +103,6 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 **Forces:** An implementer writing to the main working tree mixes its edits into the coordinator's uncommitted state, so the review diff no longer isolates the todo; a worktree keeps it exactly the todo.
 
 **Inline-lane todos:** when the coordinator makes the todo's edit itself under the Inline lane row of the `subagent-driven-development` skill's Dispatch Decision Table, the coordinator's own report stands in for the implementer result: the `Worktree:` line is the output of `git -C <repo-root>/.worktrees/<feature> rev-parse --show-toplevel`, the status code and the `Limitations:` line are the coordinator's, and the pasted verification is the coordinator's own run. Stage 1 runs on that diff and Stage 2 follows the Review Cadence, and the coordinator applies their fixes itself under the same Inline lane row; a fix the inline-edit guard hook denies goes to an implementer. The inline lane removes the implementer dispatch, never a review. Every todo's status entry in the plan file (the todo list the `writing-plans` skill defines) names its route: `lane: dispatch`, or `lane: inline <n> lines in <file>` with one `<n> lines in <file>` clause per file edited inline and `<n>` counted the way the guard hook counts (a replaced line counts 2), or both values when the todo used both routes. An inline edit the entry does not list, or an inline value for an edit the guard hook denied, is a skipped-gate finding (a required step recorded as done that the transcript shows was skipped) for the postmortem reviewer.
-**Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
-**Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.
 
 **Stage 1:** Use `spec-compliance-reviewer.md` with full requirements and the implementation diff. If GAPS returned: implementer fixes gaps, Stage 1 re-runs before Stage 2.
 
@@ -116,17 +113,11 @@ A Stage 1 or Stage 2 result whose verdict is missing, or is not one of the verdi
 Matching is exact: a verdict counts only when spelled as the template spells it; lower case, a qualifier the template does not define, or another template's value is not one of them.
 A verdict value that the replying reviewer's own template defines with its own qualifier, such as PASS (size advisory) in the skill-reviewer template, counts as written; among qualifiers, only one that template does not define makes a verdict unreadable.
 Re-dispatch once, resuming the same reviewer instance when possible and dispatching a fresh reviewer from the same template only if the resume fails (the Who Re-Checks a Fix Round section of `references/REVIEW_PROTOCOL.md`); this re-dispatch is not a fix round. If the re-dispatched reply is also unreadable, stop that todo and end the turn with a prompt to the owner stating the reviewer's raw reply and the verdict values that were expected. Never infer a pass from the reply's prose.
-**Enforcement is procedural/self-check:** CI pins the wording only; behavior is read from the transcript.
-**Context:** A reviewer reply arrives with a missing, mis-cased, unlisted, or foreign verdict.
-**Forces:** A missing verdict reads as a finished review and becomes a silent pass; exact matching makes the check a lookup, and one resumed re-dispatch recovers a reviewer that only mis-formatted its reply.
 
 **Fix-round cap:** A fix round is one pass in which the findings of a not-passed stage go back to the implementer (in the inline lane, to the coordinator) for a fix, followed by the re-check. Rounds are counted per todo across both stages. A Stage 1 re-run forced by a Stage 2 fix belongs to the same round, not a new one. Nit fixes after APPROVE WITH NITS and the size report after a size advisory are not rounds, because those verdicts advance the todo.
 The stop applies only when a not-passed verdict would need a fourth fix round; a stage not yet run runs first, and an unreadable verdict gets its one re-dispatch first.
 After 3 fix rounds on one todo without every review stage the Review Cadence runs for that todo passing, stop that todo and end the turn with a prompt to the owner that states the open findings.
 The owner's answer decides how the todo continues.
-**Enforcement is procedural/self-check:** CI pins the wording only; the transcript shows whether round three stops for a prompt.
-**Context:** A todo's review loop keeps returning findings with no end point.
-**Forces:** Each round looks cheap, so the loop runs past the point where the todo has consumed the owner's budget; a fixed count makes the stop a lookup, and the prompt hands the owner the open findings when their decision is cheapest.
 
 See `references/REVIEW_PROTOCOL.md` for full protocol details.
 

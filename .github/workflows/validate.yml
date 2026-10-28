@@ -795,6 +795,7 @@ jobs:
           echo "[+] three-amigos reference list names proof kinds"
 
       # A pin proves the heading line exists in the file, not where it sits or that a reviewer follows it.
+      # FORMULATION_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it.
       - name: Check the formulation heading is pinned
         run: |
           missing=0

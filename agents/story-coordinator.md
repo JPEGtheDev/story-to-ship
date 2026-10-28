@@ -71,7 +71,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 - When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip.
 - If the issue has no acceptance criteria, hand back with kind blocked and never draft acceptance criteria.
-- Every hand-back after planning starts carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`. No other skip reason exists.
+- Every hand-back sent while your plan file exists carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`; your plan file is created when Discovery starts, so a hand-back that stops at the Discovery questioning step carries `Discovery: ran`. A hand-back sent before your plan file exists, such as kind blocked for an issue with no acceptance criteria, carries none. No other skip reason exists.
 - When Discovery ran, write the Discovery record yourself, since it is the one non-prose file a runner writes and the Inline lane row does not apply to it: one JSON file at `discovery-records/{{STORY_NUMBER}}.json` in the feature worktree, committed before the push that opens the pull request.
 - The record has eight required fields: `story` (the story number), `date` (YYYY-MM-DD, the day the pull request opens), `amigo_tier` and `skeptic_tier` (tier names in lower case: economy, standard or premium; never a vendor model), `skeptic_findings` (the FINDINGS count of the skeptic check), `verdict` (the first Discovery verdict, READY FOR PLANNING or BACK TO OWNER; save it as a line in the plan file when Discovery ends, so it survives the owner round), `questions_sent` (the count of entries of the example map's Questions line that went to the owner, 0 when none) and `answers_changed` (the count of rules or examples whose text differs after the owner's answer, 0 when there was no owner round).
 - Write the record only when the pull request opens: a stop before a pull request, a skipped Discovery and a reconcile write none, and a rerun overwrites the same file.
@@ -105,7 +105,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Use cap reached also for a role cap: a second boundary finding for one role in one todo.
 - Use cap reached also when the plan check still exits 1 after 2 re-runs.
 - Use interim when you were resumed or asked for status and the work is still in progress.
-- A hand-back with a pull request carries the PR number, CI state, review verdicts, the Discovery line, the reloaded skills, and a `Limitations:` line.
+- A hand-back with a pull request carries the PR number, CI state, review verdicts, the reloaded skills, a `Limitations:` line, and the Discovery line whenever your plan file exists.
 - `Limitations:` is on every hand-back.
 - A hand-back with a three-role todo lists, for each role commit, the detector command and its exit code, each pasted from a command run in that same turn.
 
@@ -137,9 +137,9 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.
-- A fresh runner launched for a PR whose runner could not be resumed has no plan file: it fetches both stories, both diffs and the PR body with `gh`, skips the plan-entry steps above, and needs no Discovery line.
+- A fresh runner launched for a PR whose runner could not be resumed has no plan file: it fetches both stories, both diffs and the PR body with `gh`, skips the plan-entry steps above, and carries no Discovery line, because it has no plan file.
 - That fresh runner first runs `git -C {{REPO_ROOT}} fetch origin <branch>`, then works in a worktree made with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -b reconcile-{{WORKTREE_PREFIX}} origin/<branch>` (a new local branch, so it never collides with the dead runner's worktree), pushes only to `<branch>` as above, and opens no new pull request; the one-issue-one-PR rule above stays for the story it was launched for.
-- Discovery and planning do not run for a reconcile; the Discovery line is required only when your plan file exists.
+- Discovery and planning do not run for a reconcile; a reconcile hand-back carries the Discovery line exactly when your plan file exists.
 - CI pins in the workflow detect deleted wording only; the cap, the rule that the owner merges and the owner question are checked by reading the transcript.
 
 ## Resume

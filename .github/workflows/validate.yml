@@ -1022,3 +1022,28 @@ jobs:
             exit 1
           fi
           echo "[+] plan-check instruction strings present"
+
+      - name: Check Discovery line rule strings
+        run: |
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/story-coordinator.md 'Every hand-back sent while your plan file exists carries a Discovery line' 'a hand-back that stops at the Discovery questioning step carries `Discovery: ran`' 'A hand-back sent before your plan file exists, such as kind blocked for an issue with no acceptance criteria, carries none.' 'No other skip reason exists.' 'and the Discovery line whenever your plan file exists.' 'carries no Discovery line, because it has no plan file.' 'a reconcile hand-back carries the Discovery line exactly when your plan file exists.'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md "When the runner's plan file exists, a Discovery line whose value is exactly" 'When no plan file exists (a blocked hand-back for an issue with no acceptance criteria, or a fresh reconcile runner), the line is absent and its absence is not a missing line.'
+          if grep -qF -- 'Every hand-back after planning starts' agents/story-coordinator.md; then
+            echo "FAILED: agents/story-coordinator.md still states the old planning-starts condition for the Discovery line"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing Discovery line rule string(s)"
+            exit 1
+          fi
+          echo "[+] Discovery line rule strings present"

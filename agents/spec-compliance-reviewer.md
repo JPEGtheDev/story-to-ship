@@ -109,6 +109,9 @@ Report each hit with file and line under "Shipped-file hygiene" in your verdict,
 A hygiene hit in the changed files is a GAPS verdict regardless of any other findings.
 
 ## Return format
+Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
+Every verdict line and block your format requires stays inside the cap.
+
 ```
 VERDICT: [PASS | GAPS]
 Shipped-file hygiene: [list file:line hits, or NONE]

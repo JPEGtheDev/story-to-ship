@@ -33,7 +33,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Dispatch
 
-- Pass model on every dispatch. No dispatch prompt and no hand-back names a vendor model; the `model` parameter carries the model, and this template's prose names tiers only: Economy tier for the Discovery amigos; Standard tier for implementers, Stage 1 review, skeptic, plan-reviewer and the Refinement amigos; Premium tier for Stage 2 reviewers. The tier table lives in the subagent-driven-development skill's Model Selection.
+- Pass model on every dispatch. No dispatch prompt and no hand-back names a vendor model; the `model` parameter carries the model, and this template's prose names tiers only: Economy tier for the Discovery amigos; Standard tier for implementers, Stage 1 review, skeptic, plan-reviewer and the amigos of every other ceremony; Premium tier for Stage 2 reviewers. The tier table lives in the subagent-driven-development skill's Model Selection.
 - Set run_in_background: false on every child. A coordinator subagent cannot wait on a background child or on a child resumed by message; either ends your turn and sends the child's result to the launcher.
 - In this template every re-dispatched child (fix, re-check, and unreadable-verdict re-dispatch) is a fresh child, never a resumed one, and this replaces the two-stage-review resume step because a resumed child ends your turn.
 - A fresh re-check reviewer's prompt carries the same template, the original requirements, the finding quoted verbatim, and the fix-round diff.

@@ -29,15 +29,17 @@
 #                             expect_file_exists / expect_file_absent paths
 #                             under STATE_DIR_PARENT.
 #   input                   - stdin JSON fed to the hook (required)
-#   repeat                  - one line holding a positive decimal integer with
-#                             no leading zero (surrounding whitespace is
-#                             stripped; default 1 when the file is absent).
+#   repeat                  - a positive decimal integer with no leading zero,
+#                             at most three digits (1 to 999); default 1 when
+#                             the file is absent. All whitespace is removed
+#                             from the file before the value is checked, so
+#                             a file holding "2" newline "3" reads as 23.
 #                             The hook is run that many times in a row on the
 #                             same state dir and env, inside the same subshell,
 #                             and the case keeps the last run's exit code and
 #                             stdout. Any other value (empty, 0, text,
-#                             negative) fails the case with a reason line and
-#                             the hook is never run.
+#                             negative, 1000 or more) fails the case with a
+#                             reason line and the hook is never run.
 #   pre_flag_sessions       - newline list of session_ids; a flag file is
 #                             created for each BEFORE the hook runs
 #   pre_dirs                - newline list of directory path templates;
@@ -208,9 +210,9 @@ run_case() {
   local repeat_count=1
   if [[ -f "$repeat_file" ]]; then
     repeat_count="$(tr -d '[:space:]' <"$repeat_file")"
-    if [[ ! "$repeat_count" =~ ^[1-9][0-9]*$ ]]; then
+    if [[ ! "$repeat_count" =~ ^[1-9][0-9]{0,2}$ ]]; then
       echo "FAIL: $name"
-      echo "  - repeat file must hold a positive integer, got [$repeat_count]"
+      echo "  - repeat file must hold a positive integer up to 999, got [$repeat_count]"
       fail=$((fail + 1))
       return
     fi

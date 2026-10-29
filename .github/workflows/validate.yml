@@ -579,6 +579,30 @@ jobs:
           fi
           echo "[+] Ready to merge strings present on the owner questions page"
 
+      - name: Check owner questions template
+        run: |
+          tpl="${OWNER_QUESTIONS_TEMPLATE:-skills/running-a-sprint/references/owner-questions-template.html}"
+          if [ ! -f "$tpl" ]; then
+            printf 'FAILED: owner questions template is missing: %s\n' "$tpl"
+            exit 1
+          fi
+          missing=0
+          if LC_ALL=C grep -q '[^[:print:][:space:]]' "$tpl"; then
+            printf 'FAILED: %s contains a non-ASCII character\n' "$tpl"
+            missing=$((missing + 1))
+          fi
+          for s in '<h1>{{PAGE_TITLE}}</h1>' '<h2 id="ready">Ready to merge</h2>' '<h2 id="open">Open questions</h2>' '<h2 id="waiting">Waiting on runners, not you</h2>' '<h2 id="context">Context</h2>'; do
+            if ! grep -qF -- "$s" "$tpl"; then
+              printf 'FAILED: %s is missing the section heading: %s\n' "$tpl" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing problem(s) in the owner questions template"
+            exit 1
+          fi
+          echo "[+] Owner questions template present, ASCII, with all five section headings"
+
       - name: Check parallel todo contract strings
         run: |
           set -e

@@ -70,6 +70,7 @@ A launch card also states, for each story it names:
 
 ## Layout
 
+- A new page starts from `owner-questions-template.html` in this directory. When the template and the prose rules in this file differ, the prose rules govern.
 - The Ready to merge section sits above the open question cards, and its entries are listed newest first.
 - Cards are listed newest first.
 - A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or overlap, with no question number, so the owner sees that nothing is needed from them.

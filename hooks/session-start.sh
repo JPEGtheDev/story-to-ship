@@ -96,7 +96,13 @@ fi
 # before the stamping block so it also covers payloads with agent_id or without session_id.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
   if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
-    printf '%s' "$RAW" | jq -c '{source: (if (.source | type) == "string" then .source else null end), keys: keys, transcript_in_subagents: (if (.transcript_path | type) == "string" then (.transcript_path | contains("/subagents/")) else null end), cwd_in_worktrees: (if (.cwd | type) == "string" then (.cwd | contains("/.worktrees/")) else null end)}' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
+    printf '%s' "$RAW" | jq -c '
+      {
+        source: (if (.source | type) == "string" then .source else null end),
+        keys: keys,
+        transcript_in_subagents: (if (.transcript_path | type) == "string" then (.transcript_path | contains("/subagents/")) else null end),
+        cwd_in_worktrees: (if (.cwd | type) == "string" then (.cwd | contains("/.worktrees/")) else null end)
+      }' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
   fi
 fi
 

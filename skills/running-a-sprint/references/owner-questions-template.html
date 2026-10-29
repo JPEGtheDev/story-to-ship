@@ -1,0 +1,87 @@
+<!-- Placeholder form: every variable value is written as {{NAME}}, double curly braces around upper-case letters and underscores, never digits. Replace each one before publishing. Delete the optional Status row and the restart sentence when they do not apply. -->
+<title>{{PAGE_TITLE}}</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap");
+/* Layout: one narrow reading column; ready-to-merge list and question cards first, context below, each card links to its context. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1c2330;
+  --muted: #5a6577;
+  --line: #dde2ea;
+  --accent: #1f6f8b;
+  --rec: #e9f3f6;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a2029; --fg: #e4e8ef; --muted: #9aa5b6;
+    --line: #2c3442; --accent: #6fbfd8; --rec: #183039; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a2029; --fg: #e4e8ef; --muted: #9aa5b6;
+  --line: #2c3442; --accent: #6fbfd8; --rec: #183039; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--font-body); }
+main { max-width: 44rem; margin: 0 auto; padding-inline: 16px; padding-block: 24px 48px; display: grid; gap: 28px; }
+h1 { font-size: 1.6rem; font-weight: 600; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.1rem; font-weight: 600; margin: 0; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+h3 { font-size: 1rem; font-weight: 600; margin: 0; }
+p { margin: 0; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.meta { color: var(--muted); font-size: .9rem; }
+section { display: grid; gap: 12px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
+.qhead { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.qid { font-family: var(--font-mono); font-weight: 500; text-decoration: none; }
+.topic { color: var(--muted); font-size: .9rem; }
+.row { display: grid; grid-template-columns: 7.5rem 1fr; gap: 4px 12px; }
+.row dt { color: var(--muted); font-size: .85rem; }
+.row dd { margin: 0; min-width: 0; }
+.rec { background: var(--rec); border-radius: 6px; padding: 8px 10px; }
+.ctx { display: grid; gap: 6px; scroll-margin-top: 12px; }
+ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; }
+@media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+</style>
+<main>
+  <header style="display:grid;gap:6px">
+    <h1>{{PAGE_TITLE}}</h1>
+    <p class="meta">As of Q{{LATEST_NUMBER}}. Answer in chat by card number, for example "Q{{EXAMPLE_NUMBER}} {{EXAMPLE_ANSWER}}", or in a comment on the card's thread. A card is removed once its question is answered and the answer is acted on. Numbering restarted at Q{{RESTART_NUMBER}} on {{RESTART_DATE}}.</p>
+  </header>
+
+  <section aria-labelledby="ready">
+    <h2 id="ready">Ready to merge</h2>
+    <ul>
+      <li><a href="{{PR_URL}}">{{REPO_NAME}} PR {{PR_NUMBER}}</a> ({{STORY}}): {{PR_SUMMARY_LINE}} {{VERIFICATION_LINE}}</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="open">
+    <h2 id="open">Open questions</h2>
+    <article class="q" id="q{{NUMBER}}">
+      <div class="qhead"><a class="qid" href="#c-q{{NUMBER}}">Q{{NUMBER}}</a><span class="topic">{{STORY}}: {{TOPIC}}</span></div>
+      <p>{{QUESTION}}</p>
+      <dl class="row"><dt>Options</dt><dd>{{OPTION_ONE}} / {{OPTION_TWO}}</dd></dl>
+      <!-- Optional: add <dl class="row"><dt>Status</dt><dd>{{STATUS}}</dd></dl> when the card has a status. -->
+      <p class="rec"><strong>Recommendation:</strong> {{RECOMMENDATION}}</p>
+    </article>
+  </section>
+
+  <section aria-labelledby="waiting">
+    <h2 id="waiting">Waiting on runners, not you</h2>
+    <ul>
+      <li>{{WAITING_ITEM}}</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="context">
+    <h2 id="context">Context</h2>
+    <div class="ctx" id="c-q{{NUMBER}}">
+      <h3><a href="#q{{NUMBER}}">Q{{NUMBER}}</a> {{STORY}}</h3>
+      <p>{{CONTEXT_TEXT}} <a href="{{CONTEXT_URL}}">{{CONTEXT_LINK_LABEL}}</a></p>
+    </div>
+  </section>
+</main>

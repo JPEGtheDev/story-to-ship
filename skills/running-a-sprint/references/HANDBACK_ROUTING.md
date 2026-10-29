@@ -28,6 +28,7 @@ Check these before acting on any hand-back:
 - The first line is a kind line naming one of the five kinds: owner question, PR ready, blocked, cap reached, interim.
 - A Limitations: line is present.
 - When the runner's plan file exists, a Discovery line whose value is exactly "Discovery: ran" or "Discovery: skipped: issue carries a Feature Specification"; any other value counts as a missing line. When no plan file exists (a blocked hand-back for an issue with no acceptance criteria, or a fresh reconcile runner), the line is absent and its absence is not a missing line.
+- When a pull request exists, the Discovery line is "Discovery: ran", and the runner is not a reconcile runner (ledger state `reconciling`, or a fresh reconcile runner): a line `Record: <absolute path of the record>`; its absence counts as a missing line.
 - The reloaded skills are listed.
 - When a pull request exists: the pull request number, the CI state and the review verdicts; when none exists, these three are absent.
 - An owner question carries options and a recommendation.
@@ -44,7 +45,7 @@ This section is the one place the cap is stated.
 - Cap: 3,000 characters for the whole final message, for every kind. The required lines above count inside the cap.
 - Order: the first line is the kind line. The second line is one plain sentence naming what the owner or launcher must decide or confirm, or "no decision needed". The required lines follow.
 - Detail: everything beyond the required lines goes in the pull request body, or in the runner's plan file when no pull request exists, never in a new report file. When anything was left out, the hand-back carries one line, `Detail: PR <n> body` or `Detail: <absolute plan file path>`; when nothing was left out it carries no Detail line.
-- Record line: a hand-back sent after the pull request opens, for a story whose Discovery ran, may carry one line `Record: discovery-records/<story number>.json` after the required lines; it counts inside the cap, names the Discovery record file, and carries none of its numbers. It is separate from the Detail line.
+- Record line: a hand-back sent after the pull request opens, for a story whose Discovery ran, carries one line `Record: <absolute path of the record>` after the required lines; it counts inside the cap, names the scratch file the runner wrote, which lies outside every worktree and is never committed, and carries none of its numbers. It is separate from the Detail line. A reconcile hand-back carries none.
 - An owner question keeps its options and its recommendation inside the cap and never moves them to Detail.
 - A hand-back over the cap is not a missing line. The launcher does not resume a runner to shorten it, because the resume produces a second hand-back. For a PR ready hand-back it relays only the decision sentence, the pull request number, the CI state and the review verdicts; every other kind is handled as its row above says. It notes the overrun in the ledger.
 - Before sending, the runner counts its final message with `printf '%s' "$MESSAGE" | wc -m` (the message held in a shell variable) and shortens it when the count is over the cap. A resend that the missing-line text asks for stays inside the cap too.

@@ -1,2 +1,2 @@
 {"source":"startup","keys":["session_id","source"]}
-{"source":"compact","keys":["agent_id","cwd","hook_event_name","session_id","source","transcript_path"]}
+{"source":"compact","keys":["agent_id","cwd","hook_event_name","session_id","source","transcript_path"],"transcript_in_subagents":false,"cwd_in_worktrees":false}

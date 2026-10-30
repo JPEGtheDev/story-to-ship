@@ -891,7 +891,9 @@ jobs:
             '`Formulation: not applicable`' \
             '`Formulation: not checked -- reference not found`' \
             'it never becomes a Question and never sets the verdict to `BACK TO OWNER`' \
-            'agents/spec-compliance-reviewer.md'
+            'the Scenario Formulation Check section of `agents/spec-compliance-reviewer.md`' \
+            'formulation: <amigo>/<scenario name> rule <number> (<title>) -- "<quoted offending step>"' \
+            'under `## Discovery Open Items`; the notes move with the map'
           do
             if ! grep -qF -- "$s" "$f"; then
               printf 'FAILED: %s has no text containing: %s\n' "$f" "$s"

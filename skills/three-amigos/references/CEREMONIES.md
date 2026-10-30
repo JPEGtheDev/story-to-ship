@@ -52,7 +52,7 @@ Timebox: each amigo runs in one dispatch; there is no second dispatch round to a
 
 After all three Discovery amigos return:
 1. Build the example map (see `### Example map -- MANDATORY`) from the **Business and Tester findings only**: rules from Business, examples from both Business scenarios and Tester failure cases. Set the verdict by the stopping rule. Developer findings stay in Implementation Notes.
-2. Write the output by verdict. With `READY FOR PLANNING`, write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios (written per FORMULATION.md in this directory), out-of-scope items; open questions stay in the map's Questions line (`none` when ready). With `BACK TO OWNER`, write the example map and open questions under `## Discovery Open Items` and write no `## Feature Specification` heading. The write happens only after the skeptic check's routing has finished (see the `### Skeptic check` subsection), because that routing can change the verdict.
+2. Write the output by verdict. With `READY FOR PLANNING`, write `## Feature Specification` from the **Business and Tester findings only** -- behavioral ACs, Behavior-Driven Development (BDD) scenarios (written per FORMULATION.md in this directory), out-of-scope items; open questions stay in the map's Questions line (`none` when ready). With `BACK TO OWNER`, write the example map and open questions under `## Discovery Open Items` and write no `## Feature Specification` heading. The write happens only after the skeptic check's routing has finished (see the `### Skeptic check` subsection), because that routing can change the verdict. Write each open formulation finding as a note under the scenario it concerns in the Feature Specification; when the verdict is `BACK TO OWNER`, list each note in `## Discovery Open Items` with its amigo, scenario name and quoted step, and carry it under that scenario when the map moves under `## Feature Specification`; a note whose step the owner's answer changed or removed is dropped.
 3. Record Developer implementation findings separately under `## Implementation Notes` -- these become inputs to todo planning.
 4. Do NOT mix Developer findings into the Feature Specification. Implementation details in the Feature Specification defeat the purpose of the ceremony.
 
@@ -60,15 +60,18 @@ After all three Discovery amigos return:
 
 This check runs once per Discovery, after all three amigos return and before the map's verdict is final. Its enforcement is procedural: the orchestrator checks its own routing before writing the verdict; no tool enforces it.
 
-**Inputs (read by path, not pasted into the prompt):** the story file, the answers of all three amigos (Business, Developer, Tester), and the example map. The orchestrator saves the three amigo answers and the draft map to scratch files outside the repository (never plan.md, because the Feature Specification heading is append-only) and passes those paths; the draft map is written under its final heading only after routing finishes.
+**Inputs (read by path, not pasted into the prompt):** the story file, the answers of all three amigos (Business, Developer, Tester), and the example map. The orchestrator saves the three amigo answers and the draft map to scratch files outside the repository (never plan.md, because the Feature Specification heading is append-only) and passes those paths; the draft map is written under its final heading only after routing finishes. The formulation check also reads FORMULATION.md in this directory and `agents/spec-compliance-reviewer.md` by path.
 
-**Report:** findings only. The skeptic reports four classes and nothing else:
+**Report:** findings only. The skeptic reports five classes and nothing else:
 - rule with no example: a rule in the map has no example
 - example that tests no rule: an example in the map matches no rule
 - question left out: an amigo answer raises an open question that is not in the map's Questions line
 - statement the source does not support: a map statement the story does not make
+- scenario that breaks a formulation rule: a Given/When/Then scenario in a Business or Tester answer or in the draft map breaks a rule of FORMULATION.md in this directory
 
 The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR PLANNING` or `BACK TO OWNER`. The report lists one finding per line, naming its class and item, and ends with the line `FINDINGS: <n>`, where `<n>` is the finding count (`FINDINGS: 0` when there are none).
+
+**Formulation class (Discovery only):** the skeptic hosts this check because it is independent of the amigos that wrote the scenarios and runs once before the Feature Specification is written. It reads FORMULATION.md in this directory in full and checks each Given/When/Then scenario against rules 1, 2, 3, 5, 8 and 9, and against rules 4, 6 and 7 only when the answer or draft map holds several scenarios; a criterion in plain language is not checked, and neither is any use of the skeptic outside this Discovery check. Each broken rule is one finding line, one per broken rule per scenario: `formulation: <amigo>/<scenario name> rule <number> (<title>) -- "<quoted offending step>"` (a scenario that appears in both an amigo answer and the draft map is checked once and counted once), with the title taken from the list in the Scenario Formulation Check section of `agents/spec-compliance-reviewer.md`, read by path. When no rule is broken the report carries the line `Formulation: NONE`; when no scenario is in Given/When/Then form, `Formulation: not applicable`; when FORMULATION.md or the title list cannot be read, `Formulation: not checked -- reference not found`, which is never read as a pass. The `Formulation:` lines are not findings; each rule line counts once in `FINDINGS: <n>`.
 
 **Prompt overrides:** the plan-review framing of the skeptic template does not apply to this check. Developer answers are inputs; Developer content absent from the map is not a finding.
 
@@ -78,10 +81,11 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 - Zero findings: the map stands.
 - Skeptic run failed, BLOCKED, NEEDS_CONTEXT, or its report is unreadable: add a Question and set the verdict to `BACK TO OWNER`.
 - A rule with no example goes back to the Tester amigo; an example that tests no rule goes back to the amigo that wrote it. Each owning amigo gets one return dispatch, with all of that amigo's findings batched into the one dispatch.
-- If the return dispatch fails (including a NEEDS_CONTEXT or BLOCKED reply), or the finding is still open after the return: add a Question and set the verdict to `BACK TO OWNER`.
-- A question left out and a statement the source does not support become a Question and the verdict is `BACK TO OWNER`, with no return dispatch. A finding whose owner the source does not show gets the same routing: a Question and `BACK TO OWNER`, never a guessed amigo.
+- A formulation finding goes back to the amigo that wrote the scenario, in that amigo's one batched return dispatch. A formulation finding still open after the return, or whose return dispatch fails, is advisory: it is noted as Synthesis step 2 says, and it never becomes a Question and never sets the verdict to `BACK TO OWNER`. Scenarios changed by a return dispatch or by the owner's answer are not checked again. A formulation finding on a draft-map scenario that no amigo wrote has no owning amigo: it gets no return dispatch, stays advisory, and is noted with the owner `map`.
+- If the return dispatch fails (including a NEEDS_CONTEXT or BLOCKED reply), or the finding is still open after the return, and the finding is not a formulation finding: add a Question and set the verdict to `BACK TO OWNER`.
+- A question left out and a statement the source does not support become a Question and the verdict is `BACK TO OWNER`, with no return dispatch. A finding whose owner the source does not show gets the same routing: a Question and `BACK TO OWNER`, never a guessed amigo; a formulation finding is the exception (see the formulation bullet above).
 - At most one return dispatch per owning amigo. The skeptic is not re-run after a return.
-- Findings never become `none` by omission: the Questions line reads `none` only when there are no unresolved findings and no Questions, and every finding is either resolved by a return or listed as a Question.
+- Findings never become `none` by omission: the Questions line reads `none` only when there are no unresolved findings and no Questions, and every finding is either resolved by a return or listed as a Question. An open formulation finding is the exception: it is noted as Synthesis step 2 says, not listed as a Question.
 
 ### Read First
 

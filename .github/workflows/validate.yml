@@ -870,7 +870,7 @@ jobs:
           fi
           echo "[+] formulation heading pin is present"
 
-      # A pin proves the wording exists in the file, not where it sits or that the skeptic follows it.
+      # A pin proves the wording exists in the file, not where it sits or that the skeptic follows it. The two class lines are whole-line matches; the other pins are substring matches.
       # CEREMONIES_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it.
       - name: Check the Discovery formulation check is pinned
         run: |
@@ -893,7 +893,8 @@ jobs:
             'it never becomes a Question and never sets the verdict to `BACK TO OWNER`' \
             'the Scenario Formulation Check section of `agents/spec-compliance-reviewer.md`' \
             'formulation: <amigo>/<scenario name> rule <number> (<title>) -- "<quoted offending step>"' \
-            'list each note in `## Discovery Open Items` with its amigo, scenario name and quoted step'
+            'list each note in `## Discovery Open Items` with its amigo, scenario name and quoted step' \
+            'it gets no return dispatch, stays advisory, and is noted with the owner `map`'
           do
             if ! grep -qF -- "$s" "$f"; then
               printf 'FAILED: %s has no text containing: %s\n' "$f" "$s"

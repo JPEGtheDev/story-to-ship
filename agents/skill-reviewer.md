@@ -47,6 +47,24 @@ first or the second path. The Implementer Evidence spot-check runs once for the 
 
 {{IMPLEMENTER_EVIDENCE}}
 
+## Attribution and Non-Blocking Lists
+
+Attribution (deciding which defects the change introduced): for each file under review, run `git diff $(git merge-base HEAD origin/main) -- <file>`. The diff shows the lines the change added or edited. If `origin/main` is not available, run `git fetch origin main` once. If it is still unavailable, write "attribution not possible" in that file's FINDINGS and give that file the verdict NEEDS WORK.
+
+"Introduced" means one of two things: the offending line is in that diff, or a required element is missing because of the change. A requirement the change fails to meet (missing, partial or contradicted) counts as introduced. A hedged item (one phrased as a maybe, a suggestion or a "consider") on a line of the diff is still introduced: INTRODUCED wins over hedging, so a problem on a diff line is introduced even when it is hedged.
+
+The verdict of a file is set only by introduced defects. A defect the change introduced still sets VERDICT to NEEDS WORK under the Review Process. Where this section and the Review Process differ on what sets a verdict, this section governs.
+
+A size alert (the file is over a length limit given in the Size and Compression Rules) on a file the change did not make longer never gives NEEDS WORK by itself. Its verdict is PASS (size advisory), and the alert goes in the Non-blocking notes list. A size alert on a file the change made longer follows the Review Process.
+
+Two dispatch-level lists follow the per-file blocks and come before the Spot-check line. Each list is shown only when it has items, and neither list sets or changes any VERDICT.
+- Non-blocking notes (items that never change a verdict): hedged or advisory items, a size alert covered by the rule above, and a removal candidate (a passage the Size and Compression Rules suggest cutting) that is not on a line of the diff.
+- Leave it better (problems the change did not cause, listed for the author to fix if small): problems on lines outside the diff in a file the change edits. An item that fits both lists goes here, not in Non-blocking notes.
+
+Each item names its file. Do not change the per-file block shape or any verdict value.
+
+One root cause that shows in both files of a dispatch is listed once, in the block of the first file (the path under "Skill Under Review" that comes before the second path), with the other file named on that line. The second block does not repeat it.
+
 ---
 
 ## Skill Anatomy Reference

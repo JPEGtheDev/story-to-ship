@@ -73,6 +73,7 @@ The role rules for this dispatch are the ROLE_RULES block below. The dispatcher 
 - Follow the testing skill; the role rules above say whether you write the failing test or work against an existing one
 - Follow the cpp-patterns skill: RAII, no resource leaks, docs-same-commit rule
 - Conventional commits: `<type>[scope]: <description>`
+- Commit message trailers: add only the trailer lines the dispatch prompt names; add none otherwise.
 - Do NOT push to main or the parent branch
 - Commit to your branch: `agent/{{AGENT_NAME}}`
 - NEVER use `git stash` -- the stash stack is repository-global, shared across the main checkout and every worktree, so a stash from one agent can be popped by another session, silently mixing changes. Sequencing a failing-test commit before its fix: commit the phases directly (test commit, then implementation commit), or set work aside with a temporary WIP commit. If a stash is ever unavoidable: push with a unique message tag, capture the entry SHA immediately, apply (never pop) by SHA, drop by re-found tag. Any `git stash` invocation appearing in this agent's transcript or command log is a defect: the dispatcher treats it as a finding and returns the branch for a fix round.
@@ -178,7 +179,7 @@ Files changed: [list]
 Completed: [if PARTIAL -- what was finished and verified]
 Remaining: [if PARTIAL -- what was not completed and why]
 Decisions made: [any non-obvious choices + justification]
-Concerns: [if DONE_WITH_CONCERNS -- describe what you flagged and why]
+Concerns: [only with DONE_WITH_CONCERNS -- the action the dispatcher must take, and why]
 Limitations: [REQUIRED -- known limitations, skipped checks, or unverified areas of this work. Write 'none' only if genuinely none. Omitting this field entirely makes the result incomplete and the dispatcher will resubmit.]
 Detail: [only when content was left out -- the commit hash or the /tmp file that holds it]
 Missing context: [if NEEDS_CONTEXT -- exactly what information is needed]
@@ -186,8 +187,8 @@ Blockers: [if BLOCKED -- what cannot be resolved without external action]
 ```
 
 Status meanings:
-- DONE: Task complete. All verification gates passed. No concerns.
-- DONE_WITH_CONCERNS: Complete. Flagging issues for dispatcher review before merge.
+- DONE: Task complete, all verification gates passed, and nothing needs the dispatcher to act. Environment limits (a tool that is missing, a check that could not run here) go under the Limitations line and the status stays DONE.
+- DONE_WITH_CONCERNS: Complete, but the dispatcher must act: a correctness or scope risk, a requirement not fully met, or a decision only the dispatcher can make. The Concerns line names the action needed. Do not use DONE_WITH_CONCERNS for an environment limit, a style remark, or an item that needs no action.
 - PARTIAL: Partially complete. What was finished is tested and verified. Remaining work listed.
 - NEEDS_CONTEXT: Cannot proceed. Specific missing information listed.
 - BLOCKED: Cannot proceed. External dependency or environment issue described.

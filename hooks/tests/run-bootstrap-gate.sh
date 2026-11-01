@@ -99,6 +99,8 @@
 #   $BOOTSTRAP_GATE_STATE_DIR/.honesty-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.communication-pending-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.bootstrap-gate-log.jsonl
+#   $BOOTSTRAP_GATE_STATE_DIR/.session-start-payload-log.jsonl
+#   $BOOTSTRAP_GATE_STATE_DIR/.session-start-fingerprint-log.jsonl
 #   $BOOTSTRAP_GATE_STATE_DIR/.skills-loaded-<session_id>
 #   $BOOTSTRAP_GATE_STATE_DIR/.reload-pending-<session_id>
 # session-start.sh writes the reload-pending set from the loaded list on a

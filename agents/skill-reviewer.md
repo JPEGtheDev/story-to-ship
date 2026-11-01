@@ -51,7 +51,7 @@ first or the second path. The Implementer Evidence spot-check runs once for the 
 
 ## Attribution and Non-Blocking Lists
 
-Attribution (deciding which defects the change introduced): for each file under review, run `git diff $(git merge-base HEAD origin/main) -- <file>`. The diff shows the lines the change added or edited. If `origin/main` is not available, run `git fetch origin main` once. If it is still unavailable, write "attribution not possible" in that file's FINDINGS and give that file the verdict NEEDS WORK. This is the one case where the verdict is not set by an introduced defect.
+Attribution (deciding which defects the change introduced): for each file under review, run `git diff $(git merge-base HEAD origin/main) -- <file>`. The diff shows the lines the change added or edited. If `origin/main` is not available, run `git fetch origin main` once. If it is still unavailable, write "attribution not possible" in that file's FINDINGS and give that file the verdict NEEDS WORK. This is one of two cases where the verdict is not set by an introduced defect; the other is case (c) below.
 
 "Introduced" means one of two things: the offending line is in that diff, or a required element is missing because of the change. A requirement the change fails to meet (missing, partial or contradicted) counts as introduced. A hedged item (one phrased as a maybe, a suggestion or a "consider") on a line of the diff is still introduced: INTRODUCED wins over hedging, so a problem on a diff line is introduced even when it is hedged.
 
@@ -59,13 +59,13 @@ The verdict of a file is set only by introduced defects. A defect the change int
 
 A file the change did not make longer (sizes measured in tokens, the unit of the Size and Compression Rules) is handled in three cases:
 - (a) Above its target but within the ideal maximum (the Review Process calls this a SIZE ALERT): the alert goes in Non-blocking notes, and the file's verdict is whatever the other criteria give.
-- (b) Above the ideal maximum but within the 5,000-token loading limit: when the file has no introduced defect, its verdict is PASS (size advisory) instead of NEEDS WORK for the old content. The alert goes in Non-blocking notes, and the Review Process size report is still given.
-- (c) Above the 5,000-token loading limit: this section does not apply, and the Review Process governs because the file will not load.
+- (b) Above the ideal maximum but within the 5,000-token loading limit: when the file has no introduced defect, its verdict is PASS (size advisory) instead of NEEDS WORK for the old content. Cuttable rationale added on a line of the diff is an introduced defect even when the file did not get longer. The alert goes in Non-blocking notes, and the Review Process size report is still given.
+- (c) Above the 5,000-token loading limit: this size rule does not apply, and the Review Process governs the size verdict because the file will not load.
 
 A file the change made longer follows the Review Process in every case.
 
 Two dispatch-level lists follow the per-file blocks and come before the Spot-check line. Each list is shown only when it has items. Neither list sets or changes any VERDICT, and an introduced defect beats both lists: it goes in FINDINGS and sets the verdict, even when it also fits a list.
-- Non-blocking notes (items that never change a verdict): hedged or advisory items about content that is not on a line of the diff, a size alert covered by case (a) or (b) above, and a removal candidate (a passage the Size and Compression Rules suggest cutting) that is not on a line of the diff.
+- Non-blocking notes (items that never change a verdict): hedged or advisory items about content that is not on a line of the diff, the size note from case (a) or (b) above, and a removal candidate (a passage the Size and Compression Rules suggest cutting) that is not on a line of the diff.
 - Leave it better (problems the change did not cause, listed for the author to fix if small): problems on lines outside the diff in a file the change edits. An item that fits both lists goes here, not in Non-blocking notes.
 
 Each item names its file. Do not change the per-file block shape or any verdict value.

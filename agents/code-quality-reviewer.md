@@ -35,16 +35,16 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 **Step 2 -- Run the full checklist** against the complete content of each file.
 
-**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD origin/main) -- {{FILES}}` to get the diff. If `origin/main` is not available, run `git fetch origin main` once; if it is still unavailable, report "attribution not possible" and do not guess. For each issue found, determine:
-- If the offending line appears in the diff -> **INTRODUCED** (must fix before merge)
+**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD origin/main) -- {{FILES}}` to get the diff. If `origin/main` is not available, run `git fetch origin main` once; if it is still unavailable, report "attribution not possible" on the Critical issues line, set VERDICT to REQUEST CHANGES, and do not guess. For each issue found, determine:
+- If the offending line appears in the diff -> **INTRODUCED** (must fix before merge). This holds whether or not the item is hedged or advisory: INTRODUCED wins over the Non-blocking notes list.
 - If the offending line is outside the diff, in a file the branch changes -> route to the Leave it better list
-- A hedged or advisory item, a finding about content the branch did not change in a file it did not grow, or a removal candidate -> route to the Non-blocking notes list
+- A hedged or advisory item that is not on a line of the diff, a size alert on a file the branch did not make larger, or a removal candidate -> route to the Non-blocking notes list
 
 Neither list sets the verdict.
 
-Do not ask the caller to provide a diff. Derive it yourself.
-
 A defect the branch introduced still sets the VERDICT by the verdict rules of this template.
+
+Do not ask the caller to provide a diff. Derive it yourself.
 
 ## Review checklist (required -- check every item)
 
@@ -96,7 +96,7 @@ Check every tracked file in the diff for:
       test enforces this") does not; a grep for test-file suffixes is a floor, so read for
       names in words
 
-A hygiene hit on a line in the merge-base diff is a REQUEST CHANGES verdict regardless of any other findings; a hygiene hit on an older line in a file the branch changes goes to Leave it better instead.
+A hygiene hit on a line in the merge-base diff is a REQUEST CHANGES verdict regardless of any other findings; a hygiene hit on a line outside that diff in a file the branch changes goes to Leave it better instead.
 
 ## Evidence Spot-Check (required)
 
@@ -134,7 +134,7 @@ You commit nothing, so the commit option above does not apply: put detail that d
 After the return format above, end with ONE summary block per file listed under Files under review, in the exact shape below, nothing merged across files.
 
 - The Return format VERDICT is the most severe verdict across the per-file blocks (APPROVE < APPROVE WITH NITS < REQUEST CHANGES < REJECT).
-- A dispatch-wide finding, such as an evidence spot-check mismatch or a finding spanning files, sets the Return format VERDICT directly, overriding the roll-up, and is listed once, in the block of the first file it implicates, with the other implicated files named on that line, and the other blocks do not repeat it. Every listed file still gets its own block; a finding that implicates no single file appears only in the Return format block.
+- A dispatch-wide finding, such as an evidence spot-check mismatch or a finding spanning files, sets the Return format VERDICT directly, overriding the roll-up, and is listed once, in the block of the first file it implicates in the Files under review order, with the other implicated files named on that line; that finding also sets that block's VERDICT, and the other blocks do not repeat it. Every listed file still gets its own block; a finding that implicates no single file appears only in the Return format block.
 - Omitting a listed file's block for any reason, or merging two files into one block, is an incomplete return and is re-dispatched.
 - For a listed path that no longer exists in the worktree, confirm a delete hunk for it in the Step 3 diff; a listed path with no delete hunk was never created and is a missing-deliverable finding, not a deletion. Before calling a deletion clean, grep the tree for the deleted path and its bare filename.
 - For a confirmed deletion, emit the block with QUOTED LINE reading exactly `file deleted by this todo`, and VERDICT APPROVE when the deletion is clean. If the deletion leaves a dangling reference or removes content still required elsewhere, list it on the FINDINGS line and set that block's VERDICT to REQUEST CHANGES.

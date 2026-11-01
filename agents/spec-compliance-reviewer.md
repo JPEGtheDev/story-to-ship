@@ -36,7 +36,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 **Step 2 -- Evaluate requirements coverage** against the complete file content.
 
-**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD origin/main) -- {{FILES}}` to confirm what was actually introduced by this change. If origin/main is not available, run `git fetch origin main` once; if it is still unavailable, report "attribution not possible" and do not guess. "Introduced" means the offending line is in this diff. A requirement the branch fails to meet (missing, partial or contradicted) always counts as introduced, so a reviewer verdict is set by it; "predates the branch" covers only defects in lines the branch did not touch. Use this to distinguish between requirements that are NEWLY addressed vs requirements served by pre-existing code.
+**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD origin/main) -- {{FILES}}` to confirm what was actually introduced by this change. If origin/main is not available, run `git fetch origin main` once; if it is still unavailable, report "attribution not possible" and do not guess. "Introduced" means the offending line is in this diff. A requirement the branch fails to meet (missing, partial or contradicted) always counts as introduced, even when the contradicting line is one the branch did not touch. A reviewer verdict is set only by introduced defects. Use this to distinguish between requirements that are NEWLY addressed vs requirements served by pre-existing code.
 
 Do not ask the caller to provide a diff. Derive it yourself.
 

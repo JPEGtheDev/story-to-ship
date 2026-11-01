@@ -94,6 +94,26 @@ fi
 # transcript_path contains "/subagents/" and whether cwd contains "/.worktrees/": true or
 # false for a string value, null otherwise. No path or cwd text is ever logged. Runs
 # before the stamping block so it also covers payloads with agent_id or without session_id.
+# It also appends one line per payload to .session-start-fingerprint-log.jsonl: ts, source and
+# 16-hex SHA-256 prefixes (never raw values). SESSION_START_LOG_CLOCK is a test-only ts override.
+# fingerprint_field KEY prints the 16-hex fingerprint of a string field, or nothing.
+fingerprint_field() {
+  local field_type field_value digest=""
+  field_type="$(printf '%s' "$RAW" | jq -r --arg k "$1" '.[$k] | type' 2>/dev/null)"
+  [[ "$field_type" == "string" ]] || return 0
+  field_value="$(printf '%s' "$RAW" | jq -j --arg k "$1" '.[$k]' 2>/dev/null; printf x)"
+  field_value="${field_value%x}"
+  if command -v sha256sum &>/dev/null; then
+    digest="$(printf '%s' "$field_value" | sha256sum 2>/dev/null)"
+  elif command -v shasum &>/dev/null; then
+    digest="$(printf '%s' "$field_value" | shasum -a 256 2>/dev/null)"
+  fi
+  digest="${digest:0:16}"
+  if [[ "$digest" =~ ^[0-9a-f]{16}$ ]]; then
+    printf '%s' "$digest"
+  fi
+}
+
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
   if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
     printf '%s' "$RAW" | jq -c '
@@ -103,6 +123,26 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 't
         transcript_in_subagents: (if (.transcript_path | type) == "string" then (.transcript_path | contains("/subagents/")) else null end),
         cwd_in_worktrees: (if (.cwd | type) == "string" then (.cwd | contains("/.worktrees/")) else null end)
       }' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
+    FP_TS="${SESSION_START_LOG_CLOCK:-}"
+    [[ -n "$FP_TS" ]] || FP_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"
+    FP_SESSION_ID="$(fingerprint_field session_id)"
+    FP_TRANSCRIPT_PATH="$(fingerprint_field transcript_path)"
+    FP_PROMPT_ID="$(fingerprint_field prompt_id)"
+    FP_LINE="$(printf '%s' "$RAW" | jq -c \
+      --arg ts "$FP_TS" \
+      --arg sid "$FP_SESSION_ID" \
+      --arg tfp "$FP_TRANSCRIPT_PATH" \
+      --arg pfp "$FP_PROMPT_ID" '
+      {
+        ts: $ts,
+        source: (if (.source | type) == "string" then .source else null end),
+        session_id_fp: (if $sid == "" then null else $sid end),
+        transcript_path_fp: (if $tfp == "" then null else $tfp end),
+        prompt_id_fp: (if $pfp == "" then null else $pfp end)
+      }' 2>/dev/null)"
+    if [[ -n "$FP_LINE" ]]; then
+      printf '%s\n' "$FP_LINE" >>"$BOOTSTRAP_STATE_DIR/.session-start-fingerprint-log.jsonl" 2>/dev/null
+    fi
   fi
 fi
 

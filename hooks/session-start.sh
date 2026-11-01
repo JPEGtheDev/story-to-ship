@@ -94,14 +94,15 @@ fi
 # transcript_path contains "/subagents/" and whether cwd contains "/.worktrees/": true or
 # false for a string value, null otherwise. No path or cwd text is ever logged. Runs
 # before the stamping block so it also covers payloads with agent_id or without session_id.
-# It also appends one line per payload to .session-start-fingerprint-log.jsonl: ts, source and
-# 16-hex SHA-256 prefixes (never raw values). SESSION_START_LOG_CLOCK is a test-only ts override.
-# fingerprint_field KEY prints the 16-hex fingerprint of a string field, or nothing.
+
+# fingerprint_field KEY prints the 16-hex SHA-256 prefix of the string field KEY of RAW,
+# or nothing when the field is missing or not a string. One jq run reads the type and the
+# value: a string is emitted behind an "s" marker, any other value emits no marker.
 fingerprint_field() {
-  local field_type field_value digest=""
-  field_type="$(printf '%s' "$RAW" | jq -r --arg k "$1" '.[$k] | type' 2>/dev/null)"
-  [[ "$field_type" == "string" ]] || return 0
-  field_value="$(printf '%s' "$RAW" | jq -j --arg k "$1" '.[$k]' 2>/dev/null; printf x)"
+  local field_out field_value digest=""
+  field_out="$(printf '%s' "$RAW" | jq -j --arg k "$1" 'if (.[$k] | type) == "string" then "s" + .[$k] else empty end' 2>/dev/null; printf x)"
+  [[ "${field_out:0:1}" == "s" ]] || return 0
+  field_value="${field_out:1}"
   field_value="${field_value%x}"
   if command -v sha256sum &>/dev/null; then
     digest="$(printf '%s' "$field_value" | sha256sum 2>/dev/null)"
@@ -114,6 +115,10 @@ fingerprint_field() {
   fi
 }
 
+# Fingerprint log (side effect only, fail-open): one line per payload appended to
+# .session-start-fingerprint-log.jsonl in the state dir: ts, source and the 16-hex
+# fingerprints from fingerprint_field (never raw values). SESSION_START_LOG_CLOCK is a
+# test-only ts override.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
   if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
     printf '%s' "$RAW" | jq -c '

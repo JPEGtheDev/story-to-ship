@@ -87,6 +87,26 @@ if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
   BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
 fi
 
+# fingerprint_field KEY prints the 16-hex SHA-256 prefix of the string field KEY of RAW,
+# or nothing when the field is missing or not a string. One jq run reads the type and the
+# value: a string is emitted behind an "s" marker, any other value emits no marker.
+fingerprint_field() {
+  local field_out field_value digest=""
+  field_out="$(printf '%s' "$RAW" | jq -j --arg k "$1" 'if (.[$k] | type) == "string" then "s" + .[$k] else empty end' 2>/dev/null; printf x)"
+  [[ "${field_out:0:1}" == "s" ]] || return 0
+  field_value="${field_out:1}"
+  field_value="${field_value%x}"
+  if command -v sha256sum &>/dev/null; then
+    digest="$(printf '%s' "$field_value" | sha256sum 2>/dev/null)"
+  elif command -v shasum &>/dev/null; then
+    digest="$(printf '%s' "$field_value" | shasum -a 256 2>/dev/null)"
+  fi
+  digest="${digest:0:16}"
+  if [[ "$digest" =~ ^[0-9a-f]{16}$ ]]; then
+    printf '%s' "$digest"
+  fi
+}
+
 # Diagnostic capture (side effect only, fail-open): for every valid JSON object payload,
 # append {"source":...,"keys":[...],"transcript_in_subagents":...,"cwd_in_worktrees":...}
 # to .session-start-payload-log.jsonl in the state dir. source is null unless a string;
@@ -103,6 +123,30 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 't
         transcript_in_subagents: (if (.transcript_path | type) == "string" then (.transcript_path | contains("/subagents/")) else null end),
         cwd_in_worktrees: (if (.cwd | type) == "string" then (.cwd | contains("/.worktrees/")) else null end)
       }' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
+    # Fingerprint log (side effect only, fail-open): one line per payload appended to
+    # .session-start-fingerprint-log.jsonl in the state dir: ts, source and the 16-hex
+    # fingerprints from fingerprint_field (never raw values). SESSION_START_LOG_CLOCK is a
+    # test-only ts override.
+    FP_TS="${SESSION_START_LOG_CLOCK:-}"
+    [[ -n "$FP_TS" ]] || FP_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"
+    FP_SESSION_ID="$(fingerprint_field session_id)"
+    FP_TRANSCRIPT_PATH="$(fingerprint_field transcript_path)"
+    FP_PROMPT_ID="$(fingerprint_field prompt_id)"
+    FP_LINE="$(printf '%s' "$RAW" | jq -c \
+      --arg ts "$FP_TS" \
+      --arg sid "$FP_SESSION_ID" \
+      --arg tfp "$FP_TRANSCRIPT_PATH" \
+      --arg pfp "$FP_PROMPT_ID" '
+      {
+        ts: $ts,
+        source: (if (.source | type) == "string" then .source else null end),
+        session_id_fp: (if $sid == "" then null else $sid end),
+        transcript_path_fp: (if $tfp == "" then null else $tfp end),
+        prompt_id_fp: (if $pfp == "" then null else $pfp end)
+      }' 2>/dev/null)"
+    if [[ -n "$FP_LINE" ]]; then
+      { printf '%s\n' "$FP_LINE" >>"$BOOTSTRAP_STATE_DIR/.session-start-fingerprint-log.jsonl"; } 2>/dev/null
+    fi
   fi
 fi
 

@@ -87,14 +87,6 @@ if [[ -z "$BOOTSTRAP_STATE_DIR" && -n "${CLAUDE_PROJECT_DIR:-}" ]]; then
   BOOTSTRAP_STATE_DIR="$CLAUDE_PROJECT_DIR/.claude"
 fi
 
-# Diagnostic capture (side effect only, fail-open): for every valid JSON object payload,
-# append {"source":...,"keys":[...],"transcript_in_subagents":...,"cwd_in_worktrees":...}
-# to .session-start-payload-log.jsonl in the state dir. source is null unless a string;
-# keys are the sorted top-level key names only. The two booleans say whether
-# transcript_path contains "/subagents/" and whether cwd contains "/.worktrees/": true or
-# false for a string value, null otherwise. No path or cwd text is ever logged. Runs
-# before the stamping block so it also covers payloads with agent_id or without session_id.
-
 # fingerprint_field KEY prints the 16-hex SHA-256 prefix of the string field KEY of RAW,
 # or nothing when the field is missing or not a string. One jq run reads the type and the
 # value: a string is emitted behind an "s" marker, any other value emits no marker.
@@ -115,10 +107,13 @@ fingerprint_field() {
   fi
 }
 
-# Fingerprint log (side effect only, fail-open): one line per payload appended to
-# .session-start-fingerprint-log.jsonl in the state dir: ts, source and the 16-hex
-# fingerprints from fingerprint_field (never raw values). SESSION_START_LOG_CLOCK is a
-# test-only ts override.
+# Diagnostic capture (side effect only, fail-open): for every valid JSON object payload,
+# append {"source":...,"keys":[...],"transcript_in_subagents":...,"cwd_in_worktrees":...}
+# to .session-start-payload-log.jsonl in the state dir. source is null unless a string;
+# keys are the sorted top-level key names only. The two booleans say whether
+# transcript_path contains "/subagents/" and whether cwd contains "/.worktrees/": true or
+# false for a string value, null otherwise. No path or cwd text is ever logged. Runs
+# before the stamping block so it also covers payloads with agent_id or without session_id.
 if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 'type == "object"' >/dev/null 2>&1; then
   if [[ -n "$BOOTSTRAP_STATE_DIR" ]] && mkdir -p "$BOOTSTRAP_STATE_DIR" 2>/dev/null; then
     printf '%s' "$RAW" | jq -c '
@@ -128,6 +123,10 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 't
         transcript_in_subagents: (if (.transcript_path | type) == "string" then (.transcript_path | contains("/subagents/")) else null end),
         cwd_in_worktrees: (if (.cwd | type) == "string" then (.cwd | contains("/.worktrees/")) else null end)
       }' 2>/dev/null >>"$BOOTSTRAP_STATE_DIR/.session-start-payload-log.jsonl"
+    # Fingerprint log (side effect only, fail-open): one line per payload appended to
+    # .session-start-fingerprint-log.jsonl in the state dir: ts, source and the 16-hex
+    # fingerprints from fingerprint_field (never raw values). SESSION_START_LOG_CLOCK is a
+    # test-only ts override.
     FP_TS="${SESSION_START_LOG_CLOCK:-}"
     [[ -n "$FP_TS" ]] || FP_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"
     FP_SESSION_ID="$(fingerprint_field session_id)"

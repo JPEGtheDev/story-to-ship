@@ -145,7 +145,7 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq -e 't
         prompt_id_fp: (if $pfp == "" then null else $pfp end)
       }' 2>/dev/null)"
     if [[ -n "$FP_LINE" ]]; then
-      printf '%s\n' "$FP_LINE" >>"$BOOTSTRAP_STATE_DIR/.session-start-fingerprint-log.jsonl" 2>/dev/null
+      { printf '%s\n' "$FP_LINE" >>"$BOOTSTRAP_STATE_DIR/.session-start-fingerprint-log.jsonl"; } 2>/dev/null
     fi
   fi
 fi

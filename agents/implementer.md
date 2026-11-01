@@ -187,8 +187,8 @@ Blockers: [if BLOCKED -- what cannot be resolved without external action]
 ```
 
 Status meanings:
-- DONE: Task complete, all verification gates passed, and nothing needs the dispatcher to act. Environment limits (a tool that is missing, a check that could not run here) go under the Limitations line and the status stays DONE.
-- DONE_WITH_CONCERNS: Complete, but the dispatcher must act: a correctness or scope risk, a requirement not fully met, or a decision only the dispatcher can make. The Concerns line names the action needed. Do not use DONE_WITH_CONCERNS for an environment limit, a style remark, or an item that needs no action.
+- DONE: Task complete, every verification gate that could run here passed, and nothing needs the dispatcher to act. A gate that could not run because of the environment (for example a missing tool) is a Limitations item, not a failure, and the status stays DONE. An environment problem that stops the work itself is BLOCKED.
+- DONE_WITH_CONCERNS: Complete, but the dispatcher must decide or act: a correctness or scope risk, or a requirement that cannot be met as written. The Concerns line names the action needed. Work you did not finish is PARTIAL, not DONE_WITH_CONCERNS. Do not use DONE_WITH_CONCERNS for an environment limit, a style remark, or an item that needs no action.
 - PARTIAL: Partially complete. What was finished is tested and verified. Remaining work listed.
 - NEEDS_CONTEXT: Cannot proceed. Specific missing information listed.
 - BLOCKED: Cannot proceed. External dependency or environment issue described.

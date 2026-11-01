@@ -40,7 +40,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 - If the offending line is outside the diff, in a file the branch changes -> route to the Leave it better list
 - A hedged or advisory item that is not on a line of the diff, a size alert on a file the branch did not make larger, or a removal candidate -> route to the Non-blocking notes list
 
-Neither list sets the verdict.
+An item that fits both lists goes in Leave it better. Neither list sets the verdict.
 
 A defect the branch introduced still sets the VERDICT by the verdict rules of this template.
 

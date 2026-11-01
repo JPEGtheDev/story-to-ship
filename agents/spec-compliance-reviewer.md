@@ -36,7 +36,7 @@ The output MUST match `{{WORKTREE_PATH}}`.
 
 **Step 2 -- Evaluate requirements coverage** against the complete file content.
 
-**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD main) -- {{FILES}}` to confirm what was actually introduced by this change. Use this to distinguish between requirements that are NEWLY addressed vs requirements served by pre-existing code.
+**Step 3 -- Attribution:** Run `git diff $(git merge-base HEAD origin/main) -- {{FILES}}` to confirm what was actually introduced by this change. If origin/main is not available, run `git fetch origin main` once; if it is still unavailable, report "attribution not possible" and do not guess. "Introduced" means the offending line is in this diff. A requirement the branch fails to meet (missing, partial or contradicted) always counts as introduced, even when the contradicting line is one the branch did not touch. A reviewer verdict is set only by introduced defects. Use this to distinguish between requirements that are NEWLY addressed vs requirements served by pre-existing code.
 
 Do not ask the caller to provide a diff. Derive it yourself.
 
@@ -53,8 +53,9 @@ The Formulation line is the only addition; it is defined under Scenario Formulat
 - Quote each requirement verbatim before giving your finding -- do not paraphrase
 - Provide evidence for each finding: name the exact file and line number, or state "not found in diff"
 - Do NOT approve a requirement because "it probably handles it" -- if you cannot find the behavior, report it missing
-- Do NOT comment on code quality, naming, style, or architecture unless it directly contradicts a requirement, except for the Formulation line on a Given/When/Then requirement
-- Do NOT suggest improvements or refactoring
+- Do NOT comment on code quality, naming, style, or architecture unless it directly contradicts a requirement, except for the Formulation line on a Given/When/Then requirement, and except for notes in the Non-blocking notes and Leave it better lists of the return format
+- Do NOT suggest improvements or refactoring outside the two return-format lists (Non-blocking notes and Leave it better), which are the only place for notes
+- A line whose text the requirements quote or specify counts as in scope: never report it as out of scope, extra, or contradicting. Hedged or advisory items about it go under Non-blocking notes.
 - Do NOT praise the implementation
 - "Tests pass" is not evidence that requirements are met -- evaluate the implementation, not the test results
 - For any class whose state is displayed in the UI: verify each UI-displayed field has a traceable public accessor (class method -> `MenuState` field -> menu render call). A UI acceptance criterion without a class API path is a spec gap -- report it as MISSING, not FULL.
@@ -106,7 +107,7 @@ In addition to requirements coverage, check every tracked file changed in the di
 
 Report each hit with file and line under "Shipped-file hygiene" in your verdict, or state NONE. This check applies regardless of whether the hygiene issue contradicts a requirement.
 
-A hygiene hit in the changed files is a GAPS verdict regardless of any other findings.
+A hygiene hit on a line in the merge-base diff is a GAPS verdict regardless of any other findings. A hygiene hit on a line outside that diff (an older line in a file the branch changes) goes under Leave it better instead.
 
 ## Return format
 
@@ -114,9 +115,13 @@ Final message cap: 4,000 characters for the whole final message, counted with `w
 Every verdict line and block your format requires stays inside the cap.
 You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
 
+Non-blocking notes: hedged or advisory items, and findings that predate the branch about content the branch did not change (a size alert on a file the branch did not grow, or a removal candidate). Leave it better: problems that already existed in lines of a file the branch changes; the implementer may fix small items, and the reviewer only lists them. Neither list sets or changes VERDICT.
+
 ```
 VERDICT: [PASS | GAPS]
 Shipped-file hygiene: [list file:line hits, or NONE]
+Non-blocking notes: [one line per item; omit this line when there are none]
+Leave it better: [one line per item; omit this line when there are none]
 
 Requirements:
 
@@ -130,8 +135,10 @@ Requirements:
    ...
 
 Every requirement block carries its own Formulation line.
+One root cause that shows in several requirement blocks is listed once, in the first block it affects, with the other requirement numbers named on that line.
 If GAPS: list all gaps explicitly. Implementer must fix every gap before Stage 2 (code quality) review begins.
 If PASS: all requirements found and verified. Stage 2 (code quality) review may proceed.
+A defect the branch introduced (a contradiction, a missing example the requirements list, or any requirement the branch fails to meet) still sets VERDICT to GAPS.
 ```
 
 ## Keep Reasoning Terse

@@ -42,6 +42,7 @@ The cadence rule is in `SKILL.md`, section Review Cadence. This section holds th
 - **Unreadable verdict:** the unreadable-verdict rule in `SKILL.md` applies to each dispatch of the pass.
 - **Edge cases:** a branch diff with one file is one dispatch; a story with no risky todo has no Stage 2 before this pass. The measured case behind this rule: in a 22-todo run the quality review was 39 of 64 review dispatches.
 - **Nits:** a nit from the pass is fixed, or declined with the reason recorded in the plan file, before the pass is complete; a size report is recorded there for the owner's decision.
+- **Non-blocking lists:** a Non-blocking notes list or a Leave it better list in a reviewer reply never sets a verdict and never starts a fix round; the story coordinator agent template says how the coordinator handles Leave it better items.
 
 ## Who Re-Checks a Fix Round
 

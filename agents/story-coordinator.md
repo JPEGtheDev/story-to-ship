@@ -69,6 +69,9 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - A merge conflict or a red suite after a merge stops the batch: send a fresh fix child for the todo just merged or in conflict, never a re-run of the whole batch; branches not yet merged wait and merge after the fix, and the fix child starts from the current head of the feature branch.
 - A child that returns BLOCKED or fails review is not a merge failure and does not stop its finished siblings from merging; its todo follows the two-stage-review skill and the fix-round count stays per todo.
 - Every story run reviews as the two-stage-review skill's Review Cadence says: Stage 1 after every todo; after the story's last merge, rebase onto origin/main, push and open the pull request, wait for CI green, then run Stage 2 over the branch diff in at most 3 whole-branch cycles. List the branch diff's files under the Stage 2 grouping rule and charge each finding as that skill's Whole-Branch Pass says. A risky todo (as that skill defines it) gets its Stage 2 right after its Stage 1, before its branch merges. The pull request is handed back after the last cycle passes and CI is green on the final head.
+- Open the pull request as a draft with `gh pr create --draft` (the finishing-a-development-branch skill, Step 4). If no CI run starts on the draft after `gh pr create`, stop and hand back owner question; never mark the pull request ready to start CI.
+- Stage 2 reviewers read the branch diff and need no ready pull request. After the last whole-branch cycle passes, confirm CI is green on the final head, run `gh pr ready <n>`, and run `gh pr view <n> --json isDraft --jq .isDraft`; hand back PR ready only when isDraft prints false. If isDraft prints true after `gh pr ready` exits 0, hand back blocked.
+- A push to a pull request that is already ready is followed at once by `gh pr ready <n> --undo` (a reconcile undoes earlier, see Reconcile); the pull request is marked ready again only after CI is green on the new head and a whole-branch Stage 2 cycle has passed on it.
 - A reconcile, or a fresh runner with no plan file, never runs a batch.
 
 ## Discovery and acceptance criteria
@@ -103,6 +106,8 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim.
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.
 - Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below).
+- Hand back owner question, blocked, cap reached or interim with the pull request still a draft; only PR ready follows `gh pr ready`.
+- When `gh pr ready <n>` fails, hand back blocked with the error text; the pull request stays a draft.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
 - Use cap reached when a todo needs a fourth fix round under the two-stage-review skill's fix-round cap; it states the open findings.
 - Use cap reached also when a fourth whole-branch Stage 2 cycle would be needed; it states the open findings.
@@ -125,6 +130,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Update: fetch both refs with `git -C <feature worktree> fetch origin main <branch>`, record the lease sha with `git -C <feature worktree> rev-parse origin/<branch>`, then rebase the branch onto origin/main.
 - Keep both stories' intent in every conflict; if the rebase cannot finish for a mechanical reason, run `git -C <feature worktree> rebase --abort` and hand back kind blocked (a conflict that cannot be resolved without dropping an intent is the owner-question case below).
 - Push only your own branch, with `git -C <feature worktree> push --force-with-lease=<branch>:<lease sha> origin HEAD:<branch>` using the sha recorded before the rebase, never plain --force; a rejected lease is a hand-back of kind blocked.
+- A reconcile on a pull request that is already ready runs `gh pr ready <n> --undo` before the rebase, and marks it ready again, as the ready-step bullets in the Parallel todos section say, only after CI is green on the updated head and the reconcile Stage 2 has passed.
 - After the rebase the inline commits have new hashes: match each old inline commit to its new one by subject (`git -C <feature worktree> log --format='%h %s' origin/main..HEAD`).
 - Rewrite the `inline commits:` hashes in the plan entry to the new ones.
 - Recount the lane `<n>` from numstat on the new commits; when a conflict changed an inline commit, update the plan entry's lane and report the old and new numbers with the conflict as the reason.

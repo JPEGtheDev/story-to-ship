@@ -86,7 +86,7 @@ Before writing the PR, answer:
      grep -nE '[A-Za-z0-9_.]+Tests?\b' "$f"      # test identifiers named in documentation -- docs/README only: source has real *Tests identifiers; unscoped run floods on matches
    done
    ```
-   Draft the PR body to a file, set `PR_BODY_FILE` to its path, and pass it with `gh pr create --body-file "$PR_BODY_FILE"` (Step 4). Run the non-ASCII grep over that file as well; issue references in the body (`Closes #N`) are expected there and the other patterns do not apply to it:
+   Draft the PR body to a file, set `PR_BODY_FILE` to its path, and pass it with `gh pr create --draft --body-file "$PR_BODY_FILE"` (Step 4). Run the non-ASCII grep over that file as well; issue references in the body (`Closes #N`) are expected there and the other patterns do not apply to it:
    ```
    grep -nP '[^\x00-\x7F]' "$PR_BODY_FILE"   # the drafted PR body: non-ASCII only
    ```
@@ -140,7 +140,8 @@ See `versioning` skill for conventional commit rules.
 ## Step 4: PR Creation
 
 **Title:** Must be a valid conventional commit message -- this becomes the squash commit on merge.
-**Body:** Draft it to a file, set `PR_BODY_FILE` to that path, and create the PR with `gh pr create --body-file "$PR_BODY_FILE"`, so the Step 2 sweep runs over the file that ships.
+**Body:** Draft it to a file, set `PR_BODY_FILE` to that path, and create the PR with `gh pr create --draft --body-file "$PR_BODY_FILE"`, so the Step 2 sweep runs over the file that ships.
+**Draft:** Every pull request an agent opens is created as a draft (`--draft`) and stays a draft until CI is green and the whole-branch review has passed; the agent that owns the pull request then runs `gh pr ready <n>` (the whole-branch review is the agent's own Stage 2 pass over the branch diff and needs no ready pull request; a review requested from a person follows `gh pr ready`), and a pull request that is already ready returns to draft with `gh pr ready <n> --undo` when a later push changes it.
 
 **Description must include:**
 ```
@@ -205,3 +206,4 @@ See `versioning` skill for conventional commit rules.
 - "I'll skip the post-merge cleanup -- branches and worktrees can wait" -- **STOP. Delete the branch, close linked issues, and prune worktrees immediately after merging.**
 - Opening a PR whose body says the owner approved text the owner has not seen -- **STOP. Match each approval claim to the owner message that made it (Step 2, item 7) and label text added after it.**
 - Opening a PR with an item the plan promised for the body missing from it -- **STOP. List the promises and find each one in the drafted body file (Step 2, item 8) before gh pr create.**
+- Opening a PR without `--draft` -- **STOP. Add `--draft` to `gh pr create` (Step 4); the agent marks it ready only after CI is green and the reviews have passed.**

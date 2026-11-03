@@ -17,6 +17,9 @@
 # "implement later", "fill in details" and "Similar to Task" are placeholders. One violation
 # is reported per line, naming the first match in that order, as "line <N>" with N counting
 # every physical line of the file from 1.
+# Non-ASCII check: every physical line outside a fence is scanned the same way; a line holding
+# any byte from 128 to 255 is reported as "line <N>: non-ASCII character", after any placeholder
+# violation for that line. Bytes 0 to 127 (tabs, control characters) are never flagged.
 # Exit 0 when every entry passes all checks, 1 when any entry fails one, 2 on usage, read or
 # no-entry errors.
 
@@ -36,6 +39,8 @@ export LC_ALL
 
 cr=$(printf '\r')
 tab=$(printf '\t')
+high=$(printf '\200')
+top=$(printf '\377')
 
 # trim_blanks <text>: set trimmed to text without leading and trailing spaces and tabs.
 trim_blanks() {
@@ -132,6 +137,10 @@ while IFS= read -r line || [ -n "$line" ]; do
   placeholder_of "$line"
   if [ -n "$matched" ]; then
     printf 'VIOLATION line %s: placeholder text %s\n' "$lineno" "$matched"
+    violations=$((violations + 1))
+  fi
+  if printf '%s\n' "$line" | grep -q "[$high-$top]"; then
+    printf 'VIOLATION line %s: non-ASCII character\n' "$lineno"
     violations=$((violations + 1))
   fi
   if printf '%s\n' "$line" | grep -Eq '^(#+ +)?(Todo|Task) [0-9]+([^[:alnum:]]|$)'; then

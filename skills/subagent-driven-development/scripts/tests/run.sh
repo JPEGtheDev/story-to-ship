@@ -394,6 +394,83 @@ plan_run na-fence-ok "$PLANS/na-fence-ok.md" 0 'OK plan-check: 1 entries'
 plan_write "$PLANS/na-multi-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: y' 'Files: b' 'Depends on: Todo 1' '```' 'code sample' '```' 'Task 3: third' 'loop: single -- reason: y' 'Files: c' 'Depends on: Todo 2'
 plan_run na-multi-ok "$PLANS/na-multi-ok.md" 0 'OK plan-check: 3 entries'
 
+# Token budget checks: a plan of 8 or more entries needs a line outside a fence that matches
+# "Token budget: todos=<digits> minimum-dispatches=<digits> tokens-per-dispatch=<digits|unmeasured>".
+# pe_line <text>: print one line in the plan's line ending (pe_eol is lf or crlf).
+pe_line() {
+  if [ "$pe_eol" = crlf ]; then
+    printf '%s\r\n' "$1"
+  else
+    printf '%s\n' "$1"
+  fi
+}
+
+# plan_entries <file> <count> <kind> <eol> [preamble-line]...: write a plan with the preamble lines
+# first, then <count> valid entries. kind is Todo, Task, or mix (first half Todo, second half Task).
+# Each entry carries a loop marker, Files: a and Depends on: none.
+plan_entries() {
+  mkdir -p "$(dirname "$1")" || exit 2
+  pe_file=$1
+  pe_count=$2
+  pe_kind=$3
+  pe_eol=$4
+  shift 4
+  {
+    for pe_pre in "$@"; do
+      pe_line "$pe_pre"
+    done
+    pe_i=1
+    while [ "$pe_i" -le "$pe_count" ]; do
+      if [ "$pe_kind" = mix ]; then
+        if [ "$pe_i" -le $((pe_count / 2)) ]; then
+          pe_word=Todo
+        else
+          pe_word=Task
+        fi
+      else
+        pe_word=$pe_kind
+      fi
+      pe_line "$pe_word $pe_i: item $pe_i"
+      pe_line 'loop: single -- reason: y'
+      pe_line 'Files: a'
+      pe_line 'Depends on: none'
+      pe_i=$((pe_i + 1))
+    done
+  } > "$pe_file" || exit 2
+}
+
+TB_MISS='VIOLATION plan has 8 entries and no Token budget line'
+plan_entries "$PLANS/tb-7-none.md" 7 Todo lf
+plan_run tb-7-none "$PLANS/tb-7-none.md" 0 'OK plan-check: 7 entries'
+plan_entries "$PLANS/tb-8-none.md" 8 Todo lf
+plan_run_exact tb-8-none "$PLANS/tb-8-none.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-9-none.md" 9 Todo lf
+plan_run_exact tb-9-none "$PLANS/tb-9-none.md" 1 'VIOLATION plan has 9 entries and no Token budget line'
+plan_entries "$PLANS/tb-8-malformed.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30'
+plan_run_exact tb-8-malformed "$PLANS/tb-8-malformed.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-nonnumeric.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=abc'
+plan_run_exact tb-8-nonnumeric "$PLANS/tb-8-nonnumeric.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-negative.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=-5'
+plan_run_exact tb-8-negative "$PLANS/tb-8-negative.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-trailing-field.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured extra'
+plan_run_exact tb-8-trailing-field "$PLANS/tb-8-trailing-field.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-indented.md" 8 Todo lf '  Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured'
+plan_run_exact tb-8-indented "$PLANS/tb-8-indented.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-fenced.md" 8 Todo lf '```' 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured' '```'
+plan_run_exact tb-8-fenced "$PLANS/tb-8-fenced.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-mixed-none.md" 8 mix lf
+plan_run_exact tb-8-mixed-none "$PLANS/tb-8-mixed-none.md" 1 "$TB_MISS"
+plan_entries "$PLANS/tb-8-unmeasured.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured'
+plan_run tb-8-unmeasured "$PLANS/tb-8-unmeasured.md" 0 'OK plan-check: 8 entries'
+plan_entries "$PLANS/tb-8-integer.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=12000'
+plan_run tb-8-integer "$PLANS/tb-8-integer.md" 0 'OK plan-check: 8 entries'
+plan_entries "$PLANS/tb-8-crlf.md" 8 Todo crlf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured'
+plan_run tb-8-crlf "$PLANS/tb-8-crlf.md" 0 'OK plan-check: 8 entries'
+plan_entries "$PLANS/tb-8-two-lines.md" 8 Todo lf 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=unmeasured' 'Token budget: todos=8 minimum-dispatches=30 tokens-per-dispatch=12000'
+plan_run tb-8-two-lines "$PLANS/tb-8-two-lines.md" 0 'OK plan-check: 8 entries'
+plan_entries "$PLANS/tb-3-valid.md" 3 Todo lf
+plan_run tb-3-valid "$PLANS/tb-3-valid.md" 0 'OK plan-check: 3 entries'
+
 printf '%s cases, %s failed\n' "$cases" "$failed"
 if [ "$failed" -eq 0 ]; then
   exit 0

@@ -59,6 +59,7 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] Test names follow `ClassName_Action_ExpectedResult` pattern
 - [ ] Tests use production classes, not duplicated test helpers
 - [ ] No test covers multiple unrelated behaviors in a single TEST_F
+- [ ] Two-edit check (applies when the diff adds or changes a test file: a path in a test directory, or a test file name). Skip it when the diff changes no tests or only deletes them; the Return format line then reads N/A. Run it after the Evidence Spot-Check, never before, so scratch edits cannot contaminate the spot-check. Before any scratch edit, record `git status --porcelain` as a baseline and save a copy of each file to be edited under /tmp. If such a file already has uncommitted changes, restore only from its saved copy, never by a blanket checkout. For at least one new test per behavior, make a scratch edit that breaks that behavior (for example, change `total - discount` to `total + discount`). Take the test command from the repository's CI file or README, and cite where it came from. Run the narrowest test filter that covers the test. The failure must name that test; a build error or a failure already in the baseline run does not count. Show the command and a short failing tail. Then state whether an internal-only change (for example, renaming a private helper with no behavior change) would break that test, by reading or by one run. Limits: at most 2 scratch runs per behavior and 6 per review; the baseline run does not count. Revert first: restore the edited files from the saved copies as the very next command after any scratch run, including a failed or timed-out run. Confirm by comparing `git status --porcelain` with the baseline; never commit a scratch edit. Write the full output to a named file under /tmp and quote only a short tail in the reply. A test that fails on an internal-only change, or a broken behavior with no failing test, is a finding under Tests. Put it on the Critical issues line prefixed "Tests:" when the test is on a diff line; otherwise put it on the Leave it better list. If no test command can be found, or the tests cannot run in the review worktree, write "two-edit check not runnable" and report a Tests finding that sets REQUEST CHANGES; this overrides the introduced-only rule. Never a silent pass.
 
 ### Code quality
 - [ ] `clang-format` applied (no style violations)
@@ -113,6 +114,7 @@ Implementer's pasted verification output:
 ```
 VERDICT: [APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT]
 Evidence spot-check: [command re-run + MATCH/MISMATCH, or N/A with reason]
+Two-edit check: [command, short failing tail, internal-only statement and revert confirmation; or N/A (diff adds no tests); or "two-edit check not runnable"]
 
 Critical issues (must fix before merge -- INTRODUCED only): [list or NONE]
 Non-blocking notes: [one line per item; omit this line when there are none]

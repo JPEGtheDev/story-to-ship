@@ -64,15 +64,20 @@ reset_entry() {
   deps_filled=0
 }
 
+# violation <message>: print one violation line and count it.
+violation() {
+  printf '%s\n' "$1"
+  violations=$((violations + 1))
+}
+
 # check_field <label> <seen> <filled>: report a missing or empty field line.
 check_field() {
   if [ "$3" -eq 0 ]; then
     if [ "$2" -eq 0 ]; then
-      printf 'VIOLATION %s has no %s line\n' "$header" "$1"
+      violation "VIOLATION $header has no $1 line"
     else
-      printf 'VIOLATION %s has an empty %s line\n' "$header" "$1"
+      violation "VIOLATION $header has an empty $1 line"
     fi
-    violations=$((violations + 1))
   fi
 }
 
@@ -103,14 +108,35 @@ has_non_ascii() {
 # check_entry: report each failed check of the current entry.
 check_entry() {
   if [ "$marked" -eq 0 ]; then
-    printf 'VIOLATION %s has no loop: marker\n' "$header"
-    violations=$((violations + 1))
+    violation "VIOLATION $header has no loop: marker"
   elif [ "$marked" -gt 1 ]; then
-    printf 'VIOLATION %s has more than one loop: marker\n' "$header"
-    violations=$((violations + 1))
+    violation "VIOLATION $header has more than one loop: marker"
   fi
   check_field 'Files:' "$files_seen" "$files_filled"
   check_field 'Depends on:' "$deps_seen" "$deps_filled"
+}
+
+# budget_line_ok <line>: succeed when the line is a well-formed Token budget line.
+budget_line_ok() {
+  printf '%s\n' "$1" | grep -Eq '^Token budget: todos=[0-9]+ minimum-dispatches=[0-9]+ tokens-per-dispatch=([0-9]+|unmeasured)$'
+}
+
+# check_line <lineno> <line>: run the per-line checks on a line outside a fence (placeholder,
+# non-ASCII, and the Token budget line that sets budget_seen).
+check_line() {
+  placeholder_of "$2"
+  if [ -n "$matched" ]; then
+    violation "VIOLATION line $1: placeholder text $matched"
+  fi
+  if has_non_ascii "$2"; then
+    violation "VIOLATION line $1: non-ASCII character"
+  fi
+  case $2 in
+    'Token budget:'*)
+      if budget_line_ok "$2"; then
+        budget_seen=1
+      fi ;;
+  esac
 }
 
 entries=0
@@ -145,21 +171,7 @@ while IFS= read -r line || [ -n "$line" ]; do
       flen=${#run}
       continue ;;
   esac
-  placeholder_of "$line"
-  if [ -n "$matched" ]; then
-    printf 'VIOLATION line %s: placeholder text %s\n' "$lineno" "$matched"
-    violations=$((violations + 1))
-  fi
-  if has_non_ascii "$line"; then
-    printf 'VIOLATION line %s: non-ASCII character\n' "$lineno"
-    violations=$((violations + 1))
-  fi
-  case $line in
-    'Token budget:'*)
-      if printf '%s\n' "$line" | grep -Eq '^Token budget: todos=[0-9]+ minimum-dispatches=[0-9]+ tokens-per-dispatch=([0-9]+|unmeasured)$'; then
-        budget_seen=1
-      fi ;;
-  esac
+  check_line "$lineno" "$line"
   if printf '%s\n' "$line" | grep -Eq '^(#+ +)?(Todo|Task) [0-9]+([^[:alnum:]]|$)'; then
     if [ "$entries" -gt 0 ]; then
       check_entry
@@ -200,8 +212,7 @@ if [ "$entries" -eq 0 ]; then
 fi
 check_entry
 if [ "$entries" -ge 8 ] && [ "$budget_seen" -eq 0 ]; then
-  printf 'VIOLATION plan has %s entries and no Token budget line\n' "$entries"
-  violations=$((violations + 1))
+  violation "VIOLATION plan has $entries entries and no Token budget line"
 fi
 if [ "$violations" -gt 0 ]; then
   exit 1

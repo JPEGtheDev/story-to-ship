@@ -357,6 +357,43 @@ plan_run ph-valid-multi-ok "$PLANS/ph-valid-multi-ok.md" 0 'OK plan-check: 3 ent
 plan_write "$PLANS/ph-indented-fence-MISS.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '  ```' 'Step: TBD inside an indented fence' '  ```'
 plan_run_exact ph-indented-fence-MISS "$PLANS/ph-indented-fence-MISS.md" 1 'VIOLATION line 6: placeholder text TBD'
 
+# Non-ASCII checks: a physical line outside a fence with any byte above 127 is one violation,
+# numbered from 1 over every physical line (fenced lines included). Bytes are written as printf
+# octal escapes so this file stays ASCII. Every entry carries a loop marker, Files: a and Depends on: none.
+NA_EM=$(printf '\342\200\224')
+NA_BYTE=$(printf '\377')
+NA_BOM=$(printf '\357\273\277')
+NA_TAB=$(printf '\t')
+NA_CTL=$(printf '\001')
+plan_write "$PLANS/na-step-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step: write it $NA_EM parser"
+plan_run_exact na-step-bad "$PLANS/na-step-bad.md" 1 'VIOLATION line 5: non-ASCII character'
+plan_write "$PLANS/na-header-bad.md" "Todo 1: first $NA_EM second" 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
+plan_run_exact na-header-bad "$PLANS/na-header-bad.md" 1 'VIOLATION line 1: non-ASCII character'
+plan_write "$PLANS/na-before-header-bad.md" "Notes: see $NA_EM draft" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
+plan_run_exact na-before-header-bad "$PLANS/na-before-header-bad.md" 1 'VIOLATION line 1: non-ASCII character'
+plan_write "$PLANS/na-after-fence-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '```' 'code' '```' "Step: write it $NA_EM parser"
+plan_run_exact na-after-fence-bad "$PLANS/na-after-fence-bad.md" 1 'VIOLATION line 8: non-ASCII character'
+plan_write "$PLANS/na-lone-byte-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step: caf$NA_BYTE latte"
+plan_run_exact na-lone-byte-bad "$PLANS/na-lone-byte-bad.md" 1 'VIOLATION line 5: non-ASCII character'
+plan_write "$PLANS/na-bom-bad.md" "${NA_BOM}Plan notes" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
+plan_run_exact na-bom-bad "$PLANS/na-bom-bad.md" 1 'VIOLATION line 1: non-ASCII character'
+plan_write "$PLANS/na-two-on-line-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step: $NA_EM and $NA_BYTE here"
+plan_run_exact na-two-on-line-bad "$PLANS/na-two-on-line-bad.md" 1 'VIOLATION line 5: non-ASCII character'
+plan_write_crlf "$PLANS/na-crlf-bad.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step: write it $NA_EM parser"
+plan_run_exact na-crlf-bad "$PLANS/na-crlf-bad.md" 1 'VIOLATION line 5: non-ASCII character'
+plan_write "$PLANS/na-ascii-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: plain ASCII text only'
+plan_run na-ascii-ok "$PLANS/na-ascii-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/na-tab-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step:${NA_TAB}write it"
+plan_run na-tab-ok "$PLANS/na-tab-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/na-control-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' "Step: a${NA_CTL}b"
+plan_run na-control-ok "$PLANS/na-control-ok.md" 0 'OK plan-check: 1 entries'
+plan_write_crlf "$PLANS/na-crlf-ascii-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: plain ASCII text only'
+plan_run na-crlf-ascii-ok "$PLANS/na-crlf-ascii-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/na-fence-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '```' "sample $NA_EM text" '```'
+plan_run na-fence-ok "$PLANS/na-fence-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/na-multi-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: y' 'Files: b' 'Depends on: Todo 1' '```' 'code sample' '```' 'Task 3: third' 'loop: single -- reason: y' 'Files: c' 'Depends on: Todo 2'
+plan_run na-multi-ok "$PLANS/na-multi-ok.md" 0 'OK plan-check: 3 entries'
+
 printf '%s cases, %s failed\n' "$cases" "$failed"
 if [ "$failed" -eq 0 ]; then
   exit 0

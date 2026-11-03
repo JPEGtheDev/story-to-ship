@@ -20,7 +20,7 @@ A claim written after the numbers are in is not a prediction. It is a rationaliz
 
 Answer every question before reporting a number. A question you cannot answer makes the result inconclusive.
 
-1. Why not double? Name the limiter from a profile or from counters, not from reading the code. (For example, a sampling profiler or a hardware counter reader; or a tool-call count from the run log.)
+1. Why not double? Name the limiter (the resource or step that caps the number) from a profile or from counters, not from reading the code. (For example, a sampling profiler or a hardware counter reader; or a tool-call count from the run log.)
 2. Was each side tuned the way it runs for real? Build both sides with the same settings used in production, and do not give only one side a warm cache or a debug flag.
 3. Does the number break a physical limit? Compare it with the bandwidth, the number of cores, and the share of total time the changed piece took. A whole-task time saving larger than that share cannot come from the change, so it is a measurement error.
 4. Did it error? Count the failed runs and check that each output is correct, not only that the process exited 0.
@@ -34,7 +34,7 @@ Answer every question before reporting a number. A question you cannot answer ma
 
 - A comparison MUST have at least 5 alternated runs per side. Fewer runs make it inconclusive.
 - A single number with no comparison still states its run count.
-- The one-run exception applies only to a ballpark the owner explicitly requested. Report it as one run, and still answer questions 4 and 7. The claim is still written before the run.
+- The one-run exception applies only to a ballpark the owner explicitly requested. Report it as "ballpark, 1 run", with the range marked not applicable, the limiter named if known and otherwise "limiter not identified", and never as a result. Still answer questions 4 and 7. The claim is still written before the run.
 
 ---
 

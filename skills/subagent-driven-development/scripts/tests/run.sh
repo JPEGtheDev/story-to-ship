@@ -152,6 +152,23 @@ plan_run() {
   cases=$((cases + 1))
 }
 
+# plan_run_exact <name> <plan-file> <expected-exit> <expected-output>: like plan_run, but the
+# whole output must equal the expected text, so an extra line or a trailing CR fails.
+plan_run_exact() {
+  out=$(sh "$ROOT/plan-check.sh" "$2" 2>&1 </dev/null)
+  got=$?
+  if [ "$got" -ne "$3" ]; then
+    printf 'FAIL %s: expected exit %s got %s\n%s\n' "$1" "$3" "$got" "$out"
+    failed=$((failed + 1))
+  elif [ "$out" != "$4" ]; then
+    printf 'FAIL %s: output is not exactly: %s\n%s\n' "$1" "$4" "$out"
+    failed=$((failed + 1))
+  else
+    printf 'ok %s\n' "$1"
+  fi
+  cases=$((cases + 1))
+}
+
 # Plan-marker checker cases: plan-check.sh <planfile>.
 PLANS=$GEN/plans
 plan_write "$PLANS/plan-ok.md" 'Todo 1: first' 'loop: single -- reason: prose' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: code' 'Files: a' 'Depends on: Todo 1'
@@ -292,6 +309,53 @@ plan_write "$PLANS/depends-continuation-only-bad.md" 'Todo 1: first' 'loop: sing
 plan_run depends-continuation-only-bad "$PLANS/depends-continuation-only-bad.md" 1 'VIOLATION Todo 1: first has an empty Depends on: line'
 plan_write_crlf "$PLANS/depends-crlf-both-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
 plan_run depends-crlf-both-ok "$PLANS/depends-crlf-both-ok.md" 0 'OK plan-check: 1 entries'
+
+# Placeholder checks: TBD and TODO as whole words (case-sensitive; a letter, digit or underscore
+# directly before or after is no match), and the phrases "implement later", "fill in details"
+# and "Similar to Task". Every physical line outside a fence is checked, and the line number
+# counts fenced lines. One violation per line; the first match in the order TBD, TODO,
+# implement later, fill in details, Similar to Task is reported.
+plan_write "$PLANS/ph-tbd.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TBD write the parser'
+plan_run_exact ph-tbd "$PLANS/ph-tbd.md" 1 'VIOLATION line 5: placeholder text TBD'
+plan_write "$PLANS/ph-todo.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TODO wire the check'
+plan_run_exact ph-todo "$PLANS/ph-todo.md" 1 'VIOLATION line 5: placeholder text TODO'
+plan_write "$PLANS/ph-implement-later.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: implement later on'
+plan_run_exact ph-implement-later "$PLANS/ph-implement-later.md" 1 'VIOLATION line 5: placeholder text implement later'
+plan_write "$PLANS/ph-fill-in-details.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: fill in details here'
+plan_run_exact ph-fill-in-details "$PLANS/ph-fill-in-details.md" 1 'VIOLATION line 5: placeholder text fill in details'
+plan_write "$PLANS/ph-similar-to-task.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: Similar to Task 1 above'
+plan_run_exact ph-similar-to-task "$PLANS/ph-similar-to-task.md" 1 'VIOLATION line 5: placeholder text Similar to Task'
+plan_write "$PLANS/ph-header.md" 'Todo 1: TBD' 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
+plan_run_exact ph-header "$PLANS/ph-header.md" 1 'VIOLATION line 1: placeholder text TBD'
+plan_write "$PLANS/ph-before-header.md" 'Notes: TODO check the spec' 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none'
+plan_run_exact ph-before-header "$PLANS/ph-before-header.md" 1 'VIOLATION line 1: placeholder text TODO'
+plan_write "$PLANS/ph-after-fence.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '```' 'sample code' '```' 'Step: TBD after the fence'
+plan_run_exact ph-after-fence "$PLANS/ph-after-fence.md" 1 'VIOLATION line 8: placeholder text TBD'
+plan_write "$PLANS/ph-paren.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: (TBD) write it'
+plan_run_exact ph-paren "$PLANS/ph-paren.md" 1 'VIOLATION line 5: placeholder text TBD'
+plan_write "$PLANS/ph-colon.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TBD: write it'
+plan_run_exact ph-colon "$PLANS/ph-colon.md" 1 'VIOLATION line 5: placeholder text TBD'
+plan_write "$PLANS/ph-hyphen-digit.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TBD-1 write it'
+plan_run_exact ph-hyphen-digit "$PLANS/ph-hyphen-digit.md" 1 'VIOLATION line 5: placeholder text TBD'
+plan_write_crlf "$PLANS/ph-crlf.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TODO write it'
+plan_run_exact ph-crlf "$PLANS/ph-crlf.md" 1 'VIOLATION line 5: placeholder text TODO'
+plan_write "$PLANS/ph-two-on-line.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TBD and TODO here'
+plan_run_exact ph-two-on-line "$PLANS/ph-two-on-line.md" 1 'VIOLATION line 5: placeholder text TBD'
+plan_write "$PLANS/ph-lower-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: tbd write it'
+plan_run ph-lower-ok "$PLANS/ph-lower-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/ph-underscore-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TODO_TEMPLATES stays'
+plan_run ph-underscore-ok "$PLANS/ph-underscore-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/ph-letter-before-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: xTBD stays'
+plan_run ph-letter-before-ok "$PLANS/ph-letter-before-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/ph-digit-after-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Step: TBD2 stays'
+plan_run ph-digit-after-ok "$PLANS/ph-digit-after-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/ph-fence-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '```' 'implement later' 'fill in details' 'Similar to Task 2' 'TBD' 'TODO' '```'
+plan_run ph-fence-ok "$PLANS/ph-fence-ok.md" 0 'OK plan-check: 1 entries'
+plan_write "$PLANS/ph-valid-multi-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: y' 'Files: b' 'Depends on: Todo 1' 'Task 3: third' 'loop: single -- reason: y' 'Files: c' 'Depends on: Todo 2'
+plan_run ph-valid-multi-ok "$PLANS/ph-valid-multi-ok.md" 0 'OK plan-check: 3 entries'
+# Documented miss: an indented fence is not recognised, so its placeholder line is flagged (exit 1) although the author meant it as quoted text.
+plan_write "$PLANS/ph-indented-fence-MISS.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '  ```' 'Step: TBD inside an indented fence' '  ```'
+plan_run_exact ph-indented-fence-MISS "$PLANS/ph-indented-fence-MISS.md" 1 'VIOLATION line 6: placeholder text TBD'
 
 printf '%s cases, %s failed\n' "$cases" "$failed"
 if [ "$failed" -eq 0 ]; then

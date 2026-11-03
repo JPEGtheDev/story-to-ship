@@ -34,7 +34,7 @@ Answer every question before reporting a number. A question you cannot answer ma
 
 - A comparison MUST have at least 5 alternated runs per side. Fewer runs make it inconclusive.
 - A single number with no comparison still states its run count.
-- The one-run exception applies only to a ballpark the owner explicitly requested. Report it as "ballpark, 1 run", with the range marked not applicable, the limiter named if known and otherwise "limiter not identified", and never as a result. Still answer questions 4 and 7. The claim is still written before the run.
+- The one-run exception applies only to a ballpark the owner explicitly requested. Report it as "ballpark, 1 run", with the range marked not applicable, the limiter named if known and otherwise "limiter not identified", and never as a result. This label replaces the Report verdict, and the Inconclusive rules do not apply to it. Still answer questions 4 and 7. The claim is still written before the run.
 
 ---
 

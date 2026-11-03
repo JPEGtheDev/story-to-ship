@@ -49,8 +49,6 @@ When applying this skill, before dispatching Stage 1 from any implementer result
 
 If the canary line is absent from the implementer's output, the implementer did not follow its own BEFORE PROCEEDING -- require skill reload and resubmit before dispatching Stage 1.
 
-It signals that the worktree line was read before any reviewer dispatch; it does not prove the reviewer read it or that Stage 1 will catch every defect.
-
 Canary rationale: references/REVIEW_PROTOCOL.md.
 
 ---

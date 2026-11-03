@@ -23,7 +23,7 @@ Step 5 REFACTOR: Clean up -- rename, extract, remove duplication; tests must sta
 Step 6 COMMIT:   git add / git commit -m "feat(scope): description"
 ```
 
-Two todos run at the same time only when neither depends on the other and their `Files:` lists share no file, test files included. A todo without a `Files:` list or a `Depends on:` line runs alone (see the Parallel todos section of the story coordinator agent). The plan checker (`plan-check.sh`) now rejects a plan whose todo lacks either line; the coordinator rule above stays the rule for a plan the checker did not run on (a reconcile run skips it).
+Two todos run at the same time only when neither depends on the other and their `Files:` lists share no file, test files included. A todo without a `Files:` list or a `Depends on:` line runs alone (see the Parallel todos section of the story coordinator agent). The plan checker (`plan-check.sh`) rejects a plan whose todo lacks either line; the coordinator rule above stays the rule for a plan the checker did not run on (a reconcile run skips it).
 
 ## Seam table (before todo 1 of a code story)
 
@@ -54,7 +54,7 @@ loop: single -- reason: prose-only change to the template
 
 A CI fixture test exercises skills/subagent-driven-development/scripts/plan-check.sh; CI does not check live plans, so run `sh <skill dir>/scripts/plan-check.sh <plan file>` on a plan to check it, where `<skill dir>` is the base directory the Skill tool prints when you load the subagent-driven-development skill. An entry header is a line starting `Todo N` or `Task N` (digits, then any character other than a letter or digit, or the end of the line), with or without a leading markdown heading prefix such as `##`. Lines inside a code fence are ignored. Each entry needs exactly one `loop: three-role` or `loop: single` line before the next header; two or more fail. Known limits are listed in the three-role loop reference of the subagent-driven-development skill.
 
-The checker also enforces other rules. Each entry needs a `Files:` line with text after the colon, or indented `- ` list items after it (those items must come before the next line that starts at column 0; blank lines between are fine), and a `Depends on:` line with text after the colon (`none` counts). No line outside a fence may hold `TBD` or `TODO` as whole words (case-sensitive), or the phrases `implement later`, `fill in details` or `Similar to Task`, and no line outside a fence may hold a non-ASCII byte. A plan of 8 or more entries needs one `Token budget: todos=N minimum-dispatches=M tokens-per-dispatch=<integer or unmeasured>` line; its fields are defined in the Token Budget section of the user-story-estimation skill.
+The checker also enforces other rules. Start the `Files:`, `Depends on:` and `Token budget:` lines at column 0. Each entry needs a `Files:` line with text after the colon, or indented `- ` list items after it (those items must come before the next line that starts at column 0; blank lines between are fine), and a `Depends on:` line with text after the colon (`none` counts). No line outside a fence may hold `TBD` or `TODO` as whole words (case-sensitive), or the phrases `implement later`, `fill in details` or `Similar to Task`, and no line outside a fence may hold a non-ASCII byte. A plan of 8 or more entries needs one `Token budget: todos=N minimum-dispatches=M tokens-per-dispatch=<integer or unmeasured>` line; its fields are defined in the Token Budget section of the user-story-estimation skill.
 
 Rule for choosing:
 

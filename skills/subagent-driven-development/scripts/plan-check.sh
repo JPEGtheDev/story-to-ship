@@ -90,6 +90,11 @@ placeholder_of() {
   esac
 }
 
+# has_non_ascii <line>: succeed when the line holds a byte from 128 to 255.
+has_non_ascii() {
+  printf '%s\n' "$1" | grep -q "[$high-$top]"
+}
+
 # check_entry: report each failed check of the current entry.
 check_entry() {
   if [ "$marked" -eq 0 ]; then
@@ -139,7 +144,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     printf 'VIOLATION line %s: placeholder text %s\n' "$lineno" "$matched"
     violations=$((violations + 1))
   fi
-  if printf '%s\n' "$line" | grep -q "[$high-$top]"; then
+  if has_non_ascii "$line"; then
     printf 'VIOLATION line %s: non-ASCII character\n' "$lineno"
     violations=$((violations + 1))
   fi

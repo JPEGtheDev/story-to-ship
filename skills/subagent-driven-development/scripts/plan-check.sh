@@ -20,6 +20,11 @@
 # Non-ASCII check: every physical line outside a fence is scanned the same way; a line holding
 # any byte from 128 to 255 is reported as "line <N>: non-ASCII character", after any placeholder
 # violation for that line. Bytes 0 to 127 (tabs, control characters) are never flagged.
+# Token budget check: a plan of 8 or more entries must hold at least one line outside a fence
+# that starts at column 0 and reads exactly "Token budget: todos=<digits> minimum-dispatches=<digits>
+# tokens-per-dispatch=<digits or unmeasured>" (single spaces, no sign, nothing after the last
+# field). Only the format is checked. Missing it is reported once, after the per-entry
+# messages, as "VIOLATION plan has <N> entries and no Token budget line".
 # Exit 0 when every entry passes all checks, 1 when any entry fails one, 2 on usage, read or
 # no-entry errors.
 
@@ -110,6 +115,7 @@ check_entry() {
 
 entries=0
 violations=0
+budget_seen=0
 header=
 reset_entry
 fchar=
@@ -148,6 +154,12 @@ while IFS= read -r line || [ -n "$line" ]; do
     printf 'VIOLATION line %s: non-ASCII character\n' "$lineno"
     violations=$((violations + 1))
   fi
+  case $line in
+    'Token budget:'*)
+      if printf '%s\n' "$line" | grep -Eq '^Token budget: todos=[0-9]+ minimum-dispatches=[0-9]+ tokens-per-dispatch=([0-9]+|unmeasured)$'; then
+        budget_seen=1
+      fi ;;
+  esac
   if printf '%s\n' "$line" | grep -Eq '^(#+ +)?(Todo|Task) [0-9]+([^[:alnum:]]|$)'; then
     if [ "$entries" -gt 0 ]; then
       check_entry
@@ -187,6 +199,10 @@ if [ "$entries" -eq 0 ]; then
   exit 2
 fi
 check_entry
+if [ "$entries" -ge 8 ] && [ "$budget_seen" -eq 0 ]; then
+  printf 'VIOLATION plan has %s entries and no Token budget line\n' "$entries"
+  violations=$((violations + 1))
+fi
 if [ "$violations" -gt 0 ]; then
   exit 1
 fi

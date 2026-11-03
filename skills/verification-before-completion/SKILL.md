@@ -222,4 +222,4 @@ When a subagent reports completion, do not propagate its claim without verifying
 
 For research and evaluation methodology, see `references/RESEARCH_GATE.md`. (Domain note: this gate covers test design and scientific method.)
 
-Before reporting any performance or cost number (speed, memory, token spend, a before and after, an A/B comparison), follow `references/PERFORMANCE_CLAIMS.md`: a number without its run count, range and limiter is not reported as a result, and a comparison with fewer than 5 alternated runs per side is reported as inconclusive.
+Before reporting any performance or cost number (speed, memory, token spend, a before and after, an A/B comparison), follow `references/PERFORMANCE_CLAIMS.md`: a number without its run count, range and limiter is reported as "inconclusive" with the missing item named (a requested one-run ballpark is reported as "ballpark, 1 run", never as a result), and a comparison with fewer than 5 alternated runs per side is reported as inconclusive.

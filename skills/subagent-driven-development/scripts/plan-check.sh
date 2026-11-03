@@ -31,6 +31,35 @@ export LC_ALL
 cr=$(printf '\r')
 tab=$(printf '\t')
 
+# trim_blanks <text>: set trimmed to text without leading and trailing spaces and tabs.
+trim_blanks() {
+  trimmed=$1
+  trimmed=${trimmed#"${trimmed%%[!" $tab"]*}"}
+  trimmed=${trimmed%"${trimmed##*[!" $tab"]}"}
+}
+
+# reset_entry: clear the per-entry state; the caller sets header.
+reset_entry() {
+  marked=0
+  files_seen=0
+  files_filled=0
+  files_pending=0
+  deps_seen=0
+  deps_filled=0
+}
+
+# check_field <label> <seen> <filled>: report a missing or empty field line.
+check_field() {
+  if [ "$3" -eq 0 ]; then
+    if [ "$2" -eq 0 ]; then
+      printf 'VIOLATION %s has no %s line\n' "$header" "$1"
+    else
+      printf 'VIOLATION %s has an empty %s line\n' "$header" "$1"
+    fi
+    violations=$((violations + 1))
+  fi
+}
+
 # check_entry: report each failed check of the current entry.
 check_entry() {
   if [ "$marked" -eq 0 ]; then
@@ -40,33 +69,14 @@ check_entry() {
     printf 'VIOLATION %s has more than one loop: marker\n' "$header"
     violations=$((violations + 1))
   fi
-  if [ "$files_filled" -eq 0 ]; then
-    if [ "$files_seen" -eq 0 ]; then
-      printf 'VIOLATION %s has no Files: line\n' "$header"
-    else
-      printf 'VIOLATION %s has an empty Files: line\n' "$header"
-    fi
-    violations=$((violations + 1))
-  fi
-  if [ "$deps_filled" -eq 0 ]; then
-    if [ "$deps_seen" -eq 0 ]; then
-      printf 'VIOLATION %s has no Depends on: line\n' "$header"
-    else
-      printf 'VIOLATION %s has an empty Depends on: line\n' "$header"
-    fi
-    violations=$((violations + 1))
-  fi
+  check_field 'Files:' "$files_seen" "$files_filled"
+  check_field 'Depends on:' "$deps_seen" "$deps_filled"
 }
 
 entries=0
 violations=0
 header=
-marked=0
-files_seen=0
-files_filled=0
-files_pending=0
-deps_seen=0
-deps_filled=0
+reset_entry
 fchar=
 flen=0
 while IFS= read -r line || [ -n "$line" ]; do
@@ -74,8 +84,7 @@ while IFS= read -r line || [ -n "$line" ]; do
   if [ -n "$fchar" ]; then
     # Inside a fence: a closer is the opener character, at least as long, after leading and
     # trailing spaces and tabs are stripped from a copy of the line.
-    trimmed=${line#"${line%%[!" $tab"]*}"}
-    trimmed=${trimmed%"${trimmed##*[!" $tab"]}"}
+    trim_blanks "$line"
     case $trimmed in
       ''|*[!"$fchar"]*) ;;
       *) if [ "${#trimmed}" -ge "$flen" ]; then fchar=; fi ;;
@@ -99,30 +108,23 @@ while IFS= read -r line || [ -n "$line" ]; do
     fi
     entries=$((entries + 1))
     header=${line#"${line%%[! #]*}"}
-    marked=0
-    files_seen=0
-    files_filled=0
-    files_pending=0
-    deps_seen=0
-    deps_filled=0
+    reset_entry
   elif printf '%s\n' "$line" | grep -Eq '^loop: (three-role|single)( |$)'; then
     marked=$((marked + 1))
   else
     case $line in
       'Files:'*)
         files_seen=1
-        rest=${line#Files:}
-        rest=${rest#"${rest%%[!" $tab"]*}"}
-        if [ -n "$rest" ]; then
+        trim_blanks "${line#Files:}"
+        if [ -n "$trimmed" ]; then
           files_filled=1
         else
           files_pending=1
         fi ;;
       'Depends on:'*)
         deps_seen=1
-        rest=${line#'Depends on:'}
-        rest=${rest#"${rest%%[!" $tab"]*}"}
-        if [ -n "$rest" ]; then
+        trim_blanks "${line#'Depends on:'}"
+        if [ -n "$trimmed" ]; then
           deps_filled=1
         fi ;;
       *)

@@ -1,6 +1,6 @@
 # New Gates: Consequences and Enforcement Scope
 
-Consequences and enforcement scope for the two New Gates sections of `../SKILL.md`. The Context, Forces, and Solution of each gate stay in `../SKILL.md`.
+Consequences and enforcement scope for the two New Gates sections and the Plausibility Baseline Check section of `../SKILL.md`. The Context, Forces, and Solution of each gate stay in `../SKILL.md`.
 
 ---
 
@@ -17,3 +17,11 @@ Consequences and enforcement scope for the two New Gates sections of `../SKILL.m
 **Consequences:** Every contract fix costs one fixture dispatch; that is the price of ruling out text-only closure.
 
 **Enforcement scope:** Reviewers and the coordinator check the fix todo's evidence for a fixture output specific to the new clause; procedurally checkable, no automated detector.
+
+---
+
+## Plausibility Baseline Check
+
+**Consequences:** Requires stating an expectation before looking at the result, which takes discipline under time pressure -- exactly when it is most tempting to skip. The alternative is the source postmortem's failure repeating: a run reporting 195/288 was accepted as complete because the signal was green, and nobody compared the count to the known total.
+
+**Enforcement scope:** No mechanical detector checks this rule. It is self-checkable at generation time -- state the expected number before reading the result -- and procedurally checkable in review by asking what the baseline comparison was.

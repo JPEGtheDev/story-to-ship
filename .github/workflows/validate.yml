@@ -451,7 +451,7 @@ jobs:
               fi
             done
           }
-          check agents/story-coordinator.md 'is the work its acceptance criteria require, not a list of files' 'add the file without an owner question' 'list each added file with a one-line reason in the pull request body' 'adding a file that work needs is not a scope change' 'leave that heading out when no file was added'
+          check agents/story-coordinator.md 'is the work its acceptance criteria require, not a list of files' 'add the file without an owner question' 'list each added file with a one-line reason in the pull request body' 'adding a file that work needs is not a scope change' 'leave that heading out when no file was added' 'under an "Added files" heading'
           check skills/running-a-sprint/SKILL.md 'plus the files its pull request changes' 'it compares the Files list only' 'a runner adding a file that work needs is not one and needs no owner question'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'a file added for that work is not one'
           check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'A file added for that work is not a scope change.'

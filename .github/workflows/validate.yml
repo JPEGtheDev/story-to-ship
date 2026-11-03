@@ -743,7 +743,7 @@ jobs:
             fi
             for s in "$@"; do
               if grep -qiF -- "$s" "$file"; then
-                printf 'FAILED: %s carries the shared-file clause again (no shared-file clause): %s\n' "$file" "$s"
+                printf 'FAILED: %s carries the shared-file clause again (the risky-todo rule names paths, not shared files): %s\n' "$file" "$s"
                 missing=$((missing + 1))
               fi
             done

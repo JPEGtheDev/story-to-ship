@@ -353,7 +353,7 @@ plan_write "$PLANS/ph-fence-ok.md" 'Todo 1: first' 'loop: single -- reason: y' '
 plan_run ph-fence-ok "$PLANS/ph-fence-ok.md" 0 'OK plan-check: 1 entries'
 plan_write "$PLANS/ph-valid-multi-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: y' 'Files: b' 'Depends on: Todo 1' 'Task 3: third' 'loop: single -- reason: y' 'Files: c' 'Depends on: Todo 2'
 plan_run ph-valid-multi-ok "$PLANS/ph-valid-multi-ok.md" 0 'OK plan-check: 3 entries'
-# Documented miss: an indented fence is not recognised, so its placeholder line is flagged (exit 1) although the author meant it as quoted text.
+# Documented miss: an indented fence is not recognized, so its placeholder line is flagged (exit 1) although the author meant it as quoted text.
 plan_write "$PLANS/ph-indented-fence-MISS.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '  ```' 'Step: TBD inside an indented fence' '  ```'
 plan_run_exact ph-indented-fence-MISS "$PLANS/ph-indented-fence-MISS.md" 1 'VIOLATION line 6: placeholder text TBD'
 
@@ -393,6 +393,8 @@ plan_write "$PLANS/na-fence-ok.md" 'Todo 1: first' 'loop: single -- reason: y' '
 plan_run na-fence-ok "$PLANS/na-fence-ok.md" 0 'OK plan-check: 1 entries'
 plan_write "$PLANS/na-multi-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' 'Todo 2: second' 'loop: three-role -- reason: y' 'Files: b' 'Depends on: Todo 1' '```' 'code sample' '```' 'Task 3: third' 'loop: single -- reason: y' 'Files: c' 'Depends on: Todo 2'
 plan_run na-multi-ok "$PLANS/na-multi-ok.md" 0 'OK plan-check: 3 entries'
+plan_write "$PLANS/ph-opener-unscanned-ok.md" 'Todo 1: first' 'loop: single -- reason: y' 'Files: a' 'Depends on: none' '```TODO'"$NA_EM" 'x' '```'
+plan_run ph-opener-unscanned-ok "$PLANS/ph-opener-unscanned-ok.md" 0 'OK plan-check: 1 entries'
 
 # Token budget checks: a plan of 8 or more entries needs a line outside a fence that matches
 # "Token budget: todos=<digits> minimum-dispatches=<digits> tokens-per-dispatch=<digits|unmeasured>".

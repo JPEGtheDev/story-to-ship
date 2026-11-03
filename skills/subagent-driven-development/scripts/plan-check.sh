@@ -12,14 +12,17 @@
 # Files or Depends on lines is filled when any of them is filled; an entry whose lines are all
 # empty reports "has an empty ... line", and one with no such line reports "has no ... line".
 # Placeholder check: every physical line outside a fence (headers and lines before the first
-# header included) is scanned after the CR strip. The whole words TBD and TODO (case-sensitive;
-# a letter, digit or underscore next to the word is not a boundary) and the substrings
-# "implement later", "fill in details" and "Similar to Task" are placeholders. One violation
-# is reported per line, naming the first match in that order, as "line <N>" with N counting
-# every physical line of the file from 1.
-# Non-ASCII check: every physical line outside a fence is scanned the same way; a line holding
-# any byte from 128 to 255 is reported as "line <N>: non-ASCII character", after any placeholder
-# violation for that line. Bytes 0 to 127 (tabs, control characters) are never flagged.
+# header included) is scanned after the CR strip, except a fence opener or closer line. The whole
+# words TBD and TODO (case-sensitive; a letter, digit or underscore next to the word is not a
+# boundary) and the substrings "implement later", "fill in details" and "Similar to Task" are
+# placeholders. One violation is reported per line, naming the first match in that order, as
+# "line <N>" with N counting every physical line of the file from 1.
+# Non-ASCII check: every physical line outside a fence is scanned the same way, except a fence
+# opener or closer line; a line holding any byte from 128 to 255 is reported as
+# "line <N>: non-ASCII character", after any placeholder violation for that line. Bytes 0 to 127
+# (tabs, control characters) are never flagged.
+# Fence opener and closer lines are never scanned by either check, so a placeholder or a
+# non-ASCII byte on one of them passes.
 # Token budget check: a plan of 8 or more entries must hold at least one line outside a fence
 # that starts at column 0 and reads exactly "Token budget: todos=<digits> minimum-dispatches=<digits>
 # tokens-per-dispatch=<digits or unmeasured>" (single spaces, no sign, nothing after the last

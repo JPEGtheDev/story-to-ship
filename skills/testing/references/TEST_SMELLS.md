@@ -292,7 +292,7 @@ Test code requires its own refactoring discipline. Just like production code can
 
 ## Smells About Tests That Cannot Fail
 
-These smells describe tests that cannot fail, or that fail only in ways that tell you nothing. Such a test looks like coverage while it verifies nothing, so review should flag it the same way it flags a missing assertion. The examples below are pseudocode; no rule depends on a particular tool or framework.
+These smells describe tests that cannot fail, or that fail only in ways that tell you nothing. Such a test looks like coverage while it verifies nothing, so a reviewer MUST flag it the same way as a missing assertion. The examples below are pseudocode; no rule depends on a particular tool or framework.
 
 ### Self-Agreeing Expected Value
 
@@ -330,9 +330,9 @@ A deliberate wording pin on documentation text is allowed: there the text is the
 
 ```
 [-] BAD:
-  RETRY_LIMIT = 5                              // copied from the production constant
-  test "RetryLimit_Default_IsFive":
-      assertEq(RETRY_LIMIT, 5)                 // reads the test's own copy; production code never runs
+  MAX_ATTEMPTS = 5                             // copied from the production constant
+  test "MaxAttempts_Default_IsFive":
+      assertEq(MAX_ATTEMPTS, 5)                // reads the test's own copy; production code never runs
 
 [+] GOOD:
   test "Client_NoRetryConfigured_StopsAfterDefaultLimit":
@@ -362,7 +362,7 @@ A deliberate wording pin on documentation text is allowed: there the text is the
       user = User(name: "Ada")
       fakeDb.rows = [user]                     // the test put the row in the fake itself
       store.save(user)
-      assertEq(fakeDb.rows.size(), 1)          // checks the row the test added, not what save() wrote
+      assertEq(fakeDb.rows[0].name, "Ada")     // holds whether or not save() ran; the test added this row
 
 [+] GOOD:
   test "UserStore_Save_PersistsUser":

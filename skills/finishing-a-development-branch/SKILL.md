@@ -141,7 +141,7 @@ See `versioning` skill for conventional commit rules.
 
 **Title:** Must be a valid conventional commit message -- this becomes the squash commit on merge.
 **Body:** Draft it to a file, set `PR_BODY_FILE` to that path, and create the PR with `gh pr create --draft --body-file "$PR_BODY_FILE"`, so the Step 2 sweep runs over the file that ships.
-**Draft:** Every pull request an agent opens is created as a draft (`--draft`) and stays a draft until CI is green and the whole-branch review has passed; the agent that owns the pull request then runs `gh pr ready <n>`, and a pull request that is already ready returns to draft with `gh pr ready <n> --undo` when a later push changes it.
+**Draft:** Every pull request an agent opens is created as a draft (`--draft`) and stays a draft until CI is green and the whole-branch review has passed; the agent that owns the pull request then runs `gh pr ready <n>` (the whole-branch review is the agent's own Stage 2 pass over the branch diff and needs no ready pull request; a review requested from a person follows `gh pr ready`), and a pull request that is already ready returns to draft with `gh pr ready <n> --undo` when a later push changes it.
 
 **Description must include:**
 ```

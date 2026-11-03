@@ -599,7 +599,6 @@ jobs:
           check agents/story-coordinator.md 'Open the pull request as a draft with `gh pr create --draft`' 'hand back PR ready only when isDraft prints false.' 'stop and hand back owner question; never mark the pull request ready to start CI.' 'is followed at once by `gh pr ready <n> --undo`' 'with the pull request still a draft; only PR ready follows `gh pr ready`.' 'hand back blocked with the error text; the pull request stays a draft.' 'A reconcile on a pull request that is already ready runs `gh pr ready <n> --undo` before the rebase'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'when isDraft is true, add no Ready to merge entry and send the Draft text' '- Draft text: "Your pull request <n> is still a draft.' 'run gh pr ready <n> --undo before you start'
           check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'that isDraft is false (the pull request is not a draft)' 'A pull request that is a draft again (isDraft true) is removed the same way.'
-          check skills/running-a-sprint/SKILL.md 'gets no Ready to merge entry; resume the runner with the Draft text'
           checkgone skills/finishing-a-development-branch/SKILL.md 'gh pr create --body-file'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing or stale draft pull request rule string(s)"

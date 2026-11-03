@@ -1,12 +1,18 @@
 #!/bin/sh
 # plan-check.sh <planfile>: every plan entry must carry exactly one "loop: three-role" or
-# "loop: single" marker line before the next header or end of file.
+# "loop: single" marker line before the next header or end of file, a "Files:" line and a
+# "Depends on:" line at column 0.
 # A header is a column-0 "Todo N" or "Task N" (optionally after "#"s and spaces) followed by
 # a non-alphanumeric character or end of line. Lines inside a column-0 fence (three or more
 # backticks or tildes, closed by the same character at least as long) are ignored; an
 # unclosed fence runs to end of file. A trailing CR is stripped from every line.
-# Exit 0 when every entry has one marker, 1 when any entry has none or more than one,
-# 2 on usage, read or no-entry errors.
+# A Files line is filled by non-blank text after the colon, or by an indented list item line
+# ("  - text") that follows it before the next column-0 non-blank line (blank lines allowed).
+# A Depends on line is filled only by non-blank text after the colon. An entry with several
+# Files or Depends on lines is filled when any of them is filled; an entry whose lines are all
+# empty reports "has an empty ... line", and one with no such line reports "has no ... line".
+# Exit 0 when every entry passes all checks, 1 when any entry fails one, 2 on usage, read or
+# no-entry errors.
 
 if [ "$#" -ne 1 ]; then
   echo 'usage: plan-check.sh <planfile>' >&2
@@ -25,7 +31,7 @@ export LC_ALL
 cr=$(printf '\r')
 tab=$(printf '\t')
 
-# check_entry: report the current entry unless it has exactly one marker.
+# check_entry: report each failed check of the current entry.
 check_entry() {
   if [ "$marked" -eq 0 ]; then
     printf 'VIOLATION %s has no loop: marker\n' "$header"
@@ -34,12 +40,33 @@ check_entry() {
     printf 'VIOLATION %s has more than one loop: marker\n' "$header"
     violations=$((violations + 1))
   fi
+  if [ "$files_filled" -eq 0 ]; then
+    if [ "$files_seen" -eq 0 ]; then
+      printf 'VIOLATION %s has no Files: line\n' "$header"
+    else
+      printf 'VIOLATION %s has an empty Files: line\n' "$header"
+    fi
+    violations=$((violations + 1))
+  fi
+  if [ "$deps_filled" -eq 0 ]; then
+    if [ "$deps_seen" -eq 0 ]; then
+      printf 'VIOLATION %s has no Depends on: line\n' "$header"
+    else
+      printf 'VIOLATION %s has an empty Depends on: line\n' "$header"
+    fi
+    violations=$((violations + 1))
+  fi
 }
 
 entries=0
 violations=0
 header=
 marked=0
+files_seen=0
+files_filled=0
+files_pending=0
+deps_seen=0
+deps_filled=0
 fchar=
 flen=0
 while IFS= read -r line || [ -n "$line" ]; do
@@ -55,6 +82,10 @@ while IFS= read -r line || [ -n "$line" ]; do
     esac
     continue
   fi
+  # A column-0 non-blank line closes a pending empty Files line.
+  case $line in
+    [!" $tab"]*) files_pending=0 ;;
+  esac
   case $line in
     '```'*|'~~~'*)
       fchar=${line%"${line#?}"}
@@ -69,8 +100,37 @@ while IFS= read -r line || [ -n "$line" ]; do
     entries=$((entries + 1))
     header=${line#"${line%%[! #]*}"}
     marked=0
+    files_seen=0
+    files_filled=0
+    files_pending=0
+    deps_seen=0
+    deps_filled=0
   elif printf '%s\n' "$line" | grep -Eq '^loop: (three-role|single)( |$)'; then
     marked=$((marked + 1))
+  else
+    case $line in
+      'Files:'*)
+        files_seen=1
+        rest=${line#Files:}
+        rest=${rest#"${rest%%[!" $tab"]*}"}
+        if [ -n "$rest" ]; then
+          files_filled=1
+        else
+          files_pending=1
+        fi ;;
+      'Depends on:'*)
+        deps_seen=1
+        rest=${line#'Depends on:'}
+        rest=${rest#"${rest%%[!" $tab"]*}"}
+        if [ -n "$rest" ]; then
+          deps_filled=1
+        fi ;;
+      *)
+        if [ "$files_pending" -eq 1 ] &&
+          printf '%s\n' "$line" | grep -Eq '^[[:blank:]]+-[[:blank:]]+[^[:blank:]]'; then
+          files_filled=1
+        fi ;;
+    esac
   fi
 done < "$plan"
 

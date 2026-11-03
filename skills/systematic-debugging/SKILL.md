@@ -171,7 +171,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "I'll write the test after confirming the fix works" | Untested fixes don't stick. A test first proves the fix actually resolves the issue. |
 | "Multiple fixes at once saves time" | Can't isolate what worked. Creates new bugs. |
 | "I've already looked at it, I know the problem" | Looking at symptoms != understanding root cause. |
-| "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. See the testing skill's FLAKY_TESTS.md reference for the flaky definition, the no-retry rule and the fix rules. |
+| "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. See the flaky-test reference of the testing skill for the flaky definition, the no-retry rule and the fix rules. |
 | "One more fix attempt" (after 3 failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
 | "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates this skill's Iron Law: the earlier investigation ran without the Phase 0 problem statement and the BEFORE PROCEEDING gate. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |

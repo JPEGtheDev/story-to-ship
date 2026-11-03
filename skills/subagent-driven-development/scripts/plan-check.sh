@@ -11,6 +11,12 @@
 # A Depends on line is filled only by non-blank text after the colon. An entry with several
 # Files or Depends on lines is filled when any of them is filled; an entry whose lines are all
 # empty reports "has an empty ... line", and one with no such line reports "has no ... line".
+# Placeholder check: every physical line outside a fence (headers and lines before the first
+# header included) is scanned after the CR strip. The whole words TBD and TODO (case-sensitive;
+# a letter, digit or underscore next to the word is not a boundary) and the substrings
+# "implement later", "fill in details" and "Similar to Task" are placeholders. One violation
+# is reported per line, naming the first match in that order, as "line <N>" with N counting
+# every physical line of the file from 1.
 # Exit 0 when every entry passes all checks, 1 when any entry fails one, 2 on usage, read or
 # no-entry errors.
 
@@ -60,6 +66,25 @@ check_field() {
   fi
 }
 
+# placeholder_of <line>: set matched to the first placeholder in the line, empty when none.
+placeholder_of() {
+  matched=
+  case $1 in
+    *TBD*|*TODO*)
+      for word in TBD TODO; do
+        if printf '%s\n' "$1" | grep -Eq "(^|[^A-Za-z0-9_])$word([^A-Za-z0-9_]|\$)"; then
+          matched=$word
+          return
+        fi
+      done ;;
+  esac
+  case $1 in
+    *'implement later'*) matched='implement later' ;;
+    *'fill in details'*) matched='fill in details' ;;
+    *'Similar to Task'*) matched='Similar to Task' ;;
+  esac
+}
+
 # check_entry: report each failed check of the current entry.
 check_entry() {
   if [ "$marked" -eq 0 ]; then
@@ -79,7 +104,9 @@ header=
 reset_entry
 fchar=
 flen=0
+lineno=0
 while IFS= read -r line || [ -n "$line" ]; do
+  lineno=$((lineno + 1))
   line=${line%"$cr"}
   if [ -n "$fchar" ]; then
     # Inside a fence: a closer is the opener character, at least as long, after leading and
@@ -102,6 +129,11 @@ while IFS= read -r line || [ -n "$line" ]; do
       flen=${#run}
       continue ;;
   esac
+  placeholder_of "$line"
+  if [ -n "$matched" ]; then
+    printf 'VIOLATION line %s: placeholder text %s\n' "$lineno" "$matched"
+    violations=$((violations + 1))
+  fi
   if printf '%s\n' "$line" | grep -Eq '^(#+ +)?(Todo|Task) [0-9]+([^[:alnum:]]|$)'; then
     if [ "$entries" -gt 0 ]; then
       check_entry

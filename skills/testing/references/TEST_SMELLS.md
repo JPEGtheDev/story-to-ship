@@ -290,6 +290,189 @@ Test code requires its own refactoring discipline. Just like production code can
 
 ---
 
+## Smells About Tests That Cannot Fail
+
+These smells describe tests that cannot fail, or that fail only in ways that tell you nothing. Such a test looks like coverage while it verifies nothing, so review should flag it the same way it flags a missing assertion. The examples below are pseudocode; no rule depends on a particular tool or framework.
+
+### Self-Agreeing Expected Value
+
+**What:** The expected value is computed by the code under test, or by a helper that the code under test also uses. The test compares the code's output with the same logic that produced it, so it agrees with itself and cannot fail.
+
+```
+[-] BAD:
+  test "Discount_TenPercent_AppliesRate":
+      price = 200
+      expected = applyDiscount(price, 10)   // same function under test
+      assertEq(applyDiscount(price, 10), expected)
+
+[+] GOOD:
+  test "Discount_TenPercent_AppliesRate":
+      assertEq(applyDiscount(200, 10), 180)  // 200 minus 10 percent, worked out by hand
+```
+
+**Why it hurts:**
+- A bug in the shared logic changes the expected value and the actual value together, so the test still passes
+- The test records whatever the code does today, not what it should do
+- Reviewers read the test as a check and skip verifying the expected value
+
+**Fix:**
+- Write the expected value as a literal worked out independently, from the specification or by hand
+- Never call the code under test, or its helpers, to compute the expected side
+- See also the "Never Red" smell below
+
+---
+
+### Restated Constant
+
+**What:** The test copies a string or number from the code and checks it against that copy, so the code that reads the constant never runs. The test still passes if the code stops using the constant or changes its value.
+
+A deliberate wording pin on documentation text is allowed: there the text is the behavior, and CI checks the text itself. A constant copied from code and checked against itself stays the smell.
+
+```
+[-] BAD:
+  RETRY_LIMIT = 5                              // copied from the production constant
+  test "RetryLimit_Default_IsFive":
+      assertEq(RETRY_LIMIT, 5)                 // reads the test's own copy; production code never runs
+
+[+] GOOD:
+  test "Client_NoRetryConfigured_StopsAfterDefaultLimit":
+      client = new Client()                    // default configuration from production code
+      result = client.send(alwaysFailingTransport())
+      assertEq(result.attempts(), 5)           // asserts on what the default produces
+```
+
+**Why it hurts:**
+- The test keeps passing after the code changes, so the constant can drift or become unused unnoticed
+- It gives false confidence that the default behavior is covered
+- Reviewers see a passing check and assume the code path ran
+
+**Fix:**
+- Exercise the code that reads the constant, and assert on what it produces
+- Keep a wording pin only for documentation text, as described above
+
+---
+
+### Assertion on Self-Built Data
+
+**What:** The assertion checks data the test built itself, such as the fixture or the mock's setup, not what the system produced. The system under test could drop or change that data and the assertion would still hold.
+
+```
+[-] BAD:
+  test "UserStore_Save_PersistsUser":
+      user = User(name: "Ada")
+      fakeDb.rows = [user]                     // the test put the row in the fake itself
+      store.save(user)
+      assertEq(fakeDb.rows.size(), 1)          // checks the row the test added, not what save() wrote
+
+[+] GOOD:
+  test "UserStore_Save_PersistsUser":
+      user = User(name: "Ada")
+      store.save(user)
+      assertEq(fakeDb.rows.size(), 1)
+      assertEq(fakeDb.rows[0].name, "Ada")     // checks what save() produced
+```
+
+**Why it hurts:**
+- The test passes even when the code under test does nothing
+- Setup and assertion mirror each other, so the test verifies the fixture rather than the behavior
+- A failure points at the fixture, not at the code
+
+**Fix:**
+- Assert on the output of the code under test
+- Use the fixture only to supply inputs; read state back from the system after the call
+- See also the "Never Red" smell below
+
+---
+
+### Timing-Dependent Test
+
+**What:** The test uses a fixed sleep, the wall clock or a real timer to decide when work is done or when a deadline has passed. It passes on a fast machine and fails on a slow one.
+
+```
+[-] BAD:
+  test "Cache_EntryExpires_AfterTtl":
+      cache.put("k", v, ttl: 100 ms)
+      sleep(150 ms)                            // hopes the timer has fired
+      assertFalse(cache.contains("k"))
+
+[+] GOOD:
+  test "Cache_EntryExpires_AfterTtl":
+      clock = FakeClock(start: 0)
+      cache = new Cache(clock: clock)
+      cache.put("k", v, ttl: 100)
+      clock.advance(101)                       // move time explicitly
+      assertFalse(cache.contains("k"))
+```
+
+**Why it hurts:**
+- Fails intermittently under load and slows the suite
+- The timing contract is hidden in a sleep value that nobody checks
+- Hidden reads of the system clock are the Mystery Guest smell above
+
+**Fix:**
+- Pass the clock in, and advance it inside the test
+- Where real concurrency cannot be avoided, wait on a condition with a timeout instead of a fixed sleep
+- See `FLAKY_TESTS.md` for the flaky-test rules
+
+---
+
+### Oversized Harness
+
+**What:** Broad setup, slow end-to-end infrastructure, or a large fixture is used for a small fix. The test starts a whole system to check one function.
+
+```
+[-] BAD:
+  test "Tax_FractionalCents_Truncates":
+      startDatabase()
+      startHttpServer()
+      seedFixtureFile("customers-10000.csv")
+      result = callCheckoutApi(cartWith(item(price: 1999)))
+      assertEq(result.tax, 159)
+
+[+] GOOD:
+  test "Tax_FractionalCents_Truncates":
+      assertEq(computeTax(1999, rate: 8), 159) // unit level: the function that does the rounding
+```
+
+**Why it hurts:**
+- The test is slow to run and hard to run locally
+- It fails for reasons unrelated to the fix, so failures get ignored
+- Developers skip the suite, and the check stops guarding anything
+
+**Fix:**
+- Use the narrowest test level that already exists for that code
+- If the logic lives in one function, test that function
+- Do not build new harnesses to cover a small fix
+
+---
+
+### Throwaway Test
+
+**What:** A test is written to prove a fix and deleted right after the fix lands. The fixed behavior is then unchecked, so the bug can return without any test failing.
+
+```
+[-] BAD:
+  test "Parser_TrailingComma_NoCrash":
+      assertEq(parse("[1, 2,]"), list(1, 2))
+  // Fix merged; test deleted because "it was only for checking the fix"
+
+[+] GOOD:
+  test "Parser_TrailingComma_ParsesWithoutError":
+      assertEq(parse("[1, 2,]"), list(1, 2))
+  // Kept in the suite as the regression test for the trailing-comma crash
+```
+
+**Why it hurts:**
+- Nothing guards the fixed behavior after the change lands
+- The same bug can return unnoticed in a later change
+
+**Fix:**
+- Keep the test that proved the fix as the regression test
+- Name it for the behavior it protects, not for the bug ticket
+- Confirm it fails on the old code before the fix is applied (RED-first)
+
+---
+
 ## The Test Duplication Trade-Off
 
 Key principle: **test duplication is more tolerable than production duplication** because tests serve as documentation.
@@ -376,3 +559,9 @@ If a test has always passed:
 | Assertion Roulette | Multiple asserts, no way to know which failed | One assert per test, or use clear messages |
 | Test Code Duplication | Same setup/assert copied across tests | Extract to helpers, but preserve test intent |
 | Never Red | Test has always passed | Fix the test; RED-first. See it fail. |
+| Self-Agreeing Expected Value | Expected value is computed by the code under test | Write the expected value as a literal worked out by hand |
+| Restated Constant | Test checks a copied constant against itself; code never runs | Exercise the code that reads the constant; wording pins only for docs |
+| Assertion on Self-Built Data | Assertion checks data the test itself set up | Assert on the output of the code under test |
+| Timing-Dependent Test | Fixed sleep, wall clock or real timer decides the outcome | Pass the clock in; wait on a condition |
+| Oversized Harness | Broad setup or slow infrastructure for a small fix | Use the narrowest test level that already exists |
+| Throwaway Test | Test written to prove a fix and then deleted | Keep it as the regression test |

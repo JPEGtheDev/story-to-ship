@@ -24,6 +24,7 @@ These files back the Launch, Watch loop and Close-out sections of `../SKILL.md` 
 | `OWNER_QUESTIONS.md` | The owner questions page: the one rolling page the launcher writes from runner hand-backs, which the owner reads and answers by chat or page comment but never edits; the Ready to merge section of statement entries (entry, verification line, optional checks, owner action, stale, waiting and removal rules); the question kinds that get a card, the card fields (number, story or topic, question, options, recommendation, status, plus the launch-card counts and overlap), the context section, the layout and question numbering with restarts, the chat line, the sprint ledger fields, failure handling for a missing, failed or stale page, owner comments, and a worked example |
 | `owner-questions-template.html` | The starting HTML layout for the owner questions page: one style block and the sections header, Ready to merge, Open questions, Waiting on runners, not you, and Context, with one example entry, card and context section, and a {{NAME}} placeholder for every variable value |
 | `REHEARSAL.md` | The procedure for rehearsing the story-coordinator template as a coordinator under test: the purpose, the fixture to rebuild (it is not shipped), the GREEN and RED arms, how to run and count, how to read the result, and the limits |
+| `MOVED_RATIONALE.md` | The Context and Forces blocks moved out of SKILL.md for the Capacity, Launch, Watch loop and Close-out sections. |
 
 ---
 

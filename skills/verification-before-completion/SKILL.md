@@ -1,7 +1,7 @@
 ---
 name: verification-before-completion
 license: MIT
-description: Use when about to claim work is complete, fixed, or passing, before any completion claim, commit, or PR.
+description: Use when about to claim work is complete, fixed, or passing, before any completion claim, commit, or PR, or about to report a performance or cost number.
 ---
 
 
@@ -221,3 +221,5 @@ When a subagent reports completion, do not propagate its claim without verifying
 ## Research and Evaluation Gate
 
 For research and evaluation methodology, see `references/RESEARCH_GATE.md`. (Domain note: this gate covers test design and scientific method.)
+
+Before reporting any performance or cost number (speed, memory, token spend, a before and after, an A/B comparison), follow `references/PERFORMANCE_CLAIMS.md`: a number without its run count, range and limiter is not reported as a result, and a comparison with fewer than 5 alternated runs per side is reported as inconclusive.

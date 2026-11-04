@@ -21,7 +21,7 @@ The check prints one line per check, in this order:
 2. `NOTE fetch`: the fetch the check ran. It fetches origin main, and fetches the branch only when origin has it. This line is a note, not a check.
 3. `ancestry`: the merge commit is in origin/main (step 1).
 4. `patch`: the squash diff equals the branch diff from the merge base (step 2).
-5. `worktree`: each worktree is absent, or clean (only the plan file untracked), or it names each status line (step 3).
+5. `worktree`: each worktree is absent, or clean (only the plan file untracked), or it names each status line (step 3). An ignored file counts as well: the check runs `git status --short --ignored`, which lists an ignored file as a `!!` line, so an ignored file makes the worktree FAIL.
 
 Each check prints `OK <name>: <value>` or `FAIL <name>: <value>`. The exit codes are 0 when every line is OK, 1 when any line is FAIL, and 2 on a usage error (the usage message goes to stderr and nothing to stdout). The check changes no branch, worktree or file. Its fetch updates only remote-tracking refs.
 
@@ -46,7 +46,12 @@ A failing step prints `FAIL <step>: <first line of the git error>`, then `FAIL s
 
 The exit codes are 0 when every step and read is OK, 1 for a refusal, a failed step or a failed read, and 2 on a usage error. Branches are deleted with `branch -D` because a squash merge leaves the branch unmerged in git's view; the check has already compared the patches.
 
-A re-run after a partial run prints the absent and already gone lines for what the earlier run removed, provided the check passes. With `-x` the check uses origin's branch tip, so a run whose local branch and runner worktree are gone still passes. Without `-x`, a missing branch tip makes the check fail, so the re-run is refused and changes nothing.
+A re-run after a partial run reads the branch tip that still exists: the local branch without `-x`, or `origin/<branch>` with `-x`. The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. So:
+
+- While the tip exists, the re-run passes if the other checks pass, and it prints the absent and already gone lines for what the earlier run removed. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete.
+- Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the re-run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
+
+The `already gone` line for origin can also print on a first run: when the branch was removed on origin outside the run, the check still passes.
 
 ## What stays manual
 

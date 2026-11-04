@@ -91,7 +91,7 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check, and report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
 
 ---
 

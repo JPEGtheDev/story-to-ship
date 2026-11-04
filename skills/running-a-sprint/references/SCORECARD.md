@@ -88,15 +88,15 @@ Read the figures as follows. Cost is in tokens, and dollars print only when tool
 
 ### Needed owner change and class
 
-A merged sprint PR needed an owner change when, after it was marked ready, any of three things happened: a review comment led to a commit on the PR, a questions-page answer about the PR was logged in the sprint ledger, or the owner asked for a follow-up story within 7 days of the merge. The 7 days run from the merge. A change after the row is written amends that row in place; never append a second row for the same PR. A reverted PR still counts as merged, and the revert is an owner change. When a GitHub read fails, write "unknown" in the field; "unknown" counts nothing. A merged PR that has no row gets its row written late, at its merge-order position, and is excluded from the counts until then. Only sprint PRs merged from this change forward count; there is no backfill.
+A merged sprint PR needed an owner change when, after it was marked ready, any of three things happened: a review comment led to a commit on the PR, a questions-page answer about the PR was logged in the sprint ledger, or the owner asked for a follow-up story within 7 days of the merge. A change after the row is written amends that row in place; never append a second row for the same PR. A reverted PR still counts as merged, and the revert is an owner change. When a GitHub read fails, write "unknown" in the field; "unknown" counts nothing. A merged PR that has no row gets its row written late, at its merge-order position, and is excluded from the counts until then. Only sprint PRs merged after the first row that carries the Needed owner change field count; there is no backfill.
 
-Each PR gets one class, chosen in this order: dependency when the author is Dependabot or Renovate or only manifest or lockfile paths changed; else CI; else docs-only when every changed file is .md, .txt or under docs/; else code.
+Each PR gets one class, chosen in this order: dependency when the author is Dependabot or Renovate or only manifest or lockfile paths changed; else CI when only paths under .github/ changed; else docs-only when every changed file is .md, .txt or under docs/; else code.
 
-The launcher writes the row itself at close-out from its sprint ledger, which logs each questions-page answer per PR. No script reads the questions page. A logged questions-page answer that asks for a change to the merged PR counts as yes. An answer to a question a runner relayed is not an owner change, as the Interventions cause bullet says. When the launcher starts a new ledger, it first copies the Needed owner change rows into it, so counts and runs carry across sprints.
+The launcher writes the row itself at close-out from its sprint ledger, which logs each questions-page answer per PR. Every logged questions-page answer about the merged PR counts as yes, even though the Interventions cause bullet leaves out answers to relayed questions. When the launcher starts a new ledger, it first copies the Needed owner change rows into it, so counts and runs carry across sprints.
 
 ### CI flaky and infra-killed runs
 
-At each close-out the launcher counts the CI runs of the repository from GitHub run history. A flaky run is one that failed and then passed on a rerun of the same commit, counted as a run with attempt above 1 and conclusion success. An infra-killed run is one whose conclusion is cancelled or timed out; concurrency cancellations count here too. Both counts are approximations of the rule. Run this command with <owner/repo> replaced by the repository:
+At each close-out the launcher counts the CI runs of the repository from GitHub run history. A flaky run is one that failed and then passed on a rerun of the same commit, counted as a run with attempt above 1 and conclusion success. An infra-killed run is one whose conclusion is cancelled or timed out; concurrency cancellations count here too. Both counts are approximations of the rule, over a sliding window of the latest 400 runs, so a count can change when old runs age out; any change is reported. Run this command with <owner/repo> replaced by the repository:
 
 ```bash
 gh run list --repo <owner/repo> --limit 400 --json attempt,conclusion | jq '{flaky:(map(select(.attempt>1 and .conclusion=="success"))|length), infra:(map(select(.conclusion=="cancelled" or .conclusion=="timed_out"))|length)}'
@@ -106,22 +106,22 @@ The launcher writes both counts into the scorecard row at every close-out. The p
 
 ## Trust number
 
-The trust number reports, per repository and class, the merged sprint PRs and the share that needed an owner change. Set P to the launcher's sprint ledger, its plan.md. Only rows that match the row shape count: the value after "Needed owner change:" is yes, no or unknown, and the repository and class follow the forms in the Needed owner change and class section. A template row, a capital letter or any other word is ignored. The report lists, per repository and class, the merged sprint PRs (yes and no rows; unknown rows are left out) and the share that needed an owner change, written like "3 merged, 1 needed change (33%)"; an empty class reads "0 merged". The report always prints the counting command.
+The trust number reports, per repository and class, the merged sprint PRs and the share that needed an owner change. Set P to the launcher's sprint ledger, its plan.md. Only rows that match the row shape count: the value after "Needed owner change:" is yes, no or unknown, and the repository and class follow the forms in the Needed owner change and class section. The report lists, per repository and class, the merged sprint PRs (yes and no rows; unknown rows are left out) and the share that needed an owner change, written like "3 merged, 1 needed change (33%)"; an empty class reads "0 merged". The report always prints the counting command.
 
 ```bash
 SED='s/^- Needed owner change: (yes|no|unknown); repository: ([^;<]+); class: (dependency|CI|docs-only|code)$/\2 \3 \1/p'
 sed -nE "$SED" "$P" | awk '$3!="unknown"{m[$1" "$2]++; if($3=="yes")c[$1" "$2]++} END{for(k in m) printf "%s merged %d changed %d\n",k,m[k],c[k]+0}'
 ```
 
-The first command prints the merged and changed counts per repository and class, in no guaranteed line order. The second prints the current run of no rows per repository and class, taking rows in ledger order, which is merge order because a late row is placed at its merge-order position and an amended row stays in place. Unknown rows are skipped, and a row line ends after the class value.
+The first command prints the merged and changed counts per repository and class. The second prints the current run of no rows per repository and class, taking rows in ledger order, which is merge order because a late row is placed at its merge-order position and an amended row stays in place. Unknown rows are skipped.
 
 ```bash
 sed -nE "$SED" "$P" | awk '$3=="no"{r[$1" "$2]++} $3=="yes"{r[$1" "$2]=0} END{for(k in r) print k, r[k]}'
 ```
 
-Before trusting either counter, run each on an empty file, on a file holding one malformed row (capital letter) that must print nothing, and on a ledger holding rows for two repositories with an unknown row and a yes after no rows that must print one line per repository and class, as the counters rule above says.
+At the first close-out of each sprint, before trusting either counter, run each on an empty file, on a file holding one malformed row (capital letter) that must print nothing, and on a ledger holding rows for two repositories with an unknown row and a yes after no rows that must print one line per repository and class.
 
-A repository and class meets the bar when the second command prints a run of 10 or more for it; the run resets to 0 on a yes and counts per repository and class. That class meets the bar. The launcher then asks the owner whether to turn on auto-merge for that class; it never turns auto-merge on itself and never changes branch protection; the owner decides.
+A repository and class meets the bar when the second command prints a run of 10 or more for it; the run resets to 0 on a yes. That class meets the bar. At each close-out, after writing the row, the launcher runs the second command for the row's repository and class; when the bar is met it asks the owner whether to turn on auto-merge for that class. It never turns auto-merge on itself and never changes branch protection; the owner decides.
 
 ## Scorecard row
 
@@ -146,7 +146,5 @@ Copy one row per runner into the sprint ledger.
 - Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>
-
-The launcher tells the owner the CI counts only when they differ from the last row for that repository.
 
 Interventions cause stays as the detail behind the yes in Needed owner change.

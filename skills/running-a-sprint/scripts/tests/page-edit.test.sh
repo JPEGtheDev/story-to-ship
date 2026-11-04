@@ -268,24 +268,13 @@ expect_unchanged "add-card existing card id" 1 'FAIL add-card: id q7 already on 
 
 new_case
 syn_q7
-write_lines "$CASE_IN" 'before=q7' '<article class="q"><p>x</p></article>'
+write_lines "$CASE_IN" 'before=q7' 'card=<article class="q"><p>x</p></article>'
 expect_unchanged "add-card card without id" 1 'FAIL add-card: card has no id' add-card "$CASE_PAGE" "$CASE_IN"
 
 new_case
 syn_q7
-write_lines "$CASE_IN" 'before=q7' '<article class="q" id="q8"><p id="q9">x</p></article>'
-save_page
-run_edit add-card "$CASE_PAGE" "$CASE_IN"
-assert_exit "add-card card with two ids exit" 1 "$RC"
-assert_grep "add-card card with two ids reports FAIL add-card" '^FAIL add-card: ' "$CASE_DIR/out"
-_two_lines=$(sed -n '$=' "$CASE_DIR/out")
-if [ "$_two_lines" = 1 ]; then
-  pass_case "add-card card with two ids: one stdout line"
-else
-  fail_case "add-card card with two ids: one stdout line" "got $_two_lines lines"
-fi
-assert_empty "add-card card with two ids stderr" "$CASE_DIR/err"
-assert_unchanged "add-card card with two ids"
+write_lines "$CASE_IN" 'before=q7' 'card=<article class="q" id="q8"><p id="q9">x</p></article>'
+expect_unchanged "add-card card with two ids" 1 'FAIL add-card: card has more than one id' add-card "$CASE_PAGE" "$CASE_IN"
 
 new_case
 syn_q7
@@ -362,6 +351,47 @@ write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
 snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
 run_edit add-card "$CASE_PAGE" "$CASE_IN"
 assert_listing_same "add-card success: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+# ---- page file mode: an edit keeps the mode the page had ----
+
+# mode_of <file>: the first ten characters of the file's ls -l line, such as -rw-r--r--.
+mode_of() {
+  ls -l "$1" | awk '{print substr($1,1,10)}'
+}
+
+# assert_mode <name> <expected mode> <file>: the file's mode string is the expected one.
+assert_mode() {
+  _am_got=$(mode_of "$3") || exit 2
+  if [ "$_am_got" = "$2" ]; then
+    pass_case "$1"
+  else
+    fail_case "$1" "expected mode $2 got $_am_got"
+  fi
+}
+
+new_case
+syn_q7
+chmod 644 "$CASE_PAGE" || exit 2
+assert_mode "add-card mode 644 before the edit" '-rw-r--r--' "$CASE_PAGE"
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+expect_args "add-card keeps mode 644 page" 0 'OK add-card: q8 before q7' add-card "$CASE_PAGE" "$CASE_IN"
+assert_mode "add-card keeps mode 644" '-rw-r--r--' "$CASE_PAGE"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+chmod 644 "$CASE_PAGE" || exit 2
+assert_mode "hide mode 644 before the edit" '-rw-r--r--' "$CASE_PAGE"
+write_lines "$CASE_IN" 'hide=q7'
+expect_args "hide keeps mode 644 page" 0 'OK hide: q7' hide "$CASE_PAGE" "$CASE_IN"
+assert_mode "hide keeps mode 644" '-rw-r--r--' "$CASE_PAGE"
+
+new_case
+syn_q7
+chmod 600 "$CASE_PAGE" || exit 2
+assert_mode "add-card mode 600 before the edit" '-rw-------' "$CASE_PAGE"
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+expect_args "add-card keeps mode 600 page" 0 'OK add-card: q8 before q7' add-card "$CASE_PAGE" "$CASE_IN"
+assert_mode "add-card keeps mode 600" '-rw-------' "$CASE_PAGE"
 
 # ---- hide: anchor and block rules on synthetic pages ----
 

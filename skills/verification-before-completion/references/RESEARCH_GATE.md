@@ -20,3 +20,5 @@ BEFORE claiming any test result or evaluation finding:
 | "Gate compliance confirmed" | Tool-call telemetry showing Skill tool invoked first | Announcement text in output alone |
 
 **This gate is not only for software tests.** It applies to any investigation where you are drawing a conclusion from observed behavior -- including agent runs, manual experiments, and informal evaluations.
+
+A performance or cost comparison also follows `PERFORMANCE_CLAIMS.md`; its rule of at least 5 alternated runs per side sits beside the control-and-treatment rule above and does not replace it.

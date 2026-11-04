@@ -1,7 +1,7 @@
 ---
 name: verification-before-completion
 license: MIT
-description: Use when about to claim work is complete, fixed, or passing, before any completion claim, commit, or PR.
+description: Use when about to claim work is complete, fixed, or passing, before any completion claim, commit, or PR, or about to report a performance or cost number.
 ---
 
 
@@ -153,9 +153,7 @@ See `references/HONESTY_PATTERNS.md` for why "should work" is banned, process la
 
 "Exit 0" with an unexamined count is not verification.
 
-**Consequences:** Requires stating an expectation before looking at the result, which takes discipline under time pressure -- exactly when it is most tempting to skip. The alternative is the source postmortem's failure repeating: a run reporting 195/288 was accepted as complete because the signal was green, and nobody compared the count to the known total.
-
-**Enforcement scope:** No mechanical detector checks this rule. It is self-checkable at generation time -- state the expected number before reading the result -- and procedurally checkable in review by asking what the baseline comparison was.
+Consequences and enforcement scope: references/NEW_GATES_RATIONALE.md
 
 ---
 
@@ -221,3 +219,5 @@ When a subagent reports completion, do not propagate its claim without verifying
 ## Research and Evaluation Gate
 
 For research and evaluation methodology, see `references/RESEARCH_GATE.md`. (Domain note: this gate covers test design and scientific method.)
+
+Before reporting any performance or cost number (speed, memory, token spend, a before and after, an A/B comparison), follow `references/PERFORMANCE_CLAIMS.md`: a number without its run count, range and limiter is reported as "inconclusive" with the missing item named (a requested one-run ballpark is reported as "ballpark, 1 run", never as a result), and a comparison with fewer than 5 alternated runs per side is reported as inconclusive.

@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fixture tests for closeout-check.sh (cases 1-36) and closeout-steps.sh (group 2): the merged, fetch NOTE,
+# Fixture tests for closeout-check.sh (cases 1-39) and closeout-steps.sh (group 2): the merged, fetch NOTE,
 # ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
 # an unchanged-repositories check, and the steps' removal, deletion, fast-forward and refusal paths.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
@@ -432,6 +432,44 @@ want main-gone-on-origin "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch 
 std_run
 assert_case main-gone-on-origin 1 main-gone-on-origin
 
+# Case 37: the branch was pushed to origin after the root clone, so the root has no origin/<branch> ref (simulated
+# by deleting it). With -x the patch tip is origin/<branch>, so the branch fetch is needed; it succeeds and every
+# line is OK.
+new_case branch-fetch-needed
+git_c "$FX_ROOT" update-ref -d "refs/remotes/origin/$FX_BRANCH" || exit 2
+want branch-fetch-needed "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
+std_run -x "$FX_RECON"
+assert_case branch-fetch-needed 0 branch-fetch-needed
+
+# Case 38: origin lists the branch, but its tip commit object is missing from origin, so the branch fetch fails
+# while the probe says the branch is present. The tip is a new commit pushed from a clone (the root never has it)
+# and its loose object is then removed from the bare origin. Ancestry and patch both say fetch failed.
+new_case branch-fetch-fails
+git clone -q "$FX_ORIGIN" "$TEST_TMP/branch-fetch-fails-up" || exit 2
+git_c "$TEST_TMP/branch-fetch-fails-up" checkout -q -b "$FX_BRANCH" "origin/$FX_BRANCH" || exit 2
+printf '%s\n' later >> "$TEST_TMP/branch-fetch-fails-up/file.txt" || exit 2
+git_c "$TEST_TMP/branch-fetch-fails-up" commit -q -a -m later || exit 2
+git_c "$TEST_TMP/branch-fetch-fails-up" push -q origin "HEAD:refs/heads/$FX_BRANCH" || exit 2
+_bf_sha=$(git -C "$TEST_TMP/branch-fetch-fails-up" rev-parse HEAD) || exit 2
+_bf_obj="$FX_ORIGIN/objects/$(printf '%s\n' "$_bf_sha" | sed 's/^\(..\)/\1\//')"
+[ -f "$_bf_obj" ] || exit 2
+rm "$_bf_obj" || exit 2
+want branch-fetch-fails "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
+  "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
+std_run
+assert_case branch-fetch-fails 1 branch-fetch-fails
+
+# Case 39: origin has a branch y/<branch> and no branch <branch>, and the local branch is present with an equal
+# patch. The probe must match the exact ref, so the branch is not on origin: the NOTE says so and every line is OK.
+new_case origin-prefixed-branch
+git -C "$FX_ORIGIN" update-ref "refs/heads/y/$FX_BRANCH" "$FX_H" || exit 2
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+want origin-prefixed-branch "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean"
+std_run
+assert_case origin-prefixed-branch 0 origin-prefixed-branch
+
 # Group 2: closeout-steps.sh. CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs
 # closeout-check.sh next to itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub
 # that prints one OK line.
@@ -777,6 +815,21 @@ want steps-origin-gone-real "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is
 steps_std
 assert_case steps-origin-gone-real 0 steps-origin-gone-real
 assert_refs steps-origin-gone-real 0 0 "$FX_S" 0
+
+# Step case 16: the real check with origin holding y/<branch> and no <branch> (the same layout as check case 39).
+# The check passes with the not-on-origin NOTE, the origin branch is already gone, and y/<branch> stays on origin.
+new_case steps-origin-prefixed
+git -C "$FX_ORIGIN" update-ref "refs/heads/y/$FX_BRANCH" "$FX_H" || exit 2
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+steps_prefetch
+want steps-origin-prefixed "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+steps_std
+assert_case steps-origin-prefixed 0 steps-origin-prefixed
+_yk=0
+git -C "$FX_ORIGIN" show-ref -q --verify "refs/heads/y/$FX_BRANCH" || _yk=$?
+assert_exit "steps-origin-prefixed y branch kept on origin" 0 "$_yk"
 
 # Steps usage errors (exit 2): each missing required option, an unknown option, and each option with no value.
 new_case steps-usage

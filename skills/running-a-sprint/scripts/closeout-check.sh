@@ -8,8 +8,9 @@
 # same is done for <root>/.worktrees/<x> and its children, the patch check then uses origin/<branch> as the
 # branch tip, and without -x it uses the local branch <branch>. -P is the plan file name a clean worktree may
 # hold untracked at its top (default plan.md).
-# GitHub is read by one function that runs "${CLOSEOUT_GH:-gh}" pr view; git runs a fetch of origin main and
-# <branch> (remote refs only); nothing else changes in the repositories.
+# GitHub is read by one function that runs "${CLOSEOUT_GH:-gh}" pr view; git fetches origin main, probes origin
+# for <branch> with ls-remote, and fetches <branch> only when origin has it (remote refs only); a branch that is
+# not on origin is not a failure; nothing else changes in the repositories.
 ROOT=""
 PR=""
 BRANCH=""
@@ -113,14 +114,37 @@ check_merged() {
   fi
 }
 
-# run_fetch: fetch origin main and the branch as remote refs only. Always prints the NOTE line; FETCH_OK is 1
-# when the fetch succeeded.
+# run_fetch: fetch origin main (required), then probe origin for the branch with ls-remote and fetch the branch
+# only when origin has it. Exit 2 from the probe means the branch is not on origin, which is not a failure; any
+# other probe failure, or a failed fetch, leaves FETCH_OK at 0. Always prints the NOTE line; FETCH_OK is 1 when
+# every fetch that ran succeeded and the branch was accounted for.
 run_fetch() {
   FETCH_OK=0
-  if GIT_TERMINAL_PROMPT=0 git -C "$ROOT" fetch -q origin main "$BRANCH" >/dev/null 2>&1; then
+  _main_ok=0
+  _branch_ok=0
+  if GIT_TERMINAL_PROMPT=0 git -C "$ROOT" fetch -q origin main >/dev/null 2>&1; then
+    _main_ok=1
+  fi
+  GIT_TERMINAL_PROMPT=0 git -C "$ROOT" ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1
+  _probe=$?
+  case "$_probe" in
+    0)
+      if GIT_TERMINAL_PROMPT=0 git -C "$ROOT" fetch -q origin "$BRANCH" >/dev/null 2>&1; then
+        _branch_ok=1
+      fi
+      printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
+      ;;
+    2)
+      _branch_ok=1
+      printf 'NOTE fetch: ran git fetch origin main; %s is not on origin\n' "$BRANCH"
+      ;;
+    *)
+      printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
+      ;;
+  esac
+  if [ "$_main_ok" -eq 1 ] && [ "$_branch_ok" -eq 1 ]; then
     FETCH_OK=1
   fi
-  printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
 }
 
 # precheck <name>: 0 when a merge commit is known and the fetch succeeded. Otherwise print the FAIL line for

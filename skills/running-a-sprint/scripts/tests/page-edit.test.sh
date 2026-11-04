@@ -548,9 +548,7 @@ expect_usage "usage two arguments" add-card "$CASE_PAGE"
 expect_usage "usage four arguments" add-card "$CASE_PAGE" "$CASE_IN" extra
 expect_usage "usage hide with two arguments" hide "$CASE_PAGE"
 expect_usage "usage unknown op" bogus "$CASE_PAGE" "$CASE_IN"
-expect_usage "usage status is not an op yet" status "$CASE_PAGE" "$CASE_IN"
-expect_usage "usage ready-add is not an op yet" ready-add "$CASE_PAGE" "$CASE_IN"
-expect_usage "usage ready-remove is not an op yet" ready-remove "$CASE_PAGE" "$CASE_IN"
+expect_usage "usage unknown op frobnicate" frobnicate "$CASE_PAGE" "$CASE_IN"
 
 # ---- unreadable page or input ----
 
@@ -566,5 +564,401 @@ expect_args "add-card input is a directory" 1 "FAIL add-card: cannot read $CASE_
 expect_args "hide page is a directory" 1 "FAIL hide: cannot read $CASE_DIR/page" hide "$CASE_DIR/page" "$CASE_IN"
 expect_args "hide input missing" 1 "FAIL hide: cannot read $CASE_DIR/missing.txt" \
   hide "$CASE_PAGE" "$CASE_DIR/missing.txt"
+
+# ---- status, ready-add and ready-remove: shared fixtures ----
+
+# replace_line <src> <dst> <line> <text>: writes src to dst with the given line replaced by text.
+replace_line() {
+  { sed -n "1,$(($3 - 1))p" "$1"; printf '%s\n' "$4"; sed -n "$(($3 + 1)),\$p" "$1"; } > "$2" || exit 2
+}
+
+# The real template with the older Ready to merge entry given pr 130 (the placeholder value is "filled").
+READY130=$TEST_TMP/ready130.html
+sed 's/data-pr="filled"/data-pr="130"/' "$REAL" > "$READY130" || exit 2
+N_READY=$(line_of "$REAL" 'id="ready">')
+N_UL=$((N_READY + 1))
+N_LI=$((N_READY + 2))
+write_lines "$TEST_TMP/ul-want.txt" '    <ul>'
+sed -n "${N_UL}p" "$REAL" > "$TEST_TMP/ul-got.txt" || exit 2
+assert_file_eq "ready list: the ul line sits right after the ready heading" "$TEST_TMP/ul-want.txt" "$TEST_TMP/ul-got.txt"
+
+ENTRY131='<a href="https://example.test/pull/131">Repo PR 131</a> (427): Summary &amp; notes'
+LI131="      <li data-pr=\"131\">$ENTRY131</li>"
+
+# ---- status on the real template ----
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+N_W=$(line_of "$REAL" 'data-status="Working"')
+replace_line "$REAL" "$CASE_DIR/want.html" "$N_W" '    <p class="meta" data-status="Working">Working: Two runners on 427</p>'
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'status=Working' 'text=Two runners on 427'
+expect_args "status Working real template" 0 'OK status: Working' status "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "status Working: only the Working line changes" "$CASE_DIR/want.html" "$CASE_PAGE"
+assert_listing_same "status Working: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+N_N=$(line_of "$REAL" 'data-status="Needs you"')
+replace_line "$REAL" "$CASE_DIR/want.html" "$N_N" '    <p class="meta" data-status="Needs you">Needs you: Owner answer for Q7</p>'
+write_lines "$CASE_IN" 'status=Needs you' 'text=Owner answer for Q7'
+expect_args "status Needs you real template" 0 'OK status: Needs you' status "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "status Needs you: label with a space, Working line untouched" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# ---- status: anchor rules and failures on synthetic pages ----
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a</p>' '</main>'
+write_lines "$CASE_IN" 'status=Needs you' 'text=x'
+expect_unchanged "status label missing" 1 'FAIL status: label Needs you not found' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a</p>' '  <p data-status="Working">Working: b</p>' '</main>'
+write_lines "$CASE_IN" 'status=Working' 'text=c'
+expect_unchanged "status label repeated" 1 'FAIL status: label Working repeated' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a' '</main>'
+write_lines "$CASE_IN" 'status=Working' 'text=b'
+expect_unchanged "status line has no closing tag" 1 'FAIL status: label Working has no closing tag on its line' \
+  status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a</p>' '</main>'
+write_lines "$CASE_IN" 'status=Work' 'text=b'
+expect_unchanged "status label is a prefix of the attribute value" 1 'FAIL status: label Work not found' \
+  status "$CASE_PAGE" "$CASE_IN"
+
+for _st_pre in x x- x_ 1; do
+  new_case
+  write_lines "$CASE_PAGE" '<main>' "  <p ${_st_pre}data-status=\"Working\">Working: a</p>" '</main>'
+  write_lines "$CASE_IN" 'status=Working' 'text=b'
+  expect_unchanged "status boundary: char before data-status is $_st_pre" 1 \
+    'FAIL status: label Working not found' status "$CASE_PAGE" "$CASE_IN"
+done
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=Working'
+expect_unchanged "status without text" 1 'FAIL status: missing key text' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=Working' 'text='
+expect_unchanged "status with empty text" 1 'FAIL status: missing key text' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'text=x'
+expect_unchanged "status without status label" 1 'FAIL status: missing key status' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=' 'text=x'
+expect_unchanged "status with empty label" 1 'FAIL status: missing key status' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+printf 'status=Working\ntext=Two\303\251\n' > "$CASE_IN"
+expect_unchanged "status UTF-8 text" 1 'FAIL status: input has a non-ASCII character' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+printf 'status=Working\ntext=x\351\n' > "$CASE_IN"
+expect_unchanged "status stray byte 351" 1 'FAIL status: input has a non-ASCII character' status "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a</p>' '</main>'
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'status=Needs you' 'text=x'
+expect_unchanged "status failure leaves no temp file" 1 'FAIL status: label Needs you not found' \
+  status "$CASE_PAGE" "$CASE_IN"
+assert_listing_same "status failure: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+# ---- ready-add on the real template ----
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+insert_above "$READY130" "$CASE_DIR/want.html" "$N_LI" "$LI131"
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add 131 above the older entry" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add 131: new li first in the list, indent two more than the ul" "$CASE_DIR/want.html" "$CASE_PAGE"
+assert_listing_same "ready-add 131: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+new_case
+sed "${N_LI}d" "$REAL" > "$CASE_PAGE" || exit 2
+cat "$CASE_PAGE" > "$CASE_DIR/empty.html"
+insert_above "$CASE_DIR/empty.html" "$CASE_DIR/want.html" "$N_LI" "$LI131"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add into an empty list" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add into an empty list: li directly below the ul line" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+cat "$READY130" > "$CASE_DIR/orig.html"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add 131 before its removal" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+write_lines "$CASE_IN" 'pr=131'
+expect_args "ready-remove 131 again" 0 'OK ready-remove: 131' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-remove 131 again: page byte-identical to the page before the add" "$CASE_DIR/orig.html" "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+grep -v 'data-pr="130"' "$READY130" > "$CASE_DIR/want.html" || exit 2
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'pr=130'
+expect_args "ready-remove the older entry 130" 0 'OK ready-remove: 130' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-remove 130: its li line gone, rest byte-identical" "$CASE_DIR/want.html" "$CASE_PAGE"
+assert_listing_same "ready-remove 130: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+# ---- ready-add: failures on the real template ----
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=130' "entry=$ENTRY131"
+expect_unchanged "ready-add pr already listed" 1 'FAIL ready-add: pr 130 already listed' ready-add "$CASE_PAGE" "$CASE_IN"
+
+for _ra_pr in abc 13x ''; do
+  new_case
+  cat "$READY130" > "$CASE_PAGE"
+  write_lines "$CASE_IN" "pr=$_ra_pr" "entry=$ENTRY131"
+  expect_unchanged "ready-add pr not a number: [$_ra_pr]" 1 'FAIL ready-add: pr must be a number' \
+    ready-add "$CASE_PAGE" "$CASE_IN"
+done
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131'
+expect_unchanged "ready-add without entry" 1 'FAIL ready-add: missing key entry' ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+printf 'pr=131\nentry=Caf\303\251\n' > "$CASE_IN"
+expect_unchanged "ready-add UTF-8 entry" 1 'FAIL ready-add: input has a non-ASCII character' ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+printf 'pr=131\nentry=x\351\n' > "$CASE_IN"
+expect_unchanged "ready-add stray byte 351" 1 'FAIL ready-add: input has a non-ASCII character' ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=130' "entry=$ENTRY131"
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+save_page
+run_edit ready-add "$CASE_PAGE" "$CASE_IN"
+assert_exit "ready-add failure exit" 1 "$RC"
+assert_listing_same "ready-add failure: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+# ---- ready-add: the pr boundary and the ready anchor on synthetic pages ----
+
+for _ra_pre in x x- x_ 1; do
+  new_case
+  write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' "    <li ${_ra_pre}data-pr=\"131\">old</li>" '  </ul>' '</main>'
+  write_lines "$CASE_DIR/want.html" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '    <li data-pr="131">Entry</li>' \
+    "    <li ${_ra_pre}data-pr=\"131\">old</li>" '  </ul>' '</main>'
+  write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+  expect_args "ready-add 131 beside a non-matching data-pr: char before is $_ra_pre" 0 'OK ready-add: 131' \
+    ready-add "$CASE_PAGE" "$CASE_IN"
+  assert_file_eq "ready-add 131 beside $_ra_pre data-pr: inserted under the ul" "$CASE_DIR/want.html" "$CASE_PAGE"
+done
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '    <li data-pr="1310">old</li>' '  </ul>' '</main>'
+write_lines "$CASE_DIR/want.html" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '    <li data-pr="131">Entry</li>' \
+  '    <li data-pr="1310">old</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_args "ready-add 131 with data-pr 1310 on the page" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add 131: data-pr=\"1310\" is another pr" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p>nothing here</p>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add anchor ready missing" 1 'FAIL ready-add: anchor ready not found' ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 data-id="ready">Ready</h2>' '  <ul>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add data-id is not the anchor" 1 'FAIL ready-add: anchor ready not found' \
+  ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready</h2>' '  <h2 id="ready">Ready again</h2>' '  <ul>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add anchor ready repeated" 1 'FAIL ready-add: anchor ready repeated' ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <ul>' '    <li>old</li>' '  </ul>' '  <h2 id="ready">Ready to merge</h2>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add no list after the anchor" 1 'FAIL ready-add: no list after anchor ready' \
+  ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <ul>' '    <li>old</li>' '  </ul>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '  </ul>' '</main>'
+write_lines "$CASE_DIR/want.html" '<main>' '  <ul>' '    <li>old</li>' '  </ul>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' \
+  '    <li data-pr="131">Entry</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_args "ready-add uses the first ul after the anchor" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add: the li goes under the ul after the anchor, not the one before" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# ---- ready-remove: the pr rules and the block rule ----
+
+for _rr_pre in x x- x_ 1; do
+  new_case
+  write_lines "$CASE_PAGE" '<main>' '  <ul>' "    <li ${_rr_pre}data-pr=\"131\">old</li>" '  </ul>' '</main>'
+  cat "$CASE_PAGE" > "$CASE_DIR/saved"
+  write_lines "$CASE_IN" 'pr=131'
+  expect_args "ready-remove 131 beside a non-matching data-pr: char before is $_rr_pre" 1 \
+    'FAIL ready-remove: pr 131 not found' ready-remove "$CASE_PAGE" "$CASE_IN"
+  assert_unchanged "ready-remove boundary $_rr_pre: page unchanged"
+done
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <ul>' '    <li data-pr="1310">old</li>' '  </ul>' '</main>'
+save_page
+write_lines "$CASE_IN" 'pr=131'
+expect_args "ready-remove 131 with only data-pr 1310 listed" 1 'FAIL ready-remove: pr 131 not found' \
+  ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_unchanged "ready-remove 131 with only 1310: page unchanged"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <ul>' '    <li data-pr="131">a</li>' '    <li data-pr="131">b</li>' '  </ul>' '</main>'
+save_page
+write_lines "$CASE_IN" 'pr=131'
+expect_args "ready-remove pr repeated" 1 'FAIL ready-remove: pr 131 repeated' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_unchanged "ready-remove pr repeated: page unchanged"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131'
+expect_unchanged "ready-remove pr absent" 1 'FAIL ready-remove: pr 131 not found' ready-remove "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+: > "$CASE_IN"
+expect_unchanged "ready-remove without pr" 1 'FAIL ready-remove: missing key pr' ready-remove "$CASE_PAGE" "$CASE_IN"
+
+for _rr_pr in abc 13x ''; do
+  new_case
+  cat "$READY130" > "$CASE_PAGE"
+  write_lines "$CASE_IN" "pr=$_rr_pr"
+  expect_unchanged "ready-remove pr not a number: [$_rr_pr]" 1 'FAIL ready-remove: pr must be a number' \
+    ready-remove "$CASE_PAGE" "$CASE_IN"
+done
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+printf 'pr=131\303\251\n' > "$CASE_IN"
+expect_unchanged "ready-remove UTF-8 pr" 1 'FAIL ready-remove: input has a non-ASCII character' ready-remove "$CASE_PAGE" "$CASE_IN"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+printf 'pr=131\351\n' > "$CASE_IN"
+expect_unchanged "ready-remove stray byte 351" 1 'FAIL ready-remove: input has a non-ASCII character' ready-remove "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '    <li data-pr="131">' '      <li>' \
+  '      </li>' '    </li>' '    <li data-pr="130">Older</li>' '  </ul>' '</main>'
+write_lines "$CASE_DIR/want.html" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul>' '    <li data-pr="130">Older</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131'
+expect_args "ready-remove a multi-line li whole" 0 'OK ready-remove: 131' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-remove 131: block ends at its own closing tag, nested closing tag at deeper indent ignored" \
+  "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# ---- status, ready-add and ready-remove: unreadable page or input ----
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=Working' 'text=x'
+expect_args "status page missing" 1 "FAIL status: cannot read $CASE_DIR/missing.html" \
+  status "$CASE_DIR/missing.html" "$CASE_IN"
+expect_args "status page is a directory" 1 "FAIL status: cannot read $CASE_DIR/page" \
+  status "$CASE_DIR/page" "$CASE_IN"
+expect_args "status input missing" 1 "FAIL status: cannot read $CASE_DIR/missing.txt" \
+  status "$CASE_PAGE" "$CASE_DIR/missing.txt"
+expect_args "status input is a directory" 1 "FAIL status: cannot read $CASE_DIR/page" \
+  status "$CASE_PAGE" "$CASE_DIR/page"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add page missing" 1 "FAIL ready-add: cannot read $CASE_DIR/missing.html" \
+  ready-add "$CASE_DIR/missing.html" "$CASE_IN"
+expect_args "ready-add page is a directory" 1 "FAIL ready-add: cannot read $CASE_DIR/page" \
+  ready-add "$CASE_DIR/page" "$CASE_IN"
+expect_args "ready-add input missing" 1 "FAIL ready-add: cannot read $CASE_DIR/missing.txt" \
+  ready-add "$CASE_PAGE" "$CASE_DIR/missing.txt"
+expect_args "ready-add input is a directory" 1 "FAIL ready-add: cannot read $CASE_DIR/page" \
+  ready-add "$CASE_PAGE" "$CASE_DIR/page"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=130'
+expect_args "ready-remove page missing" 1 "FAIL ready-remove: cannot read $CASE_DIR/missing.html" \
+  ready-remove "$CASE_DIR/missing.html" "$CASE_IN"
+expect_args "ready-remove page is a directory" 1 "FAIL ready-remove: cannot read $CASE_DIR/page" \
+  ready-remove "$CASE_DIR/page" "$CASE_IN"
+expect_args "ready-remove input missing" 1 "FAIL ready-remove: cannot read $CASE_DIR/missing.txt" \
+  ready-remove "$CASE_PAGE" "$CASE_DIR/missing.txt"
+expect_args "ready-remove input is a directory" 1 "FAIL ready-remove: cannot read $CASE_DIR/page" \
+  ready-remove "$CASE_PAGE" "$CASE_DIR/page"
+
+# ---- status, ready-add and ready-remove: missing keys ----
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131'
+expect_unchanged "ready-add without entry key" 1 'FAIL ready-add: missing key entry' ready-add "$CASE_PAGE" "$CASE_IN"
+
+# ---- file mode: an edit keeps the mode the page had ----
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+chmod 644 "$CASE_PAGE" || exit 2
+assert_mode "status mode 644 before the edit" '-rw-r--r--' "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=Needs you' 'text=Owner answer'
+expect_args "status keeps mode 644 page" 0 'OK status: Needs you' status "$CASE_PAGE" "$CASE_IN"
+assert_mode "status keeps mode 644" '-rw-r--r--' "$CASE_PAGE"
+
+new_case
+cat "$REAL" > "$CASE_PAGE"
+chmod 600 "$CASE_PAGE" || exit 2
+assert_mode "status mode 600 before the edit" '-rw-------' "$CASE_PAGE"
+write_lines "$CASE_IN" 'status=Needs you' 'text=Owner answer'
+expect_args "status keeps mode 600 page" 0 'OK status: Needs you' status "$CASE_PAGE" "$CASE_IN"
+assert_mode "status keeps mode 600" '-rw-------' "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+chmod 644 "$CASE_PAGE" || exit 2
+assert_mode "ready-add mode 644 before the edit" '-rw-r--r--' "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add keeps mode 644 page" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_mode "ready-add keeps mode 644" '-rw-r--r--' "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+chmod 600 "$CASE_PAGE" || exit 2
+assert_mode "ready-add mode 600 before the edit" '-rw-------' "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+expect_args "ready-add keeps mode 600 page" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_mode "ready-add keeps mode 600" '-rw-------' "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+chmod 644 "$CASE_PAGE" || exit 2
+assert_mode "ready-remove mode 644 before the edit" '-rw-r--r--' "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=130'
+expect_args "ready-remove keeps mode 644 page" 0 'OK ready-remove: 130' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_mode "ready-remove keeps mode 644" '-rw-r--r--' "$CASE_PAGE"
+
+new_case
+cat "$READY130" > "$CASE_PAGE"
+chmod 600 "$CASE_PAGE" || exit 2
+assert_mode "ready-remove mode 600 before the edit" '-rw-------' "$CASE_PAGE"
+write_lines "$CASE_IN" 'pr=130'
+expect_args "ready-remove keeps mode 600 page" 0 'OK ready-remove: 130' ready-remove "$CASE_PAGE" "$CASE_IN"
+assert_mode "ready-remove keeps mode 600" '-rw-------' "$CASE_PAGE"
 
 test_summary

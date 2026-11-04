@@ -16,6 +16,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself: it launches runners, relays and verifies their hand-backs, and closes out each merge. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
+Capacity, Launch, Watch loop and Close-out keep their Context and Forces in references/MOVED_RATIONALE.md.
+
 ---
 
 ## Intake

@@ -791,14 +791,55 @@ moved_commit "$TEST_TMP/fx-case" || exit 2
 moved_expect case-fail 'FAIL moved: old.md -> new.md: text missing from added lines of new.md'
 moved_run case-fail "$TEST_TMP/fx-case" 1 -m old.md new.md "$MV_PARA"
 
-# Case 19i: the text spans two hunks of old.md (removed Intro line. and removed Tail line., with the changed
-# line between them): the text may not span hunks, so the removed side fails. The added side holds the text.
-moved_fixture "$TEST_TMP/fx-two-hunks" "$MV_MAIN" || exit 2
-moved_write "$TEST_TMP/fx-two-hunks" old.md '' 'The slow brown fox' 'jumps over the lazy dog.' '' || exit 2
-moved_write "$TEST_TMP/fx-two-hunks" new.md 'Intro line.' 'Tail line.' || exit 2
+# Case 19i: the text would match if the removed lines of two hunks were joined: old.md loses Intro line. and
+# Tail line., and the change between them is an added line only (no removed line between). The removed
+# lines of the two hunks read "Intro line. Tail line.", so only the one-hunk rule makes this FAIL. The added
+# side holds the text on one line.
+printf '%s\n' 'Intro line.' 'Gap line.' 'Keep line.' 'Tail line.' 'Last line.' > "$TEST_TMP/mv-two.txt" || exit 2
+moved_fixture "$TEST_TMP/fx-two-hunks" "$TEST_TMP/mv-two.txt" || exit 2
+moved_write "$TEST_TMP/fx-two-hunks" old.md 'Gap line.' 'Added line.' 'Keep line.' 'Last line.' || exit 2
+moved_write "$TEST_TMP/fx-two-hunks" new.md 'Intro line. Tail line.' || exit 2
 moved_commit "$TEST_TMP/fx-two-hunks" || exit 2
 moved_expect two-hunks-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
 moved_run two-hunks-fail "$TEST_TMP/fx-two-hunks" 1 -m old.md new.md 'Intro line. Tail line.'
+
+# Case 19v: the text is a removed line "-- note" (its diff line is "--- note"), moved to new.md: OK.
+printf '%s\n' 'Intro line.' '-- note' '' 'Tail line.' > "$TEST_TMP/mv-dash-note.txt" || exit 2
+moved_fixture "$TEST_TMP/fx-dash-note" "$TEST_TMP/mv-dash-note.txt" || exit 2
+moved_write "$TEST_TMP/fx-dash-note" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-dash-note" new.md '-- note' || exit 2
+moved_commit "$TEST_TMP/fx-dash-note" || exit 2
+moved_expect dash-note-ok 'OK moved: old.md -> new.md'
+moved_run dash-note-ok "$TEST_TMP/fx-dash-note" 0 -m old.md new.md '-- note'
+
+# Case 19w: the text is the removed line "--" (its diff line is exactly "---"), moved to new.md: OK.
+printf '%s\n' 'Intro line.' '--' '' 'Tail line.' > "$TEST_TMP/mv-dash-exact.txt" || exit 2
+moved_fixture "$TEST_TMP/fx-dash-exact" "$TEST_TMP/mv-dash-exact.txt" || exit 2
+moved_write "$TEST_TMP/fx-dash-exact" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-dash-exact" new.md '--' || exit 2
+moved_commit "$TEST_TMP/fx-dash-exact" || exit 2
+moved_expect dash-exact-ok 'OK moved: old.md -> new.md'
+moved_run dash-exact-ok "$TEST_TMP/fx-dash-exact" 0 -m old.md new.md '--'
+
+# Case 19x: the text is the added line "++ note" (its diff line is "+++ note") in new.md, and old.md holds it as a
+# removed line: OK.
+printf '%s\n' 'Intro line.' '++ note' '' 'Tail line.' > "$TEST_TMP/mv-plus-note.txt" || exit 2
+moved_fixture "$TEST_TMP/fx-plus-note" "$TEST_TMP/mv-plus-note.txt" || exit 2
+moved_write "$TEST_TMP/fx-plus-note" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-plus-note" new.md '++ note' || exit 2
+moved_commit "$TEST_TMP/fx-plus-note" || exit 2
+moved_expect plus-note-ok 'OK moved: old.md -> new.md'
+moved_run plus-note-ok "$TEST_TMP/fx-plus-note" 0 -m old.md new.md '++ note'
+
+# Case 19y: the text is the added line "++" (its diff line is exactly "+++") in new.md, and old.md holds it as a
+# removed line: OK.
+printf '%s\n' 'Intro line.' '++' '' 'Tail line.' > "$TEST_TMP/mv-plus-exact.txt" || exit 2
+moved_fixture "$TEST_TMP/fx-plus-exact" "$TEST_TMP/mv-plus-exact.txt" || exit 2
+moved_write "$TEST_TMP/fx-plus-exact" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-plus-exact" new.md '++' || exit 2
+moved_commit "$TEST_TMP/fx-plus-exact" || exit 2
+moved_expect plus-exact-ok 'OK moved: old.md -> new.md'
+moved_run plus-exact-ok "$TEST_TMP/fx-plus-exact" 0 -m old.md new.md '++'
 
 # Case 19j: old.md is not in the diff (only new.md is created): the not-in-the-diff form names old.md.
 moved_fixture "$TEST_TMP/fx-old-absent" "$MV_MAIN" || exit 2

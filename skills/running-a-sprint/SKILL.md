@@ -16,16 +16,13 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself: it launches runners, relays and verifies their hand-backs, and closes out each merge. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
-Capacity, Launch, Watch loop and Close-out moved Context and Forces pairs to references/MOVED_RATIONALE.md.
+Intake, Capacity, Launch, Watch loop and Close-out moved Context and Forces pairs to references/MOVED_RATIONALE.md.
 
 ---
 
 ## Intake
 
 The stories come from an epic issue's checklist (if one exists). Read each story with `gh issue view <story> --json body` and look for its acceptance criteria.
-
-**Context:** A story with no acceptance criteria reaches intake.
-**Forces:** A runner that starts without criteria invents them, and the owner then reviews a PR built on criteria nobody agreed to. Holding back one story costs that story a delay; the other stories lose nothing.
 
 A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the three-amigos requirements ceremony) for launched stories; the runner does.
 
@@ -94,7 +91,7 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner. Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
 
 ---
 
@@ -159,5 +156,5 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - [references/RECONCILE.md](references/RECONCILE.md) -- Close-out step 7: the reconcile of open sprint PRs after a merge
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
 - [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
-- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved Context and Forces pairs of the Capacity, Launch, Watch loop and Close-out sections
+- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved Context and Forces pairs of the Intake, Capacity, Launch, Watch loop and Close-out sections
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

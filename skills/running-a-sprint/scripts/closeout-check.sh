@@ -114,6 +114,12 @@ check_merged() {
   fi
 }
 
+# git_net <git args>: run git -C <root> with terminal prompts off and its output discarded. Returns the exit
+# status of git.
+git_net() {
+  GIT_TERMINAL_PROMPT=0 git -C "$ROOT" "$@" >/dev/null 2>&1
+}
+
 # run_fetch: fetch origin main (required), then probe origin for the branch with ls-remote and fetch the branch
 # only when origin has it. Exit 2 from the probe means the branch is not on origin, which is not a failure; any
 # other probe failure, or a failed fetch, leaves FETCH_OK at 0. Always prints the NOTE line; FETCH_OK is 1 when
@@ -122,26 +128,20 @@ run_fetch() {
   FETCH_OK=0
   _main_ok=0
   _branch_ok=0
-  if GIT_TERMINAL_PROMPT=0 git -C "$ROOT" fetch -q origin main >/dev/null 2>&1; then
+  if git_net fetch -q origin main; then
     _main_ok=1
   fi
-  GIT_TERMINAL_PROMPT=0 git -C "$ROOT" ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1
+  git_net ls-remote --exit-code --heads origin "$BRANCH"
   _probe=$?
-  case "$_probe" in
-    0)
-      if GIT_TERMINAL_PROMPT=0 git -C "$ROOT" fetch -q origin "$BRANCH" >/dev/null 2>&1; then
-        _branch_ok=1
-      fi
-      printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
-      ;;
-    2)
+  if [ "$_probe" -eq 2 ]; then
+    _branch_ok=1
+    printf 'NOTE fetch: ran git fetch origin main; %s is not on origin\n' "$BRANCH"
+  else
+    if [ "$_probe" -eq 0 ] && git_net fetch -q origin "$BRANCH"; then
       _branch_ok=1
-      printf 'NOTE fetch: ran git fetch origin main; %s is not on origin\n' "$BRANCH"
-      ;;
-    *)
-      printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
-      ;;
-  esac
+    fi
+    printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
+  fi
   if [ "$_main_ok" -eq 1 ] && [ "$_branch_ok" -eq 1 ]; then
     FETCH_OK=1
   fi

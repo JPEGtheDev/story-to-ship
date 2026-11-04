@@ -587,7 +587,7 @@ assert_case steps-all 0 steps-all
 check_prefix_eq steps-all
 assert_refs steps-all 0 0 "$FX_S" 0
 
-# Step case 2: -e is accepted and ignored in this todo. One clean runner worktree, otherwise as case 1.
+# Step case 2: -e is accepted and ignored. One clean runner worktree, otherwise as case 1.
 new_case steps-epic
 want_green steps-epic "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
   "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"

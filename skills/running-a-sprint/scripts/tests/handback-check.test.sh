@@ -4,14 +4,14 @@
 # command is a stub that prints a JSON fixture file, and the branch fixtures use a local bare repository
 # as origin.
 # HANDBACK_CHECK=<path> substitutes another script (used to prove a test can fail).
-# shellcheck source=lib.sh
+# shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
 
 SCRIPT=${HANDBACK_CHECK:-$(dirname "$0")/../handback-check.sh}
 STUB=$TEST_TMP/gh-stub
 REPO=$TEST_TMP/wt
 JSON=$TEST_TMP/pr.json
-export HANDBACK_GH=$STUB STUB_JSON=$JSON
+export HANDBACK_GH="$STUB" STUB_JSON="$JSON"
 unset STUB_EXIT
 
 # GOOD_ROLLUP: one successful check run, the all-good rollup.
@@ -44,7 +44,7 @@ printf '%s\n' 'Closes #427' '' 'Summary of the change.' '' 'Generated with Claud
 write_gh_stub "$STUB" || exit 2
 
 # make_origin_clone <dir> <ahead> [base trailer]: a bare origin at <dir>.origin.git seeded with main, and a
-# clone at <dir> on branch agent/s427-t1-tw with <ahead> commits on top of origin/main. The optional third
+# clone at <dir> on branch agent/example-tw with <ahead> commits on top of origin/main. The optional third
 # argument is a trailer line for the seed commit on main. Sets FIX_BASE to the origin/main sha and
 # FIX_HEAD to the clone HEAD.
 make_origin_clone() {
@@ -61,7 +61,7 @@ make_origin_clone() {
   git init -q --bare -b main "$_origin" || return 1
   git_c "$_seed" push -q "$_origin" main || return 1
   git clone -q "$_origin" "$1" || return 1
-  git_c "$1" checkout -q -b agent/s427-t1-tw || return 1
+  git_c "$1" checkout -q -b agent/example-tw || return 1
   _i=0
   while [ "$_i" -lt "$2" ]; do
     printf '%s\n' "feature $_i" >> "$1/file.txt" || return 1
@@ -665,7 +665,7 @@ inline_expect upper-ignored 'FAIL inline: README.md plan 6, numstat 0'
 inline_case upper-ignored "$INL" 1
 
 # Case 19: the moved line. moved_fixture <dir> <base file>: a bare origin whose main holds the base file as
-# old.md, and a clone at <dir> on branch agent/s427-t1-tw with no commits above origin/main. moved_commit <dir>
+# old.md, and a clone at <dir> on branch agent/example-tw with no commits above origin/main. moved_commit <dir>
 # commits every change in the clone as one change commit, so the branch is one commit ahead.
 moved_fixture() {
   git init -q -b main "$1.seed" || return 1
@@ -675,7 +675,7 @@ moved_fixture() {
   git init -q --bare -b main "$1.origin.git" || return 1
   git_c "$1.seed" push -q "$1.origin.git" main || return 1
   git clone -q "$1.origin.git" "$1" || return 1
-  git_c "$1" checkout -q -b agent/s427-t1-tw || return 1
+  git_c "$1" checkout -q -b agent/example-tw || return 1
 }
 
 # moved_write <dir> <file> [lines...]: write the lines to a file of the clone at <dir>, one line each.

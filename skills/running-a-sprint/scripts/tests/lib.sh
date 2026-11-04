@@ -80,21 +80,6 @@ git_c() {
   git -C "$_gd" -c user.name=t -c user.email=t@example.com -c commit.gpgsign=false "$@"
 }
 
-# make_repo <dir>: a repository on branch agent/s427-t1-tw with a base commit (main) and one
-# feature commit on top. Sets FIX_BASE to the base sha and FIX_HEAD to the feature sha.
-# shellcheck disable=SC2034
-make_repo() {
-  git init -q -b main "$1" || return 1
-  printf '%s\n' 'base' > "$1/file.txt" || return 1
-  git_c "$1" add -A || return 1
-  git_c "$1" commit -q -m base || return 1
-  FIX_BASE=$(git -C "$1" rev-parse HEAD) || return 1
-  git_c "$1" checkout -q -b agent/s427-t1-tw || return 1
-  printf '%s\n' 'feature' >> "$1/file.txt" || return 1
-  git_c "$1" commit -q -a -m feature || return 1
-  FIX_HEAD=$(git -C "$1" rev-parse HEAD) || return 1
-}
-
 # write_gh_stub <file>: a gh stand-in. It exits with STUB_EXIT when that is set,
 # otherwise it prints the file named by STUB_JSON.
 # The single-quoted lines are stub source text, so their $ must stay unexpanded.

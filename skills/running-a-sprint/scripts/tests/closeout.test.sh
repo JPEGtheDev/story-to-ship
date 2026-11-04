@@ -6,7 +6,7 @@
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
 # of a local bare origin under the test temp directory.
 # CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail).
-# shellcheck source=lib.sh
+# shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
 
 # write_closeout_gh_stub <file>: a gh stand-in that dispatches on its arguments. "pr view" prints STUB_JSON
@@ -42,13 +42,13 @@ write_closeout_gh_stub() {
 SCRIPT=${CLOSEOUT_CHECK:-$(dirname "$0")/../closeout-check.sh}
 STUB=$TEST_TMP/gh-stub
 JSON=$TEST_TMP/merge.json
-export CLOSEOUT_GH=$STUB STUB_JSON=$JSON STUB_DIR=$TEST_TMP
+export CLOSEOUT_GH="$STUB" STUB_JSON="$JSON" STUB_DIR="$TEST_TMP"
 unset STUB_EXIT
 write_closeout_gh_stub "$STUB" || exit 2
 
-FX_PREFIX=s427-t6-tw
-FX_BRANCH=agent/s427-t6-tw
-FX_RECON=s427-t6-rc
+FX_PREFIX=example-tw
+FX_BRANCH=agent/example-tw
+FX_RECON=example-rc
 
 # NOTE_FETCH: the fetch line printed after the merged line in every run, for the fixture branch.
 NOTE_FETCH="NOTE fetch: ran git fetch origin main $FX_BRANCH"
@@ -73,8 +73,8 @@ write_merge() {
 }
 
 # make_fixture <dir> [squash extra line]: a bare origin at <dir>/origin.git seeded with main (file.txt and a
-# .gitignore that ignores *.log), a root clone at <dir>/root on main, the branch agent/s427-t6-tw with one
-# commit in the runner worktree at <dir>/root/.worktrees/s427-t6-tw (plan.md untracked there), the branch
+# .gitignore that ignores *.log), a root clone at <dir>/root on main, the branch agent/example-tw with one
+# commit in the runner worktree at <dir>/root/.worktrees/example-tw (plan.md untracked there), the branch
 # pushed to origin, and the squash commit pushed to origin main by a clone at <dir>/upstream. The squash
 # holds the same file change as the branch plus the optional extra line. The root keeps its old origin/main
 # until a fetch. Sets FX_ROOT, FX_WT, FX_ORIGIN, FX_H (branch tip) and FX_S (squash commit).
@@ -330,9 +330,9 @@ new_case gh-invalid-json
 printf '%s\n' 'not json at all' > "$TEST_TMP/bad.json" || exit 2
 want gh-invalid-json "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
-export STUB_JSON=$TEST_TMP/bad.json
+export STUB_JSON="$TEST_TMP/bad.json"
 std_run
-export STUB_JSON=$JSON
+export STUB_JSON="$JSON"
 assert_case gh-invalid-json 1 gh-invalid-json
 
 # Case 14: the merge commit is not in origin/main (here the branch tip, which origin has only on its branch).
@@ -843,6 +843,7 @@ assert_file_eq "steps-local-fails refs" "$TEST_TMP/want-refs-steps-local-fails" 
 # branch are already removed; origin keeps its branch and main is not fast-forwarded.
 new_case steps-origin-refuses
 steps_prefetch
+# shellcheck disable=SC2016 # the single-quoted lines are hook source text; their $ names expand when git runs the hook.
 printf '%s\n' '#!/bin/sh' \
   'while read -r _old _new _ref; do' \
   '  if [ "$_new" = '"$ZERO_SHA"' ]; then' \

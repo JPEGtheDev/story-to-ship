@@ -5,7 +5,7 @@
 # no-temp-file rule and the file mode kept by each edit. The real template (placeholders filled, two cards q7
 # and q9, each with its context block) and small synthetic pages are the fixtures. No network.
 # PAGE_EDIT=<path> substitutes another script (used to prove a test can fail).
-# shellcheck source=lib.sh
+# shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
 
 PAGE_EDIT=${PAGE_EDIT:-$(dirname "$0")/../page-edit.sh}
@@ -437,6 +437,7 @@ assert_listing_same "add-card success: no temp file left beside the page" "$CASE
 
 # mode_of <file>: the first ten characters of the file's ls -l line, such as -rw-r--r--.
 mode_of() {
+  # shellcheck disable=SC2012 # the fixture names are plain ASCII we create, so ls -l output is safe to parse here.
   ls -l "$1" | awk '{print substr($1,1,10)}'
 }
 

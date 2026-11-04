@@ -2,7 +2,7 @@
 # Fixture tests for tests/run.sh: the PASS and FAIL lines, the summary line, and the exit codes for
 # a directory whose test file passes, one whose test files pass and fail, and one with no
 # *.test.sh file. RUN_SH=<path> substitutes another runner (used to prove a test can fail).
-# shellcheck source=lib.sh
+# shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
 
 RUNNER=${RUN_SH:-$(dirname "$0")/run.sh}

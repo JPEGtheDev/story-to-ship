@@ -336,6 +336,7 @@ status_op() {
   find_one data-status "$STATUS_LABEL" "label $STATUS_LABEL"
   make_temp
   _so_rc=0
+  # shellcheck disable=SC2097,SC2098 # the awk program reads STATUS_ATTR and STATUS_LABEL through ENVIRON, so the env-prefix form is intended.
   STATUS_ATTR="data-status=\"$STATUS_LABEL\"" STATUS_LABEL="$STATUS_LABEL" STATUS_TEXT="$STATUS_TEXT" awk -v n="$FIRST" "$COUNT_FUNCS"'
 NR == n {
   p = first_in($0, ENVIRON["STATUS_ATTR"])

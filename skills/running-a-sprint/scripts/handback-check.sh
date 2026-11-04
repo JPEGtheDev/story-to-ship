@@ -438,6 +438,7 @@ check_moved() {
   _i=1
   while [ "$_i" -le "$MAP_COUNT" ]; do
     eval "_mo=\$MAP_${_i}_OLD; _mn=\$MAP_${_i}_NEW; _mt=\$MAP_${_i}_TEXT"
+    # shellcheck disable=SC2154 # _mo, _mn and _mt are assigned by the eval above; shellcheck cannot follow eval.
     check_moved_pair "$_mo" "$_mn" "$_mt"
     _i=$((_i + 1))
   done

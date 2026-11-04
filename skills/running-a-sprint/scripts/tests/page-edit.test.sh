@@ -1,7 +1,8 @@
 #!/bin/sh
-# Fixture tests for page-edit.sh, the owner page editor, for its add-card and hide ops: the usage errors (exit 2),
-# the anchor rules, the card and context checks, the hide blocks, the non-ASCII check, the unreadable-file messages,
-# the byte-identical failure path and the no-temp-file rule. The real template (placeholders filled, two cards q7
+# Fixture tests for page-edit.sh, the owner page editor, for its add-card, hide, status, ready-add and ready-remove
+# ops: the usage errors (exit 2), the anchor rules, the card and context checks, the hide blocks, the status and
+# Ready to merge rules, the non-ASCII check, the unreadable-file messages, the byte-identical failure path, the
+# no-temp-file rule and the file mode kept by each edit. The real template (placeholders filled, two cards q7
 # and q9, each with its context block) and small synthetic pages are the fixtures. No network.
 # PAGE_EDIT=<path> substitutes another script (used to prove a test can fail).
 . "$(dirname "$0")/lib.sh"
@@ -428,7 +429,7 @@ snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
 run_edit add-card "$CASE_PAGE" "$CASE_IN"
 assert_listing_same "add-card success: no temp file left beside the page" "$CASE_DIR/listing-before"
 
-# ---- page file mode: an edit keeps the mode the page had ----
+# ---- add-card and hide: page file mode ----
 
 # mode_of <file>: the first ten characters of the file's ls -l line, such as -rw-r--r--.
 mode_of() {
@@ -911,7 +912,7 @@ cat "$READY130" > "$CASE_PAGE"
 write_lines "$CASE_IN" 'pr=131'
 expect_unchanged "ready-add without entry key" 1 'FAIL ready-add: missing key entry' ready-add "$CASE_PAGE" "$CASE_IN"
 
-# ---- file mode: an edit keeps the mode the page had ----
+# ---- status, ready-add and ready-remove: page file mode ----
 
 new_case
 cat "$REAL" > "$CASE_PAGE"

@@ -38,7 +38,7 @@
 # Everything is checked before anything is written. The result is built in a temp file made with mktemp in the page's
 # directory, given the page's mode by cp -p, and moved over the page with mv only when every check passed; the temp
 # file is removed on every exit that has not moved it.
-# Tools: sh, awk, grep, mktemp, cp, mv, rm, and cmp. No other command is used.
+# Tools: sh, awk, grep, mktemp, cp, mv and rm. No other command is used.
 NL='
 '
 TAB=$(printf '\t')
@@ -120,6 +120,13 @@ function id_in(line,   rest, offset, p, abs, v, q) {
     offset = abs
   }
   return ""
+}'
+
+# INDENT_FUNC: the awk function indent_of, which returns the leading blanks of a line. Shared by every awk program
+# that inserts or matches a block at a line's indent.
+INDENT_FUNC='function indent_of(s) {
+  sub(/[^[:blank:]].*$/, "", s)
+  return s
 }'
 
 # usage: the usage line to stderr, exit 2.
@@ -218,10 +225,9 @@ pr_check() {
 # ends at the first later line equal to the start line's indent plus its closing tag, or at the start line itself when
 # that line also holds the closing tag. Fails when no such line exists.
 block_end() {
-  BLOCK_END=$(awk -v s="$2" '
+  BLOCK_END=$(awk -v s="$2" "$INDENT_FUNC"'
 NR == s {
-  ind = $0
-  sub(/[^[:blank:]].*$/, "", ind)
+  ind = indent_of($0)
   tag = ""
   if (match($0, /<[A-Za-z][A-Za-z0-9]*/)) tag = substr($0, RSTART + 1, RLENGTH - 1)
   close_tag = "</" tag ">"
@@ -307,7 +313,8 @@ add_card() {
     fi
   fi
   make_temp
-  CARD_TEXT="$CARD" CTX_TEXT="$CONTEXT" awk -v n1="$BEFORE_LINE" -v n2="$CTX_LINE" 'function indent_of(s) { sub(/[^[:blank:]].*$/, "", s); return s } NR == n1 { print indent_of($0) ENVIRON["CARD_TEXT"] } NR == n2 { print indent_of($0) ENVIRON["CTX_TEXT"] } { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
+  CARD_TEXT="$CARD" CTX_TEXT="$CONTEXT" awk -v n1="$BEFORE_LINE" -v n2="$CTX_LINE" "$INDENT_FUNC"'
+NR == n1 { print indent_of($0) ENVIRON["CARD_TEXT"] } NR == n2 { print indent_of($0) ENVIRON["CTX_TEXT"] } { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
   copy_over
   if [ -n "$CONTEXT" ]; then
     printf 'OK add-card: %s before %s and context\n' "$NEW_ID" "$BEFORE"
@@ -371,11 +378,10 @@ ready_add() {
     fail "no list after anchor ready"
   fi
   make_temp
-  PR_NUM="$PR" ENTRY_HTML="$ENTRY" awk -v n="$_ra_ul" '
+  PR_NUM="$PR" ENTRY_HTML="$ENTRY" awk -v n="$_ra_ul" "$INDENT_FUNC"'
 { print }
 NR == n {
-  ind = $0
-  sub(/[^[:blank:]].*$/, "", ind)
+  ind = indent_of($0)
   print ind "  <li data-pr=\"" ENVIRON["PR_NUM"] "\">" ENVIRON["ENTRY_HTML"] "</li>"
 }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
   copy_over

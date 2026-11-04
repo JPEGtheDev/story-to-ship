@@ -259,6 +259,56 @@ expect_args "add-card href and data-id do not hold the new id" 0 'OK add-card: q
   add-card "$CASE_PAGE" "$CASE_IN"
 assert_file_eq "add-card href and data-id: card above q7" "$CASE_DIR/want.html" "$CASE_PAGE"
 
+# The anchor boundary: the character before id is not a letter, digit, underscore or hyphen. A double quote, the
+# start of the line and a tab all sit before a match; a letter, digit or underscore before id does not match.
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p class="a"id="q7">a</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" '  <p class="a"id="q7">a</p>' '</main>'
+expect_args "add-card double quote before id matches" 0 'OK add-card: q8 before q7' add-card "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "add-card double quote before id: card above that line" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <article class="q"id="q7">' '    <p>x</p>' '  </article>' '  <div class="ctx" id="c-q7">' \
+  '    <p>y</p>' '  </div>' '  <p>keep</p>' '</main>'
+write_lines "$CASE_IN" 'hide=q7'
+write_lines "$CASE_DIR/want.html" '<main>' '  <p>keep</p>' '</main>'
+expect_args "hide double quote before id matches" 0 'OK hide: q7' hide "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "hide double quote before id: card and context blocks gone" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' 'id="q7">a</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+write_lines "$CASE_DIR/want.html" '<main>' "$CARD8" 'id="q7">a</p>' '</main>'
+expect_args "add-card id at column 0 matches" 0 'OK add-card: q8 before q7' add-card "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "add-card id at column 0: card above that line" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' "  <p${TAB}id=\"q7\">a</p>" '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" "  <p${TAB}id=\"q7\">a</p>" '</main>'
+expect_args "add-card tab before id matches" 0 'OK add-card: q8 before q7' add-card "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "add-card tab before id: card above that line with its indent" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p xid="q7">a</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+expect_unchanged "add-card letter before id does not match" 1 'FAIL add-card: anchor q7 not found' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p 9id="q7">a</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+expect_unchanged "add-card digit before id does not match" 1 'FAIL add-card: anchor q7 not found' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p my_id="q7">a</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+expect_unchanged "add-card underscore before id does not match" 1 'FAIL add-card: anchor q7 not found' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
 # ---- add-card: card and context checks ----
 
 new_case
@@ -303,6 +353,32 @@ write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>
 write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX8"
 expect_unchanged "add-card context id already on the page" 1 'FAIL add-card: id c-q8 already on the page' \
   add-card "$CASE_PAGE" "$CASE_IN"
+
+# The context html's own id, when it differs from c-<card id>: checked against the page like the card id.
+CTX_ZZ='<div class="ctx" id="c-zz"><p>Context &amp; notes</p></div>'
+CTX_NOID='<div class="ctx"><p>Context &amp; notes</p></div>'
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '  <div id="c-zz">z</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_ZZ"
+expect_unchanged "add-card context own id already on the page" 1 'FAIL add-card: id c-zz already on the page' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_ZZ"
+write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" '  <p id="q7">a</p>' "  $CTX_ZZ" '  <div id="c-q7">x</div>' '</main>'
+expect_args "add-card context own id not on the page" 0 'OK add-card: q8 before q7 and context' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "add-card context own id not on the page: context above c-q7" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_NOID"
+write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" '  <p id="q7">a</p>' "  $CTX_NOID" '  <div id="c-q7">x</div>' '</main>'
+expect_args "add-card context without an id is accepted" 0 'OK add-card: q8 before q7 and context' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "add-card context without an id: context above c-q7" "$CASE_DIR/want.html" "$CASE_PAGE"
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <article class="q" id="q7">' '    <div id="c-q7">x</div>' '  </article>' '</main>'

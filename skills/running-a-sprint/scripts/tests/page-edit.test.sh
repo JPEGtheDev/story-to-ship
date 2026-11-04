@@ -364,31 +364,57 @@ write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX8"
 expect_unchanged "add-card context id already on the page" 1 'FAIL add-card: id c-q8 already on the page' \
   add-card "$CASE_PAGE" "$CASE_IN"
 
-# The context html's own id, when it differs from c-<card id>: checked against the page like the card id.
+# The context must hold exactly one id, and it must be c-<card id>. Each other context id fails with the page unchanged:
+# the card's own id, a different c- id (q9, and c-q80 for the prefix of c-q8), an id-less context and a context on a
+# card whose id is q2 (its c-q2 is required, not c-q7 or c-q8).
 CTX_ZZ='<div class="ctx" id="c-zz"><p>Context &amp; notes</p></div>'
 CTX_NOID='<div class="ctx"><p>Context &amp; notes</p></div>'
+CTX_Q8ID='<div class="ctx" id="q8"><p>Context &amp; notes</p></div>'
+CTX_C9='<div class="ctx" id="c-q9"><p>Context &amp; notes</p></div>'
+CTX_C80='<div class="ctx" id="c-q80"><p>Context &amp; notes</p></div>'
+CARD2='<article class="q" id="q2"><p>Question?</p></article>'
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '  <div id="c-zz">z</div>' '</main>'
 write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_ZZ"
-expect_unchanged "add-card context own id already on the page" 1 'FAIL add-card: id c-zz already on the page' \
+expect_unchanged "add-card context id zz on the page, card q8" 1 'FAIL add-card: context id must be c-q8' \
   add-card "$CASE_PAGE" "$CASE_IN"
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
 write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_ZZ"
-write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" '  <p id="q7">a</p>' "  $CTX_ZZ" '  <div id="c-q7">x</div>' '</main>'
-expect_args "add-card context own id not on the page" 0 'OK add-card: q8 before q7 and context' \
+expect_unchanged "add-card context id zz not on the page, card q8" 1 'FAIL add-card: context id must be c-q8' \
   add-card "$CASE_PAGE" "$CASE_IN"
-assert_file_eq "add-card context own id not on the page: context above c-q7" "$CASE_DIR/want.html" "$CASE_PAGE"
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
 write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_NOID"
-write_lines "$CASE_DIR/want.html" '<main>' "  $CARD8" '  <p id="q7">a</p>' "  $CTX_NOID" '  <div id="c-q7">x</div>' '</main>'
-expect_args "add-card context without an id is accepted" 0 'OK add-card: q8 before q7 and context' \
+expect_unchanged "add-card context without an id is refused" 1 'FAIL add-card: context id must be c-q8' \
   add-card "$CASE_PAGE" "$CASE_IN"
-assert_file_eq "add-card context without an id: context above c-q7" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_Q8ID"
+expect_unchanged "add-card context id is the card id q8, not c-q8" 1 'FAIL add-card: context id must be c-q8' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_C9"
+expect_unchanged "add-card context id c-q9 on card q8" 1 'FAIL add-card: context id must be c-q8' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX_C80"
+expect_unchanged "add-card context id c-q80 is not c-q8" 1 'FAIL add-card: context id must be c-q8' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD2" "context=$CTX_NOID"
+expect_unchanged "add-card q2 with an id-less context is refused" 1 'FAIL add-card: context id must be c-q2' \
+  add-card "$CASE_PAGE" "$CASE_IN"
 
 # A context with more than one id fails, even when its first id is absent from the page and a later one is on it.
 new_case
@@ -900,6 +926,32 @@ new_case
 write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ulx>' '  </ulx>' '</main>'
 write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
 expect_unchanged "ready-add tag ulx is not a ul" 1 'FAIL ready-add: no list after anchor ready' ready-add "$CASE_PAGE" "$CASE_IN"
+
+# The list search stops at the next section or h2, so a Ready heading with no list of its own never reaches the list of the
+# next section.
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <p>none yet</p>' '  <h2>Waiting on runners</h2>' \
+  '  <ul>' '    <li>old</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add Ready list missing, next h2 has a ul" 1 'FAIL ready-add: no list after anchor ready' \
+  ready-add "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <p>none yet</p>' '  <section class="w">' '  <ul>' \
+  '    <li>old</li>' '  </ul>' '  </section>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add Ready list missing, next section has a ul" 1 'FAIL ready-add: no list after anchor ready' \
+  ready-add "$CASE_PAGE" "$CASE_IN"
+
+# A ul whose opener is followed by a tab is a list too: the entry lands in the Ready list, not the Waiting list.
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' "  <ul${TAB}class=\"r\">" '    <li data-pr="130">old</li>' '  </ul>' \
+  '  <h2>Waiting</h2>' '  <ul>' '    <li>w</li>' '  </ul>' '</main>'
+write_lines "$CASE_DIR/want.html" '<main>' '  <h2 id="ready">Ready to merge</h2>' "  <ul${TAB}class=\"r\">" '    <li data-pr="131">Entry</li>' \
+  '    <li data-pr="130">old</li>' '  </ul>' '  <h2>Waiting</h2>' '  <ul>' '    <li>w</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_args "ready-add under a ul opener followed by a tab" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add under a ul opener followed by a tab: the entry lands in the Ready list" "$CASE_DIR/want.html" "$CASE_PAGE"
 
 # ---- ready-remove: the pr rules and the block rule ----
 

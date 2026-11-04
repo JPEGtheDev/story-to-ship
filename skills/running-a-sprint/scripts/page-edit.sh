@@ -7,9 +7,9 @@
 #     card is one line of HTML holding exactly one id attribute, id="<id>", and the id is not empty. It is inserted
 #     directly above the line that holds id="<before>", with that line's indent. context, when given, is one line of
 #     HTML inserted directly above the line that holds id="c-<before>", with that line's indent. The card id must not
-#     already be on the page; a context holds at most one id attribute, and when it holds one, that id must be
-#     non-empty and must not already be on the page either (a context without an id is accepted; two or more ids
-#     fail). The c-<card id> anchor must not already be on the page.
+#     already be on the page. context holds exactly one id attribute, and that id must be c-<card id>: no id, an
+#     empty id, two or more ids or any other id fails, and the page is not changed. The c-<card id> anchor must not
+#     already be on the page.
 #   hide: hide=<id> (repeatable)
 #     The card block is the line that holds id="<id>" through the first later line equal to that line's indent plus
 #     the closing tag of the element that line opens, or that line alone when it holds as many closing tags of that
@@ -23,8 +23,9 @@
 #   ready-add: pr=<n> entry=<html>
 #     pr is digits only: no pr key is "missing key pr", an empty or non-digit value is "must be a number". entry is one
 #     line of HTML, the inside of the list item; required. The Ready to merge list is the first line after the line
-#     holding id="ready" that opens a ul element (<ul> or <ul followed by a space). The line
-#     <li data-pr="<n>"> entry </li> goes directly below that list line, with that
+#     holding id="ready" that opens a ul element (<ul followed by a space, a tab or >). The search stops at the first
+#     later line that holds <section or <h2; with no list before that line the op fails "no list after anchor ready".
+#     The line <li data-pr="<n>"> entry </li> goes directly below that list line, with that
 #     line's indent plus two spaces, so the newest entry is first. A pr already on the page fails.
 #   ready-remove: pr=<n>
 #     The block of the line holding data-pr="<n>" is removed, found with the hide block rule (here the closing tag is
@@ -353,12 +354,15 @@ add_card() {
     if [ "$CTX_IDS" -gt 1 ]; then
       fail "context has more than one id"
     fi
-    if [ "$CTX_IDS" -gt 0 ]; then
-      CTX_ID=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CTX_TEXT"]) }') || fail "cannot read the context"
-      if [ -z "$CTX_ID" ]; then
-        fail "context has an empty id"
-      fi
-      need_absent id "$CTX_ID" "id $CTX_ID already on the page"
+    if [ "$CTX_IDS" -eq 0 ]; then
+      fail "context id must be c-$NEW_ID"
+    fi
+    CTX_ID=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CTX_TEXT"]) }') || fail "cannot read the context"
+    if [ -z "$CTX_ID" ]; then
+      fail "context has an empty id"
+    fi
+    if [ "$CTX_ID" != "c-$NEW_ID" ]; then
+      fail "context id must be c-$NEW_ID"
     fi
   fi
   make_temp
@@ -416,7 +420,7 @@ NR == n {
 }
 
 # ready_add: inserts the Ready to merge entry for pr directly below the first line after the ready anchor that opens
-# a ul element (<ul> or <ul followed by a space).
+# a ul element (<ul followed by a space, a tab or >). The search ends at the first later line holding <section or <h2.
 ready_add() {
   pr_check
   if [ -z "$ENTRY" ]; then
@@ -424,7 +428,7 @@ ready_add() {
   fi
   need_absent data-pr "$PR" "pr $PR already listed"
   find_anchor ready
-  _ra_ul=$(awk -v a="$FIRST" 'NR > a && $0 ~ /<ul[ >]/ { print NR; exit }' "$PAGE") || fail "cannot read $PAGE"
+  _ra_ul=$(awk -v a="$FIRST" 'NR > a && /<section|<h2/ { exit } NR > a && $0 ~ /<ul[[:space:]>]/ { print NR; exit }' "$PAGE") || fail "cannot read $PAGE"
   if [ -z "$_ra_ul" ]; then
     fail "no list after anchor ready"
   fi

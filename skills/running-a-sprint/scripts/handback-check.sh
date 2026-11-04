@@ -4,14 +4,15 @@
 # Prints one line per check: "OK <name>: <value>" or "FAIL <name>: <value>".
 # Exit 0 when every check is OK, 1 when any check fails or GitHub cannot be read, 2 on a usage error.
 # GitHub is read by one function that runs "${HANDBACK_GH:-gh}" pr view; no other network use.
-# -b is the base ref for the branch check (remote and branch split at the first slash); -P and -m are
-# parsed and stored here; the checks that use them come in later todos.
+# -b is the base ref for the branch check (remote and branch split at the first slash); -P is the plan file
+# read by the inline check; -m is parsed and stored here, and its check comes in a later todo.
 # shellcheck disable=SC2034
 PR=""
 WT=""
 STORY=""
 BASE="origin/main"
 PLAN="plan.md"
+PLAN_GIVEN=0
 MAP_COUNT=0
 MAP_OLD=""
 MAP_NEW=""
@@ -53,6 +54,7 @@ while [ "$#" -gt 0 ]; do
     -P)
       [ "$#" -ge 2 ] || usage
       PLAN=$2
+      PLAN_GIVEN=1
       shift 2
       ;;
     -m)
@@ -279,6 +281,99 @@ check_ascii() {
   fi
 }
 
+# inline_clauses <plan file>: print "<file> <n>" for each "lane: inline <n> lines in <file>" clause, one line per
+# file in order of first appearance; the n values of a repeated file add up.
+inline_clauses() {
+  awk '
+    {
+      s = $0
+      while (match(s, /lane: inline [0-9]+ lines in [^ \t]+/)) {
+        split(substr(s, RSTART, RLENGTH), f, " ")
+        if (!(f[6] in plan)) { cnt++; order[cnt] = f[6]; plan[f[6]] = 0 }
+        plan[f[6]] += f[3]
+        s = substr(s, RSTART + RLENGTH)
+      }
+    }
+    END { for (k = 1; k <= cnt; k++) print order[k], plan[order[k]] }' "$1"
+}
+
+# inline_hashes <plan file>: print each token of 7 to 40 lowercase hex characters that follows "inline commits:"
+# on any line, once per hash, in order of appearance. Other tokens are ignored.
+inline_hashes() {
+  awk -v kw='inline commits:' '
+    {
+      s = $0
+      while ((i = index(s, kw)) > 0) {
+        s = substr(s, i + length(kw))
+        n = split(s, t, /[[:space:]]+/)
+        for (k = 1; k <= n; k++) {
+          if (t[k] ~ /^[0-9a-f]+$/ && length(t[k]) >= 7 && length(t[k]) <= 40 && !(t[k] in seen)) {
+            seen[t[k]] = 1
+            print t[k]
+          }
+        }
+      }
+    }' "$1"
+}
+
+# numstat_of <hash> <file>: added plus deleted lines of the file in the commit. A binary file (numstat prints -)
+# counts 0. A root commit has no parent, so its diff fails and the sum reads 0.
+numstat_of() {
+  git -C "$WT" diff --numstat "$1^" "$1" -- "$2" | awk '$1 != "-" { s += $1 + $2 } END { print s + 0 }'
+}
+
+# check_inline: each file named by a "lane: inline <n> lines in <file>" clause in the plan file (-P, default
+# plan.md, relative to the worktree) has the added plus deleted lines of its inline commits equal to the sum of
+# its n values. A missing default plan prints none; a missing plan named with -P fails. A hash that does not
+# resolve to a commit fails once; the file lines use the hashes that resolve.
+check_inline() {
+  _path="$WT/$PLAN"
+  if [ ! -f "$_path" ]; then
+    if [ "$PLAN_GIVEN" -eq 1 ]; then
+      emit fail inline "plan file $PLAN not found"
+    else
+      emit ok inline none
+    fi
+    return
+  fi
+  _clauses=$(inline_clauses "$_path")
+  if [ -z "$_clauses" ]; then
+    emit ok inline none
+    return
+  fi
+  _good=""
+  _hashes=$(inline_hashes "$_path")
+  while IFS= read -r _h; do
+    [ -n "$_h" ] || continue
+    if git -C "$WT" rev-parse -q --verify "$_h^{commit}" >/dev/null 2>&1; then
+      _good=$(printf '%s\n%s' "$_good" "$_h")
+    else
+      emit fail inline "hash $_h not found"
+    fi
+  done <<HASHES
+$_hashes
+HASHES
+  while IFS= read -r _line; do
+    [ -n "$_line" ] || continue
+    _f=${_line% *}
+    _plan=${_line##* }
+    _sum=0
+    while IFS= read -r _h; do
+      [ -n "$_h" ] || continue
+      _sum=$((_sum + $(numstat_of "$_h" "$_f")))
+    done <<GOOD
+$_good
+GOOD
+    if [ "$_sum" -eq "$_plan" ]; then
+      emit ok inline "$_f $_plan lines"
+    else
+      emit fail inline "$_f plan $_plan, numstat $_sum"
+    fi
+  done <<CLAUSES
+$_clauses
+CLAUSES
+}
+
 if ! fetch_pr; then
   for _name in state draft mergeable head ci branch closing footer coauthor ascii; do
     emit fail "$_name" "gh failed"
@@ -296,6 +391,7 @@ check_closing
 check_footer
 check_coauthor
 check_ascii
+check_inline
 
 if [ "$FAILS" -eq 0 ]; then
   exit 0

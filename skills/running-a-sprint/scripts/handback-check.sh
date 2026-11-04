@@ -2,7 +2,8 @@
 # handback-check.sh -n <PR> -w <runner worktree> -s <story> [-b <base ref>] [-P <plan file>]
 #                   [-m <old file> <new file> <text>]...
 # Prints one line per check: "OK <name>: <value>" or "FAIL <name>: <value>".
-# Exit 0 when every check is OK, 1 when any check fails or GitHub cannot be read, 2 on a usage error.
+# Exit 0 when every check is OK, 1 when any check fails or GitHub cannot be read, 2 on a usage error
+# (a -s story that is not a whole number is a usage error).
 # GitHub is read by one function that runs "${HANDBACK_GH:-gh}" pr view; no other network use.
 # -b is the base ref for the branch check (remote and branch split at the first slash); -P is the plan file
 # read by the inline check. Each -m <old> <new> <text> is one moved check: the text must appear, whitespace-collapsed,
@@ -70,6 +71,10 @@ done
 if [ -z "$PR" ] || [ -z "$WT" ] || [ -z "$STORY" ]; then
   usage
 fi
+# The story is compared as a number in closing_others, so anything but digits is a usage error.
+case "$STORY" in
+  *[!0-9]*) usage ;;
+esac
 
 # emit <ok|fail> <name> <value>: print one result line and count a failure.
 emit() {
@@ -192,10 +197,16 @@ check_branch() {
 }
 
 # closing_refs: read a PR body on stdin and print each issue reference that follows a closing keyword,
-# in body order. A reference is #N or owner/repo#N; a chain joined by commas, "and" or "&" is read in
-# full. Keywords are whole words in any case, with an optional colon. CR bytes are stripped first.
+# in body order. A reference is #N, owner/repo#N or an issue URL (https://github.com/owner/repo/issues/N);
+# a URL prints as owner/repo#N, so it is another issue to closing_others. A chain joined by commas,
+# "and" or "&" is read in full. Keywords are whole words in any case, with an optional colon, and the
+# keyword and the colon may be wrapped in asterisks or underscores. Lines inside a fenced code block
+# (a line starting with three backticks opens the fence and a second such line closes it) are skipped.
+# CR bytes are stripped first.
 closing_refs() {
-  tr -d '\r' | LC_ALL=C grep -oiE '(^|[^[:alnum:]_])(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)(:[[:space:]]*|[[:space:]]+)([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+([[:space:]]*(,|&|and)[[:space:]]*([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+)*' | LC_ALL=C grep -oE '([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+'
+  _ref='(https://github\.com/[^[:space:]/]+/[^[:space:]/]+/issues/[0-9]+|([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+)'
+  _pat='(^|[^[:alnum:]_])[*_]*(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)([*_]*:[*_]*[[:space:]]*|[*_]*[[:space:]]+)'"$_ref"'([[:space:]]*(,|&|and)[[:space:]]*'"$_ref"')*'
+  tr -d '\r' | awk '/^```/ { fence = !fence; next } !fence' | LC_ALL=C grep -oiE "$_pat" | LC_ALL=C grep -oE "$_ref" | sed -e 's|^https://github\.com/\([^/]*\)/\([^/]*\)/issues/\([0-9]*\)$|\1/\2#\3|'
 }
 
 # closing_others: read references on stdin and print those that do not name the story -s (a numeric
@@ -273,17 +284,28 @@ check_ascii() {
   fi
 }
 
-# inline_clauses <plan file>: print "<file> <n>" for each "lane: inline <n> lines in <file>" clause, one line per
-# file in order of first appearance; the n values of a repeated file add up.
+# inline_clauses <plan file>: print "<file> <n>" for each "<n> lines in <file>" clause that follows "lane: inline" on
+# a line, one line per file in order of first appearance; the n values of a repeated file add up. Both the
+# documented form (one lane: inline, then one clause per file) and the repeated-prefix form are read. A file name
+# has its backticks removed and its trailing commas, semicolons and periods stripped.
 inline_clauses() {
   awk '
+    function add(name, n) {
+      if (!(name in plan)) { cnt++; order[cnt] = name; plan[name] = 0 }
+      plan[name] += n
+    }
     {
       s = $0
-      while (match(s, /lane: inline [0-9]+ lines in [^ \t]+/)) {
-        split(substr(s, RSTART, RLENGTH), f, " ")
-        if (!(f[6] in plan)) { cnt++; order[cnt] = f[6]; plan[f[6]] = 0 }
-        plan[f[6]] += f[3]
-        s = substr(s, RSTART + RLENGTH)
+      while ((i = index(s, "lane: inline ")) > 0) {
+        s = substr(s, i + length("lane: inline "))
+        while (match(s, /^[ \t]*[0-9]+ lines in[ \t]+[^ \t]+/)) {
+          split(substr(s, RSTART, RLENGTH), f, " ")
+          name = f[4]
+          gsub(/`/, "", name)
+          sub(/[,;.]+$/, "", name)
+          if (name != "") add(name, f[1])
+          s = substr(s, RSTART + RLENGTH)
+        }
       }
     }
     END { for (k = 1; k <= cnt; k++) print order[k], plan[order[k]] }' "$1"

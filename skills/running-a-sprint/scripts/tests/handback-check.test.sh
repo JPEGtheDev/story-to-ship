@@ -201,7 +201,7 @@ assert_case "gh-invalid-json" 1 "$TEST_TMP/want-ghfail"
 # Case 7: usage errors exit 2, print a usage message on stderr and nothing on stdout.
 # Each run uses the all-good document so a script that ignores the usage error would print OK lines.
 write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD" "$GOOD_ROLLUP" "$GOOD_BODY"
-for usage in "missing-n|-w $REPO -s 427" "missing-w|-n 431 -s 427" "missing-s|-n 431 -w $REPO" "unknown-option|-n 431 -w $REPO -s 427 -z"; do
+for usage in "missing-n|-w $REPO -s 427" "missing-w|-n 431 -s 427" "missing-s|-n 431 -w $REPO" "unknown-option|-n 431 -w $REPO -s 427 -z" "story-letters|-n 431 -w $REPO -s abc" "story-digit-suffix|-n 431 -w $REPO -s 427a" "story-negative|-n 431 -w $REPO -s -1"; do
   name=${usage%%|*}
   args=${usage#*|}
   # shellcheck disable=SC2086
@@ -446,6 +446,43 @@ body_case ascii-first-line "$REPO" 1 "$TEST_TMP/body-two-bad" "$CLOSE_OK" "$FOOT
 printf 'Closes #427\n\n\tIndented with a tab.\n\nGenerated with Claude Code\n' > "$TEST_TMP/body-tab"
 body_case ascii-tab "$REPO" 0 "$TEST_TMP/body-tab" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
 
+# Case 11z: a closing keyword followed by an issue URL counts as a reference to that other issue (here
+# o/r#12). The URL is written as owner/repo#number, and the line fails although the story is named.
+printf '%s\n' 'Closes #427' '' 'Fixes https://github.com/o/r/issues/12' '' 'Generated with Claude Code' > "$TEST_TMP/body-url-other"
+body_case closing-url-other "$REPO" 1 "$TEST_TMP/body-url-other" "FAIL closing: also names o/r#12" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11aa: a keyword in bold asterisks counts as a keyword: **Fixes** #12 names another issue.
+printf '%s\n' 'Closes #427' '' '**Fixes** #12' '' 'Generated with Claude Code' > "$TEST_TMP/body-bold-other"
+body_case closing-bold-other "$REPO" 1 "$TEST_TMP/body-bold-other" "FAIL closing: also names #12" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ab: a bold keyword that names the story passes (the keyword is found through the asterisks).
+printf '%s\n' '**Closes** #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-bold-story"
+body_case closing-bold-story "$REPO" 0 "$TEST_TMP/body-bold-story" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ac: a keyword in underscores (italics) that names the story passes.
+printf '%s\n' '_Closes #427_' '' 'Generated with Claude Code' > "$TEST_TMP/body-under-story"
+body_case closing-underscore-story "$REPO" 0 "$TEST_TMP/body-under-story" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11af: emphasis around the keyword and the colon together (**Closes:** #427) passes.
+printf '%s\n' '**Closes:** #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-bold-colon"
+body_case closing-bold-colon "$REPO" 0 "$TEST_TMP/body-bold-colon" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ag: a URL to the story's own number is a cross-repository form of it (o/r#427), so it is another issue.
+printf '%s\n' 'Closes https://github.com/o/r/issues/427' '' 'Generated with Claude Code' > "$TEST_TMP/body-url-story"
+body_case closing-url-story "$REPO" 1 "$TEST_TMP/body-url-story" "FAIL closing: also names o/r#427" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ad: a Closes line that sits only inside a fenced code block does not count: no keyword, the line fails.
+printf '%s\n' '```' 'Closes #427' '```' '' 'Generated with Claude Code' > "$TEST_TMP/body-fenced-story"
+body_case closing-fenced-only "$REPO" 1 "$TEST_TMP/body-fenced-story" "FAIL closing: no closing keyword for #427" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ae: a fenced reference to another issue is not read; the story named outside the fence passes.
+printf '%s\n' 'Closes #427' '' '```' 'Fixes #12' '```' '' 'Generated with Claude Code' > "$TEST_TMP/body-fenced-other"
+body_case closing-fenced-other "$REPO" 0 "$TEST_TMP/body-fenced-other" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
 # Case 12: the coauthor line also reads the commit messages in base..HEAD. One branch commit with the
 # trailer fails with that commit's short sha. The fixture has no body trailer and one commit.
 make_origin_clone "$TEST_TMP/coa-one" 0 || exit 2
@@ -663,6 +700,28 @@ inline_case long-token-ignored "$INL" 1
 write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_UP"
 inline_expect upper-ignored 'FAIL inline: README.md plan 6, numstat 0'
 inline_case upper-ignored "$INL" 1
+
+# Case 18w: the documented form, one lane: inline and two "<n> lines in <file>" clauses on it. Both files are checked,
+# README.md 6 and notes.txt 3, in plan order.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md 3 lines in notes.txt inline commits: $INL_SHA"
+inline_expect documented-form 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case documented-form "$INL" 0
+
+# Case 18x: the second clause is checked, not skipped: notes.txt plan 2 against numstat 3 fails with its own line.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md 2 lines in notes.txt inline commits: $INL_SHA"
+inline_expect second-clause-fail 'OK inline: README.md 6 lines' 'FAIL inline: notes.txt plan 2, numstat 3'
+inline_case second-clause-fail "$INL" 1
+
+# Case 18y: punctuation after a file name (a comma after README.md, a period after notes.txt) is not part of the
+# name: both clauses are read as README.md and notes.txt.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md, 3 lines in notes.txt. inline commits: $INL_SHA"
+inline_expect punctuated-names 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case punctuated-names "$INL" 0
+
+# Case 18z: backticks around the file names are stripped and the punctuation after them too.
+write_plan "$INL/plan.md" "lane: inline 6 lines in \`README.md\`, 3 lines in \`notes.txt\`; inline commits: $INL_SHA"
+inline_expect backticked-names 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case backticked-names "$INL" 0
 
 # Case 19: the moved line. moved_fixture <dir> <base file>: a bare origin whose main holds the base file as
 # old.md, and a clone at <dir> on branch agent/example-tw with no commits above origin/main. moved_commit <dir>

@@ -1,18 +1,49 @@
 #!/bin/sh
 # Fixture tests for closeout-check.sh (cases 1-39) and closeout-steps.sh (group 2): the merged, fetch NOTE,
 # ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
-# an unchanged-repositories check, and the steps' removal, deletion, fast-forward and refusal paths.
+# an unchanged-repositories check, the steps' removal, deletion, fast-forward and refusal paths, and the steps'
+# issue, epic and flaky-run lines.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
 # of a local bare origin under the test temp directory.
 # CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail).
 . "$(dirname "$0")/lib.sh"
 
+# write_closeout_gh_stub <file>: a gh stand-in that dispatches on its arguments. "pr view" prints STUB_JSON
+# (STUB_EXIT, when set, is its exit code). "issue view <n> --json state" prints $STUB_DIR/issue-<n>.json,
+# "issue view <n> --json body" prints $STUB_DIR/epic-<n>.json and "run list ..." prints $STUB_DIR/runs.json.
+# A read whose marker $STUB_DIR/fail-<key> exists exits 1; one whose $STUB_DIR/bad-<key> exists prints
+# invalid JSON. The keys are issue, epic and flaky. Any other call exits 2.
+# The single-quoted lines are stub source text, so their $ must stay unexpanded.
+# shellcheck disable=SC2016
+write_closeout_gh_stub() {
+  printf '%s\n' '#!/bin/sh' \
+    'if [ "$1 $2" = "pr view" ]; then' \
+    '  if [ -n "${STUB_EXIT:-}" ]; then exit "$STUB_EXIT"; fi' \
+    '  cat "$STUB_JSON"' \
+    '  exit 0' \
+    'fi' \
+    'if [ "$1 $2" = "issue view" ]; then' \
+    '  if [ "$5" = state ]; then _k=issue; else _k=epic; fi' \
+    '  _f="$STUB_DIR/$_k-$3.json"' \
+    'elif [ "$1 $2" = "run list" ]; then' \
+    '  _k=flaky' \
+    '  _f="$STUB_DIR/runs.json"' \
+    'else' \
+    '  printf "%s\n" "unexpected gh call: $*" >&2' \
+    '  exit 2' \
+    'fi' \
+    'if [ -f "$STUB_DIR/fail-$_k" ]; then exit 1; fi' \
+    'if [ -f "$STUB_DIR/bad-$_k" ]; then printf "%s\n" "not json"; exit 0; fi' \
+    'cat "$_f"' > "$1" || return 1
+  chmod +x "$1" || return 1
+}
+
 SCRIPT=${CLOSEOUT_CHECK:-$(dirname "$0")/../closeout-check.sh}
 STUB=$TEST_TMP/gh-stub
 JSON=$TEST_TMP/merge.json
-export CLOSEOUT_GH=$STUB STUB_JSON=$JSON
+export CLOSEOUT_GH=$STUB STUB_JSON=$JSON STUB_DIR=$TEST_TMP
 unset STUB_EXIT
-write_gh_stub "$STUB" || exit 2
+write_closeout_gh_stub "$STUB" || exit 2
 
 FX_PREFIX=s427-t6-tw
 FX_BRANCH=agent/s427-t6-tw
@@ -76,11 +107,38 @@ make_fixture() {
   FX_S=$(git -C "$_d/upstream" rev-parse HEAD) || return 1
 }
 
+# write_issue <number> <state>: the gh issue view document for the state read (issue-<number>.json).
+write_issue() {
+  printf '{"state":"%s"}\n' "$2" > "$TEST_TMP/issue-$1.json" || exit 2
+}
+
+# write_epic <number> <body line>...: the gh issue view document for the body read (epic-<number>.json), with
+# the lines joined by newlines as the body string.
+write_epic() {
+  _we=$1
+  shift
+  printf '%s\n' "$@" | jq -Rs '{body: .}' > "$TEST_TMP/epic-$_we.json" || exit 2
+}
+
+# write_runs <JSON array>: the gh run list document for the flaky read (runs.json).
+write_runs() {
+  printf '%s\n' "$1" > "$TEST_TMP/runs.json" || exit 2
+}
+
+# gh_reset: the gh reads of a fresh case: issue 427 CLOSED, no runs, no epic document, and no failure or bad
+# markers. A case that needs another read value writes it after new_case.
+gh_reset() {
+  write_issue 427 CLOSED
+  write_runs '[]'
+  rm -f "$TEST_TMP"/fail-* "$TEST_TMP"/bad-* "$TEST_TMP"/epic-*.json || exit 2
+}
+
 # new_case <name> [squash extra line]: a fresh fixture under TEST_TMP/<name>. Sets S7, the short squash sha.
 new_case() {
   make_fixture "$TEST_TMP/$1" "${2:-}" || exit 2
   S7=$(short7 "$FX_S") || exit 2
   write_merge MERGED "$FX_S" || exit 2
+  gh_reset
 }
 
 # make_local_commit: one commit on the runner branch that is not pushed, so the local tip differs from origin.
@@ -619,16 +677,21 @@ want steps-all \
   "OK remove-worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b" \
   "OK delete-branch-local: $FX_BRANCH" \
   "OK delete-branch-origin: $FX_BRANCH" \
-  "OK fast-forward: main at $S7"
+  "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" \
+  "OK flaky: 0"
 steps_std
 assert_case steps-all 0 steps-all
 check_prefix_eq steps-all
 assert_refs steps-all 0 0 "$FX_S" 0
 
-# Step case 2: -e is accepted and ignored. One clean runner worktree, otherwise as case 1.
+# Step case 2: -e 400 names an epic whose body has an unchecked line for #427. One clean runner worktree, otherwise
+# as case 1; the epic line follows the issue line.
 new_case steps-epic
+write_epic 400 "- [ ] #427 the story"
 want_green steps-epic "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
-  "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"
+  "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "OK flaky: 0"
 steps_std -e 400
 assert_case steps-epic 0 steps-epic
 
@@ -698,7 +761,7 @@ want steps-x-local-gone "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in
   "OK worktree: $FX_WT absent" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
   "OK remove-worktree: $FX_WT absent" "OK remove-worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
   "OK delete-branch-local: $FX_BRANCH already gone" "OK delete-branch-local: reconcile-$FX_RECON already gone" \
-  "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"
+  "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7" "OK issue: #427 CLOSED" "OK flaky: 0"
 steps_std -x "$FX_RECON"
 assert_case steps-x-local-gone 0 steps-x-local-gone
 assert_refs steps-x-local-gone 0 0 "$FX_S" 0
@@ -719,7 +782,9 @@ want steps-x-full "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origi
   "OK delete-branch-local: $FX_BRANCH" \
   "OK delete-branch-local: reconcile-$FX_RECON" \
   "OK delete-branch-origin: $FX_BRANCH" \
-  "OK fast-forward: main at $S7"
+  "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" \
+  "OK flaky: 0"
 steps_std -x "$FX_RECON"
 assert_case steps-x-full 0 steps-x-full
 assert_refs steps-x-full 0 0 "$FX_S" 0
@@ -729,7 +794,8 @@ new_case steps-origin-gone
 steps_prefetch
 git_c "$FX_ROOT" push -q origin --delete "$FX_BRANCH" >/dev/null 2>&1 || exit 2
 want steps-origin-gone "OK check: stub" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
-  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" "OK flaky: 0"
 steps_stub
 assert_case steps-origin-gone 0 steps-origin-gone
 assert_refs steps-origin-gone 0 0 "$FX_S" 0
@@ -743,7 +809,7 @@ git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
 git_c "$FX_ROOT" push -q origin --delete "$FX_BRANCH" >/dev/null 2>&1 || exit 2
 want steps-rerun "OK check: stub" "OK remove-worktree: $FX_WT absent" \
   "OK delete-branch-local: $FX_BRANCH already gone" "OK delete-branch-origin: $FX_BRANCH already gone" \
-  "OK fast-forward: main at $S7"
+  "OK fast-forward: main at $S7" "OK issue: #427 CLOSED" "OK flaky: 0"
 steps_stub
 assert_case steps-rerun 0 steps-rerun
 assert_refs steps-rerun 0 0 "$FX_S" 0
@@ -811,7 +877,8 @@ steps_prefetch
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
 want steps-origin-gone-real "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
-  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" "OK flaky: 0"
 steps_std
 assert_case steps-origin-gone-real 0 steps-origin-gone-real
 assert_refs steps-origin-gone-real 0 0 "$FX_S" 0
@@ -824,12 +891,151 @@ git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
 steps_prefetch
 want steps-origin-prefixed "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
-  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" "OK flaky: 0"
 steps_std
 assert_case steps-origin-prefixed 0 steps-origin-prefixed
 _yk=0
 git -C "$FX_ORIGIN" show-ref -q --verify "refs/heads/y/$FX_BRANCH" || _yk=$?
 assert_exit "steps-origin-prefixed y branch kept on origin" 0 "$_yk"
+
+# want_done <name> <line>...: the expected output of a close-out that completes on the fixture with only the runner
+# worktree: the check lines, the four step lines, then the given lines.
+want_done() {
+  _dn=$1
+  shift
+  want_green "$_dn" "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
+    "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7" "$@"
+}
+
+# steps_flaky_case <name> <run list JSON> <count>: a complete close-out with the given run list and no -e. The issue
+# is CLOSED and the flaky line must print the count.
+steps_flaky_case() {
+  new_case "$1"
+  write_runs "$2"
+  want_done "$1" "OK issue: #427 CLOSED" "OK flaky: $3"
+  steps_std
+  assert_case "$1" 0 "$1"
+}
+
+# Issue state: an OPEN issue prints its state as the document says; the run still completes with exit 0.
+new_case steps-issue-open
+write_issue 427 OPEN
+want_done steps-issue-open "OK issue: #427 OPEN" "OK flaky: 0"
+steps_std
+assert_case steps-issue-open 0 steps-issue-open
+assert_refs steps-issue-open 0 0 "$FX_S" 0
+
+# Epic line: a checked line for #427 prints [x].
+new_case steps-epic-checked
+write_epic 400 "- [x] #427 something"
+want_done steps-epic-checked "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-checked 0 steps-epic-checked
+
+# Epic line: an upper-case X marker prints [x] too.
+new_case steps-epic-upper
+write_epic 400 "- [X] #427 something"
+want_done steps-epic-upper "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-upper 0 steps-epic-upper
+
+# Epic line: no line names #427 as a whole number (#4270, #42 and #1427 do not), so the epic line fails. The steps
+# are already done, so the branch and worktree are gone and the run exits 1.
+new_case steps-epic-missing
+write_epic 400 "- [ ] #4270 other" "- [x] #42 more" "- [ ] #1427 extra"
+want_done steps-epic-missing "OK issue: #427 CLOSED" "FAIL epic: #400 has no line naming #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-missing 1 steps-epic-missing
+assert_refs steps-epic-missing 0 0 "$FX_S" 0
+
+# Epic line: a line naming #427 without a checkbox is ignored, and the later unchecked line matches.
+new_case steps-epic-no-box
+write_epic 400 "Discussed #427 in the notes" "- [ ] #427 the story"
+want_done steps-epic-no-box "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-no-box 0 steps-epic-no-box
+
+# Epic line: the first matching line wins, so the checked line above the unchecked one prints [x].
+new_case steps-epic-first
+write_epic 400 "- [x] #427 first" "- [ ] #427 second"
+want_done steps-epic-first "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-first 0 steps-epic-first
+
+# Flaky count: distinct head SHAs with both a failure and a success run. Zero, one and two shas, and the runs of
+# one sha counted once.
+steps_flaky_case steps-flaky-success-only '[{"headSha":"a","conclusion":"success"},{"headSha":"b","conclusion":"success"}]' 0
+steps_flaky_case steps-flaky-failure-only '[{"headSha":"a","conclusion":"failure"},{"headSha":"b","conclusion":"failure"}]' 0
+steps_flaky_case steps-flaky-one '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"}]' 1
+steps_flaky_case steps-flaky-two '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"},{"headSha":"b","conclusion":"success"},{"headSha":"b","conclusion":"failure"},{"headSha":"c","conclusion":"failure"}]' 2
+steps_flaky_case steps-flaky-repeat '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"}]' 1
+steps_flaky_case steps-flaky-cancelled '[{"headSha":"a","conclusion":"cancelled"},{"headSha":"a","conclusion":"success"}]' 0
+steps_flaky_case steps-flaky-skipped '[{"headSha":"a","conclusion":"skipped"},{"headSha":"a","conclusion":"failure"}]' 0
+steps_flaky_case steps-flaky-empty '[]' 0
+
+# gh failures: each read fails on its own (exit 1) while the other two read fine. The steps are done; exit 1.
+new_case steps-issue-gh-fails
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/fail-issue" || exit 2
+want_done steps-issue-gh-fails "FAIL issue: gh failed" "OK epic: #400 [ ] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-issue-gh-fails 1 steps-issue-gh-fails
+assert_refs steps-issue-gh-fails 0 0 "$FX_S" 0
+
+new_case steps-epic-gh-fails
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/fail-epic" || exit 2
+want_done steps-epic-gh-fails "OK issue: #427 CLOSED" "FAIL epic: gh failed" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-gh-fails 1 steps-epic-gh-fails
+assert_refs steps-epic-gh-fails 0 0 "$FX_S" 0
+
+new_case steps-flaky-gh-fails
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/fail-flaky" || exit 2
+want_done steps-flaky-gh-fails "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "FAIL flaky: gh failed"
+steps_std -e 400
+assert_case steps-flaky-gh-fails 1 steps-flaky-gh-fails
+assert_refs steps-flaky-gh-fails 0 0 "$FX_S" 0
+
+# Invalid JSON from one read counts as a gh failure for that read only.
+new_case steps-issue-bad-json
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/bad-issue" || exit 2
+want_done steps-issue-bad-json "FAIL issue: gh failed" "OK epic: #400 [ ] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-issue-bad-json 1 steps-issue-bad-json
+
+new_case steps-epic-bad-json
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/bad-epic" || exit 2
+want_done steps-epic-bad-json "OK issue: #427 CLOSED" "FAIL epic: gh failed" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-bad-json 1 steps-epic-bad-json
+
+new_case steps-flaky-bad-json
+write_epic 400 "- [ ] #427 the story"
+touch "$TEST_TMP/bad-flaky" || exit 2
+want_done steps-flaky-bad-json "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "FAIL flaky: gh failed"
+steps_std -e 400
+assert_case steps-flaky-bad-json 1 steps-flaky-bad-json
+
+# Refused run with -e and a flaky run list: the check fails (the PR is OPEN), so none of the issue, epic or flaky lines
+# print.
+new_case steps-refused-new-lines
+write_epic 400 "- [ ] #427 the story"
+write_runs '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"}]'
+write_merge OPEN null
+steps_prefetch
+check_alone steps-refused-new-lines
+want steps-refused-new-lines "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+  "FAIL patch: no merge commit" "OK worktree: $FX_WT clean" "FAIL steps: refused, close-out check failed"
+steps_snapshot "$TEST_TMP/before-steps-refused-new-lines" || exit 2
+steps_std -e 400
+assert_case steps-refused-new-lines 1 steps-refused-new-lines
+check_prefix_eq steps-refused-new-lines
+steps_compare steps-refused-new-lines "$TEST_TMP/before-steps-refused-new-lines"
 
 # Steps usage errors (exit 2): each missing required option, an unknown option, and each option with no value.
 new_case steps-usage

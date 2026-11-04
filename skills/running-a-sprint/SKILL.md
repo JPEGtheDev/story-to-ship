@@ -16,6 +16,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself: it launches runners, relays and verifies their hand-backs, and closes out each merge. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
+Capacity, Launch, Watch loop and Close-out moved Context and Forces pairs to references/MOVED_RATIONALE.md.
+
 ---
 
 ## Intake
@@ -38,10 +40,7 @@ Every launch question to the owner states, for each story it names, "working N o
 **Context:** The owner answers a launch question with a short "go".
 **Forces:** A question that omits the counts makes the "go" an approval the launcher must interpret, and an over-limit launch then rests on the launcher's reading, not on the owner's decision. While N is below L the launch needs no named answer.
 
-**Context:** Two stories could touch the same file at the same time.
-**Forces:** Parallel runners finish sooner, but two branches that edit one file conflict at merge, and the conflict costs a runner's whole fix cycle. The "Files to Create/Modify" list in the story is the only advance signal of overlap.
-
-A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time, each waiting until the previous story's pull request is merged.
+A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time, each waiting until the previous story's pull request is merged. For a sprint story with an open, unmerged pull request the launcher compares another story against that story's Files list plus the files its pull request changes (`gh pr diff <PR number> --name-only`); for a working or held runner with no pull request yet it compares the Files list only, and a conflict from a file that runner adds later is handled by the runner's rebase before it opens its pull request, or by the reconcile (Close-out step 7) once it has one; if the `gh pr diff` call fails, it compares the Files list only. The Files list is an overlap signal only: a story's scope is the work its acceptance criteria require, not a list of files.
 
 ---
 
@@ -62,9 +61,6 @@ Launch with one Agent call per story:
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text.
 - The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session (L = 6 gives 2); a result below 1 is passed as 1.
 
-**Context:** The launch prompt is where the launcher is tempted to add the rules.
-**Forces:** The template already carries every rule, and a second copy in the prompt drifts from it, so the runner follows whichever it read last. An omitted `model` makes the runner inherit the launcher's tier.
-
 The launcher creates no worktree for a runner, because the runner creates the tree named by its own `WORKTREE_PREFIX`. Record the runner in the ledger at launch.
 
 ---
@@ -81,10 +77,7 @@ Verify before relaying anything to the owner:
 - For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
 - Add every question for the owner to the owner questions page as a card: an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question and a reconcile question. A merge-ready PR is a Ready to merge entry on the same page, not a card (see `references/OWNER_QUESTIONS.md`). Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay.
 
-**Context:** A hand-back reports green CI and clean counts.
-**Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
-
-The owner decides three things: merge, fix-round cap override, scope change. The launcher never decides them, never merges, and never treats silence as consent.
+The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
 When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists), so the launcher's rules are back before it acts.
 
@@ -102,9 +95,6 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner. Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow.
-
-**Context:** The owner merged and the sprint feels finished.
-**Forces:** Each step removes state the next one needs or could be mistaken for, so the order is fixed: the patch comparison needs the runner branch tip, and a deleted branch loses it. A skipped step leaves a stale branch, worktree or conflict that surfaces on a later merge.
 
 ---
 
@@ -126,7 +116,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 - About to launch a story with no acceptance criteria, or draft the criteria myself -- STOP. Relay the gap to the owner and route the story through `user-story-generator`.
 - About to answer a runner's question, or a child's result, myself -- STOP. Look up the row in `references/HANDBACK_ROUTING.md`; owner-reserved questions go to the owner.
-- About to merge, override the fix-round cap or change a story's scope -- STOP. These are the owner's. For a merge, the owner decides from the Ready to merge entry and the launcher never merges; for a cap override or scope change, relay the question with the runner's recommendation and end the turn.
+- About to merge, override the fix-round cap or make a scope change (a change to an acceptance criterion or added behavior the story does not name) -- STOP. These are the owner's. For a merge, the owner decides from the Ready to merge entry and the launcher never merges; for a cap override or scope change, relay the question with the runner's recommendation and end the turn.
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
 - About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until the working count is below the limit (or an owner answer names the new limit or that launch, under the rule on launch questions in Capacity) or the overlapping story's pull request merges, or run it alone when the list is absent. A reconcile replacement (Close-out step 7) is exempt.
 - About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the overlap, and launch only on an answer that names the new limit or that launch.
@@ -169,4 +159,5 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - [references/RECONCILE.md](references/RECONCILE.md) -- Close-out step 7: the reconcile of open sprint PRs after a merge
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
 - [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
+- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved Context and Forces pairs of the Capacity, Launch, Watch loop and Close-out sections
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

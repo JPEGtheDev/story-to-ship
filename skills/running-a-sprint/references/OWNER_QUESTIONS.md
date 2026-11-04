@@ -18,7 +18,7 @@ Each of these question kinds gets a card:
 
 - **owner question**: an owner question hand-back from a runner.
 - **cap override**: a cap reached hand-back that needs the owner to continue, split, accept with a follow-up, or drop.
-- **scope change**: a runner or the launcher needs a change to a story's scope.
+- **scope change**: a runner or the launcher needs a change to the work the story's acceptance criteria require (an acceptance criterion changed, or behavior the story does not name added). A file added for that work is not a scope change.
 - **launch over the limit**: a launch the Capacity rules allow only when the owner names the new limit or that launch.
 - **intake gap**: a story with no acceptance criteria, relayed under the intake rule.
 - **blocked without criteria**: a blocked hand-back whose reason is a story with no acceptance criteria and that the owner must route.

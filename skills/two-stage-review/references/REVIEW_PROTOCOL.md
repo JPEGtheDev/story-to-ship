@@ -108,3 +108,5 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 `Canary confirmed: [Worktree: line from implementer output]` is the observable signal that the Worktree line was read before any reviewer dispatch; it is not evidence that items 1 and 3 ran (the numbered items of BEFORE PROCEEDING in SKILL.md). A less powerful model can produce it mechanically: copy the Worktree line, paste it.
 
 **Note:** The canary raises the cost of skipping for compliant agents -- it is not cryptographically bound to execution, and it does not prove the reviewer read the line or that Stage 1 will catch every defect.
+
+It signals that the worktree line was read before any reviewer dispatch; it does not prove the reviewer read it or that Stage 1 will catch every defect.

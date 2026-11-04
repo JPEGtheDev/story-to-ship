@@ -3,7 +3,7 @@
 This file is the launcher's routing table for a sprint. Each runner is a coordinator subagent (the story-coordinator template) that runs one story and hands back; the launcher is the session that started the runners, relays the owner's answers, resumes runners, and closes out merges. A child is a subagent a runner dispatched, never the runner itself. Read this file whenever a hand-back or a runner event arrives, before acting on it.
 
 **Context:** A hand-back or event arrives while other runners are still working, and the quickest reply looks like answering the runner directly.
-**Forces:** The launcher holds the owner's attention and the runners' branches, while a runner holds only its own story, so every reply that is not a lookup in this table risks a decision the owner never made. The owner-reserved decisions are exactly: merge, fix-round cap override, scope change.
+**Forces:** The launcher holds the owner's attention and the runners' branches, while a runner holds only its own story, so every reply that is not a lookup in this table risks a decision the owner never made. The owner-reserved decisions are exactly: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a file added for that work is not one.
 
 Every cell in the Launcher must NOT column starts with the same four prohibitions, and each row adds its own after them.
 

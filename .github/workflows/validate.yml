@@ -437,6 +437,32 @@ jobs:
           fi
           echo "[+] Reconcile contract strings present"
 
+      - name: Check scope contract strings
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/story-coordinator.md 'is the work its acceptance criteria require, not a list of files' 'add the file without an owner question' 'list each added file with a one-line reason in the pull request body' 'adding a file that work needs is not a scope change' 'leave that heading out when no file was added' 'under an "Added files" heading'
+          check skills/running-a-sprint/SKILL.md 'plus the files its pull request changes' 'it compares the Files list only' 'a runner adding a file that work needs is not one and needs no owner question'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'a file added for that work is not one'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'A file added for that work is not a scope change.'
+          check skills/two-stage-review/SKILL.md 'or when a file its child branch changes lies under one of those paths'
+          check skills/two-stage-review/references/REVIEW_LOOP.md 'a Files entry or a changed file under .github/, hooks/ or agents/'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing scope contract string(s)"
+            exit 1
+          fi
+          echo "[+] Scope contract strings present"
+
       - name: Check hand-back size contract strings
         run: |
           missing=0
@@ -703,7 +729,7 @@ jobs:
           fi
           echo "[+] Review cadence contract strings present, replaced wording absent"
 
-      - name: Check risky-todo rule is path-only
+      - name: Check risky-todo rule has no shared-file clause
         run: |
           set -e
           missing=0
@@ -717,7 +743,7 @@ jobs:
             fi
             for s in "$@"; do
               if grep -qiF -- "$s" "$file"; then
-                printf 'FAILED: %s carries the shared-file clause again (a todo is risky by path only): %s\n' "$file" "$s"
+                printf 'FAILED: %s carries the shared-file clause again (the risky-todo rule names paths, not shared files): %s\n' "$file" "$s"
                 missing=$((missing + 1))
               fi
             done
@@ -728,7 +754,7 @@ jobs:
             echo "Found $missing shared-file clause problem(s)"
             exit 1
           fi
-          echo "[+] risky-todo rule is path-only in the two-stage-review skill"
+          echo "[+] no shared-file clause in the risky-todo rule of the two-stage-review skill"
 
       - name: Check agent templates index matches agents/
         run: |

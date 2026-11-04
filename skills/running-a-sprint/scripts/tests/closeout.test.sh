@@ -117,6 +117,14 @@ want() {
   printf '%s\n' "$@" > "$TEST_TMP/want-$_wn" || exit 2
 }
 
+# want_green <name> <worktree line>...: the expected stdout when the merged, NOTE, ancestry and patch lines
+# are all OK for the current fixture, followed by the given worktree lines.
+want_green() {
+  _gn=$1
+  shift
+  want "$_gn" "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" "$@"
+}
+
 # assert_case <name> <expected exit> <want name>: the exit code and the exact stdout lines.
 assert_case() {
   assert_exit "$1 exit" "$2" "$RC"
@@ -149,8 +157,7 @@ snapshot() {
 
 # Case 1: all OK on the runner worktree alone. plan.md is the only untracked file and the patch is equal.
 new_case all-ok
-want all-ok "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT clean"
+want_green all-ok "OK worktree: $FX_WT clean"
 std_run
 assert_case all-ok 0 all-ok
 
@@ -158,7 +165,7 @@ assert_case all-ok 0 all-ok
 new_case two-children
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-b" || exit 2
-want two-children "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want_green two-children \
   "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b clean"
@@ -175,24 +182,21 @@ assert_case patch-differs 1 patch-differs
 # Case 4: a modified tracked file in the runner worktree fails the worktree line with its status.
 new_case dirty-tracked
 printf '%s\n' more >> "$FX_WT/file.txt" || exit 2
-want dirty-tracked "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "FAIL worktree: $FX_WT has  M file.txt, ?? plan.md"
+want_green dirty-tracked "FAIL worktree: $FX_WT has  M file.txt, ?? plan.md"
 std_run
 assert_case dirty-tracked 1 dirty-tracked
 
 # Case 5: an untracked file other than the plan file fails the worktree line.
 new_case untracked-other
 printf '%s\n' scratch > "$FX_WT/scratch.txt" || exit 2
-want untracked-other "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "FAIL worktree: $FX_WT has ?? plan.md, ?? scratch.txt"
+want_green untracked-other "FAIL worktree: $FX_WT has ?? plan.md, ?? scratch.txt"
 std_run
 assert_case untracked-other 1 untracked-other
 
 # Case 6: an ignored file (matched by the committed .gitignore) fails the worktree line.
 new_case ignored-file
 printf '%s\n' log > "$FX_WT/ignored.log" || exit 2
-want ignored-file "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "FAIL worktree: $FX_WT has ?? plan.md, !! ignored.log"
+want_green ignored-file "FAIL worktree: $FX_WT has ?? plan.md, !! ignored.log"
 std_run
 assert_case ignored-file 1 ignored-file
 
@@ -201,7 +205,7 @@ new_case dirty-child
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-b" || exit 2
 printf '%s\n' scratch > "$FX_ROOT/.worktrees/$FX_PREFIX-b/scratch.txt" || exit 2
-want dirty-child "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want_green dirty-child \
   "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
   "FAIL worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b has ?? plan.md, ?? scratch.txt"
@@ -211,8 +215,7 @@ assert_case dirty-child 1 dirty-child
 # Case 8: the runner worktree is removed while the local branch stays. The worktree line is OK absent.
 new_case runner-absent
 git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
-want runner-absent "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT absent"
+want_green runner-absent "OK worktree: $FX_WT absent"
 std_run
 assert_case runner-absent 0 runner-absent
 
@@ -244,12 +247,12 @@ assert_case merged-null 1 merged-null
 # Case 12: the gh stub exits non-zero. The merged line says gh failed; the rest follow from no merge commit.
 new_case gh-exit
 write_merge MERGED "$FX_S"
-want gh-failed "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want gh-exit "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 export STUB_EXIT=1
 std_run
 unset STUB_EXIT
-assert_case gh-exit 1 gh-failed
+assert_case gh-exit 1 gh-exit
 
 # Case 13: the gh stub prints invalid JSON. The same lines as the non-zero exit.
 new_case gh-invalid-json
@@ -287,12 +290,13 @@ want local-tip-no-x "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in ori
 std_run
 assert_case local-tip-no-x 1 local-tip-no-x
 
-# Case 17: -x with a replacement setup. The patch uses origin's branch tip, not the unpushed local tip.
+# Case 17: -x with an unpushed local commit and a reconcile worktree with a child. The patch uses origin's
+# branch tip, not the unpushed local tip, so it is OK; all three worktree lines are clean.
 new_case x-all-ok
 make_local_commit || exit 2
 add_reconcile || exit 2
 add_child "$FX_ROOT/.worktrees/$FX_RECON-c" || exit 2
-want x-all-ok "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want_green x-all-ok \
   "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_RECON clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_RECON-c clean"
@@ -304,7 +308,7 @@ new_case x-dirty
 make_local_commit || exit 2
 add_reconcile || exit 2
 printf '%s\n' scratch > "$FX_ROOT/.worktrees/$FX_RECON/scratch.txt" || exit 2
-want x-dirty "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want_green x-dirty \
   "OK worktree: $FX_WT clean" \
   "FAIL worktree: $FX_ROOT/.worktrees/$FX_RECON has ?? plan.md, ?? scratch.txt"
 std_run -x "$FX_RECON"
@@ -313,8 +317,7 @@ assert_case x-dirty 1 x-dirty
 # Case 19: -x with no reconcile worktree. The reconcile path line is OK absent.
 new_case x-absent
 make_local_commit || exit 2
-want x-absent "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
+want_green x-absent "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
 std_run -x "$FX_RECON"
 assert_case x-absent 0 x-absent
 
@@ -322,23 +325,20 @@ assert_case x-absent 0 x-absent
 new_case plan-name-ok
 rm -f "$FX_WT/plan.md" || exit 2
 printf '%s\n' notes > "$FX_WT/notes.md" || exit 2
-want plan-name-ok "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT clean"
+want_green plan-name-ok "OK worktree: $FX_WT clean"
 std_run -P notes.md
 assert_case plan-name-ok 0 plan-name-ok
 
 # Case 21: -P notes.md with plan.md untracked and no notes.md. plan.md is now an unexpected file.
 new_case plan-name-fail
-want plan-name-fail "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "FAIL worktree: $FX_WT has ?? plan.md"
+want_green plan-name-fail "FAIL worktree: $FX_WT has ?? plan.md"
 std_run -P notes.md
 assert_case plan-name-fail 1 plan-name-fail
 
 # Case 22: the default plan file is absent, so the worktree status is empty. Nothing is unexpected: OK clean.
 new_case no-plan-file
 rm -f "$FX_WT/plan.md" || exit 2
-want no-plan-file "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT clean"
+want_green no-plan-file "OK worktree: $FX_WT clean"
 std_run
 assert_case no-plan-file 0 no-plan-file
 
@@ -346,8 +346,7 @@ assert_case no-plan-file 0 no-plan-file
 # so the refs, the worktree list, the worktree files and the worktree status must match before and after.
 new_case unchanged
 git -C "$FX_ROOT" fetch -q origin || exit 2
-want unchanged "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
-  "OK worktree: $FX_WT clean"
+want_green unchanged "OK worktree: $FX_WT clean"
 snapshot "$TEST_TMP/before" || exit 2
 std_run
 assert_case unchanged 0 unchanged

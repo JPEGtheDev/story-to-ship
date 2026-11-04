@@ -123,54 +123,59 @@ run_fetch() {
   printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
 }
 
-# check_ancestry: the merge commit is reachable from origin/main after the fetch.
-check_ancestry() {
+# precheck <name>: 0 when a merge commit is known and the fetch succeeded. Otherwise print the FAIL line for
+# <name> (no merge commit, or fetch failed) and return 1.
+precheck() {
   if [ -z "$MERGE_SHA" ]; then
-    emit "FAIL ancestry: no merge commit"
-    return
+    emit "FAIL $1: no merge commit"
+    return 1
   fi
   if [ "$FETCH_OK" -ne 1 ]; then
-    emit "FAIL ancestry: fetch failed"
-    return
+    emit "FAIL $1: fetch failed"
+    return 1
   fi
-  _s7=$(printf '%.7s' "$MERGE_SHA")
+  return 0
+}
+
+# check_ancestry: the merge commit is reachable from origin/main after the fetch.
+check_ancestry() {
+  precheck ancestry || return
+  _short=$(printf '%.7s' "$MERGE_SHA")
   if git -C "$ROOT" merge-base --is-ancestor "$MERGE_SHA" origin/main >/dev/null 2>&1; then
-    emit "OK ancestry: $_s7 is in origin/main"
+    emit "OK ancestry: $_short is in origin/main"
   else
-    emit "FAIL ancestry: $_s7 is not in origin/main"
+    emit "FAIL ancestry: $_short is not in origin/main"
   fi
 }
 
-# check_patch: the squash commit's diff equals the branch diff from the merge base. The squash diff is S^ to S;
-# the branch diff is B to H, with B the merge base of S^ and H, and H the local branch (origin/<branch> with -x).
-# Lines starting with "index " are removed from both diffs before the byte comparison.
+# patch_matches <base> <tip>: 0 when the diff from base to tip and the squash diff (S^ to S) are byte-equal.
+# Lines starting with "index " are removed from both diffs first. The raw and filtered diffs go under TMP.
+patch_matches() {
+  git -C "$ROOT" diff --no-color --no-ext-diff "$1" "$2" > "$TMP/branch.raw" 2>/dev/null &&
+    git -C "$ROOT" diff --no-color --no-ext-diff "$MERGE_SHA^" "$MERGE_SHA" > "$TMP/squash.raw" 2>/dev/null &&
+    sed '/^index /d' "$TMP/branch.raw" > "$TMP/branch.diff" &&
+    sed '/^index /d' "$TMP/squash.raw" > "$TMP/squash.diff" &&
+    cmp -s "$TMP/branch.diff" "$TMP/squash.diff"
+}
+
+# check_patch: the squash commit's diff equals the branch diff from the merge base B. B is the merge base of S^
+# and the tip H, where H is the local branch (origin/<branch> with -x).
 check_patch() {
-  if [ -z "$MERGE_SHA" ]; then
-    emit "FAIL patch: no merge commit"
-    return
-  fi
-  if [ "$FETCH_OK" -ne 1 ]; then
-    emit "FAIL patch: fetch failed"
-    return
-  fi
+  precheck patch || return
   if [ -n "$RECON" ]; then
     _tip="refs/remotes/origin/$BRANCH"
   else
     _tip="refs/heads/$BRANCH"
   fi
-  if ! _h=$(git -C "$ROOT" rev-parse -q --verify "$_tip^{commit}" 2>/dev/null) || [ -z "$_h" ]; then
+  if ! _tip_sha=$(git -C "$ROOT" rev-parse -q --verify "$_tip^{commit}" 2>/dev/null) || [ -z "$_tip_sha" ]; then
     emit "FAIL patch: branch tip not found"
     return
   fi
-  if ! _b=$(git -C "$ROOT" merge-base "$MERGE_SHA^" "$_h" 2>/dev/null) || [ -z "$_b" ]; then
+  if ! _base=$(git -C "$ROOT" merge-base "$MERGE_SHA^" "$_tip_sha" 2>/dev/null) || [ -z "$_base" ]; then
     emit "FAIL patch: squash differs from branch diff"
     return
   fi
-  if git -C "$ROOT" diff --no-color --no-ext-diff "$_b" "$_h" > "$TMP/branch.raw" 2>/dev/null &&
-    git -C "$ROOT" diff --no-color --no-ext-diff "$MERGE_SHA^" "$MERGE_SHA" > "$TMP/squash.raw" 2>/dev/null &&
-    sed '/^index /d' "$TMP/branch.raw" > "$TMP/branch.diff" &&
-    sed '/^index /d' "$TMP/squash.raw" > "$TMP/squash.diff" &&
-    cmp -s "$TMP/branch.diff" "$TMP/squash.diff"; then
+  if patch_matches "$_base" "$_tip_sha"; then
     emit "OK patch: squash equals branch diff"
   else
     emit "FAIL patch: squash differs from branch diff"

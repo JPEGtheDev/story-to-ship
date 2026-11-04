@@ -3,7 +3,8 @@
 # Prints one line per check: "OK <name>: <value>" or "FAIL <name>: <value>", in this order: merged, a NOTE
 # line for the fetch, ancestry, patch, then the worktree lines. Exit 0 when every line is OK, 1 when any line
 # fails, 2 on a usage error (usage on stderr, nothing on stdout).
-# -r must be an absolute path to the repository root. -p is the runner worktree prefix: the runner worktree is
+# -r must be an absolute path to the repository root; trailing slashes are stripped from it, and a relative path
+# is a usage error. -p is the runner worktree prefix: the runner worktree is
 # <root>/.worktrees/<prefix> and the child worktrees are the registered <root>/.worktrees/<prefix>-*. With -x the
 # same is done for <root>/.worktrees/<x> and its children, the patch check then uses origin/<branch> as the
 # branch tip, and without -x it uses the local branch <branch>. -P is the plan file name a clean worktree may
@@ -71,6 +72,13 @@ done
 if [ -z "$ROOT" ] || [ -z "$PR" ] || [ -z "$BRANCH" ] || [ -z "$PREFIX" ]; then
   usage
 fi
+case "$ROOT" in
+  /*) ;;
+  *) usage ;;
+esac
+while [ "$ROOT" != / ] && [ "${ROOT%/}" != "$ROOT" ]; do
+  ROOT=${ROOT%/}
+done
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -122,8 +130,9 @@ git_net() {
 
 # run_fetch: fetch origin main (required), then probe origin for the branch with ls-remote and fetch the branch
 # only when origin has it. Exit 2 from the probe means the branch is not on origin, which is not a failure; any
-# other probe failure, or a failed fetch, leaves FETCH_OK at 0. Always prints the NOTE line; FETCH_OK is 1 when
-# every fetch that ran succeeded and the branch was accounted for.
+# other probe failure, or a failed fetch, leaves FETCH_OK at 0. Always prints the NOTE line, which names only the
+# fetches that ran: the branch is named after main when the probe found it, and the probe failure case prints
+# the main fetch alone. FETCH_OK is 1 when every fetch that ran succeeded and the branch was accounted for.
 run_fetch() {
   FETCH_OK=0
   _main_ok=0
@@ -136,11 +145,13 @@ run_fetch() {
   if [ "$_probe" -eq 2 ]; then
     _branch_ok=1
     printf 'NOTE fetch: ran git fetch origin main; %s is not on origin\n' "$BRANCH"
-  else
-    if [ "$_probe" -eq 0 ] && git_net fetch -q origin "$BRANCH"; then
+  elif [ "$_probe" -eq 0 ]; then
+    if git_net fetch -q origin "$BRANCH"; then
       _branch_ok=1
     fi
     printf 'NOTE fetch: ran git fetch origin main %s\n' "$BRANCH"
+  else
+    printf 'NOTE fetch: ran git fetch origin main\n'
   fi
   if [ "$_main_ok" -eq 1 ] && [ "$_branch_ok" -eq 1 ]; then
     FETCH_OK=1

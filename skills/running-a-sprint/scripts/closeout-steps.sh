@@ -12,9 +12,10 @@
 #   issue: OK issue: #<issue> <state>, the state from gh issue view.
 #   epic: only with -e. The first line of the epic body that holds a checkbox (- [x], - [X] or - [ ]) and names
 #     #<issue> as a whole number prints OK epic: #<epic> [x] #<issue> or [ ]; no such line prints
-#     FAIL epic: #<epic> has no line naming #<issue>.
-#   flaky: OK flaky: <count>, the distinct head SHAs of <branch> that have both a failure and a success run in
-#     gh run list.
+#     FAIL epic: #<epic> has no line naming #<issue>. The checkbox must start the line (after optional leading
+#     spaces), and the line counts only when the first #<number> after the box is #<issue>.
+#   flaky: OK flaky: <count>, the distinct head SHAs of <branch> that have both a run with conclusion failure
+#     and a run with conclusion success in gh run list (other conclusions, such as startup_failure, do not count).
 # A read whose gh call exits non-zero or prints invalid JSON prints FAIL <read>: gh failed, and the other reads
 # still run. The GitHub reads run "${CLOSEOUT_GH:-gh}"; no read changes anything. Any FAIL read makes the exit 1.
 # A failing step prints FAIL <step>: <first line of the git error output>, then the line
@@ -24,7 +25,8 @@
 # Removal uses git worktree remove --force: the check has already allowed only the plan file to be untracked, and
 # a locked worktree still fails. Branches are deleted with branch -D because a squash merge leaves the branch
 # unmerged in git's view; the check has already compared the patches. Nothing is pushed with --force, and nothing
-# outside these steps is changed. A detached root HEAD is named "detached HEAD" in the refusal line.
+# outside these steps is changed. A detached root HEAD is named "detached HEAD" in the refusal line. A trailing
+# slash on -r is stripped; a relative -r is a usage error (exit 2) before anything runs.
 ROOT=""
 PR=""
 BRANCH=""
@@ -92,6 +94,13 @@ done
 if [ -z "$ROOT" ] || [ -z "$PR" ] || [ -z "$BRANCH" ] || [ -z "$PREFIX" ] || [ -z "$ISSUE" ]; then
   usage
 fi
+case "$ROOT" in
+  /*) ;;
+  *) usage ;;
+esac
+while [ "$ROOT" != / ] && [ "${ROOT%/}" != "$ROOT" ]; do
+  ROOT=${ROOT%/}
+done
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -222,29 +231,21 @@ read_issue() {
   printf 'OK issue: #%s %s\n' "$ISSUE" "$_st"
 }
 
-# epic_box: read the epic body on stdin and print the checkbox of the first line that holds a checkbox marker and
-# names #<issue> as a whole number (not followed or preceded by a digit). Prints nothing when none does.
+# epic_box: read the epic body on stdin and print the checkbox of the first line that starts with a checkbox
+# (- [x], - [X] or - [ ], after optional leading spaces) whose first #<number> after the box is #<issue>. The
+# number is compared as a whole digit run, so #4270 does not match 427. Prints nothing when no line does.
 epic_box() {
-  awk -v n="#$ISSUE" '
-function named(s,    start, p, q, before, after) {
-  start = 1
-  while ((p = index(substr(s, start), n)) > 0) {
-    q = start + p - 1
-    before = (q > 1) ? substr(s, q - 1, 1) : ""
-    after = substr(s, q + length(n), 1)
-    if (before !~ /[0-9]/ && after !~ /[0-9]/) return 1
-    start = q + 1
-  }
-  return 0
-}
-function box(s) {
-  if (index(s, "- [x]") > 0 || index(s, "- [X]") > 0) return "[x]"
-  if (index(s, "- [ ]") > 0) return "[ ]"
-  return ""
-}
+  awk -v n="$ISSUE" '
 {
-  b = box($0)
-  if (b != "" && named($0)) {
+  if (match($0, /^ *- \[[xX]\]/)) {
+    b = "[x]"
+  } else if (match($0, /^ *- \[ \]/)) {
+    b = "[ ]"
+  } else {
+    next
+  }
+  rest = substr($0, RSTART + RLENGTH)
+  if (match(rest, /#[0-9]+/) && substr(rest, RSTART + 1, RLENGTH - 1) == n) {
     print b
     exit
   }
@@ -269,14 +270,15 @@ read_epic() {
   printf 'OK epic: #%s %s #%s\n' "$EPIC" "$_box" "$ISSUE"
 }
 
-# read_flaky: print the count of distinct head SHAs of the branch with both a failure and a success run, or
-# FAIL flaky: gh failed when gh fails or its output is not a run list.
+# read_flaky: print the count of distinct head SHAs of the branch with both a failure and a success run (exact
+# conclusion values, so startup_failure does not count as failure), or FAIL flaky: gh failed when gh fails or its
+# output is not a run list.
 read_flaky() {
   if ! gh_read runs.json run list --branch "$BRANCH" --json headSha,conclusion --limit 100; then
     gh_fail flaky
     return 1
   fi
-  _n=$(jq -r 'if type == "array" then ([group_by(.headSha)[] | map(.conclusion) | select(contains(["failure"]) and contains(["success"]))] | length) else error("not an array") end' "$TMP/runs.json") || _n=""
+  _n=$(jq -r 'if type == "array" then ([group_by(.headSha)[] | map(.conclusion) | select(any(.[]; . == "failure") and any(.[]; . == "success"))] | length) else error("not an array") end' "$TMP/runs.json") || _n=""
   if [ -z "$_n" ]; then
     gh_fail flaky
     return 1

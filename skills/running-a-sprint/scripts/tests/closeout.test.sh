@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fixture tests for closeout-check.sh (cases 1-39) and closeout-steps.sh (group 2): the merged, fetch NOTE,
+# Fixture tests for closeout-check.sh (cases 1-42) and closeout-steps.sh (group 2): the merged, fetch NOTE,
 # ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
 # an unchanged-repositories check, the steps' removal, deletion, fast-forward and refusal paths, and the steps'
 # issue, epic and flaky-run lines.
@@ -344,11 +344,12 @@ want not-in-origin "OK merged: $FX_H" "$NOTE_FETCH" "FAIL ancestry: $H7 is not i
 std_run
 assert_case not-in-origin 1 not-in-origin
 
-# Case 15: the origin path is removed, so the fetch fails. Ancestry and patch both say fetch failed.
+# Case 15: the origin path is removed, so the main fetch and the branch probe both fail. The NOTE names only the main
+# fetch, since the branch fetch never ran. Ancestry and patch both say fetch failed.
 new_case fetch-fails
 write_merge MERGED "$FX_S"
 rm -rf "$FX_ORIGIN" || exit 2
-want fetch-fails "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
+want fetch-fails "OK merged: $FX_S" "NOTE fetch: ran git fetch origin main" "FAIL ancestry: fetch failed" \
   "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
 std_run
 assert_case fetch-fails 1 fetch-fails
@@ -529,6 +530,35 @@ want origin-prefixed-branch "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is
 std_run
 assert_case origin-prefixed-branch 0 origin-prefixed-branch
 
+# Case 40: -r with a trailing slash. The children are found and checked as with no slash, so the dirty child fails
+# its own line with the normalized path (no double slash) and the runner line stays OK.
+new_case check-root-slash
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
+printf '%s\n' more >> "$FX_ROOT/.worktrees/$FX_PREFIX-a/file.txt" || exit 2
+want check-root-slash "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" "FAIL worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a has  M file.txt, ?? plan.md"
+run_close -r "$FX_ROOT/" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX"
+assert_case check-root-slash 1 check-root-slash
+
+# Case 41: a relative -r is a usage error (exit 2, usage on stderr, nothing on stdout).
+usage_case relative-root -r root -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX"
+
+# Case 42: the ls-remote probe exits 128. A git wrapper first on PATH fails only ls-remote; the main fetch still runs.
+# The NOTE names only the main fetch, the branch is not fetched, so ancestry and patch say fetch failed (exit 1).
+new_case probe-fails
+mkdir "$TEST_TMP/probe-bin" || exit 2
+_rg=$(command -v git) || exit 2
+# shellcheck disable=SC2016 # the single-quoted lines are wrapper source text; their $ expand when the wrapper runs.
+printf '%s\n' '#!/bin/sh' 'for _a in "$@"; do' '  if [ "$_a" = ls-remote ]; then exit 128; fi' 'done' > "$TEST_TMP/probe-bin/git" || exit 2
+printf 'exec %s "$@"\n' "$_rg" >> "$TEST_TMP/probe-bin/git" || exit 2
+chmod +x "$TEST_TMP/probe-bin/git" || exit 2
+want probe-fails "OK merged: $FX_S" "NOTE fetch: ran git fetch origin main" "FAIL ancestry: fetch failed" \
+  "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
+PATH="$TEST_TMP/probe-bin:$PATH" sh "$SCRIPT" -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" \
+  >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+RC=$?
+assert_case probe-fails 1 probe-fails
+
 # Group 2: closeout-steps.sh. CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs
 # closeout-check.sh next to itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub
 # that prints one OK line.
@@ -570,10 +600,11 @@ steps_prefetch() {
 }
 
 # steps_snapshot <file>: the root HEAD, the root and origin refs, the worktree list, the root status, every file
-# under the root except .git with its content, and the status of each worktree under .worktrees.
+# under the root except .git with its content, and the status of each worktree under .worktrees. A detached root
+# HEAD is recorded as "detached HEAD" (symbolic-ref fails there, and its error is discarded).
 steps_snapshot() {
   {
-    git -C "$FX_ROOT" symbolic-ref HEAD
+    git -C "$FX_ROOT" symbolic-ref HEAD 2>/dev/null || printf 'detached HEAD\n'
     git -C "$FX_ROOT" for-each-ref
     git -C "$FX_ORIGIN" for-each-ref
     git -C "$FX_ROOT" worktree list --porcelain
@@ -980,6 +1011,36 @@ want_done steps-epic-first "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK 
 steps_std -e 400
 assert_case steps-epic-first 0 steps-epic-first
 
+# Epic line: the first #<number> after the box decides the line, so a checked line that names #430 first does not
+# count and the later unchecked line for #427 prints [ ].
+new_case steps-epic-other-first
+write_epic 400 "- [x] #430 depends on #427" "- [ ] #427 the story"
+want_done steps-epic-other-first "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-other-first 0 steps-epic-other-first
+
+# Epic line: the first number after the box is #4270, so the line does not name #427 even though #427 follows it.
+new_case steps-epic-first-number
+write_epic 400 "- [x] #4270 and #427" "- [ ] #427 the story"
+want_done steps-epic-first-number "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-first-number 0 steps-epic-first-number
+
+# Epic line: the checkbox must start the line, so a box after other text does not count and the epic line fails.
+new_case steps-epic-box-mid-line
+write_epic 400 "Done: - [x] #427 the story"
+want_done steps-epic-box-mid-line "OK issue: #427 CLOSED" "FAIL epic: #400 has no line naming #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-box-mid-line 1 steps-epic-box-mid-line
+assert_refs steps-epic-box-mid-line 0 0 "$FX_S" 0
+
+# Epic line: optional leading spaces before the box are allowed, so the indented line prints [x].
+new_case steps-epic-indented
+write_epic 400 "  - [x] #427 the story"
+want_done steps-epic-indented "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-indented 0 steps-epic-indented
+
 # Flaky count: distinct head SHAs with both a failure and a success run. Zero, one and two shas, and the runs of
 # one sha counted once.
 steps_flaky_case steps-flaky-success-only '[{"headSha":"a","conclusion":"success"},{"headSha":"b","conclusion":"success"}]' 0
@@ -991,6 +1052,8 @@ steps_flaky_case steps-flaky-cancelled '[{"headSha":"a","conclusion":"cancelled"
 steps_flaky_case steps-flaky-cancelled-failure '[{"headSha":"a","conclusion":"cancelled"},{"headSha":"a","conclusion":"failure"}]' 0
 steps_flaky_case steps-flaky-skipped '[{"headSha":"a","conclusion":"skipped"},{"headSha":"a","conclusion":"failure"}]' 0
 steps_flaky_case steps-flaky-empty '[]' 0
+steps_flaky_case steps-flaky-startup-failure '[{"headSha":"a","conclusion":"startup_failure"},{"headSha":"a","conclusion":"success"}]' 0
+steps_flaky_case steps-flaky-startup-mixed '[{"headSha":"a","conclusion":"startup_failure"},{"headSha":"a","conclusion":"success"},{"headSha":"b","conclusion":"failure"},{"headSha":"b","conclusion":"success"}]' 1
 
 # gh failures: each read fails on its own (exit 1) while the other two read fine. The steps are done; exit 1.
 new_case steps-issue-gh-fails
@@ -1068,5 +1131,44 @@ steps_usage_case value-i -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i
 steps_usage_case value-e -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -e
 steps_usage_case value-x -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -x
 steps_usage_case value-P -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -P
+steps_usage_case relative-root -r relative/root -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427
+
+# Step case 17: -r with a trailing slash. The child is found, removed and checked with the normalized paths, and
+# the run completes with the same lines as with no slash.
+new_case steps-root-slash
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
+want steps-root-slash \
+  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
+  "OK remove-worktree: $FX_WT" "OK remove-worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a" \
+  "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7" \
+  "OK issue: #427 CLOSED" "OK flaky: 0"
+run_steps -r "$FX_ROOT/" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427
+assert_case steps-root-slash 0 steps-root-slash
+assert_refs steps-root-slash 0 0 "$FX_S" 0
+
+# Step case 18: -P notes.md with the runner worktree holding only notes.md untracked. The forwarded -P makes the
+# worktree clean, so the run completes. Without the forward the check reads plan.md, sees notes.md as unexpected and
+# refuses the run.
+new_case steps-plan-name
+rm -f "$FX_WT/plan.md" || exit 2
+printf '%s\n' notes > "$FX_WT/notes.md" || exit 2
+want_done steps-plan-name "OK issue: #427 CLOSED" "OK flaky: 0"
+steps_std -P notes.md
+assert_case steps-plan-name 0 steps-plan-name
+assert_refs steps-plan-name 0 0 "$FX_S" 0
+
+# Step case 19: the repo root is on a detached HEAD. The check passes, and the run is refused with the exact
+# detached HEAD line before any step.
+new_case steps-root-detached
+git_c "$FX_ROOT" checkout -q --detach || exit 2
+steps_prefetch
+check_alone steps-root-detached
+want_green steps-root-detached "OK worktree: $FX_WT clean" "FAIL steps: refused, repo root is on detached HEAD, not main"
+steps_snapshot "$TEST_TMP/before-steps-root-detached" || exit 2
+steps_std
+assert_case steps-root-detached 1 steps-root-detached
+check_prefix_eq steps-root-detached
+steps_compare steps-root-detached "$TEST_TMP/before-steps-root-detached"
 
 test_summary

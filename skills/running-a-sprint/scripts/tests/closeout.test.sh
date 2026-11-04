@@ -364,4 +364,20 @@ usage_case value-r -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -r
 usage_case value-x -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -x
 usage_case value-P -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -P
 
+# Case 32: origin/main has a second commit (later main) after the squash S. The runner merges S into its branch,
+# so the branch tip H holds S and merge-base(origin/main, H) is S, while merge-base(S^, H) is S^. The squash and
+# the branch diff from S^ are equal, so the patch is OK. A base taken from origin/main gives an empty diff and
+# FAIL. The ancestry check is OK because S is a proper ancestor of origin/main.
+new_case later-main
+git_c "$FX_ROOT" fetch -q origin main || exit 2
+git_c "$FX_WT" merge -q --no-edit "$FX_S" || exit 2
+git_c "$FX_ROOT" push -q origin "$FX_BRANCH" || exit 2
+printf '%s\n' later > "$TEST_TMP/later-main/upstream/other.txt" || exit 2
+git_c "$TEST_TMP/later-main/upstream" add other.txt || exit 2
+git_c "$TEST_TMP/later-main/upstream" commit -q -m "later main" || exit 2
+git_c "$TEST_TMP/later-main/upstream" push -q origin main || exit 2
+want_green later-main "OK worktree: $FX_WT clean"
+std_run
+assert_case later-main 0 later-main
+
 test_summary

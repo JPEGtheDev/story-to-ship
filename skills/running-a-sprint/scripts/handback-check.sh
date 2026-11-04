@@ -5,7 +5,8 @@
 # Exit 0 when every check is OK, 1 when any check fails or GitHub cannot be read, 2 on a usage error.
 # GitHub is read by one function that runs "${HANDBACK_GH:-gh}" pr view; no other network use.
 # -b is the base ref for the branch check (remote and branch split at the first slash); -P is the plan file
-# read by the inline check; -m is parsed and stored here, and its check comes in a later todo.
+# read by the inline check. Each -m <old> <new> <text> is one moved check: the text must appear, whitespace-collapsed,
+# in one hunk of the removed lines of old and in one hunk of the added lines of new, in git diff base...HEAD.
 # shellcheck disable=SC2034
 PR=""
 WT=""
@@ -14,9 +15,6 @@ BASE="origin/main"
 PLAN="plan.md"
 PLAN_GIVEN=0
 MAP_COUNT=0
-MAP_OLD=""
-MAP_NEW=""
-MAP_TEXT=""
 FAILS=0
 PR_JSON=""
 
@@ -59,10 +57,8 @@ while [ "$#" -gt 0 ]; do
       ;;
     -m)
       [ "$#" -ge 4 ] || usage
-      MAP_OLD=$2
-      MAP_NEW=$3
-      MAP_TEXT=$4
       MAP_COUNT=$((MAP_COUNT + 1))
+      eval "MAP_${MAP_COUNT}_OLD=\$2; MAP_${MAP_COUNT}_NEW=\$3; MAP_${MAP_COUNT}_TEXT=\$4"
       shift 4
       ;;
     *)
@@ -370,6 +366,83 @@ $_clauses
 CLAUSES
 }
 
+# moved_side <sign> <text>: read a one-file diff on stdin and print 1 when the text, whitespace-collapsed, is a
+# substring of one hunk's lines that start with sign (+ or -), else 0. The file header before the first @@ is
+# skipped, so a removed line that starts with "--" still counts. A hunk's marked lines are joined with single
+# spaces; the text is searched within one hunk only. An empty text matches nothing.
+moved_side() {
+  MV_SIGN=$1 MV_TEXT=$2 awk '
+    function squash(s) {
+      gsub(/[[:space:]]+/, " ", s)
+      sub(/^ /, "", s)
+      sub(/ $/, "", s)
+      return s
+    }
+    function close_hunk() {
+      if (inh && want != "" && index(squash(body), want) > 0) found = 1
+      body = ""
+    }
+    BEGIN { sign = ENVIRON["MV_SIGN"]; want = squash(ENVIRON["MV_TEXT"]); found = 0; inh = 0; body = "" }
+    /^@@/ { close_hunk(); inh = 1; next }
+    inh && substr($0, 1, 1) == sign { body = body " " substr($0, 2) }
+    END { close_hunk(); print found + 0 }'
+}
+
+# check_moved_pair <old> <new> <text>: the text appears in the removed lines of old and in the added lines of new
+# in base...HEAD. A file missing from the diff is named alone (or both, when both are missing) and is not searched.
+check_moved_pair() {
+  _pair="$1 -> $2"
+  if ! _names=$(git -C "$WT" diff --no-renames --name-only "$BASE...HEAD"); then
+    emit fail moved "$_pair: diff unreadable"
+    return
+  fi
+  if printf '%s\n' "$_names" | grep -Fxq -- "$1"; then _oin=1; else _oin=0; fi
+  if printf '%s\n' "$_names" | grep -Fxq -- "$2"; then _nin=1; else _nin=0; fi
+  if [ "$_oin" -eq 0 ] && [ "$_nin" -eq 0 ]; then
+    emit fail moved "$_pair: $1 and $2 not in the diff"
+    return
+  fi
+  if [ "$_oin" -eq 0 ]; then
+    emit fail moved "$_pair: $1 not in the diff"
+    return
+  fi
+  if [ "$_nin" -eq 0 ]; then
+    emit fail moved "$_pair: $2 not in the diff"
+    return
+  fi
+  if ! _oh=$(git -C "$WT" diff -U0 --no-renames "$BASE...HEAD" -- "$1") ||
+    ! _nh=$(git -C "$WT" diff -U0 --no-renames "$BASE...HEAD" -- "$2"); then
+    emit fail moved "$_pair: diff unreadable"
+    return
+  fi
+  _rm=$(printf '%s\n' "$_oh" | moved_side - "$3")
+  _ad=$(printf '%s\n' "$_nh" | moved_side + "$3")
+  if [ "$_rm" -eq 1 ] && [ "$_ad" -eq 1 ]; then
+    emit ok moved "$_pair"
+  elif [ "$_rm" -eq 0 ] && [ "$_ad" -eq 0 ]; then
+    emit fail moved "$_pair: text missing from removed lines of $1 and added lines of $2"
+  elif [ "$_rm" -eq 0 ]; then
+    emit fail moved "$_pair: text missing from removed lines of $1"
+  else
+    emit fail moved "$_pair: text missing from added lines of $2"
+  fi
+}
+
+# check_moved: every -m option in the order given is checked, one line each. With no -m option the line is OK none
+# given. The check reads git only, so it runs after the GitHub checks and is not in the gh failure loop.
+check_moved() {
+  if [ "$MAP_COUNT" -eq 0 ]; then
+    emit ok moved "none given"
+    return
+  fi
+  _i=1
+  while [ "$_i" -le "$MAP_COUNT" ]; do
+    eval "_mo=\$MAP_${_i}_OLD; _mn=\$MAP_${_i}_NEW; _mt=\$MAP_${_i}_TEXT"
+    check_moved_pair "$_mo" "$_mn" "$_mt"
+    _i=$((_i + 1))
+  done
+}
+
 if ! fetch_pr; then
   for _name in state draft mergeable head ci branch closing footer coauthor ascii; do
     emit fail "$_name" "gh failed"
@@ -388,6 +461,7 @@ check_footer
 check_coauthor
 check_ascii
 check_inline
+check_moved
 
 if [ "$FAILS" -eq 0 ]; then
   exit 0

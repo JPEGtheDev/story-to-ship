@@ -44,7 +44,7 @@ export CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT"
 # Prints one [+]/[-] line per check and returns the number of failed checks
 # in the global run_failures.
 run_checks() {
-  local cmds="$1" cmd rest before name out
+  local cmds="$1" cmd rest before out
   local -a names=()
   run_failures=0
 

@@ -67,6 +67,17 @@ Do not ask the caller to provide a diff. Derive it yourself.
   5. Routing: a test that fails on an internal-only change goes on the Critical issues line prefixed "Tests:" when the test is on a diff line; otherwise it goes on the Leave it better list. A broken behavior with no failing test is a missing test: it goes on the Missing tests line, and also on the Critical issues line prefixed "Tests:" when the behavior's code is on a diff line; otherwise only on the Missing tests line. If no test command can be found, or the tests cannot run in the review worktree, write "two-edit check not runnable" and report a Tests finding on the Critical issues line prefixed "Tests:" that sets REQUEST CHANGES; this overrides the introduced-only rule. Never a silent pass.
   6. Output: write the full output to a named file under /tmp, show the command and a short failing tail in the reply, and never commit a scratch edit.
 
+### Blast radius
+- [ ] Blast-radius check (applies when the change alters a public interface, a stored or transmitted format, a config key, or behavior other code relies on; otherwise write N/A with a one-clause reason and say nothing more):
+  - Look for consumers outside the diff that a grep for callers would not show. Examples: other programs or processes that read the same bytes or file, stored columns, config keys read elsewhere, wire or file formats parsed by other code, and code several hops downstream.
+  - Name the consumers checked.
+  - Name the one fact that makes the change safe. Most risky-looking changes are safe for one reason; find that reason.
+  - State how far the proof got: stated, cited at a file:line, walked step by step, or run. A run needs its command and output.
+  - A run happens in the review worktree, under `timeout 90`. Use at most 2 runs per review. These runs are counted separately from the Two-edit check's 6-run limit. If a run cannot execute, record the level actually reached and write "run not possible: <reason>". Never claim a run that did not happen.
+  - A consumer the change breaks is a finding on the Critical issues line, prefixed "Blast radius:", with file:line and how to check it.
+  - A consumer checked and found safe goes on the cleared list.
+  - If no fact that makes the change safe can be found, list the change as unproven and report it as a finding on the Critical issues line, prefixed "Blast radius:". This sets REQUEST CHANGES. Never a silent pass.
+
 ### Code quality
 - [ ] `clang-format` applied (no style violations)
 - [ ] Naming: PascalCase classes, camelCase methods/members, `m_` prefix for members
@@ -121,6 +132,7 @@ Implementer's pasted verification output:
 VERDICT: [APPROVE | APPROVE WITH NITS | REQUEST CHANGES | REJECT]
 Evidence spot-check: [command re-run + MATCH/MISMATCH, or N/A with reason]
 Two-edit check: [command, short failing tail, internal-only statement and restore confirmation (cmp result, any mismatch and its re-restore, any unchecked behaviors at the run limit); or N/A (diff adds or changes no tests); or "two-edit check not runnable"]
+Blast-radius check: [consumers checked, the safe-because fact, proof level (stated, cited, walked, or run with command and output), cleared list; or "N/A (<reason>)"]
 
 Critical issues (must fix before merge -- INTRODUCED only): [list or NONE]
 Non-blocking notes: [one line per item; omit this line when there are none]

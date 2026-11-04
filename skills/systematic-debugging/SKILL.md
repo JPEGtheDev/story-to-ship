@@ -77,6 +77,7 @@ The BEFORE PROCEEDING gate above still applies to runtime behavior bugs, in addi
 - Read the error message **completely** -- do not skim the last line and assume you understand it
 - Reproduce consistently -- what exact steps trigger the failure?
 - Check recent changes -- `git diff`, recent commits -- what changed?
+- For a bug that appeared between a known good commit and a known bad commit, run `git bisect` between them before reading code to form a hypothesis; the pass/fail check is the reproduction from this phase. With no known good commit, skip the bisect and say so. For a runtime behavior bug, the researcher's observation artifact is the pass/fail check.
 - For **build errors**: read the FULL compiler output, not just the first error
 - For **test failures**: read the FULL test output; run the specific failing test in isolation
 - For **visual regression failures**: examine the diff image, compare pixels

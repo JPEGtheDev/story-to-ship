@@ -10,6 +10,9 @@
 PAGE_EDIT=${PAGE_EDIT:-$(dirname "$0")/../page-edit.sh}
 TEMPLATE=$(dirname "$0")/../../references/owner-questions-template.html
 TAB=$(printf '\t')
+REAL_AWK=$(command -v awk) || exit 2
+REAL_CP=$(command -v cp) || exit 2
+REAL_MV=$(command -v mv) || exit 2
 
 # One-line card and context HTML. The card holds one id attribute; its context block has id c-q8.
 CARD8='<article class="q" id="q8"><div class="qhead"><a class="qid" href="#c-q8">Q8</a><span class="topic">Story: Topic &amp; more</span></div><p>Question?</p></article>'
@@ -620,9 +623,27 @@ expect_unchanged "status label repeated" 1 'FAIL status: label Working repeated'
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a' '</main>'
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
 write_lines "$CASE_IN" 'status=Working' 'text=b'
 expect_unchanged "status line has no closing tag" 1 'FAIL status: label Working has no closing tag on its line' \
   status "$CASE_PAGE" "$CASE_IN"
+assert_listing_same "status line has no closing tag: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  data-status="Working">Working: a</p>' '</main>'
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'status=Working' 'text=b'
+expect_unchanged "status line has no opening tag before the attribute" 1 \
+  'FAIL status: label Working has no closing tag on its line' status "$CASE_PAGE" "$CASE_IN"
+assert_listing_same "status line has no opening tag: no temp file left beside the page" "$CASE_DIR/listing-before"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working" x' '</main>'
+snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+write_lines "$CASE_IN" 'status=Working' 'text=b'
+expect_unchanged "status line has no closing angle bracket after the attribute" 1 \
+  'FAIL status: label Working has no closing tag on its line' status "$CASE_PAGE" "$CASE_IN"
+assert_listing_same "status line has no closing angle bracket: no temp file left beside the page" "$CASE_DIR/listing-before"
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p data-status="Working">Working: a</p>' '</main>'
@@ -866,6 +887,78 @@ write_lines "$CASE_IN" 'pr=131'
 expect_args "ready-remove a multi-line li whole" 0 'OK ready-remove: 131' ready-remove "$CASE_PAGE" "$CASE_IN"
 assert_file_eq "ready-remove 131: block ends at its own closing tag, nested closing tag at deeper indent ignored" \
   "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# ---- every op: a failure after the temp file exists leaves no temp file ----
+
+# stub_tool <tool> <real path> <case pattern>: writes CASE_DIR/bin/<tool>, a stand-in that exits 1 when its arguments
+# ("$*") match the case pattern (a glob with no spaces) and otherwise runs the real tool.
+# The single-quoted lines are stub source text, so their $ must stay unexpanded.
+# shellcheck disable=SC2016
+stub_tool() {
+  mkdir -p "$CASE_DIR/bin" || exit 2
+  printf '%s\n' '#!/bin/sh' 'case "$*" in' "  $3) exit 1 ;;" 'esac' "exec \"$2\" \"\$@\"" > "$CASE_DIR/bin/$1" || exit 2
+  chmod +x "$CASE_DIR/bin/$1" || exit 2
+}
+
+# op_case <op>: a fresh case holding the page and the input that the op edits.
+op_case() {
+  new_case
+  case "$1" in
+    add-card)
+      cat "$REAL" > "$CASE_PAGE"
+      write_lines "$CASE_IN" 'before=q7' "card=$CARD8"
+      ;;
+    hide)
+      cat "$REAL" > "$CASE_PAGE"
+      write_lines "$CASE_IN" 'hide=q7'
+      ;;
+    status)
+      cat "$REAL" > "$CASE_PAGE"
+      write_lines "$CASE_IN" 'status=Working' 'text=Two runners on 427'
+      ;;
+    ready-add)
+      cat "$READY130" > "$CASE_PAGE"
+      write_lines "$CASE_IN" 'pr=131' "entry=$ENTRY131"
+      ;;
+    ready-remove)
+      cat "$READY130" > "$CASE_PAGE"
+      write_lines "$CASE_IN" 'pr=130'
+      ;;
+  esac
+}
+
+# expect_temp_gone <name> <op> <reason>: runs the op with the case's stubs first on PATH. The run exits 1 with the one
+# FAIL line, leaves the page byte-identical and leaves no temp file beside the page.
+expect_temp_gone() {
+  snapshot_dir "$CASE_DIR/page" "$CASE_DIR/listing-before"
+  save_page
+  RC=0
+  PATH="$CASE_DIR/bin:$PATH" sh "$PAGE_EDIT" "$2" "$CASE_PAGE" "$CASE_IN" > "$CASE_DIR/out" 2> "$CASE_DIR/err" || RC=$?
+  assert_exit "$1 exit" 1 "$RC"
+  assert_stdout "$1 stdout" "FAIL $2: $3" "$CASE_DIR/out"
+  assert_empty "$1 stderr" "$CASE_DIR/err"
+  assert_unchanged "$1"
+  assert_listing_same "$1: no temp file left beside the page" "$CASE_DIR/listing-before"
+}
+
+for _pt_op in add-card hide status ready-add ready-remove; do
+  case "$_pt_op" in
+    add-card) _pt_awk='*n1*' ;;
+    status) _pt_awk='*open_end*' ;;
+    ready-add) _pt_awk='*ENTRY_HTML*' ;;
+    *) _pt_awk='*RANGES*' ;;
+  esac
+  op_case "$_pt_op"
+  stub_tool cp "$REAL_CP" '-p*'
+  expect_temp_gone "$_pt_op: mode copy fails after the temp file exists" "$_pt_op" "cannot copy the mode of $CASE_PAGE"
+  op_case "$_pt_op"
+  stub_tool awk "$REAL_AWK" "$_pt_awk"
+  expect_temp_gone "$_pt_op: awk write fails after the temp file exists" "$_pt_op" \
+    "cannot write a temp file beside $CASE_PAGE"
+  op_case "$_pt_op"
+  stub_tool mv "$REAL_MV" '*'
+  expect_temp_gone "$_pt_op: move over the page fails after the temp file exists" "$_pt_op" "cannot write $CASE_PAGE"
+done
 
 # ---- status, ready-add and ready-remove: unreadable page or input ----
 

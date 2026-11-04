@@ -56,7 +56,7 @@ Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
+**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). A failing test caused by wrong CWD is not a regression and requires no fix.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 

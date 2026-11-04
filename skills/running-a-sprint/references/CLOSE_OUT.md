@@ -8,7 +8,7 @@ Run it with absolute paths from the launcher's session, with the working directo
 
 `sh skills/running-a-sprint/scripts/closeout-check.sh -r <repo root> -n <PR number> -b <branch> -p <prefix> [-x <reconcile prefix>] [-P <plan file name>]`
 
-- `-r` is the absolute path of the repository root. A trailing slash is stripped; a relative path is a usage error (exit 2) before anything runs.
+- `-r` is the absolute path of the repository root. Trailing slashes are stripped; a relative path is a usage error (exit 2) before anything runs.
 - `-n` is the pull request number.
 - `-b` is the story branch name.
 - `-p` is the runner worktree prefix. The runner worktree is `<root>/.worktrees/<prefix>`, and its children are the registered `<root>/.worktrees/<prefix>-*` worktrees.
@@ -34,7 +34,7 @@ Run `closeout-check.sh` first, with the same options. When every line is OK, rea
    - `remove-worktree`: the runner worktree, then its registered children in path order (with `-x`, the reconcile worktree and its children after them). `OK remove-worktree: <path>`, or `OK remove-worktree: <path> absent` when the directory is gone. Removal uses `git worktree remove --force`.
    - `delete-branch-local`: the branch, with `branch -D` (and `reconcile-<x>` with `-x`). `OK delete-branch-local: <branch>`, or `... already gone` when the branch does not exist.
    - `delete-branch-origin`: the branch on origin, probed with ls-remote. `OK delete-branch-origin: <branch>`, or `... already gone` when origin does not have it. Nothing is pushed with --force.
-   - `fast-forward`: root main to origin/main with `--ff-only`. `OK fast-forward: main at <first 7 characters of the sha>` (sha: Secure Hash Algorithm, the commit hash that git prints).
+   - `fast-forward`: root main to origin/main with `--ff-only`. `OK fast-forward: main at <first 7 characters of the SHA>` (SHA: Secure Hash Algorithm, the commit hash that git prints).
 3. Then three reads, one line each, in this order:
    - `issue`: `OK issue: #<issue number> <state>`.
    - `epic`, only with `-e`: the first line of the epic body that holds a checkbox (`- [x]`, `- [X]` or `- [ ]`) and names `#<issue number>` as a whole number prints `OK epic: #<epic> [x] #<issue>` or `[ ]`. When no such line exists it prints `FAIL epic: #<epic> has no line naming #<issue>`. The checkbox must start the line (after optional leading spaces), and the line counts only when the first `#<number>` after the checkbox is `#<issue>`. The script only reads this line; it does not tick it.
@@ -50,7 +50,8 @@ A re-run after a partial run reads the branch tip that still exists: the local b
 
 - While the tip exists, the re-run passes if the other checks pass, and it prints the absent and already gone lines for what the earlier run removed. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete.
 - Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the re-run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
-- When a run stops at a failed step, or a re-run is refused, the launcher finishes the close-out by hand: the steps the script printed OK for are done, and the rest are SKILL.md Close-out step 4 (delete the branch locally and on origin), step 5 (fast-forward main) and step 6 (tick the epic checkbox), then the reads of step 6 (the issue state, the epic line and the flaky count).
+- The by-hand fallback applies only after a partial run (a step printed FAIL after earlier steps printed OK, or a re-run is refused because the check printed `FAIL patch: branch tip not found`) and after the root-not-on-main refusal. The launcher then finishes the close-out by hand: the steps the script printed OK for are done, and the rest are SKILL.md Close-out step 4 (delete the branch locally and on origin), step 5 (fast-forward main) and step 6 (tick the epic checkbox), then the reads of step 6 (the issue state, the epic line and the flaky count). When `remove-worktree` is the step that failed, the rest of step 3 is manual too: remove the remaining runner and child worktrees by hand (with `-x`, the reconcile worktree and its children as well).
+- A FAIL on patch, worktree, merged or ancestry goes to the owner as SKILL.md Close-out steps 2 and 3 say; it is not a by-hand fallback.
 
 The `already gone` line for origin can also print on a first run: when the branch was removed on origin outside the run, the check still passes.
 

@@ -81,7 +81,7 @@ A launch card also states, for each story it names:
 
 ## Editing the page
 
-The launcher edits its local copy of the page file, kept outside the repository as the Failure handling rules already imply, with this command:
+The launcher edits its local copy of the page file with this command:
 
 `sh skills/running-a-sprint/scripts/page-edit.sh <op> <page file> <input file>`
 
@@ -93,7 +93,7 @@ The input file holds key=value lines, each split at its first "=". After the edi
 - `ready-add`: keys `pr` (digits only) and `entry` (one line of HTML). The new entry goes first in the Ready to merge list.
 - `ready-remove`: key `pr`. Removes that pull request's Ready to merge entry.
 
-Each run prints one OK line per op, or one FAIL line. Exit codes: 0 when all ops are OK, 1 on a FAIL, 2 on a usage error. When an anchor is missing or occurs more than once, a key is missing, or the input has non-ASCII text, the script fails and leaves the page file byte-identical. The launcher reads the FAIL line, fixes the input and runs the script again. It does not edit the page file by hand to get around a FAIL.
+Each run prints one OK line per op (for `hide`, one per distinct id), or one FAIL line. Exit codes: 0 when all ops are OK, 1 on a FAIL, 2 on a usage error. When an anchor is missing or occurs more than once, a key is missing, or the input has any character other than printable ASCII and tab, the script fails and leaves the page file byte-identical. The launcher reads the FAIL line, fixes the input and runs the script again. It does not edit the page file by hand to get around a FAIL.
 
 ## Numbering restart
 

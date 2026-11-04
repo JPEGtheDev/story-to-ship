@@ -1,6 +1,6 @@
 # Moved Rationale
 
-The Context and Forces blocks of four sections of `../SKILL.md`, moved here word for word so SKILL.md stays under the 5,000-token limit, except that the Capacity Forces line now also names the open pull request's changed files as an overlap signal.
+The Context and Forces blocks of four sections of `../SKILL.md`, moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second.
 
 ## Capacity
 

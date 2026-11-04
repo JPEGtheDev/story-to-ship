@@ -175,10 +175,10 @@ check_ci() {
 check_branch() {
   _remote=${BASE%%/*}
   _branch=${BASE#*/}
-  _fetch_ok=1
-  GIT_TERMINAL_PROMPT=0 git -C "$WT" fetch "$_remote" "$_branch" >/dev/null 2>&1 || _fetch_ok=0
+  GIT_TERMINAL_PROMPT=0 git -C "$WT" fetch "$_remote" "$_branch" >/dev/null 2>&1
+  _fetch_rc=$?
   printf 'NOTE fetch: ran git fetch %s %s\n' "$_remote" "$_branch"
-  if [ "$_fetch_ok" -eq 0 ]; then
+  if [ "$_fetch_rc" -ne 0 ]; then
     emit fail branch "fetch failed"
     return
   fi
@@ -248,7 +248,7 @@ check_footer() {
 check_coauthor() {
   _bhit=$(pr_field 'body // ""' | tr -d '\r' | grep -ciE '^ *co-authored-by:')
   if ! _log=$(git -C "$WT" log --abbrev=7 --format='%x01%h%n%B' "$BASE..HEAD") ||
-    ! _n=$(git -C "$WT" rev-list --count "$BASE..HEAD"); then
+    ! _commits=$(git -C "$WT" rev-list --count "$BASE..HEAD"); then
     emit fail coauthor "commits unreadable"
     return
   fi
@@ -257,16 +257,12 @@ check_coauthor() {
     tolower($0) ~ /^ *co-authored-by:/ && !(sha in seen) { seen[sha] = 1; list = list (list == "" ? "" : "; ") "commit " sha }
     END { print list }')
   if [ "$_bhit" -gt 0 ]; then
-    if [ -n "$_all" ]; then
-      _all="body; $_all"
-    else
-      _all=body
-    fi
+    _all="body${_all:+; $_all}"
   fi
   if [ -n "$_all" ]; then
     emit fail coauthor "$_all"
   else
-    emit ok coauthor "none in body or $_n commits"
+    emit ok coauthor "none in body or $_commits commits"
   fi
 }
 

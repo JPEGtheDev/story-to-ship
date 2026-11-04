@@ -95,6 +95,13 @@ pr_field() {
   printf '%s\n' "$PR_JSON" | jq -r ".$1"
 }
 
+# ci_query <filter>: run a jq filter over PR_JSON with the effective-state definition in front. The
+# effective state of a rollup entry is its conclusion when non-empty, else its status; a StatusContext
+# uses its state.
+ci_query() {
+  printf '%s\n' "$PR_JSON" | jq -r 'def eff: if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end;'"$1"
+}
+
 # check_field <name> <field> <expected>: the PR field equals the expected value.
 check_field() {
   _v=$(pr_field "$2")
@@ -137,9 +144,7 @@ check_head() {
 # check_ci: every statusCheckRollup entry is SUCCESS. A CheckRun uses its conclusion when non-empty,
 # else its status; a StatusContext uses its state. Entries are named by name (CheckRun) or context.
 check_ci() {
-  # _eff: jq definition of the effective state of one rollup entry (the conclusion, else the status).
-  _eff='def eff: if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end;'
-  _total=$(printf '%s\n' "$PR_JSON" | jq -r '(.statusCheckRollup // []) | length') || {
+  _total=$(ci_query '(.statusCheckRollup // []) | length') || {
     emit fail ci "rollup unreadable"
     return
   }
@@ -147,7 +152,7 @@ check_ci() {
     emit fail ci "no checks"
     return
   fi
-  _nbad=$(printf '%s\n' "$PR_JSON" | jq -r "$_eff"'[(.statusCheckRollup // [])[] | eff | select(. != "SUCCESS")] | length') || {
+  _nbad=$(ci_query '[(.statusCheckRollup // [])[] | eff | select(. != "SUCCESS")] | length') || {
     emit fail ci "rollup unreadable"
     return
   }
@@ -155,7 +160,7 @@ check_ci() {
     emit ok ci "$_total checks successful"
     return
   fi
-  _bad=$(printf '%s\n' "$PR_JSON" | jq -r "$_eff"'[(.statusCheckRollup // [])[] | {n: (if .__typename == "StatusContext" then .context else .name end), s: eff} | select(.s != "SUCCESS") | "\(.n)=\(.s)"] | join(",")') || {
+  _bad=$(ci_query '[(.statusCheckRollup // [])[] | {n: (if .__typename == "StatusContext" then .context else .name end), s: eff} | select(.s != "SUCCESS") | "\(.n)=\(.s)"] | join(",")') || {
     emit fail ci "rollup unreadable"
     return
   }

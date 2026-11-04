@@ -44,7 +44,7 @@ Use this skill for every one of these situations:
 - Performance problems
 - Anything the user describes as "broken"
 
-**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue. These are exactly when the iron law is most needed -- and most likely to be skipped.
+**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue.
 
 ---
 
@@ -122,8 +122,6 @@ Before stating a root cause (the end of Phase 1), write this line:
 Root cause: X because Y (evidence: <artifact or output line>)
 ```
 
-This shows gate item 3 ran. It does not prove the evidence is correct.
-
 ---
 
 ## The 3-Strikes Architecture Rule
@@ -135,7 +133,7 @@ Examine whether the approach is architecturally wrong before continuing. Common 
 - Fixes require "massive refactoring" that keeps expanding
 - Each fix creates new symptoms elsewhere
 
-**Discuss with the user before attempting more fixes.** The problem is likely not what you think it is.
+**Discuss with the user before attempting more fixes.**
 
 ---
 

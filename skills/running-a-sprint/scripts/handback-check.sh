@@ -133,6 +133,8 @@ check_head() {
 # check_ci: every statusCheckRollup entry is SUCCESS. A CheckRun uses its conclusion when non-empty,
 # else its status; a StatusContext uses its state. Entries are named by name (CheckRun) or context.
 check_ci() {
+  # _eff: jq definition of the effective state of one rollup entry (the conclusion, else the status).
+  _eff='def eff: if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end;'
   _total=$(printf '%s\n' "$PR_JSON" | jq -r '(.statusCheckRollup // []) | length') || {
     emit fail ci "rollup unreadable"
     return
@@ -141,7 +143,7 @@ check_ci() {
     emit fail ci "no checks"
     return
   fi
-  _nbad=$(printf '%s\n' "$PR_JSON" | jq -r '[(.statusCheckRollup // [])[] | (if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end) | select(. != "SUCCESS")] | length') || {
+  _nbad=$(printf '%s\n' "$PR_JSON" | jq -r "$_eff"'[(.statusCheckRollup // [])[] | eff | select(. != "SUCCESS")] | length') || {
     emit fail ci "rollup unreadable"
     return
   }
@@ -149,7 +151,7 @@ check_ci() {
     emit ok ci "$_total checks successful"
     return
   fi
-  _bad=$(printf '%s\n' "$PR_JSON" | jq -r '[(.statusCheckRollup // [])[] | {n: (if .__typename == "StatusContext" then .context else .name end), s: (if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end)} | select(.s != "SUCCESS") | "\(.n)=\(.s)"] | join(",")') || {
+  _bad=$(printf '%s\n' "$PR_JSON" | jq -r "$_eff"'[(.statusCheckRollup // [])[] | {n: (if .__typename == "StatusContext" then .context else .name end), s: eff} | select(.s != "SUCCESS") | "\(.n)=\(.s)"] | join(",")') || {
     emit fail ci "rollup unreadable"
     return
   }

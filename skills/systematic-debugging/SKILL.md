@@ -44,7 +44,7 @@ Use this skill for every one of these situations:
 - Performance problems
 - Anything the user describes as "broken"
 
-**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue. These are exactly when the iron law is most needed -- and most likely to be skipped.
+**Use this skill especially** when under time pressure, when "one quick fix" seems obvious, when you've already tried a fix that didn't work, or when you don't fully understand the issue.
 
 ---
 
@@ -56,7 +56,7 @@ Each phase MUST be completed in order.
 
 ### Phase 0: Write the Problem Down First
 
-**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
+**First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). A failing test caused by wrong CWD is not a regression and requires no fix.
 
 Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
@@ -77,6 +77,7 @@ The BEFORE PROCEEDING gate above still applies to runtime behavior bugs, in addi
 - Read the error message **completely** -- do not skim the last line and assume you understand it
 - Reproduce consistently -- what exact steps trigger the failure?
 - Check recent changes -- `git diff`, recent commits -- what changed?
+- For a bug that appeared between a known good commit and a known bad commit, run `git bisect` between them before reading code, and form a hypothesis only after the bisect names the first bad commit; the pass/fail check is the reproduction from this phase. With no known good commit, skip the bisect and say so. For a runtime behavior bug, the researcher's observation artifact is the pass/fail check.
 - For **build errors**: read the FULL compiler output, not just the first error
 - For **test failures**: read the FULL test output; run the specific failing test in isolation
 - For **visual regression failures**: examine the diff image, compare pixels
@@ -121,8 +122,6 @@ Before stating a root cause (the end of Phase 1), write this line:
 Root cause: X because Y (evidence: <artifact or output line>)
 ```
 
-This shows gate item 3 ran. It does not prove the evidence is correct.
-
 ---
 
 ## The 3-Strikes Architecture Rule
@@ -134,7 +133,7 @@ Examine whether the approach is architecturally wrong before continuing. Common 
 - Fixes require "massive refactoring" that keeps expanding
 - Each fix creates new symptoms elsewhere
 
-**Discuss with the user before attempting more fixes.** The problem is likely not what you think it is.
+**Discuss with the user before attempting more fixes.**
 
 ---
 

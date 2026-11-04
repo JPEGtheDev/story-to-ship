@@ -169,3 +169,12 @@ Terminate immediately on encountering irrecoverable state corruption rather than
 ## Why Write the Problem Down First
 
 Vague problem statements produce vague investigations.
+
+## Moved Rationale
+
+Sentences moved word for word from the main file of the debugging skill:
+
+- After the list of times to use the skill: "These are exactly when the iron law is most needed -- and most likely to be skipped."
+- After the gate canary line: "This shows gate item 3 ran. It does not prove the evidence is correct."
+- After "Discuss with the user before attempting more fixes.": "The problem is likely not what you think it is."
+- After the working-directory check: "CWD mismatch is the most common source of false test failures"

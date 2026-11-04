@@ -130,8 +130,34 @@ check_head() {
   fi
 }
 
+# check_ci: every statusCheckRollup entry is SUCCESS. A CheckRun uses its conclusion when non-empty,
+# else its status; a StatusContext uses its state. Entries are named by name (CheckRun) or context.
+check_ci() {
+  _total=$(printf '%s\n' "$PR_JSON" | jq -r '(.statusCheckRollup // []) | length') || {
+    emit fail ci "rollup unreadable"
+    return
+  }
+  if [ "$_total" -eq 0 ]; then
+    emit fail ci "no checks"
+    return
+  fi
+  _nbad=$(printf '%s\n' "$PR_JSON" | jq -r '[(.statusCheckRollup // [])[] | (if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end) | select(. != "SUCCESS")] | length') || {
+    emit fail ci "rollup unreadable"
+    return
+  }
+  if [ "$_nbad" -eq 0 ]; then
+    emit ok ci "$_total checks successful"
+    return
+  fi
+  _bad=$(printf '%s\n' "$PR_JSON" | jq -r '[(.statusCheckRollup // [])[] | {n: (if .__typename == "StatusContext" then .context else .name end), s: (if .__typename == "StatusContext" then .state elif ((.conclusion // "") != "") then .conclusion else (.status // "") end)} | select(.s != "SUCCESS") | "\(.n)=\(.s)"] | join(",")') || {
+    emit fail ci "rollup unreadable"
+    return
+  }
+  emit fail ci "$_nbad of $_total not successful: $_bad"
+}
+
 if ! fetch_pr; then
-  for _name in state draft mergeable head; do
+  for _name in state draft mergeable head ci; do
     emit fail "$_name" "gh failed"
   done
   exit 1
@@ -141,6 +167,7 @@ check_state
 check_draft
 check_mergeable
 check_head
+check_ci
 
 if [ "$FAILS" -eq 0 ]; then
   exit 0

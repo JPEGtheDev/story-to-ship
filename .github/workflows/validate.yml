@@ -942,6 +942,33 @@ jobs:
           fi
           echo "[+] Discovery formulation check pins are present"
 
+      # A pin proves the wording exists in the file, not where it sits or that an agent follows it. The two rule lines are whole-line matches, so text added to a pinned line fails; the pointer pin is a substring match and pins the pointer, not a rule.
+      # FLAKY_TESTS_PATH and TESTING_SKILL_PATH override the file paths so the gate-can-fail proof can point this step at temp copies; CI never sets them.
+      - name: Check the flaky-test rules are pinned
+        run: |
+          missing=0
+          f="${FLAKY_TESTS_PATH:-skills/testing/references/FLAKY_TESTS.md}"
+          g="${TESTING_SKILL_PATH:-skills/testing/SKILL.md}"
+          for s in \
+            'A test is flaky when it passes and fails on the same commit and setup with no change.' \
+            'No automatic retries in the test runner or CI; a retry hides the flake.'
+          do
+            if ! grep -qxF -- "$s" "$f"; then
+              printf 'FAILED: %s has no line equal to: %s\n' "$f" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          s='references/FLAKY_TESTS.md'
+          if ! grep -qF -- "$s" "$g"; then
+            printf 'FAILED: %s has no text containing: %s\n' "$g" "$s"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing flaky-test rule pin(s)"
+            exit 1
+          fi
+          echo "[+] flaky-test rule pins are present"
+
       # This 20,000-character cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it

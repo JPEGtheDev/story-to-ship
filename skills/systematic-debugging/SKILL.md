@@ -58,7 +58,7 @@ Each phase MUST be completed in order.
 
 **First: verify your test runner current working directory (CWD).** Run `pwd` and confirm it matches the required execution directory (e.g., a test binary that must be run from the build directory). CWD mismatch is the most common source of false test failures -- a failing test caused by wrong CWD is not a regression and requires no fix.
 
-Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. Vague problem statements produce vague investigations. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
+Before touching any other tool, write one precise sentence describing the failure: what is failing, what was expected, and what actually happened. If you cannot write the sentence, you do not yet understand the problem well enough to investigate it.
 
 See `references/DEBUGGING_TACTICS.md` for the full Feynman Algorithm and the RubberDucking tactic.
 
@@ -171,7 +171,7 @@ If you find yourself thinking any of the following, **STOP and return to Phase 1
 | "I'll write the test after confirming the fix works" | Untested fixes don't stick. A test first proves the fix actually resolves the issue. |
 | "Multiple fixes at once saves time" | Can't isolate what worked. Creates new bugs. |
 | "I've already looked at it, I know the problem" | Looking at symptoms != understanding root cause. |
-| "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. |
+| "The test is flaky, just rerun it" | Flaky = non-determinism = root cause needed. See the flaky-test rules in the testing skill. |
 | "One more fix attempt" (after 3 failures) | 3+ failures = architectural problem. Question the approach. |
 | "I found it -- patching it now" | "Debug" means investigate and report. It does not mean fix. Present findings, wait for instruction. |
 | "I already started debugging before loading this skill -- I'll use it from here" | Retroactive skill load violates this skill's Iron Law: the earlier investigation ran without the Phase 0 problem statement and the BEFORE PROCEEDING gate. Any investigation performed before loading this skill is tainted by unverified assumptions. **STOP. Restart from Phase 0 with this skill active.** |

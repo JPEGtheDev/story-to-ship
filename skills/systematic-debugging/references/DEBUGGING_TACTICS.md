@@ -165,3 +165,7 @@ Terminate immediately on encountering irrecoverable state corruption rather than
 
 - `testing` -- test taxonomy; saw-test-fail gate
 - `cpp-safety` -- resource ownership patterns; exception-safe destructors
+
+## Why Write the Problem Down First
+
+Vague problem statements produce vague investigations.

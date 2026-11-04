@@ -125,6 +125,7 @@ If you catch yourself thinking any of these, STOP and take the action the item n
 - "Tests after achieve the same goals"
 - "I need to get the implementation right before I know what to test"
 - "Just this once" or "This is different because..."
+- "A test failed once and passed on rerun, so retry it" -- STOP. Do not rerun for a green result; open an issue with both run links and remove the nondeterminism. Full text: `references/FLAKY_TESTS.md`.
 
 **Each item above names its own action; items without one: delete code written before the test and start over with RED.**
 
@@ -173,4 +174,5 @@ For CI workflow rules (artifact uploads, permissions, PR comments), see the `wor
 - `references/testing-anti-patterns.md` -- common testing anti-patterns (testing mock behavior, test-only methods in production classes, mocking without understanding, incomplete mock data, visual regression tests without Red-Green, happy-path-only doubles)
 - `references/TEST_SMELLS.md` -- test smells catalog (Fowler/van Deursen): patterns that undermine reliability, readability, or correctness
 - `references/TESTING_PATTERNS.md` -- generic testing canon: AAA rules + template, test double taxonomy, test size model (Software Engineering at Google), depended-upon behavior rule, coincidence articulation, Agile Alarm Bell, naming examples
+- `references/FLAKY_TESTS.md` -- flaky-test definition, no-retry rule, issue, fix and seed rules
 

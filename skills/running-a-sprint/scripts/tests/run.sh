@@ -1,6 +1,7 @@
 #!/bin/sh
 # Runs every tests/*.test.sh file with sh and prints one line per file plus a summary.
-# Exits 1 when a test file fails or when no *.test.sh file exists.
+# Exits 1 when a test file fails or when no *.test.sh file exists, and 2 when the script's own directory cannot be
+# entered (line 5, the cd fails).
 # Usage: sh skills/running-a-sprint/scripts/tests/run.sh
 DIR=$(cd "$(dirname "$0")" && pwd) || exit 2
 

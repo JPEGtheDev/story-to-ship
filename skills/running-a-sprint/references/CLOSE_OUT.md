@@ -1,14 +1,14 @@
 # Close-out scripts
 
-The Close-out section of `../SKILL.md` lists the steps. Two POSIX sh scripts in `../scripts/` run its steps 1 to 5 and the reads of step 6. The rules stay in SKILL.md. The Close-out section is unchanged; these scripts are the way to run its steps 1-5 and the reads of step 6. The lane_sum count and the scorecard row, the checkbox tick of step 6, the reconcile of step 7 and the ledger edit stay manual.
+The Close-out section of `../SKILL.md` lists the steps. Two POSIX (Portable Operating System Interface) sh scripts in `../scripts/` run its steps 1 to 5 and the reads of step 6. The rules stay in SKILL.md, and the Close-out section is unchanged; these scripts are the way to run its steps 1-5 and the reads of step 6. The lane_sum count and the scorecard row, the checkbox tick of step 6, the reconcile of step 7 and the ledger edit stay manual.
 
 ## closeout-check.sh (step 1, step 2 and the worktree part of step 3)
 
-Run it with absolute paths from the launcher's session:
+Run it with absolute paths from the launcher's session, with the working directory set to the repository root (the relative path below resolves only there):
 
 `sh skills/running-a-sprint/scripts/closeout-check.sh -r <repo root> -n <PR number> -b <branch> -p <prefix> [-x <reconcile prefix>] [-P <plan file name>]`
 
-- `-r` is the absolute path of the repository root.
+- `-r` is the absolute path of the repository root. A trailing slash is stripped; a relative path is a usage error (exit 2) before anything runs.
 - `-n` is the pull request number.
 - `-b` is the story branch name.
 - `-p` is the runner worktree prefix. The runner worktree is `<root>/.worktrees/<prefix>`, and its children are the registered `<root>/.worktrees/<prefix>-*` worktrees.
@@ -27,18 +27,18 @@ Each check prints `OK <name>: <value>` or `FAIL <name>: <value>`. The exit codes
 
 ## closeout-steps.sh (steps 3 to 5 and the reads of step 6)
 
-It takes the same options as the check, plus `-i <issue number>` (required) and `-e <epic issue number>` (optional). It runs in this order:
+Run `closeout-check.sh` first, with the same options. When every line is OK, read the plan file and run the lane_sum count (SKILL.md Close-out step 3), and only then run this script, whose worktree removal deletes the untracked plan file that holds the lane entries and the inline commit hashes. It takes the same options as the check, plus `-i <issue number>` (required) and `-e <epic issue number>` (optional). It runs in this order:
 
 1. It runs closeout-check.sh with the same options and prints the check output unchanged. A FAIL line in the check, or a repo root that is not on main, refuses the run before any change: `FAIL steps: refused, close-out check failed`, or `FAIL steps: refused, repo root is on <branch>, not main` (a detached root HEAD is named "detached HEAD"). The exit code is 1.
 2. Then the steps, one line each:
    - `remove-worktree`: the runner worktree, then its registered children in path order (with `-x`, the reconcile worktree and its children after them). `OK remove-worktree: <path>`, or `OK remove-worktree: <path> absent` when the directory is gone. Removal uses `git worktree remove --force`.
    - `delete-branch-local`: the branch, with `branch -D` (and `reconcile-<x>` with `-x`). `OK delete-branch-local: <branch>`, or `... already gone` when the branch does not exist.
    - `delete-branch-origin`: the branch on origin, probed with ls-remote. `OK delete-branch-origin: <branch>`, or `... already gone` when origin does not have it. Nothing is pushed with --force.
-   - `fast-forward`: root main to origin/main with `--ff-only`. `OK fast-forward: main at <first 7 characters of the sha>`.
+   - `fast-forward`: root main to origin/main with `--ff-only`. `OK fast-forward: main at <first 7 characters of the sha>` (sha: Secure Hash Algorithm, the commit hash that git prints).
 3. Then three reads, one line each, in this order:
    - `issue`: `OK issue: #<issue number> <state>`.
-   - `epic`, only with `-e`: the first line of the epic body that holds a checkbox (`- [x]`, `- [X]` or `- [ ]`) and names `#<issue number>` as a whole number prints `OK epic: #<epic> [x] #<issue>` or `[ ]`. When no such line exists it prints `FAIL epic: #<epic> has no line naming #<issue>`. The script only reads this line; it does not tick it.
-   - `flaky`: `OK flaky: <count>`, the number of distinct head SHAs of the branch that have both a failure and a success run in `gh run list`.
+   - `epic`, only with `-e`: the first line of the epic body that holds a checkbox (`- [x]`, `- [X]` or `- [ ]`) and names `#<issue number>` as a whole number prints `OK epic: #<epic> [x] #<issue>` or `[ ]`. When no such line exists it prints `FAIL epic: #<epic> has no line naming #<issue>`. The checkbox must start the line (after optional leading spaces), and the line counts only when the first `#<number>` after the checkbox is `#<issue>`. The script only reads this line; it does not tick it.
+   - `flaky`: `OK flaky: <count>`, the number of distinct head SHAs of the branch that have both a run with the conclusion `failure` and a run with the conclusion `success` in `gh run list`; other conclusions, such as `startup_failure`, do not count.
 
 A read whose gh call exits non-zero or prints invalid JSON prints `FAIL <read>: gh failed`. The other reads still run, and the exit code is 1.
 
@@ -50,6 +50,7 @@ A re-run after a partial run reads the branch tip that still exists: the local b
 
 - While the tip exists, the re-run passes if the other checks pass, and it prints the absent and already gone lines for what the earlier run removed. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete.
 - Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the re-run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
+- When a run stops at a failed step, or a re-run is refused, the launcher finishes the close-out by hand: the steps the script printed OK for are done, and the rest are SKILL.md Close-out step 4 (delete the branch locally and on origin), step 5 (fast-forward main) and step 6 (tick the epic checkbox), then the reads of step 6 (the issue state, the epic line and the flaky count).
 
 The `already gone` line for origin can also print on a first run: when the branch was removed on origin outside the run, the check still passes.
 
@@ -59,3 +60,4 @@ The `already gone` line for origin can also print on a first run: when the branc
 - The checkbox tick of step 6. The script only reads the epic line.
 - The reconcile of step 7, from `RECONCILE.md`.
 - The ledger edit.
+- An unregistered directory under `<root>/.worktrees/` with a runner or reconcile prefix: the scripts list only registered worktrees, so the launcher finds such a directory by hand (for example with `ls`) and removes it by hand, as SKILL.md Close-out step 3 says.

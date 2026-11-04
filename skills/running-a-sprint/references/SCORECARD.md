@@ -94,6 +94,16 @@ Each PR gets one class, chosen in this order: dependency when the author is Depe
 
 The launcher writes the row itself at close-out from its sprint ledger, which logs each questions-page answer per PR. No script reads the questions page. A logged questions-page answer that asks for a change to the merged PR counts as yes. An answer to a question a runner relayed is not an owner change, as the Interventions cause bullet says. When the launcher starts a new ledger, it first copies the Needed owner change rows into it, so counts and runs carry across sprints.
 
+### CI flaky and infra-killed runs
+
+At each close-out the launcher counts the CI runs of the repository from GitHub run history. A flaky run is one that failed and then passed on a rerun of the same commit, counted as a run with attempt above 1 and conclusion success. An infra-killed run is one whose conclusion is cancelled or timed out; concurrency cancellations count here too. Both counts are approximations of the rule. Run this command with <owner/repo> replaced by the repository:
+
+```bash
+gh run list --repo <owner/repo> --limit 400 --json attempt,conclusion | jq '{flaky:(map(select(.attempt>1 and .conclusion=="success"))|length), infra:(map(select(.conclusion=="cancelled" or .conclusion=="timed_out"))|length)}'
+```
+
+The launcher writes both counts into the scorecard row at every close-out. The previous count is the CI runs bullet of the last close-out's row for that repository. The launcher tells the owner only when a count differs from the previous count. With no previous row, or a previous row that reads unknown, it reports the count. When a gh read fails, the row reads unknown for both counts and nothing is reported.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.
@@ -110,11 +120,14 @@ Copy one row per runner into the sprint ledger.
 - Owner-reserved items decided without a question: <n>; owner questions relayed: <n>
 - Interventions cause: <one entry per owner intervention after the first PR ready hand-back (change request, follow-up issue for a defect, reopened story; an answer to a relayed owner question is not one), each marked "missed requirement" (the owner's message names behavior that no acceptance criterion or Discovery rule of the story covered; Discovery is the runner's three-amigos requirements step) or "other" (including behavior a criterion covered that the PR did not meet); the launcher records each entry in the runner's ledger entry when the owner's message arrives and adds it to this row, amending a row already written at close-out; none when there was none>
 - Needed owner change: <yes, no or unknown>; repository: <owner/repo>; class: <dependency, CI, docs-only or code>
+- CI runs for this repository: flaky <n>, infra-killed <n>, or unknown
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
 - Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>
+
+The launcher tells the owner the CI counts only when they differ from the last row for that repository.
 
 Interventions cause stays as the detail behind the yes in Needed owner change.

@@ -134,117 +134,42 @@ check_ci() {
   assert_case "$1" "$2" "$TEST_TMP/want-$1"
 }
 
+# want_pr <file> <state line> <draft line> <mergeable line> <head line>: write the expected stdout of a check on
+# the shared fixture with one of the four PR lines changed. The ci, NOTE, branch and body lines are the all-good
+# ones (one ci check, 1 ahead 0 behind, one commit), so the file lists the lines that a case changes.
+want_pr() {
+  printf '%s\n' "$2" "$3" "$4" "$5" "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead 1" \
+    "$GOOD_CHECKS" > "$1"
+}
+
 # Case 1: all good. Every line is OK and the exit is 0.
 check_pr OPEN false MERGEABLE "$FIX_HEAD"
-cat > "$TEST_TMP/want-good" <<EOF
-OK state: OPEN
-OK draft: false
-OK mergeable: MERGEABLE
-OK head: $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-good" "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD"
 assert_case "all-good" 0 "$TEST_TMP/want-good"
 
 # Case 2: a closed PR fails the state line only.
 check_pr CLOSED false MERGEABLE "$FIX_HEAD"
-cat > "$TEST_TMP/want-closed" <<EOF
-FAIL state: CLOSED
-OK draft: false
-OK mergeable: MERGEABLE
-OK head: $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-closed" "FAIL state: CLOSED" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD"
 assert_case "state-closed" 1 "$TEST_TMP/want-closed"
 
 # Case 3: a draft PR fails the draft line only.
 check_pr OPEN true MERGEABLE "$FIX_HEAD"
-cat > "$TEST_TMP/want-draft" <<EOF
-OK state: OPEN
-FAIL draft: true
-OK mergeable: MERGEABLE
-OK head: $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-draft" "OK state: OPEN" "FAIL draft: true" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD"
 assert_case "draft-true" 1 "$TEST_TMP/want-draft"
 
 # Case 4: mergeable UNKNOWN and CONFLICTING both fail the mergeable line.
 check_pr OPEN false UNKNOWN "$FIX_HEAD"
-cat > "$TEST_TMP/want-unknown" <<EOF
-OK state: OPEN
-OK draft: false
-FAIL mergeable: UNKNOWN
-OK head: $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-unknown" "OK state: OPEN" "OK draft: false" "FAIL mergeable: UNKNOWN" "OK head: $FIX_HEAD"
 assert_case "mergeable-unknown" 1 "$TEST_TMP/want-unknown"
 
 check_pr OPEN false CONFLICTING "$FIX_HEAD"
-cat > "$TEST_TMP/want-conflicting" <<EOF
-OK state: OPEN
-OK draft: false
-FAIL mergeable: CONFLICTING
-OK head: $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-conflicting" "OK state: OPEN" "OK draft: false" "FAIL mergeable: CONFLICTING" "OK head: $FIX_HEAD"
 assert_case "mergeable-conflicting" 1 "$TEST_TMP/want-conflicting"
 
 # Case 5: a PR head that differs from the worktree HEAD fails the head line with both shas.
 check_pr OPEN false MERGEABLE "$FIX_BASE"
-cat > "$TEST_TMP/want-head" <<EOF
-OK state: OPEN
-OK draft: false
-OK mergeable: MERGEABLE
-FAIL head: pr $FIX_BASE worktree $FIX_HEAD
-OK ci: 1 checks successful
-$NOTE_LINE
-OK branch: behind 0, ahead 1
-OK closing: names #427
-OK footer: Generated with Claude Code
-OK coauthor: none in body or 1 commits
-OK ascii: body is ASCII
-OK inline: none
-OK moved: none given
-EOF
+want_pr "$TEST_TMP/want-head" "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" \
+  "FAIL head: pr $FIX_BASE worktree $FIX_HEAD"
 assert_case "head-differs" 1 "$TEST_TMP/want-head"
 
 # Case 6a: the gh stub exits non-zero. Exactly one FAIL line per check name, value "gh failed".

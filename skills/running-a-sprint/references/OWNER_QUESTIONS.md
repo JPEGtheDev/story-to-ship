@@ -76,6 +76,24 @@ A launch card also states, for each story it names:
 - A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or overlap, with no question number, so the owner sees that nothing is needed from them.
 - A card is removed once its question is answered and the answer is acted on. Removing it before the action is done is a defect.
 - Question numbers start at Q1. The owner may ask for numbering to restart; when it does, the page says when numbering restarted, and the ledger records the restart and the highest number used since.
+- The top of the page has two status lines, labeled Working and Needs you. Each element carries `data-status` with that label. Working holds a short count and summary of the runners at work. Needs you holds a short count and summary of what waits on the owner: the cards and the Ready to merge entries. These lines hold counts and summaries only; the "waiting on runners, not you" list names each story. The launcher replaces each line with the editor's `status` op after every change.
+- Each Ready to merge entry carries `data-pr` with its pull request number, which the editor uses to find it. A page built before this template, without the `data-status` or `data-pr` markers, makes the `status` op fail with "label ... not found" and the `ready-remove` op fail with "pr ... not found" for an older entry. The launcher then starts a new page from the current template instead of editing an old page by hand.
+
+## Editing the page
+
+The launcher edits its local copy of the page file, kept outside the repository as the Failure handling rules already imply, with this command:
+
+`sh skills/running-a-sprint/scripts/page-edit.sh <op> <page file> <input file>`
+
+The input file holds key=value lines, each split at its first "=". After the edit, the launcher republishes and re-reads the page as Failure handling says. Publishing the page stays one call of the publishing tool, and the ledger stays an Edit-tool edit; the script does neither.
+
+- `add-card`: keys `before` (the id of the card to go above), `card` (one line of HTML holding one id) and, optionally, `context` (one line of HTML). The new card goes directly above the named card, and its context section goes directly above the named card's context section.
+- `hide`: key `hide`, repeatable, one card id each. Removes each named card and its context section.
+- `status`: keys `status` (the label, for example Working) and `text`. Replaces the text of the line that carries that `data-status` label with "label: text".
+- `ready-add`: keys `pr` (digits only) and `entry` (one line of HTML). The new entry goes first in the Ready to merge list.
+- `ready-remove`: key `pr`. Removes that pull request's Ready to merge entry.
+
+Each run prints one OK line per op, or one FAIL line. Exit codes: 0 when all ops are OK, 1 on a FAIL, 2 on a usage error. When an anchor is missing or occurs more than once, a key is missing, or the input has non-ASCII text, the script fails and leaves the page file byte-identical. The launcher reads the FAIL line, fixes the input and runs the script again. It does not edit the page file by hand to get around a FAIL.
 
 ## Numbering restart
 

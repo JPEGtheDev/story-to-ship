@@ -104,6 +104,23 @@ gh run list --repo <owner/repo> --limit 400 --json attempt,conclusion | jq '{fla
 
 The launcher writes both counts into the scorecard row at every close-out. The previous count is the CI runs bullet of the last close-out's row for that repository. The launcher tells the owner only when a count differs from the previous count. With no previous row, or a previous row that reads unknown, it reports the count. When a gh read fails, the row reads unknown for both counts and nothing is reported.
 
+## Trust number
+
+The trust number reports, per repository and class, the merged sprint PRs and the share that needed an owner change. Set P to the launcher's sprint ledger, its plan.md. Only rows that match the row shape count: the value after "Needed owner change:" is yes, no or unknown, and the repository and class follow the forms in the Needed owner change and class section. A template row, a capital letter or any other word is ignored. The report lists, per repository and class, the merged sprint PRs (yes and no rows; unknown rows are left out) and the share that needed an owner change, written like "3 merged, 1 needed change (33%)"; an empty class reads "0 merged". The report always prints the counting command.
+
+```bash
+SED='s/^- Needed owner change: (yes|no|unknown); repository: ([^;<]+); class: (dependency|CI|docs-only|code)$/\2 \3 \1/p'
+sed -nE "$SED" "$P" | awk '$3!="unknown"{m[$1" "$2]++; if($3=="yes")c[$1" "$2]++} END{for(k in m) printf "%s merged %d changed %d\n",k,m[k],c[k]+0}'
+```
+
+The first command prints the merged and changed counts per repository and class, in no guaranteed line order. The second prints the current run of no rows per repository and class, taking rows in ledger order, which is merge order because a late row is placed at its merge-order position and an amended row stays in place. Unknown rows are skipped, and a row line ends after the class value.
+
+```bash
+sed -nE "$SED" "$P" | awk '$3=="no"{r[$1" "$2]++} $3=="yes"{r[$1" "$2]=0} END{for(k in r) print k, r[k]}'
+```
+
+Before trusting either counter, run each on an empty file, on a file holding one malformed row (capital letter) that must print nothing, and on a ledger holding rows for two repositories with an unknown row and a yes after no rows that must print one line per repository and class, as the counters rule above says.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.

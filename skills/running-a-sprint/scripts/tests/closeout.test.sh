@@ -450,6 +450,22 @@ steps_compare() {
   assert_file_eq "$1 unchanged" "$2" "$TEST_TMP/after-$1"
 }
 
+# normalize_step_fail <step name> <actual file> <out file>: rewrite the FAIL line of the named step to
+# `FAIL <step name>: <git error>` when its message after the prefix is non-empty. git words its own error
+# text differently by version, so only the presence of that text is checked. An empty message is left as it
+# is and fails the byte comparison that follows.
+normalize_step_fail() {
+  sed "s/^FAIL $1: .\{1,\}\$/FAIL $1: <git error>/" "$2" > "$3" || exit 2
+}
+
+# assert_case_step <name> <expected exit> <want name> <step name>: assert_case after normalize_step_fail on the
+# actual stdout of the named step.
+assert_case_step() {
+  normalize_step_fail "$4" "$TEST_TMP/out" "$TEST_TMP/norm-$1" || exit 2
+  assert_exit "$1 exit" "$2" "$RC"
+  assert_file_eq "$1 lines" "$TEST_TMP/want-$3" "$TEST_TMP/norm-$1"
+}
+
 # refs_actual <file>: the local and origin branch refs, the root main sha and the registered worktrees.
 refs_actual() {
   {
@@ -652,10 +668,10 @@ new_case steps-remove-fails
 git_c "$FX_ROOT" worktree lock "$FX_WT" || exit 2
 steps_prefetch
 want_green steps-remove-fails "OK worktree: $FX_WT clean" \
-  "FAIL remove-worktree: fatal: cannot remove a locked working tree;" "FAIL steps: stopped, later steps not run"
+  "FAIL remove-worktree: <git error>" "FAIL steps: stopped, later steps not run"
 steps_snapshot "$TEST_TMP/before-steps-remove-fails" || exit 2
 steps_std
-assert_case steps-remove-fails 1 steps-remove-fails
+assert_case_step steps-remove-fails 1 steps-remove-fails remove-worktree
 steps_compare steps-remove-fails "$TEST_TMP/before-steps-remove-fails"
 
 # Step case 12: a second worktree holds the branch, so the worktree is removed and the local branch delete fails.
@@ -663,12 +679,11 @@ new_case steps-local-fails
 steps_prefetch
 git_c "$FX_ROOT" worktree add -q -f "$FX_ROOT/held" "$FX_BRANCH" || exit 2
 want_green steps-local-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
-  "FAIL delete-branch-local: error: cannot delete branch '$FX_BRANCH' used by worktree at '$FX_ROOT/held'" \
-  "FAIL steps: stopped, later steps not run"
+  "FAIL delete-branch-local: <git error>" "FAIL steps: stopped, later steps not run"
 refs_want "$TEST_TMP/want-refs-steps-local-fails" 1 1 "$(git -C "$FX_ROOT" rev-parse refs/heads/main)" 0
 printf 'worktree %s\n' "$FX_ROOT/held" >> "$TEST_TMP/want-refs-steps-local-fails"
 steps_std
-assert_case steps-local-fails 1 steps-local-fails
+assert_case_step steps-local-fails 1 steps-local-fails delete-branch-local
 refs_actual "$TEST_TMP/got-refs-steps-local-fails"
 assert_file_eq "steps-local-fails refs" "$TEST_TMP/want-refs-steps-local-fails" "$TEST_TMP/got-refs-steps-local-fails"
 
@@ -686,10 +701,10 @@ printf '%s\n' '#!/bin/sh' \
 chmod +x "$FX_ORIGIN/hooks/pre-receive" || exit 2
 _main0=$(git -C "$FX_ROOT" rev-parse refs/heads/main) || exit 2
 want_green steps-origin-refuses "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
-  "OK delete-branch-local: $FX_BRANCH" "FAIL delete-branch-origin: To $FX_ORIGIN" \
+  "OK delete-branch-local: $FX_BRANCH" "FAIL delete-branch-origin: <git error>" \
   "FAIL steps: stopped, later steps not run"
 steps_std
-assert_case steps-origin-refuses 1 steps-origin-refuses
+assert_case_step steps-origin-refuses 1 steps-origin-refuses delete-branch-origin
 refs_want "$TEST_TMP/want-refs-steps-origin-refuses" 0 1 "$_main0" 0
 refs_actual "$TEST_TMP/got-refs-steps-origin-refuses"
 assert_file_eq "steps-origin-refuses refs" "$TEST_TMP/want-refs-steps-origin-refuses" "$TEST_TMP/got-refs-steps-origin-refuses"
@@ -701,11 +716,9 @@ steps_prefetch
 _main0=$(git -C "$FX_ROOT" rev-parse refs/heads/main) || exit 2
 want_green steps-ff-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
   "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" \
-  "FAIL fast-forward: fatal: Not possible to fast-forward, aborting." "FAIL steps: stopped, later steps not run"
-export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=advice.diverging GIT_CONFIG_VALUE_0=false
+  "FAIL fast-forward: <git error>" "FAIL steps: stopped, later steps not run"
 steps_std
-unset GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0
-assert_case steps-ff-fails 1 steps-ff-fails
+assert_case_step steps-ff-fails 1 steps-ff-fails fast-forward
 refs_want "$TEST_TMP/want-refs-steps-ff-fails" 0 0 "$_main0" 0
 refs_actual "$TEST_TMP/got-refs-steps-ff-fails"
 assert_file_eq "steps-ff-fails refs" "$TEST_TMP/want-refs-steps-ff-fails" "$TEST_TMP/got-refs-steps-ff-fails"

@@ -215,6 +215,7 @@ Rationale moved out of SKILL.md to keep that file under its size limit.
 
 - Token budget gate (Building the Plan, step 7): A 14-todo epic under the old three-children-per-todo review pipeline consumed ~500K tokens x 42+ dispatches minimum. Compute this upfront -- not after 3 rate-limit hits.
 - Async-state sixth question (Smart Trust Gate): A feature with invisible async state has no failure-diagnosis path.
+- Enforceability-detector gate (Building the Plan, step 8): per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
 
 ---
 

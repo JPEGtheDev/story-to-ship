@@ -65,8 +65,8 @@ Before todos, apply `references/DECISION_DEFERRAL.md` to each significant archit
 4. Sanity-check: does the plan address every acceptance criterion?
 5. Name known downsides proactively -- trade-offs, risks, limitations the user did not ask about
 6. Disclose decision rationale -- name alternatives considered and why the chosen approach was selected
-7. **Token budget gate:** If todo count >= 8, load `user-story-estimation` and compute the token budget before presenting the plan for approval.
-8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews: per-todo reviews validate files in isolation and cannot see whether a change landed in an enforceable layer or stayed prose.
+7. **Token budget gate:** If todo count >= 8, load `user-story-estimation`, compute the token budget, and write it into the plan file as the Token budget line its Token Budget section defines, before presenting the plan for approval.
+8. **Enforceability-detector gate:** Any todo that adds a gate must name its external detector as an acceptance criterion -- a CI-guarded string, a reviewer checklist dimension, or a cold-log audit row -- gate text alone does not qualify. Plans that add gates include a final whole-branch coherence review with an explicit enforceability-litmus dimension, additive to per-todo reviews.
 
 ### No-Placeholder Rule
 

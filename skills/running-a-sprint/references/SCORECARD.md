@@ -121,6 +121,8 @@ sed -nE "$SED" "$P" | awk '$3=="no"{r[$1" "$2]++} $3=="yes"{r[$1" "$2]=0} END{fo
 
 Before trusting either counter, run each on an empty file, on a file holding one malformed row (capital letter) that must print nothing, and on a ledger holding rows for two repositories with an unknown row and a yes after no rows that must print one line per repository and class, as the counters rule above says.
 
+A repository and class meets the bar when the second command prints a run of 10 or more for it; the run resets to 0 on a yes and counts per repository and class. That class meets the bar. The launcher then asks the owner whether to turn on auto-merge for that class; it never turns auto-merge on itself and never changes branch protection; the owner decides.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.

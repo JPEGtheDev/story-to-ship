@@ -73,9 +73,9 @@ Do not ask the caller to provide a diff. Derive it yourself.
   - Name the consumers checked.
   - Name the one fact that makes the change safe. Most risky-looking changes are safe for one reason; find that reason.
   - State how far the proof got: stated, cited at a file:line, walked step by step, or run. A run needs its command and output.
-  - A run happens in the review worktree, under `timeout 90`. Use at most 2 runs per review. These runs are counted separately from the Two-edit check's 6-run limit. If a run cannot execute, record the level actually reached and write "run not possible: <reason>". Never claim a run that did not happen.
+  - A run happens in the review worktree, under `timeout 90`, after the Evidence Spot-Check. Use at most 2 runs per review. These runs are counted separately from the Two-edit check's 6-run limit. A run edits no tracked file; if it needs a scratch edit, follow the Two-edit check's save, restore and cmp steps. Write the full output to a named file under /tmp and show the command and a short tail. If a run cannot execute, record the level actually reached and write "run not possible: <reason>". Never claim a run that did not happen.
   - A consumer the change breaks is a finding on the Critical issues line, prefixed "Blast radius:", with file:line and how to check it.
-  - A consumer checked and found safe goes on the cleared list.
+  - A consumer checked and found safe goes on the cleared list on the Blast-radius check line.
   - If no fact that makes the change safe can be found, list the change as unproven and report it as a finding on the Critical issues line, prefixed "Blast radius:". This sets REQUEST CHANGES. Never a silent pass.
 
 ### Code quality

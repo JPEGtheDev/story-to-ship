@@ -98,13 +98,19 @@ short_sha() {
 
 make_origin_clone "$REPO" 1 || exit 2
 
+# run_script [args]: run the script with the arguments and no stdin. Sets RC, leaves stdout in
+# $TEST_TMP/out and stderr in $TEST_TMP/err.
+run_script() {
+  sh "$SCRIPT" "$@" >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+  RC=$?
+}
+
 # check_pr <state> <isDraft> <mergeable> <headRefOid> [rollup JSON]: write the PR document, then run
 # the check with the default arguments. The rollup defaults to GOOD_ROLLUP and the body to GOOD_BODY.
 # Sets RC and leaves stdout in $TEST_TMP/out, stderr in $TEST_TMP/err.
 check_pr() {
   write_pr_json "$JSON" "$1" "$2" "$3" "$4" "${5:-$GOOD_ROLLUP}" "$GOOD_BODY"
-  sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-  RC=$?
+  run_script -n 431 -w "$REPO" -s 427
 }
 
 # assert_case <name> <expected exit> <expected stdout file>: exit, exact stdout, empty stderr.
@@ -245,11 +251,8 @@ assert_case "gh-exit-nonzero" 1 "$TEST_TMP/want-ghfail"
 
 # Case 6b: the gh stub prints invalid JSON. The same ten FAIL lines and no crash message.
 printf '%s\n' 'not json at all' > "$TEST_TMP/bad.json"
-STUB_JSON=$TEST_TMP/bad.json
-export STUB_JSON
-sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+STUB_JSON=$TEST_TMP/bad.json sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
-export STUB_JSON=$JSON
 assert_case "gh-invalid-json" 1 "$TEST_TMP/want-ghfail"
 
 # Case 7: usage errors exit 2, print a usage message on stderr and nothing on stdout.
@@ -269,8 +272,7 @@ done
 
 # Case 8: -b origin/main given explicitly matches the default on the shared all-good fixture.
 write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD" "$GOOD_ROLLUP" "$GOOD_BODY"
-sh "$SCRIPT" -n 431 -w "$REPO" -s 427 -b origin/main >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-RC=$?
+run_script -n 431 -w "$REPO" -s 427 -b origin/main
 assert_case "base-ref-accepted" 0 "$TEST_TMP/want-good"
 
 # Case 9: the ci line. Each entry's effective state is its conclusion when non-empty, else its
@@ -295,8 +297,7 @@ check_ci ci-empty-array 1 '[]' "FAIL ci: no checks"
 # A missing statusCheckRollup field is the same as an empty rollup: FAIL ci: no checks.
 _gb=$(jq -Rs . < "$GOOD_BODY") || exit 2
 printf '%s\n' "{\"number\":431,\"state\":\"OPEN\",\"isDraft\":false,\"mergeable\":\"MERGEABLE\",\"headRefOid\":\"$FIX_HEAD\",\"body\":$_gb}" > "$JSON"
-sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-RC=$?
+run_script -n 431 -w "$REPO" -s 427
 printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD" \
   "FAIL ci: no checks" "$NOTE_LINE" "OK branch: behind 0, ahead 1" "$GOOD_CHECKS" > "$TEST_TMP/want-ci-missing-field"
 assert_case "ci-missing-field" 1 "$TEST_TMP/want-ci-missing-field"
@@ -326,8 +327,7 @@ check_branch() {
   _bhead=$(git -C "$_bwt" rev-parse HEAD) || exit 2
   _bn=$(git -C "$_bwt" rev-list --count "origin/main..HEAD") || exit 2
   write_pr_json "$JSON" OPEN false MERGEABLE "$_bhead" "$GOOD_ROLLUP" "$GOOD_BODY"
-  sh "$SCRIPT" -n 431 -w "$_bwt" -s 427 "$@" >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-  RC=$?
+  run_script -n 431 -w "$_bwt" -s 427 "$@"
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "$_bline" "$CLOSE_OK" "$FOOT_OK" \
     "OK coauthor: none in body or $_bn commits" "$ASCII_OK" > "$TEST_TMP/want-$_bname"
@@ -369,8 +369,7 @@ check_branch branch-behind-one "$TEST_TMP/behind1" 1 "FAIL branch: behind 1, ahe
 # on stderr, nothing on stdout. The all-good document is written so a script that ignores the error
 # would print OK lines and exit 0.
 write_pr_json "$JSON" OPEN false MERGEABLE "$(git -C "$REPO" rev-parse HEAD)" "$GOOD_ROLLUP" "$GOOD_BODY"
-sh "$SCRIPT" -n 431 -w "$REPO" -s 427 -b main >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-RC=$?
+run_script -n 431 -w "$REPO" -s 427 -b main
 assert_exit "base-no-slash exit" 2 "$RC"
 assert_empty "base-no-slash stdout" "$TEST_TMP/out"
 assert_nonempty "base-no-slash stderr" "$TEST_TMP/err"
@@ -384,8 +383,7 @@ body_case() {
   _bhead=$(git -C "$2" rev-parse HEAD) || exit 2
   _bahead=$(git -C "$2" rev-list --count "origin/main..HEAD") || exit 2
   write_pr_json "$JSON" OPEN false MERGEABLE "$_bhead" "$GOOD_ROLLUP" "$4"
-  sh "$SCRIPT" -n 431 -w "$2" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
-  RC=$?
+  run_script -n 431 -w "$2" -s 427
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_bahead" \
     "$5" "$6" "$7" "$8" > "$TEST_TMP/want-$1"

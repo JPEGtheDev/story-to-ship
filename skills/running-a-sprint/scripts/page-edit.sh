@@ -1,8 +1,8 @@
 #!/bin/sh
 # page-edit.sh <op> <page file> <input file>
-# Edits the owner question page (built from references/owner-questions-template.html) in place. Ops now: add-card and
-# hide. The ops status, ready-add and ready-remove are added by a later change; until then they are usage errors.
-# The input file holds key=value lines, each split at its first "="; a key the op does not read is ignored.
+# Edits the owner question page (built from references/owner-questions-template.html) in place. Ops: add-card, hide,
+# status, ready-add and ready-remove. The input file holds key=value lines, each split at its first "="; a key the op
+# does not read is ignored.
 #   add-card: before=<id> card=<html> [context=<html>]
 #     card is one line of HTML holding exactly one id attribute, id="<id>". It is inserted directly above the line
 #     that holds id="<before>", with that line's indent. context, when given, is one line of HTML inserted directly
@@ -13,13 +13,27 @@
 #     The card block is the line that holds id="<id>" through the first later line equal to that line's indent plus
 #     the closing tag of the element that line opens, or that line alone when it also holds that closing tag. The
 #     context block is the same for id="c-<id>". Both blocks are removed. An id given twice is removed once.
-# An anchor is id="<value>" where the character before it is the start of the line or any character other than a
-# letter, digit, underscore or hyphen (so data-id="..." and href="#..." do not count, while class="a"id="x" does). add-card needs the before anchor to occur exactly once; hide needs each id and c-<id> to
-# occur exactly once.
+#   status: status=<label> text=<text>
+#     The line holding data-status="<label>" is one element: an opening tag, its text and its closing tag. The text
+#     between the opening tag and the closing tag becomes "<label>: <text>" (the text is inserted as given). A label
+#     may hold a space. Both keys are required; an empty value counts as missing.
+#   ready-add: pr=<n> entry=<html>
+#     pr is digits only: no pr key is "missing key pr", an empty or non-digit value is "must be a number". entry is one
+#     line of HTML, the inside of the list item; required. The Ready to merge list is the first <ul> line after the
+#     line holding id="ready". The line <li data-pr="<n>"> entry </li> goes directly below that <ul> line, with that
+#     line's indent plus two spaces, so the newest entry is first. A pr already on the page fails.
+#   ready-remove: pr=<n>
+#     The block of the line holding data-pr="<n>" is removed, found with the hide block rule (here the closing tag is
+#     </li>, or the line alone when it also holds that closing tag). pr is checked as for ready-add.
+# An anchor is attr="<value>" where the character before attr is the start of the line or any character other than a
+# letter, digit, underscore or hyphen (so data-id="..." and href="#..." do not count, while class="a"id="x" does).
+# The anchor ids (add-card, hide, ready-add) and the attributes data-status and data-pr (status, ready-add,
+# ready-remove) must each occur exactly once, except that ready-add's data-pr must not occur at all.
 # Output: on success one line per op: "OK add-card: <id> before <before>" (with " and context" when context was given),
-# or one "OK hide: <id>" line per distinct id, in the order first given. On any failure exactly one line,
-# "FAIL <op>: <reason>", on stdout, exit 1, and the page is not changed. A page or input that is not a readable regular
-# file is a FAIL line too. Input bytes other than printable ASCII and tab fail the op.
+# one "OK hide: <id>" line per distinct id, in the order first given, "OK status: <label>", "OK ready-add: <n>" or
+# "OK ready-remove: <n>". On any failure exactly one line, "FAIL <op>: <reason>", on stdout, exit 1, and the page is
+# not changed. A page or input that is not a readable regular file is a FAIL line too. Input bytes other than
+# printable ASCII and tab fail the op.
 # Exit codes: 0 all OK, 1 a FAIL, 2 a usage error (usage on stderr, nothing on stdout).
 # Everything is checked before anything is written. The result is built in a temp file made with mktemp in the page's
 # directory, given the page's mode by cp -p, and moved over the page with mv only when every check passed; the temp
@@ -52,11 +66,17 @@ FIRST=0
 BLOCK_END=""
 BEFORE_LINE=0
 CTX_LINE=0
+STATUS_LABEL=""
+STATUS_TEXT=""
+PR=""
+PR_SEEN=0
+ENTRY=""
 
-# COUNT_FUNCS: awk functions shared by every anchor and id lookup. bound_ok: a match at column abs counts when the
-# character before it is the start of the line or not a letter, digit, underscore or hyphen. count_in: counts the
-# matches of a needle in one line. id_in: the value of the first id="..." in one line that passes bound_ok (the text
-# to the end of the line when the closing quote is missing), or "" when there is none.
+# COUNT_FUNCS: awk functions shared by every anchor and attribute lookup. bound_ok: a match at column abs counts when
+# the character before it is the start of the line or not a letter, digit, underscore or hyphen. count_in: counts the
+# matches of a needle in one line. first_in: the column of the first matching needle in one line, or 0. id_in: the
+# value of the first id="..." in one line that passes bound_ok (the text to the end of the line when the closing quote
+# is missing), or "" when there is none.
 COUNT_FUNCS='
 function bound_ok(line, abs) {
   if (abs == 1) return 1
@@ -73,6 +93,17 @@ function count_in(line, needle,   rest, offset, p, abs, n) {
     offset = abs
   }
   return n
+}
+function first_in(line, needle,   rest, offset, p, abs) {
+  rest = line
+  offset = 0
+  while ((p = index(rest, needle)) > 0) {
+    abs = offset + p
+    if (bound_ok(line, abs)) return abs
+    rest = substr(line, abs + 1)
+    offset = abs
+  }
+  return 0
 }
 function id_in(line,   rest, offset, p, abs, v, q) {
   rest = line
@@ -93,7 +124,7 @@ function id_in(line,   rest, offset, p, abs, v, q) {
 
 # usage: the usage line to stderr, exit 2.
 usage() {
-  printf 'usage: page-edit.sh <add-card|hide> <page file> <input file>\n' >&2
+  printf 'usage: page-edit.sh <add-card|hide|status|ready-add|ready-remove> <page file> <input file>\n' >&2
   exit 2
 }
 
@@ -148,23 +179,39 @@ count_page() {
   FIRST=${_pair#* }
 }
 
-# find_anchor <name>: id="<name>" occurs exactly once on the page; sets FIRST to its line. Fails otherwise.
-find_anchor() {
-  count_page "$PAGE" "id=\"$1\""
+# find_one <attr> <value> <what>: attr="value" occurs exactly once on the page; sets FIRST to its line. Fails with
+# "<what> not found" or "<what> repeated" otherwise.
+find_one() {
+  count_page "$PAGE" "$1=\"$2\""
   if [ "$COUNT" -eq 0 ]; then
-    fail "anchor $1 not found"
+    fail "$3 not found"
   fi
   if [ "$COUNT" -gt 1 ]; then
-    fail "anchor $1 repeated"
+    fail "$3 repeated"
   fi
 }
 
-# need_absent <name> <reason>: id="<name>" does not occur on the page, or the op fails with the reason.
+# find_anchor <name>: id="<name>" occurs exactly once on the page; sets FIRST to its line. Fails otherwise.
+find_anchor() {
+  find_one id "$1" "anchor $1"
+}
+
+# need_absent <attr> <value> <reason>: attr="value" does not occur on the page, or the op fails with the reason.
 need_absent() {
-  count_page "$PAGE" "id=\"$1\""
+  count_page "$PAGE" "$1=\"$2\""
   if [ "$COUNT" -gt 0 ]; then
-    fail "$2"
+    fail "$3"
   fi
+}
+
+# pr_check: the pr key was given, and its value is digits only.
+pr_check() {
+  if [ "$PR_SEEN" -eq 0 ]; then
+    fail "missing key pr"
+  fi
+  case "$PR" in
+    '' | *[!0-9]*) fail "pr must be a number" ;;
+  esac
 }
 
 # block_end <name> <start line>: sets BLOCK_END to the last line of the block that starts at the start line. The block
@@ -212,14 +259,20 @@ hide_one() {
   OUT="${OUT}OK hide: $1$NL"
 }
 
+# remove_ranges: writes the page without the lines of RANGES (pairs of first and last line, in one pass) into the
+# temp file and moves it over the page.
+remove_ranges() {
+  make_temp
+  RANGES="$RANGES" awk 'BEGIN { n = split(ENVIRON["RANGES"], r, " "); for (k = 1; k < n; k += 2) for (i = r[k] + 0; i <= r[k + 1] + 0; i++) skip[i] = 1 } !(NR in skip) { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
+  copy_over
+}
+
 # hide_all: every id was checked while the input was read; removes the blocks in one pass and prints the OK lines.
 hide_all() {
   if [ "$HIDE_COUNT" -eq 0 ]; then
     fail "missing key hide"
   fi
-  make_temp
-  RANGES="$RANGES" awk 'BEGIN { n = split(ENVIRON["RANGES"], r, " "); for (k = 1; k < n; k += 2) for (i = r[k] + 0; i <= r[k + 1] + 0; i++) skip[i] = 1 } !(NR in skip) { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
-  copy_over
+  remove_ranges
   printf '%s' "$OUT"
 }
 
@@ -241,16 +294,16 @@ add_card() {
   NEW_ID=$(CARD_TEXT="$CARD" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CARD_TEXT"]) }') || fail "cannot read the card"
   find_anchor "$BEFORE"
   BEFORE_LINE=$FIRST
-  need_absent "$NEW_ID" "id $NEW_ID already on the page"
+  need_absent id "$NEW_ID" "id $NEW_ID already on the page"
   CTX_LINE=0
   if [ -n "$CONTEXT" ]; then
     find_anchor "c-$BEFORE"
     CTX_LINE=$FIRST
-    need_absent "c-$NEW_ID" "id c-$NEW_ID already on the page"
+    need_absent id "c-$NEW_ID" "id c-$NEW_ID already on the page"
     CTX_IDS=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print count_in(ENVIRON["CTX_TEXT"], "id=\"") + 0 }') || fail "cannot read the context"
     if [ "$CTX_IDS" -gt 0 ]; then
       CTX_ID=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CTX_TEXT"]) }') || fail "cannot read the context"
-      need_absent "$CTX_ID" "id $CTX_ID already on the page"
+      need_absent id "$CTX_ID" "id $CTX_ID already on the page"
     fi
   fi
   make_temp
@@ -263,10 +316,86 @@ add_card() {
   fi
 }
 
+# status_op: replaces the text of the one-line element that holds data-status="<label>" with "<label>: <text>". The
+# opening tag is the one that holds the attribute; its closing tag is the element's own, on the same line. A line
+# without that closing tag fails before the page is touched.
+status_op() {
+  if [ -z "$STATUS_LABEL" ]; then
+    fail "missing key status"
+  fi
+  if [ -z "$STATUS_TEXT" ]; then
+    fail "missing key text"
+  fi
+  find_one data-status "$STATUS_LABEL" "label $STATUS_LABEL"
+  make_temp
+  _so_rc=0
+  STATUS_ATTR="data-status=\"$STATUS_LABEL\"" STATUS_LABEL="$STATUS_LABEL" STATUS_TEXT="$STATUS_TEXT" awk -v n="$FIRST" "$COUNT_FUNCS"'
+NR == n {
+  p = first_in($0, ENVIRON["STATUS_ATTR"])
+  rest = substr($0, p)
+  g = index(rest, ">")
+  if (g == 0) exit 3
+  open_end = p + g - 1
+  pre = substr($0, 1, p - 1)
+  if (!match(pre, /<[A-Za-z][A-Za-z0-9]*[^<]*$/)) exit 3
+  name = substr(pre, RSTART + 1)
+  sub(/[^A-Za-z0-9].*$/, "", name)
+  close_tag = "</" name ">"
+  c = index(substr($0, open_end + 1), close_tag)
+  if (c == 0) exit 3
+  close_at = open_end + c
+  print substr($0, 1, open_end) ENVIRON["STATUS_LABEL"] ": " ENVIRON["STATUS_TEXT"] substr($0, close_at)
+  next
+}
+{ print }' "$PAGE" > "$TMP" || _so_rc=$?
+  if [ "$_so_rc" -eq 3 ]; then
+    fail "label $STATUS_LABEL has no closing tag on its line"
+  fi
+  if [ "$_so_rc" -ne 0 ]; then
+    fail "cannot write a temp file beside $PAGE"
+  fi
+  copy_over
+  printf 'OK status: %s\n' "$STATUS_LABEL"
+}
+
+# ready_add: inserts the Ready to merge entry for pr directly below the first <ul> line after the ready anchor.
+ready_add() {
+  pr_check
+  if [ -z "$ENTRY" ]; then
+    fail "missing key entry"
+  fi
+  need_absent data-pr "$PR" "pr $PR already listed"
+  find_anchor ready
+  _ra_ul=$(awk -v a="$FIRST" 'NR > a && index($0, "<ul>") > 0 { print NR; exit }' "$PAGE") || fail "cannot read $PAGE"
+  if [ -z "$_ra_ul" ]; then
+    fail "no list after anchor ready"
+  fi
+  make_temp
+  PR_NUM="$PR" ENTRY_HTML="$ENTRY" awk -v n="$_ra_ul" '
+{ print }
+NR == n {
+  ind = $0
+  sub(/[^[:blank:]].*$/, "", ind)
+  print ind "  <li data-pr=\"" ENVIRON["PR_NUM"] "\">" ENVIRON["ENTRY_HTML"] "</li>"
+}' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"
+  copy_over
+  printf 'OK ready-add: %s\n' "$PR"
+}
+
+# ready_remove: removes the block of the Ready to merge entry for pr, found with the hide block rule.
+ready_remove() {
+  pr_check
+  find_one data-pr "$PR" "pr $PR"
+  block_end "$PR" "$FIRST"
+  RANGES="$FIRST $BLOCK_END"
+  remove_ranges
+  printf 'OK ready-remove: %s\n' "$PR"
+}
+
 [ "$#" -eq 3 ] || usage
 OP=$1
 case "$OP" in
-  add-card | hide) ;;
+  add-card | hide | status | ready-add | ready-remove) ;;
   *) usage ;;
 esac
 PAGE=$2
@@ -287,25 +416,29 @@ while IFS= read -r LINE || [ -n "$LINE" ]; do
   esac
   KEY=${LINE%%=*}
   VAL=${LINE#*=}
-  if [ "$OP" = add-card ]; then
-    case "$KEY" in
-      before) BEFORE=$VAL ;;
-      card) CARD=$VAL ;;
-      context) CONTEXT=$VAL ;;
-    esac
-  else
-    case "$KEY" in
-      hide)
-        HIDE_COUNT=$((HIDE_COUNT + 1))
-        hide_one "$VAL"
-        ;;
-    esac
-  fi
+  case "$OP:$KEY" in
+    add-card:before) BEFORE=$VAL ;;
+    add-card:card) CARD=$VAL ;;
+    add-card:context) CONTEXT=$VAL ;;
+    hide:hide)
+      HIDE_COUNT=$((HIDE_COUNT + 1))
+      hide_one "$VAL"
+      ;;
+    status:status) STATUS_LABEL=$VAL ;;
+    status:text) STATUS_TEXT=$VAL ;;
+    ready-add:pr | ready-remove:pr)
+      PR=$VAL
+      PR_SEEN=1
+      ;;
+    ready-add:entry) ENTRY=$VAL ;;
+  esac
 done < "$IN"
 
-if [ "$OP" = add-card ]; then
-  add_card
-else
-  hide_all
-fi
+case "$OP" in
+  add-card) add_card ;;
+  hide) hide_all ;;
+  status) status_op ;;
+  ready-add) ready_add ;;
+  ready-remove) ready_remove ;;
+esac
 exit 0

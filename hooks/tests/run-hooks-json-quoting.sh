@@ -16,6 +16,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOKS_JSON="$SCRIPT_DIR/../hooks.json"
+# shellcheck disable=SC2016 # literal placeholder, not an expansion
 PLACEHOLDER='${CLAUDE_PLUGIN_ROOT}'
 
 pass_count=0
@@ -118,6 +119,7 @@ else
 fi
 
 # Mutation self-check: unquote the placeholder in the first command only.
+# shellcheck disable=SC2016 # literal placeholder, not an expansion
 mutated_text="$(printf '%s\n' "$commands_text" | sed '1s/"\(\${CLAUDE_PLUGIN_ROOT}[^"]*\)"/\1/')"
 echo "== Mutation self-check (first command unquoted) =="
 run_checks "$mutated_text"

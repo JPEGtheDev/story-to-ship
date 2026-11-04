@@ -4,6 +4,7 @@
 # command is a stub that prints a JSON fixture file, and the branch fixtures use a local bare repository
 # as origin.
 # HANDBACK_CHECK=<path> substitutes another script (used to prove a test can fail).
+# shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
 SCRIPT=${HANDBACK_CHECK:-$(dirname "$0")/../handback-check.sh}

@@ -5,6 +5,7 @@
 # no-temp-file rule and the file mode kept by each edit. The real template (placeholders filled, two cards q7
 # and q9, each with its context block) and small synthetic pages are the fixtures. No network.
 # PAGE_EDIT=<path> substitutes another script (used to prove a test can fail).
+# shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
 PAGE_EDIT=${PAGE_EDIT:-$(dirname "$0")/../page-edit.sh}

@@ -1162,6 +1162,26 @@ jobs:
           sh skills/subagent-driven-development/scripts/tests/run.sh
           echo "[+] role-boundary detector and plan-marker fixtures pass"
 
+      - name: Shellcheck running-a-sprint scripts
+        run: |
+          shellcheck -x skills/running-a-sprint/scripts/handback-check.sh
+          shellcheck -x skills/running-a-sprint/scripts/closeout-check.sh
+          shellcheck -x skills/running-a-sprint/scripts/closeout-steps.sh
+          shellcheck -x skills/running-a-sprint/scripts/page-edit.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/lib.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/run.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/run.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/closeout.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/handback-check.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/page-edit.test.sh
+          echo "[+] running-a-sprint scripts pass shellcheck"
+
+      - name: Run running-a-sprint script tests
+        run: |
+          set -e
+          sh skills/running-a-sprint/scripts/tests/run.sh
+          echo "[+] running-a-sprint script tests pass"
+
       - name: Check the detector in the reference matches the shipped script
         run: |
           set -e

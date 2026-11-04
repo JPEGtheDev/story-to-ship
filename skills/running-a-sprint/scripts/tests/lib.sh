@@ -82,6 +82,7 @@ git_c() {
 
 # make_repo <dir>: a repository on branch agent/s427-t1-tw with a base commit (main) and one
 # feature commit on top. Sets FIX_BASE to the base sha and FIX_HEAD to the feature sha.
+# shellcheck disable=SC2034
 make_repo() {
   git init -q -b main "$1" || return 1
   printf '%s\n' 'base' > "$1/file.txt" || return 1

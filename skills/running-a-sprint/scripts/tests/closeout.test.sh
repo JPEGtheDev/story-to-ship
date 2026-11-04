@@ -6,6 +6,7 @@
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
 # of a local bare origin under the test temp directory.
 # CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail).
+# shellcheck source=lib.sh
 . "$(dirname "$0")/lib.sh"
 
 # write_closeout_gh_stub <file>: a gh stand-in that dispatches on its arguments. "pr view" prints STUB_JSON

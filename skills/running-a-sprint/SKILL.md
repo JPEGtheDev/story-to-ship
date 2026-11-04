@@ -16,7 +16,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself: it launches runners, relays and verifies their hand-backs, and closes out each merge. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
-Capacity, Launch, Watch loop and Close-out keep their Context and Forces in references/MOVED_RATIONALE.md.
+Capacity, Launch, Watch loop and Close-out moved Context and Forces pairs to references/MOVED_RATIONALE.md.
 
 ---
 
@@ -159,5 +159,5 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - [references/RECONCILE.md](references/RECONCILE.md) -- Close-out step 7: the reconcile of open sprint PRs after a merge
 - [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
 - [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
-- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- the Context and Forces blocks of the Capacity, Launch, Watch loop and Close-out sections
+- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved Context and Forces pairs of the Capacity, Launch, Watch loop and Close-out sections
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

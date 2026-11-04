@@ -77,6 +77,7 @@ make_fixture() {
 new_case() {
   make_fixture "$TEST_TMP/$1" "${2:-}" || exit 2
   S7=$(short7 "$FX_S") || exit 2
+  write_merge MERGED "$FX_S" || exit 2
 }
 
 # make_local_commit: one commit on the runner branch that is not pushed, so the local tip differs from origin.
@@ -253,10 +254,12 @@ assert_case gh-exit 1 gh-failed
 # Case 13: the gh stub prints invalid JSON. The same lines as the non-zero exit.
 new_case gh-invalid-json
 printf '%s\n' 'not json at all' > "$TEST_TMP/bad.json" || exit 2
+want gh-invalid-json "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+  "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 export STUB_JSON=$TEST_TMP/bad.json
 std_run
 export STUB_JSON=$JSON
-assert_case gh-invalid-json 1 gh-failed
+assert_case gh-invalid-json 1 gh-invalid-json
 
 # Case 14: the merge commit is not in origin/main (here the branch tip, which origin has only on its branch).
 new_case not-in-origin

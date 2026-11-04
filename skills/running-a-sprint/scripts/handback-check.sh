@@ -200,13 +200,14 @@ check_branch() {
 # in body order. A reference is #N, owner/repo#N or an issue URL (https://github.com/owner/repo/issues/N);
 # a URL prints as owner/repo#N, so it is another issue to closing_others. A chain joined by commas,
 # "and" or "&" is read in full. Keywords are whole words in any case, with an optional colon, and the
-# keyword and the colon may be wrapped in asterisks or underscores. Lines inside a fenced code block
-# (a line starting with three backticks opens the fence and a second such line closes it) are skipped.
-# CR bytes are stripped first.
+# keyword and the colon may be wrapped in asterisks or underscores. Lines inside a fenced code block are skipped:
+# a line starting with three backticks opens the fence (an opening line may carry an info string such as
+# ```text), and only a line of three or more backticks with optional trailing spaces and nothing else closes
+# it. CR bytes are stripped first.
 closing_refs() {
   _ref='(https://github\.com/[^[:space:]/]+/[^[:space:]/]+/issues/[0-9]+|([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+)'
   _pat='(^|[^[:alnum:]_])[*_]*(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)([*_]*:[*_]*[[:space:]]*|[*_]*[[:space:]]+)'"$_ref"'([[:space:]]*(,|&|and)[[:space:]]*'"$_ref"')*'
-  tr -d '\r' | awk '/^```/ { fence = !fence; next } !fence' | LC_ALL=C grep -oiE "$_pat" | LC_ALL=C grep -oE "$_ref" | sed -e 's|^https://github\.com/\([^/]*\)/\([^/]*\)/issues/\([0-9]*\)$|\1/\2#\3|'
+  tr -d '\r' | awk 'fence { if ($0 ~ /^```+ *$/) fence = 0; next } /^```/ { fence = 1; next } { print }' | LC_ALL=C grep -oiE "$_pat" | LC_ALL=C grep -oE "$_ref" | sed -e 's|^https://github\.com/\([^/]*\)/\([^/]*\)/issues/\([0-9]*\)$|\1/\2#\3|'
 }
 
 # closing_others: read references on stdin and print those that do not name the story -s (a numeric
@@ -286,8 +287,9 @@ check_ascii() {
 
 # inline_clauses <plan file>: print "<file> <n>" for each "<n> lines in <file>" clause that follows "lane: inline" on
 # a line, one line per file in order of first appearance; the n values of a repeated file add up. Both the
-# documented form (one lane: inline, then one clause per file) and the repeated-prefix form are read. A file name
-# has its backticks removed and its trailing commas, semicolons and periods stripped.
+# documented form (one lane: inline, then one clause per file) and the repeated-prefix form are read. Clauses in one
+# chain may be joined by "and" or "&" (an optional joiner before each clause); any other word ends the chain. A file
+# name has its backticks removed and its trailing commas, semicolons, periods and close parens stripped.
 inline_clauses() {
   awk '
     function add(name, n) {
@@ -298,11 +300,13 @@ inline_clauses() {
       s = $0
       while ((i = index(s, "lane: inline ")) > 0) {
         s = substr(s, i + length("lane: inline "))
-        while (match(s, /^[ \t]*[0-9]+ lines in[ \t]+[^ \t]+/)) {
-          split(substr(s, RSTART, RLENGTH), f, " ")
+        while (match(s, /^[ \t]*((and|&)[ \t]+)?[0-9]+ lines in[ \t]+[^ \t]+/)) {
+          clause = substr(s, RSTART, RLENGTH)
+          sub(/^[ \t]*((and|&)[ \t]+)?/, "", clause)
+          split(clause, f, " ")
           name = f[4]
           gsub(/`/, "", name)
-          sub(/[,;.]+$/, "", name)
+          sub(/[,;.)]+$/, "", name)
           if (name != "") add(name, f[1])
           s = substr(s, RSTART + RLENGTH)
         }
@@ -312,7 +316,8 @@ inline_clauses() {
 }
 
 # inline_hashes <plan file>: print each token of 7 to 40 lowercase hex characters that follows "inline commits:"
-# on any line, once per hash, in order of appearance. Other tokens are ignored.
+# on any line, once per hash, in order of appearance. Each token has its backticks removed and its trailing commas,
+# semicolons, periods and close parens stripped before the test. Other tokens are ignored.
 inline_hashes() {
   awk -v kw='inline commits:' '
     {
@@ -321,9 +326,12 @@ inline_hashes() {
         s = substr(s, i + length(kw))
         n = split(s, t, /[[:space:]]+/)
         for (k = 1; k <= n; k++) {
-          if (t[k] ~ /^[0-9a-f]+$/ && length(t[k]) >= 7 && length(t[k]) <= 40 && !(t[k] in seen)) {
-            seen[t[k]] = 1
-            print t[k]
+          tok = t[k]
+          gsub(/`/, "", tok)
+          sub(/[,;.)]+$/, "", tok)
+          if (tok ~ /^[0-9a-f]+$/ && length(tok) >= 7 && length(tok) <= 40 && !(tok in seen)) {
+            seen[tok] = 1
+            print tok
           }
         }
       }

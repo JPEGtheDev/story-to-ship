@@ -483,6 +483,27 @@ body_case closing-fenced-only "$REPO" 1 "$TEST_TMP/body-fenced-story" "FAIL clos
 printf '%s\n' 'Closes #427' '' '```' 'Fixes #12' '```' '' 'Generated with Claude Code' > "$TEST_TMP/body-fenced-other"
 body_case closing-fenced-other "$REPO" 0 "$TEST_TMP/body-fenced-other" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
 
+# Case 11af: a fence line with an info string inside an open fence does not close it. The "```text" line stays
+# inside, so "Fixes #12" and "still inside" are hidden, the plain "```" closes, and "Closes #427" after it is read.
+printf '%s\n' '```' 'Fixes #12' '```text' 'still inside' '```' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-info-inside"
+body_case closing-info-inside-fence "$REPO" 0 "$TEST_TMP/body-info-inside" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ak: "``` extra" inside an open fence is not a closing line, so "Fixes #12" stays hidden and only #427 is named.
+printf '%s\n' '```' '``` extra' 'Fixes #12' '```' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-info-close"
+body_case closing-info-not-close "$REPO" 0 "$TEST_TMP/body-info-close" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ah: a closing line of backticks with trailing spaces closes the fence, so "Closes #427" is read.
+printf '%s\n' '```' 'Fixes #12' '``` ' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-close-spaces"
+body_case closing-fence-trailing-spaces "$REPO" 0 "$TEST_TMP/body-close-spaces" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11ai: a longer run of backticks closes the fence too (three or more backticks alone).
+printf '%s\n' '```' 'Fixes #12' '````' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-close-four"
+body_case closing-fence-four-backticks "$REPO" 0 "$TEST_TMP/body-close-four" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11aj: an info-string line outside any fence opens a fence, so "Fixes #12" is hidden until the closing line.
+printf '%s\n' '```text' 'Fixes #12' '```' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-open-info"
+body_case closing-info-opens-fence "$REPO" 0 "$TEST_TMP/body-open-info" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
 # Case 12: the coauthor line also reads the commit messages in base..HEAD. One branch commit with the
 # trailer fails with that commit's short sha. The fixture has no body trailer and one commit.
 make_origin_clone "$TEST_TMP/coa-one" 0 || exit 2
@@ -722,6 +743,69 @@ inline_case punctuated-names "$INL" 0
 write_plan "$INL/plan.md" "lane: inline 6 lines in \`README.md\`, 3 lines in \`notes.txt\`; inline commits: $INL_SHA"
 inline_expect backticked-names 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
 inline_case backticked-names "$INL" 0
+
+# Case 18aa: a hash followed by a semicolon, comma, period or close paren is read as the hash (the trailing
+# punctuation is stripped). Each case has the file line OK, so a dropped hash shows as numstat 0.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA;"
+inline_expect hash-semicolon 'OK inline: README.md 6 lines'
+inline_case hash-semicolon "$INL" 0
+
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA,"
+inline_expect hash-comma 'OK inline: README.md 6 lines'
+inline_case hash-comma "$INL" 0
+
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA."
+inline_expect hash-period 'OK inline: README.md 6 lines'
+inline_case hash-period "$INL" 0
+
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "(inline commits: $INL_SHA)"
+inline_expect hash-paren 'OK inline: README.md 6 lines'
+inline_case hash-paren "$INL" 0
+
+# Case 18ab: a hash in backticks with a trailing semicolon is read: the backticks are stripped like file names.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: \`$INL_SHA\`;"
+inline_expect hash-backticks 'OK inline: README.md 6 lines'
+inline_case hash-backticks "$INL" 0
+
+# Case 18ac: punctuation inside a hash token is not stripped: "SHA;x" is not hex, so it is ignored (numstat 0).
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA;x"
+inline_expect hash-inner-punct 'FAIL inline: README.md plan 6, numstat 0'
+inline_case hash-inner-punct "$INL" 1
+
+# Case 18ad: a clause joined to the next by "and" is read: README.md 6 and notes.txt 3, both OK, in plan order.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md and 3 lines in notes.txt; inline commits: $INL_SHA"
+inline_expect clause-and-ok 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case clause-and-ok "$INL" 0
+
+# Case 18ae: the same joined clause with a wrong count fails with its own FAIL line for notes.txt.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md and 2 lines in notes.txt inline commits: $INL_SHA"
+inline_expect clause-and-fail 'OK inline: README.md 6 lines' 'FAIL inline: notes.txt plan 2, numstat 3'
+inline_case clause-and-fail "$INL" 1
+
+# Case 18af: "&" is an accepted joiner too.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md & 3 lines in notes.txt inline commits: $INL_SHA"
+inline_expect clause-ampersand 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case clause-ampersand "$INL" 0
+
+# Case 18ag: a word other than and or & ends the chain: "then 3 lines in notes.txt" is not read (notes.txt absent).
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md then 3 lines in notes.txt inline commits: $INL_SHA"
+inline_expect clause-then-stops 'OK inline: README.md 6 lines'
+inline_case clause-then-stops "$INL" 0
+
+# Case 18ah: a file name ending in ")" has the paren stripped: "(lane: inline 6 lines in README.md)" reads README.md 6.
+write_plan "$INL/plan.md" "(lane: inline 6 lines in README.md) inline commits: $INL_SHA"
+inline_expect paren-name-ok 'OK inline: README.md 6 lines'
+inline_case paren-name-ok "$INL" 0
+
+# Case 18ai: the paren rule with the joiner: a parenthesized chain reads both files, notes.txt without its paren.
+write_plan "$INL/plan.md" "(lane: inline 6 lines in README.md and 3 lines in notes.txt) inline commits: $INL_SHA"
+inline_expect paren-chain-ok 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case paren-chain-ok "$INL" 0
+
+# Case 18aj: a joiner with no clause after it reads nothing more: "and inline commits:" is not a clause.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md and inline commits: $INL_SHA"
+inline_expect dangling-and 'OK inline: README.md 6 lines'
+inline_case dangling-and "$INL" 0
 
 # Case 19: the moved line. moved_fixture <dir> <base file>: a bare origin whose main holds the base file as
 # old.md, and a clone at <dir> on branch agent/example-tw with no commits above origin/main. moved_commit <dir>

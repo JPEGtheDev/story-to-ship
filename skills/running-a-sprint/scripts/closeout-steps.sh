@@ -203,15 +203,20 @@ gh_read() {
   "${CLOSEOUT_GH:-gh}" "$@" > "$TMP/$_gf"
 }
 
+# gh_fail <label>: print the FAIL line of a read whose GitHub call failed or returned unusable output.
+gh_fail() {
+  printf 'FAIL %s: gh failed\n' "$1"
+}
+
 # read_issue: print the issue state line, or FAIL issue: gh failed when gh fails or the state is missing.
 read_issue() {
   if ! gh_read issue.json issue view "$ISSUE" --json state; then
-    printf 'FAIL issue: gh failed\n'
+    gh_fail issue
     return 1
   fi
   _st=$(jq -r '.state // ""' "$TMP/issue.json") || _st=""
   if [ -z "$_st" ]; then
-    printf 'FAIL issue: gh failed\n'
+    gh_fail issue
     return 1
   fi
   printf 'OK issue: #%s %s\n' "$ISSUE" "$_st"
@@ -249,11 +254,11 @@ function box(s) {
 # read_epic: print the epic line for -e, or FAIL epic: gh failed, or FAIL epic: no line naming the issue.
 read_epic() {
   if ! gh_read epic.json issue view "$EPIC" --json body; then
-    printf 'FAIL epic: gh failed\n'
+    gh_fail epic
     return 1
   fi
   if ! _body=$(jq -r '.body // ""' "$TMP/epic.json"); then
-    printf 'FAIL epic: gh failed\n'
+    gh_fail epic
     return 1
   fi
   _box=$(printf '%s\n' "$_body" | epic_box)
@@ -268,12 +273,12 @@ read_epic() {
 # FAIL flaky: gh failed when gh fails or its output is not a run list.
 read_flaky() {
   if ! gh_read runs.json run list --branch "$BRANCH" --json headSha,conclusion --limit 100; then
-    printf 'FAIL flaky: gh failed\n'
+    gh_fail flaky
     return 1
   fi
   _n=$(jq -r 'if type == "array" then ([group_by(.headSha)[] | map(.conclusion) | select(contains(["failure"]) and contains(["success"]))] | length) else error("not an array") end' "$TMP/runs.json") || _n=""
   if [ -z "$_n" ]; then
-    printf 'FAIL flaky: gh failed\n'
+    gh_fail flaky
     return 1
   fi
   printf 'OK flaky: %s\n' "$_n"

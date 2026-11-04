@@ -12,3 +12,4 @@ node_modules/
 .claude/.*-pending-*
 .claude/.skills-loaded-*
 skills/subagent-driven-development/scripts/tests/generated/
+evals/results/

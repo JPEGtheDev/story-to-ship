@@ -138,6 +138,14 @@ find_anchor() {
   fi
 }
 
+# need_absent <name> <reason>: id="<name>" does not occur on the page, or the op fails with the reason.
+need_absent() {
+  count_page "$PAGE" "id=\"$1\""
+  if [ "$COUNT" -gt 0 ]; then
+    fail "$2"
+  fi
+}
+
 # block_end <name> <start line>: sets BLOCK_END to the last line of the block that starts at the start line. The block
 # ends at the first later line equal to the start line's indent plus its closing tag, or at the start line itself when
 # that line also holds the closing tag. Fails when no such line exists.
@@ -212,18 +220,12 @@ add_card() {
   NEW_ID=$(printf '%s\n' "$CARD" | sed 's/.*[[:blank:]]id="\([^"]*\)".*/\1/')
   find_anchor "$BEFORE"
   BEFORE_LINE=$FIRST
-  count_page "$PAGE" "id=\"$NEW_ID\""
-  if [ "$COUNT" -gt 0 ]; then
-    fail "id $NEW_ID already on the page"
-  fi
+  need_absent "$NEW_ID" "id $NEW_ID already on the page"
   CTX_LINE=0
   if [ -n "$CONTEXT" ]; then
     find_anchor "c-$BEFORE"
     CTX_LINE=$FIRST
-    count_page "$PAGE" "id=\"c-$NEW_ID\""
-    if [ "$COUNT" -gt 0 ]; then
-      fail "id c-$NEW_ID already on the page"
-    fi
+    need_absent "c-$NEW_ID" "id c-$NEW_ID already on the page"
   fi
   make_temp
   CARD_TEXT="$CARD" CTX_TEXT="$CONTEXT" awk -v n1="$BEFORE_LINE" -v n2="$CTX_LINE" 'function indent_of(s) { sub(/[^[:blank:]].*$/, "", s); return s } NR == n1 { print indent_of($0) ENVIRON["CARD_TEXT"] } NR == n2 { print indent_of($0) ENVIRON["CTX_TEXT"] } { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"

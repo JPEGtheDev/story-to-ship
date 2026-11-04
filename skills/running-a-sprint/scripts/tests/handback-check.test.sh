@@ -1,6 +1,6 @@
 #!/bin/sh
 # Fixture tests for handback-check.sh: the state, draft, mergeable, head, ci, branch, closing, footer,
-# coauthor, ascii and inline lines, the gh failure path, the fetch NOTE line and usage errors. No network: the gh
+# coauthor, ascii, inline and moved lines, the gh failure path, the fetch NOTE line and usage errors. No network: the gh
 # command is a stub that prints a JSON fixture file, and the branch fixtures use a local bare repository
 # as origin.
 # HANDBACK_CHECK=<path> substitutes another script (used to prove a test can fail).
@@ -26,7 +26,10 @@ CO_NONE1='OK coauthor: none in body or 1 commits'
 ASCII_OK='OK ascii: body is ASCII'
 # INLINE_NONE: the inline line when the worktree has no plan.md (no clause to read).
 INLINE_NONE='OK inline: none'
-GOOD_CHECKS=$(printf '%s\n' "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK" "$INLINE_NONE")
+# MOVED_NONE: the moved line when no -m option is given.
+MOVED_NONE='OK moved: none given'
+# GOOD_CHECKS: the body, inline and moved lines of the all-good fixture with no plan and no -m option.
+GOOD_CHECKS=$(printf '%s\n' "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK" "$INLINE_NONE" "$MOVED_NONE")
 
 # Non-ASCII bytes are written as printf escapes so this file stays ASCII. ROBOT is U+1F916 (an emoji)
 # and DASH is U+2014 (an em-dash).
@@ -146,6 +149,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "all-good" 0 "$TEST_TMP/want-good"
 
@@ -164,6 +168,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "state-closed" 1 "$TEST_TMP/want-closed"
 
@@ -182,6 +187,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "draft-true" 1 "$TEST_TMP/want-draft"
 
@@ -200,6 +206,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "mergeable-unknown" 1 "$TEST_TMP/want-unknown"
 
@@ -217,6 +224,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "mergeable-conflicting" 1 "$TEST_TMP/want-conflicting"
 
@@ -235,6 +243,7 @@ OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
 OK inline: none
+OK moved: none given
 EOF
 assert_case "head-differs" 1 "$TEST_TMP/want-head"
 
@@ -338,7 +347,7 @@ check_branch() {
   run_script -n 431 -w "$_bwt" -s 427 "$@"
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "$_bline" "$CLOSE_OK" "$FOOT_OK" \
-    "OK coauthor: none in body or $_bn commits" "$ASCII_OK" "$INLINE_NONE" > "$TEST_TMP/want-$_bname"
+    "OK coauthor: none in body or $_bn commits" "$ASCII_OK" "$INLINE_NONE" "$MOVED_NONE" > "$TEST_TMP/want-$_bname"
   assert_exit "$_bname exit" "$_bexit" "$RC"
   assert_file_eq "$_bname lines" "$TEST_TMP/want-$_bname" "$TEST_TMP/out"
 }
@@ -394,7 +403,7 @@ body_case() {
   run_script -n 431 -w "$2" -s 427
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_bahead" \
-    "$5" "$6" "$7" "$8" "$INLINE_NONE" > "$TEST_TMP/want-$1"
+    "$5" "$6" "$7" "$8" "$INLINE_NONE" "$MOVED_NONE" > "$TEST_TMP/want-$1"
   assert_case "$1" "$3" "$TEST_TMP/want-$1"
 }
 
@@ -579,6 +588,7 @@ inline_case() {
     "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_ibn" "$CLOSE_OK" "$FOOT_OK" \
     "OK coauthor: none in body or $_ibn commits" "$ASCII_OK" > "$TEST_TMP/want-$_iname"
   cat "$TEST_TMP/exp-$_iname" >> "$TEST_TMP/want-$_iname"
+  printf '%s\n' "$MOVED_NONE" >> "$TEST_TMP/want-$_iname"
   assert_case "$_iname" "$_iexit" "$TEST_TMP/want-$_iname"
 }
 
@@ -727,5 +737,233 @@ inline_case long-token-ignored "$INL" 1
 write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_UP"
 inline_expect upper-ignored 'FAIL inline: README.md plan 6, numstat 0'
 inline_case upper-ignored "$INL" 1
+
+# Case 19: the moved line. moved_fixture <dir> <base file>: a bare origin whose main holds the base file as
+# old.md, and a clone at <dir> on branch agent/s427-t1-tw with no commits above origin/main. moved_commit <dir>
+# commits every change in the clone as one change commit, so the branch is one commit ahead.
+moved_fixture() {
+  git init -q -b main "$1.seed" || return 1
+  cp "$2" "$1.seed/old.md" || return 1
+  git_c "$1.seed" add -A || return 1
+  git_c "$1.seed" commit -q -m base || return 1
+  git init -q --bare -b main "$1.origin.git" || return 1
+  git_c "$1.seed" push -q "$1.origin.git" main || return 1
+  git clone -q "$1.origin.git" "$1" || return 1
+  git_c "$1" checkout -q -b agent/s427-t1-tw || return 1
+}
+
+# moved_write <dir> <file> [lines...]: write the lines to a file of the clone at <dir>, one line each.
+moved_write() {
+  _wd=$1
+  _wf=$2
+  shift 2
+  printf '%s\n' "$@" > "$_wd/$_wf"
+}
+
+# moved_commit <dir>: stage every change in the clone at <dir> and commit it as one change commit.
+moved_commit() {
+  git_c "$1" add -A || return 1
+  git_c "$1" commit -q -m change || return 1
+}
+
+# moved_expect <name> [lines...]: write the expected moved lines of the case to $TEST_TMP/mvexp-<name>.
+moved_expect() {
+  _mename=$1
+  shift
+  printf '%s\n' "$@" > "$TEST_TMP/mvexp-$_mename"
+}
+
+# moved_run <name> <worktree> <expected exit> [script args]: run the check on the worktree with the all-good
+# document and -b origin/main, and compare stdout with the state..ascii lines, the inline none line and the
+# lines in $TEST_TMP/mvexp-<name>.
+moved_run() {
+  _mname=$1
+  _mwt=$2
+  _mexit=$3
+  shift 3
+  _mhead=$(git -C "$_mwt" rev-parse HEAD) || exit 2
+  _mn=$(git -C "$_mwt" rev-list --count "origin/main..HEAD") || exit 2
+  write_pr_json "$JSON" OPEN false MERGEABLE "$_mhead" "$GOOD_ROLLUP" "$GOOD_BODY"
+  run_script -n 431 -w "$_mwt" -s 427 -b origin/main "$@"
+  printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_mhead" \
+    "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_mn" "$CLOSE_OK" "$FOOT_OK" \
+    "OK coauthor: none in body or $_mn commits" "$ASCII_OK" "$INLINE_NONE" > "$TEST_TMP/want-$_mname"
+  cat "$TEST_TMP/mvexp-$_mname" >> "$TEST_TMP/want-$_mname"
+  assert_case "$_mname" "$_mexit" "$TEST_TMP/want-$_mname"
+}
+
+# Base files: MV_MAIN is the six-line main file; MV_REGEX and MV_REGEX_NEG hold the metacharacter lines.
+MV_PARA='The quick brown fox jumps over the lazy dog.'
+MV_MAIN=$TEST_TMP/mv-main.txt
+MV_REGEX=$TEST_TMP/mv-regex.txt
+MV_REGEX_NEG=$TEST_TMP/mv-regex-neg.txt
+printf '%s\n' 'Intro line.' '' 'The quick brown fox' 'jumps over the lazy dog.' '' 'Tail line.' > "$MV_MAIN" || exit 2
+printf '%s\n' 'Refs follow.' '' 'a.b (c) x*' '' 'Tail line.' > "$MV_REGEX" || exit 2
+printf '%s\n' 'Refs follow.' '' 'axb c xxx' '' 'Tail line.' > "$MV_REGEX_NEG" || exit 2
+
+# Case 19a: a paragraph moved from old.md to new.md (old.md loses it, new.md gains it): OK.
+moved_fixture "$TEST_TMP/fx-moved-ok" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-moved-ok" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-moved-ok" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-moved-ok" || exit 2
+moved_expect moved-ok 'OK moved: old.md -> new.md'
+moved_run moved-ok "$TEST_TMP/fx-moved-ok" 0 -m old.md new.md "$MV_PARA"
+
+# Case 19b: the text wrapped differently in old.md and new.md (line breaks and double spaces differ), and the
+# text argument has padded ends: OK.
+moved_fixture "$TEST_TMP/fx-moved-wrapped" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-moved-wrapped" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-moved-wrapped" new.md 'The  quick brown' 'fox jumps over  the lazy dog.' || exit 2
+moved_commit "$TEST_TMP/fx-moved-wrapped" || exit 2
+moved_expect moved-wrapped-ok 'OK moved: old.md -> new.md'
+moved_run moved-wrapped-ok "$TEST_TMP/fx-moved-wrapped" 0 -m old.md new.md "  $MV_PARA  "
+
+# Case 19c: the text sits only in the added lines of new.md (old.md keeps it as an unchanged line): FAIL removed side.
+moved_fixture "$TEST_TMP/fx-added-only" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-added-only" old.md 'Intro line.' '' 'The quick brown fox' 'jumps over the lazy dog.' '' || exit 2
+moved_write "$TEST_TMP/fx-added-only" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-added-only" || exit 2
+moved_expect added-only-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
+moved_run added-only-fail "$TEST_TMP/fx-added-only" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19d: the text sits in an unchanged context line next to a changed line of old.md: FAIL removed side.
+moved_fixture "$TEST_TMP/fx-context" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-context" old.md 'Intro changed.' '' 'The quick brown fox' 'jumps over the lazy dog.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-context" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-context" || exit 2
+moved_expect context-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
+moved_run context-fail "$TEST_TMP/fx-context" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19e: the text sits only in the removed lines of old.md (new.md has other words): FAIL added side.
+moved_fixture "$TEST_TMP/fx-removed-only" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-removed-only" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-removed-only" new.md 'Something else.' || exit 2
+moved_commit "$TEST_TMP/fx-removed-only" || exit 2
+moved_expect removed-only-fail 'FAIL moved: old.md -> new.md: text missing from added lines of new.md'
+moved_run removed-only-fail "$TEST_TMP/fx-removed-only" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19f: the text is in neither side: both sides named.
+moved_fixture "$TEST_TMP/fx-neither" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-neither" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-neither" new.md 'Something else.' || exit 2
+moved_commit "$TEST_TMP/fx-neither" || exit 2
+moved_expect neither-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md and added lines of new.md'
+moved_run neither-fail "$TEST_TMP/fx-neither" 1 -m old.md new.md 'Unrelated words here.'
+
+# Case 19g: the text differs from new.md by one word (cat for dog): the added side fails only.
+moved_fixture "$TEST_TMP/fx-one-word" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-one-word" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-one-word" new.md 'The quick brown fox jumps over the lazy cat.' || exit 2
+moved_commit "$TEST_TMP/fx-one-word" || exit 2
+moved_expect one-word-fail 'FAIL moved: old.md -> new.md: text missing from added lines of new.md'
+moved_run one-word-fail "$TEST_TMP/fx-one-word" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19h: the case differs (upper case in new.md): the added side fails only.
+moved_fixture "$TEST_TMP/fx-case" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-case" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-case" new.md 'THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG.' || exit 2
+moved_commit "$TEST_TMP/fx-case" || exit 2
+moved_expect case-fail 'FAIL moved: old.md -> new.md: text missing from added lines of new.md'
+moved_run case-fail "$TEST_TMP/fx-case" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19i: the text spans two hunks of old.md (removed Intro line. and removed Tail line., with the changed
+# line between them): the text may not span hunks, so the removed side fails. The added side holds the text.
+moved_fixture "$TEST_TMP/fx-two-hunks" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-two-hunks" old.md '' 'The slow brown fox' 'jumps over the lazy dog.' '' || exit 2
+moved_write "$TEST_TMP/fx-two-hunks" new.md 'Intro line.' 'Tail line.' || exit 2
+moved_commit "$TEST_TMP/fx-two-hunks" || exit 2
+moved_expect two-hunks-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
+moved_run two-hunks-fail "$TEST_TMP/fx-two-hunks" 1 -m old.md new.md 'Intro line. Tail line.'
+
+# Case 19j: old.md is not in the diff (only new.md is created): the not-in-the-diff form names old.md.
+moved_fixture "$TEST_TMP/fx-old-absent" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-old-absent" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-old-absent" || exit 2
+moved_expect old-absent 'FAIL moved: old.md -> new.md: old.md not in the diff'
+moved_run old-absent "$TEST_TMP/fx-old-absent" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19k: new.md is not in the diff (old.md is changed, new.md is never created): the form names new.md.
+moved_fixture "$TEST_TMP/fx-new-absent" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-new-absent" old.md 'Intro line.' '' 'Tail line.' || exit 2
+moved_commit "$TEST_TMP/fx-new-absent" || exit 2
+moved_expect new-absent 'FAIL moved: old.md -> new.md: new.md not in the diff'
+moved_run new-absent "$TEST_TMP/fx-new-absent" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19l: neither file is in the diff (only other.md is created): the and form names both.
+moved_fixture "$TEST_TMP/fx-both-absent" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-both-absent" other.md 'Unrelated.' || exit 2
+moved_commit "$TEST_TMP/fx-both-absent" || exit 2
+moved_expect both-absent 'FAIL moved: old.md -> new.md: old.md and new.md not in the diff'
+moved_run both-absent "$TEST_TMP/fx-both-absent" 1 -m old.md new.md "$MV_PARA"
+
+# Case 19m: old.md deleted in the diff: its removed lines hold the text, so OK.
+moved_fixture "$TEST_TMP/fx-old-deleted" "$MV_MAIN" || exit 2
+rm -f "$TEST_TMP/fx-old-deleted/old.md" || exit 2
+moved_write "$TEST_TMP/fx-old-deleted" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-old-deleted" || exit 2
+moved_expect old-deleted-ok 'OK moved: old.md -> new.md'
+moved_run old-deleted-ok "$TEST_TMP/fx-old-deleted" 0 -m old.md new.md "$MV_PARA"
+
+# Case 19n: two -m options, both OK: two lines in the order given.
+moved_fixture "$TEST_TMP/fx-two-ok" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-two-ok" old.md 'Intro line.' '' || exit 2
+moved_write "$TEST_TMP/fx-two-ok" new.md "$MV_PARA" || exit 2
+moved_write "$TEST_TMP/fx-two-ok" other.md 'Tail line.' || exit 2
+moved_commit "$TEST_TMP/fx-two-ok" || exit 2
+moved_expect two-ok 'OK moved: old.md -> new.md' 'OK moved: old.md -> other.md'
+moved_run two-ok "$TEST_TMP/fx-two-ok" 0 -m old.md new.md "$MV_PARA" -m old.md other.md 'Tail line.'
+
+# Case 19o: two -m options, first OK and second FAIL: both lines are printed and the exit is 1.
+moved_fixture "$TEST_TMP/fx-two-mixed" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-two-mixed" old.md 'Intro line.' '' || exit 2
+moved_write "$TEST_TMP/fx-two-mixed" new.md "$MV_PARA" || exit 2
+moved_commit "$TEST_TMP/fx-two-mixed" || exit 2
+moved_expect two-mixed 'OK moved: old.md -> new.md' 'FAIL moved: old.md -> new.md: text missing from added lines of new.md'
+moved_run two-mixed "$TEST_TMP/fx-two-mixed" 1 -m old.md new.md "$MV_PARA" -m old.md new.md 'Tail line.'
+
+# Case 19p: the same pair given twice, both OK: the line is printed for each option, not only the last.
+moved_fixture "$TEST_TMP/fx-same-pair" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-same-pair" old.md 'Intro line.' '' || exit 2
+moved_write "$TEST_TMP/fx-same-pair" new.md "$MV_PARA" '' 'Tail line.' || exit 2
+moved_commit "$TEST_TMP/fx-same-pair" || exit 2
+moved_expect same-pair 'OK moved: old.md -> new.md' 'OK moved: old.md -> new.md'
+moved_run same-pair "$TEST_TMP/fx-same-pair" 0 -m old.md new.md "$MV_PARA" -m old.md new.md 'Tail line.'
+
+# Case 19q: no -m option: the line reads none given, exit 0.
+moved_fixture "$TEST_TMP/fx-none" "$MV_MAIN" || exit 2
+moved_write "$TEST_TMP/fx-none" other.md 'Unrelated.' || exit 2
+moved_commit "$TEST_TMP/fx-none" || exit 2
+moved_expect none-given "$MOVED_NONE"
+moved_run none-given "$TEST_TMP/fx-none" 0
+
+# Case 19r: a regex metacharacter text matches its literal words: a.b (c) x* is in both sides, OK.
+moved_fixture "$TEST_TMP/fx-regex-ok" "$MV_REGEX" || exit 2
+moved_write "$TEST_TMP/fx-regex-ok" old.md 'Refs follow.' '' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-regex-ok" new.md 'a.b (c) x*' || exit 2
+moved_commit "$TEST_TMP/fx-regex-ok" || exit 2
+moved_expect regex-ok 'OK moved: old.md -> new.md'
+moved_run regex-ok "$TEST_TMP/fx-regex-ok" 0 -m old.md new.md 'a.b (c) x*'
+
+# Case 19s: the text a.b (c) matches a regex but not the literal removed line axb c: the removed side fails.
+moved_fixture "$TEST_TMP/fx-regex-dot" "$MV_REGEX_NEG" || exit 2
+moved_write "$TEST_TMP/fx-regex-dot" old.md 'Refs follow.' '' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-regex-dot" new.md 'a.b (c) x*' || exit 2
+moved_commit "$TEST_TMP/fx-regex-dot" || exit 2
+moved_expect regex-dot-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
+moved_run regex-dot-fail "$TEST_TMP/fx-regex-dot" 1 -m old.md new.md 'a.b (c)'
+
+# Case 19t: the text x* matches a regex (empty match) but not the literal removed line xxx: the removed side fails.
+moved_fixture "$TEST_TMP/fx-regex-star" "$MV_REGEX_NEG" || exit 2
+moved_write "$TEST_TMP/fx-regex-star" old.md 'Refs follow.' '' '' 'Tail line.' || exit 2
+moved_write "$TEST_TMP/fx-regex-star" new.md 'a.b (c) x*' || exit 2
+moved_commit "$TEST_TMP/fx-regex-star" || exit 2
+moved_expect regex-star-fail 'FAIL moved: old.md -> new.md: text missing from removed lines of old.md'
+moved_run regex-star-fail "$TEST_TMP/fx-regex-star" 1 -m old.md new.md 'x*'
+
+# Case 19u: -m with fewer than three values after it is a usage error: exit 2, usage on stderr, no stdout.
+run_script -n 431 -w "$REPO" -s 427 -m old.md new.md
+assert_exit "moved-usage exit" 2 "$RC"
+assert_empty "moved-usage stdout" "$TEST_TMP/out"
+assert_grep "moved-usage message" 'usage' "$TEST_TMP/err"
 
 test_summary

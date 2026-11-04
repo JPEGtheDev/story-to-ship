@@ -8,10 +8,19 @@
 #   2. delete-branch-local: <branch>, then with -x reconcile-<x>; a branch that does not exist is already gone.
 #   3. delete-branch-origin: <branch> on origin, checked with git ls-remote; already gone when absent.
 #   4. fast-forward: root main to origin/main with --ff-only.
+# After the steps, three reads print one line each, in this order:
+#   issue: OK issue: #<issue> <state>, the state from gh issue view.
+#   epic: only with -e. The first line of the epic body that holds a checkbox (- [x], - [X] or - [ ]) and names
+#     #<issue> as a whole number prints OK epic: #<epic> [x] #<issue> or [ ]; no such line prints
+#     FAIL epic: #<epic> has no line naming #<issue>.
+#   flaky: OK flaky: <count>, the distinct head SHAs of <branch> that have both a failure and a success run in
+#     gh run list.
+# A read whose gh call exits non-zero or prints invalid JSON prints FAIL <read>: gh failed, and the other reads
+# still run. The GitHub reads run "${CLOSEOUT_GH:-gh}"; no read changes anything. Any FAIL read makes the exit 1.
 # A failing step prints FAIL <step>: <first line of the git error output>, then the line
-# FAIL steps: stopped, later steps not run; nothing after it runs. Exit codes: 0 every step OK, 1 a refusal or a
-# failed step, 2 a usage error (usage on stderr, nothing on stdout). -i is required, and no step uses its value.
-# -e is accepted and ignored.
+# FAIL steps: stopped, later steps not run; nothing after it runs. Exit codes: 0 every step and read OK, 1 a refusal,
+# a failed step or a failed read, 2 a usage error (usage on stderr, nothing on stdout). -i is required; -e is
+# optional and names the epic issue.
 # Removal uses git worktree remove --force: the check has already allowed only the plan file to be untracked, and
 # a locked worktree still fails. Branches are deleted with branch -D because a squash merge leaves the branch
 # unmerged in git's view; the check has already compared the patches. Nothing is pushed with --force, and nothing
@@ -23,6 +32,7 @@ PREFIX=""
 RECON=""
 PLAN=""
 ISSUE=""
+EPIC=""
 TMP=""
 
 # usage: print the usage line to stderr and exit 2.
@@ -70,6 +80,7 @@ while [ "$#" -gt 0 ]; do
       ;;
     -e)
       [ "$#" -ge 2 ] || usage
+      EPIC=$2
       shift 2
       ;;
     *)
@@ -184,6 +195,90 @@ fast_forward() {
   printf 'OK fast-forward: main at %.7s\n' "$_sha"
 }
 
+# gh_read <file name> <gh arguments>: run the GitHub command named by CLOSEOUT_GH (default gh) with the arguments and
+# write its output to TMP/<file name>. Returns the command's exit status; every GitHub read goes through here.
+gh_read() {
+  _gf=$1
+  shift
+  "${CLOSEOUT_GH:-gh}" "$@" > "$TMP/$_gf"
+}
+
+# read_issue: print the issue state line, or FAIL issue: gh failed when gh fails or the state is missing.
+read_issue() {
+  if ! gh_read issue.json issue view "$ISSUE" --json state; then
+    printf 'FAIL issue: gh failed\n'
+    return 1
+  fi
+  _st=$(jq -r '.state // ""' "$TMP/issue.json") || _st=""
+  if [ -z "$_st" ]; then
+    printf 'FAIL issue: gh failed\n'
+    return 1
+  fi
+  printf 'OK issue: #%s %s\n' "$ISSUE" "$_st"
+}
+
+# epic_box: read the epic body on stdin and print the checkbox of the first line that holds a checkbox marker and
+# names #<issue> as a whole number (not followed or preceded by a digit). Prints nothing when none does.
+epic_box() {
+  awk -v n="#$ISSUE" '
+function named(s,    start, p, q, before, after) {
+  start = 1
+  while ((p = index(substr(s, start), n)) > 0) {
+    q = start + p - 1
+    before = (q > 1) ? substr(s, q - 1, 1) : ""
+    after = substr(s, q + length(n), 1)
+    if (before !~ /[0-9]/ && after !~ /[0-9]/) return 1
+    start = q + 1
+  }
+  return 0
+}
+function box(s) {
+  if (index(s, "- [x]") > 0 || index(s, "- [X]") > 0) return "[x]"
+  if (index(s, "- [ ]") > 0) return "[ ]"
+  return ""
+}
+{
+  b = box($0)
+  if (b != "" && named($0)) {
+    print b
+    exit
+  }
+}'
+}
+
+# read_epic: print the epic line for -e, or FAIL epic: gh failed, or FAIL epic: no line naming the issue.
+read_epic() {
+  if ! gh_read epic.json issue view "$EPIC" --json body; then
+    printf 'FAIL epic: gh failed\n'
+    return 1
+  fi
+  if ! _body=$(jq -r '.body // ""' "$TMP/epic.json"); then
+    printf 'FAIL epic: gh failed\n'
+    return 1
+  fi
+  _box=$(printf '%s\n' "$_body" | epic_box)
+  if [ -z "$_box" ]; then
+    printf 'FAIL epic: #%s has no line naming #%s\n' "$EPIC" "$ISSUE"
+    return 1
+  fi
+  printf 'OK epic: #%s %s #%s\n' "$EPIC" "$_box" "$ISSUE"
+}
+
+# read_flaky: print the count of distinct head SHAs of the branch with both a failure and a success run, or
+# FAIL flaky: gh failed when gh fails or its output is not a run list.
+read_flaky() {
+  if ! gh_read runs.json run list --branch "$BRANCH" --json headSha,conclusion --limit 100; then
+    printf 'FAIL flaky: gh failed\n'
+    return 1
+  fi
+  _n=$(jq -r 'if type == "array" then ([group_by(.headSha)[] | map(.conclusion) | select(contains(["failure"]) and contains(["success"]))] | length) else error("not an array") end' "$TMP/runs.json") || _n=""
+  if [ -z "$_n" ]; then
+    printf 'FAIL flaky: gh failed\n'
+    return 1
+  fi
+  printf 'OK flaky: %s\n' "$_n"
+}
+
 run_check || {
   printf 'FAIL steps: refused, close-out check failed\n'
   exit 1
@@ -200,4 +295,11 @@ if [ -n "$RECON" ]; then
 fi
 delete_origin "$BRANCH"
 fast_forward
-exit 0
+
+_rc=0
+read_issue || _rc=1
+if [ -n "$EPIC" ]; then
+  read_epic || _rc=1
+fi
+read_flaky || _rc=1
+exit "$_rc"

@@ -956,6 +956,21 @@ want_done steps-epic-no-box "OK issue: #427 CLOSED" "OK epic: #400 [ ] #427" "OK
 steps_std -e 400
 assert_case steps-epic-no-box 0 steps-epic-no-box
 
+# Epic line: a checkbox-less line naming #427 takes no default box, so the later checked line prints [x].
+new_case steps-epic-no-box-checked
+write_epic 400 "Discussed #427 in the notes" "- [x] #427 the story"
+want_done steps-epic-no-box-checked "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-no-box-checked 0 steps-epic-no-box-checked
+
+# Epic line: when the only line naming #427 has no checkbox, no line matches and the epic line fails (exit 1).
+new_case steps-epic-only-no-box
+write_epic 400 "Discussed #427 in the notes"
+want_done steps-epic-only-no-box "OK issue: #427 CLOSED" "FAIL epic: #400 has no line naming #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-only-no-box 1 steps-epic-only-no-box
+assert_refs steps-epic-only-no-box 0 0 "$FX_S" 0
+
 # Epic line: the first matching line wins, so the checked line above the unchecked one prints [x].
 new_case steps-epic-first
 write_epic 400 "- [x] #427 first" "- [ ] #427 second"
@@ -971,6 +986,7 @@ steps_flaky_case steps-flaky-one '[{"headSha":"a","conclusion":"failure"},{"head
 steps_flaky_case steps-flaky-two '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"},{"headSha":"b","conclusion":"success"},{"headSha":"b","conclusion":"failure"},{"headSha":"c","conclusion":"failure"}]' 2
 steps_flaky_case steps-flaky-repeat '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":"success"}]' 1
 steps_flaky_case steps-flaky-cancelled '[{"headSha":"a","conclusion":"cancelled"},{"headSha":"a","conclusion":"success"}]' 0
+steps_flaky_case steps-flaky-cancelled-failure '[{"headSha":"a","conclusion":"cancelled"},{"headSha":"a","conclusion":"failure"}]' 0
 steps_flaky_case steps-flaky-skipped '[{"headSha":"a","conclusion":"skipped"},{"headSha":"a","conclusion":"failure"}]' 0
 steps_flaky_case steps-flaky-empty '[]' 0
 

@@ -6,13 +6,15 @@
 #   add-card: before=<id> card=<html> [context=<html>]
 #     card is one line of HTML holding exactly one id attribute, id="<id>". It is inserted directly above the line
 #     that holds id="<before>", with that line's indent. context, when given, is one line of HTML inserted directly
-#     above the line that holds id="c-<before>", with that line's indent.
+#     above the line that holds id="c-<before>", with that line's indent. The card id must not already be on the page;
+#     when the context holds an id attribute, that id must not already be on the page either (a context without an id
+#     is accepted). The c-<card id> anchor must not already be on the page.
 #   hide: hide=<id> (repeatable)
 #     The card block is the line that holds id="<id>" through the first later line equal to that line's indent plus
 #     the closing tag of the element that line opens, or that line alone when it also holds that closing tag. The
 #     context block is the same for id="c-<id>". Both blocks are removed. An id given twice is removed once.
-# An anchor is id="<value>" where the text before it is the start of the line, a space or a tab (so data-id="..." and
-# href="#..." do not count). add-card needs the before anchor to occur exactly once; hide needs each id and c-<id> to
+# An anchor is id="<value>" where the character before it is the start of the line or any character other than a
+# letter, digit, underscore or hyphen (so data-id="..." and href="#..." do not count, while class="a"id="x" does). add-card needs the before anchor to occur exactly once; hide needs each id and c-<id> to
 # occur exactly once.
 # Output: on success one line per op: "OK add-card: <id> before <before>" (with " and context" when context was given),
 # or one "OK hide: <id>" line per distinct id, in the order first given. On any failure exactly one line,
@@ -22,7 +24,7 @@
 # Everything is checked before anything is written. The result is built in a temp file made with mktemp in the page's
 # directory, given the page's mode by cp -p, and moved over the page with mv only when every check passed; the temp
 # file is removed on every exit that has not moved it.
-# Tools: sh, sed, awk, grep, mktemp, cp, mv, rm, and cmp. No other command is used.
+# Tools: sh, awk, grep, mktemp, cp, mv, rm, and cmp. No other command is used.
 NL='
 '
 TAB=$(printf '\t')
@@ -39,6 +41,8 @@ CARD=""
 CONTEXT=""
 CARD_IDS=0
 NEW_ID=""
+CTX_IDS=0
+CTX_ID=""
 HIDE_COUNT=0
 SEEN="$NL"
 RANGES=""
@@ -49,25 +53,42 @@ BLOCK_END=""
 BEFORE_LINE=0
 CTX_LINE=0
 
-# COUNT_FUNCS: awk function that counts the matches of a needle in one line. A match counts when the text before it is
-# the start of the line, a space or a tab.
+# COUNT_FUNCS: awk functions shared by every anchor and id lookup. bound_ok: a match at column abs counts when the
+# character before it is the start of the line or not a letter, digit, underscore or hyphen. count_in: counts the
+# matches of a needle in one line. id_in: the value of the first id="..." in one line that passes bound_ok (the text
+# to the end of the line when the closing quote is missing), or "" when there is none.
 COUNT_FUNCS='
-function count_in(line, needle,   rest, offset, p, abs, pre, n) {
+function bound_ok(line, abs) {
+  if (abs == 1) return 1
+  return substr(line, abs - 1, 1) !~ /[A-Za-z0-9_-]/
+}
+function count_in(line, needle,   rest, offset, p, abs, n) {
   n = 0
   rest = line
   offset = 0
   while ((p = index(rest, needle)) > 0) {
     abs = offset + p
-    if (abs == 1) {
-      n++
-    } else {
-      pre = substr(line, abs - 1, 1)
-      if (pre == " " || pre == "\t") n++
-    }
+    if (bound_ok(line, abs)) n++
     rest = substr(line, abs + 1)
     offset = abs
   }
   return n
+}
+function id_in(line,   rest, offset, p, abs, v, q) {
+  rest = line
+  offset = 0
+  while ((p = index(rest, "id=\"")) > 0) {
+    abs = offset + p
+    if (bound_ok(line, abs)) {
+      v = substr(line, abs + 4)
+      q = index(v, "\"")
+      if (q > 0) return substr(v, 1, q - 1)
+      return v
+    }
+    rest = substr(line, abs + 1)
+    offset = abs
+  }
+  return ""
 }'
 
 # usage: the usage line to stderr, exit 2.
@@ -217,7 +238,7 @@ add_card() {
   if [ "$CARD_IDS" -gt 1 ]; then
     fail "card has more than one id"
   fi
-  NEW_ID=$(printf '%s\n' "$CARD" | sed 's/.*[[:blank:]]id="\([^"]*\)".*/\1/')
+  NEW_ID=$(CARD_TEXT="$CARD" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CARD_TEXT"]) }') || fail "cannot read the card"
   find_anchor "$BEFORE"
   BEFORE_LINE=$FIRST
   need_absent "$NEW_ID" "id $NEW_ID already on the page"
@@ -226,6 +247,11 @@ add_card() {
     find_anchor "c-$BEFORE"
     CTX_LINE=$FIRST
     need_absent "c-$NEW_ID" "id c-$NEW_ID already on the page"
+    CTX_IDS=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print count_in(ENVIRON["CTX_TEXT"], "id=\"") + 0 }') || fail "cannot read the context"
+    if [ "$CTX_IDS" -gt 0 ]; then
+      CTX_ID=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CTX_TEXT"]) }') || fail "cannot read the context"
+      need_absent "$CTX_ID" "id $CTX_ID already on the page"
+    fi
   fi
   make_temp
   CARD_TEXT="$CARD" CTX_TEXT="$CONTEXT" awk -v n1="$BEFORE_LINE" -v n2="$CTX_LINE" 'function indent_of(s) { sub(/[^[:blank:]].*$/, "", s); return s } NR == n1 { print indent_of($0) ENVIRON["CARD_TEXT"] } NR == n2 { print indent_of($0) ENVIRON["CTX_TEXT"] } { print }' "$PAGE" > "$TMP" || fail "cannot write a temp file beside $PAGE"

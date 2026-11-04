@@ -698,4 +698,34 @@ write_plan "$INB/plan.md" 'lane: inline 1 lines in bin.dat' "inline commits: $IN
 inline_expect binary-one 'FAIL inline: bin.dat plan 1, numstat 0'
 inline_case binary-one "$INB" 1
 
+# Length and case bounds of the hash token: 7 to 40 lowercase hex characters. INL_SHA is 7 characters and
+# INL_FULL is the 40-character commit name of the same commit.
+INL_FULL=$(git -C "$INL" rev-parse HEAD) || exit 2
+INL_SIX=$(printf '%s\n' "$INL_SHA" | awk '{ print substr($0, 1, 6) }')
+INL_UP=$(printf '%s\n' "$INL_FULL" | tr 'a-f' 'A-F')
+[ "${#INL_FULL}" -eq 40 ] && [ "$INL_UP" != "$INL_FULL" ] || exit 2
+
+# Case 18s: a full 40-character hash on the inline commits: line resolves to its commit and counts: README.md 6.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_FULL"
+inline_expect full-hash-ok 'OK inline: README.md 6 lines'
+inline_case full-hash-ok "$INL" 0
+
+# Case 18t: a 6-character lowercase hex token is below the 7-character minimum and is ignored: no hash line, and
+# the file line reads numstat 0 against plan 6.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SIX"
+inline_expect six-char-ignored 'FAIL inline: README.md plan 6, numstat 0'
+inline_case six-char-ignored "$INL" 1
+
+# Case 18u: a 41-character hex token (the 40-character hash plus one hex character) is above the 40-character
+# maximum and is ignored: no hash line, and the file line reads numstat 0 against plan 6.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: ${INL_FULL}a"
+inline_expect long-token-ignored 'FAIL inline: README.md plan 6, numstat 0'
+inline_case long-token-ignored "$INL" 1
+
+# Case 18v: an uppercase hex token of 40 characters (the real hash uppercased) is not lowercase hex and is ignored:
+# no hash line, and the file line reads numstat 0 against plan 6.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_UP"
+inline_expect upper-ignored 'FAIL inline: README.md plan 6, numstat 0'
+inline_case upper-ignored "$INL" 1
+
 test_summary

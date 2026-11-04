@@ -432,6 +432,7 @@ jobs:
           checkx agents/story-coordinator.md '## Reconcile'
           check agents/story-coordinator.md '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read' 'rev-parse origin/<branch>' 'each statement that now contradicts another statement' 'worktree add .worktrees/{{WORKTREE_PREFIX}} -b reconcile-{{WORKTREE_PREFIX}}' 'never replace an earlier one' 'Reconcile text (it names a merged PR' 'origin HEAD:<branch>' 'for a mechanical reason'
           check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()' 'Reconciles (per merge that triggered one)' 'Reconciles: <PRs reconciled>' 'one `Reconciles:` entry per reconcile'
+          check skills/running-a-sprint/references/SCORECARD.md '- Needed owner change: <yes, no or unknown>; repository:' '- CI runs for this repository: flaky <n>' '## Trust number' 'That class meets the bar.'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing reconcile contract string(s)"
             exit 1

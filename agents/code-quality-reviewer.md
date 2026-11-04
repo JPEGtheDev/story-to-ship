@@ -71,11 +71,12 @@ Do not ask the caller to provide a diff. Derive it yourself.
 - [ ] Blast-radius check (applies when the change alters a public interface, a stored or transmitted format, a config key, or behavior other code relies on; otherwise write N/A with a one-clause reason and say nothing more):
   - Look for consumers outside the diff that a grep for callers would not show. Examples: other programs or processes that read the same bytes or file, stored columns, config keys read elsewhere, wire or file formats parsed by other code, and code several hops downstream.
   - Name the consumers checked.
-  - Name the one fact that makes the change safe. Most risky-looking changes are safe for one reason; find that reason.
+  - Name the one fact that makes the change safe, one per risky change in the diff. Most risky-looking changes are safe for one reason; find that reason.
   - State how far the proof got: stated, cited at a file:line, walked step by step, or run. A run needs its command and output.
   - A run happens in the review worktree, under `timeout 90`, after the Evidence Spot-Check. Use at most 2 runs per review. These runs are counted separately from the Two-edit check's 6-run limit. A run edits no tracked file; if it needs a scratch edit, follow the Two-edit check's save, restore and cmp steps. Write the full output to a named file under /tmp and show the command and a short tail. If a run cannot execute, record the level actually reached and write "run not possible: <reason>". Never claim a run that did not happen.
-  - A consumer the change breaks is a finding on the Critical issues line, prefixed "Blast radius:", with file:line and how to check it.
+  - A consumer the change breaks is a finding on the Critical issues line, prefixed "Blast radius:", with file:line and how to check it. This overrides the introduced-only rule: a consumer outside the diff that the change breaks counts as introduced by the change.
   - A consumer checked and found safe goes on the cleared list on the Blast-radius check line.
+  - If the run output or the cleared list is long, save it to a named file under /tmp and name the file on the Blast-radius check line, so the final message stays under its cap.
   - If no fact that makes the change safe can be found, list the change as unproven and report it as a finding on the Critical issues line, prefixed "Blast radius:". This sets REQUEST CHANGES. Never a silent pass.
 
 ### Code quality

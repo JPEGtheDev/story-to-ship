@@ -1,6 +1,6 @@
 #!/bin/sh
 # Fixture tests for handback-check.sh: the state, draft, mergeable, head, ci, branch, closing, footer,
-# coauthor and ascii lines, the gh failure path, the fetch NOTE line and usage errors. No network: the gh
+# coauthor, ascii and inline lines, the gh failure path, the fetch NOTE line and usage errors. No network: the gh
 # command is a stub that prints a JSON fixture file, and the branch fixtures use a local bare repository
 # as origin.
 # HANDBACK_CHECK=<path> substitutes another script (used to prove a test can fail).
@@ -24,7 +24,9 @@ CLOSE_OK='OK closing: names #427'
 FOOT_OK='OK footer: Generated with Claude Code'
 CO_NONE1='OK coauthor: none in body or 1 commits'
 ASCII_OK='OK ascii: body is ASCII'
-GOOD_CHECKS=$(printf '%s\n' "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK")
+# INLINE_NONE: the inline line when the worktree has no plan.md (no clause to read).
+INLINE_NONE='OK inline: none'
+GOOD_CHECKS=$(printf '%s\n' "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK" "$INLINE_NONE")
 
 # Non-ASCII bytes are written as printf escapes so this file stays ASCII. ROBOT is U+1F916 (an emoji)
 # and DASH is U+2014 (an em-dash).
@@ -143,6 +145,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "all-good" 0 "$TEST_TMP/want-good"
 
@@ -160,6 +163,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "state-closed" 1 "$TEST_TMP/want-closed"
 
@@ -177,6 +181,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "draft-true" 1 "$TEST_TMP/want-draft"
 
@@ -194,6 +199,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "mergeable-unknown" 1 "$TEST_TMP/want-unknown"
 
@@ -210,6 +216,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "mergeable-conflicting" 1 "$TEST_TMP/want-conflicting"
 
@@ -227,6 +234,7 @@ OK closing: names #427
 OK footer: Generated with Claude Code
 OK coauthor: none in body or 1 commits
 OK ascii: body is ASCII
+OK inline: none
 EOF
 assert_case "head-differs" 1 "$TEST_TMP/want-head"
 
@@ -330,7 +338,7 @@ check_branch() {
   run_script -n 431 -w "$_bwt" -s 427 "$@"
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "$_bline" "$CLOSE_OK" "$FOOT_OK" \
-    "OK coauthor: none in body or $_bn commits" "$ASCII_OK" > "$TEST_TMP/want-$_bname"
+    "OK coauthor: none in body or $_bn commits" "$ASCII_OK" "$INLINE_NONE" > "$TEST_TMP/want-$_bname"
   assert_exit "$_bname exit" "$_bexit" "$RC"
   assert_file_eq "$_bname lines" "$TEST_TMP/want-$_bname" "$TEST_TMP/out"
 }
@@ -386,7 +394,7 @@ body_case() {
   run_script -n 431 -w "$2" -s 427
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
     "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_bahead" \
-    "$5" "$6" "$7" "$8" > "$TEST_TMP/want-$1"
+    "$5" "$6" "$7" "$8" "$INLINE_NONE" > "$TEST_TMP/want-$1"
   assert_case "$1" "$3" "$TEST_TMP/want-$1"
 }
 
@@ -544,5 +552,150 @@ body_case coauthor-zero-commits "$TEST_TMP/coa-zero" 0 "$GOOD_BODY" "$CLOSE_OK" 
 make_origin_clone "$TEST_TMP/coa-base" 0 'Co-Authored-By: Base <b@example.com>' || exit 2
 body_case coauthor-base-trailer-ignored "$TEST_TMP/coa-base" 0 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
   "OK coauthor: none in body or 0 commits" "$ASCII_OK"
+
+# Case 18: the inline line. INL is a clone with two branch commits on top of origin/main. Commit 1 (INL_BASE)
+# adds README.md with four lines (4 added). Commit 2 (INL_SHA) keeps two README.md lines, deletes two and adds
+# four (README.md 4 added, 2 deleted) and adds notes.txt with three lines (3 added). The other lines are the
+# all-good lines for the worktree; inline_case compares the whole stdout with the expected inline lines of
+# the named case and checks the exit code. inline_expect <name> [lines...]: write the expected inline lines.
+inline_expect() {
+  _ename=$1
+  shift
+  printf '%s\n' "$@" > "$TEST_TMP/exp-$_ename"
+}
+
+# inline_case <name> <worktree> <expected exit> [script args]: run the check on the worktree with the all-good
+# document and compare stdout with the state..ascii lines followed by $TEST_TMP/exp-<name>.
+inline_case() {
+  _iname=$1
+  _iwt=$2
+  _iexit=$3
+  shift 3
+  _ihead=$(git -C "$_iwt" rev-parse HEAD) || exit 2
+  _ibn=$(git -C "$_iwt" rev-list --count "origin/main..HEAD") || exit 2
+  write_pr_json "$JSON" OPEN false MERGEABLE "$_ihead" "$GOOD_ROLLUP" "$GOOD_BODY"
+  run_script -n 431 -w "$_iwt" -s 427 "$@"
+  printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_ihead" \
+    "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_ibn" "$CLOSE_OK" "$FOOT_OK" \
+    "OK coauthor: none in body or $_ibn commits" "$ASCII_OK" > "$TEST_TMP/want-$_iname"
+  cat "$TEST_TMP/exp-$_iname" >> "$TEST_TMP/want-$_iname"
+  assert_case "$_iname" "$_iexit" "$TEST_TMP/want-$_iname"
+}
+
+# write_plan <file> [lines...]: write each argument as one line of the file.
+write_plan() {
+  _wf=$1
+  shift
+  printf '%s\n' "$@" > "$_wf"
+}
+
+INL=$TEST_TMP/inl
+make_origin_clone "$INL" 0 || exit 2
+printf '%s\n' one two three four > "$INL/README.md" || exit 2
+git_c "$INL" add -A || exit 2
+git_c "$INL" commit -q -m 'readme base' || exit 2
+INL_BASE=$(short_sha "$INL" HEAD) || exit 2
+printf '%s\n' one two five six seven eight > "$INL/README.md" || exit 2
+printf '%s\n' 'note one' 'note two' 'note three' > "$INL/notes.txt" || exit 2
+git_c "$INL" add -A || exit 2
+git_c "$INL" commit -q -m 'readme and notes' || exit 2
+INL_SHA=$(short_sha "$INL" HEAD) || exit 2
+
+# Case 18a: a clause with the hash on its own inline commits: line. README.md is 4 + 2 = 6; notes.txt has no clause
+# and is ignored.
+write_plan "$INL/plan.md" 'Todo 1: example' 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA"
+inline_expect own-line-ok 'OK inline: README.md 6 lines'
+inline_case own-line-ok "$INL" 0
+
+# Case 18b: the same clause with the hash on the lane line after the clause.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md inline commits: '"$INL_SHA"
+inline_expect lane-line-ok 'OK inline: README.md 6 lines'
+inline_case lane-line-ok "$INL" 0
+
+# Case 18c, 18d, 18e: the plan count 8, 5 and 7 each differ from numstat 6 and fail with both numbers.
+write_plan "$INL/plan.md" 'lane: inline 8 lines in README.md' "inline commits: $INL_SHA"
+inline_expect plan-high 'FAIL inline: README.md plan 8, numstat 6'
+inline_case plan-high "$INL" 1
+
+write_plan "$INL/plan.md" 'lane: inline 5 lines in README.md' "inline commits: $INL_SHA"
+inline_expect plan-low 'FAIL inline: README.md plan 5, numstat 6'
+inline_case plan-low "$INL" 1
+
+write_plan "$INL/plan.md" 'lane: inline 7 lines in README.md' "inline commits: $INL_SHA"
+inline_expect plan-off-by-one 'FAIL inline: README.md plan 7, numstat 6'
+inline_case plan-off-by-one "$INL" 1
+
+# Case 18f: one commit, two files with clauses. notes.txt (plan 2, numstat 3) fails and is listed first because
+# its clause comes first; README.md (6) is OK. Lines follow plan order.
+write_plan "$INL/plan.md" 'lane: inline 2 lines in notes.txt' 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA"
+inline_expect two-file-mixed 'FAIL inline: notes.txt plan 2, numstat 3' 'OK inline: README.md 6 lines'
+inline_case two-file-mixed "$INL" 1
+
+# Case 18g: two clauses on one lane line, both OK, listed in plan order.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md lane: inline 3 lines in notes.txt inline commits: $INL_SHA"
+inline_expect two-clauses-one-line 'OK inline: README.md 6 lines' 'OK inline: notes.txt 3 lines'
+inline_case two-clauses-one-line "$INL" 0
+
+# Case 18h: two commits for one file add: INL_BASE gives 4 and INL_SHA gives 6, so 10.
+write_plan "$INL/plan.md" 'lane: inline 10 lines in README.md' "inline commits: $INL_BASE $INL_SHA"
+inline_expect two-commits-one-file 'OK inline: README.md 10 lines'
+inline_case two-commits-one-file "$INL" 0
+
+# Case 18i: the same file in two clauses adds the n values: 3 + 3 = 6, one line only.
+write_plan "$INL/plan.md" 'lane: inline 3 lines in README.md' 'lane: inline 3 lines in README.md' "inline commits: $INL_SHA"
+inline_expect same-file-twice 'OK inline: README.md 6 lines'
+inline_case same-file-twice "$INL" 0
+
+# Case 18j: a plan with no clause prints OK inline: none even when it names commits.
+write_plan "$INL/plan.md" 'Todo 1: example' "inline commits: $INL_SHA"
+inline_expect no-clause 'OK inline: none'
+inline_case no-clause "$INL" 0
+
+# Case 18k: no default plan.md in the worktree prints OK inline: none.
+rm -f "$INL/plan.md" || exit 2
+inline_expect default-plan-absent 'OK inline: none'
+inline_case default-plan-absent "$INL" 0
+
+# Case 18l: a -P plan file that is missing fails with its name and exits 1.
+inline_expect p-missing 'FAIL inline: plan file missing-plan.md not found'
+inline_case p-missing "$INL" 1 -P missing-plan.md
+
+# Case 18m: -P names another file: that file is read, and the default plan.md (which would fail with count 9) is not.
+write_plan "$INL/plan.md" 'lane: inline 9 lines in README.md' "inline commits: $INL_SHA"
+write_plan "$INL/lane-plan.md" 'lane: inline 6 lines in README.md' "inline commits: $INL_SHA"
+inline_expect p-present 'OK inline: README.md 6 lines'
+inline_case p-present "$INL" 0 -P lane-plan.md
+
+# Case 18n: a hash that is not a commit fails once with the hash as written; the file line still prints from the
+# hashes that resolve.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: deadbee $INL_SHA"
+inline_expect unknown-hash 'FAIL inline: hash deadbee not found' 'OK inline: README.md 6 lines'
+inline_case unknown-hash "$INL" 1
+
+# Case 18o: a hash named twice (on the lane line and on its own line) counts once: 6, not 12.
+write_plan "$INL/plan.md" "lane: inline 6 lines in README.md inline commits: $INL_SHA" "inline commits: $INL_SHA"
+inline_expect hash-twice 'OK inline: README.md 6 lines'
+inline_case hash-twice "$INL" 0
+
+# Case 18p: a token that is not hex after inline commits: is ignored.
+write_plan "$INL/plan.md" 'lane: inline 6 lines in README.md' "inline commits: notahash $INL_SHA"
+inline_expect non-hex-token 'OK inline: README.md 6 lines'
+inline_case non-hex-token "$INL" 0
+
+# Case 18q: a binary file change counts 0 (numstat prints -): n 0 is OK.
+INB=$TEST_TMP/inl-bin
+make_origin_clone "$INB" 0 || exit 2
+printf 'bin\000ary\n' > "$INB/bin.dat" || exit 2
+git_c "$INB" add -A || exit 2
+git_c "$INB" commit -q -m 'binary file' || exit 2
+INB_SHA=$(short_sha "$INB" HEAD) || exit 2
+write_plan "$INB/plan.md" 'lane: inline 0 lines in bin.dat' "inline commits: $INB_SHA"
+inline_expect binary-zero 'OK inline: bin.dat 0 lines'
+inline_case binary-zero "$INB" 0
+
+# Case 18r: the same binary change with n 1 fails: the binary count is 0, not 1.
+write_plan "$INB/plan.md" 'lane: inline 1 lines in bin.dat' "inline commits: $INB_SHA"
+inline_expect binary-one 'FAIL inline: bin.dat plan 1, numstat 0'
+inline_case binary-one "$INB" 1
 
 test_summary

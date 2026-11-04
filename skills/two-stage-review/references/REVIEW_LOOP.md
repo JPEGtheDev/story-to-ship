@@ -42,7 +42,7 @@ Mark todo done once each nit from an APPROVE WITH NITS block is fixed, or declin
          |
          v
 After the last todo (the whole-branch pass; it is not run per todo):
-CI on the feature branch head: red --> fix CI first (a CI fix is not a Stage 2 cycle) --> green
+CI on the feature branch head: red --> classify it (story-coordinator Red CI section), fix own code first (a CI fix is not a Stage 2 cycle) --> green
          |
          v
 Stage 2 over the branch diff (`git diff --name-only origin/main...HEAD`, minus any file whose latest change came from a risky todo that already passed its Stage 2, grouped as in the Stage 2 rule above: at most two files per dispatch, one block per file; same verdict-block rules, including the unreadable-verdict re-dispatch)
@@ -73,5 +73,5 @@ Stage 2 over the branch diff (`git diff --name-only origin/main...HEAD`, minus a
     Mark todo done once each nit is fixed or declined with a recorded reason, and any size report is recorded for the user's decision. Reload skills (session-bootstrap refresh rule).
               |
               v
-    After the last todo (whole-branch pass): CI red -> fix CI first -> CI green -> Stage 2 over `git diff --name-only origin/main...HEAD` minus files last changed by a risky todo that passed its Stage 2 (same verdict rules) -> any block REQUEST CHANGES / REJECT / NEEDS WORK? -> fresh implementer fixes (a finding charges the fix rounds of the todo whose Files list names the file) -> re-check changed hunks + CI green -> next cycle (at most 3 whole-branch cycles, separate from the per-todo fix-round cap; a fourth cycle -> stop and prompt the owner with the open findings)
+    After the last todo (whole-branch pass): CI red -> classify it, fix own code first -> CI green -> Stage 2 over `git diff --name-only origin/main...HEAD` minus files last changed by a risky todo that passed its Stage 2 (same verdict rules) -> any block REQUEST CHANGES / REJECT / NEEDS WORK? -> fresh implementer fixes (a finding charges the fix rounds of the todo whose Files list names the file) -> re-check changed hunks + CI green -> next cycle (at most 3 whole-branch cycles, separate from the per-todo fix-round cap; a fourth cycle -> stop and prompt the owner with the open findings)
 ```

@@ -11,12 +11,12 @@ related:
 
 # Old-Versus-New Eval Comparison
 
-Use this procedure before a skill is shortened or reworded. It measures the change; it does not shorten anything.
+Use this procedure before shipping an edit that shortens or rewords a skill. It measures the change; it does not shorten anything.
 
 ## a. When It Applies
 
-1. Run this procedure before any edit that shortens or rewords a skill's SKILL.md or references/ text.
-2. Ship the changed skill only when no case's score drops. Any drop blocks the change. There is no tolerance.
+1. Run this procedure before shipping any edit that shortens or rewords a skill's SKILL.md or references/ text. Step d.1 compares the commit before the edit with the edited tree, so the comparison runs after the edit and before shipping.
+2. Ship the changed skill only when no case's score drops. A first-run drop is not a verdict: step d.6 reruns it, and a drop that the step d.6 rerun confirms blocks the change. There is no tolerance for a confirmed drop.
 
 ## b. Consent and Cost
 
@@ -37,7 +37,7 @@ Use this procedure before a skill is shortened or reworded. It measures the chan
 2. Run the old checkout:
    `claude plugin eval <old-path> --runs 5 --model <model> --judge-model <judge-model> --ablation none --no-publish --max-cost-usd <ceiling> --json <old.json>`
 3. Run the same command on `<new-path>` with `--json <new.json>`. Keep the same `--runs`, `--model`, and `--judge-model` on both.
-4. Join and print the per-case scores and the difference:
+4. Join and print the per-case scores and the difference. Every case must appear in both files; the join silently skips a case that is missing from new.json:
    `jq -n --slurpfile o <old.json> --slurpfile n <new.json> '[ $o[0].cases[] as $a | ($n[0].cases[] | select(.name==$a.name)) as $b | {case:$a.name, old:$a.aggregates.score, new:$b.aggregates.score, diff:($b.aggregates.score-$a.aggregates.score)} ]'`
 5. A negative `diff` is a drop.
 6. For a dropped case, rerun that case once on both checkouts: add `--case <case-name>` and a new `--json` file name. The rerun needs the owner's consent and a ceiling.
@@ -70,5 +70,6 @@ Use this procedure before a skill is shortened or reworded. It measures the chan
 ## h. Limits
 
 1. Scores come from model runs. Five runs per case is the floor.
-2. A case that scores the same with and without the plugin does not prove the skill text matters. The completion-claim case did in a spike.
+2. A case that scores the same with and without the plugin (the completion-claim case is one) does not prove the skill text matters.
 3. A passing comparison shows no measured drop. It does not show the text is unneeded.
+4. The join reads cases[].aggregates.score; check that field exists in the first --ablation none output before trusting the table.

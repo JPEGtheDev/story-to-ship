@@ -103,10 +103,11 @@ write_gh_stub() {
   chmod +x "$1" || return 1
 }
 
-# write_pr_json <file> <state> <isDraft> <mergeable> <headRefOid>: a gh pr view document for PR 431.
+# write_pr_json <file> <state> <isDraft> <mergeable> <headRefOid> [rollup JSON]: a gh pr view document
+# for PR 431. The rollup is raw JSON for statusCheckRollup and defaults to an empty array.
 write_pr_json() {
-  printf '{"number":431,"state":"%s","isDraft":%s,"mergeable":"%s","headRefOid":"%s","statusCheckRollup":[],"body":""}\n' \
-    "$2" "$3" "$4" "$5" > "$1"
+  printf '{"number":431,"state":"%s","isDraft":%s,"mergeable":"%s","headRefOid":"%s","statusCheckRollup":%s,"body":""}\n' \
+    "$2" "$3" "$4" "$5" "${6:-[]}" > "$1"
 }
 
 # test_summary: print the counts and exit 0 when no assertion failed, 1 otherwise.

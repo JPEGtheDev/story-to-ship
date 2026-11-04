@@ -131,7 +131,7 @@ run_fetch() {
   if git_net fetch -q origin main; then
     _main_ok=1
   fi
-  git_net ls-remote --exit-code --heads origin "$BRANCH"
+  git_net ls-remote --exit-code origin "refs/heads/$BRANCH"
   _probe=$?
   if [ "$_probe" -eq 2 ]; then
     _branch_ok=1

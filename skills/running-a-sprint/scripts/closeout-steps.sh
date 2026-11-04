@@ -164,7 +164,7 @@ delete_local() {
 # absent (already gone); any other failure stops the run.
 delete_origin() {
   _ls=0
-  GIT_TERMINAL_PROMPT=0 git -C "$ROOT" ls-remote --exit-code --heads origin "$1" >/dev/null 2>"$TMP/err" || _ls=$?
+  GIT_TERMINAL_PROMPT=0 git -C "$ROOT" ls-remote --exit-code origin "refs/heads/$1" >/dev/null 2>"$TMP/err" || _ls=$?
   case "$_ls" in
     0) ;;
     2)

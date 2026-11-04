@@ -1,9 +1,9 @@
 #!/bin/sh
 # Fixture tests for page-edit.sh, the owner page editor, for its add-card, hide, status, ready-add and ready-remove
 # ops: the usage errors (exit 2), the anchor rules, the card and context checks, the hide blocks, the status and
-# Ready to merge rules, the non-ASCII check, the unreadable-file messages, the byte-identical failure path, the
-# no-temp-file rule and the file mode kept by each edit. The real template (placeholders filled, two cards q7
-# and q9, each with its context block) and small synthetic pages are the fixtures. No network.
+# Ready to merge rules, the non-ASCII and carriage return checks, the unreadable-file messages, the byte-identical
+# failure path, the no-temp-file rule and the file mode kept by each edit. The real template (placeholders filled,
+# two cards q7 and q9, each with its context block) and small synthetic pages are the fixtures. No network.
 # PAGE_EDIT=<path> substitutes another script (used to prove a test can fail).
 # shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
@@ -333,6 +333,11 @@ expect_unchanged "add-card card with two ids" 1 'FAIL add-card: card has more th
 
 new_case
 syn_q7
+write_lines "$CASE_IN" 'before=q7' 'card=<article class="q" id=""><p>x</p></article>'
+expect_unchanged "add-card card with an empty id" 1 'FAIL add-card: card has an empty id' add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+syn_q7
 write_lines "$CASE_IN" "card=$CARD8"
 expect_unchanged "add-card missing key before" 1 'FAIL add-card: missing key before' add-card "$CASE_PAGE" "$CASE_IN"
 
@@ -385,6 +390,25 @@ expect_args "add-card context without an id is accepted" 0 'OK add-card: q8 befo
   add-card "$CASE_PAGE" "$CASE_IN"
 assert_file_eq "add-card context without an id: context above c-q7" "$CASE_DIR/want.html" "$CASE_PAGE"
 
+# A context with more than one id fails, even when its first id is absent from the page and a later one is on it.
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '  <p id="q10">z</p>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" 'context=<div class="ctx" id="c-zz"><p id="q10">Context</p></div>'
+expect_unchanged "add-card context with a second id on the page" 1 'FAIL add-card: context has more than one id' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" 'context=<div class="ctx" id="c-zz"><p id="zz2">Context</p></div>'
+expect_unchanged "add-card context with two absent ids" 1 'FAIL add-card: context has more than one id' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <div id="c-q7">x</div>' '</main>'
+write_lines "$CASE_IN" 'before=q7' "card=$CARD8" 'context=<div class="ctx" id=""><p>x</p></div>'
+expect_unchanged "add-card context with an empty id" 1 'FAIL add-card: context has an empty id' \
+  add-card "$CASE_PAGE" "$CASE_IN"
+
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <article class="q" id="q7">' '    <div id="c-q7">x</div>' '  </article>' '</main>'
 write_lines "$CASE_IN" 'before=q7' "card=$CARD8" "context=$CTX8"
@@ -413,7 +437,7 @@ expect_unchanged "add-card stray byte 351" 1 'FAIL add-card: input has a non-ASC
 new_case
 syn_q7
 printf 'before=q7\ncard=<article class="q" id="q8"><p>x</p></article>\r\n' > "$CASE_IN"
-expect_unchanged "add-card carriage return byte" 1 'FAIL add-card: input has a non-ASCII character' \
+expect_unchanged "add-card carriage return byte" 1 'FAIL add-card: input has a carriage return' \
   add-card "$CASE_PAGE" "$CASE_IN"
 
 new_case
@@ -485,7 +509,16 @@ expect_unchanged "hide missing anchor" 1 'FAIL hide: anchor q99 not found' hide 
 new_case
 syn_q7
 write_lines "$CASE_IN" 'hide=q7'
-expect_unchanged "hide card without context block" 1 'FAIL hide: anchor c-q7 not found' hide "$CASE_PAGE" "$CASE_IN"
+write_lines "$CASE_DIR/want.html" '<main>' '</main>'
+expect_args "hide card without context block" 0 'OK hide: q7
+NOTE hide: q7 has no context section' hide "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "hide card without context block: the card block goes, nothing else changes" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <article class="q" id="q7"><p>x</p></article>' '  <div id="c-q7">c</div>' '  <div id="c-q7">d</div>' \
+  '</main>'
+write_lines "$CASE_IN" 'hide=q7'
+expect_unchanged "hide context anchor c-q7 repeated" 1 'FAIL hide: anchor c-q7 repeated' hide "$CASE_PAGE" "$CASE_IN"
 
 new_case
 write_lines "$CASE_PAGE" '<main>' '  <p id="q7">a</p>' '  <p id="q7">b</p>' '  <div id="c-q7">c</div>' '</main>'
@@ -514,6 +547,33 @@ write_lines "$CASE_IN" 'hide=q7'
 write_lines "$CASE_DIR/want.html" '<main>' '  <p>keep</p>' '</main>'
 expect_args "hide single-line blocks" 0 'OK hide: q7' hide "$CASE_PAGE" "$CASE_IN"
 assert_file_eq "hide single-line blocks: both lines gone" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# A start line that opens a nested div and closes only that nested div is not a one-line block: the card runs to the
+# first later line that is the indent plus </div>.
+new_case
+write_lines "$CASE_PAGE" '<main>' '<div class="q" id="q2"><div class="h">t</div>' '<p>body</p>' '</div>' \
+  '<div class="ctx" id="c-q2"><p>y</p></div>' '<p>keep</p>' '</main>'
+write_lines "$CASE_IN" 'hide=q2'
+write_lines "$CASE_DIR/want.html" '<main>' '<p>keep</p>' '</main>'
+expect_args "hide start line with an unclosed nested div runs to the closing line" 0 'OK hide: q2' hide "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "hide start line with an unclosed nested div: no orphan body or closing line left" \
+  "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# A start line that opens and closes its nested div on the same line is a one-line block.
+new_case
+write_lines "$CASE_PAGE" '<main>' '<div class="q" id="q2"><div class="h">t</div></div>' \
+  '<div class="ctx" id="c-q2"><p>y</p></div>' '<p>keep</p>' '</main>'
+write_lines "$CASE_IN" 'hide=q2'
+write_lines "$CASE_DIR/want.html" '<main>' '<p>keep</p>' '</main>'
+expect_args "hide start line with a balanced nested div is one line" 0 'OK hide: q2' hide "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "hide start line with a balanced nested div: both one-line blocks gone" \
+  "$CASE_DIR/want.html" "$CASE_PAGE"
+
+# The carriage return check is its own reason for hide too.
+new_case
+cat "$REAL" > "$CASE_PAGE"
+printf 'hide=q7\r\n' > "$CASE_IN"
+expect_unchanged "hide carriage return byte" 1 'FAIL hide: input has a carriage return' hide "$CASE_PAGE" "$CASE_IN"
 
 new_case
 cat "$REAL" > "$CASE_PAGE"
@@ -826,6 +886,21 @@ write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
 expect_args "ready-add uses the first ul after the anchor" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
 assert_file_eq "ready-add: the li goes under the ul after the anchor, not the one before" "$CASE_DIR/want.html" "$CASE_PAGE"
 
+# The list is the first ul line after the anchor, and a ul with attributes counts.
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul class="r">' '    <li data-pr="130">old</li>' '  </ul>' \
+  '  <h2>Waiting</h2>' '  <ul>' '    <li>w</li>' '  </ul>' '</main>'
+write_lines "$CASE_DIR/want.html" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ul class="r">' '    <li data-pr="131">Entry</li>' \
+  '    <li data-pr="130">old</li>' '  </ul>' '  <h2>Waiting</h2>' '  <ul>' '    <li>w</li>' '  </ul>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_args "ready-add under a ul with attributes after the anchor" 0 'OK ready-add: 131' ready-add "$CASE_PAGE" "$CASE_IN"
+assert_file_eq "ready-add under a ul with attributes: the entry stays out of the Waiting list" "$CASE_DIR/want.html" "$CASE_PAGE"
+
+new_case
+write_lines "$CASE_PAGE" '<main>' '  <h2 id="ready">Ready to merge</h2>' '  <ulx>' '  </ulx>' '</main>'
+write_lines "$CASE_IN" 'pr=131' 'entry=Entry'
+expect_unchanged "ready-add tag ulx is not a ul" 1 'FAIL ready-add: no list after anchor ready' ready-add "$CASE_PAGE" "$CASE_IN"
+
 # ---- ready-remove: the pr rules and the block rule ----
 
 for _rr_pre in x x- x_ 1; do
@@ -999,13 +1074,6 @@ expect_args "ready-remove input missing" 1 "FAIL ready-remove: cannot read $CASE
   ready-remove "$CASE_PAGE" "$CASE_DIR/missing.txt"
 expect_args "ready-remove input is a directory" 1 "FAIL ready-remove: cannot read $CASE_DIR/page" \
   ready-remove "$CASE_PAGE" "$CASE_DIR/page"
-
-# ---- status, ready-add and ready-remove: missing keys ----
-
-new_case
-cat "$READY130" > "$CASE_PAGE"
-write_lines "$CASE_IN" 'pr=131'
-expect_unchanged "ready-add without entry key" 1 'FAIL ready-add: missing key entry' ready-add "$CASE_PAGE" "$CASE_IN"
 
 # ---- status, ready-add and ready-remove: page file mode ----
 

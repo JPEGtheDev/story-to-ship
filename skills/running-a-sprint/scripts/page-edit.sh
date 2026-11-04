@@ -4,23 +4,27 @@
 # status, ready-add and ready-remove. The input file holds key=value lines, each split at its first "="; a key the op
 # does not read is ignored.
 #   add-card: before=<id> card=<html> [context=<html>]
-#     card is one line of HTML holding exactly one id attribute, id="<id>". It is inserted directly above the line
-#     that holds id="<before>", with that line's indent. context, when given, is one line of HTML inserted directly
-#     above the line that holds id="c-<before>", with that line's indent. The card id must not already be on the page;
-#     when the context holds an id attribute, that id must not already be on the page either (a context without an id
-#     is accepted). The c-<card id> anchor must not already be on the page.
+#     card is one line of HTML holding exactly one id attribute, id="<id>", and the id is not empty. It is inserted
+#     directly above the line that holds id="<before>", with that line's indent. context, when given, is one line of
+#     HTML inserted directly above the line that holds id="c-<before>", with that line's indent. The card id must not
+#     already be on the page; a context holds at most one id attribute, and when it holds one, that id must be
+#     non-empty and must not already be on the page either (a context without an id is accepted; two or more ids
+#     fail). The c-<card id> anchor must not already be on the page.
 #   hide: hide=<id> (repeatable)
 #     The card block is the line that holds id="<id>" through the first later line equal to that line's indent plus
-#     the closing tag of the element that line opens, or that line alone when it also holds that closing tag. The
-#     context block is the same for id="c-<id>". Both blocks are removed. An id given twice is removed once.
+#     the closing tag of the element that line opens, or that line alone when it holds as many closing tags of that
+#     element as opening tags of it. The context block is the same for id="c-<id>". Both blocks are removed. An id
+#     given twice is removed once. When no line holds id="c-<id>", only the card block is removed and the output
+#     carries "NOTE hide: <id> has no context section" after the OK line. Two or more lines holding id="c-<id>" fail.
 #   status: status=<label> text=<text>
 #     The line holding data-status="<label>" is one element: an opening tag, its text and its closing tag. The text
 #     between the opening tag and the closing tag becomes "<label>: <text>" (the text is inserted as given). A label
 #     may hold a space. Both keys are required; an empty value counts as missing.
 #   ready-add: pr=<n> entry=<html>
 #     pr is digits only: no pr key is "missing key pr", an empty or non-digit value is "must be a number". entry is one
-#     line of HTML, the inside of the list item; required. The Ready to merge list is the first <ul> line after the
-#     line holding id="ready". The line <li data-pr="<n>"> entry </li> goes directly below that <ul> line, with that
+#     line of HTML, the inside of the list item; required. The Ready to merge list is the first line after the line
+#     holding id="ready" that opens a ul element (<ul> or <ul followed by a space). The line
+#     <li data-pr="<n>"> entry </li> goes directly below that list line, with that
 #     line's indent plus two spaces, so the newest entry is first. A pr already on the page fails.
 #   ready-remove: pr=<n>
 #     The block of the line holding data-pr="<n>" is removed, found with the hide block rule (here the closing tag is
@@ -28,12 +32,14 @@
 # An anchor is attr="<value>" where the character before attr is the start of the line or any character other than a
 # letter, digit, underscore or hyphen (so data-id="..." and href="#..." do not count, while class="a"id="x" does).
 # The anchor ids (add-card, hide, ready-add) and the attributes data-status and data-pr (status, ready-add,
-# ready-remove) must each occur exactly once, except that ready-add's data-pr must not occur at all.
+# ready-remove) must each occur exactly once, except that ready-add's data-pr must not occur at all and hide's
+# c-<id> anchor may be absent (see hide).
 # Output: on success one line per op: "OK add-card: <id> before <before>" (with " and context" when context was given),
-# one "OK hide: <id>" line per distinct id, in the order first given, "OK status: <label>", "OK ready-add: <n>" or
-# "OK ready-remove: <n>". On any failure exactly one line, "FAIL <op>: <reason>", on stdout, exit 1, and the page is
-# not changed. A page or input that is not a readable regular file is a FAIL line too. Input bytes other than
-# printable ASCII and tab fail the op.
+# one "OK hide: <id>" line per distinct id, in the order first given (each followed by its NOTE line when its context
+# section is absent), "OK status: <label>", "OK ready-add: <n>" or "OK ready-remove: <n>". On any failure exactly one
+# line, "FAIL <op>: <reason>", on stdout, exit 1, and the page is not changed. A page or input that is not a readable
+# regular file is a FAIL line too. Input bytes other than printable ASCII and tab fail the op; a carriage return
+# fails with its own reason.
 # Exit codes: 0 all OK, 1 a FAIL, 2 a usage error (usage on stderr, nothing on stdout).
 # Everything is checked before anything is written. The result is built in a temp file made with mktemp in the page's
 # directory, given the page's mode by cp -p, and moved over the page with mv only when every check passed; the temp
@@ -42,6 +48,7 @@
 NL='
 '
 TAB=$(printf '\t')
+CR=$(printf '\r')
 export LC_ALL=C
 OP=""
 PAGE=""
@@ -223,15 +230,38 @@ pr_check() {
 
 # block_end <name> <start line>: sets BLOCK_END to the last line of the block that starts at the start line. The block
 # ends at the first later line equal to the start line's indent plus its closing tag, or at the start line itself when
-# that line also holds the closing tag. Fails when no such line exists.
+# that line holds as many closing tags of its tag as opening tags of that tag (and at least one). Fails when no such
+# line exists.
 block_end() {
   BLOCK_END=$(awk -v s="$2" "$INDENT_FUNC"'
+# count_open: the opening tags <tag, each followed by a character that is not a letter or digit.
+function count_open(line, tag,   n, rest, p, after) {
+  n = 0
+  rest = line
+  while ((p = index(rest, "<" tag)) > 0) {
+    after = substr(rest, p + length(tag) + 1, 1)
+    if (after !~ /[A-Za-z0-9]/) n++
+    rest = substr(rest, p + 1)
+  }
+  return n
+}
+# count_close: the occurrences of the closing tag text.
+function count_close(line, close_tag,   n, rest, p) {
+  n = 0
+  rest = line
+  while ((p = index(rest, close_tag)) > 0) {
+    n++
+    rest = substr(rest, p + length(close_tag))
+  }
+  return n
+}
 NR == s {
   ind = indent_of($0)
   tag = ""
   if (match($0, /<[A-Za-z][A-Za-z0-9]*/)) tag = substr($0, RSTART + 1, RLENGTH - 1)
   close_tag = "</" tag ">"
-  if (index($0, close_tag) > 0) {
+  closes = count_close($0, close_tag)
+  if (closes > 0 && closes == count_open($0, tag)) {
     print NR
     exit
   }
@@ -247,8 +277,9 @@ NR > s && $0 == want {
   fi
 }
 
-# hide_one <id>: checks the id's card and context anchors and block ends, and adds both blocks to RANGES. An id seen
-# before is skipped. Nothing is written here.
+# hide_one <id>: checks the id's card anchor and block end, and the context anchor when one is on the page, and adds
+# the blocks to RANGES. An id seen before is skipped. A context anchor absent from the page leaves only the card block
+# to remove, with a NOTE line after the OK line. Nothing is written here.
 hide_one() {
   case "$SEEN" in
     *"$NL$1$NL"*) return 0 ;;
@@ -256,12 +287,21 @@ hide_one() {
   SEEN="$SEEN$1$NL"
   find_anchor "$1"
   _h_card=$FIRST
-  find_anchor "c-$1"
+  count_page "$PAGE" "id=\"c-$1\""
+  if [ "$COUNT" -gt 1 ]; then
+    fail "anchor c-$1 repeated"
+  fi
   _h_ctx=$FIRST
   block_end "$1" "$_h_card"
   _h_card_end=$BLOCK_END
+  RANGES="$RANGES $_h_card $_h_card_end"
+  if [ "$COUNT" -eq 0 ]; then
+    OUT="${OUT}OK hide: $1$NL"
+    OUT="${OUT}NOTE hide: $1 has no context section$NL"
+    return 0
+  fi
   block_end "c-$1" "$_h_ctx"
-  RANGES="$RANGES $_h_card $_h_card_end $_h_ctx $BLOCK_END"
+  RANGES="$RANGES $_h_ctx $BLOCK_END"
   OUT="${OUT}OK hide: $1$NL"
 }
 
@@ -298,6 +338,9 @@ add_card() {
     fail "card has more than one id"
   fi
   NEW_ID=$(CARD_TEXT="$CARD" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CARD_TEXT"]) }') || fail "cannot read the card"
+  if [ -z "$NEW_ID" ]; then
+    fail "card has an empty id"
+  fi
   find_anchor "$BEFORE"
   BEFORE_LINE=$FIRST
   need_absent id "$NEW_ID" "id $NEW_ID already on the page"
@@ -307,8 +350,14 @@ add_card() {
     CTX_LINE=$FIRST
     need_absent id "c-$NEW_ID" "id c-$NEW_ID already on the page"
     CTX_IDS=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print count_in(ENVIRON["CTX_TEXT"], "id=\"") + 0 }') || fail "cannot read the context"
+    if [ "$CTX_IDS" -gt 1 ]; then
+      fail "context has more than one id"
+    fi
     if [ "$CTX_IDS" -gt 0 ]; then
       CTX_ID=$(CTX_TEXT="$CONTEXT" awk "$COUNT_FUNCS"'BEGIN { print id_in(ENVIRON["CTX_TEXT"]) }') || fail "cannot read the context"
+      if [ -z "$CTX_ID" ]; then
+        fail "context has an empty id"
+      fi
       need_absent id "$CTX_ID" "id $CTX_ID already on the page"
     fi
   fi
@@ -366,7 +415,8 @@ NR == n {
   printf 'OK status: %s\n' "$STATUS_LABEL"
 }
 
-# ready_add: inserts the Ready to merge entry for pr directly below the first <ul> line after the ready anchor.
+# ready_add: inserts the Ready to merge entry for pr directly below the first line after the ready anchor that opens
+# a ul element (<ul> or <ul followed by a space).
 ready_add() {
   pr_check
   if [ -z "$ENTRY" ]; then
@@ -374,7 +424,7 @@ ready_add() {
   fi
   need_absent data-pr "$PR" "pr $PR already listed"
   find_anchor ready
-  _ra_ul=$(awk -v a="$FIRST" 'NR > a && index($0, "<ul>") > 0 { print NR; exit }' "$PAGE") || fail "cannot read $PAGE"
+  _ra_ul=$(awk -v a="$FIRST" 'NR > a && $0 ~ /<ul[ >]/ { print NR; exit }' "$PAGE") || fail "cannot read $PAGE"
   if [ -z "$_ra_ul" ]; then
     fail "no list after anchor ready"
   fi
@@ -411,6 +461,9 @@ trap 'cleanup' EXIT
 trap 'exit 1' HUP INT TERM
 need_file "$PAGE"
 need_file "$IN"
+if LC_ALL=C grep -q "$CR" "$IN"; then
+  fail "input has a carriage return"
+fi
 if LC_ALL=C grep -q "[^$TAB -~]" "$IN"; then
   fail "input has a non-ASCII character"
 fi

@@ -193,8 +193,94 @@ check_branch() {
   fi
 }
 
+# closing_refs: read a PR body on stdin and print each issue reference that follows a closing keyword,
+# in body order. A reference is #N or owner/repo#N; a chain joined by commas, "and" or "&" is read in
+# full. Keywords are whole words in any case, with an optional colon. CR bytes are stripped first.
+closing_refs() {
+  tr -d '\r' | LC_ALL=C grep -oiE '(^|[^[:alnum:]_])(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)(:[[:space:]]*|[[:space:]]+)([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+([[:space:]]*(,|&|and)[[:space:]]*([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+)*' | LC_ALL=C grep -oE '([[:alnum:]_.-]+/[[:alnum:]_.-]+)?#[0-9]+'
+}
+
+# closing_others: read references on stdin and print those that do not name the story -s (a numeric
+# compare), each once, comma-joined in input order. Prints an empty line when there are none.
+closing_others() {
+  awk -v story="$STORY" '
+    $0 == "" { next }
+    /^#[0-9]+$/ && substr($0, 2) + 0 == story + 0 { next }
+    !($0 in seen) { seen[$0] = 1; list = list (list == "" ? "" : ",") $0 }
+    END { print list }'
+}
+
+# check_closing: a closing keyword names the story and no other issue. Any other reference fails, even
+# when the story is not named; a body with no reference at all fails with no keyword.
+check_closing() {
+  _refs=$(pr_field 'body // ""' | closing_refs)
+  _others=$(printf '%s\n' "$_refs" | closing_others)
+  if [ -n "$_others" ]; then
+    emit fail closing "also names $_others"
+  elif [ -n "$_refs" ]; then
+    emit ok closing "names #$STORY"
+  else
+    emit fail closing "no closing keyword for #$STORY"
+  fi
+}
+
+# check_footer: the last non-empty body line, CR and trailing blanks stripped, is one of the two footer
+# lines exactly.
+check_footer() {
+  _last=$(pr_field 'body // ""' | tr -d '\r' | sed -e 's/[[:blank:]]*$//' -e '/^$/d' | tail -n 1)
+  case "$_last" in
+    '')
+      emit fail footer "empty body"
+      ;;
+    'Generated with Claude Code' | 'Generated with [Claude Code](https://claude.com/claude-code)')
+      emit ok footer "$_last"
+      ;;
+    *)
+      emit fail footer "last line is \"$_last\""
+      ;;
+  esac
+}
+
+# check_coauthor: no Co-Authored-By line (any case, optional leading spaces) in the body or in a commit
+# message of base..HEAD. A body hit names "body"; a commit hit names "commit <sha>", newest first.
+check_coauthor() {
+  _bhit=$(pr_field 'body // ""' | tr -d '\r' | grep -ciE '^ *co-authored-by:')
+  if ! _log=$(git -C "$WT" log --abbrev=7 --format='%x01%h%n%B' "$BASE..HEAD") ||
+    ! _n=$(git -C "$WT" rev-list --count "$BASE..HEAD"); then
+    emit fail coauthor "commits unreadable"
+    return
+  fi
+  _all=$(printf '%s\n' "$_log" | awk '
+    /^\001/ { sha = substr($0, 2); next }
+    tolower($0) ~ /^ *co-authored-by:/ && !(sha in seen) { seen[sha] = 1; list = list (list == "" ? "" : "; ") "commit " sha }
+    END { print list }')
+  if [ "$_bhit" -gt 0 ]; then
+    if [ -n "$_all" ]; then
+      _all="body; $_all"
+    else
+      _all=body
+    fi
+  fi
+  if [ -n "$_all" ]; then
+    emit fail coauthor "$_all"
+  else
+    emit ok coauthor "none in body or $_n commits"
+  fi
+}
+
+# check_ascii: the body as GitHub returns it (CR kept) holds only printable ASCII, tab, CR and newline.
+# LC_ALL=C is set for the scan so that every non-ASCII byte counts.
+check_ascii() {
+  _bad=$(pr_field 'body // ""' | LC_ALL=C awk '/[^\t\r -~]/ { print NR; exit }')
+  if [ -z "$_bad" ]; then
+    emit ok ascii "body is ASCII"
+  else
+    emit fail ascii "non-ASCII byte on line $_bad"
+  fi
+}
+
 if ! fetch_pr; then
-  for _name in state draft mergeable head ci branch; do
+  for _name in state draft mergeable head ci branch closing footer coauthor ascii; do
     emit fail "$_name" "gh failed"
   done
   exit 1
@@ -206,6 +292,10 @@ check_mergeable
 check_head
 check_ci
 check_branch
+check_closing
+check_footer
+check_coauthor
+check_ascii
 
 if [ "$FAILS" -eq 0 ]; then
   exit 0

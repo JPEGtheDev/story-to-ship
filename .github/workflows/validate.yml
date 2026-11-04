@@ -1205,10 +1205,14 @@ jobs:
               fi
             done
           }
-          check agents/story-coordinator.md '## Red CI' 'Classify a red CI check on the pull request head before it costs a fix round or a retry.' 'A stale base is not a fix round. Record each stale base merge in the Red CI log.' 'At most 2 stale base merges run per story' 'a third red CI classed as stale base is a hand-back of kind blocked naming the failing check.' 'Take one fresh run by hand with' 'a second infrastructure class on the same head is own code' 'A second failure with the same job name and the same first failing error line is reclassified as own code' 'When the runner has no permission to re-run the job, it hands back kind blocked and reports that instead.' 'Any red CI that fits none of these classes is own code.' 'only an own code failure is a fix round of this reconcile'
+          if ! grep -qxF -- '## Red CI' agents/story-coordinator.md; then
+            echo "FAILED: agents/story-coordinator.md has no line equal to: ## Red CI"
+            missing=$((missing + 1))
+          fi
+          check agents/story-coordinator.md 'Classify a red CI check on the pull request head before it costs a fix round or a retry.' 'Own code: the failure is in code the branch changed.' 'Stale base: the base moved and the failure is in code the branch did not touch.' 'Infrastructure: the job died before any test ran, or a service outside the repository failed.' 'Merge origin/main into the branch after the pull request is open, push without force, and wait for CI again.' 'A stale base is not a fix round. Record each stale base merge in the Red CI log.' 'At most 2 stale base merges run per story' 'a third red CI classed as stale base is a hand-back of kind blocked naming the failing check.' 'Take one fresh run by hand with' 'a second infrastructure class on the same head is own code' 'A second failure with the same job name and the same first failing error line is reclassified as own code' 'When the runner has no permission to re-run the job, it hands back kind blocked and reports that instead.' 'Any red CI that fits none of these classes is own code.' 'only an own code failure is a fix round of this reconcile'
           check skills/two-stage-review/SKILL.md 'is not a fix round; one classed as own code is, and it is charged like a finding'
           check skills/two-stage-review/references/REVIEW_PROTOCOL.md "Classify a red CI as the story-coordinator template's Red CI section says before fixing it"
-          if grep -qxF -- '- CI failing on the updated head is also a fix round.' agents/story-coordinator.md; then
+          if grep -qF -- '- CI failing on the updated head is also a fix round.' agents/story-coordinator.md; then
             echo "FAILED: agents/story-coordinator.md still counts every red CI on the updated head as a fix round"
             missing=$((missing + 1))
           fi

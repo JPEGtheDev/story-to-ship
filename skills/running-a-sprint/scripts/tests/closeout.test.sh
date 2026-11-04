@@ -380,4 +380,348 @@ want_green later-main "OK worktree: $FX_WT clean"
 std_run
 assert_case later-main 0 later-main
 
+# Group 2: closeout-steps.sh (Todo 7). Every case in this group fails until the script exists (RED).
+# CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs closeout-check.sh next to
+# itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub that prints one OK line.
+STEPS=${CLOSEOUT_STEPS:-$(dirname "$0")/../closeout-steps.sh}
+STUBCHK=$TEST_TMP/check-stub
+printf '%s\n' '#!/bin/sh' 'echo "OK check: stub"' 'exit 0' > "$STUBCHK" || exit 2
+chmod +x "$STUBCHK" || exit 2
+ZERO_SHA=0000000000000000000000000000000000000000
+
+# run_steps [args]: run the steps script with the arguments and no stdin. Sets RC; stdout goes to
+# $TEST_TMP/out and stderr to $TEST_TMP/err.
+run_steps() {
+  sh "$STEPS" "$@" >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+  RC=$?
+}
+
+# steps_std [extra args]: the steps options for PR 431 on the fixture with issue 427, plus the extra arguments.
+steps_std() {
+  run_steps -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 "$@"
+}
+
+# steps_stub: the standard steps options with CLOSEOUT_CHECK naming the stub check, so the check always passes.
+steps_stub() {
+  CLOSEOUT_CHECK=$STUBCHK sh "$STEPS" -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 \
+    >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+  RC=$?
+}
+
+# steps_usage_case <name> [args]: a usage error exits 2, prints nothing on stdout and a usage message on stderr.
+steps_usage_case() {
+  _un=$1
+  shift
+  run_steps "$@"
+  assert_exit "steps-usage-$_un exit" 2 "$RC"
+  assert_empty "steps-usage-$_un stdout" "$TEST_TMP/out"
+  assert_nonempty "steps-usage-$_un stderr" "$TEST_TMP/err"
+  assert_grep "steps-usage-$_un message" 'usage' "$TEST_TMP/err"
+}
+
+# steps_prefetch: fetch the root's remote refs first, so the check's own fetch changes no ref in the snapshots.
+steps_prefetch() {
+  git_c "$FX_ROOT" fetch -q origin || exit 2
+}
+
+# steps_snapshot <file>: the root HEAD, the root and origin refs, the worktree list, the root status, every file
+# under the root except .git with its content, and the status of each worktree under .worktrees.
+steps_snapshot() {
+  {
+    git -C "$FX_ROOT" symbolic-ref HEAD
+    git -C "$FX_ROOT" for-each-ref
+    git -C "$FX_ORIGIN" for-each-ref
+    git -C "$FX_ROOT" worktree list --porcelain
+    git -C "$FX_ROOT" status --short --ignored
+    find "$FX_ROOT" -name .git -prune -o -type f -print | LC_ALL=C sort | while IFS= read -r _sf; do
+      printf 'file %s\n' "$_sf"
+      cat "$_sf"
+    done
+    find "$FX_ROOT/.worktrees" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort | while IFS= read -r _sw; do
+      printf 'status %s\n' "$_sw"
+      git -C "$_sw" status --short --ignored
+    done
+  } > "$1" || exit 2
+}
+
+# steps_compare <name> <before file>: take the snapshot now and assert it equals the before snapshot.
+steps_compare() {
+  steps_snapshot "$TEST_TMP/after-$1" || exit 2
+  assert_file_eq "$1 unchanged" "$2" "$TEST_TMP/after-$1"
+}
+
+# refs_actual <file>: the local and origin branch refs, the root main sha and the registered worktrees.
+refs_actual() {
+  {
+    git -C "$FX_ROOT" for-each-ref --format='local %(refname)' refs/heads
+    git -C "$FX_ORIGIN" for-each-ref --format='origin %(refname)' refs/heads
+    git -C "$FX_ROOT" rev-parse refs/heads/main | sed 's/^/main /'
+    git -C "$FX_ROOT" worktree list --porcelain | grep '^worktree ' | LC_ALL=C sort
+  } > "$1" || exit 2
+}
+
+# refs_want <file> <local branch 0|1> <origin branch 0|1> <main sha> <runner worktree 0|1>: the expected
+# refs_actual lines for the fixture, the root worktree and the runner worktree when it is present.
+refs_want() {
+  {
+    if [ "$2" = 1 ]; then
+      printf 'local refs/heads/%s\n' "$FX_BRANCH"
+    fi
+    printf 'local refs/heads/main\n'
+    if [ "$3" = 1 ]; then
+      printf 'origin refs/heads/%s\n' "$FX_BRANCH"
+    fi
+    printf 'origin refs/heads/main\n'
+    printf 'main %s\n' "$4"
+    printf 'worktree %s\n' "$FX_ROOT"
+    if [ "$5" = 1 ]; then
+      printf 'worktree %s\n' "$FX_WT"
+    fi
+  } > "$1" || exit 2
+}
+
+# check_alone <name>: run closeout-check.sh alone on the fixture with the standard options and keep its output.
+check_alone() {
+  std_run
+  cp "$TEST_TMP/out" "$TEST_TMP/check-alone-$1" || exit 2
+}
+
+# check_prefix_eq <name>: the first lines of the steps output are exactly the lines check_alone kept.
+check_prefix_eq() {
+  _cn=$(wc -l < "$TEST_TMP/check-alone-$1" | tr -d ' ') || exit 2
+  sed -n "1,${_cn}p" "$TEST_TMP/out" > "$TEST_TMP/prefix-$1" || exit 2
+  assert_file_eq "$1 check lines first" "$TEST_TMP/check-alone-$1" "$TEST_TMP/prefix-$1"
+}
+
+# Step case 1: a clean runner worktree and two clean children. Every worktree is removed, the branch is deleted
+# locally and on origin, main moves to origin/main, and the check lines are those closeout-check.sh prints alone.
+new_case steps-all
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-b" || exit 2
+check_alone steps-all
+want steps-all \
+  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b clean" \
+  "OK remove-worktree: $FX_WT" \
+  "OK remove-worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a" \
+  "OK remove-worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b" \
+  "OK delete-branch-local: $FX_BRANCH" \
+  "OK delete-branch-origin: $FX_BRANCH" \
+  "OK fast-forward: main at $S7"
+steps_std
+assert_case steps-all 0 steps-all
+check_prefix_eq steps-all
+refs_want "$TEST_TMP/want-refs-steps-all" 0 0 "$FX_S" 0
+refs_actual "$TEST_TMP/got-refs-steps-all"
+assert_file_eq "steps-all refs" "$TEST_TMP/want-refs-steps-all" "$TEST_TMP/got-refs-steps-all"
+
+# Step case 2: -e is accepted and ignored in this todo. One clean runner worktree, otherwise as case 1.
+new_case steps-epic
+want_green steps-epic "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
+  "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"
+steps_std -e 400
+assert_case steps-epic 0 steps-epic
+
+# Step case 3: a child holds an untracked scratch file. The check fails, so nothing is removed or deleted.
+new_case steps-dirty-child
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
+add_child "$FX_ROOT/.worktrees/$FX_PREFIX-b" || exit 2
+printf '%s\n' scratch > "$FX_ROOT/.worktrees/$FX_PREFIX-b/scratch.txt" || exit 2
+steps_prefetch
+check_alone steps-dirty-child
+want_green steps-dirty-child \
+  "OK worktree: $FX_WT clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
+  "FAIL worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b has ?? plan.md, ?? scratch.txt" \
+  "FAIL steps: refused, close-out check failed"
+steps_snapshot "$TEST_TMP/before-steps-dirty-child" || exit 2
+steps_std
+assert_case steps-dirty-child 1 steps-dirty-child
+check_prefix_eq steps-dirty-child
+steps_compare steps-dirty-child "$TEST_TMP/before-steps-dirty-child"
+
+# Step case 4: the PR is OPEN. The check fails on the state and the missing merge commit, so the run is refused.
+new_case steps-open
+write_merge OPEN null
+steps_prefetch
+check_alone steps-open
+want steps-open "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+  "FAIL patch: no merge commit" "OK worktree: $FX_WT clean" "FAIL steps: refused, close-out check failed"
+steps_snapshot "$TEST_TMP/before-steps-open" || exit 2
+steps_std
+assert_case steps-open 1 steps-open
+check_prefix_eq steps-open
+steps_compare steps-open "$TEST_TMP/before-steps-open"
+
+# Step case 5: the check passes, but the repo root is on side, not main. The run is refused before any step.
+new_case steps-root-branch
+git_c "$FX_ROOT" checkout -q -b side || exit 2
+steps_prefetch
+check_alone steps-root-branch
+want_green steps-root-branch "OK worktree: $FX_WT clean" "FAIL steps: refused, repo root is on side, not main"
+steps_snapshot "$TEST_TMP/before-steps-root-branch" || exit 2
+steps_std
+assert_case steps-root-branch 1 steps-root-branch
+check_prefix_eq steps-root-branch
+steps_compare steps-root-branch "$TEST_TMP/before-steps-root-branch"
+
+# Step case 6: a second run on the fully closed-out state. The branch is gone from origin, so the check's fetch
+# of the branch fails (ancestry and patch both say fetch failed); the run is refused and changes nothing.
+new_case steps-second-run
+steps_prefetch
+steps_std
+assert_exit "steps-second-run first exit" 0 "$RC"
+want steps-second-run "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
+  "FAIL patch: fetch failed" "OK worktree: $FX_WT absent" "FAIL steps: refused, close-out check failed"
+steps_snapshot "$TEST_TMP/before-steps-second-run" || exit 2
+steps_std
+assert_case steps-second-run 1 steps-second-run
+steps_compare steps-second-run "$TEST_TMP/before-steps-second-run"
+
+# Step case 7: with -x, the runner worktree and its branch are already gone. The check uses origin's branch tip,
+# so it passes; the absent lines and the already gone line are printed and the rest runs.
+new_case steps-x-local-gone
+git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
+git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
+want steps-x-local-gone "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT absent" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
+  "OK remove-worktree: $FX_WT absent" "OK remove-worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
+  "OK delete-branch-local: $FX_BRANCH already gone" "OK delete-branch-local: reconcile-$FX_RECON already gone" \
+  "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"
+steps_std -x "$FX_RECON"
+assert_case steps-x-local-gone 0 steps-x-local-gone
+refs_want "$TEST_TMP/want-refs-steps-x-local-gone" 0 0 "$FX_S" 0
+refs_actual "$TEST_TMP/got-refs-steps-x-local-gone"
+assert_file_eq "steps-x-local-gone refs" "$TEST_TMP/want-refs-steps-x-local-gone" "$TEST_TMP/got-refs-steps-x-local-gone"
+
+# Step case 8: with -x, a reconcile worktree on its own local branch and a reconcile child. The reconcile worktree,
+# its child and the reconcile branch are removed after the runner side, then the branch on origin, then main.
+new_case steps-x-full
+git_c "$FX_ROOT" worktree add -q -b "reconcile-$FX_RECON" "$FX_ROOT/.worktrees/$FX_RECON" "origin/$FX_BRANCH" || exit 2
+printf '%s\n' plan > "$FX_ROOT/.worktrees/$FX_RECON/plan.md" || exit 2
+add_child "$FX_ROOT/.worktrees/$FX_RECON-c" || exit 2
+want steps-x-full "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_RECON clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_RECON-c clean" \
+  "OK remove-worktree: $FX_WT" \
+  "OK remove-worktree: $FX_ROOT/.worktrees/$FX_RECON" \
+  "OK remove-worktree: $FX_ROOT/.worktrees/$FX_RECON-c" \
+  "OK delete-branch-local: $FX_BRANCH" \
+  "OK delete-branch-local: reconcile-$FX_RECON" \
+  "OK delete-branch-origin: $FX_BRANCH" \
+  "OK fast-forward: main at $S7"
+steps_std -x "$FX_RECON"
+assert_case steps-x-full 0 steps-x-full
+refs_want "$TEST_TMP/want-refs-steps-x-full" 0 0 "$FX_S" 0
+refs_actual "$TEST_TMP/got-refs-steps-x-full"
+assert_file_eq "steps-x-full refs" "$TEST_TMP/want-refs-steps-x-full" "$TEST_TMP/got-refs-steps-x-full"
+
+# Step case 9 (stub check): the branch is already gone from origin. The check is the stub, so the steps alone decide.
+new_case steps-origin-gone
+steps_prefetch
+git_c "$FX_ROOT" push -q origin --delete "$FX_BRANCH" >/dev/null 2>&1 || exit 2
+want steps-origin-gone "OK check: stub" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+steps_stub
+assert_case steps-origin-gone 0 steps-origin-gone
+refs_want "$TEST_TMP/want-refs-steps-origin-gone" 0 0 "$FX_S" 0
+refs_actual "$TEST_TMP/got-refs-steps-origin-gone"
+assert_file_eq "steps-origin-gone refs" "$TEST_TMP/want-refs-steps-origin-gone" "$TEST_TMP/got-refs-steps-origin-gone"
+
+# Step case 10 (stub check): a re-run after a partial run. The worktree, the local branch and the origin branch are
+# all gone; the absent and already gone lines are printed and the fast-forward is still done.
+new_case steps-rerun
+steps_prefetch
+git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
+git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
+git_c "$FX_ROOT" push -q origin --delete "$FX_BRANCH" >/dev/null 2>&1 || exit 2
+want steps-rerun "OK check: stub" "OK remove-worktree: $FX_WT absent" \
+  "OK delete-branch-local: $FX_BRANCH already gone" "OK delete-branch-origin: $FX_BRANCH already gone" \
+  "OK fast-forward: main at $S7"
+steps_stub
+assert_case steps-rerun 0 steps-rerun
+refs_want "$TEST_TMP/want-refs-steps-rerun" 0 0 "$FX_S" 0
+refs_actual "$TEST_TMP/got-refs-steps-rerun"
+assert_file_eq "steps-rerun refs" "$TEST_TMP/want-refs-steps-rerun" "$TEST_TMP/got-refs-steps-rerun"
+
+# Step case 11: the runner worktree is locked, so its removal fails first. Nothing has changed and the run stops.
+new_case steps-remove-fails
+git_c "$FX_ROOT" worktree lock "$FX_WT" || exit 2
+steps_prefetch
+want_green steps-remove-fails "OK worktree: $FX_WT clean" \
+  "FAIL remove-worktree: fatal: cannot remove a locked working tree;" "FAIL steps: stopped, later steps not run"
+steps_snapshot "$TEST_TMP/before-steps-remove-fails" || exit 2
+steps_std
+assert_case steps-remove-fails 1 steps-remove-fails
+steps_compare steps-remove-fails "$TEST_TMP/before-steps-remove-fails"
+
+# Step case 12: a second worktree holds the branch, so the worktree is removed and the local branch delete fails.
+new_case steps-local-fails
+steps_prefetch
+git_c "$FX_ROOT" worktree add -q -f "$FX_ROOT/held" "$FX_BRANCH" || exit 2
+want_green steps-local-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
+  "FAIL delete-branch-local: error: cannot delete branch '$FX_BRANCH' used by worktree at '$FX_ROOT/held'" \
+  "FAIL steps: stopped, later steps not run"
+refs_want "$TEST_TMP/want-refs-steps-local-fails" 1 1 "$(git -C "$FX_ROOT" rev-parse refs/heads/main)" 0
+printf 'worktree %s\n' "$FX_ROOT/held" >> "$TEST_TMP/want-refs-steps-local-fails"
+steps_std
+assert_case steps-local-fails 1 steps-local-fails
+refs_actual "$TEST_TMP/got-refs-steps-local-fails"
+assert_file_eq "steps-local-fails refs" "$TEST_TMP/want-refs-steps-local-fails" "$TEST_TMP/got-refs-steps-local-fails"
+
+# Step case 13: origin refuses ref deletions (a pre-receive hook in the bare origin). The worktree and the local
+# branch are already removed; origin keeps its branch and main is not fast-forwarded.
+new_case steps-origin-refuses
+steps_prefetch
+printf '%s\n' '#!/bin/sh' \
+  'while read -r _old _new _ref; do' \
+  '  if [ "$_new" = '"$ZERO_SHA"' ]; then' \
+  '    exit 1' \
+  '  fi' \
+  'done' \
+  'exit 0' > "$FX_ORIGIN/hooks/pre-receive" || exit 2
+chmod +x "$FX_ORIGIN/hooks/pre-receive" || exit 2
+_main0=$(git -C "$FX_ROOT" rev-parse refs/heads/main) || exit 2
+want_green steps-origin-refuses "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
+  "OK delete-branch-local: $FX_BRANCH" "FAIL delete-branch-origin: To $FX_ORIGIN" \
+  "FAIL steps: stopped, later steps not run"
+steps_std
+assert_case steps-origin-refuses 1 steps-origin-refuses
+refs_want "$TEST_TMP/want-refs-steps-origin-refuses" 0 1 "$_main0" 0
+refs_actual "$TEST_TMP/got-refs-steps-origin-refuses"
+assert_file_eq "steps-origin-refuses refs" "$TEST_TMP/want-refs-steps-origin-refuses" "$TEST_TMP/got-refs-steps-origin-refuses"
+
+# Step case 14: root main has a commit that origin/main lacks, so the fast-forward fails after the deletions.
+new_case steps-ff-fails
+git_c "$FX_ROOT" commit -q --allow-empty -m "local main commit" || exit 2
+steps_prefetch
+_main0=$(git -C "$FX_ROOT" rev-parse refs/heads/main) || exit 2
+want_green steps-ff-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" \
+  "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" \
+  "FAIL fast-forward: fatal: Not possible to fast-forward, aborting." "FAIL steps: stopped, later steps not run"
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=advice.diverging GIT_CONFIG_VALUE_0=false
+steps_std
+unset GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0
+assert_case steps-ff-fails 1 steps-ff-fails
+refs_want "$TEST_TMP/want-refs-steps-ff-fails" 0 0 "$_main0" 0
+refs_actual "$TEST_TMP/got-refs-steps-ff-fails"
+assert_file_eq "steps-ff-fails refs" "$TEST_TMP/want-refs-steps-ff-fails" "$TEST_TMP/got-refs-steps-ff-fails"
+
+# Steps usage errors (exit 2): each missing required option, an unknown option, and each option with no value.
+new_case steps-usage
+steps_usage_case missing-i -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX"
+steps_usage_case missing-r -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427
+steps_usage_case missing-n -r "$FX_ROOT" -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427
+steps_usage_case missing-b -r "$FX_ROOT" -n 431 -p "$FX_PREFIX" -i 427
+steps_usage_case missing-p -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -i 427
+steps_usage_case unknown-option -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -z
+steps_usage_case value-r -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -r
+steps_usage_case value-i -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i
+steps_usage_case value-e -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -e
+steps_usage_case value-x -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -x
+steps_usage_case value-P -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" -i 427 -P
+
 test_summary

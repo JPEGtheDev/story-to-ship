@@ -8,8 +8,8 @@
 #     directly above the line that holds id="<before>", with that line's indent. context, when given, is one line of
 #     HTML inserted directly above the line that holds id="c-<before>", with that line's indent. The card id must not
 #     already be on the page. context holds exactly one id attribute, and that id must be c-<card id>: no id, an
-#     empty id, two or more ids or any other id fails, and the page is not changed. The c-<card id> anchor must not
-#     already be on the page.
+#     empty id, two or more ids or any other id fails, and the page is not changed. When context is given, the
+#     c-<card id> anchor must not already be on the page.
 #   hide: hide=<id> (repeatable)
 #     The card block is the line that holds id="<id>" through the first later line equal to that line's indent plus
 #     the closing tag of the element that line opens, or that line alone when it holds as many closing tags of that

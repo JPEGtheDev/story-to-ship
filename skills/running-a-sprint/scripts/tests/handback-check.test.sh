@@ -1,7 +1,8 @@
 #!/bin/sh
-# Fixture tests for handback-check.sh: the state, draft, mergeable, head, ci and branch lines, the gh
-# failure path, the fetch NOTE line and usage errors. No network: the gh command is a stub that prints
-# a JSON fixture file, and the branch fixtures use a local bare repository as origin.
+# Fixture tests for handback-check.sh: the state, draft, mergeable, head, ci, branch, closing, footer,
+# coauthor and ascii lines, the gh failure path, the fetch NOTE line and usage errors. No network: the gh
+# command is a stub that prints a JSON fixture file, and the branch fixtures use a local bare repository
+# as origin.
 # HANDBACK_CHECK=<path> substitutes another script (used to prove a test can fail).
 . "$(dirname "$0")/lib.sh"
 
@@ -18,18 +19,39 @@ GOOD_ROLLUP='[{"__typename":"CheckRun","name":"build","status":"COMPLETED","conc
 # NOTE_LINE: the fetch line printed before the branch line when the default base ref is used.
 NOTE_LINE='NOTE fetch: ran git fetch origin main'
 
+# The four body lines of the all-good fixture: one commit on the branch, no trailer, plain footer.
+CLOSE_OK='OK closing: names #427'
+FOOT_OK='OK footer: Generated with Claude Code'
+CO_NONE1='OK coauthor: none in body or 1 commits'
+ASCII_OK='OK ascii: body is ASCII'
+GOOD_CHECKS=$(printf '%s\n' "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK")
+
+# Non-ASCII bytes are written as printf escapes so this file stays ASCII. ROBOT is U+1F916 (an emoji)
+# and DASH is U+2014 (an em-dash).
+ROBOT=$(printf '\360\237\244\226')
+DASH=$(printf '\342\200\224')
+
+# GOOD_BODY: the all-good PR body (a closing reference, text and the plain footer).
+GOOD_BODY=$TEST_TMP/body-good
+printf '%s\n' 'Closes #427' '' 'Summary of the change.' '' 'Generated with Claude Code' > "$GOOD_BODY" || exit 2
+
 write_gh_stub "$STUB" || exit 2
 
-# make_origin_clone <dir> <ahead>: a bare origin at <dir>.origin.git seeded with main, and a clone at
-# <dir> on branch agent/s427-t1-tw with <ahead> commits on top of origin/main. Sets FIX_BASE to the
-# origin/main sha and FIX_HEAD to the clone HEAD.
+# make_origin_clone <dir> <ahead> [base trailer]: a bare origin at <dir>.origin.git seeded with main, and a
+# clone at <dir> on branch agent/s427-t1-tw with <ahead> commits on top of origin/main. The optional third
+# argument is a trailer line for the seed commit on main. Sets FIX_BASE to the origin/main sha and
+# FIX_HEAD to the clone HEAD.
 make_origin_clone() {
   _seed=$1.seed
   _origin=$1.origin.git
   git init -q -b main "$_seed" || return 1
   printf '%s\n' 'base' > "$_seed/file.txt" || return 1
   git_c "$_seed" add -A || return 1
-  git_c "$_seed" commit -q -m base || return 1
+  if [ -n "${3:-}" ]; then
+    git_c "$_seed" commit -q -m base -m "$3" || return 1
+  else
+    git_c "$_seed" commit -q -m base || return 1
+  fi
   git init -q --bare -b main "$_origin" || return 1
   git_c "$_seed" push -q "$_origin" main || return 1
   git clone -q "$_origin" "$1" || return 1
@@ -57,13 +79,30 @@ advance_origin() {
   git_c "$1.upstream" push -q origin main || return 1
 }
 
+# commit_line <dir> <subject> [trailer]: append a line to file.txt and commit it on the branch. The optional
+# trailer is a second paragraph of the commit message.
+commit_line() {
+  printf '%s\n' "$2" >> "$1/file.txt" || return 1
+  if [ -n "${3:-}" ]; then
+    git_c "$1" commit -q -a -m "$2" -m "$3" || return 1
+  else
+    git_c "$1" commit -q -a -m "$2" || return 1
+  fi
+}
+
+# short_sha <dir> <rev>: the first seven characters of the commit that <rev> names in the repository at <dir>.
+short_sha() {
+  _full=$(git -C "$1" rev-parse "$2") || return 1
+  printf '%s\n' "$_full" | awk '{ print substr($0, 1, 7) }'
+}
+
 make_origin_clone "$REPO" 1 || exit 2
 
 # check_pr <state> <isDraft> <mergeable> <headRefOid> [rollup JSON]: write the PR document, then run
-# the check with the default arguments. The rollup defaults to GOOD_ROLLUP. Sets RC and leaves stdout
-# in $TEST_TMP/out, stderr in $TEST_TMP/err.
+# the check with the default arguments. The rollup defaults to GOOD_ROLLUP and the body to GOOD_BODY.
+# Sets RC and leaves stdout in $TEST_TMP/out, stderr in $TEST_TMP/err.
 check_pr() {
-  write_pr_json "$JSON" "$1" "$2" "$3" "$4" "${5:-$GOOD_ROLLUP}"
+  write_pr_json "$JSON" "$1" "$2" "$3" "$4" "${5:-$GOOD_ROLLUP}" "$GOOD_BODY"
   sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
   RC=$?
 }
@@ -80,7 +119,7 @@ assert_case() {
 check_ci() {
   check_pr OPEN false MERGEABLE "$FIX_HEAD" "$3"
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD" "$4" \
-    "$NOTE_LINE" "OK branch: behind 0, ahead 1" > "$TEST_TMP/want-$1"
+    "$NOTE_LINE" "OK branch: behind 0, ahead 1" "$GOOD_CHECKS" > "$TEST_TMP/want-$1"
   assert_case "$1" "$2" "$TEST_TMP/want-$1"
 }
 
@@ -94,6 +133,10 @@ OK head: $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "all-good" 0 "$TEST_TMP/want-good"
 
@@ -107,6 +150,10 @@ OK head: $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "state-closed" 1 "$TEST_TMP/want-closed"
 
@@ -120,6 +167,10 @@ OK head: $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "draft-true" 1 "$TEST_TMP/want-draft"
 
@@ -133,6 +184,10 @@ OK head: $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "mergeable-unknown" 1 "$TEST_TMP/want-unknown"
 
@@ -145,6 +200,10 @@ OK head: $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "mergeable-conflicting" 1 "$TEST_TMP/want-conflicting"
 
@@ -158,6 +217,10 @@ FAIL head: pr $FIX_BASE worktree $FIX_HEAD
 OK ci: 1 checks successful
 $NOTE_LINE
 OK branch: behind 0, ahead 1
+OK closing: names #427
+OK footer: Generated with Claude Code
+OK coauthor: none in body or 1 commits
+OK ascii: body is ASCII
 EOF
 assert_case "head-differs" 1 "$TEST_TMP/want-head"
 
@@ -173,10 +236,14 @@ FAIL mergeable: gh failed
 FAIL head: gh failed
 FAIL ci: gh failed
 FAIL branch: gh failed
+FAIL closing: gh failed
+FAIL footer: gh failed
+FAIL coauthor: gh failed
+FAIL ascii: gh failed
 EOF
 assert_case "gh-exit-nonzero" 1 "$TEST_TMP/want-ghfail"
 
-# Case 6b: the gh stub prints invalid JSON. The same six FAIL lines and no crash message.
+# Case 6b: the gh stub prints invalid JSON. The same ten FAIL lines and no crash message.
 printf '%s\n' 'not json at all' > "$TEST_TMP/bad.json"
 STUB_JSON=$TEST_TMP/bad.json
 export STUB_JSON
@@ -187,7 +254,7 @@ assert_case "gh-invalid-json" 1 "$TEST_TMP/want-ghfail"
 
 # Case 7: usage errors exit 2, print a usage message on stderr and nothing on stdout.
 # Each run uses the all-good document so a script that ignores the usage error would print OK lines.
-write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD"
+write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD" "$GOOD_ROLLUP" "$GOOD_BODY"
 for usage in "missing-n|-w $REPO -s 427" "missing-w|-n 431 -s 427" "missing-s|-n 431 -w $REPO" "unknown-option|-n 431 -w $REPO -s 427 -z"; do
   name=${usage%%|*}
   args=${usage#*|}
@@ -201,7 +268,7 @@ for usage in "missing-n|-w $REPO -s 427" "missing-w|-n 431 -s 427" "missing-s|-n
 done
 
 # Case 8: -b origin/main given explicitly matches the default on the shared all-good fixture.
-write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD" "$GOOD_ROLLUP"
+write_pr_json "$JSON" OPEN false MERGEABLE "$FIX_HEAD" "$GOOD_ROLLUP" "$GOOD_BODY"
 sh "$SCRIPT" -n 431 -w "$REPO" -s 427 -b origin/main >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
 assert_case "base-ref-accepted" 0 "$TEST_TMP/want-good"
@@ -226,11 +293,12 @@ check_ci ci-success-and-skipped 1 '[{"__typename":"CheckRun","name":"build","sta
 check_ci ci-empty-array 1 '[]' "FAIL ci: no checks"
 
 # A missing statusCheckRollup field is the same as an empty rollup: FAIL ci: no checks.
-printf '%s\n' "{\"number\":431,\"state\":\"OPEN\",\"isDraft\":false,\"mergeable\":\"MERGEABLE\",\"headRefOid\":\"$FIX_HEAD\",\"body\":\"\"}" > "$JSON"
+_gb=$(jq -Rs . < "$GOOD_BODY") || exit 2
+printf '%s\n' "{\"number\":431,\"state\":\"OPEN\",\"isDraft\":false,\"mergeable\":\"MERGEABLE\",\"headRefOid\":\"$FIX_HEAD\",\"body\":$_gb}" > "$JSON"
 sh "$SCRIPT" -n 431 -w "$REPO" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
 printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $FIX_HEAD" \
-  "FAIL ci: no checks" "$NOTE_LINE" "OK branch: behind 0, ahead 1" > "$TEST_TMP/want-ci-missing-field"
+  "FAIL ci: no checks" "$NOTE_LINE" "OK branch: behind 0, ahead 1" "$GOOD_CHECKS" > "$TEST_TMP/want-ci-missing-field"
 assert_case "ci-missing-field" 1 "$TEST_TMP/want-ci-missing-field"
 
 # StatusContext entries: a SUCCESS state passes, a PENDING state fails with the context name.
@@ -246,8 +314,9 @@ check_ci ci-two-failing 1 '[{"__typename":"CheckRun","name":"build","status":"CO
 
 # Case 10: the branch line. check_branch <name> <worktree> <expected exit> <expected branch line>
 # [script args]: runs the check on one worktree with a PR document whose head is that worktree's HEAD
-# and an all-good rollup. The other lines must be OK. Stdout is compared exactly; stderr is not checked
-# because git's own fetch messages may appear there.
+# and an all-good rollup and body. The other lines must be OK; the coauthor count is the commit count
+# on the branch. Stdout is compared exactly; stderr is not checked because git's own fetch messages may
+# appear there.
 check_branch() {
   _bname=$1
   _bwt=$2
@@ -255,11 +324,13 @@ check_branch() {
   _bline=$4
   shift 4
   _bhead=$(git -C "$_bwt" rev-parse HEAD) || exit 2
-  write_pr_json "$JSON" OPEN false MERGEABLE "$_bhead" "$GOOD_ROLLUP"
+  _bn=$(git -C "$_bwt" rev-list --count "origin/main..HEAD") || exit 2
+  write_pr_json "$JSON" OPEN false MERGEABLE "$_bhead" "$GOOD_ROLLUP" "$GOOD_BODY"
   sh "$SCRIPT" -n 431 -w "$_bwt" -s 427 "$@" >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
   RC=$?
   printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
-    "OK ci: 1 checks successful" "$NOTE_LINE" "$_bline" > "$TEST_TMP/want-$_bname"
+    "OK ci: 1 checks successful" "$NOTE_LINE" "$_bline" "$CLOSE_OK" "$FOOT_OK" \
+    "OK coauthor: none in body or $_bn commits" "$ASCII_OK" > "$TEST_TMP/want-$_bname"
   assert_exit "$_bname exit" "$_bexit" "$RC"
   assert_file_eq "$_bname lines" "$TEST_TMP/want-$_bname" "$TEST_TMP/out"
 }
@@ -297,12 +368,183 @@ check_branch branch-behind-one "$TEST_TMP/behind1" 1 "FAIL branch: behind 1, ahe
 # Case 10e: a base ref without a slash names no remote, so it is a usage error: exit 2, usage message
 # on stderr, nothing on stdout. The all-good document is written so a script that ignores the error
 # would print OK lines and exit 0.
-write_pr_json "$JSON" OPEN false MERGEABLE "$(git -C "$REPO" rev-parse HEAD)" "$GOOD_ROLLUP"
+write_pr_json "$JSON" OPEN false MERGEABLE "$(git -C "$REPO" rev-parse HEAD)" "$GOOD_ROLLUP" "$GOOD_BODY"
 sh "$SCRIPT" -n 431 -w "$REPO" -s 427 -b main >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
 assert_exit "base-no-slash exit" 2 "$RC"
 assert_empty "base-no-slash stdout" "$TEST_TMP/out"
 assert_nonempty "base-no-slash stderr" "$TEST_TMP/err"
 assert_grep "base-no-slash message" 'usage' "$TEST_TMP/err"
+
+# Case 11: the closing, footer, coauthor and ascii lines. body_case <name> <worktree> <expected exit>
+# <body file> <closing line> <footer line> <coauthor line> <ascii line>: runs the check on the worktree
+# with the body file as the PR body. The head is the worktree HEAD and the rollup is all good, so the
+# state..branch lines are OK; the four body lines are the ones given. Exact stdout and exit code.
+body_case() {
+  _bhead=$(git -C "$2" rev-parse HEAD) || exit 2
+  _bahead=$(git -C "$2" rev-list --count "origin/main..HEAD") || exit 2
+  write_pr_json "$JSON" OPEN false MERGEABLE "$_bhead" "$GOOD_ROLLUP" "$4"
+  sh "$SCRIPT" -n 431 -w "$2" -s 427 >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
+  RC=$?
+  printf '%s\n' "OK state: OPEN" "OK draft: false" "OK mergeable: MERGEABLE" "OK head: $_bhead" \
+    "OK ci: 1 checks successful" "$NOTE_LINE" "OK branch: behind 0, ahead $_bahead" \
+    "$5" "$6" "$7" "$8" > "$TEST_TMP/want-$1"
+  assert_case "$1" "$3" "$TEST_TMP/want-$1"
+}
+
+# Case 11a: a markdown-link footer passes.
+printf '%s\n' 'Closes #427' '' 'Summary.' '' 'Generated with [Claude Code](https://claude.com/claude-code)' > "$TEST_TMP/body-md"
+body_case footer-markdown-link "$REPO" 0 "$TEST_TMP/body-md" "$CLOSE_OK" \
+  "OK footer: Generated with [Claude Code](https://claude.com/claude-code)" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11b: a CRLF body passes; the CR bytes are stripped before the closing and footer checks.
+printf 'Closes #427\r\n\r\nSummary.\r\n\r\nGenerated with Claude Code\r\n' > "$TEST_TMP/body-crlf"
+body_case crlf-body "$REPO" 0 "$TEST_TMP/body-crlf" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11c: trailing spaces and a tab on the footer line are stripped; the footer still passes.
+printf 'Closes #427\n\nSummary.\n\nGenerated with Claude Code \t \n' > "$TEST_TMP/body-trail"
+body_case footer-trailing-blanks "$REPO" 0 "$TEST_TMP/body-trail" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11d: empty lines after the footer are skipped: the last non-empty line is the footer.
+printf 'Closes #427\n\nSummary.\n\nGenerated with Claude Code\n\n\n' > "$TEST_TMP/body-trail-lines"
+body_case footer-trailing-empty-lines "$REPO" 0 "$TEST_TMP/body-trail-lines" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11e: an emoji prefix on the footer line fails the footer and the ascii check on that line (line 5).
+printf '%s\n' 'Closes #427' '' 'Summary.' '' "$ROBOT Generated with Claude Code" > "$TEST_TMP/body-emoji-footer"
+body_case footer-emoji-prefix "$REPO" 1 "$TEST_TMP/body-emoji-footer" "$CLOSE_OK" \
+  "FAIL footer: last line is \"$ROBOT Generated with Claude Code\"" "$CO_NONE1" "FAIL ascii: non-ASCII byte on line 5"
+
+# Case 11f: text after the footer makes the last non-empty line the failing footer value.
+printf '%s\n' 'Closes #427' '' 'Summary.' '' 'Generated with Claude Code' 'See the diff.' > "$TEST_TMP/body-after"
+body_case footer-text-after "$REPO" 1 "$TEST_TMP/body-after" "$CLOSE_OK" \
+  'FAIL footer: last line is "See the diff."' "$CO_NONE1" "$ASCII_OK"
+
+# Case 11g: a footer in the middle of the body fails; the closing reference after it still passes.
+printf '%s\n' 'Generated with Claude Code' '' 'Summary.' '' 'Closes #427' > "$TEST_TMP/body-mid"
+body_case footer-mid-body "$REPO" 1 "$TEST_TMP/body-mid" "$CLOSE_OK" \
+  'FAIL footer: last line is "Closes #427"' "$CO_NONE1" "$ASCII_OK"
+
+# Case 11h: an empty body fails the closing and footer lines; coauthor and ascii pass on no bytes.
+: > "$TEST_TMP/body-empty"
+body_case body-empty "$REPO" 1 "$TEST_TMP/body-empty" "FAIL closing: no closing keyword for #427" \
+  "FAIL footer: empty body" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11i: a second closing reference to another issue fails with its number.
+printf '%s\n' 'Closes #427' '' 'fixes #12' '' 'Generated with Claude Code' > "$TEST_TMP/body-fixes12"
+body_case closing-fixes-other "$REPO" 1 "$TEST_TMP/body-fixes12" "FAIL closing: also names #12" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11j: a comma list that adds another issue fails with that issue's number.
+printf '%s\n' 'Closes #427, #12' '' 'Generated with Claude Code' > "$TEST_TMP/body-comma12"
+body_case closing-comma-other "$REPO" 1 "$TEST_TMP/body-comma12" "FAIL closing: also names #12" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11k: 4270 is a different whole number from 427: a near-miss fails.
+printf '%s\n' 'Closes #4270' '' 'Generated with Claude Code' > "$TEST_TMP/body-4270"
+body_case closing-near-miss "$REPO" 1 "$TEST_TMP/body-4270" "FAIL closing: also names #4270" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11l: a cross-repository reference counts as another issue and is written as is.
+printf '%s\n' 'Resolves owner/repo#427' '' 'Generated with Claude Code' > "$TEST_TMP/body-owner"
+body_case closing-owner-repo "$REPO" 1 "$TEST_TMP/body-owner" "FAIL closing: also names owner/repo#427" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11m: no closing keyword before the story number fails with no keyword.
+printf '%s\n' 'Refers to #427.' '' 'Generated with Claude Code' > "$TEST_TMP/body-nokw"
+body_case closing-no-keyword "$REPO" 1 "$TEST_TMP/body-nokw" "FAIL closing: no closing keyword for #427" \
+  "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11n: the keyword counts in lower case.
+printf '%s\n' 'closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-lower"
+body_case closing-lower "$REPO" 0 "$TEST_TMP/body-lower" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11o: the keyword counts in upper case.
+printf '%s\n' 'RESOLVES #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-upper"
+body_case closing-upper "$REPO" 0 "$TEST_TMP/body-upper" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11p: the keyword counts in mixed case.
+printf '%s\n' 'cLoSeS #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-mixed"
+body_case closing-mixed "$REPO" 0 "$TEST_TMP/body-mixed" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11q: an optional colon between the keyword and the reference counts.
+printf '%s\n' 'Closes: #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-colon"
+body_case closing-colon "$REPO" 0 "$TEST_TMP/body-colon" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11r: the same story reference twice is fine: the numbers are unique.
+printf '%s\n' 'Closes #427' '' 'Closes #427' '' 'Generated with Claude Code' > "$TEST_TMP/body-twice"
+body_case closing-twice "$REPO" 0 "$TEST_TMP/body-twice" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11s: a Co-Authored-By line in the body (mixed case) fails the coauthor line.
+printf '%s\n' 'Closes #427' '' 'Summary.' '' 'Co-Authored-By: Claude <noreply@example.com>' '' 'Generated with Claude Code' > "$TEST_TMP/body-coa"
+body_case coauthor-body "$REPO" 1 "$TEST_TMP/body-coa" "$CLOSE_OK" "$FOOT_OK" "FAIL coauthor: body" "$ASCII_OK"
+
+# Case 11t: leading spaces and lower case still start the trailer line: it fails.
+printf '%s\n' 'Closes #427' '' '  co-authored-by: Someone <s@example.com>' '' 'Generated with Claude Code' > "$TEST_TMP/body-coa-indent"
+body_case coauthor-body-indented "$REPO" 1 "$TEST_TMP/body-coa-indent" "$CLOSE_OK" "$FOOT_OK" "FAIL coauthor: body" "$ASCII_OK"
+
+# Case 11u: the trailer text in the middle of a line does not start the line: it passes.
+printf '%s\n' 'Closes #427' '' 'Mention co-authored-by: in the middle of a line.' '' 'Generated with Claude Code' > "$TEST_TMP/body-coa-mid"
+body_case coauthor-mid-line "$REPO" 0 "$TEST_TMP/body-coa-mid" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 11v: an em-dash on line 3 fails the ascii line with that line number.
+printf '%s\n' 'Closes #427' '' "Summary $DASH text." '' 'Generated with Claude Code' > "$TEST_TMP/body-dash"
+body_case ascii-em-dash "$REPO" 1 "$TEST_TMP/body-dash" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" \
+  "FAIL ascii: non-ASCII byte on line 3"
+
+# Case 11w: an emoji on line 3 fails the ascii line with that line number.
+printf '%s\n' 'Closes #427' '' "Summary $ROBOT text." '' 'Generated with Claude Code' > "$TEST_TMP/body-emoji"
+body_case ascii-emoji "$REPO" 1 "$TEST_TMP/body-emoji" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" \
+  "FAIL ascii: non-ASCII byte on line 3"
+
+# Case 11x: with a non-ASCII byte on line 3 and again on line 5, the first offending line is named.
+printf '%s\n' 'Closes #427' '' "Summary $DASH text." '' "Note $ROBOT text." '' 'Generated with Claude Code' > "$TEST_TMP/body-two-bad"
+body_case ascii-first-line "$REPO" 1 "$TEST_TMP/body-two-bad" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" \
+  "FAIL ascii: non-ASCII byte on line 3"
+
+# Case 11y: a tab is whitespace and passes the ascii line.
+printf 'Closes #427\n\n\tIndented with a tab.\n\nGenerated with Claude Code\n' > "$TEST_TMP/body-tab"
+body_case ascii-tab "$REPO" 0 "$TEST_TMP/body-tab" "$CLOSE_OK" "$FOOT_OK" "$CO_NONE1" "$ASCII_OK"
+
+# Case 12: the coauthor line also reads the commit messages in base..HEAD. One branch commit with the
+# trailer fails with that commit's short sha. The fixture has no body trailer and one commit.
+make_origin_clone "$TEST_TMP/coa-one" 0 || exit 2
+commit_line "$TEST_TMP/coa-one" 'trailer one' 'Co-Authored-By: Claude <noreply@example.com>' || exit 2
+_s1=$(short_sha "$TEST_TMP/coa-one" HEAD) || exit 2
+body_case coauthor-one-commit "$TEST_TMP/coa-one" 1 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
+  "FAIL coauthor: commit $_s1" "$ASCII_OK"
+
+# Case 13: two branch commits with trailers both fail, listed newest first (git log order), joined by "; ".
+make_origin_clone "$TEST_TMP/coa-two" 0 || exit 2
+commit_line "$TEST_TMP/coa-two" 'first' 'Co-Authored-By: A <a@example.com>' || exit 2
+commit_line "$TEST_TMP/coa-two" 'second' 'co-authored-by: B <b@example.com>' || exit 2
+_new=$(short_sha "$TEST_TMP/coa-two" HEAD) || exit 2
+_old=$(short_sha "$TEST_TMP/coa-two" HEAD~1) || exit 2
+body_case coauthor-two-commits "$TEST_TMP/coa-two" 1 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
+  "FAIL coauthor: commit $_new; commit $_old" "$ASCII_OK"
+
+# Case 14: a trailer in the body and a trailer in one commit list both: "body; commit <sha>".
+make_origin_clone "$TEST_TMP/coa-both" 0 || exit 2
+commit_line "$TEST_TMP/coa-both" 'with trailer' 'Co-Authored-By: C <c@example.com>' || exit 2
+_sb=$(short_sha "$TEST_TMP/coa-both" HEAD) || exit 2
+printf '%s\n' 'Closes #427' '' 'Co-Authored-By: Claude <noreply@example.com>' '' 'Generated with Claude Code' > "$TEST_TMP/body-coa-both"
+body_case coauthor-body-and-commit "$TEST_TMP/coa-both" 1 "$TEST_TMP/body-coa-both" "$CLOSE_OK" "$FOOT_OK" \
+  "FAIL coauthor: body; commit $_sb" "$ASCII_OK"
+
+# Case 15: two clean branch commits: the count reads 2 and the line passes.
+make_origin_clone "$TEST_TMP/coa-clean" 0 || exit 2
+commit_line "$TEST_TMP/coa-clean" 'clean one' || exit 2
+commit_line "$TEST_TMP/coa-clean" 'clean two' || exit 2
+body_case coauthor-clean-two "$TEST_TMP/coa-clean" 0 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
+  "OK coauthor: none in body or 2 commits" "$ASCII_OK"
+
+# Case 16: no branch commits (HEAD is origin/main): the count reads 0 and the line passes.
+make_origin_clone "$TEST_TMP/coa-zero" 0 || exit 2
+body_case coauthor-zero-commits "$TEST_TMP/coa-zero" 0 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
+  "OK coauthor: none in body or 0 commits" "$ASCII_OK"
+
+# Case 17: a trailer on the base commit is outside base..HEAD and is not read: the count reads 0 and passes.
+make_origin_clone "$TEST_TMP/coa-base" 0 'Co-Authored-By: Base <b@example.com>' || exit 2
+body_case coauthor-base-trailer-ignored "$TEST_TMP/coa-base" 0 "$GOOD_BODY" "$CLOSE_OK" "$FOOT_OK" \
+  "OK coauthor: none in body or 0 commits" "$ASCII_OK"
 
 test_summary

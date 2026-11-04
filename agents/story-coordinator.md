@@ -89,6 +89,16 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Exit 2 or any other exit code (127 means the script was not found): hand back blocked with the error text.
 - A reconcile and a fresh runner with no plan file skip the plan check.
 
+## Red CI
+
+- Classify a red CI check on the pull request head before it costs a fix round or a retry. One rule covers every path: the first run on the draft, the wait for green before Stage 2, a push to a ready pull request, and a reconcile.
+- Write the class and its evidence in the plan file, in the entry of the todo or reconcile it belongs to; a runner with no plan file writes them in the pull request body.
+- Own code: the failure is in code the branch changed. Its fix is a fix round, counted under the two-stage-review skill's fix-round cap.
+- Stale base: the base moved and the failure is in code the branch did not touch. After `git -C <feature worktree> fetch origin main`, `git -C <feature worktree> merge-base --is-ancestor origin/main HEAD` exits 1 when the base moved and 0 when it did not; any other exit code is a hand-back of kind blocked with the error text. Merge origin/main into the branch after the pull request is open, push without force, and wait for CI again. A stale base is not a fix round. Record each stale base merge in the plan file entry (or the pull request body when there is no plan file). At most 2 stale base merges run per story; a third red CI classed as stale base is a hand-back of kind blocked naming the failing check.
+- Infrastructure: the job died before any test ran, or a service outside the repository failed. Take one fresh run by hand with `gh run rerun <run id> --failed`; it is one action the runner takes, not an automatic retry, and it runs once per red CI; find the run id with `gh run list --branch <branch> --limit 1`. A second failure with the same job name and the same first failing error line is reclassified as own code. When the runner has no permission to re-run the job, it reports that in the hand-back instead.
+- These are own code: a test that failed once and passed on retry, a failure in code both the base and the branch changed, an infrastructure failure after some tests ran, and a merge conflict while bringing in a stale base.
+- Any red CI that fits none of these classes is own code.
+
 ## Hand-back
 
 - The hand-back text is the deliverable; never write a report file, since the harness may refuse it.
@@ -137,7 +147,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Its requirements are the acceptance criteria of both stories; it reads every overlapping file as it stands after the update and reports each statement that now contradicts another statement and each acceptance criterion of either story that is no longer met.
 - Each finding quotes a file:line pair; a result with no findings lists the files read.
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
-- CI failing on the updated head is also a fix round.
+- CI failing on the updated head is classified as the Red CI section says; only an own code failure is a fix round of this reconcile. A stale base in a reconcile is brought in by the rebase of the Update bullet, not by a merge, and counts toward the same limit of 2 stale base updates per story.
 - Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
 - Stage 2 runs as one pass, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files, with a re-check after each fix round (a reconcile is not a new whole-branch pass over the story).
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.

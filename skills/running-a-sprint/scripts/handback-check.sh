@@ -4,7 +4,8 @@
 # Prints one line per check: "OK <name>: <value>" or "FAIL <name>: <value>".
 # Exit 0 when every check is OK, 1 when any check fails or GitHub cannot be read, 2 on a usage error.
 # GitHub is read by one function that runs "${HANDBACK_GH:-gh}" pr view; no other network use.
-# -b, -P and -m are parsed and stored here; the checks that use them come in later todos.
+# -b is the base ref for the branch check (remote and branch split at the first slash); -P and -m are
+# parsed and stored here; the checks that use them come in later todos.
 # shellcheck disable=SC2034
 PR=""
 WT=""
@@ -43,7 +44,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     -b)
       [ "$#" -ge 2 ] || usage
-      BASE=$2
+      case "$2" in
+        */*) BASE=$2 ;;
+        *) usage ;;
+      esac
       shift 2
       ;;
     -P)
@@ -158,8 +162,34 @@ check_ci() {
   emit fail ci "$_nbad of $_total not successful: $_bad"
 }
 
+# check_branch: the runner branch is not behind its base ref after a fetch of the base branch. The
+# base ref is split at its first slash into the remote and the branch. A NOTE line says what ran.
+# Ahead is reported in the value; only behind fails.
+check_branch() {
+  _remote=${BASE%%/*}
+  _branch=${BASE#*/}
+  _fetch_ok=1
+  GIT_TERMINAL_PROMPT=0 git -C "$WT" fetch "$_remote" "$_branch" >/dev/null 2>&1 || _fetch_ok=0
+  printf 'NOTE fetch: ran git fetch %s %s\n' "$_remote" "$_branch"
+  if [ "$_fetch_ok" -eq 0 ]; then
+    emit fail branch "fetch failed"
+    return
+  fi
+  if ! _counts=$(git -C "$WT" rev-list --left-right --count "$BASE...HEAD" 2>/dev/null); then
+    emit fail branch "position unreadable"
+    return
+  fi
+  _behind=$(printf '%s\n' "$_counts" | awk '{print $1}')
+  _ahead=$(printf '%s\n' "$_counts" | awk '{print $2}')
+  if [ "$_behind" -eq 0 ]; then
+    emit ok branch "behind $_behind, ahead $_ahead"
+  else
+    emit fail branch "behind $_behind, ahead $_ahead"
+  fi
+}
+
 if ! fetch_pr; then
-  for _name in state draft mergeable head ci; do
+  for _name in state draft mergeable head ci branch; do
     emit fail "$_name" "gh failed"
   done
   exit 1
@@ -170,6 +200,7 @@ check_draft
 check_mergeable
 check_head
 check_ci
+check_branch
 
 if [ "$FAILS" -eq 0 ]; then
   exit 0

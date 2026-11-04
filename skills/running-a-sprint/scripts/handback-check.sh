@@ -91,34 +91,29 @@ pr_field() {
   printf '%s\n' "$PR_JSON" | jq -r ".$1"
 }
 
+# check_field <name> <field> <expected>: the PR field equals the expected value.
+check_field() {
+  _v=$(pr_field "$2")
+  if [ "$_v" = "$3" ]; then
+    emit ok "$1" "$_v"
+  else
+    emit fail "$1" "$_v"
+  fi
+}
+
 # check_state: the PR is OPEN.
 check_state() {
-  _v=$(pr_field state)
-  if [ "$_v" = OPEN ]; then
-    emit ok state "$_v"
-  else
-    emit fail state "$_v"
-  fi
+  check_field state state OPEN
 }
 
 # check_draft: the PR is not a draft.
 check_draft() {
-  _v=$(pr_field isDraft)
-  if [ "$_v" = false ]; then
-    emit ok draft "$_v"
-  else
-    emit fail draft "$_v"
-  fi
+  check_field draft isDraft false
 }
 
 # check_mergeable: GitHub reports the PR as MERGEABLE (UNKNOWN and CONFLICTING fail).
 check_mergeable() {
-  _v=$(pr_field mergeable)
-  if [ "$_v" = MERGEABLE ]; then
-    emit ok mergeable "$_v"
-  else
-    emit fail mergeable "$_v"
-  fi
+  check_field mergeable mergeable MERGEABLE
 }
 
 # check_head: the PR head is the commit checked out in the runner worktree.

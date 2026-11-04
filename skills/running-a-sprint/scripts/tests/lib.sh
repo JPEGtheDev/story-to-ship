@@ -96,6 +96,8 @@ make_repo() {
 
 # write_gh_stub <file>: a gh stand-in. It exits with STUB_EXIT when that is set,
 # otherwise it prints the file named by STUB_JSON.
+# The single-quoted lines are stub source text, so their $ must stay unexpanded.
+# shellcheck disable=SC2016
 write_gh_stub() {
   printf '%s\n' '#!/bin/sh' 'if [ -n "${STUB_EXIT:-}" ]; then exit "$STUB_EXIT"; fi' 'cat "$STUB_JSON"' > "$1" || return 1
   chmod +x "$1" || return 1

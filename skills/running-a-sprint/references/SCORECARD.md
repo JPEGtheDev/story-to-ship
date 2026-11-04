@@ -84,6 +84,16 @@ Run `python3 tools/tier_usage/tier_usage.py "$D"` at close-out. D is the launche
 
 Read the figures as follows. Cost is in tokens, and dollars print only when tools/tier_usage/tiers.json holds rates. The est_output_tokens column is estimated, because transcripts record placeholder output counts. A dispatch whose description names no todo is counted in the unattributed column when it is an implementer, spec-compliance-reviewer, code-quality-reviewer or skill-reviewer dispatch, and left out of fix rounds (the passes in which a not-passed review sends the todo back to an implementer, the avg_fix_rounds column) and the first-pass Stage 1 rate, so read every rate next to its unattributed count. The input_side_tokens column adds input, cache-write and cache-read tokens without weights and leaves output out. The cost_per_todo_tokens and cost_per_todo_usd columns divide each tier's figure by the runner's whole todo count, so the per-tier figures add up to the runner's per-todo cost. A todo whose first Stage 1 verdict is unreadable is left out of the first-pass rate, so check the per-dispatch rows for first_stage1_pass holding unreadable before treating a low rate as review failures.
 
+## Owner change and CI counts
+
+### Needed owner change and class
+
+A merged sprint PR needed an owner change when, after it was marked ready, any of three things happened: a review comment led to a commit on the PR, a questions-page answer about the PR was logged in the sprint ledger, or the owner asked for a follow-up story within 7 days of the merge. The 7 days run from the merge. A change after the row is written amends that row in place; never append a second row for the same PR. A reverted PR still counts as merged, and the revert is an owner change. When a GitHub read fails, write "unknown" in the field; "unknown" counts nothing. A merged PR that has no row gets its row written late, at its merge-order position, and is excluded from the counts until then. Only sprint PRs merged from this change forward count; there is no backfill.
+
+Each PR gets one class, chosen in this order: dependency when the author is Dependabot or Renovate or only manifest or lockfile paths changed; else CI; else docs-only when every changed file is .md, .txt or under docs/; else code.
+
+The launcher writes the row itself at close-out from its sprint ledger, which logs each questions-page answer per PR. No script reads the questions page. A logged questions-page answer that asks for a change to the merged PR counts as yes. An answer to a question a runner relayed is not an owner change, as the Interventions cause bullet says. When the launcher starts a new ledger, it first copies the Needed owner change rows into it, so counts and runs carry across sprints.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.
@@ -99,9 +109,12 @@ Copy one row per runner into the sprint ledger.
 - Hand-back numbers confirmed in tool output: <n of 3>
 - Owner-reserved items decided without a question: <n>; owner questions relayed: <n>
 - Interventions cause: <one entry per owner intervention after the first PR ready hand-back (change request, follow-up issue for a defect, reopened story; an answer to a relayed owner question is not one), each marked "missed requirement" (the owner's message names behavior that no acceptance criterion or Discovery rule of the story covered; Discovery is the runner's three-amigos requirements step) or "other" (including behavior a criterion covered that the PR did not meet); the launcher records each entry in the runner's ledger entry when the owner's message arrives and adds it to this row, amending a row already written at close-out; none when there was none>
+- Needed owner change: <yes, no or unknown>; repository: <owner/repo>; class: <dependency, CI, docs-only or code>
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
 - Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>
+
+Interventions cause stays as the detail behind the yes in Needed owner change.

@@ -45,6 +45,7 @@ jobs:
           shellcheck hooks/tests/run-workflow-model-guard.sh
           shellcheck hooks/tests/run-shell-write-guard.sh
           shellcheck hooks/tests/run-inline-edit-guard.sh
+          shellcheck hooks/tests/run-hooks-json-quoting.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
           echo "[+] All shell scripts pass shellcheck"

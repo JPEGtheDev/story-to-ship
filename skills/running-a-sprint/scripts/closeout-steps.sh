@@ -10,8 +10,8 @@
 #   4. fast-forward: root main to origin/main with --ff-only.
 # A failing step prints FAIL <step>: <first line of the git error output>, then the line
 # FAIL steps: stopped, later steps not run; nothing after it runs. Exit codes: 0 every step OK, 1 a refusal or a
-# failed step, 2 a usage error (usage on stderr, nothing on stdout). -i is required; this todo does not otherwise
-# use it. -e is accepted and ignored in this todo; its output is a later todo.
+# failed step, 2 a usage error (usage on stderr, nothing on stdout). -i is required, and no step uses its value.
+# -e is accepted and ignored.
 # Removal uses git worktree remove --force: the check has already allowed only the plan file to be untracked, and
 # a locked worktree still fails. Branches are deleted with branch -D because a squash merge leaves the branch
 # unmerged in git's view; the check has already compared the patches. Nothing is pushed with --force, and nothing

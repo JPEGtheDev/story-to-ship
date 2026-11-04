@@ -1,6 +1,7 @@
 #!/bin/sh
-# Fixture tests for closeout-check.sh: the merged, fetch NOTE, ancestry, patch and worktree lines, the
-# -x and -P options, the gh failure paths, usage errors (exit 2) and an unchanged-repositories check.
+# Fixture tests for closeout-check.sh (cases 1-32) and closeout-steps.sh (group 2): the merged, fetch NOTE,
+# ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
+# an unchanged-repositories check, and the steps' removal, deletion, fast-forward and refusal paths.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
 # of a local bare origin under the test temp directory.
 # CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail).
@@ -131,15 +132,24 @@ assert_case() {
   assert_file_eq "$1 lines" "$TEST_TMP/want-$3" "$TEST_TMP/out"
 }
 
-# usage_case <name> [args]: a usage error exits 2, prints nothing on stdout and a usage message on stderr.
+# usage_expect <label> <runner function> [args]: the runner exits 2, prints nothing on stdout and a usage
+# message on stderr.
+usage_expect() {
+  _ul=$1
+  _ur=$2
+  shift 2
+  "$_ur" "$@"
+  assert_exit "$_ul exit" 2 "$RC"
+  assert_empty "$_ul stdout" "$TEST_TMP/out"
+  assert_nonempty "$_ul stderr" "$TEST_TMP/err"
+  assert_grep "$_ul message" 'usage' "$TEST_TMP/err"
+}
+
+# usage_case <name> [args]: usage_expect for closeout-check.sh.
 usage_case() {
   _un=$1
   shift
-  run_close "$@"
-  assert_exit "usage-$_un exit" 2 "$RC"
-  assert_empty "usage-$_un stdout" "$TEST_TMP/out"
-  assert_nonempty "usage-$_un stderr" "$TEST_TMP/err"
-  assert_grep "usage-$_un message" 'usage' "$TEST_TMP/err"
+  usage_expect "usage-$_un" run_close "$@"
 }
 
 # snapshot <file>: the refs, the worktree list, the file list under .worktrees and the status of each worktree.
@@ -380,9 +390,9 @@ want_green later-main "OK worktree: $FX_WT clean"
 std_run
 assert_case later-main 0 later-main
 
-# Group 2: closeout-steps.sh (Todo 7). Every case in this group fails until the script exists (RED).
-# CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs closeout-check.sh next to
-# itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub that prints one OK line.
+# Group 2: closeout-steps.sh. CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs
+# closeout-check.sh next to itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub
+# that prints one OK line.
 STEPS=${CLOSEOUT_STEPS:-$(dirname "$0")/../closeout-steps.sh}
 STUBCHK=$TEST_TMP/check-stub
 printf '%s\n' '#!/bin/sh' 'echo "OK check: stub"' 'exit 0' > "$STUBCHK" || exit 2
@@ -408,15 +418,11 @@ steps_stub() {
   RC=$?
 }
 
-# steps_usage_case <name> [args]: a usage error exits 2, prints nothing on stdout and a usage message on stderr.
+# steps_usage_case <name> [args]: usage_expect for closeout-steps.sh.
 steps_usage_case() {
   _un=$1
   shift
-  run_steps "$@"
-  assert_exit "steps-usage-$_un exit" 2 "$RC"
-  assert_empty "steps-usage-$_un stdout" "$TEST_TMP/out"
-  assert_nonempty "steps-usage-$_un stderr" "$TEST_TMP/err"
-  assert_grep "steps-usage-$_un message" 'usage' "$TEST_TMP/err"
+  usage_expect "steps-usage-$_un" run_steps "$@"
 }
 
 # steps_prefetch: fetch the root's remote refs first, so the check's own fetch changes no ref in the snapshots.
@@ -496,6 +502,14 @@ refs_want() {
   } > "$1" || exit 2
 }
 
+# assert_refs <name> <local branch 0|1> <origin branch 0|1> <main sha> <runner worktree 0|1>: after a run, the refs
+# and worktrees equal refs_want for those arguments.
+assert_refs() {
+  refs_want "$TEST_TMP/want-refs-$1" "$2" "$3" "$4" "$5"
+  refs_actual "$TEST_TMP/got-refs-$1"
+  assert_file_eq "$1 refs" "$TEST_TMP/want-refs-$1" "$TEST_TMP/got-refs-$1"
+}
+
 # check_alone <name>: run closeout-check.sh alone on the fixture with the standard options and keep its output.
 check_alone() {
   std_run
@@ -529,9 +543,7 @@ want steps-all \
 steps_std
 assert_case steps-all 0 steps-all
 check_prefix_eq steps-all
-refs_want "$TEST_TMP/want-refs-steps-all" 0 0 "$FX_S" 0
-refs_actual "$TEST_TMP/got-refs-steps-all"
-assert_file_eq "steps-all refs" "$TEST_TMP/want-refs-steps-all" "$TEST_TMP/got-refs-steps-all"
+assert_refs steps-all 0 0 "$FX_S" 0
 
 # Step case 2: -e is accepted and ignored in this todo. One clean runner worktree, otherwise as case 1.
 new_case steps-epic
@@ -608,9 +620,7 @@ want steps-x-local-gone "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in
   "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7"
 steps_std -x "$FX_RECON"
 assert_case steps-x-local-gone 0 steps-x-local-gone
-refs_want "$TEST_TMP/want-refs-steps-x-local-gone" 0 0 "$FX_S" 0
-refs_actual "$TEST_TMP/got-refs-steps-x-local-gone"
-assert_file_eq "steps-x-local-gone refs" "$TEST_TMP/want-refs-steps-x-local-gone" "$TEST_TMP/got-refs-steps-x-local-gone"
+assert_refs steps-x-local-gone 0 0 "$FX_S" 0
 
 # Step case 8: with -x, a reconcile worktree on its own local branch and a reconcile child. The reconcile worktree,
 # its child and the reconcile branch are removed after the runner side, then the branch on origin, then main.
@@ -631,9 +641,7 @@ want steps-x-full "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origi
   "OK fast-forward: main at $S7"
 steps_std -x "$FX_RECON"
 assert_case steps-x-full 0 steps-x-full
-refs_want "$TEST_TMP/want-refs-steps-x-full" 0 0 "$FX_S" 0
-refs_actual "$TEST_TMP/got-refs-steps-x-full"
-assert_file_eq "steps-x-full refs" "$TEST_TMP/want-refs-steps-x-full" "$TEST_TMP/got-refs-steps-x-full"
+assert_refs steps-x-full 0 0 "$FX_S" 0
 
 # Step case 9 (stub check): the branch is already gone from origin. The check is the stub, so the steps alone decide.
 new_case steps-origin-gone
@@ -643,9 +651,7 @@ want steps-origin-gone "OK check: stub" "OK remove-worktree: $FX_WT" "OK delete-
   "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
 steps_stub
 assert_case steps-origin-gone 0 steps-origin-gone
-refs_want "$TEST_TMP/want-refs-steps-origin-gone" 0 0 "$FX_S" 0
-refs_actual "$TEST_TMP/got-refs-steps-origin-gone"
-assert_file_eq "steps-origin-gone refs" "$TEST_TMP/want-refs-steps-origin-gone" "$TEST_TMP/got-refs-steps-origin-gone"
+assert_refs steps-origin-gone 0 0 "$FX_S" 0
 
 # Step case 10 (stub check): a re-run after a partial run. The worktree, the local branch and the origin branch are
 # all gone; the absent and already gone lines are printed and the fast-forward is still done.
@@ -659,9 +665,7 @@ want steps-rerun "OK check: stub" "OK remove-worktree: $FX_WT absent" \
   "OK fast-forward: main at $S7"
 steps_stub
 assert_case steps-rerun 0 steps-rerun
-refs_want "$TEST_TMP/want-refs-steps-rerun" 0 0 "$FX_S" 0
-refs_actual "$TEST_TMP/got-refs-steps-rerun"
-assert_file_eq "steps-rerun refs" "$TEST_TMP/want-refs-steps-rerun" "$TEST_TMP/got-refs-steps-rerun"
+assert_refs steps-rerun 0 0 "$FX_S" 0
 
 # Step case 11: the runner worktree is locked, so its removal fails first. Nothing has changed and the run stops.
 new_case steps-remove-fails
@@ -705,9 +709,7 @@ want_green steps-origin-refuses "OK worktree: $FX_WT clean" "OK remove-worktree:
   "FAIL steps: stopped, later steps not run"
 steps_std
 assert_case_step steps-origin-refuses 1 steps-origin-refuses delete-branch-origin
-refs_want "$TEST_TMP/want-refs-steps-origin-refuses" 0 1 "$_main0" 0
-refs_actual "$TEST_TMP/got-refs-steps-origin-refuses"
-assert_file_eq "steps-origin-refuses refs" "$TEST_TMP/want-refs-steps-origin-refuses" "$TEST_TMP/got-refs-steps-origin-refuses"
+assert_refs steps-origin-refuses 0 1 "$_main0" 0
 
 # Step case 14: root main has a commit that origin/main lacks, so the fast-forward fails after the deletions.
 new_case steps-ff-fails
@@ -719,9 +721,7 @@ want_green steps-ff-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_W
   "FAIL fast-forward: <git error>" "FAIL steps: stopped, later steps not run"
 steps_std
 assert_case_step steps-ff-fails 1 steps-ff-fails fast-forward
-refs_want "$TEST_TMP/want-refs-steps-ff-fails" 0 0 "$_main0" 0
-refs_actual "$TEST_TMP/got-refs-steps-ff-fails"
-assert_file_eq "steps-ff-fails refs" "$TEST_TMP/want-refs-steps-ff-fails" "$TEST_TMP/got-refs-steps-ff-fails"
+assert_refs steps-ff-fails 0 0 "$_main0" 0
 
 # Steps usage errors (exit 2): each missing required option, an unknown option, and each option with no value.
 new_case steps-usage

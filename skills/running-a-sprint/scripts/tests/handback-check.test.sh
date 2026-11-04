@@ -287,6 +287,13 @@ make_origin_clone "$TEST_TMP/stale-explicit" 5 || exit 2
 advance_origin "$TEST_TMP/stale-explicit" 2 || exit 2
 check_branch branch-explicit-base "$TEST_TMP/stale-explicit" 1 "FAIL branch: behind 2, ahead 5" -b origin/main
 
+# Case 10d2: the local origin/main is behind by exactly one commit. origin advanced by one, and the
+# branch has three commits on top of the fork point. Only a fetch makes origin/main one commit ahead:
+# behind 1, ahead 3. The behind boundary (behind > 0 fails) is exercised at 1, not only at 2.
+make_origin_clone "$TEST_TMP/behind1" 3 || exit 2
+advance_origin "$TEST_TMP/behind1" 1 || exit 2
+check_branch branch-behind-one "$TEST_TMP/behind1" 1 "FAIL branch: behind 1, ahead 3"
+
 # Case 10e: a base ref without a slash names no remote, so it is a usage error: exit 2, usage message
 # on stderr, nothing on stdout. The all-good document is written so a script that ignores the error
 # would print OK lines and exit 0.

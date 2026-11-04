@@ -5,7 +5,8 @@
 # issue, epic and flaky-run lines.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
 # of a local bare origin under the test temp directory.
-# CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail).
+# CLOSEOUT_CHECK=<path> substitutes another script (used to prove a test can fail). When it is exported, the
+# steps cases in group 2 run the substituted check too, because closeout-steps.sh reads it as well.
 # shellcheck source=SCRIPTDIR/lib.sh
 . "$(dirname "$0")/lib.sh"
 
@@ -548,13 +549,15 @@ usage_case relative-root -r root -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX"
 new_case probe-fails
 mkdir "$TEST_TMP/probe-bin" || exit 2
 _rg=$(command -v git) || exit 2
+# The real git path reaches the wrapper through CLOSEOUT_TEST_REAL_GIT in the environment, not in the wrapper text,
+# so a path with spaces or quotes needs no quoting in the generated file.
 # shellcheck disable=SC2016 # the single-quoted lines are wrapper source text; their $ expand when the wrapper runs.
-printf '%s\n' '#!/bin/sh' 'for _a in "$@"; do' '  if [ "$_a" = ls-remote ]; then exit 128; fi' 'done' > "$TEST_TMP/probe-bin/git" || exit 2
-printf 'exec %s "$@"\n' "$_rg" >> "$TEST_TMP/probe-bin/git" || exit 2
+printf '%s\n' '#!/bin/sh' 'for _a in "$@"; do' '  if [ "$_a" = ls-remote ]; then exit 128; fi' 'done' \
+  'exec "$CLOSEOUT_TEST_REAL_GIT" "$@"' > "$TEST_TMP/probe-bin/git" || exit 2
 chmod +x "$TEST_TMP/probe-bin/git" || exit 2
 want probe-fails "OK merged: $FX_S" "NOTE fetch: ran git fetch origin main" "FAIL ancestry: fetch failed" \
   "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
-PATH="$TEST_TMP/probe-bin:$PATH" sh "$SCRIPT" -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" \
+CLOSEOUT_TEST_REAL_GIT=$_rg PATH="$TEST_TMP/probe-bin:$PATH" sh "$SCRIPT" -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" \
   >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
 assert_case probe-fails 1 probe-fails
@@ -1040,6 +1043,13 @@ write_epic 400 "  - [x] #427 the story"
 want_done steps-epic-indented "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
 steps_std -e 400
 assert_case steps-epic-indented 0 steps-epic-indented
+
+# Epic line: a tab is leading white space too, so a tab-indented box prints [x] (the old space-only anchor missed it).
+new_case steps-epic-tab-indented
+write_epic 400 "$(printf '\t- [x] #427 the story')"
+want_done steps-epic-tab-indented "OK issue: #427 CLOSED" "OK epic: #400 [x] #427" "OK flaky: 0"
+steps_std -e 400
+assert_case steps-epic-tab-indented 0 steps-epic-tab-indented
 
 # Flaky count: distinct head SHAs with both a failure and a success run. Zero, one and two shas, and the runs of
 # one sha counted once.

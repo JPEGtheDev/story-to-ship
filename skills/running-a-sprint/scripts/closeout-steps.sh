@@ -10,10 +10,9 @@
 #   4. fast-forward: root main to origin/main with --ff-only.
 # After the steps, three reads print one line each, in this order:
 #   issue: OK issue: #<issue> <state>, the state from gh issue view.
-#   epic: only with -e. The first line of the epic body that holds a checkbox (- [x], - [X] or - [ ]) and names
-#     #<issue> as a whole number prints OK epic: #<epic> [x] #<issue> or [ ]; no such line prints
-#     FAIL epic: #<epic> has no line naming #<issue>. The checkbox must start the line (after optional leading
-#     spaces), and the line counts only when the first #<number> after the box is #<issue>.
+#   epic: only with -e. The first line of the epic body whose checkbox (- [x], - [X] or - [ ]) starts the line
+#     after optional spaces or tabs, and whose first #<number> after the box is #<issue> as a whole number, prints
+#     OK epic: #<epic> [x] #<issue> or [ ]; no such line prints FAIL epic: #<epic> has no line naming #<issue>.
 #   flaky: OK flaky: <count>, the distinct head SHAs of <branch> that have both a run with conclusion failure
 #     and a run with conclusion success in gh run list (other conclusions, such as startup_failure, do not count).
 # A read whose gh call exits non-zero or prints invalid JSON prints FAIL <read>: gh failed, and the other reads
@@ -232,14 +231,14 @@ read_issue() {
 }
 
 # epic_box: read the epic body on stdin and print the checkbox of the first line that starts with a checkbox
-# (- [x], - [X] or - [ ], after optional leading spaces) whose first #<number> after the box is #<issue>. The
-# number is compared as a whole digit run, so #4270 does not match 427. Prints nothing when no line does.
+# (- [x], - [X] or - [ ], after optional leading spaces or tabs) whose first #<number> after the box is #<issue>.
+# The number is compared as a whole digit run, so #4270 does not match 427. Prints nothing when no line does.
 epic_box() {
   awk -v n="$ISSUE" '
 {
-  if (match($0, /^ *- \[[xX]\]/)) {
+  if (match($0, /^[ \t]*- \[[xX]\]/)) {
     b = "[x]"
-  } else if (match($0, /^ *- \[ \]/)) {
+  } else if (match($0, /^[ \t]*- \[ \]/)) {
     b = "[ ]"
   } else {
     next

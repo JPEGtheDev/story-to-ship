@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fixture tests for closeout-check.sh (cases 1-32) and closeout-steps.sh (group 2): the merged, fetch NOTE,
+# Fixture tests for closeout-check.sh (cases 1-36) and closeout-steps.sh (group 2): the merged, fetch NOTE,
 # ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
 # an unchanged-repositories check, and the steps' removal, deletion, fast-forward and refusal paths.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
@@ -20,6 +20,8 @@ FX_RECON=s427-t6-rc
 
 # NOTE_FETCH: the fetch line printed after the merged line in every run, for the fixture branch.
 NOTE_FETCH="NOTE fetch: ran git fetch origin main $FX_BRANCH"
+# NOTE_GONE: the fetch line when the branch is not on origin (the host deleted it), so only main was fetched.
+NOTE_GONE="NOTE fetch: ran git fetch origin main; $FX_BRANCH is not on origin"
 # PATCH_OK: the patch line when the squash and the branch diff are equal.
 PATCH_OK='OK patch: squash equals branch diff'
 
@@ -390,6 +392,46 @@ want_green later-main "OK worktree: $FX_WT clean"
 std_run
 assert_case later-main 0 later-main
 
+# Case 33: the host deleted the branch on origin, the local branch and the runner worktree remain. The branch is
+# not fetched, the NOTE says so, and the local tip still matches the squash, so every line is OK.
+new_case origin-gone-local-kept
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+want origin-gone-local-kept "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+  "$PATCH_OK" "OK worktree: $FX_WT clean"
+std_run
+assert_case origin-gone-local-kept 0 origin-gone-local-kept
+
+# Case 34: the branch is gone from origin and the local branch (with its runner worktree) is gone too. No tip exists,
+# so the patch line says branch tip not found; ancestry is still OK.
+new_case origin-gone-local-gone
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
+git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
+want origin-gone-local-gone "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+  "FAIL patch: branch tip not found" "OK worktree: $FX_WT absent"
+std_run
+assert_case origin-gone-local-gone 1 origin-gone-local-gone
+
+# Case 35: the branch is gone from origin and -x is given, so the patch tip is origin/<branch>. The stale
+# remote-tracking ref is removed here, as a prune would remove it, so the tip is not found; ancestry is OK.
+new_case origin-gone-x
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+git_c "$FX_ROOT" update-ref -d "refs/remotes/origin/$FX_BRANCH" || exit 2
+want origin-gone-x "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+  "FAIL patch: branch tip not found" "OK worktree: $FX_WT clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
+std_run -x "$FX_RECON"
+assert_case origin-gone-x 1 origin-gone-x
+
+# Case 36: origin still has the branch, but its main ref is gone, so the main fetch fails while the branch probe
+# succeeds. The fetch failure is reported as before: ancestry and patch both say fetch failed.
+new_case main-gone-on-origin
+git -C "$FX_ORIGIN" update-ref -d refs/heads/main || exit 2
+want main-gone-on-origin "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
+  "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
+std_run
+assert_case main-gone-on-origin 1 main-gone-on-origin
+
 # Group 2: closeout-steps.sh. CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs
 # closeout-check.sh next to itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub
 # that prints one OK line.
@@ -595,14 +637,15 @@ assert_case steps-root-branch 1 steps-root-branch
 check_prefix_eq steps-root-branch
 steps_compare steps-root-branch "$TEST_TMP/before-steps-root-branch"
 
-# Step case 6: a second run on the fully closed-out state. The branch is gone from origin, so the check's fetch
-# of the branch fails (ancestry and patch both say fetch failed); the run is refused and changes nothing.
+# Step case 6: a second run on the fully closed-out state. The branch is gone from origin and locally, so the check
+# does not fetch it (NOTE says so), ancestry is OK and the patch finds no branch tip; the run is refused and
+# changes nothing.
 new_case steps-second-run
 steps_prefetch
 steps_std
 assert_exit "steps-second-run first exit" 0 "$RC"
-want steps-second-run "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
-  "FAIL patch: fetch failed" "OK worktree: $FX_WT absent" "FAIL steps: refused, close-out check failed"
+want steps-second-run "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+  "FAIL patch: branch tip not found" "OK worktree: $FX_WT absent" "FAIL steps: refused, close-out check failed"
 steps_snapshot "$TEST_TMP/before-steps-second-run" || exit 2
 steps_std
 assert_case steps-second-run 1 steps-second-run
@@ -722,6 +765,18 @@ want_green steps-ff-fails "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_W
 steps_std
 assert_case_step steps-ff-fails 1 steps-ff-fails fast-forward
 assert_refs steps-ff-fails 0 0 "$_main0" 0
+
+# Step case 15: the real check (no stub). The host deleted the branch on origin; the local branch and the runner
+# worktree remain. The check passes with the not-on-origin NOTE, then every step runs and the branch is already gone.
+new_case steps-origin-gone-real
+steps_prefetch
+git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
+want steps-origin-gone-real "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
+  "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7"
+steps_std
+assert_case steps-origin-gone-real 0 steps-origin-gone-real
+assert_refs steps-origin-gone-real 0 0 "$FX_S" 0
 
 # Steps usage errors (exit 2): each missing required option, an unknown option, and each option with no value.
 new_case steps-usage

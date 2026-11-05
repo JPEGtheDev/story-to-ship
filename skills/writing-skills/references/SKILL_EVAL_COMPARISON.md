@@ -28,15 +28,15 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 
 ## c. Cases and Checkouts
 
-1. Cases live in `evals/`: `prompt.md` plus `graders/*.md` per case. Each case has one rule.
+1. Cases live in `evals/`: each case folder holds `prompt.md`, `graders/*.md`, `case.yaml` and `scaffold.sh`. `scaffold.sh` builds the small test repository the case runs in. Each case has one rule.
 2. Both checkouts must hold identical `evals/` directories. Run `diff -r -x results <old-path>/evals <new-path>/evals`. Continue only when it prints nothing and exits 0.
 
 ## d. Steps
 
 1. Make the old checkout: `git worktree add <old-path> <base-commit>`, where `<base-commit>` is the commit before the edit. Keep the edited tree as the new checkout at `<new-path>`.
 2. Run the old checkout:
-   `claude plugin eval <old-path> --runs 5 --model <model> --judge-model <judge-model> --ablation none --no-publish --max-cost-usd <ceiling> --json <old.json>`
-3. Run the same command on `<new-path>` with `--json <new.json>`. Keep the same `--runs`, `--model`, and `--judge-model` on both.
+   `claude plugin eval <old-path> --runs 5 --model <model> --judge-model <judge-model> --ablation none --scaffold --allow-tools Edit --no-publish --max-cost-usd <ceiling> --json <old.json>`
+3. Run the same command on `<new-path>` with `--json <new.json>`. Keep the same `--runs`, `--model`, `--judge-model`, `--scaffold`, and `--allow-tools Edit` on both.
 4. Join and print the per-case scores and the difference. Every case must appear in both files; the join silently skips a case that is missing from new.json:
    `jq -n --slurpfile o <old.json> --slurpfile n <new.json> '[ $o[0].cases[] as $a | ($n[0].cases[] | select(.name==$a.name)) as $b | {case:$a.name, old:$a.aggregates.score, new:$b.aggregates.score, diff:($b.aggregates.score-$a.aggregates.score)} ]'`
 5. A negative `diff` is a drop.
@@ -48,6 +48,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 
 1. `--ablation none`: the default compares the plugin against no plugin and makes `tool_used: Skill` graders display-only. A comparison between two plugin versions needs those graders to count. The flag also halves the spend.
 2. `--no-publish`: keeps the HTML report local.
+3. `--scaffold --allow-tools Edit`: `--scaffold` runs each case's `scaffold.sh` so the case has its test repository; without it the case runs in an empty folder. `--allow-tools Edit` lets the session-start case edit its README. Both are operator grants and are part of the owner's consent for the run.
 
 ## f. Failure Outcomes
 

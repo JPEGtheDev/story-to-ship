@@ -66,8 +66,8 @@ A launch card also states, for each story it names:
 ## Pilot check card
 
 - **Fields.** A pilot check card carries the usual required fields. Its question names the pilot story and its pull request number, the failed launcher check, the missing required lines, or both, and the decision the owner needs. Its options are the owner's answers, and its recommendation is the launcher's.
-- **Release.** For a failed launcher verification check, the owner's answer to that card releases the pilot hold, as [PILOT.md](PILOT.md) states, and the launcher writes the pilot line as "released"; a resume alone releases nothing. This holds when the hand-back also lacks required lines: the failed check governs, the card lists the missing lines, and the runner is not resumed. For a missing required line with no failed check, the owner's answer does not release the hold, except an answer that merges or drops the pilot, as [PILOT.md](PILOT.md) states; otherwise the pilot is resumed and must hand back again and pass.
-- **Removal.** The card is removed from the page when the owner's answer has been acted on, or when a later PR ready hand-back of the pilot passes its checks.
+- **Release.** The pilot line value that follows the owner's answer to a pilot check card is in the table in [PILOT.md](PILOT.md).
+- **Removal.** The card is removed from the page when the owner's answer has been acted on, or when a later PR ready hand-back of the pilot passes its checks. The pilot line value that follows is in the table in [PILOT.md](PILOT.md).
 
 ## Context section
 

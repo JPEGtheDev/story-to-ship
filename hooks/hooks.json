@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\""
           }
         ]
       }
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-message-gates.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/pre-message-gates.sh\""
           }
         ]
       },
@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-message.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/pre-message.sh\""
           }
         ]
       }
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "BOOTSTRAP_GATE_MODE=deny ${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-pre.sh"
+            "command": "BOOTSTRAP_GATE_MODE=deny \"${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-pre.sh\""
           }
         ]
       },
@@ -42,7 +42,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/workflow-model-guard.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/workflow-model-guard.sh\""
           }
         ]
       },
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/shell-write-guard.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/shell-write-guard.sh\""
           }
         ]
       },
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/inline-edit-guard.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/inline-edit-guard.sh\""
           }
         ]
       }
@@ -71,7 +71,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "BOOTSTRAP_GATE_MODE=deny ${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-post.sh"
+            "command": "BOOTSTRAP_GATE_MODE=deny \"${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-post.sh\""
           }
         ]
       }

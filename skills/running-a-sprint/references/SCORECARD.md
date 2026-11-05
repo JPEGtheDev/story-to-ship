@@ -84,6 +84,45 @@ Run `python3 tools/tier_usage/tier_usage.py "$D"` at close-out. D is the launche
 
 Read the figures as follows. Cost is in tokens, and dollars print only when tools/tier_usage/tiers.json holds rates. The est_output_tokens column is estimated, because transcripts record placeholder output counts. A dispatch whose description names no todo is counted in the unattributed column when it is an implementer, spec-compliance-reviewer, code-quality-reviewer or skill-reviewer dispatch, and left out of fix rounds (the passes in which a not-passed review sends the todo back to an implementer, the avg_fix_rounds column) and the first-pass Stage 1 rate, so read every rate next to its unattributed count. The input_side_tokens column adds input, cache-write and cache-read tokens without weights and leaves output out. The cost_per_todo_tokens and cost_per_todo_usd columns divide each tier's figure by the runner's whole todo count, so the per-tier figures add up to the runner's per-todo cost. A todo whose first Stage 1 verdict is unreadable is left out of the first-pass rate, so check the per-dispatch rows for first_stage1_pass holding unreadable before treating a low rate as review failures.
 
+## Owner change and CI counts
+
+### Needed owner change and class
+
+A merged sprint PR needed an owner change when, after it was marked ready, any of three things happened: a review comment led to a commit on the PR, a questions-page answer about the PR was logged in the sprint ledger, or the owner asked for a follow-up story within 7 days of the merge. A change after the row is written amends that row in place; never append a second row for the same PR. A reverted PR still counts as merged, and the revert is an owner change. When a GitHub read fails, write "unknown" in the field; "unknown" counts nothing. A merged PR that has no row gets its row written late, at its merge-order position, and is excluded from the counts until then. Only sprint PRs closed out on or after the first row that carries the Needed owner change field count; there is no backfill.
+
+Each PR gets one class, chosen in this order: dependency when the author is Dependabot or Renovate or only manifest or lockfile paths changed; else CI when only paths under .github/ changed; else docs-only when every changed file is .md, .txt or under docs/; else code.
+
+The launcher writes the row itself at close-out from its sprint ledger, which logs each questions-page answer per PR. Every logged questions-page answer about the merged PR counts as yes, even though the Interventions cause bullet leaves out answers to relayed questions. When the launcher starts a new ledger, it first copies the Needed owner change rows into it, so counts and runs carry across sprints.
+
+### CI flaky and infra-killed runs
+
+At each close-out the launcher counts the CI runs of the repository from GitHub run history. A flaky run is one that failed and then passed on a rerun of the same commit, counted as a run with attempt above 1 and conclusion success. An infra-killed run is one whose conclusion is cancelled or timed out; concurrency cancellations count here too. Both counts are approximations of the rule, over a sliding window of the latest 400 runs, so a count can change when old runs age out; any change is reported. Run this command with <owner/repo> replaced by the repository:
+
+```bash
+gh run list --repo <owner/repo> --limit 400 --json attempt,conclusion | jq '{flaky:(map(select(.attempt>1 and .conclusion=="success"))|length), infra:(map(select(.conclusion=="cancelled" or .conclusion=="timed_out"))|length)}'
+```
+
+The launcher writes both counts into the scorecard row at every close-out. The previous count is the CI runs bullet of the last close-out's row for that repository. The launcher tells the owner only when a count differs from the previous count. With no previous row, or a previous row that reads unknown, it reports the count. When a gh read fails, the row reads unknown for both counts and nothing is reported.
+
+## Trust number
+
+The trust number reports, per repository and class, the merged sprint PRs and the share that needed an owner change. Set P to the launcher's sprint ledger, its plan.md. Only rows that match the row shape count: the value after "Needed owner change:" is yes, no or unknown, and the repository and class follow the forms in the Needed owner change and class section. The report lists, per repository and class, the merged sprint PRs (yes and no rows; unknown rows are left out) and the share that needed an owner change, written like "3 merged, 1 needed change (33%)"; an empty class reads "0 merged". The report always prints the counting command.
+
+```bash
+SED='s/^- Needed owner change: (yes|no|unknown); repository: ([^;<]+); class: (dependency|CI|docs-only|code)$/\2 \3 \1/p'
+sed -nE "$SED" "$P" | awk '$3!="unknown"{m[$1" "$2]++; if($3=="yes")c[$1" "$2]++} END{for(k in m) printf "%s merged %d changed %d\n",k,m[k],c[k]+0}'
+```
+
+The first command prints the merged and changed counts per repository and class. The second prints the current run of no rows per repository and class, taking rows in ledger order, which is merge order because a late row is placed at its merge-order position and an amended row stays in place. Unknown rows are skipped.
+
+```bash
+sed -nE "$SED" "$P" | awk '$3=="no"{r[$1" "$2]++} $3=="yes"{r[$1" "$2]=0} END{for(k in r) print k, r[k]}'
+```
+
+At the first close-out of each sprint, before trusting either counter, run each on an empty file, on a file holding one malformed row (capital letter) that must print nothing, and on a ledger holding rows for two repositories with an unknown row and a yes after no rows that must print one line per repository and class.
+
+A repository and class meets the bar when the second command prints a run of 10 or more for it; the run resets to 0 on a yes. That class meets the bar. At each close-out, after writing the row, the launcher runs the second command for the row's repository and class; when the bar is met it asks the owner whether to turn on auto-merge for that class. It never turns auto-merge on itself and never changes branch protection; the owner decides.
+
 ## Scorecard row
 
 Copy one row per runner into the sprint ledger.
@@ -99,9 +138,13 @@ Copy one row per runner into the sprint ledger.
 - Hand-back numbers confirmed in tool output: <n of 3>
 - Owner-reserved items decided without a question: <n>; owner questions relayed: <n>
 - Interventions cause: <one entry per owner intervention after the first PR ready hand-back (change request, follow-up issue for a defect, reopened story; an answer to a relayed owner question is not one), each marked "missed requirement" (the owner's message names behavior that no acceptance criterion or Discovery rule of the story covered; Discovery is the runner's three-amigos requirements step) or "other" (including behavior a criterion covered that the PR did not meet); the launcher records each entry in the runner's ledger entry when the owner's message arrives and adds it to this row, amending a row already written at close-out; none when there was none>
+- Needed owner change: <yes, no or unknown>; repository: <owner/repo>; class: <dependency, CI, docs-only or code>
+- CI runs for this repository: flaky <n>, infra-killed <n>, or unknown
 - Reconciles: <PRs reconciled>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; cost <tokens>; owner questions <n>
 - Launcher turns on relay and monitoring (sprint-wide, recorded once per sprint): <n>; missing child transcripts: <n>
 - Runner tokens per segment: <list, none for a segment that ended in a failure notice>
 - Per-tier usage: <the summary lines for this runner, from the section above>
 - Correction-source ratio: <ratio> from <count> corrections
 - What to change: <one line>
+
+Interventions cause stays as the detail behind the yes in Needed owner change.

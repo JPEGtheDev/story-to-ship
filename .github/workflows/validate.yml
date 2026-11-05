@@ -433,6 +433,8 @@ jobs:
           checkx agents/story-coordinator.md '## Reconcile'
           check agents/story-coordinator.md '--force-with-lease' 'Reconcile record' 'Reconcile: merged PR' 'fresh count of 3' 'files read' 'rev-parse origin/<branch>' 'each statement that now contradicts another statement' 'worktree add .worktrees/{{WORKTREE_PREFIX}} -b reconcile-{{WORKTREE_PREFIX}}' 'never replace an earlier one' 'Reconcile text (it names a merged PR' 'origin HEAD:<branch>' 'for a mechanical reason'
           check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()' 'Reconciles (per merge that triggered one)' 'Reconciles: <PRs reconciled>' 'one `Reconciles:` entry per reconcile'
+          check skills/running-a-sprint/references/SCORECARD.md '- Needed owner change: <yes, no or unknown>; repository:' '- CI runs for this repository: flaky <n>' 'That class meets the bar.'
+          checkx skills/running-a-sprint/references/SCORECARD.md '## Trust number'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing reconcile contract string(s)"
             exit 1
@@ -1163,6 +1165,26 @@ jobs:
           sh skills/subagent-driven-development/scripts/tests/run.sh
           echo "[+] role-boundary detector and plan-marker fixtures pass"
 
+      - name: Shellcheck running-a-sprint scripts
+        run: |
+          shellcheck -x skills/running-a-sprint/scripts/handback-check.sh
+          shellcheck -x skills/running-a-sprint/scripts/closeout-check.sh
+          shellcheck -x skills/running-a-sprint/scripts/closeout-steps.sh
+          shellcheck -x skills/running-a-sprint/scripts/page-edit.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/lib.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/run.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/run.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/closeout.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/handback-check.test.sh
+          shellcheck -x skills/running-a-sprint/scripts/tests/page-edit.test.sh
+          echo "[+] running-a-sprint scripts pass shellcheck"
+
+      - name: Run running-a-sprint script tests
+        run: |
+          set -e
+          sh skills/running-a-sprint/scripts/tests/run.sh
+          echo "[+] running-a-sprint script tests pass"
+
       - name: Check the detector in the reference matches the shipped script
         run: |
           set -e
@@ -1192,6 +1214,36 @@ jobs:
             exit 1
           fi
           echo "[+] plan-check instruction strings present"
+
+      - name: Check red CI classification strings
+        run: |
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          if ! grep -qxF -- '## Red CI' agents/story-coordinator.md; then
+            echo "FAILED: agents/story-coordinator.md has no line equal to: ## Red CI"
+            missing=$((missing + 1))
+          fi
+          check agents/story-coordinator.md 'Classify a red CI check on the pull request head before it costs a fix round or a retry.' 'Own code: the failure is in code the branch changed.' 'Stale base: the base moved and the failure is in code the branch did not touch.' 'Infrastructure: the job died before any test ran, or a service outside the repository failed.' 'Merge origin/main into the branch after the pull request is open, push without force, and wait for CI again.' 'A stale base is not a fix round. Record each stale base merge in the Red CI log.' 'At most 2 stale base merges run per story' 'a third red CI classed as stale base is a hand-back of kind blocked naming the failing check.' 'Take one fresh run by hand with' 'a second infrastructure class on the same head is own code' 'A second failure with the same job name and the same first failing error line is reclassified as own code' 'When the runner has no permission to re-run the job, it hands back kind blocked and reports that instead.' 'Any red CI that fits none of these classes is own code.' 'only an own code failure is a fix round of this reconcile'
+          check skills/two-stage-review/SKILL.md 'is not a fix round; one classed as own code is, and it is charged like a finding'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md "Classify a red CI as the story-coordinator template's Red CI section says before fixing it"
+          if grep -qF -- '- CI failing on the updated head is also a fix round.' agents/story-coordinator.md; then
+            echo "FAILED: agents/story-coordinator.md still counts every red CI on the updated head as a fix round"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing red CI classification string(s)"
+            exit 1
+          fi
+          echo "[+] red CI classification strings present"
 
       - name: Check Discovery line rule strings
         run: |

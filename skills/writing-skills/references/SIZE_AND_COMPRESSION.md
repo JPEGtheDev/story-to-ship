@@ -33,6 +33,7 @@ When SKILL.md exceeds its ideal max:
    - No cuttable content found -> the skill is at minimum functional size. Report: "All criteria pass. Size exceeds ideal max because [specific enforcement content]. Options: accept current size, split by domain, or remove [specific candidate] with confirmation. Decision required." Do NOT continue compression attempts.
 
 Token estimate: `chars / 4` is a reliable approximation for technical Markdown.
+Before and after a shortening, record the skill's on-invoke token cost from `claude plugin details` as `SKILL_EVAL_COMPARISON.md` describes.
 
 **Check before shipping:**
 ```bash

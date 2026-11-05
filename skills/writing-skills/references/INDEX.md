@@ -1,6 +1,6 @@
 ---
 title: "writing-skills References Index"
-description: "Index of all reference files for the writing-skills skill -- skill anatomy schemas, voice and authority rules, size constraints, model compatibility notes, review instructions, dispatch pattern, tiered reference model, and reference index format."
+description: "Index of all reference files for the writing-skills skill -- skill anatomy schemas, voice and authority rules, size constraints, model compatibility notes, review instructions, dispatch pattern, tiered reference model, reference index format, and old-versus-new eval comparison."
 domain: skills
 subdomain: writing-skills
 tags: [skills, writing-skills, references, index]
@@ -26,6 +26,7 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 | `DISPATCH_PATTERN.md` | Step-by-step dispatch instructions for auditing skills; read before dispatching any skill-reviewer agent |
 | `TIERED_REFERENCE_MODEL.md` | How to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading |
 | `REFERENCE_INDEX_FORMAT.md` | Required format for `references/INDEX.md` files -- YAML frontmatter template, file table rules, Related section rules, and complete template; read before creating or updating any INDEX.md |
+| `SKILL_EVAL_COMPARISON.md` | Old-versus-new eval comparison before a skill is shortened or reworded -- `claude plugin eval` flags, consent and cost ceilings, the per-case score join, the no-drop rule, and recording on-invoke token cost with `claude plugin details` |
 
 ---
 

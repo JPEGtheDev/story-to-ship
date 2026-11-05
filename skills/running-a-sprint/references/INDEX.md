@@ -1,6 +1,6 @@
 ---
 title: "running-a-sprint References Index"
-description: "Index of reference files for the running-a-sprint skill -- the hand-back and runner-event routing table with the required hand-back lines, the hand-back size contract and the resume texts, and the hand-back check script handback-check.sh with its check lines, its inline and moved checks, and its exit codes, and the sprint scorecard with its predictions, measures table and counting commands, subagent-transcript audit, the per-tier usage close-out step, and per-runner scorecard row, and the coordinator rehearsal procedure with its fixture, arms, counting and result-reading rules, and the owner questions page with its Ready to merge section, card fields, layout, ledger fields, failure handling and worked example, the Editing the page section with the page editor script page-edit.sh, its operations and exit codes, the Working and Needs you status lines and the data-pr markers, the close-out check and steps scripts with their options, output lines and exit codes, and the Close-out step 7 reconcile of other open sprint PRs against a merged change with its Reconcile text hand-off, queueing and replacement-runner rules."
+description: "Index of reference files for the running-a-sprint skill -- the hand-back and runner-event routing table with the required hand-back lines, the hand-back size contract and the resume texts, and the hand-back check script handback-check.sh with its check lines, its inline and moved checks, and its exit codes, the pilot hold with its pilot line states and pilot hand-back checks, and the sprint scorecard with its predictions, measures table and counting commands, subagent-transcript audit, the per-tier usage close-out step, and per-runner scorecard row, and the coordinator rehearsal procedure with its fixture, arms, counting and result-reading rules, and the owner questions page with its Ready to merge section, card fields, layout, ledger fields, failure handling and worked example, the Editing the page section with the page editor script page-edit.sh, its operations and exit codes, the Working and Needs you status lines and the data-pr markers, the close-out check and steps scripts with their options, output lines and exit codes, and the Close-out step 7 reconcile of other open sprint PRs against a merged change with its Reconcile text hand-off, queueing and replacement-runner rules."
 domain: skills
 subdomain: running-a-sprint
 tags: [skills, running-a-sprint, references, index]
@@ -10,7 +10,7 @@ related:
 
 # running-a-sprint References Index
 
-These files back the Launch, Watch loop and Close-out sections of `../SKILL.md` (`RECONCILE.md` backs Close-out step 7), and `REHEARSAL.md` backs the check to repeat when the story-coordinator template they depend on changes.
+These files back the Capacity, Launch, Watch loop and Close-out sections of `../SKILL.md` (`PILOT.md` backs Capacity, `RECONCILE.md` backs Close-out step 7), and `REHEARSAL.md` backs the check to repeat when the story-coordinator template they depend on changes.
 
 ---
 
@@ -26,7 +26,7 @@ These files back the Launch, Watch loop and Close-out sections of `../SKILL.md` 
 | `OWNER_QUESTIONS.md` | The owner questions page: the one rolling page the launcher writes from runner hand-backs, which the owner reads and answers by chat or page comment but never edits; the Ready to merge section of statement entries (entry, verification line, optional checks, owner action, stale, waiting and removal rules); the question kinds that get a card, the card fields (number, story or topic, question, options, recommendation, status, plus the launch-card counts and overlap), the context section, the layout and question numbering with restarts, the chat line, the sprint ledger fields, failure handling for a missing, failed or stale page, owner comments, and a worked example; the Editing the page section with the page editor script `page-edit.sh`, its five operations, its exit codes, and the Working and Needs you status lines and the data-pr markers |
 | `owner-questions-template.html` | The starting HTML layout for the owner questions page: one style block and the sections header, Ready to merge, Open questions, Waiting on runners, not you, and Context, with one example entry, card and context section, and a {{NAME}} placeholder for every variable value |
 | `REHEARSAL.md` | The procedure for rehearsing the story-coordinator template as a coordinator under test: the purpose, the fixture to rebuild (it is not shipped), the GREEN and RED arms, how to run and count, how to read the result, and the limits |
-| `MOVED_RATIONALE.md` | Context and Forces pairs moved out of SKILL.md from the Intake, Capacity, Launch, Watch loop and Close-out sections. |
+| `MOVED_RATIONALE.md` | Context and Forces pairs moved out of SKILL.md from the Intake, Capacity, Launch, Watch loop and Close-out sections, and the Launch question owner text section (an operative rule, not a pair) moved out of SKILL.md Launch. |
 
 ---
 

@@ -1,5 +1,3 @@
+#!/usr/bin/env bash
 set -eu
-mkdir -p api web docs scripts
-for d in api web docs scripts; do
-  printf 'x\n' > "$d/README.txt"
-done
+for d in api web docs scripts; do mkdir -p "$d"; printf 'x\n' > "$d/README.txt"; done

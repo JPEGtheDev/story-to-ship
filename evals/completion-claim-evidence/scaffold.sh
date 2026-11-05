@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -eu
 mkdir -p docs/guides/archive src
 for n in alpha bravo charlie delta echo foxtrot golf; do

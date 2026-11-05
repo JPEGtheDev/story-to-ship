@@ -48,7 +48,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 
 1. `--ablation none`: the default compares the plugin against no plugin and makes `tool_used: Skill` graders display-only. A comparison between two plugin versions needs those graders to count. The flag also halves the spend.
 2. `--no-publish`: keeps the HTML report local.
-3. `--scaffold --allow-tools Edit`: `--scaffold` runs each case's `scaffold.sh` so the case has its test repository; without it the case runs in an empty folder. `--allow-tools Edit` lets the session-start case edit its README. Both are operator grants and are part of the owner's consent for the run.
+3. `--scaffold --allow-tools Edit`: `--scaffold` is an opt-in that runs each case's `scaffold.sh` so the case has its test repository (without it the case runs in an empty folder), and the test repository's answers differ from the plugin's own files, so a session that reads the plugin folder instead gets the wrong answer; `--allow-tools Edit` is an operator grant that lets the `session-bootstrap-first` case edit its README; both are part of the owner's consent for the run.
 
 ## f. Failure Outcomes
 

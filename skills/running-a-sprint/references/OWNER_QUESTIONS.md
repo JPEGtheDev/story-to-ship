@@ -23,6 +23,7 @@ Each of these question kinds gets a card:
 - **intake gap**: a story with no acceptance criteria, relayed under the intake rule.
 - **blocked without criteria**: a blocked hand-back whose reason is a story with no acceptance criteria and that the owner must route.
 - **reconcile question**: a reconcile that needs the owner's answer before it can run or finish.
+- **pilot check card**: a card put on the page when a pilot runner's PR ready hand-back fails a launcher verification check or a required-line check.
 
 A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge section.
 
@@ -61,6 +62,12 @@ A launch card also states, for each story it names:
 
 **Context:** A card is a launch card or any other kind of question, and each kind carries a different set of required fields.
 **Forces:** A launch card without its counts turns the owner's "go" into an approval the launcher has to interpret, while extra counts on any other card bury the one decision the owner has to make.
+
+## Pilot check card
+
+- **Fields.** A pilot check card carries the usual required fields. Its question names the pilot story and its pull request number, the failed launcher check or the missing required lines, and the decision the owner needs. Its options are the owner's answers, and its recommendation is the launcher's.
+- **Release.** The owner's answer to a pilot check card releases the pilot hold, as [PILOT.md](PILOT.md) states. The release rules stay in that file; a resume alone releases nothing.
+- **Removal.** The card is removed from the page when the owner answers it, or when a later PR ready hand-back of the pilot passes its checks.
 
 ## Context section
 

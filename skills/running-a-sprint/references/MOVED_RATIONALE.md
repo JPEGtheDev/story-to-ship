@@ -1,6 +1,11 @@
 # Moved Rationale
 
-One Context and Forces pair from each of four sections of `../SKILL.md` (Capacity and Launch keep their other pair there), moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second.
+One Context and Forces pair from each of five sections of `../SKILL.md` (Capacity and Launch keep their other pair there), moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second.
+
+## Intake
+
+**Context:** A story with no acceptance criteria reaches intake.
+**Forces:** A runner that starts without criteria invents them, and the owner then reviews a PR built on criteria nobody agreed to. Holding back one story costs that story a delay; the other stories lose nothing.
 
 ## Capacity
 

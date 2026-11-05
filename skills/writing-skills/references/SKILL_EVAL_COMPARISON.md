@@ -25,6 +25,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 3. Consent for one run does not cover a rerun or a changed command. Ask again.
 4. The comparison has two runs, one per checkout. Each run gets its own ceiling. The total is twice the ceiling.
 5. If consent is withheld, no run happens. Do not ship the change on the strength of this procedure.
+6. `--scaffold` runs each case's `scaffold.sh` as bash on the machine as the user running the command. Run evals only on code you have read, including every `scaffold.sh` in both checkouts.
 
 ## c. Cases and Checkouts
 
@@ -49,6 +50,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 1. `--ablation none`: the default compares the plugin against no plugin and makes `tool_used: Skill` graders display-only. A comparison between two plugin versions needs those graders to count. The flag also halves the spend.
 2. `--no-publish`: keeps the HTML report local.
 3. `--scaffold --allow-tools Edit`: `--scaffold` is an opt-in that runs each case's `scaffold.sh` so the case has its test repository (without it the case runs in an empty folder), and the test repository's answers differ from the plugin's own files, so a session that reads the plugin folder instead gets the wrong answer; `--allow-tools Edit` is an operator grant that lets the `session-bootstrap-first` case edit its README; both are part of the owner's consent for the run.
+4. Model tiers: run the sessions at the Economy tier and the judge at the Standard tier (`--model` and `--judge-model`), the same on both checkouts. The tiers are defined in the Model Selection section of the subagent-driven-development skill; this note names tiers only, so the procedure does not change when a model name does.
 
 ## f. Failure Outcomes
 
@@ -74,3 +76,6 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 2. A case that scores the same with and without the plugin (the completion-claim case is one) does not prove the skill text matters.
 3. A passing comparison shows no measured drop. It does not show the text is unneeded.
 4. The join reads cases[].aggregates.score; check that field exists in the first --ablation none output before trusting the table.
+5. Coverage: each eval case exercises one rule: `session-bootstrap-first` the first-tool-is-session-bootstrap rule, `completion-claim-evidence` the rule that a completion claim carries its evidence, `dispatch-passes-model` the rule that an Agent dispatch passes a model. A skill with no case gets no result from this procedure: a passing comparison says nothing about it.
+6. What each case does and does not show: `completion-claim-evidence` scored the same with and without the plugin in its recorded run, so it does not show that the plugin text matters. In the recorded run of `dispatch-passes-model`, the session without the plugin made no Agent call (the grader reported "Agent called 0x"), so that case's score does not measure whether the model was passed. `session-bootstrap-first` tests the hook text injected at session start and before the first prompt, not the skill body.
+7. A session can read the plugin folder: a session may open the plugin's own files instead of the test repository. The scaffolded repositories hold answers that differ from the plugin's files, so such a session scores wrong, but a case that does not check the answer (the dispatch and bootstrap cases) cannot catch it.

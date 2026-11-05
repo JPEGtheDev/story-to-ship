@@ -26,3 +26,7 @@ One Context and Forces pair from each of five sections of `../SKILL.md` (Capacit
 
 **Context:** The owner merged and the sprint feels finished.
 **Forces:** Each step removes state the next one needs or could be mistaken for, so the order is fixed: the patch comparison needs the runner branch tip, and a deleted branch loses it. A skipped step leaves a stale branch, worktree or conflict that surfaces on a later merge.
+
+## Launch question owner text
+
+Every launch question to the owner states, for each story it names, "working N of L" (N the working runners counted from the ledger re-read this turn, L the limit now in force), "held for the owner M (open PRs)" (M the sprint stories held for the owner or with an open, unmerged pull request, each counted once), and the story's file overlap under the rule below (the working runner, held runner or open-PR story whose list it overlaps; "none"; or "list absent, run alone"). A launch while N is at or above L happens only when the owner's answer names the new limit or names that over-limit launch for that story; "go", "launch it", silence and an answer to an intake gap do not. A named new limit is a ceiling, not a count of launches; record it in the ledger and state it as L in later questions.

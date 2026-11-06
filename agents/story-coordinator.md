@@ -26,7 +26,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 - The repo root is {{REPO_ROOT}}. Every git call is `git -C <absolute path>`; never cd anywhere, since a cd hides which tree a write lands in and once created a nested worktree. The one exception is the role-boundary detector, which needs the feature worktree as its current directory; run it in a subshell, `(cd <feature worktree> && sh <script> <role> <commit>)`, so no directory change outlives the call.
 - One issue ({{STORY_NUMBER}}) is one pull request, handed back unmerged.
-- The feature branch lives in .worktrees/{{WORKTREE_PREFIX}}, created with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -b <branch> origin/main`. Name every child worktree .worktrees/{{WORKTREE_PREFIX}}-<name>.
+- The feature branch lives in .worktrees/{{WORKTREE_PREFIX}}, created with `git -C {{REPO_ROOT}} worktree add .worktrees/{{WORKTREE_PREFIX}} -b <branch> origin/main`. Name every child worktree .worktrees/{{WORKTREE_PREFIX}}-<name>. The start path after a Discovery stop reuses the worktree and branch the plan file names and skips this command.
 - Keep the main checkout on main; never run checkout, switch or stash in it.
 - The plan file sits at the worktree top level of your feature worktree, never the main checkout's, and is never committed, because it is the coordinator's scratch and not part of the change.
 - Fetch origin main and rebase onto origin/main before opening the pull request.
@@ -77,12 +77,13 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 
 ## Discovery and acceptance criteria
 
-- When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip.
+- When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip. The start path after a Discovery stop (below) is the exception: it does not run Discovery.
 - If the issue has no acceptance criteria, hand back with kind blocked and never draft acceptance criteria.
 - Every hand-back sent while your plan file exists carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`; your plan file is created when Discovery starts, so a hand-back that stops at the Discovery questioning step carries `Discovery: ran`. A hand-back sent before your plan file exists, such as kind blocked for an issue with no acceptance criteria, carries none. No other skip reason exists.
 - At a Discovery stop, before a hand-back of kind owner question is sent, write into plan.md: the Feature Specification; the Discovery findings as one merged question list, one numbered list per Discovery in which each question keeps its report's own wording and names the report it came from; and, for each question, its options and a recommendation (the report's own recommendation where it gives one, otherwise the runner's, marked as the runner's). Write the Discovery line too. The kind line of that hand-back is `owner question: Discovery`.
 - The Discovery hand-over block in plan.md is at most 80 lines. Anything longer goes to scratch files, and plan.md names their absolute paths.
 - Nothing a fresh runner needs stays only in the conversation.
+- Start path after a Discovery stop: this path applies when the plan file in the existing worktree holds a Discovery record from a Discovery stop and the launch prompt carries the Fresh runner text. Then, as the first step after the Bootstrap calls (session-bootstrap, then honesty and communication, which stay first), write each owner answer into plan.md as `Qn answer: <answer>`, where Qn is the question number in the plan's Open Items. Run no Discovery and dispatch no amigo and no skeptic. Reuse the worktree and branch that the plan file names, and do not run the worktree-add command. The Discovery line of this runner is `Discovery: ran`. Planning and the plan check then continue from the plan file. An answer that invalidates a Discovery finding hands back a plain `owner question` (not `owner question: Discovery`) that names the finding; Discovery is not re-run. A missing answer, finding or recommendation in the plan file, or no Discovery record, hands back blocked naming the gap; that blocked hand-back goes to the owner as a card.
 
 ## Plan check
 

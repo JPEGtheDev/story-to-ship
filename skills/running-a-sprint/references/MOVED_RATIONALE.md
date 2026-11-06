@@ -1,6 +1,6 @@
 # Moved Rationale
 
-Context and Forces pairs from five sections of `../SKILL.md` (Capacity and Launch have two each), moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; it is an operative rule rather than a Context and Forces pair.
+Context and Forces pairs from five sections of `../SKILL.md` (Capacity and Launch have two each), moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; the Launch question owner text was later reworded from file overlap to the Depends On dependency. It is an operative rule rather than a Context and Forces pair.
 
 ## Intake
 

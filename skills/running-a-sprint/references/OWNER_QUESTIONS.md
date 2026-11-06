@@ -32,14 +32,15 @@ A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge s
 **Context:** A runner hands back a PR ready with nothing left for the owner to decide.
 **Forces:** A merge card asks the owner to choose between merge and hold on a fact the launcher has already verified, while a statement costs the owner one line to read and keeps the cards for real decisions.
 
-- **Placement.** The section has the heading "Ready to merge" and sits above the open question cards. Its entries are listed newest first.
+- **Placement.** The section has the heading "Ready to merge" and sits above the open question cards. Its entries are listed in the recommended merge order; the first entry is the PR next to merge.
 - **Entry.** One statement per merge-ready PR: the PR link, the story, one line on what the PR does, and the verification line. An entry has no question number, no options and no recommendation.
+- **Position.** Each entry carries "Merge order: <n> of <N>" and one line of reason. The recommended order is: first, a PR whose story depends on an open story merges after that story's PR (the dependency rule); then, among the rest, the PR with the fewest changed files comes first (the fewest-files rule, counted from `gh pr diff <n> --name-only`). The reason line states which rule placed the entry, or that it is the only entry when N is 1. An entry waiting on a reconcile keeps its place in this order, and its reason line also carries the reconcile-pending reason.
 - **Verification line.** One line, written by the launcher from its own `gh pr view <n> --json number,state,mergeable,headRefOid,statusCheckRollup,body` and its `gh pr view <n> --json isDraft`. It states the PR state, mergeable, the CI state on the head, whether the head equals the runner worktree head (`git -C <runner worktree> rev-parse HEAD` equals headRefOid), the closing keyword in the body, the footer in the body, that isDraft is false (the pull request is not a draft), the inline-edit comparison, and the reconcile checks in the PR ready row of `HANDBACK_ROUTING.md`.
 - **Optional checks.** The inline-edit comparison applies only when the runner made inline commits. The reconcile checks apply only when a reconcile was queued or sent. Every other check is required.
 - **Owner action.** The owner acts on an entry by saying "merged", either in chat or as a comment on the entry on the page. Entries have no number to answer by.
 - **Stale.** Before each republish the launcher re-runs `gh pr view` for every entry. When CI is not green or the head differs from the head last checked, the entry is removed and returns only after the PR ready checks in `HANDBACK_ROUTING.md` pass again. The re-run includes `gh pr view <n> --json isDraft`. A pull request that is a draft again (isDraft true) is removed the same way.
-- **Waiting.** A PR that also needs an owner decision (a scope change, a declined finding, a reconcile question) keeps a card for that decision only, and its entry is not on the page until the decision is made. A PR waiting on a reconcile has no entry until the reconcile checks pass. An entry's story counts as held for the owner, since it already has an open, unmerged PR.
-- **Removal.** An entry is removed when the owner reports the merge and the Close-out section of `../SKILL.md` has run. The removal is a page change like any other: republish, re-read, one chat line.
+- **Waiting.** A PR that also needs an owner decision (a scope change, a declined finding, a reconcile question) keeps a card for that decision only, and its entry is not on the page until the decision is made. A PR waiting on a reconcile keeps its entry and its place in the recommended order, marked with its reconcile-pending reason; a runner's PR ready hand-back is never held off the list by a queued reconcile, and the Reconcile text is sent when that PR is first. An entry's story counts as held for the owner, since it already has an open, unmerged PR.
+- **Removal.** An entry is removed when the owner reports the merge and the Close-out section of `../SKILL.md` has run. Next to merge for the reconcile of a merged PR is the first entry on the list once the merged PR's entry is removed; the Close-out section removes the merged entry. The removal is a page change like any other: republish, re-read, one chat line, and it runs the merge-order rebuild under Editing the page.
 
 ## Card fields
 
@@ -58,7 +59,7 @@ A launch card also states, for each story it names:
 
 - "working N of L", where N is the number of working runners counted from the ledger re-read this turn and L is the limit now in force.
 - "held for the owner M (open PRs)", where M is the number of sprint stories held for the owner or with an open, unmerged PR, each counted once.
-- The story's file overlap under the Capacity section of `../SKILL.md`: the working runner, held runner or open-PR story it overlaps, "none", or "list absent, run alone".
+- The story's dependency: the story its "Depends On" line names that is still open, or "none".
 
 **Context:** A card is a launch card or any other kind of question, and each kind carries a different set of required fields.
 **Forces:** A launch card without its counts turns the owner's "go" into an approval the launcher has to interpret, while extra counts on any other card bury the one decision the owner has to make.
@@ -78,9 +79,9 @@ A launch card also states, for each story it names:
 ## Layout
 
 - A new page starts from `owner-questions-template.html` in this directory. When the template and the prose rules in this file differ, the prose rules govern.
-- The Ready to merge section sits above the open question cards, and its entries are listed newest first.
+- The Ready to merge section sits above the open question cards, and its entries are listed in the recommended merge order.
 - Cards are listed newest first.
-- A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or overlap, with no question number, so the owner sees that nothing is needed from them.
+- A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or a dependency, with no question number, so the owner sees that nothing is needed from them.
 - A card is removed once its question is answered and the answer is acted on. Removing it before the action is done is a defect.
 - Question numbers start at Q1. The owner may ask for numbering to restart; when it does, the page says when numbering restarted, and the ledger records the restart and the highest number used since.
 - The top of the page has two status lines, labeled Working and Needs you. Each element carries `data-status` with that label. Working holds a short count and summary of the runners at work. Needs you holds a short count and summary of what waits on the owner: the cards and the Ready to merge entries. These lines hold counts and summaries only; the "waiting on runners, not you" list names each story. The launcher replaces each line with the editor's `status` op (an operation of `page-edit.sh`, listed under Editing the page) after every change.
@@ -99,6 +100,7 @@ The input file holds key=value lines, each split at its first "=". The input mus
 - `status`: keys `status` (the label, for example Working) and `text`. Replaces the text of the line that carries that `data-status` label with "label: text".
 - `ready-add`: keys `pr` (digits only) and `entry` (one line of HTML). The new entry goes first in the Ready to merge list. The list is the first `ul` element after the line that holds `id="ready"`, whether it is written as `<ul>` or with attributes; the search stops at the first later line that holds `<section` or `<h2`, and with no list before that line the op fails with `no list after anchor ready`.
 - `ready-remove`: key `pr`. Removes that pull request's Ready to merge entry.
+- Merge-order rebuild: any `ready-add`, any `ready-remove` (including a stale removal and a merge removal) and any change of recommended order runs the full rebuild, because each change alters N, and n on the other entries. The rebuild renumbers every entry's "Merge order: <n> of <N>" line and its reason line, then makes one `ready-remove` for every entry on the list, then one `ready-add` for each entry in reverse recommended order (the last place first, the next-to-merge PR last). The chat line for that change names the count of `ready-remove` and `ready-add` calls.
 
 Each run prints one OK line per op (for `hide`, one per distinct id), or one FAIL line; the one other line is `NOTE hide: <id> has no context section`, printed after the OK line of a card with no context section. Exit codes: 0 when all ops are OK, 1 on a FAIL, 2 on a usage error. When a required anchor (the `id` attribute value or `data-status` or `data-pr` attribute value the script finds a line by) is missing or occurs more than once, a key is missing, or the input has any character other than printable ASCII and tab, the script fails and leaves the page file byte-identical. Two anchors are exceptions: the `c-<id>` anchor of `hide` may be absent (see `hide`), and `ready-add` requires that the new `pr` is not already on the page. The launcher reads the FAIL line, fixes the input and runs the script again. It does not edit the page file by hand to get around a FAIL.
 
@@ -123,7 +125,7 @@ The sprint ledger (the launcher's plan file, see the Launch section of `../SKILL
 - the name of the tool that publishes the page,
 - the highest question number used so far,
 - the numbering restart, when one has happened, and the highest question number used since it (after a restart this is the question counter),
-- each Ready to merge entry's PR number with the head last checked, so a restarted launcher can rebuild the list.
+- each Ready to merge entry's PR number with the head last checked, its merge order ("<n> of <N>") and its reason line, so a restarted launcher can rebuild the list and its order.
 
 Each card's number is also recorded in the pending question field of the runner entry it belongs to, next to any reconcile entry that is already there.
 
@@ -159,9 +161,9 @@ If the question counter is missing from the ledger, the launcher takes the highe
 The values below run through the main steps of this file.
 
 1. Runner for story 120 hands back "PR ready" with PR 131. The launcher re-runs `gh pr view` for PR 131 and confirms the PR is open and mergeable, the CI state on the head is green, and the head equals the runner worktree head. The runner made no inline commits, so the inline-edit comparison does not apply, and no reconcile was queued or sent.
-2. The launcher adds a Ready to merge entry for PR 131: the PR link, "story 120, scope check of the new skill", one line on what the PR does, and the verification line "open, mergeable, CI green on head 9d41e7b, head equals runner worktree, closing keyword and footer present". The entry has no question number, no options and no recommendation.
+2. The launcher adds a Ready to merge entry for PR 131: the PR link, "story 120, scope check of the new skill", one line on what the PR does, and the verification line "open, mergeable, CI green on head 9d41e7b, head equals runner worktree, closing keyword and footer present". The entry carries the line "Merge order: 1 of 1" and the reason "only entry on the list". The entry has no question number, no options and no recommendation.
 3. Runner for story 124 hands back an owner question: the story covers two concerns. The launcher adds card Q7: story or topic "story 124, usage column in the ledger", question "split story 124 or keep it whole?", options "split" or "keep", recommendation "split", and a context section with the issue link, since no PR exists yet.
-4. The launcher writes Q7 into the runner entry's pending question field, sets the ledger's highest question number to 7, and records PR 131 with head 9d41e7b in the ledger's entry list.
+4. The launcher writes Q7 into the runner entry's pending question field, sets the ledger's highest question number to 7, and records PR 131 with head 9d41e7b, merge order 1 of 1 and its reason line in the ledger's entry list.
 5. The launcher republishes the page, re-reads it, and finds Q7 as the newest card and the PR 131 link in Ready to merge.
 6. Chat lines: "Ready to merge added: PR 131, story 120. See the page." and "Q7 added: story 124, usage column. See the page."
 7. The owner replies in chat: "Q7 split".

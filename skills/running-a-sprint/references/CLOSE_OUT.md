@@ -50,9 +50,11 @@ The exit codes are 0 when every step and read is OK, 1 for a refusal, a failed s
 
 The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. An unplanned re-run, one the launcher never ordered, would print the lines described below; none of them orders or permits running the script again. The tip that still exists is the local branch without `-x`, or `origin/<branch>` with `-x`.
 
-A run that stops partway, a step that printed FAIL after earlier steps printed OK, is not re-run and not finished by hand. Its close-out stop card names the failed step, as SKILL.md Close-out says. A run refused at the start, after a partial run, gets the same card.
+A run that stops partway, a step that printed FAIL after earlier steps printed OK, is not re-run or finished before the owner answers its stop card. Its close-out stop card names the failed step, as SKILL.md Close-out says. A run refused at the start, after a partial run, gets the same card.
 
-Once the origin delete has run, no tip remains: the check prints `FAIL patch: branch tip not found`, the run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing. The `absent` and `already gone` lines name what the earlier run removed.
+After a partial run, the steps the script printed OK for are done, and the rest are SKILL.md Close-out step 4 (delete the branch locally and on origin), step 5 (fast-forward main) and step 6 (tick the epic checkbox), then the reads of step 6 (the issue state, the epic line and the flaky count). When `remove-worktree` is the step that failed, the rest of step 3 remains too: the runner and child worktrees not yet removed (with `-x`, the reconcile worktree and its children as well).
+
+Once the origin delete has run, no tip remains: the check prints `FAIL patch: branch tip not found`, the run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing. A refused run prints the check's lines and the refusal line, and no step line: its `OK worktree: <path> absent` lines name what the earlier run removed, and no `already gone` line prints, because no step runs.
 
 The root-not-on-main refusal is not a partial run: it exits before any step runs, so the launcher puts the root checkout back on main and runs the script again.
 

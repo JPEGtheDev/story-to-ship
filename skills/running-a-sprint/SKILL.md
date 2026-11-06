@@ -14,15 +14,15 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role, the launcher plans nothing itself. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role, the launcher plans nothing itself. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
 ---
 
 ## Intake
 
-The stories come from an epic issue's checklist (if one exists). Read each story with `gh issue view <story> --json body` and look for its acceptance criteria.
+The stories come from an epic issue's checklist. Read each story with `gh issue view <story> --json body` and look for its acceptance criteria.
 
-A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST, and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery for launched stories; the runner does.
+A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the requirements ceremony) for launched stories; the runner does.
 
 ---
 
@@ -41,7 +41,7 @@ A story whose "Files to Create/Modify" list overlaps the list of a working runne
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
+Keep the sprint ledger in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
 
 The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
@@ -51,7 +51,7 @@ Launch with one Agent call per story:
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
 - `run_in_background` is true. The runner's own children run in the foreground inside it.
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text.
-- The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session (L = 6 gives 2); a result below 1 is passed as 1.
+- The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session; a result below 1 is passed as 1.
 
 See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher creates no runner worktree. Record the runner in the ledger at launch.
 

@@ -15,6 +15,8 @@ Run it with absolute paths from the launcher's session, with the working directo
 - `-x` (optional) is the reconcile worktree prefix. The patch check then uses `origin/<branch>` as the branch tip, and the reconcile worktree and its children are checked too.
 - `-P` (optional) is the plan file name a clean worktree may hold untracked at its top. The default is `plan.md`.
 
+The launcher checks by hand, before it runs either script, that the pull request's merge commit S has one parent. `gh pr view <PR number> --json mergeCommit` gives S, and `git -C <root> rev-list --parents -n 1 <S>` prints two fields for one parent (a squash or a one-commit rebase) and three fields for a merge commit. A merge commit stops here with a stop card for the owner, naming SKILL.md Close-out step 1. The scripts do not make this check.
+
 The check prints one line per check, in this order:
 
 1. `merged`: the PR state is MERGED and it has a merge commit (step 1). `FAIL merged: gh failed` when gh fails.
@@ -46,15 +48,15 @@ A failing step prints `FAIL <step>: <first line of the git error>`, then `FAIL s
 
 The exit codes are 0 when every step and read is OK, 1 for a refusal, a failed step or a failed read, and 2 on a usage error. Branches are deleted with `branch -D` because a squash merge leaves the branch unmerged in git's view; the check has already compared the patches.
 
-The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. The tip that still exists is the local branch without `-x`, or `origin/<branch>` with `-x`. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete. The absent and already gone lines name what the earlier run removed.
+The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. An unplanned re-run, one the launcher never ordered, would print the lines described below; none of them orders or permits running the script again. The tip that still exists is the local branch without `-x`, or `origin/<branch>` with `-x`.
 
-A run that stops partway, a step that printed FAIL after earlier steps printed OK, is not re-run and not finished by hand. Its close-out stop card names the failed step, as SKILL.md Close-out says. A refused re-run (`FAIL steps: refused, close-out check failed`) gets the same card.
+A run that stops partway, a step that printed FAIL after earlier steps printed OK, is not re-run and not finished by hand. Its close-out stop card names the failed step, as SKILL.md Close-out says. A run refused at the start, after a partial run, gets the same card.
 
-Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
+Once the origin delete has run, no tip remains: the check prints `FAIL patch: branch tip not found`, the run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing. The `absent` and `already gone` lines name what the earlier run removed.
 
 The root-not-on-main refusal is not a partial run: it exits before any step runs, so the launcher puts the root checkout back on main and runs the script again.
 
-A FAIL on patch, worktree, merged or ancestry goes to the owner as SKILL.md Close-out steps 2 and 3 say.
+A FAIL on merged or ancestry (step 1), patch (step 2) or worktree (step 3) goes to the owner as SKILL.md Close-out says.
 
 The `already gone` line for origin can also print on a first run: when the branch was removed on origin outside the run, the check still passes.
 

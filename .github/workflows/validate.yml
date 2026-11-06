@@ -435,6 +435,8 @@ jobs:
           check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()' 'Reconciles (per merge that triggered one)' 'Reconciles: <PRs reconciled>' 'one `Reconciles:` entry per reconcile'
           check skills/running-a-sprint/references/SCORECARD.md '- Needed owner change: <yes, no or unknown>; repository:' '- CI runs for this repository: flaky <n>' 'That class meets the bar.'
           checkx skills/running-a-sprint/references/SCORECARD.md '## Trust number'
+          check skills/running-a-sprint/SKILL.md 'The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria and no file overlap with a working runner.'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'A hand-back of kind owner question, blocked or cap reached from the pilot keeps the pilot held; the answer to it is not a pass.'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing reconcile contract string(s)"
             exit 1

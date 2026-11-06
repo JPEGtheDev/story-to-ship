@@ -50,10 +50,10 @@ Launch with one Agent call per story:
 - `subagent_type` is `story-coordinator`.
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
 - `run_in_background` is true. The runner's own children run in the foreground inside it.
-- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text. For a fresh runner for a Discovery stop, the launch prompt also carries the Fresh runner text of `references/HANDBACK_ROUTING.md`, which holds the owner's answers and nothing else.
+- The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text. For a fresh runner for a Discovery stop, WORKTREE_PREFIX is the stopped runner's prefix from the ledger. For a fresh runner for a Discovery stop, the launch prompt also carries the Fresh runner text of `references/HANDBACK_ROUTING.md`, which holds the owner's answers and nothing else.
 - The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session; a result below 1 is passed as 1.
 
-See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher creates no runner worktree. Record the runner in the ledger at launch.
+See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher creates no runner worktree. Record the runner in the ledger at launch. A fresh runner for a Discovery stop instead reuses the existing tree and branch that the stopped runner's prefix names.
 
 ---
 

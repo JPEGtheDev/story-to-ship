@@ -73,6 +73,6 @@ This section defines one Discovery-stop rehearsal: a run in which the subject st
   5. the dispatch and background counts are taken with `dispatch_count` and `bg_count` as `SCORECARD.md` defines them;
   6. the length of the final message is taken with the wc -m command in the Hand-back size contract section of `HANDBACK_ROUTING.md`, and is at most the cap stated in that section.
 
-  The run passes when items 1-4 and 6 hold, and item 5 passes when the dispatch count is at least 1 and the background count is 0, as Reading the result states.
+  The run passes when all six items hold; item 5 holds when the dispatch count is at least 1 and the background count is 0, as Reading the result states.
 - Consent: this run needs the owner's consent, as the Limits section says.
 - Limits: one run gives no rate. This section does not rehearse the fresh-runner path, meaning the launch of a fresh runner after the owner answers; the run ends at the hand-back. The Limits section applies to this section too.

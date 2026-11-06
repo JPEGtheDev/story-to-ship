@@ -16,8 +16,6 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
-Moved pairs and passages: `references/MOVED_RATIONALE.md`.
-
 ---
 
 ## Intake
@@ -92,7 +90,7 @@ Run these in order once origin shows the PR MERGED; the sweep or the owner's rep
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released.
 
-A check that fails at a step stops there and goes to the owner as today; the branch and worktree stay. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
+A check that fails at a step stops there and goes to the owner as today; the branch and worktree stay, and the PR's Ready to merge entry is removed. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
 
 ---
 

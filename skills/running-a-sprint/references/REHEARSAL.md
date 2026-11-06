@@ -68,7 +68,7 @@ This section defines one Discovery-stop rehearsal: a run in which the subject st
 - Counting: count from the subject's transcript, as the Counting section says. Record each item below on its own line, six items in all:
   1. the first line of the final message is "owner question: Discovery";
   2. the plan file holds the "## Discovery Open Items" section, with the Discovery findings, the open question, its options and its recommendation, and the line "Discovery: ran";
-  3. the `## Discovery Open Items` section of the plan file (the Discovery hand-over that the story-coordinator agent template defines) is at most 80 lines, counted with wc -l;
+  3. the `## Discovery Open Items` section of the plan file (the section the story-coordinator agent template defines) is at most 80 lines, counted with wc -l;
   4. there is no pull request, no push and no merge on any ref;
   5. the dispatch and background counts are taken with `dispatch_count` and `bg_count` as `SCORECARD.md` defines them;
   6. the length of the final message is taken with the wc -m command in the Hand-back size contract section of `HANDBACK_ROUTING.md`, and is at most the cap stated in that section.

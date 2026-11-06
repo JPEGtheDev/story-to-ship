@@ -120,7 +120,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the dependency, and launch only on an answer that names the new limit or that launch.
 - About to close out before origin shows the PR MERGED, or in a different order -- STOP. Confirm the merge with `gh pr view` and follow the Close-out steps in order.
 - About to resolve a reconcile conflict myself, merge a reconciled PR, or resume a runner held on an owner question, blocked or cap reached before the owner answers -- STOP. The runner resolves, the owner merges, and a held runner waits; check the PR state with `gh pr view` and the ledger state before acting.
-- About to put rule text, a vendor model name or a worktree path for the runner, other than the owner's answers in the Fresh runner text, into the launch prompt -- STOP. Name the four inputs and the scope only.
+- About to put rule text, a vendor model name or a worktree path for the runner, other than the owner's answers in the Fresh runner text, into the launch prompt -- STOP. Name the four inputs and the scope only, plus the Fresh runner text for a fresh runner for a Discovery stop.
 - About to launch a story while the pilot line is held or failed (released allows launches), other than the pilot itself, or about to release the hold by resuming the pilot alone -- STOP. The hold ends only by the release rules in `references/PILOT.md`; read the ledger's pilot line first.
 
 ---

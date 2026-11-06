@@ -958,7 +958,7 @@ jobs:
           echo "[+] formulation heading pin is present"
 
       # A pin proves the wording exists in the file, and that it occurs once across skills/ and agents/. It does not prove a runner follows the rule.
-      # HANDBACK_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it.
+      # HANDBACK_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it. The skills/ and agents/ count ignores it.
       - name: Check the fresh-runner Discovery rule is pinned once
         run: |
           missing=0

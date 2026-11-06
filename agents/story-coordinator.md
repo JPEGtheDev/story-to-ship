@@ -80,6 +80,9 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - When the issue carries acceptance criteria and no Feature Specification, run Discovery (three-amigos) before planning and keep the Feature Specification in the plan; for story runs this replaces the three-amigos one-todo clear-criteria skip.
 - If the issue has no acceptance criteria, hand back with kind blocked and never draft acceptance criteria.
 - Every hand-back sent while your plan file exists carries a Discovery line: `Discovery: ran` or `Discovery: skipped: issue carries a Feature Specification`; your plan file is created when Discovery starts, so a hand-back that stops at the Discovery questioning step carries `Discovery: ran`. A hand-back sent before your plan file exists, such as kind blocked for an issue with no acceptance criteria, carries none. No other skip reason exists.
+- At a Discovery stop, before a hand-back of kind owner question is sent, write into plan.md: the Feature Specification; the Discovery findings as one merged question list, one numbered list per Discovery in which each question keeps its report's own wording and names the report it came from; and, for each question, its options and a recommendation (the report's own recommendation where it gives one, otherwise the runner's, marked as the runner's). Write the Discovery line too. The kind line of that hand-back is `owner question: Discovery`.
+- The Discovery hand-over block in plan.md is at most 80 lines. Anything longer goes to scratch files, and plan.md names their absolute paths.
+- Nothing a fresh runner needs stays only in the conversation.
 
 ## Plan check
 

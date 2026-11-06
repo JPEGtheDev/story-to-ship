@@ -1,6 +1,6 @@
 # Moved Rationale
 
-Context and Forces pairs from five sections of `../SKILL.md` (Capacity and Launch have two each), moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; it is an operative rule rather than a Context and Forces pair. Passages moved word for word from SKILL.md later sit under headings that start with "Moved from SKILL.md:".
+This file holds moved rationale and moved operative passages from `../SKILL.md`, and each heading says which kind it holds. Context and Forces pairs from five sections (Capacity and Launch have two each) are rationale, moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; it is an operative rule rather than a Context and Forces pair. Passages moved word for word from SKILL.md (operative passages) sit under headings that start with "Moved from SKILL.md:", except "Moved from SKILL.md: rationale", which holds the rationale clauses moved out of SKILL.md sentences.
 
 ## Intake
 
@@ -35,7 +35,7 @@ Context and Forces pairs from five sections of `../SKILL.md` (Capacity and Launc
 
 ## Launch question owner text
 
-Note: "the rule below" in the paragraph that follows means the overlap paragraph in the Capacity section of `../SKILL.md`, which stayed in SKILL.md.
+Note: "the rule below" in the paragraph that follows means the overlap rule in the Capacity section of `../SKILL.md`; that rule stays in SKILL.md, and only its comparison passage moved (see "Moved from SKILL.md: overlap comparison" below).
 
 Every launch question to the owner states, for each story it names, "working N of L" (N the working runners counted from the ledger re-read this turn, L the limit now in force), "held for the owner M (open PRs)" (M the sprint stories held for the owner or with an open, unmerged pull request, each counted once), and the story's file overlap under the rule below (the working runner, held runner or open-PR story whose list it overlaps; "none"; or "list absent, run alone"). A launch while N is at or above L happens only when the owner's answer names the new limit or names that over-limit launch for that story; "go", "launch it", silence and an answer to an intake gap do not. A named new limit is a ceiling, not a count of launches; record it in the ledger and state it as L in later questions.
 
@@ -62,3 +62,13 @@ For a sprint story with an open, unmerged pull request the launcher compares ano
 ## Moved from SKILL.md: reconcile state
 
 State value `reconciling <merged PR number>` means a Reconcile text is out; a reconcile waiting to be sent (for the runner to hand back or for the owner to answer) is recorded in the pending question field as `reconcile pending after PR <merged PR number>`.
+
+## Moved from SKILL.md: rationale
+
+Each clause below was cut from the SKILL.md sentence named in its line, after the words given; the rule in that sentence stays in SKILL.md.
+
+- Capacity, after "does not count": ", so the next story launches while the owner reviews"
+- Launch, after "is true": ", so the launcher receives completion notices"
+- Watch loop, after "(every skill the compaction hook lists)": ", so the launcher's rules are back before it acts"
+- Close-out step 4, after "for a reconcile replacement": "; the squash leaves it unmerged in git's view"
+- Close-out step 6, after "(unverified)": "; the shell-write guard denies a body file written inside the repository"

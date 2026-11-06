@@ -14,7 +14,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role, the launcher plans nothing itself. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
 ---
 
@@ -28,20 +28,20 @@ A story with no acceptance criteria is NOT launched. Relay the gap to the owner 
 
 ## Capacity
 
-Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count, so the next story launches while the owner reviews. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the overlap rule do not gate. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under `references/MOVED_RATIONALE.md`, Launch question owner text. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the overlap rule allow.
+Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the overlap rule do not gate. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under `references/MOVED_RATIONALE.md`, Launch question owner text. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the overlap rule allow.
 
 The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria and no file overlap with a working runner.
 No other story launches until the pilot hands back PR ready and that hand-back passes the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included. The other pilot rules and the release rules are in `references/PILOT.md`.
 
 Every launch question to the owner follows the wording in `references/MOVED_RATIONALE.md`, section Launch question owner text.
 
-A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: skill stories. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: overlap comparison. The Files list is an overlap signal only: a story's scope is the work its acceptance criteria require, not a list of files.
+A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: skill stories, run one at a time. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: overlap comparison, Files list plus pull request files. The Files list is an overlap signal only: a story's scope is the work its acceptance criteria require, not a list of files.
 
 ---
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
 
 The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
@@ -49,19 +49,19 @@ Launch with one Agent call per story:
 
 - `subagent_type` is `story-coordinator`.
 - `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model anywhere else.
-- `run_in_background` is true, so the launcher receives completion notices. The runner's own children run in the foreground inside it.
+- `run_in_background` is true. The runner's own children run in the foreground inside it.
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text.
 - The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session (L = 6 gives 2); a result below 1 is passed as 1.
 
-See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree. Record the runner in the ledger at launch.
+See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher creates no runner worktree. Record the runner in the ledger at launch.
 
 ---
 
 ## Watch loop
 
-End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep (the routing table alone cannot carry it, since a hand-back never reaches its row): `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
+End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep: `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 
-An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the sweep recognizes; the pilot line release (`references/PILOT.md`) also runs on the sweep path.
+An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A PR whose close-out stopped is recorded in the ledger as `close-out stopped`; the sweep does not run its close-out again. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the sweep recognizes; a PR merged another way is left alone and the owner is told. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
 Verify before relaying anything to the owner:
 
@@ -73,24 +73,24 @@ Verify before relaying anything to the owner:
 
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
-When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists), so the launcher's rules are back before it acts.
+When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
 
 ---
 
 ## Close-out
 
-Run these in order once origin shows the PR MERGED; the sweep or the owner's report triggers them, not a requirement. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
+Run these in order once origin shows the PR MERGED, whether the sweep or the owner's report found it. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
 
 1. Confirm the merge on origin: `gh pr view <PR number> --json state,mergeCommit` shows MERGED, and `git -C R fetch origin main` then `git -C R merge-base --is-ancestor S origin/main` exits 0 (S is the squash commit).
 2. Compare patches (squash tree-equality; H is the runner branch tip, or `origin/<branch>` after a fetch for a reconcile replacement): `B=$(git -C R merge-base S^ H); cmp <(git -C R diff $B H | grep -v '^index ') <(git -C R diff S^ S | grep -v '^index ')`. A difference goes to the owner; do not continue.
 3. Read the lane entries and inline commit hashes from the runner's plan file and run the `lane_sum` count from `references/SCORECARD.md` before step 4 deletes the branch. Then remove the runner worktree (`git -C R worktree remove --force <path>` once `git -C <path> status --short` shows only the untracked plan file; anything else goes to the owner, and do not continue) and every `.worktrees/<prefix>-*` child worktree, orphaned child worktrees included; for a reconcile replacement do this for the dead runner's prefix and the fresh runner's prefix (find them with `git -C R worktree list`).
-4. Delete the branch locally (`git -C R branch -D <branch>`, and `reconcile-<prefix>` for a reconcile replacement; the squash leaves it unmerged in git's view) and on origin with git push origin --delete <branch>, run through `git -C R`.
+4. Delete the branch locally (`git -C R branch -D <branch>`, and `reconcile-<prefix>` for a reconcile replacement) and on origin with git push origin --delete <branch>, run through `git -C R`.
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
-6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified); the shell-write guard denies a body file written inside the repository.
+6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified).
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released.
 
-A check that fails at a step stops there and goes to the owner as today; the branch and worktree stay, and the PR's Ready to merge entry is removed. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
+A check that fails at a step stops there and goes to the owner, and the PR's Ready to merge entry is removed; before step 4, the branch and worktree stay. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
 
 ---
 

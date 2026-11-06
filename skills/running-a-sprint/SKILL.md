@@ -61,7 +61,9 @@ See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher
 
 End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep: `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 
-An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A PR whose close-out stopped is recorded in the ledger as `close-out stopped`; the sweep does not run its close-out again. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the sweep recognizes; a PR merged another way is left alone and the owner is told. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
+An owner's "merged" message gets the same check and skips a PR whose state is set: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the close-out accepts; a PR merged another way stops at step 1 or step 2 and goes to the owner. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
+
+The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is set, so no close-out repeats. A stopped PR waits for the owner's answer to its card, which decides the next step; the launcher clears `stopped` only when the answer re-runs the close-out.
 
 Verify before relaying anything to the owner:
 
@@ -81,7 +83,7 @@ When the session-bootstrap gate prompts again (after a compaction or restart has
 
 Run these in order once origin shows the PR MERGED, whether the sweep or the owner's report found it. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
 
-1. Confirm the merge on origin: `gh pr view <PR number> --json state,mergeCommit` shows MERGED, and `git -C R fetch origin main` then `git -C R merge-base --is-ancestor S origin/main` exits 0 (S is the squash commit).
+1. Confirm the merge on origin: `gh pr view <PR number> --json state,mergeCommit` shows MERGED, and `git -C R fetch origin main` then `git -C R merge-base --is-ancestor S origin/main` exits 0 (S is the squash commit). S has one parent (`git -C R rev-list --parents -n 1 S` shows two fields); a merge commit stops here.
 2. Compare patches (squash tree-equality; H is the runner branch tip, or `origin/<branch>` after a fetch for a reconcile replacement): `B=$(git -C R merge-base S^ H); cmp <(git -C R diff $B H | grep -v '^index ') <(git -C R diff S^ S | grep -v '^index ')`. A difference goes to the owner; do not continue.
 3. Read the lane entries and inline commit hashes from the runner's plan file and run the `lane_sum` count from `references/SCORECARD.md` before step 4 deletes the branch. Then remove the runner worktree (`git -C R worktree remove --force <path>` once `git -C <path> status --short` shows only the untracked plan file; anything else goes to the owner, and do not continue) and every `.worktrees/<prefix>-*` child worktree, orphaned child worktrees included; for a reconcile replacement do this for the dead runner's prefix and the fresh runner's prefix (find them with `git -C R worktree list`).
 4. Delete the branch locally (`git -C R branch -D <branch>`, and `reconcile-<prefix>` for a reconcile replacement) and on origin with git push origin --delete <branch>, run through `git -C R`.
@@ -140,12 +142,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 ## Related Skills
 
-- `subagent-driven-development` -- tier table (Model Selection) and the children's dispatch rules
-- `two-stage-review` -- the review stages and fix-round cap
-- `using-git-worktrees` -- one worktree per runner and child
-- `user-story-generator` -- the route for a story with no acceptance criteria
-- `three-amigos` -- Discovery, run by the runner for launched stories
-- `session-bootstrap` -- the launcher re-invokes it alone at a gate prompt
+Related skills: `references/MOVED_RATIONALE.md`, Moved from SKILL.md: related skills.
 
 ---
 

@@ -1,6 +1,6 @@
 # Moved Rationale
 
-This file holds moved rationale and moved operative passages from `../SKILL.md`, and each heading says which kind it holds. Context and Forces pairs from five sections (Capacity and Launch have two each) are rationale, moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; it is an operative rule rather than a Context and Forces pair. Passages moved word for word from SKILL.md (operative passages) sit under headings that start with "Moved from SKILL.md:", except "Moved from SKILL.md: rationale", which holds the rationale clauses moved out of SKILL.md sentences.
+This file holds moved rationale and moved operative passages from `../SKILL.md`, and each heading says which kind it holds. Context and Forces pairs from five sections (Capacity and Launch have two each) are rationale, moved here word for word so SKILL.md stays under the 5,000-token limit, with one exception: the Capacity Forces line was reworded in the move. It said the story's "Files to Create/Modify" list "is the only advance signal of overlap"; it now says that list is the primary signal and that, for a story with an open pull request, the files its pull request changes are a second. The Launch question owner text section, at the end of this file, is also moved here word for word; it is an operative rule rather than a Context and Forces pair. Passages moved word for word from SKILL.md (operative passages) sit under headings that start with "Moved from SKILL.md:", except "Moved from SKILL.md: rationale", which holds the rationale clauses moved out of SKILL.md sentences, and the related skills heading below it, which holds navigation (the Related Skills list), not a rule.
 
 ## Intake
 
@@ -35,7 +35,7 @@ This file holds moved rationale and moved operative passages from `../SKILL.md`,
 
 ## Launch question owner text
 
-Note: "the rule below" in the paragraph that follows means the overlap rule in the Capacity section of `../SKILL.md`; that rule stays in SKILL.md, and only its comparison passage moved (see "Moved from SKILL.md: overlap comparison" below).
+Note: "the rule below" in the paragraph that follows means the overlap rule in the Capacity section of `../SKILL.md`; that rule stays in SKILL.md, and two of its passages moved: the comparison passage (see "Moved from SKILL.md: overlap comparison" below) and the skill-stories sentence (see "Moved from SKILL.md: skill stories" below).
 
 Every launch question to the owner states, for each story it names, "working N of L" (N the working runners counted from the ledger re-read this turn, L the limit now in force), "held for the owner M (open PRs)" (M the sprint stories held for the owner or with an open, unmerged pull request, each counted once), and the story's file overlap under the rule below (the working runner, held runner or open-PR story whose list it overlaps; "none"; or "list absent, run alone"). A launch while N is at or above L happens only when the owner's answer names the new limit or names that over-limit launch for that story; "go", "launch it", silence and an answer to an intake gap do not. A named new limit is a ceiling, not a count of launches; record it in the ledger and state it as L in later questions.
 
@@ -72,3 +72,12 @@ Each clause below was cut from the SKILL.md sentence named in its line, after th
 - Watch loop, after "(every skill the compaction hook lists)": ", so the launcher's rules are back before it acts"
 - Close-out step 4, after "for a reconcile replacement": "; the squash leaves it unmerged in git's view"
 - Close-out step 6, after "(unverified)": "; the shell-write guard denies a body file written inside the repository"
+
+## Moved from SKILL.md: related skills
+
+- `subagent-driven-development` -- tier table (Model Selection) and the children's dispatch rules
+- `two-stage-review` -- the review stages and fix-round cap
+- `using-git-worktrees` -- one worktree per runner and child
+- `user-story-generator` -- the route for a story with no acceptance criteria
+- `three-amigos` -- Discovery, run by the runner for launched stories
+- `session-bootstrap` -- the launcher re-invokes it alone at a gate prompt

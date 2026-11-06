@@ -26,7 +26,7 @@ Every cell in the Launcher must NOT column starts with the same four prohibition
 Check these before acting on any hand-back:
 
 - The first line is a kind line naming one of the five kinds: owner question, PR ready, blocked, cap reached, interim.
-- Allowed form of the kind line: owner question: Discovery (the phase clause of a Discovery stop; the first-line match owner question still holds).
+- Allowed form of the kind line: owner question: Discovery (the suffix ': Discovery' marks a Discovery stop; the first-line match owner question still holds).
 - A Limitations: line is present.
 - When the runner's plan file exists, a Discovery line whose value is exactly "Discovery: ran" or "Discovery: skipped: issue carries a Feature Specification"; any other value counts as a missing line. When no plan file exists (a blocked hand-back for an issue with no acceptance criteria, or a fresh reconcile runner), the line is absent and its absence is not a missing line.
 - The reloaded skills are listed.

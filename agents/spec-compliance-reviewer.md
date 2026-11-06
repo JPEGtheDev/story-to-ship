@@ -113,7 +113,8 @@ A hygiene hit on a line in the merge-base diff is a GAPS verdict regardless of a
 
 Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
 Every verdict line and block your format requires stays inside the cap.
-You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
+You commit nothing, so the commit option above does not apply: put command output and detail that do not fit in a named file under /tmp that the reply names; no finding is dropped.
+Every correctness, naming and design finding carries exactly one mark, as defined in references/REVIEW_PROTOCOL.md, section Finding Marks. `checked`: the exact command run, the last 40 lines of its output, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims. No finding is dropped to meet a length limit. PASS and APPROVE verdicts carry no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
 
 Non-blocking notes: hedged or advisory items, and findings that predate the branch about content the branch did not change (a size alert on a file the branch did not grow, or a removal candidate). Leave it better: problems that already existed in lines of a file the branch changes; the implementer may fix small items, and the reviewer only lists them. An item that fits both lists goes in Leave it better. Neither list sets or changes VERDICT.
 

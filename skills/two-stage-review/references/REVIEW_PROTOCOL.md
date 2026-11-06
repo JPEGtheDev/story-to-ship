@@ -46,9 +46,29 @@ The cadence rule is in `SKILL.md`, section Review Cadence. This section holds th
 
 ## Who Re-Checks a Fix Round
 
-When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground. If the original instance cannot be resumed -- the resume call fails or the instance is gone -- dispatch a fresh reviewer from the same template with the original requirements file and the fix-round diff, and state in the dispatch that it is a re-check of a named finding, quoting the finding verbatim, so the new instance starts from the finding instead of from a blank review.
+When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANGES, or any other named finding re-check -- the re-check is performed by the same reviewer instance that raised the finding, resumed with its original context. It is not a fresh full-panel re-run and not a different reviewer. A full-panel re-run multiplies cost without adding independence: the reviewer that raised the finding already holds the finding's context and can verify the fix precisely, while swapping reviewers loses that context and risks re-litigating settled ground. If the original instance cannot be resumed -- the resume call fails or the instance is gone -- dispatch a fresh reviewer from the same template with the original requirements file and the fix-round diff, and state in the dispatch that it is a re-check of a named finding, quoting the finding verbatim, so the new instance starts from the finding instead of from a blank review. The dispatcher re-run of a finding (see Finding Marks) is the exception: it uses a fresh child of the same template instead, and the violation signal in the enforcement paragraph below does not apply to that re-run.
 
 **Enforcement is procedural/self-check:** the checkable signal is a fix-round re-check dispatched as a fresh reviewer -- no resume of, or continuity with, the reviewer instance that raised the finding, and no stated resume failure with the finding quoted in the dispatch -- visible in the dispatch transcript. No automated detector exists.
+
+---
+
+## Finding Marks
+
+Every finding carries one of three marks. The mark states what stands behind the claim.
+
+- `checked`: the reviewer ran a command. The finding gives the command, the command's exit status and last line in the reply, its last 40 lines in the named file under /tmp, and the output the code needs instead.
+- `inferred`: no run stands behind the claim. The finding states the reason no run was made.
+- `shown by reading`: the finding quotes a file:line that a reader can check, and that line says what the finding claims.
+
+Scope: every finding carries a mark. A verdict line carries no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
+
+Dispatcher re-run: before a finding reaches the implementer, the dispatcher re-runs the finding's command once. A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one. One re-check per finding. A re-check counts toward the fix-round cap of the todo the finding belongs to; a re-check against a whole-branch Stage 2 finding counts toward the 3-cycle cap. A re-run reproduces when its exit status and the last line the finding quotes match the reviewer's; the whole output is not compared.
+
+Shown-by-reading findings: the dispatcher reads the quoted file:line and checks that it says what the finding claims. No command runs for these findings.
+
+Safety: a re-run never changes the worktree and never writes through gh. A command that writes to the tree or calls a gh command that writes is not re-run; the finding is re-marked `inferred` and the reason is stated. A read-only gh call (for example `gh pr checks`) is re-run. Findings that share one command re-run it once. If the CI state changed since the review, the finding goes back to the reviewer as `state changed`, not as `does not reproduce`.
+
+Reply size: command output goes to a named file under /tmp that the reply names. No finding is dropped to fit the reply cap.
 
 ---
 
@@ -65,7 +85,7 @@ If this section and SKILL.md differ, SKILL.md governs.
 
 ## Moved Rationale
 
-These notes moved word for word from SKILL.md to keep the skill under the core-skill size cap; each group is labelled with the rule it belongs to.
+These notes moved word for word from SKILL.md to keep the skill under the core-skill size cap; each group is labeled with the rule it belongs to.
 
 **Stage 1 gate (Never skip Stage 1):**
 **Context:** An implementer result is in hand and the quality review looks like the faster path.

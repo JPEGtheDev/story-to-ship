@@ -61,9 +61,9 @@ See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher
 
 End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep: `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 
-An owner's "merged" message gets the same check and skips a PR whose state is set: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the close-out accepts; a PR merged another way stops at step 1 or step 2 and goes to the owner. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
+An owner's "merged" message gets the same check and skips a PR whose state is `closed out` or `stopped`: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the close-out accepts; a PR merged another way stops at step 1 or step 2 and goes to the owner. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
-The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is set, so no close-out repeats. A stopped PR waits for the owner's answer to its card, which decides the next step; the launcher clears `stopped` only when the answer re-runs the close-out.
+The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`, so no close-out repeats. A stopped PR waits for the owner's answer to the stop, which decides the next step; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
 
 Verify before relaying anything to the owner:
 
@@ -92,7 +92,7 @@ Run these in order once origin shows the PR MERGED, whether the sweep or the own
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released.
 
-A check that fails at a step stops there and goes to the owner, and the PR's Ready to merge entry is removed; before step 4, the branch and worktree stay. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
+A check that fails at a step stops there: the close-out stop card names the failed step, the PR's Ready to merge entry is removed, and nothing is re-run. A stop at step 1 or 2 leaves the branch and worktree in place; a stop at step 3 or later may not, and the card says what remains. A finished close-out gets one chat line to the owner and the same removal.
 
 ---
 

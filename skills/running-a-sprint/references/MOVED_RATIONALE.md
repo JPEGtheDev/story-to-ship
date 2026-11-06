@@ -75,9 +75,9 @@ Each clause below was cut from the SKILL.md sentence named in its line, after th
 
 ## Moved from SKILL.md: related skills
 
-- `subagent-driven-development` -- tier table (Model Selection) and the children's dispatch rules
-- `two-stage-review` -- the review stages and fix-round cap
-- `using-git-worktrees` -- one worktree per runner and child
+- `subagent-driven-development` -- Model Selection holds the tier table; the runner's children follow its dispatch rules
+- `two-stage-review` -- the review stages and fix-round cap the runner runs
+- `using-git-worktrees` -- every runner and child works in its own worktree
 - `user-story-generator` -- the route for a story with no acceptance criteria
-- `three-amigos` -- Discovery, run by the runner for launched stories
-- `session-bootstrap` -- the launcher re-invokes it alone at a gate prompt
+- `three-amigos` -- Discovery, which the runner runs for launched stories
+- `session-bootstrap` -- the launcher re-invokes it alone when its gate prompts again

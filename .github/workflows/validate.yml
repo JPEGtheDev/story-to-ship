@@ -560,9 +560,9 @@ jobs:
             done
           }
           check skills/running-a-sprint/SKILL.md 'Add every question for the owner to the owner questions page as a card' 'Only the launcher writes the page.' 'Chat carries one line per change, plus a pointer to the page when a question is added.' 'The owner questions page adds five ledger fields' 'The card is the relay' 'a cap override, a scope change, a launch over the limit'
-          check skills/running-a-sprint/references/OWNER_QUESTIONS.md '- `number`:' '- `story or topic`:' '- `question`:' '- `options`:' '- `recommendation`:' '- `status`:' 'none given' 'waiting on runners, not you' 'Question numbers start at Q1. The owner may ask for numbering to restart' 'Only the launcher writes the page' 'as of Q' 'After it acts on an owner comment, the launcher replies on the thread and resolves it.'
-          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Add the question to the owner questions page' 'as its card' 'Add a Ready to merge entry for the pull request to the owner questions page' 'Put the question to the owner as the card described below' 'put the gap to the owner as the card described below' 'treat any other blocker like an owner question' 'Put the open findings and the options' 'with a recommendation, as the card described below' 'every other kind is handled as its row above says'
-          check skills/running-a-sprint/SKILL.md 'becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says.'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md '- `number`:' '- `story or topic`:' '- `question`:' '- `options`:' '- `recommendation`:' '- `status`:' 'none given' 'waiting on runners, not you' 'Question numbers start at Q1. The owner may ask for numbering to restart' 'Only the launcher writes the page' 'as of Q' 'After it acts on an owner comment, the launcher replies on the thread and resolves it.' 'An entry is removed when origin shows the pull request MERGED' 'close-out stop card'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Add the question to the owner questions page' 'as its card' 'Add a Ready to merge entry for the pull request to the owner questions page' 'Put the question to the owner as the card described below' 'put the gap to the owner as the card described below' 'treat any other blocker like an owner question' 'Put the open findings and the options' 'with a recommendation, as the card described below' 'every other kind is handled as its row above says' 'owner reports a merge, or the sweep finds a merge'
+          check skills/running-a-sprint/SKILL.md 'becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says.' 'Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep'
           check skills/running-a-sprint/references/INDEX.md '`OWNER_QUESTIONS.md`'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing owner questions page string(s)"
@@ -1007,14 +1007,16 @@ jobs:
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it
       # was split (honesty from communication; two-stage-review from
-      # subagent-driven-development). No repo-wide skill-size cap is
-      # CI-enforced; other skills have not been measured against this limit.
+      # subagent-driven-development). running-a-sprint SKILL.md is listed too,
+      # and this check alone holds it under the cap. No repo-wide skill-size
+      # cap is CI-enforced; other skills have not been measured against this
+      # limit.
       - name: Enforce size cap on core skills
         run: |
           set -e
           limit=20000
           over=0
-          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md; do
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md; do
             size=$(wc -c < "$f")
             if [ "$size" -gt "$limit" ]; then
               echo "FAILED: $f is $size characters, exceeding the $limit-character limit"
@@ -1273,3 +1275,23 @@ jobs:
             exit 1
           fi
           echo "[+] Discovery line rule strings present"
+
+      - name: Check running-a-sprint SKILL.md row counts
+        run: |
+          set -e
+          missing=0
+          reds=$(awk '/^## Red Flags/{f=1;next} /^## /{f=0} f && /^- /' skills/running-a-sprint/SKILL.md | wc -l)
+          if [ "$reds" -ne 10 ]; then
+            printf 'FAILED: skills/running-a-sprint/SKILL.md has %s Red Flag bullets, expected 10\n' "$reds"
+            missing=$((missing + 1))
+          fi
+          rats=$(awk '/^## Rationalization Prevention/{f=1;next} /^## /{f=0} f && /^\| / && !/^\| Excuse/ && !/^\|--/' skills/running-a-sprint/SKILL.md | wc -l)
+          if [ "$rats" -ne 8 ]; then
+            printf 'FAILED: skills/running-a-sprint/SKILL.md has %s Rationalization Prevention data rows, expected 8\n' "$rats"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing running-a-sprint SKILL.md row count problem(s)"
+            exit 1
+          fi
+          echo "[+] running-a-sprint SKILL.md has 10 Red Flag bullets and 8 Rationalization Prevention rows"

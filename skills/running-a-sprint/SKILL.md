@@ -22,7 +22,7 @@ The launcher is the session that runs the sprint. A runner is a coordinator suba
 
 The stories come from an epic issue's checklist (if one exists). Read each story with `gh issue view <story> --json body` and look for its acceptance criteria.
 
-A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the three-amigos requirements ceremony) for launched stories; the runner does.
+A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST, and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity and overlap allow, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery for launched stories; the runner does.
 
 ---
 
@@ -59,9 +59,9 @@ See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher
 
 ## Watch loop
 
-End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep: `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
+End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep (the routing table alone cannot carry this step, because a hand-back never reaches its row): `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 
-An owner's "merged" message gets the same check and skips a PR whose state is `closed out` or `stopped`: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the close-out accepts; a PR merged another way stops at step 1 or step 2 and goes to the owner. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
+An owner's "merged" message gets the same check and skips a PR whose state is `closed out` or `stopped`: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the merge method the close-out accepts; a merge commit stops at step 1, and another merge goes to the owner only when step 2 differs. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
 The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`, so no close-out repeats. A stopped PR waits for the owner's answer to the stop, which decides the next step; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
 

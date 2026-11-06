@@ -46,12 +46,15 @@ A failing step prints `FAIL <step>: <first line of the git error>`, then `FAIL s
 
 The exit codes are 0 when every step and read is OK, 1 for a refusal, a failed step or a failed read, and 2 on a usage error. Branches are deleted with `branch -D` because a squash merge leaves the branch unmerged in git's view; the check has already compared the patches.
 
-A re-run after a partial run reads the branch tip that still exists: the local branch without `-x`, or `origin/<branch>` with `-x`. The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. So:
+The run deletes the local branch first and the branch on origin after it, and that push also removes `origin/<branch>`. The tip that still exists is the local branch without `-x`, or `origin/<branch>` with `-x`. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete. The absent and already gone lines name what the earlier run removed.
 
-- While the tip exists, the re-run passes if the other checks pass, and it prints the absent and already gone lines for what the earlier run removed. Without `-x`, that is only a run that stopped before the local branch delete. With `-x`, it is a run that stopped before the origin delete, even after the local delete.
-- Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the re-run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
-- The by-hand fallback applies only after a partial run (a step printed FAIL after earlier steps printed OK, or a re-run is refused because the check printed `FAIL patch: branch tip not found`). The root-not-on-main refusal is not a partial run: it exits before any step runs, so the launcher puts the root checkout back on main and runs the script again. After a partial run the launcher finishes the close-out by hand: the steps the script printed OK for are done, and the rest are SKILL.md Close-out step 4 (delete the branch locally and on origin), step 5 (fast-forward main) and step 6 (tick the epic checkbox), then the reads of step 6 (the issue state, the epic line and the flaky count). When `remove-worktree` is the step that failed, the rest of step 3 is manual too: remove the remaining runner and child worktrees by hand (with `-x`, the reconcile worktree and its children as well).
-- A FAIL on patch, worktree, merged or ancestry goes to the owner as SKILL.md Close-out steps 2 and 3 say; it is not a by-hand fallback. The one patch FAIL that is a fallback case is `branch tip not found` after a partial run, named above.
+A run that stops partway, a step that printed FAIL after earlier steps printed OK, is not re-run and not finished by hand. Its close-out stop card names the failed step, as SKILL.md Close-out says. A refused re-run (`FAIL steps: refused, close-out check failed`) gets the same card.
+
+Once the run has deleted the branch on origin, no tip remains. The check prints `FAIL patch: branch tip not found`, the run is refused (`FAIL steps: refused, close-out check failed`), and it changes nothing.
+
+The root-not-on-main refusal is not a partial run: it exits before any step runs, so the launcher puts the root checkout back on main and runs the script again.
+
+A FAIL on patch, worktree, merged or ancestry goes to the owner as SKILL.md Close-out steps 2 and 3 say.
 
 The `already gone` line for origin can also print on a first run: when the branch was removed on origin outside the run, the check still passes.
 

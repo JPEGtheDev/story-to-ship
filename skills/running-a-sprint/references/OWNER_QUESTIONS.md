@@ -24,6 +24,7 @@ Each of these question kinds gets a card:
 - **blocked without criteria**: a blocked hand-back whose reason is a story with no acceptance criteria and that the owner must route.
 - **reconcile question**: a reconcile that needs the owner's answer before it can run or finish.
 - **pilot check card**: a card put on the page when a pilot runner's PR ready hand-back fails a launcher verification check or a required-line check, or any pilot hand-back that lacks a required line.
+- **close-out stop card**: a close-out that stopped at a failed step (the Close-out section of `../SKILL.md`). The card names the failed step and, for a stop at step 3 or later, says what remains on disk. Its fields are the required card fields in the Card fields section: number, story or topic, question, options and recommendation. Its options are the owner's choices for a stopped PR in SKILL.md: the remaining steps finished, or the stop left as it is. Its recommendation is the launcher's. Its removal follows the general rule in the Layout section: the card is removed once its question is answered and the answer is acted on.
 
 A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge section.
 
@@ -39,7 +40,7 @@ A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge s
 - **Owner action.** The owner acts on an entry by saying "merged", either in chat or as a comment on the entry on the page. Entries have no number to answer by.
 - **Stale.** Before each republish the launcher re-runs `gh pr view` for every entry. When CI is not green or the head differs from the head last checked, the entry is removed and returns only after the PR ready checks in `HANDBACK_ROUTING.md` pass again. The re-run includes `gh pr view <n> --json isDraft`. A pull request that is a draft again (isDraft true) is removed the same way.
 - **Waiting.** A PR that also needs an owner decision (a scope change, a declined finding, a reconcile question) keeps a card for that decision only, and its entry is not on the page until the decision is made. A PR waiting on a reconcile has no entry until the reconcile checks pass. An entry's story counts as held for the owner, since it already has an open, unmerged PR.
-- **Removal.** An entry is removed when the owner reports the merge and the Close-out section of `../SKILL.md` has run. The removal is a page change like any other: republish, re-read, one chat line.
+- **Removal.** An entry is removed when origin shows the pull request MERGED, whether the sweep found it or the owner's "merged" message did, and the Close-out section of `../SKILL.md` has run or stopped. A stopped close-out also removes the entry, as SKILL.md's stop paragraph says. The removal is a page change like any other: republish, re-read, one chat line.
 
 ## Card fields
 
@@ -166,7 +167,7 @@ The values below run through the main steps of this file.
 6. Chat lines: "Ready to merge added: PR 131, story 120. See the page." and "Q7 added: story 124, usage column. See the page."
 7. The owner replies in chat: "Q7 split".
 8. The launcher runs the split, then removes card Q7 from the page, republishes the page, re-reads it, and sends the chat line "Q7 done: story 124 split, card removed."
-9. The owner says "merged" for PR 131 in chat. The launcher runs the Close-out section of `../SKILL.md`, then removes the PR 131 entry from Ready to merge, republishes the page, re-reads it and checks that the PR 131 link is gone. Chat line: "Ready to merge removed: PR 131 merged, story 120." If the owner had said "merged" as a comment on the entry, the launcher would also reply on that thread and resolve it.
+9. The owner says "merged" for PR 131 in chat. The launcher reads origin with `gh pr view 131 --json state` and sees MERGED before it runs the Close-out section of `../SKILL.md`. Then it removes the PR 131 entry from Ready to merge, republishes the page, re-reads it and checks that the PR 131 link is gone. Chat line: "Ready to merge removed: PR 131 merged, story 120." If the owner had said "merged" as a comment on the entry, the launcher would also reply on that thread and resolve it.
 10. The next card the launcher adds is Q8, because Q7 is used and the counter stands at 7.
 
 ## Related

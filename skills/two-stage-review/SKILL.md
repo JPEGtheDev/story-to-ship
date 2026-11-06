@@ -112,7 +112,11 @@ The stop applies only when a not-passed verdict would need a fourth fix round; a
 After 3 fix rounds on one todo without every review stage the Review Cadence runs for that todo passing, stop that todo and end the turn with a prompt to the owner that states the open findings.
 The owner's answer decides how the todo continues.
 
-See `references/REVIEW_PROTOCOL.md` for full protocol details.
+**Finding marks:** every finding carries one mark: `checked`, `inferred` or `shown by reading`. PASS and APPROVE carry no mark.
+
+**Dispatcher re-run:** the dispatcher re-runs each `checked` finding's command once before the finding reaches the implementer; a finding that does not reproduce goes to a fresh re-check child of the same template (never a resumed one), one re-check per finding, counted toward the fix-round cap.
+
+See `references/REVIEW_PROTOCOL.md` for full protocol details, including the Finding Marks section.
 
 ---
 

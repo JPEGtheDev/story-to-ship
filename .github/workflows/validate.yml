@@ -182,6 +182,19 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the passing commit; no WIP commit.'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes at most one commit, the refactor commit (none when it reports `no refactor needed`); no WIP commit.'
           check agents/implementer.md 'The commit rules in your role block override the commit advice under Constraints.'
+          check agents/code-quality-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/spec-compliance-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/skill-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/code-quality-reviewer.md 'No finding is dropped to meet a length limit.'
+          check agents/skill-reviewer.md 'No finding is dropped to meet a length limit.'
+          check agents/spec-compliance-reviewer.md 'No finding is dropped to meet a length limit.'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md 'No finding is dropped to fit the reply cap.'
+          check skills/two-stage-review/SKILL.md 'a finding that does not reproduce goes to a fresh re-check child of the same template (never a resumed one)'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md 'A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one.'
+          check agents/story-coordinator.md 'Every claim in a hand-back that the owner may act on is marked `checked`, `shown by reading` or `inferred`.'
+          check agents/story-coordinator.md 'If the CI state changed since the review, the finding goes back to the reviewer as `state changed`, not as `does not reproduce`.'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'names the claims the launcher re-checked itself'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'names the claims the launcher re-checked itself'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing three-role loop contract string(s)"
             exit 1
@@ -314,7 +327,7 @@ jobs:
             fi
             while IFS= read -r line; do
               [ -n "$line" ] || continue
-              printf 'FAILED: %s still contains a file-count or tool-call sizing limit: %s\n' "$file" "$line"
+              printf 'FAILED: %s still contains forbidden wording: %s\n' "$file" "$line"
               missing=$((missing + 1))
             done <<< "$hits"
           }
@@ -322,6 +335,7 @@ jobs:
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/code-quality-reviewer.md "Two-edit check (" "Two-edit check:" "internal-only change" "never commit" "not runnable" "git status --porcelain"
           check agents/code-quality-reviewer.md "### Blast radius" "Blast radius:" "Blast-radius check (" "Blast-radius check:" "unproven" "run not possible"
+          checkabsent agents/code-quality-reviewer.md 'keep the highest-ranked findings and say how many you dropped'
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
           check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Buried-caveat audit" "Blocker-disclosure audit" "Dispatch-routing audit" "Correction-source audit" "Correction-source itemization"
@@ -427,8 +441,8 @@ jobs:
             done
           }
           check skills/running-a-sprint/references/MOVED_RATIONALE.md 'reconcile pending' 'Reconcile text' 'reconcile pending after PR <merged PR number>'
-          check skills/running-a-sprint/SKILL.md 'is the one launch the limit and the overlap rule do not gate' 'A reconcile replacement is exempt from the overlap check' 'A reconcile replacement (Close-out step 7) is exempt.' 'for a reconcile replacement do this for the dead runner' 'and `reconcile-<prefix>` for a reconcile replacement' 'follow `references/RECONCILE.md`' 'Moved from SKILL.md: reconcile state' 'Moved from SKILL.md: overlap comparison'
-          check skills/running-a-sprint/references/RECONCILE.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text' 'A reconcile in progress finishes before' 'gh pr list --state open --json number' 'is not a sprint PR' 'reconcile pending after PR <merged PR number>' 'Whenever a Reconcile text is sent, set the state to `reconciling <merged PR number>`' 'exempt from the limit and the overlap rule' 'then tell the owner in one line that the PR head changed' 'set the ledger state to `reconciling <merged PR number>`' 'is not to be merged before the reconcile finishes' 'open question and without replacing it'
+          check skills/running-a-sprint/SKILL.md 'is the one launch the limit and the dependency rule do not gate' 'A reconcile replacement is exempt from the dependency check' 'A reconcile replacement (Close-out step 7) is exempt from the dependency check.' 'for a reconcile replacement do this for the dead runner' 'and `reconcile-<prefix>` for a reconcile replacement' 'follow `references/RECONCILE.md`' 'Moved from SKILL.md: reconcile state' 'A dependency that is closed unmerged, outside the sprint, or circular is an owner question'
+          check skills/running-a-sprint/references/RECONCILE.md 'gh pr diff <PR number> --name-only' 'reconcile pending' 'Reconcile text' 'A reconcile in progress finishes before' 'gh pr list --state open --json number' 'is not a sprint PR' 'reconcile pending after PR <merged PR number>' 'Whenever a Reconcile text is sent, set the state to `reconciling <merged PR number>`' 'exempt from the limit and the dependency rule' 'then tell the owner in one line that the PR head changed' 'set the ledger state to `reconciling <merged PR number>`' 'is not to be merged before the reconcile finishes' 'open question and without replacing it'
           check skills/running-a-sprint/references/INDEX.md '| `RECONCILE.md` |'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Reconcile text:' 'Reconcile: merged PR' 'fresh count of 3' 'run `gh pr view <PR number> --json body`' 'a fresh count of 3 for that reconcile' 'each statement that now contradicts another statement' 'then send any queued Reconcile text' 'or is a fresh reconcile runner' 'or is a fresh reconcile runner, also check the Reconcile: line' 'report the PR as waiting on a reconcile and not to be merged yet' 'then send any queued Reconcile text and record the line'
           checkx agents/story-coordinator.md '## Reconcile'
@@ -436,8 +450,12 @@ jobs:
           check skills/running-a-sprint/references/SCORECARD.md 'Reconciles:' 'reconcile_count()' 'Reconciles (per merge that triggered one)' 'Reconciles: <PRs reconciled>' 'one `Reconciles:` entry per reconcile'
           check skills/running-a-sprint/references/SCORECARD.md '- Needed owner change: <yes, no or unknown>; repository:' '- CI runs for this repository: flaky <n>' 'That class meets the bar.'
           checkx skills/running-a-sprint/references/SCORECARD.md '## Trust number'
-          check skills/running-a-sprint/SKILL.md 'The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria and no file overlap with a working runner.'
+          check skills/running-a-sprint/SKILL.md 'The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria.'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'A hand-back of kind owner question, blocked or cap reached from the pilot keeps the pilot held; the answer to it is not a pass.'
+          check skills/running-a-sprint/SKILL.md 'Depends On: #N' 'A bare #N mention elsewhere in the body does not hold a story'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'Merge order: <n> of <N>'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'rules that contradict each other'
+          check skills/running-a-sprint/references/RECONCILE.md 'the PR next to merge' 'When `gh pr diff` fails for that PR, compare its Files list'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing reconcile contract string(s)"
             exit 1
@@ -459,8 +477,8 @@ jobs:
             done
           }
           check agents/story-coordinator.md 'is the work its acceptance criteria require, not a list of files' 'add the file without an owner question' 'list each added file with a one-line reason in the pull request body' 'adding a file that work needs is not a scope change' 'leave that heading out when no file was added' 'under an "Added files" heading'
-          check skills/running-a-sprint/references/MOVED_RATIONALE.md 'plus the files its pull request changes' 'it compares the Files list only'
-          check skills/running-a-sprint/SKILL.md 'a runner adding a file that work needs is not one and needs no owner question' 'Moved from SKILL.md: reconcile state' 'Moved from SKILL.md: overlap comparison'
+          check skills/running-a-sprint/references/MOVED_RATIONALE.md 'the open story its Depends On line names, or "none"' 'the dependency paragraph in the Capacity section'
+          check skills/running-a-sprint/SKILL.md 'The "Files to Create/Modify" list is an optional, informational field' 'it never holds a launch, and a story with no Files list launches like any other story' 'a runner adding a file that work needs is not one and needs no owner question'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'a file added for that work is not one'
           check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'A file added for that work is not a scope change.'
           check skills/two-stage-review/SKILL.md 'or when a file its child branch changes lies under one of those paths'

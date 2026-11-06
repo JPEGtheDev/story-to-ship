@@ -150,7 +150,8 @@ Do NOT comment on style issues already handled by clang-format. Only flag things
 
 Final message cap: 4,000 characters for the whole final message, counted with `wc -m`; put the decision-relevant lines first, and leave any detail that does not fit in a commit or in a named file under /tmp that the message names.
 The verdict block of every file listed, and every other line your format requires, stay inside the cap; a reply with two blocks counts as one message.
-You commit nothing, so the commit option above does not apply: put detail that does not fit in a named file under /tmp, or keep the highest-ranked findings and say how many you dropped.
+You commit nothing, so the commit option above does not apply: put command output and detail that do not fit in a named file under /tmp that the reply names.
+Every finding carries exactly one mark, as defined in the Finding Marks section of the two-stage-review skill's review protocol reference. `checked`: the exact command run, the command's exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims. No finding is dropped to meet a length limit. A verdict line carries no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
 
 After the return format above, end with ONE summary block per file listed under Files under review, in the exact shape below, nothing merged across files.
 

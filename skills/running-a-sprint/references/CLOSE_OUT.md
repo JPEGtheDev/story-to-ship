@@ -21,7 +21,7 @@ The check prints one line per check, in this order:
 2. `NOTE fetch`: the fetch the check ran. It fetches origin main, and fetches the branch only when origin has it. This line is a note, not a check.
 3. `ancestry`: the merge commit is in origin/main (step 1).
 4. `patch`: the squash diff equals the branch diff from the merge base (step 2).
-5. `worktree`: each worktree is absent, or clean (only the plan file untracked), or it names each status line (step 3). An ignored file counts as well: the check runs `git status --short --ignored`, which lists an ignored file as a `!!` line, so an ignored file makes the worktree FAIL.
+5. `worktree`: each worktree is absent, or clean (only the plan file untracked), or it names each status line (step 3). An ignored file does not count: the check runs `git status --short`, the same status as step 3, which lists no ignored file, so an ignored file leaves the worktree clean.
 
 Each check prints `OK <name>: <value>` or `FAIL <name>: <value>`. The exit codes are 0 when every line is OK, 1 when any line is FAIL, and 2 on a usage error (the usage message goes to stderr and nothing to stdout). The check changes no branch, worktree or file. Its fetch updates only remote-tracking refs.
 

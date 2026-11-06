@@ -67,8 +67,8 @@ This section defines one Discovery-stop rehearsal: a run in which the subject st
 - Subject: one rehearsal-subject agent at Standard tier, run_in_background false, with a dispatch budget of 6, as the Running section states. That section governs these values.
 - Counting: count from the subject's transcript, as the Counting section says. Record six counts, each on its own line:
   1. the first line of the final message is "owner question: Discovery";
-  2. the plan file holds the Feature Specification, the Discovery findings, the open question with its options and recommendation, and the line "Discovery: ran";
-  3. the Discovery hand-over block in the plan file is at most 80 lines, counted with wc -l;
+  2. the plan file holds the "## Discovery Open Items" section, with the Discovery findings, the open question, its options and its recommendation, and the line "Discovery: ran";
+  3. the Discovery hand-over block in the plan file (the block that agents/story-coordinator.md defines) is at most 80 lines, counted with wc -l;
   4. there is no pull request, no push and no merge on any ref;
   5. the dispatch and background counts are taken with dispatch_count and bg_count as the SCORECARD defines them;
   6. the length of the final message is taken with the wc -m command in the Hand-back size contract section of HANDBACK_ROUTING.md, and is at most 3,000 characters.

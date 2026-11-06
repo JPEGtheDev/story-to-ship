@@ -14,9 +14,9 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself: it launches runners, relays and verifies their hand-backs, and closes out each merge. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
-Intake, Capacity, Launch, Watch loop and Close-out moved Context and Forces pairs to references/MOVED_RATIONALE.md.
+Moved pairs and passages: `references/MOVED_RATIONALE.md`.
 
 ---
 
@@ -30,20 +30,20 @@ A story with no acceptance criteria is NOT launched. Relay the gap to the owner 
 
 ## Capacity
 
-Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count, so the next story launches while the owner reviews. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the overlap rule do not gate. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under the rule on launch questions in `references/MOVED_RATIONALE.md`, section Launch question owner text. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the overlap rule allow.
+Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count, so the next story launches while the owner reviews. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the overlap rule do not gate. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under `references/MOVED_RATIONALE.md`, Launch question owner text. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the overlap rule allow.
 
 The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria and no file overlap with a working runner.
 No other story launches until the pilot hands back PR ready and that hand-back passes the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included. The other pilot rules and the release rules are in `references/PILOT.md`.
 
 Every launch question to the owner follows the wording in `references/MOVED_RATIONALE.md`, section Launch question owner text.
 
-A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. Stories that add a skill all edit the README and CONTRIBUTING count lines and their lists overlap, so the launcher runs them one at a time, each waiting until the previous story's pull request is merged. For a sprint story with an open, unmerged pull request the launcher compares another story against that story's Files list plus the files its pull request changes (`gh pr diff <PR number> --name-only`); for a working or held runner with no pull request yet it compares the Files list only, and a conflict from a file that runner adds later is handled by the runner's rebase before it opens its pull request, or by the reconcile (Close-out step 7) once it has one; if the `gh pr diff` call fails, it compares the Files list only. The Files list is an overlap signal only: a story's scope is the work its acceptance criteria require, not a list of files.
+A story whose "Files to Create/Modify" list overlaps the list of a working runner, of a runner held for the owner, or of a sprint story with an open, unmerged pull request waits; it launches at Close-out step 8 after that overlapping story's pull request merges. When the list is absent, run that story alone: it launches only when no other runner is working or held for the owner and no other sprint story has an open, unmerged pull request, and no other story launches until the pull request of the story run alone is merged. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: skill stories. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: overlap comparison. The Files list is an overlap signal only: a story's scope is the work its acceptance criteria require, not a list of files.
 
 ---
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. State value `reconciling <merged PR number>` means a Reconcile text is out; a reconcile waiting to be sent (for the runner to hand back or for the owner to answer) is recorded in the pending question field as `reconcile pending after PR <merged PR number>`. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason, because it has no runner and a reload would lose it. Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state. A story that is not yet running (waiting for a slot, waiting on an overlap, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
 
 The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
@@ -55,13 +55,15 @@ Launch with one Agent call per story:
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text.
 - The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in one session (L = 6 gives 2); a result below 1 is passed as 1.
 
-The launcher creates no worktree for a runner, because the runner creates the tree named by its own `WORKTREE_PREFIX`. Record the runner in the ledger at launch.
+See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree. Record the runner in the ledger at launch.
 
 ---
 
 ## Watch loop
 
-End the turn while runners work. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
+End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep (the routing table alone cannot carry it, since a hand-back never reaches its row): `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. When a hand-back or event arrives, look it up in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
+
+An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A repeat close-out is a no-op. A sprint PR that origin shows CLOSED without a merge holds its runner and tells the owner. Squash is the only merge method the sweep recognizes; the pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
 Verify before relaying anything to the owner:
 
@@ -69,7 +71,7 @@ Verify before relaying anything to the owner:
 - Compare the runner's inline-edit count (the number of lines it edited itself rather than through a child) with `git diff --numstat` of its inline commits against the lane entries in its plan file (its per-todo lane lines); `references/SCORECARD.md` carries the counting command. Report any mismatch.
 - While a runner is live, run the child visibility count (`missing_children`) from `references/SCORECARD.md`.
 - For a PR ready hand-back, relay only its decision sentence (its kind line when it has none), plus the pull request number, CI state and review verdicts from your own `gh pr view`; never paste a hand-back body to the owner. An owner question, blocked or cap reached hand-back becomes a card on the owner questions page (`references/OWNER_QUESTIONS.md`), as its row in `references/HANDBACK_ROUTING.md` says. Read the hand-back's Detail target only when a decision needs it, and note an over-cap hand-back (Hand-back size contract in that file) in the ledger.
-- Add every question for the owner to the owner questions page as a card: an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question, a reconcile question and a pilot check card. A merge-ready PR is a Ready to merge entry on the same page, not a card (see `references/OWNER_QUESTIONS.md`). Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay.
+- Add every question for the owner to the owner questions page as a card: an owner question, a cap override, a scope change, a launch over the limit, an intake gap, a blocked-without-criteria question, a reconcile question, a pilot check card and a close-out stop card. A merge-ready PR is a Ready to merge entry on the same page, not a card (see `references/OWNER_QUESTIONS.md`). Only the launcher writes the page. Chat carries one line per change, plus a pointer to the page when a question is added. The card is the relay.
 
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
@@ -79,7 +81,7 @@ When the session-bootstrap gate prompts again (after a compaction or restart has
 
 ## Close-out
 
-Run these in order after the owner says a PR is merged. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
+Run these in order once origin shows the PR MERGED; the sweep or the owner's report triggers them, not a requirement. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
 
 1. Confirm the merge on origin: `gh pr view <PR number> --json state,mergeCommit` shows MERGED, and `git -C R fetch origin main` then `git -C R merge-base --is-ancestor S origin/main` exits 0 (S is the squash commit).
 2. Compare patches (squash tree-equality; H is the runner branch tip, or `origin/<branch>` after a fetch for a reconcile replacement): `B=$(git -C R merge-base S^ H); cmp <(git -C R diff $B H | grep -v '^index ') <(git -C R diff S^ S | grep -v '^index ')`. A difference goes to the owner; do not continue.
@@ -90,6 +92,8 @@ Run these in order after the owner says a PR is merged. Every git call is `git -
 7. Reconcile the other open sprint PRs against the merged change: follow `references/RECONCILE.md`, which holds all of step 7.
 8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released.
 
+A check that fails at a step stops there and goes to the owner as today; the branch and worktree stay. A close-out that stops after branch deletion (step 4) gets a close-out stop card naming the failed step; nothing is re-run, and its Ready to merge entry is removed. A finished close-out gets one chat line to the owner and the same removal.
+
 ---
 
 ## BEFORE PROCEEDING
@@ -99,7 +103,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 1. The ledger was re-read this turn and the runner or story is in it.
 2. A launch names `STORY_NUMBER`, `REPO_ROOT`, `WORKTREE_PREFIX` and `PARALLEL_LIMIT`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no overlap with a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request. A reconcile replacement is exempt from the overlap check (Close-out step 7). Until the pilot passes or a release rule in `references/PILOT.md` ends the hold, only the pilot launches.
 3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, apart from the ledger note for an over-cap hand-back, and the PR number and CI state were re-checked with `gh pr view`.
-4. A close-out starts only after the owner reported the merge, and runs in the order of the Close-out section.
+4. A close-out starts only after origin shows the PR MERGED (by the sweep or an owner report), and runs in the order of the Close-out section.
 
 [+] All 4 met -> proceed
 [-] Any unmet -> fix it first: re-read the ledger, look up the row, or relay the question to the owner
@@ -114,7 +118,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
 - About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose file list overlaps a working runner, a runner held for the owner, or a sprint story with an open, unmerged pull request -- STOP. Wait until the working count is below the limit (or an owner answer names the new limit or that launch, under the rule on launch questions in Capacity) or the overlapping story's pull request merges, or run it alone when the list is absent. A reconcile replacement (Close-out step 7) is exempt.
 - About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the overlap, and launch only on an answer that names the new limit or that launch.
-- About to close out before the owner reported the merge, or in a different order -- STOP. Confirm the merge on origin and follow the Close-out steps in order.
+- About to close out before origin shows the PR MERGED, or in a different order -- STOP. Confirm the merge with `gh pr view` and follow the Close-out steps in order.
 - About to resolve a reconcile conflict myself, merge a reconciled PR, or resume a runner held on an owner question, blocked or cap reached before the owner answers -- STOP. The runner resolves, the owner merges, and a held runner waits; check the PR state with `gh pr view` and the ledger state before acting.
 - About to put rule text, a vendor model name or a worktree path for the runner into the launch prompt -- STOP. Name the four inputs and the scope only.
 - About to launch a story while the pilot line is held or failed (released allows launches), other than the pilot itself, or about to release the hold by resuming the pilot alone -- STOP. The hold ends only by the release rules in `references/PILOT.md`; read the ledger's pilot line first.
@@ -125,7 +129,7 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 | Excuse | Reality |
 |--------|---------|
-| "The story is obvious; I will write its acceptance criteria and launch." | A runner and a launcher both inventing criteria is the failure intake exists to stop. Relay the gap and continue with the other stories. |
+| "The story is obvious; I will write its acceptance criteria and launch." | Invented criteria are the failure intake exists to stop. Relay the gap and continue with the other stories. |
 | "The runner's recommendation is clearly right; I will approve it." | The owner reserves merge, fix-round cap override and scope change. The recommendation goes to the owner, not past them. |
 | "The hand-back says CI is green; re-running `gh pr view` is redundant." | The runner reports its own output. The launcher's check is the only independent one. |
 | "A child's result arrived; I will answer the child and save a turn." | The result belongs to the runner's plan. Resume the runner with the child-result text and never act on it. |
@@ -138,22 +142,22 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 
 ## Related Skills
 
-- `subagent-driven-development` -- Model Selection holds the tier table; the runner's children follow its dispatch rules
-- `two-stage-review` -- the review stages and fix-round cap the runner runs
-- `using-git-worktrees` -- every runner and child works in its own worktree
+- `subagent-driven-development` -- tier table (Model Selection) and the children's dispatch rules
+- `two-stage-review` -- the review stages and fix-round cap
+- `using-git-worktrees` -- one worktree per runner and child
 - `user-story-generator` -- the route for a story with no acceptance criteria
-- `three-amigos` -- Discovery, which the runner runs for launched stories
-- `session-bootstrap` -- the launcher re-invokes it alone when its gate prompts again
+- `three-amigos` -- Discovery, run by the runner for launched stories
+- `session-bootstrap` -- the launcher re-invokes it alone at a gate prompt
 
 ---
 
 ## References
 
-- [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, the required hand-back lines, the hand-back size contract and the resume texts
-- [references/OWNER_QUESTIONS.md](references/OWNER_QUESTIONS.md) -- the owner questions page: card fields, context section, layout, numbering, ledger fields, failure handling and a worked example
-- [references/RECONCILE.md](references/RECONCILE.md) -- Close-out step 7: the reconcile of open sprint PRs after a merge
-- [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures with counting commands, subagent-transcript audit and the scorecard row
-- [references/REHEARSAL.md](references/REHEARSAL.md) -- the coordinator rehearsal to repeat when the story-coordinator template changes
-- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved Context and Forces pairs of the Intake, Capacity, Launch, Watch loop and Close-out sections, and its Launch question owner text section
+- [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md) -- the 11-row routing table, required lines, size contract and resume texts
+- [references/OWNER_QUESTIONS.md](references/OWNER_QUESTIONS.md) -- the owner questions page: cards, layout, numbering, ledger fields, failure handling, worked example
+- [references/RECONCILE.md](references/RECONCILE.md) -- Close-out step 7: reconciling open sprint PRs after a merge
+- [references/SCORECARD.md](references/SCORECARD.md) -- predictions, measures, transcript audit, scorecard row
+- [references/REHEARSAL.md](references/REHEARSAL.md) -- coordinator rehearsal, repeated when its template changes
+- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md) -- moved pairs and passages, and the Launch question owner text section
 - [references/PILOT.md](references/PILOT.md) -- the pilot runner and its release rules
 - [references/INDEX.md](references/INDEX.md) -- index of the reference files

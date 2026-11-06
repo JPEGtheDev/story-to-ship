@@ -52,6 +52,28 @@ When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANG
 
 ---
 
+## Finding Marks
+
+Every finding carries one of three marks. The mark states what stands behind the claim.
+
+- `checked`: the reviewer ran a command. The finding gives the command, its last 40 lines of output, and the output the code needs instead.
+- `inferred`: no run stands behind the claim. The finding states the reason no run was made.
+- `shown by reading`: the finding quotes a file:line that a reader can check, and that line says what the finding claims.
+
+Scope: correctness, naming and design findings all carry a mark. PASS and APPROVE verdicts carry no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
+
+Dispatcher re-run: before a finding reaches the implementer, the dispatcher re-runs the finding's command once. A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one. One re-check per finding. A re-check counts toward the fix-round cap of the todo the finding belongs to; a re-check against a whole-branch Stage 2 finding counts toward the 3-cycle cap.
+
+Shown-by-reading findings: the dispatcher reads the quoted file:line and checks that it says what the finding claims. No command runs for these findings.
+
+Safety: a re-run never changes the worktree and never writes through gh. A command that writes to the tree or calls gh is not re-run; the finding stays `inferred` and the reason is stated. Findings that share one command re-run it once. If the CI state changed since the review, the finding goes back to the reviewer as `state changed`, not as `does not reproduce`.
+
+Reply size: command output goes to a named file under /tmp that the reply names. No finding is dropped to fit the reply cap.
+
+Owner rulings supersede the AC2 wording of story 411: the re-check is a fresh child of the same template and counts toward the fix-round cap.
+
+---
+
 ## Child Report Size Cap
 
 **Context:** A child's final message enters the dispatcher's context in full and the dispatcher cannot shorten it. In two long sessions, sub-agent hand-backs were 13.0% and 18.4% of the characters added to the main thread (794,337 and 863,233 characters), and pasted diffs and long command output carried most of them (172,009 of 794,337 characters were inside code fences in the first session).

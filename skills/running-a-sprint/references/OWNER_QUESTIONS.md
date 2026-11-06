@@ -54,6 +54,7 @@ Every card carries these fields, with these exact names:
 - `status`: only when relevant, for example the CI state of a PR. Leave the field out when it does not apply.
 
 Required: `number`, `story or topic`, `question`, `options` and `recommendation`. Optional: `status`.
+A card or Ready to merge entry keeps each runner claim's mark (checked, shown by reading, or inferred) and names the claims the launcher re-checked itself.
 
 A launch card also states, for each story it names:
 

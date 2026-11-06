@@ -185,6 +185,10 @@ jobs:
           check agents/code-quality-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
           check agents/spec-compliance-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
           check agents/skill-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/code-quality-reviewer.md 'No finding is dropped to meet a length limit.'
+          check agents/skill-reviewer.md 'No finding is dropped to meet a length limit.'
+          check agents/spec-compliance-reviewer.md 'No finding is dropped to meet a length limit.'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md 'No finding is dropped to fit the reply cap.'
           check skills/two-stage-review/SKILL.md 'a finding that does not reproduce goes to a fresh re-check child of the same template (never a resumed one)'
           check skills/two-stage-review/references/REVIEW_PROTOCOL.md 'A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one.'
           check agents/story-coordinator.md 'Every claim in a hand-back that the owner may act on is marked `checked`, `shown by reading` or `inferred`.'
@@ -323,7 +327,7 @@ jobs:
             fi
             while IFS= read -r line; do
               [ -n "$line" ] || continue
-              printf 'FAILED: %s still contains a file-count or tool-call sizing limit: %s\n' "$file" "$line"
+              printf 'FAILED: %s still contains forbidden wording: %s\n' "$file" "$line"
               missing=$((missing + 1))
             done <<< "$hits"
           }

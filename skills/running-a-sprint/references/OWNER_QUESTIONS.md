@@ -32,8 +32,9 @@ A merge-ready PR is a Ready to merge entry, not a card; see the Ready to merge s
 **Context:** A runner hands back a PR ready with nothing left for the owner to decide.
 **Forces:** A merge card asks the owner to choose between merge and hold on a fact the launcher has already verified, while a statement costs the owner one line to read and keeps the cards for real decisions.
 
-- **Placement.** The section has the heading "Ready to merge" and sits above the open question cards. Its entries are listed newest first.
+- **Placement.** The section has the heading "Ready to merge" and sits above the open question cards. Its entries are listed in the recommended merge order; the first entry is the PR next to merge.
 - **Entry.** One statement per merge-ready PR: the PR link, the story, one line on what the PR does, and the verification line. An entry has no question number, no options and no recommendation.
+- **Position.** Each entry carries "Merge order: <n> of <N>" and one line of reason: a dependency the PR's story has, or the reconcile that is smallest. The reason is one line.
 - **Verification line.** One line, written by the launcher from its own `gh pr view <n> --json number,state,mergeable,headRefOid,statusCheckRollup,body` and its `gh pr view <n> --json isDraft`. It states the PR state, mergeable, the CI state on the head, whether the head equals the runner worktree head (`git -C <runner worktree> rev-parse HEAD` equals headRefOid), the closing keyword in the body, the footer in the body, that isDraft is false (the pull request is not a draft), the inline-edit comparison, and the reconcile checks in the PR ready row of `HANDBACK_ROUTING.md`.
 - **Optional checks.** The inline-edit comparison applies only when the runner made inline commits. The reconcile checks apply only when a reconcile was queued or sent. Every other check is required.
 - **Owner action.** The owner acts on an entry by saying "merged", either in chat or as a comment on the entry on the page. Entries have no number to answer by.
@@ -58,7 +59,7 @@ A launch card also states, for each story it names:
 
 - "working N of L", where N is the number of working runners counted from the ledger re-read this turn and L is the limit now in force.
 - "held for the owner M (open PRs)", where M is the number of sprint stories held for the owner or with an open, unmerged PR, each counted once.
-- The story's file overlap under the Capacity section of `../SKILL.md`: the working runner, held runner or open-PR story it overlaps, "none", or "list absent, run alone".
+- The story's dependency: the story its "Depends On" line names that is still open, or "none".
 
 **Context:** A card is a launch card or any other kind of question, and each kind carries a different set of required fields.
 **Forces:** A launch card without its counts turns the owner's "go" into an approval the launcher has to interpret, while extra counts on any other card bury the one decision the owner has to make.
@@ -78,9 +79,9 @@ A launch card also states, for each story it names:
 ## Layout
 
 - A new page starts from `owner-questions-template.html` in this directory. When the template and the prose rules in this file differ, the prose rules govern.
-- The Ready to merge section sits above the open question cards, and its entries are listed newest first.
+- The Ready to merge section sits above the open question cards, and its entries are listed in the recommended merge order.
 - Cards are listed newest first.
-- A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or overlap, with no question number, so the owner sees that nothing is needed from them.
+- A "waiting on runners, not you" list sits below the cards. It names each story whose runner is still working or whose launch waits on capacity or a dependency, with no question number, so the owner sees that nothing is needed from them.
 - A card is removed once its question is answered and the answer is acted on. Removing it before the action is done is a defect.
 - Question numbers start at Q1. The owner may ask for numbering to restart; when it does, the page says when numbering restarted, and the ledger records the restart and the highest number used since.
 - The top of the page has two status lines, labeled Working and Needs you. Each element carries `data-status` with that label. Working holds a short count and summary of the runners at work. Needs you holds a short count and summary of what waits on the owner: the cards and the Ready to merge entries. These lines hold counts and summaries only; the "waiting on runners, not you" list names each story. The launcher replaces each line with the editor's `status` op (an operation of `page-edit.sh`, listed under Editing the page) after every change.
@@ -99,6 +100,7 @@ The input file holds key=value lines, each split at its first "=". The input mus
 - `status`: keys `status` (the label, for example Working) and `text`. Replaces the text of the line that carries that `data-status` label with "label: text".
 - `ready-add`: keys `pr` (digits only) and `entry` (one line of HTML). The new entry goes first in the Ready to merge list. The list is the first `ul` element after the line that holds `id="ready"`, whether it is written as `<ul>` or with attributes; the search stops at the first later line that holds `<section` or `<h2`, and with no list before that line the op fails with `no list after anchor ready`.
 - `ready-remove`: key `pr`. Removes that pull request's Ready to merge entry.
+- Merge order changes: because `ready-add` inserts first, a change of recommended order is made by one `ready-remove` for every entry on the list, then one `ready-add` for each entry in reverse recommended order (the last place first, the next-to-merge PR last). The chat line for that change names the count of `ready-remove` and `ready-add` calls.
 
 Each run prints one OK line per op (for `hide`, one per distinct id), or one FAIL line; the one other line is `NOTE hide: <id> has no context section`, printed after the OK line of a card with no context section. Exit codes: 0 when all ops are OK, 1 on a FAIL, 2 on a usage error. When a required anchor (the `id` attribute value or `data-status` or `data-pr` attribute value the script finds a line by) is missing or occurs more than once, a key is missing, or the input has any character other than printable ASCII and tab, the script fails and leaves the page file byte-identical. Two anchors are exceptions: the `c-<id>` anchor of `hide` may be absent (see `hide`), and `ready-add` requires that the new `pr` is not already on the page. The launcher reads the FAIL line, fixes the input and runs the script again. It does not edit the page file by hand to get around a FAIL.
 

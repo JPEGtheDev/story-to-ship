@@ -62,9 +62,9 @@ If RED equals GREEN on the three behaviors, first grep the skills the subject lo
 
 This section defines one Discovery-stop rehearsal: a run in which the subject stops at Discovery with an owner question and hands back. It uses the Fixture, Running and Counting sections above, with the differences listed here.
 
-- Fixture: the sandbox described in the Fixture section, with one difference. The story is story 1's stub story file, and its acceptance criteria hold one question only the owner can answer; that file is the one that holds the question. Leave out the Feature Specification section that states Discovery ran, because a Discovery stop needs the subject to run Discovery.
+- Fixture: the sandbox described in the Fixture section, with one difference. The story is story 1's stub story file, and its acceptance criteria hold one question only the owner can answer. Leave out the Feature Specification section that states Discovery ran, because a Discovery stop needs the subject to run Discovery.
 - Arms: one run, GREEN arm only (the template as shipped). The two-runs-per-arm rule in the Running section does not apply to this single run, so the run gives no RED comparison and no rate.
-- Subject: one rehearsal-subject agent at Standard tier, run_in_background false, with a dispatch budget of 6, as the Running section states. That section governs these values.
+- Subject: one rehearsal-subject agent at Standard tier, run_in_background false, with a dispatch budget of 6, as the Running section states.
 - Counting: count from the subject's transcript, as the Counting section says. Record each item below on its own line, six items in all:
   1. the first line of the final message is "owner question: Discovery";
   2. the plan file holds the "## Discovery Open Items" section, with the Discovery findings, the open question, its options and its recommendation, and the line "Discovery: ran";
@@ -74,5 +74,5 @@ This section defines one Discovery-stop rehearsal: a run in which the subject st
   6. the length of the final message is taken with the wc -m command in the Hand-back size contract section of `HANDBACK_ROUTING.md`, and is at most the cap stated in that section.
 
   The run passes when items 1-4 and 6 hold, and item 5 passes when the dispatch count is at least 1 and the background count is 0, as Reading the result states.
-- Consent: the owner's consent is needed for this one run. A rehearsal of this kind needs that consent for each run.
+- Consent: this run needs the owner's consent, as the Limits section says.
 - Limits: one run gives no rate. This section does not rehearse the fresh-runner path, meaning the launch of a fresh runner after the owner answers; the run ends at the hand-back. The Limits section applies to this section too.

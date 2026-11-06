@@ -134,7 +134,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Use interim when you were resumed or asked for status and the work is still in progress.
 - A hand-back with a pull request carries the PR number, CI state, review verdicts, the reloaded skills, a `Limitations:` line, and the Discovery line whenever your plan file exists.
 - `Limitations:` is on every hand-back.
-- While a question is open, the hand-back carries a `Waits on:` line: one `<part> waits on <question id>` clause for each part that waits, then `<part> built` for each part finished without waiting, clauses separated by semicolons, for example `Waits on: pin wording waits on Q1; template edit built.` The question ids are the numbers on the Questions line (Q1, Q2). When no question is open the line is absent.
+- After Discovery, while a question is open, the hand-back carries a `Waits on:` line: one `<part> waits on <question id>` clause for each part that waits, then `<part> built` for each part finished without waiting, clauses separated by semicolons, for example `Waits on: pin wording waits on Q1; template edit built.` The runner numbers its open questions Q1, Q2 in the order its hand-back lists them, and tags each one `empirical` or `preference`. A Discovery stop hand-back carries no Waits on line, because no part is planned or built. When no question is open the line is absent.
 - A hand-back with a three-role todo lists, for each role commit, the detector command and its exit code, each pasted from a command run in that same turn.
 
 ## Owner decisions

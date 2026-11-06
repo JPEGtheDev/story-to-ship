@@ -182,6 +182,15 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the passing commit; no WIP commit.'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes at most one commit, the refactor commit (none when it reports `no refactor needed`); no WIP commit.'
           check agents/implementer.md 'The commit rules in your role block override the commit advice under Constraints.'
+          check agents/code-quality-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/spec-compliance-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check agents/skill-reviewer.md '`checked`: the exact command run, the command'\''s exit status and last line in the reply, and its last 40 lines in the named /tmp file, and the output the code needs instead. `inferred`: no run stands behind the claim; state the reason. `shown by reading`: a quoted file:line that a reader can check says what the finding claims.'
+          check skills/two-stage-review/SKILL.md 'a finding that does not reproduce goes to a fresh re-check child of the same template (never a resumed one)'
+          check skills/two-stage-review/references/REVIEW_PROTOCOL.md 'A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one.'
+          check agents/story-coordinator.md 'Every claim in a hand-back that the owner may act on is marked `checked`, `shown by reading` or `inferred`.'
+          check agents/story-coordinator.md 'If the CI state changed since the review, the finding goes back to the reviewer as `state changed`, not as `does not reproduce`.'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'names the claims the launcher re-checked itself'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'names the claims the launcher re-checked itself'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing three-role loop contract string(s)"
             exit 1
@@ -322,6 +331,7 @@ jobs:
           check agents/code-quality-reviewer.md "Evidence Spot-Check" "IMPLEMENTER_EVIDENCE"
           check agents/code-quality-reviewer.md "Two-edit check (" "Two-edit check:" "internal-only change" "never commit" "not runnable" "git status --porcelain"
           check agents/code-quality-reviewer.md "### Blast radius" "Blast radius:" "Blast-radius check (" "Blast-radius check:" "unproven" "run not possible"
+          checkabsent agents/code-quality-reviewer.md 'keep the highest-ranked findings and say how many you dropped'
           check agents/skill-reviewer.md "IMPLEMENTER_EVIDENCE"
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "Evidence Spot-Check"
           check agents/postmortem-reviewer.md "Limitation-disclosure audit" "Evidence-spot-check audit" "Buried-caveat audit" "Blocker-disclosure audit" "Dispatch-routing audit" "Correction-source audit" "Correction-source itemization"

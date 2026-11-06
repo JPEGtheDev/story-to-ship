@@ -56,11 +56,11 @@ When a fix round follows a review finding -- Stage 1 GAPS, Stage 2 REQUEST CHANG
 
 Every finding carries one of three marks. The mark states what stands behind the claim.
 
-- `checked`: the reviewer ran a command. The finding gives the command, its last 40 lines of output, and the output the code needs instead.
+- `checked`: the reviewer ran a command. The finding gives the command, the command's exit status and last line in the reply, its last 40 lines in the named file under /tmp, and the output the code needs instead.
 - `inferred`: no run stands behind the claim. The finding states the reason no run was made.
 - `shown by reading`: the finding quotes a file:line that a reader can check, and that line says what the finding claims.
 
-Scope: correctness, naming and design findings all carry a mark. PASS and APPROVE verdicts carry no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
+Scope: every finding carries a mark. A verdict line carries no mark. A command that cannot run is reported as `run not possible` and marked `inferred`, with the reason.
 
 Dispatcher re-run: before a finding reaches the implementer, the dispatcher re-runs the finding's command once. A finding that does not reproduce goes back to a fresh re-check child of the same template, never a resumed one. One re-check per finding. A re-check counts toward the fix-round cap of the todo the finding belongs to; a re-check against a whole-branch Stage 2 finding counts toward the 3-cycle cap.
 
@@ -70,7 +70,7 @@ Safety: a re-run never changes the worktree and never writes through gh. A comma
 
 Reply size: command output goes to a named file under /tmp that the reply names. No finding is dropped to fit the reply cap.
 
-Owner rulings supersede the AC2 wording of story 411: the re-check is a fresh child of the same template and counts toward the fix-round cap.
+Where an owner ruling and the story's acceptance criteria differ, the owner ruling governs the re-check path: a fresh child of the same template, counted toward the fix-round cap.
 
 ---
 

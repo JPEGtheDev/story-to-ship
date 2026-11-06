@@ -35,6 +35,8 @@ Ghost commits from prior agents are a recurring risk. An uncommitted change with
 active work in progress means a prior agent or a manual edit left state behind; starting
 new work on top of it contaminates the diff.
 
+A session with no repository has no working tree, so there is nothing to contaminate, and item 5 is met there with no git command.
+
 ---
 
 ## Why Hook Fixes Need an Observed Firing

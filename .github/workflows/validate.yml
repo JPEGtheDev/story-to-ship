@@ -957,6 +957,29 @@ jobs:
           fi
           echo "[+] formulation heading pin is present"
 
+      # A pin proves the wording exists in the file, and that it occurs once across skills/ and agents/. It does not prove a runner follows the rule.
+      # HANDBACK_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it. The skills/ and agents/ count ignores it.
+      - name: Check the fresh-runner Discovery rule is pinned once
+        run: |
+          missing=0
+          f="${HANDBACK_PATH:-skills/running-a-sprint/references/HANDBACK_ROUTING.md}"
+          s='A Discovery stop with a plan file is answered by a fresh runner for the same story, worktree and branch, and never by resuming the stopped runner.'
+          n=$(grep -oF -- "$s" "$f" | wc -l)
+          if [ "$n" -ne 1 ]; then
+            printf 'FAILED: %s holds %s occurrences of the fresh-runner rule, expected 1\n' "$f" "$n"
+            missing=$((missing + 1))
+          fi
+          t=$(grep -rF -o --include='*.md' -- "$s" skills agents | wc -l)
+          if [ "$t" -ne 1 ]; then
+            printf 'FAILED: skills/ and agents/ hold %s occurrences of the fresh-runner rule, expected 1\n' "$t"
+            missing=$((missing + 1))
+          fi
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing fresh-runner rule pin(s) failing"
+            exit 1
+          fi
+          echo "[+] fresh-runner Discovery rule pin is present once"
+
       # A pin proves the wording exists in the file, not where it sits or that the skeptic follows it. The two class lines are whole-line matches; the other pins are substring matches.
       # CEREMONIES_PATH overrides the file path so the gate-can-fail proof can point this step at a temp copy; CI never sets it.
       - name: Check the Discovery formulation check is pinned

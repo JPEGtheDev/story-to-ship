@@ -224,7 +224,7 @@ check_worktree() {
     emit "OK worktree: $1 absent"
     return
   fi
-  if ! git -C "$1" status --short --ignored > "$TMP/status" 2>/dev/null; then
+  if ! git -C "$1" status --short > "$TMP/status" 2>/dev/null; then
     emit "FAIL worktree: $1 status failed"
     return
   fi

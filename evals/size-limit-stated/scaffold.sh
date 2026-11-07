@@ -13,4 +13,5 @@ Files:
 Depends on: none
 
 Before editing, read docs/size-policy.md for the CI size limit on skill files.
+Measure the current size of skills/demo/SKILL.md with wc -c before editing.
 PLAN

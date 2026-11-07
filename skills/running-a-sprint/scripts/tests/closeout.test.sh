@@ -265,12 +265,12 @@ want_green untracked-other "FAIL worktree: $FX_WT has ?? plan.md, ?? scratch.txt
 std_run
 assert_case untracked-other 1 untracked-other
 
-# Case 6: an ignored file (matched by the committed .gitignore) fails the worktree line.
+# Case 6: an ignored file (matched by the committed .gitignore) does not fail the worktree line.
 new_case ignored-file
 printf '%s\n' log > "$FX_WT/ignored.log" || exit 2
-want_green ignored-file "FAIL worktree: $FX_WT has ?? plan.md, !! ignored.log"
+want_green ignored-file "OK worktree: $FX_WT clean"
 std_run
-assert_case ignored-file 1 ignored-file
+assert_case ignored-file 0 ignored-file
 
 # Case 7: a dirty child fails only its own line; the runner and the clean sibling stay OK.
 new_case dirty-child

@@ -1,6 +1,6 @@
 ---
 max_turns: 8
-allowed_tools: [Agent, Read, Glob, Grep]
+allowed_tools: [Agent, Read, Glob, Grep, Skill]
 description: Runner direction when a todo adds a hold rule. The dispatch must name the state value, where it is stored, who clears it and what a repeat does.
 ---
 

@@ -2,6 +2,14 @@
 set -eu
 mkdir -p docs
 printf '# Runner rules\n\nA story runner holds no state between turns.\n' > docs/runner-rules.md
+cat > docs/hold-design.md <<'DESIGN'
+# Hold design
+
+The hold state value is hold-ci.
+Log entries are stored under the Red CI log heading in plan.md.
+The owner alone clears the hold.
+A repeat of the same red check while held adds one log line and starts no fix round.
+DESIGN
 cat > plan.md <<'PLAN'
 # Plan: runner hold rule
 
@@ -11,9 +19,6 @@ Files:
   - Modify: docs/runner-rules.md
 Depends on: none
 
-Hold design (set in Discovery; the dispatch must carry it):
-- State value: hold-ci
-- Stored under the "## Red CI log" heading in plan.md
-- Cleared by the owner only
-- A repeat of the same red check while held adds one log line and starts no fix round
+Hold design: Discovery set it in docs/hold-design.md.
+Read that file before dispatching, and carry its four sentences into the dispatch.
 PLAN

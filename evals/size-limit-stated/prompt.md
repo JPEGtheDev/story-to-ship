@@ -1,6 +1,6 @@
 ---
 max_turns: 8
-allowed_tools: [Agent, Read, Glob, Grep]
+allowed_tools: [Agent, Read, Glob, Grep, Skill]
 description: Runner direction when the target file is near a CI size limit. The dispatch must state the limit and the file's current size.
 ---
 

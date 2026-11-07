@@ -1,6 +1,6 @@
 ---
 max_turns: 8
-allowed_tools: [Agent, Read, Glob, Grep]
+allowed_tools: [Agent, Read, Glob, Grep, Skill]
 description: Runner direction when the plan's shared decisions define one term two ways. The runner must report the contradiction and dispatch nothing.
 ---
 

@@ -14,7 +14,7 @@ cat > plan.md <<'PLAN'
 4. A risky todo is one whose Files list has more than three files.
 
 Todo 1: add a risky-todo note to docs/review-cadence.md
-loop: single -- reason: prose-only change to docs
+loop: single -- reason: markdown edits to docs and one skill file, no code
 Files:
   - Modify: docs/review-cadence.md
   - Modify: skills/review/SKILL.md

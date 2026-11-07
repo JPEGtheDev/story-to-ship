@@ -1,6 +1,6 @@
 ---
 type: tool_used
 tool: Agent
-input_match: "20,?000"
+input_match: "\\b20,?000\\b"
 min: 1
 ---

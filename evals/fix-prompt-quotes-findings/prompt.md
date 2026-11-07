@@ -1,6 +1,6 @@
 ---
 max_turns: 8
-allowed_tools: [Agent, Read, Glob, Grep]
+allowed_tools: [Agent, Read, Glob, Grep, Skill]
 description: Runner direction for a fix round. The fix-round implementer dispatch must quote each reviewer finding word for word with a fix or decline word.
 ---
 

@@ -1,6 +1,6 @@
 ---
 max_turns: 8
-allowed_tools: [Agent, Read, Glob, Grep]
+allowed_tools: [Agent, Read, Glob, Grep, Skill]
 description: Runner direction when a rule lives in two files and the todo edits only one. The dispatch must name the second file and say to align it.
 ---
 

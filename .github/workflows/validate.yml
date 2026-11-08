@@ -48,6 +48,8 @@ jobs:
           shellcheck hooks/tests/run-hooks-json-quoting.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
+          shellcheck tools/validate_workflow/run.sh
+          shellcheck tools/validate_workflow/tests/run.sh
           echo "[+] All shell scripts pass shellcheck"
 
       - name: Run all hook fixture suites

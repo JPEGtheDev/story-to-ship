@@ -1,0 +1,109 @@
+step	Validate hooks.json
+step	Validate .claude-plugin JSON files
+step	Shellcheck shell scripts
+step	Run all hook fixture suites
+step	Run first-action audit tests
+step	Stop turn-log wedge safety (empty stdin)
+step	Enforce pre-message hook word budget
+step	Check loaded pre-message variants are empty or a single line
+step	Check three-role loop contract strings
+step	Check for broken references in skill files
+step	Validate SKILL.md frontmatter
+step	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values
+step	Require one tools line in agents/ frontmatter
+step	Check agent template contracts
+step	Check reconcile contract strings
+step	Check scope contract strings
+step	Check hand-back size contract strings
+step	Check child report size cap strings
+step	Check owner questions page strings
+step	Check Ready to merge strings
+step	Check draft pull request rules
+step	Check owner questions template
+step	Check parallel todo contract strings
+step	Check review cadence contract strings
+step	Check risky-todo rule has no shared-file clause
+step	Check agent templates index matches agents/
+step	Check Discovery example map is pinned
+step	Check Discovery skeptic check and economy tier are pinned
+step	Check acceptance proof kinds are pinned
+step	Check three-amigos reference list names proof kinds for the formulation reference
+step	Check the formulation heading is pinned
+step	Check the Discovery formulation check is pinned
+step	Check the flaky-test rules are pinned
+step	Enforce size cap on core skills
+step	Hook script smoke test
+step	SessionStart source-branch detector
+step	Verify .claude/hooks symlink integrity
+step	Check hooks/README.md matches .claude/hooks
+step	Run session-events converter unit tests
+step	Run context-measure unit tests
+step	Run tier usage script unit tests
+step	Shellcheck role-check scripts
+step	Run role-boundary detector and plan-marker fixtures
+step	Shellcheck running-a-sprint scripts
+step	Run running-a-sprint script tests
+step	Check the detector in the reference matches the shipped script
+step	Check plan-check instruction strings
+step	Check red CI classification strings
+step	Check Discovery line rule strings
+step	Check running-a-sprint SKILL.md row counts
+step	Run validate workflow guard
+step	Run validate workflow guard tests
+covers	Enforce size cap on core skills	skills/honesty/SKILL.md
+covers	Enforce size cap on core skills	skills/communication/SKILL.md
+covers	Enforce size cap on core skills	skills/subagent-driven-development/SKILL.md
+covers	Enforce size cap on core skills	skills/two-stage-review/SKILL.md
+covers	Enforce size cap on core skills	skills/running-a-sprint/SKILL.md
+proof	Check agent templates index matches agents/	IDX_PATH=skills/subagent-driven-development/references/AGENT_TEMPLATES.md	skills/subagent-driven-development/references/AGENT_TEMPLATES.md	empty	index missing or stale row for
+proof	Check the formulation heading is pinned	FORMULATION_PATH=skills/three-amigos/references/FORMULATION.md	skills/three-amigos/references/FORMULATION.md	empty	has no line equal to: ## Formulation
+proof	Check the Discovery formulation check is pinned	CEREMONIES_PATH=skills/three-amigos/references/CEREMONIES.md	skills/three-amigos/references/CEREMONIES.md	empty	has no text containing: **Formulation class (Discovery only):**
+proof	Check the flaky-test rules are pinned	FLAKY_TESTS_PATH=skills/testing/references/FLAKY_TESTS.md	skills/testing/references/FLAKY_TESTS.md	empty	has no line equal to: No automatic retries
+proof	Enforce size cap on core skills	-	skills/honesty/SKILL.md	oversize	exceeding the 20000-character limit
+proof	Run validate workflow guard	-	tools/validate_workflow/checks.list	empty	FINDING
+proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	FAIL
+pending	Validate hooks.json	must-fail proof filed in #455
+pending	Validate .claude-plugin JSON files	must-fail proof filed in #455
+pending	Shellcheck shell scripts	must-fail proof filed in #455
+pending	Run all hook fixture suites	must-fail proof filed in #455
+pending	Run first-action audit tests	must-fail proof filed in #455
+pending	Stop turn-log wedge safety (empty stdin)	must-fail proof filed in #455
+pending	Enforce pre-message hook word budget	must-fail proof filed in #455
+pending	Check loaded pre-message variants are empty or a single line	must-fail proof filed in #455
+pending	Check three-role loop contract strings	must-fail proof filed in #455
+pending	Check for broken references in skill files	must-fail proof filed in #455
+pending	Validate SKILL.md frontmatter	must-fail proof filed in #455
+pending	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values	must-fail proof filed in #455
+pending	Require one tools line in agents/ frontmatter	must-fail proof filed in #455
+pending	Check agent template contracts	must-fail proof filed in #455
+pending	Check reconcile contract strings	must-fail proof filed in #455
+pending	Check scope contract strings	must-fail proof filed in #455
+pending	Check hand-back size contract strings	must-fail proof filed in #455
+pending	Check child report size cap strings	must-fail proof filed in #455
+pending	Check owner questions page strings	must-fail proof filed in #455
+pending	Check Ready to merge strings	must-fail proof filed in #455
+pending	Check draft pull request rules	must-fail proof filed in #455
+pending	Check owner questions template	must-fail proof filed in #455
+pending	Check parallel todo contract strings	must-fail proof filed in #455
+pending	Check review cadence contract strings	must-fail proof filed in #455
+pending	Check risky-todo rule has no shared-file clause	must-fail proof filed in #455
+pending	Check Discovery example map is pinned	must-fail proof filed in #455
+pending	Check Discovery skeptic check and economy tier are pinned	must-fail proof filed in #455
+pending	Check acceptance proof kinds are pinned	must-fail proof filed in #455
+pending	Check three-amigos reference list names proof kinds for the formulation reference	must-fail proof filed in #455
+pending	Hook script smoke test	must-fail proof filed in #455
+pending	SessionStart source-branch detector	must-fail proof filed in #455
+pending	Verify .claude/hooks symlink integrity	must-fail proof filed in #455
+pending	Check hooks/README.md matches .claude/hooks	must-fail proof filed in #455
+pending	Run session-events converter unit tests	must-fail proof filed in #455
+pending	Run context-measure unit tests	must-fail proof filed in #455
+pending	Run tier usage script unit tests	must-fail proof filed in #455
+pending	Shellcheck role-check scripts	must-fail proof filed in #455
+pending	Run role-boundary detector and plan-marker fixtures	must-fail proof filed in #455
+pending	Shellcheck running-a-sprint scripts	must-fail proof filed in #455
+pending	Run running-a-sprint script tests	must-fail proof filed in #455
+pending	Check the detector in the reference matches the shipped script	must-fail proof filed in #455
+pending	Check plan-check instruction strings	must-fail proof filed in #455
+pending	Check red CI classification strings	must-fail proof filed in #455
+pending	Check Discovery line rule strings	must-fail proof filed in #455
+pending	Check running-a-sprint SKILL.md row counts	must-fail proof filed in #455

@@ -1314,3 +1314,9 @@ jobs:
             exit 1
           fi
           echo "[+] running-a-sprint SKILL.md has 10 Red Flag bullets and 8 Rationalization Prevention rows"
+
+      - name: Run validate workflow guard
+        run: sh tools/validate_workflow/run.sh
+
+      - name: Run validate workflow guard tests
+        run: sh tools/validate_workflow/tests/run.sh

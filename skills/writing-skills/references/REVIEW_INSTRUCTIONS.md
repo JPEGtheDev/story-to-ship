@@ -61,10 +61,10 @@ item are in the reference sections above.
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
 - [ ] **Enforcement co-location** -- every banned phrase or prohibited action has its safe substitute in SKILL.md, not behind a references/ pointer?
 - [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names.
-- [ ] A routing change covers every skill whose frontmatter triggers on the same signal.
-- [ ] A rehearsal fixture must not already contain the rule it is meant to catch; a RED catch on a clean fixture means the amendment is redundant.
+- [ ] A routing change covers every skill whose frontmatter triggers on the same signal. Applies when the change is a routing change. Otherwise mark N/A.
+- [ ] A rehearsal fixture must not already contain the rule it is meant to catch; a RED catch on a clean fixture means the amendment is redundant. Applies when a rehearsal is part of the review. Otherwise mark N/A.
 - [ ] Shipped text carries no dated snapshot and no owner-set label.
-- [ ] A dead-code or dangling-reference sweep covers only files tracked on main.
+- [ ] A dead-code or dangling-reference sweep covers only files tracked on main. Applies when a sweep is part of the review. Otherwise mark N/A.
 - [ ] In a cross-skill sweep, a bare SKILL.md hit that names another skill is a real cross-tree hit.
 - [ ] Shipped skill and agent text names no vendor model name; a model tier is named only by its tier (Economy, Standard, Premium).
 
@@ -210,6 +210,13 @@ Return findings in EXACTLY this structure:
 | Skill-specific content | [+]/[-] | file:line |
 | Related skill cross-reference | [+]/[-] | file:line |
 | Domain language match | [+]/[-] | file:line or "no issues found" |
+| Shipped text names only shipped checks, modes and roles (R1) | [+]/[-] | file:line |
+| Routing change covers every triggering skill (R2) | [+]/[-]/N/A | file:line or "not a routing change" |
+| Rehearsal fixture does not contain the rule (R3) | [+]/[-]/N/A | file:line or "no rehearsal" |
+| No dated snapshot or owner-set label (R4) | [+]/[-] | file:line or "no issues found" |
+| Sweep covers only files tracked on main (R5) | [+]/[-]/N/A | file:line or "no sweep" |
+| Bare SKILL.md hit naming another skill is a cross-tree hit (R6) | [+]/[-] | file:line or "no issues found" |
+| No vendor model name; tiers only (R7) | [+]/[-] | file:line or "no issues found" |
 
 ### Reference Files
 [For each file in references/ -- repeat this block per file, or write "No references/ directory":]

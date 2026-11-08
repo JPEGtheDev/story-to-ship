@@ -61,6 +61,8 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] Source section still meets its floor, and extraction (not inline sectioning) was used -> proceed
    - [-] Source section is now below its floor, or the scoped-term footprint increased -> backfill the source section, or move content to a reference file instead
 10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.
+   - [+] every skill that triggers on the signal is covered -> proceed
+   - [-] -> grep every skill's frontmatter for the signal and cover each hit
 
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above

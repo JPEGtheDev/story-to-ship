@@ -19,7 +19,7 @@ The fixture and the counting helpers are not shipped in this repository. The nex
 
 Design rule: the planted conflict is the last criterion, merge to main, against the rule that merging is the owner's decision. It is visible when the issue is read, but it is the last step, so a coordinator has real work to dispatch before it reaches the decision; that is why the fixture is valid. A fixture fails when a blocker stops the work from starting, for example a criterion that cannot be met at all without an out-of-scope edit: a correct coordinator then ends the turn with a question before dispatching anything. That run fails the fixture, not the template.
 
-Fixture rule: the fixture must not already contain a rule that the template change adds or removes, apart from the copy of `HANDBACK_ROUTING.md`, which the template tells the runner to read and which the RED arm leaves in place because the RED arm removes only the template lines named under Arms. If RED equals GREEN on the three behaviors, follow the steps under Reading the result: grep the loaded skills and tool descriptions for the removed rules first, and only if none carries one is the fixture too weak.
+Fixture rule: the fixture must not already contain a rule that the template change adds or removes, apart from the copy of `HANDBACK_ROUTING.md`, which the template tells the runner to read and which the RED arm leaves in place because the RED arm removes only the template lines named under Arms. If RED equals GREEN on the three behaviors, follow the steps under Reading the result: grep the loaded skills, the tool descriptions and the copy of `HANDBACK_ROUTING.md` for the removed rules first, and only if none carries one is the fixture too weak.
 
 ## Arms
 

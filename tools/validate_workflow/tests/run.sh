@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=16
+EXPECTED_CASES=27
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -81,13 +81,31 @@ use_head() {
   git -C "$1" checkout -q -b head
 }
 
-# check_run LABEL REPO EXPECT_RC FINDING: run run.sh against REPO and report
-# PASS or FAIL. FINDING is an id such as R1, or - to check the exit code only.
+# set_proof LIST STEP ENV TARGET MODE SUBSTRING: replace the pending or proof entry
+# of STEP in LIST with a proof entry built from the arguments.
+set_proof() {
+  awk -v s="$2" -v e="$3" -v t="$4" -v m="$5" -v x="$6" 'BEGIN { FS = OFS = "\t" }
+    ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, e, t, m, x; next }
+    { print }
+  ' "$1" | set_content "$1"
+}
+
+# check_run LABEL REPO EXPECT_RC FINDING [inner] [TEXT]: run run.sh against REPO and
+# report PASS or FAIL. FINDING is an id such as R1, or - to check the exit code only.
+# The optional fifth argument "inner" exports VALIDATE_WORKFLOW_INNER=1 to the
+# suite; any other call (such as -) runs the suite with that variable unset.
+# The optional sixth argument TEXT must appear as a fixed string in the combined
+# stdout and stderr of the run.
 check_run() {
   CASES=$((CASES + 1))
   out="$TMP/run$CASES.out"
-  env -u VALIDATE_WORKFLOW_INNER VALIDATE_WORKFLOW_ROOT="$2" VALIDATE_WORKFLOW_BASE=base \
-    sh "$RUN" > "$out" 2>&1
+  if [ "${5:-}" = inner ]; then
+    env VALIDATE_WORKFLOW_INNER=1 VALIDATE_WORKFLOW_ROOT="$2" VALIDATE_WORKFLOW_BASE=base \
+      sh "$RUN" > "$out" 2>&1
+  else
+    env -u VALIDATE_WORKFLOW_INNER VALIDATE_WORKFLOW_ROOT="$2" VALIDATE_WORKFLOW_BASE=base \
+      sh "$RUN" > "$out" 2>&1
+  fi
   rc=$?
   bad=0
   if [ "$rc" -ne "$3" ]; then
@@ -96,6 +114,10 @@ check_run() {
   fi
   if [ "$4" != "-" ] && ! grep -F "FINDING $4" "$out" > /dev/null; then
     echo "FAIL: $1: no FINDING $4 line in output"
+    bad=1
+  fi
+  if [ -n "${6:-}" ] && ! grep -F "$6" "$out" > /dev/null; then
+    echo "FAIL: $1: output lacks '$6'"
     bad=1
   fi
   if [ "$bad" -eq 0 ]; then
@@ -336,6 +358,163 @@ awk -v s="$SIZE_STEP" -v p="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
 commit_all "$repo" "head: covers line dropped from the list"
 # Assert
 check_run "n covers list entry dropped" "$repo" 1 R1
+
+# Case o: a step-level if key added to a check step.
+# Arrange
+repo="$TMP/o"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "      - name: Validate hooks.json" { print; print "        if: always()"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: step-level if on a check step"
+# Assert
+check_run "R4 step-level if" "$repo" 1 R4
+
+# Case p: a job-level continue-on-error key added under validate.
+# Arrange
+repo="$TMP/p"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "    runs-on: ubuntu-latest" { print; print "    continue-on-error: true"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: job-level continue-on-error"
+# Assert
+check_run "R4 job-level continue-on-error" "$repo" 1 R4
+
+# Case q: a paths filter added inside the on: block.
+# Arrange
+repo="$TMP/q"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  !done && $0 == "  pull_request:" { print; print "    paths: [skills]"; done = 1; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: paths filter in the on block"
+# Assert
+check_run "R4 path filter in on block" "$repo" 1 R4
+
+# Case r: the push trigger and its branches key removed from the on: block.
+# Arrange
+repo="$TMP/r"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "  push:" { skip = 1; next }
+  skip && /^    / { next }
+  { skip = 0; print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: remove the push trigger"
+# Assert
+check_run "R1 push trigger removed" "$repo" 1 R1
+
+# Case s: a proof whose control run fails on the unmodified copy. The flaky-test
+# step is pointed at a file absent from the tree, so its run block exits non-zero.
+# Arrange
+repo="$TMP/s"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check the flaky-test rules are pinned" \
+  "FLAKY_TESTS_PATH=skills/testing/references/NO_SUCH.md" \
+  skills/testing/references/FLAKY_TESTS.md empty "flaky-test rule pins"
+commit_all "$repo" "head: proof whose control run fails"
+# Assert
+check_run "proof control fails" "$repo" 1 R2
+
+# Case t: a proof whose target, emptied, prints output without the expected substring.
+# The flaky-test step prints FAILED lines on an empty target, never the substring below.
+# Arrange
+repo="$TMP/t"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check the flaky-test rules are pinned" - \
+  skills/testing/references/FLAKY_TESTS.md empty "UNPRINTED-SUBSTRING"
+commit_all "$repo" "head: proof expected substring never printed"
+# Assert
+check_run "proof expected substring lost" "$repo" 1 R2
+
+# Case u: the size step's oversize proof with the correct substring, restated explicitly.
+# The step fails on the 20001-byte copy, so both the control and the must-fail run hold.
+# Arrange
+repo="$TMP/u"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "$SIZE_STEP" - "$SIZE_FILE" oversize "exceeding the 20000-character limit"
+commit_all "$repo" "head: size proof restated"
+# Assert
+check_run "proof oversize mode passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
+
+# Case v: a proof whose expected substring is empty.
+# Arrange
+repo="$TMP/v"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "$SIZE_STEP" - "$SIZE_FILE" oversize ""
+commit_all "$repo" "head: proof with an empty expected substring"
+# Assert
+check_run "empty expected substring" "$repo" 2 - - "empty expected output substring"
+
+# Case w: a proof whose mode is not empty or oversize.
+# Arrange
+repo="$TMP/w"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "$SIZE_STEP" - "$SIZE_FILE" delete "exceeding the 20000-character limit"
+commit_all "$repo" "head: proof with an unknown mode"
+# Assert
+check_run "proof with unknown mode" "$repo" 2 -
+
+# Case x: the control-failing proof of case s, run with VALIDATE_WORKFLOW_INNER unset.
+# The proof must run, so the control failure is reported.
+# Arrange
+repo="$TMP/x"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check the flaky-test rules are pinned" \
+  "FLAKY_TESTS_PATH=skills/testing/references/NO_SUCH.md" \
+  skills/testing/references/FLAKY_TESTS.md empty "flaky-test rule pins"
+commit_all "$repo" "head: control-failing proof, inner guard unset"
+# Assert
+check_run "guard runs proofs when INNER unset" "$repo" 1 R2
+
+# Case y: the same list as case x, run with VALIDATE_WORKFLOW_INNER=1 exported.
+# The proofs are skipped, so the suite passes.
+# Arrange
+repo="$TMP/y"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check the flaky-test rules are pinned" \
+  "FLAKY_TESTS_PATH=skills/testing/references/NO_SUCH.md" \
+  skills/testing/references/FLAKY_TESTS.md empty "flaky-test rule pins"
+commit_all "$repo" "head: control-failing proof, inner guard set"
+# Assert
+check_run "guard skips proofs when INNER=1" "$repo" 0 - inner "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

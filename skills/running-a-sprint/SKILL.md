@@ -14,7 +14,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human. The launcher plans nothing itself. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The terms are defined in references/MOVED_RATIONALE.md, section Moved from SKILL.md: definitions. The launcher plans nothing itself. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill and never launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
 ---
 
@@ -41,7 +41,7 @@ A story whose body has a line "Depends On: #N" naming another open story waits u
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story that is not yet running (waiting for a slot, waiting on a dependency, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
+Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file (plan.md at the top level of the main checkout). That file is untracked and never committed. The ledger fields are in references/MOVED_RATIONALE.md, section Moved from SKILL.md: ledger fields. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story that is not yet running (waiting for a slot, waiting on a dependency, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before every dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
 
 The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
@@ -101,7 +101,7 @@ A check that fails at a step stops there: the close-out stop card names the fail
 Before dispatching any runner, answering any hand-back, or closing out any merge:
 
 1. The ledger was re-read this turn and the runner or story is in it.
-2. A launch names `STORY_NUMBER`, `REPO_ROOT`, `WORKTREE_PREFIX` and `PARALLEL_LIMIT`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no working runner it depends on, and no "Depends On: #N" line naming another open story, until that story's pull request merges. A reconcile replacement is exempt from the dependency check (Close-out step 7). Until the pilot passes or a release rule in `references/PILOT.md` ends the hold, only the pilot launches. A fresh runner for a Discovery stop is exempt from the Capacity limit and the dependency rule: it is never gated or deferred by them.
+2. A launch names `STORY_NUMBER`, `REPO_ROOT`, `WORKTREE_PREFIX` and `PARALLEL_LIMIT`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; the story has acceptance criteria and no working runner it depends on, and no "Depends On: #N" line naming another open story, until that story's pull request merges. A reconcile replacement is exempt from the dependency check (Close-out step 7). Until the pilot passes or a release rule in `references/PILOT.md` ends the hold, only the pilot launches. A fresh runner for a Discovery stop is exempt (Capacity).
 3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in the Capacity section, the launch check, are the only actions taken, apart from the ledger note for an over-cap hand-back, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after origin shows the PR MERGED (by the sweep or an owner report), and runs in the order of the Close-out section.
 
@@ -116,8 +116,8 @@ Before dispatching any runner, answering any hand-back, or closing out any merge
 - About to answer a runner's question, or a child's result, myself -- STOP. Look up the row in `references/HANDBACK_ROUTING.md`; owner-reserved questions go to the owner.
 - About to merge, override the fix-round cap or make a scope change (a change to an acceptance criterion or added behavior the story does not name) -- STOP. These are the owner's. For a merge, the owner decides from the Ready to merge entry and the launcher never merges; for a cap override or scope change, relay the question with the runner's recommendation and end the turn.
 - About to relay a hand-back's PR number, CI state or edit count I did not re-check -- STOP. Run `gh pr view` and the numstat comparison first.
-- About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose "Depends On: #N" line names another open story, until that story's pull request merges -- STOP. Wait until the working count is below the limit (or an owner answer names the new limit or that launch, under the rule on launch questions in Capacity) or the depended-on story's pull request merges. A reconcile replacement (Close-out step 7) is exempt from the dependency check. The launch of a fresh runner for a Discovery stop is the exception: it is never gated or deferred, and it counts as working once launched.
-- About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the dependency, and launch only on an answer that names the new limit or that launch. A fresh runner for a Discovery stop is exempt: launch it on the owner's answers.
+- About to launch a story while the working count is at or above the limit (3 unless the owner changed it), or one whose "Depends On: #N" line names another open story, until that story's pull request merges -- STOP. Wait until the working count is below the limit (or an owner answer names the new limit or that launch, under the rule on launch questions in Capacity) or the depended-on story's pull request merges. A reconcile replacement (Close-out step 7) is exempt from the dependency check. A fresh runner for a Discovery stop is exempt (Capacity).
+- About to launch a story while the working count is at or above the limit on a go that named neither the new limit nor that over-limit launch ("launch it", "go", a reply to a question that carried no counts, an intake-gap answer) -- STOP. Ask again with "working N of L", "held for the owner M (open PRs)" and the dependency, and launch only on an answer that names the new limit or that launch. A fresh runner for a Discovery stop is exempt (Capacity).
 - About to close out before origin shows the PR MERGED, or in a different order -- STOP. Confirm the merge with `gh pr view` and follow the Close-out steps in order.
 - About to resolve a reconcile conflict myself, merge a reconciled PR, or resume a runner held on an owner question, blocked or cap reached before the owner answers -- STOP. The runner resolves, the owner merges, and a held runner waits; check the PR state with `gh pr view` and the ledger state before acting.
 - About to put rule text, a vendor model name or a worktree path for the runner, other than the owner's answers in the Fresh runner text, into the launch prompt -- STOP. Name the four inputs and the scope only, plus the Fresh runner text for a fresh runner for a Discovery stop.
@@ -147,14 +147,5 @@ Related skills: `references/MOVED_RATIONALE.md`, Moved from SKILL.md: related sk
 ---
 
 ## References
-
-- [references/HANDBACK_ROUTING.md](references/HANDBACK_ROUTING.md)
-- [references/OWNER_QUESTIONS.md](references/OWNER_QUESTIONS.md)
-- [references/RECONCILE.md](references/RECONCILE.md)
-- [references/SCORECARD.md](references/SCORECARD.md)
-- [references/REHEARSAL.md](references/REHEARSAL.md)
-- [references/MOVED_RATIONALE.md](references/MOVED_RATIONALE.md)
-- [references/PILOT.md](references/PILOT.md)
-- [references/INDEX.md](references/INDEX.md)
 
 See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reference descriptions.

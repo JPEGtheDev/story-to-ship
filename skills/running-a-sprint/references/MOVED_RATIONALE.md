@@ -84,3 +84,11 @@ Each clause below was cut from the SKILL.md sentence named in its line, after th
 - `references/MOVED_RATIONALE.md` -- moved pairs and passages, and the Launch question owner text section
 - `references/PILOT.md` -- the pilot runner and its release rules
 - `references/INDEX.md` -- index of the reference files
+
+## Moved from SKILL.md: ledger fields
+
+Fields per runner: runner id, story, worktree prefix, branch, PR number, state, pending question.
+
+## Moved from SKILL.md: definitions
+
+The launcher is the session that runs the sprint. A runner is a coordinator subagent (the `story-coordinator` template) that runs one story end to end, opens one pull request (PR) and hands it back unmerged. A hand-back is the runner's final message. The owner is the human.

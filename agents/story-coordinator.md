@@ -151,14 +151,15 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Append a `## Reconcile record` section to the PR body; never replace an earlier one.
 - The section starts with the line `Merged PR <n>:`, then one bullet per resolved hunk, `<file>: <hunk> -- <reason>`, or the single bullet `no conflicts`.
 - Write the Reconcile record before any owner-question hand-back.
-- Cross-story check: dispatch a fresh spec-compliance-reviewer child at the Standard tier with run_in_background false.
-- Its requirements are the acceptance criteria of both stories; it reads every overlapping file as it stands after the update and reports each statement that now contradicts another statement and each acceptance criterion of either story that is no longer met.
-- Each finding quotes a file:line pair; a result with no findings lists the files read.
+- A reconcile reviews only the resolved conflict hunks on the conflicting files, plus CI; an overlap that rebases with no conflict needs only the rebase and green CI, with no reviewer.
+- Cross-story check: only when a conflict was resolved, dispatch a fresh spec-compliance-reviewer child at the Standard tier with run_in_background false.
+- Its requirements are the acceptance criteria of both stories; it reads only the resolved conflict hunks on the conflicting files as they stand after the update, and reports each statement in those hunks that now contradicts another statement and each acceptance criterion of either story that those hunks no longer meet.
+- Each finding quotes a file:line pair; a result with no findings lists the hunks read.
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
 - CI failing on the updated head is classified as the Red CI section says; only an own code failure is a fix round of this reconcile. A stale base found after the Update rebase is brought in by merging origin/main without force and counts toward the same limit of 2 stale base merges per story; the Update rebase itself does not count.
-- Re-verify: wait for CI on the updated head and re-run the spec review on the overlap files plus the resolved hunks.
+- Re-verify: wait for CI on the updated head and re-run the spec review on the resolved hunks.
 - Stage 2 runs as one pass, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files, with a re-check after each fix round (a reconcile is not a new whole-branch pass over the story).
-- Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0.
+- Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0. On a clean rebase with no conflict, write the line with conflicts resolved 0; cross-story findings 0; fix rounds 0; spec review not run (clean rebase, no reviewer); CI <state>.
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.
 - A fresh runner launched for a PR whose runner could not be resumed has no plan file: it fetches both stories, both diffs and the PR body with `gh`, skips the plan-entry steps above, and carries no Discovery line, because it has no plan file.

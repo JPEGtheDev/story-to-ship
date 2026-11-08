@@ -129,16 +129,21 @@ in_block() {
   ' "$3"
 }
 
+# has_head_step STEP: exit 0 when the head workflow has a step named STEP.
+has_head_step() {
+  grep -Fxq -- "$1" "$TMP/head.steps"
+}
+
 # check_removal: R1 for base steps and for base covers and proof entries the head drops.
 check_removal() {
   while IFS= read -r step; do
-    if ! grep -Fxq -- "$step" "$TMP/head.steps"; then
+    if ! has_head_step "$step"; then
       finding R1 "base step \"$step\" is absent from the head workflow"
     fi
   done < "$TMP/base.steps"
 
   while IFS="$TAB" read -r kind step detail; do
-    grep -Fxq -- "$step" "$TMP/head.steps" || continue
+    has_head_step "$step" || continue
     case $kind in
       covers)
         in_block "$step" "$detail" "$TMP/head.blocks" ||
@@ -173,7 +178,7 @@ check_new_steps() {
 # check_list_entries: R5 for each head list entry naming a step absent from the head.
 check_list_entries() {
   while IFS="$TAB" read -r kind step detail; do
-    grep -Fxq -- "$step" "$TMP/head.steps" ||
+    has_head_step "$step" ||
       finding R5 "$kind entry names step \"$step\", which is absent from the head workflow"
   done < "$TMP/head.list"
 }
@@ -236,10 +241,10 @@ check_triggers() {
 check_skip_keys() {
   skip_counts "$TMP/base.wf" > "$TMP/base.keys"
   skip_counts "$ROOT/$WF" > "$TMP/head.keys"
-  while IFS=' ' read -r key n; do
-    b=$(awk -v k="$key" '$1 == k { print $2 }' "$TMP/base.keys")
-    if [ "$n" -gt "$b" ]; then
-      finding R4 "head has $n \"$key\" key(s) against $b in base; skip keys and path filters are refused"
+  while IFS=' ' read -r key head_n; do
+    base_n=$(awk -v k="$key" '$1 == k { print $2 }' "$TMP/base.keys")
+    if [ "$head_n" -gt "$base_n" ]; then
+      finding R4 "head has $head_n \"$key\" key(s) against $base_n in base; skip keys and path filters are refused"
     fi
   done < "$TMP/head.keys"
 }
@@ -298,6 +303,11 @@ run_block() {
   ) > "$rb_out" 2>&1
 }
 
+# copy_tree DEST: copy the prepared proof tree to DEST, a path that does not exist yet.
+copy_tree() {
+  cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
+}
+
 # apply_mode FILE MODE: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x.
 # parse_list has already refused any other mode.
 apply_mode() {
@@ -316,7 +326,7 @@ run_proofs() {
   n=0
   while IFS="$TAB" read -r kind step envs target mode text; do
     [ "$kind" = proof ] || continue
-    grep -Fxq -- "$step" "$TMP/head.steps" || continue
+    has_head_step "$step" || continue
     n=$((n + 1))
     body=$TMP/body.$n.sh
     if ! extract_run "$step" "$ROOT/$WF" "$body"; then
@@ -343,11 +353,6 @@ run_proofs() {
       finding R2 "proof for \"$step\" did not fail with the expected output"
     fi
   done < "$TMP/head.list"
-}
-
-# copy_tree DEST: copy the prepared proof tree to DEST, a path that does not exist yet.
-copy_tree() {
-  cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
 }
 
 # Base ref: fetch origin/main once when the default ref is missing.

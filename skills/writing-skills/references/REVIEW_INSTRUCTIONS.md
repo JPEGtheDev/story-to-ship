@@ -60,6 +60,13 @@ item are in the reference sections above.
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
 - [ ] **Enforcement co-location** -- every banned phrase or prohibited action has its safe substitute in SKILL.md, not behind a references/ pointer?
+- [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names.
+- [ ] A routing change covers every skill whose frontmatter triggers on the same signal.
+- [ ] A rehearsal fixture must not already contain the rule it is meant to catch; a RED catch on a clean fixture means the amendment is redundant.
+- [ ] Shipped text carries no dated snapshot and no owner-set label.
+- [ ] A dead-code or dangling-reference sweep covers only files tracked on main.
+- [ ] In a cross-skill sweep, a bare SKILL.md hit that names another skill is a real cross-tree hit.
+- [ ] Shipped skill and agent text names no vendor model name; a model tier is named only by its tier (Economy, Standard, Premium).
 
 [+] All pass -> proceed to Step 3
 [-] Any unmet -> record every failing item; continue through all steps before filing verdict

@@ -42,6 +42,14 @@ else
   case_fail fail-echo-evidence "no 'VIOLATION line 1: echo' in output: $OUT"
 fi
 
+# Case: the append form ">>" on line 2 is flagged (the second ">" of ">>" is not an excluded 2>> form).
+run_check "$FIX/fail-echo-evidence.md"
+if printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 2: echo'; then
+  case_ok fail-echo-append
+else
+  case_fail fail-echo-append "no 'VIOLATION line 2: echo' in output: $OUT"
+fi
+
 # Case: digit-count form on line 1 is flagged.
 run_check "$FIX/fail-digits-count.md"
 if [ "$RC" -ne 1 ]; then
@@ -52,14 +60,16 @@ else
   case_fail fail-digits-count "no 'VIOLATION line 1: digit-count' in output: $OUT"
 fi
 
-# Case: each digit-pattern and count-step variant on lines 2 to 4 is flagged (the digit class,
-# the \d pattern, and a bare grep -c with no wc).
+# Case: each digit-pattern and count-step variant on lines 2 to 5 is flagged (the digit class,
+# the \d pattern, a bare grep -c with no wc, and a grep piped to wc with no -c).
+run_check "$FIX/fail-digits-count.md"
 if printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 2: digit-count' &&
   printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 3: digit-count' &&
-  printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 4: digit-count'; then
+  printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 4: digit-count' &&
+  printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 5: digit-count'; then
   case_ok fail-digits-count-variants
 else
-  case_fail fail-digits-count-variants "lines 2-4 not all flagged as digit-count: $OUT"
+  case_fail fail-digits-count-variants "lines 2-5 not all flagged as digit-count: $OUT"
 fi
 
 # Case: the clean fixture passes with exit 0 and no output.

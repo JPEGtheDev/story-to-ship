@@ -21,7 +21,7 @@ fi
 # is_echo_redirect <line>: true when the line has the word echo and a file redirect.
 is_echo_redirect() {
   printf '%s\n' "$1" | grep -qE '(^|[^[:alnum:]_])echo([^[:alnum:]_]|$)' || return 1
-  printf '%s\n' "$1" | grep -qE '(^|[^0-9])>>?[^&]'
+  printf '%s\n' "$1" | grep -qE '(^|[^0-9>])>>?[^&]'
 }
 
 # is_digit_count <line>: true when the line matches the digit-count form.

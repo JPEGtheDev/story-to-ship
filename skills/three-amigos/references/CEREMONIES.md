@@ -40,7 +40,7 @@ The example map lives in the Feature Specification, or under `## Discovery Open 
 - `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.
 - `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.
 
-A rule summarises its examples: state each rule in one sentence and put the detail in its examples. Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
+A rule summarizes its examples: state each rule in one sentence and put the detail in its examples. Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
 
 ### Stopping rule and timebox
 
@@ -132,7 +132,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 3. Is the dependency order correct? Can all todos be completed in stated order?
 4. Are there missing edge cases, error handling, or failure modes?
 5. Does the plan risk introducing breaking changes to existing behavior?
-6. Is each todo one behaviour or one reviewable change with one objective that one review can judge? A todo holding two independently verifiable objectives, or one that no single review could judge, must be split before this plan is approved.
+6. Is each todo one behavior or one reviewable change with one objective that one review can judge? A todo holding two independently verifiable objectives, or one that no single review could judge, must be split before this plan is approved.
 
 ---
 

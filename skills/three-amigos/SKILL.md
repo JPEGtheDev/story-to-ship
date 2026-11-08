@@ -62,7 +62,7 @@ Simple 1-todo, clear AC -> skip; use Skeptic. 1+2 required for Discovery feature
 
 When dispatching Ceremony 1 (Discovery), each amigo MUST address ALL of the following in addition to the standard agenda in `references/CEREMONIES.md`:
 
-1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labelled `[UNCLEAR: optional?]` in the example map (Questions line). Never assume required unless the AC explicitly states it.
+1. **Field optionality:** For each field or attribute in the acceptance criteria: is it required, optional, or conditional? Ambiguous optionality MUST be labeled `[UNCLEAR: optional?]` in the example map (Questions line). Never assume required unless the AC explicitly states it.
 2. **UI dialog entry paths:** For any UI dialog or panel in the acceptance criteria: enumerate every menu path and keyboard shortcut that opens it. Any path not mentioned in the ACs MUST be flagged as `[UNPLANNED: entry-path]` in the example map (Questions line).
 
 These two questions are part of every Discovery amigo brief's agenda items (the focused-brief rule in Ceremony 1 of `references/CEREMONIES.md`).

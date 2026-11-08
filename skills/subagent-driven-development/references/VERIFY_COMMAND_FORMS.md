@@ -6,7 +6,7 @@ The forms of verification command that cannot fail, and which of them a script c
 
 `scripts/verify-command-check.sh` checks the two forms below. Run it as `sh <skill dir>/scripts/verify-command-check.sh <prompt file>`. It prints nothing and exits 0 when the file is clean, prints each violation and exits 1 when it finds one, and exits 2 on a usage error or an unreadable file.
 
-**echo form.** An evidence file built with `echo` instead of `printf`. The script reports `VIOLATION line <N>: echo`. Limit: a redirect character inside quoted text is flagged, and a line whose redirect is the last character is not.
+**echo form.** An evidence file built with `echo` instead of `printf`. The script reports `VIOLATION line N: echo`. Limit: a redirect character inside quoted text is flagged, and a line whose redirect is the last character is not.
 
 **digit-count form.** A count check that greps digits but not number words. The script reports `VIOLATION line <N>: digit-count`. Limit: the check is line-based, so a count split across lines is not caught.
 

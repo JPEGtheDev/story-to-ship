@@ -461,8 +461,8 @@ def banned_counts(text):
     return {phrase: len(pattern.findall(visible)) for phrase, pattern in BANNED_PATTERNS}
 
 
-def behaviour(records):
-    """Behaviour baseline over the main thread: banned phrases, Skill calls and
+def behavior(records):
+    """Behavior baseline over the main thread: banned phrases, Skill calls and
     the reload check after each compaction."""
     banned = {phrase: 0 for phrase in BANNED_PHRASES}
     text_chars = 0
@@ -534,10 +534,10 @@ def behaviour(records):
     }
 
 
-def format_behaviour(baseline):
-    """The Behaviour baseline section, ready to append to the text report."""
+def format_behavior(baseline):
+    """The Behavior baseline section, ready to append to the text report."""
     lines = [
-        "Behaviour baseline",
+        "Behavior baseline",
         "Banned phrases: " + ", ".join(BANNED_PHRASES),
         "Assistant text characters: %d" % baseline["assistant_text_chars"],
         "Banned total: %d" % baseline["banned_total"],
@@ -678,9 +678,9 @@ def main(argv=None):
         "--json", action="store_true", help="print the full measurement as one JSON object"
     )
     parser.add_argument(
-        "--behaviour",
+        "--behavior",
         action="store_true",
-        help="add the behaviour baseline (banned phrases, skills, reload checks)",
+        help="add the behavior baseline (banned phrases, skills, reload checks)",
     )
     args = parser.parse_args(argv)
     path = args.transcript
@@ -695,7 +695,7 @@ def main(argv=None):
     if not records:
         return fail("no parseable JSON object line in %s" % ascii_text(path))
     result = measure(records)
-    baseline = behaviour(records) if args.behaviour else None
+    baseline = behavior(records) if args.behavior else None
     if args.json:
         data = {
             "path": path,
@@ -705,12 +705,12 @@ def main(argv=None):
             "turns": result["turns"],
         }
         if baseline is not None:
-            data["behaviour"] = baseline
+            data["behavior"] = baseline
         sys.stdout.write(json.dumps(data, sort_keys=True, indent=2) + "\n")
     else:
         report = format_report(path, len(records), malformed, result, args.top)
         if baseline is not None:
-            report += "\n" + format_behaviour(baseline)
+            report += "\n" + format_behavior(baseline)
         sys.stdout.write(report)
     return 0
 

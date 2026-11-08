@@ -3,7 +3,7 @@
 Shows what fills the main thread of a Claude Code session, by source, from one
 transcript. A transcript is the JSON Lines file (one JSON object per line) that
 Claude Code writes for a session. The tool reads it and reports how many
-characters each source contributed, per turn. It can also report a behaviour
+characters each source contributed, per turn. It can also report a behavior
 baseline: banned phrases, Skill calls and a reload check after each compaction.
 
 The tool is read-only. It does not change the transcript.
@@ -11,13 +11,13 @@ The tool is read-only. It does not change the transcript.
 ## Usage
 
 ```
-python3 tools/context_measure/context_measure.py TRANSCRIPT [--top N] [--json] [--behaviour]
+python3 tools/context_measure/context_measure.py TRANSCRIPT [--top N] [--json] [--behavior]
 ```
 
 - `TRANSCRIPT`: path to one transcript file.
 - `--top N`: how many turns to list by size. Default 5. Must be a positive integer.
 - `--json`: print the full measurement as one JSON object instead of the text report.
-- `--behaviour`: add the behaviour baseline (see below). With `--json`, it is added under the key `behaviour`.
+- `--behavior`: add the behavior baseline (see below). With `--json`, it is added under the key `behavior`.
 
 Exit codes:
 
@@ -82,9 +82,9 @@ unless the record carries a `rendered` list.
   queued-command attachment counts once. The characters counted are those of the first
   arrival.
 
-## Behaviour baseline
+## Behavior baseline
 
-`--behaviour` reads the main thread only (sub-agent records excluded).
+`--behavior` reads the main thread only (sub-agent records excluded).
 
 - Banned phrases. The list is a fixed constant in the module. The first six phrases
   come from the honesty skill and the next five from the communication skill; "load

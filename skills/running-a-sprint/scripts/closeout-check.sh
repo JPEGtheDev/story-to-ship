@@ -1,7 +1,7 @@
 #!/bin/sh
 # closeout-check.sh -r <repo root> -n <PR> -b <branch> -p <prefix> [-x <reconcile prefix>] [-P <plan file>]
 # Prints one line per check: "OK <name>: <value>" or "FAIL <name>: <value>", in this order: merged, a NOTE
-# line for the fetch, ancestry, patch, then the worktree lines. Exit 0 when every line is OK, 1 when any line
+# line for the fetch, ancestry, parents, patch, then the worktree lines. Exit 0 when every line is OK, 1 when any line
 # fails, 2 on a usage error (usage on stderr, nothing on stdout).
 # -r must be an absolute path to the repository root; trailing slashes are stripped from it, and a relative path
 # is a usage error. -p is the runner worktree prefix: the runner worktree is
@@ -183,6 +183,28 @@ check_ancestry() {
   fi
 }
 
+# check_parents: the merge commit has exactly one parent. git rev-list --parents prints the commit and then its
+# parents, so the count is the field count minus one. Zero parents (a root commit or an unreadable commit) fails
+# with the unreadable message; two or more fail with the count. With no merge commit, git is not run.
+check_parents() {
+  if [ -z "$MERGE_SHA" ]; then
+    emit "FAIL parents: no merge commit"
+    return
+  fi
+  _pshort=$(printf '%.7s' "$MERGE_SHA")
+  _pcount=0
+  if _parents=$(git -C "$ROOT" rev-list --parents -n 1 "$MERGE_SHA" 2>/dev/null); then
+    _pcount=$(printf '%s\n' "$_parents" | awk '{ print NF - 1 }')
+  fi
+  if [ "$_pcount" -lt 1 ]; then
+    emit "FAIL parents: cannot read the parent count of $_pshort; stop card for the owner."
+  elif [ "$_pcount" -eq 1 ]; then
+    emit "OK parents: $_pshort has 1 parent"
+  else
+    emit "FAIL parents: $_pshort has $_pcount parents; stop card for the owner."
+  fi
+}
+
 # patch_matches <base> <tip>: 0 when the diff from base to tip and the squash diff (S^ to S) are byte-equal.
 # Lines starting with "index " are removed from both diffs first. The raw and filtered diffs go under TMP.
 patch_matches() {
@@ -266,6 +288,7 @@ fi
 check_merged
 run_fetch
 check_ancestry
+check_parents
 check_patch
 check_worktrees
 

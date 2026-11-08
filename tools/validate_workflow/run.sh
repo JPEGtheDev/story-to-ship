@@ -1,10 +1,13 @@
 #!/bin/sh
 # validate-workflow guard. Compares the head validate workflow
 # and checks.list with the base and reports:
-#   R1  a base step, covers path or proof entry that the head drops
-#   R2  a pending entry whose reason lacks #<digits>
+#   R1  a base step, covers path or proof entry that the head drops, or a base
+#       trigger (push, pull_request, workflow_dispatch) the head drops
+#   R2  a pending entry whose reason lacks #<digits>, or a proof whose control
+#       run fails or whose must-fail run lacks the expected output
 #   R3  a head step with no step entry, or a new head step lacking a proof entry
 #       or carrying a pending entry
+#   R4  a skip key or path filter whose head count exceeds the base count
 #   R5  a list entry naming a step absent from the head workflow
 # Usage: sh tools/validate_workflow/run.sh
 # Env: VALIDATE_WORKFLOW_ROOT (default: current directory),
@@ -73,6 +76,10 @@ parse_list() {
       else if ($1 == "covers" || $1 == "pending") want = 3
       else if ($1 == "proof") want = 6
       else want = 0
+      if ($1 == "proof" && NF == 6 && $6 == "") {
+        print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
+        exit 2
+      }
       if (want == 0) {
         problem = "unknown type"
       } else if (NF != want) {
@@ -80,6 +87,9 @@ parse_list() {
       } else {
         for (i = 2; i <= NF && problem == ""; i++) {
           if ($i == "") problem = "empty field " i
+        }
+        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize") {
+          problem = "unknown proof mode " $5
         }
       }
       if (problem == "" && $2 ~ /^[ \t]|[ \t]$/) problem = "step name has surrounding whitespace"
@@ -179,6 +189,167 @@ check_pending_reasons() {
   done < "$TMP/head.list"
 }
 
+# on_triggers WORKFLOW: print each push, pull_request or workflow_dispatch key of the on: block.
+on_triggers() {
+  awk '
+    /^on:/ { area = 1; next }
+    /^[^[:space:]#]/ { area = 0 }
+    area && /^[[:space:]]*(push|pull_request|workflow_dispatch):/ {
+      name = $0
+      sub(/^[[:space:]]*/, "", name)
+      sub(/:.*/, "", name)
+      print name
+    }
+  ' "$1"
+}
+
+# skip_counts WORKFLOW: print "KEY COUNT" for each skip key and path filter. Step-level keys
+# sit at exactly eight spaces and job-level keys at exactly four; a run block holds only
+# deeper lines, so these never match inside one. paths and paths-ignore count inside on:.
+skip_counts() {
+  awk '
+    /^on:/ { area = "on"; next }
+    /^[^[:space:]#]/ { area = "" }
+    area == "on" && /^[[:space:]]+paths(-ignore)?:/ { n["on-paths"]++ }
+    /^        if:/ { n["step-if"]++ }
+    /^        continue-on-error:/ { n["step-continue-on-error"]++ }
+    /^    if:/ { n["job-if"]++ }
+    /^    continue-on-error:/ { n["job-continue-on-error"]++ }
+    END {
+      split("step-if step-continue-on-error job-if job-continue-on-error on-paths", keys, " ")
+      for (i = 1; i <= 5; i++) print keys[i], n[keys[i]] + 0
+    }
+  ' "$1"
+}
+
+# check_triggers: R1 for each base trigger absent from the head on: block.
+check_triggers() {
+  on_triggers "$TMP/base.wf" > "$TMP/base.triggers"
+  on_triggers "$ROOT/$WF" > "$TMP/head.triggers"
+  while IFS= read -r t; do
+    grep -Fxq -- "$t" "$TMP/head.triggers" ||
+      finding R1 "base trigger \"$t\" is absent from the head on: block"
+  done < "$TMP/base.triggers"
+}
+
+# check_skip_keys: R4 for each skip key or path filter whose head count exceeds the base count.
+check_skip_keys() {
+  skip_counts "$TMP/base.wf" > "$TMP/base.keys"
+  skip_counts "$ROOT/$WF" > "$TMP/head.keys"
+  while IFS=' ' read -r key n; do
+    b=$(awk -v k="$key" '$1 == k { print $2 }' "$TMP/base.keys")
+    if [ "$n" -gt "$b" ]; then
+      finding R4 "head has $n \"$key\" key(s) against $b in base; skip keys and path filters are refused"
+    fi
+  done < "$TMP/head.keys"
+}
+
+# extract_run STEP WORKFLOW OUT: write the run block of STEP to OUT and exit 0. A block scalar
+# (run: |) gives its content lines with the ten-space indent removed; a single-line run gives
+# its command. Exit 1 when the step has no run key.
+extract_run() {
+  VW_STEP=$1 awk -v out="$3" '
+    BEGIN { state = 0 }
+    state == 0 && $0 == "      - name: " ENVIRON["VW_STEP"] { state = 1; next }
+    state == 1 && (/^      - / || /^  [A-Za-z]/) { exit }
+    state == 1 && /^        run: [|>]/ { state = 2; found = 1; next }
+    state == 1 && /^        run: / {
+      line = $0
+      sub(/^        run: /, "", line)
+      print line > out
+      found = 1
+      exit
+    }
+    state == 2 && /^[[:space:]]*$/ { print "" > out; next }
+    state == 2 && index($0, "          ") == 1 { print substr($0, 11) > out; next }
+    state == 2 { exit }
+    END { exit !found }
+  ' "$2"
+}
+
+# prepare_tree: copy the tracked files of ROOT and its .git into TMP/tree once.
+prepare_tree() {
+  mkdir "$TMP/tree" || die "cannot make the proof tree"
+  git -C "$ROOT" ls-files > "$TMP/tracked" || die "cannot list the tracked files"
+  while IFS= read -r f; do
+    [ -f "$ROOT/$f" ] || continue
+    mkdir -p "$TMP/tree/$(dirname -- "$f")" || die "cannot make a directory in the proof tree"
+    cp "$ROOT/$f" "$TMP/tree/$f" || die "cannot copy $f into the proof tree"
+  done < "$TMP/tracked"
+  if [ -e "$ROOT/.git" ]; then
+    cp -R "$ROOT/.git" "$TMP/tree/.git" || die "cannot copy .git into the proof tree"
+  fi
+}
+
+# run_block DIR ENVS BODY OUT: run BODY under bash -eo pipefail in DIR with the ENVS
+# pairs exported ("-" exports none) and VALIDATE_WORKFLOW_INNER=1, so a guard run
+# inside a proof does not recurse. Standard input is empty; output goes to OUT.
+run_block() {
+  rb_dir=$1 rb_envs=$2 rb_body=$3 rb_out=$4
+  (
+    cd "$rb_dir" || exit 2
+    set --
+    if [ "$rb_envs" != - ]; then
+      set -f
+      for pair in $rb_envs; do set -- "$@" "$pair"; done
+      set +f
+    fi
+    exec env VALIDATE_WORKFLOW_INNER=1 "$@" bash -eo pipefail "$rb_body" < /dev/null
+  ) > "$rb_out" 2>&1
+}
+
+# apply_mode FILE MODE: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x.
+# parse_list has already refused any other mode.
+apply_mode() {
+  case $2 in
+    empty) : > "$1" ;;
+    oversize) awk 'BEGIN { s = sprintf("%20001s", ""); gsub(/ /, "x", s); printf "%s", s }' > "$1" ;;
+  esac
+}
+
+# run_proofs: for each head proof line, run the step's run block on an unmodified copy
+# (control: exit 0), then on a fresh copy with the target changed by the mode (must-fail:
+# non-zero exit and the expected substring in the output). A proof for a step absent from
+# the head is left to R5.
+run_proofs() {
+  prepare_tree
+  n=0
+  while IFS="$TAB" read -r kind step envs target mode text; do
+    [ "$kind" = proof ] || continue
+    grep -Fxq -- "$step" "$TMP/head.steps" || continue
+    n=$((n + 1))
+    body=$TMP/body.$n.sh
+    if ! extract_run "$step" "$ROOT/$WF" "$body"; then
+      finding R2 "proof for \"$step\" has no run block in the head workflow"
+      continue
+    fi
+    ctl=$TMP/control.$n
+    copy_tree "$ctl"
+    if ! run_block "$ctl" "$envs" "$body" "$TMP/control.$n.out"; then
+      finding R2 "proof control for \"$step\" failed"
+      continue
+    fi
+    fail=$TMP/fail.$n
+    copy_tree "$fail"
+    if [ ! -f "$fail/$target" ]; then
+      finding R2 "proof target \"$target\" of step \"$step\" is absent from the tree"
+      continue
+    fi
+    apply_mode "$fail/$target" "$mode"
+    if ! run_block "$fail" "$envs" "$body" "$TMP/fail.$n.out" &&
+      grep -Fq -- "$text" "$TMP/fail.$n.out"; then
+      printf 'PROOF ok: %s\n' "$step"
+    else
+      finding R2 "proof for \"$step\" did not fail with the expected output"
+    fi
+  done < "$TMP/head.list"
+}
+
+# copy_tree DEST: copy the prepared proof tree to DEST, a path that does not exist yet.
+copy_tree() {
+  cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
+}
+
 # Base ref: fetch origin/main once when the default ref is missing.
 if ! git -C "$ROOT" rev-parse -q --verify "$BASE^{commit}" > /dev/null 2>&1; then
   if [ "$BASE" = origin/main ]; then
@@ -215,6 +386,14 @@ check_removal
 check_new_steps
 check_list_entries
 check_pending_reasons
+check_triggers
+check_skip_keys
+
+if [ "${VALIDATE_WORKFLOW_INNER:-}" = 1 ]; then
+  echo "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
+else
+  run_proofs
+fi
 
 if [ "$FINDINGS" -eq 0 ]; then
   echo "OK validate-workflow"

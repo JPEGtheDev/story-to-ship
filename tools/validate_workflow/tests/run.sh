@@ -452,6 +452,10 @@ check_run "proof control fails" "$repo" 1 R2
 # Arrange
 repo="$TMP/t"
 make_base "$repo" 1
+mkdir -p "$repo/skills/testing/references" &&
+  cp "$REPO/skills/testing/references/FLAKY_TESTS.md" "$repo/skills/testing/references/" &&
+  cp "$REPO/skills/testing/SKILL.md" "$repo/skills/testing/" || exit 2
+commit_all "$repo" "base: flaky-test step files"
 use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
@@ -459,7 +463,8 @@ set_proof "$list" "Check the flaky-test rules are pinned" - \
   skills/testing/references/FLAKY_TESTS.md empty "UNPRINTED-SUBSTRING"
 commit_all "$repo" "head: proof expected substring never printed"
 # Assert
-check_run "proof expected substring lost" "$repo" 1 R2
+check_run "proof expected substring lost" "$repo" 1 R2 - \
+  "did not fail with the expected output"
 
 # Case u: the size step's oversize proof with the correct substring, restated explicitly.
 # The step fails on the 20001-byte copy, so both the control and the must-fail run hold.

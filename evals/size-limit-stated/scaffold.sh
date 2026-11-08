@@ -15,3 +15,8 @@ Depends on: none
 Before editing, read docs/size-policy.md for the CI size limit on skill files.
 Measure the current size of skills/demo/SKILL.md with wc -c before editing.
 PLAN
+mkdir -p .worktrees
+printf '.worktrees/\n' > .gitignore
+git init -q
+git add -A
+git -c user.name=eval -c user.email=eval@example.invalid commit -q -m "scaffold base"

@@ -26,3 +26,8 @@ Stage 1 review: FAIL
 2. The changelog entry for 2.3.0 is missing the date.
 3. The example config sets retries to 3 but the text says 5.
 REVIEW
+mkdir -p .worktrees
+printf '.worktrees/\n' > .gitignore
+git init -q
+git add -A
+git -c user.name=eval -c user.email=eval@example.invalid commit -q -m "scaffold base"

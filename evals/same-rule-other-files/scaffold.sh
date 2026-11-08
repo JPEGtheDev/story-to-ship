@@ -12,3 +12,8 @@ Files:
   - Modify: docs/style-guide.md
 Depends on: none
 PLAN
+mkdir -p .worktrees
+printf '.worktrees/\n' > .gitignore
+git init -q
+git add -A
+git -c user.name=eval -c user.email=eval@example.invalid commit -q -m "scaffold base"

@@ -1,6 +1,6 @@
 #!/bin/sh
-# Fixture tests for closeout-check.sh (cases 1-42) and closeout-steps.sh (group 2): the merged, fetch NOTE,
-# ancestry, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
+# Fixture tests for closeout-check.sh (cases 1-47) and closeout-steps.sh (group 2): the merged, fetch NOTE,
+# ancestry, parents, patch and worktree lines, the -x and -P options, the gh failure paths, usage errors (exit 2),
 # an unchanged-repositories check, the steps' removal, deletion, fast-forward and refusal paths, and the steps'
 # issue, epic and flaky-run lines.
 # No network: the gh command is a stub that prints a JSON fixture file, and every repository is a clone
@@ -109,6 +109,28 @@ make_fixture() {
   FX_S=$(git -C "$_d/upstream" rev-parse HEAD) || return 1
 }
 
+# make_merge <upstream dir> <side count 1|2>: one side commit per count, each on a branch from the base commit
+# (the squash's parent) that adds its own file, then one --no-ff merge of those branches into main. The merge has
+# the squash as its first parent, so it has count + 1 parents. It is pushed to origin main. Sets FX_M (merge sha).
+make_merge() {
+  _mu=$1
+  _mn=$2
+  _mi=1
+  set --
+  while [ "$_mi" -le "$_mn" ]; do
+    git_c "$_mu" checkout -q -b "side$_mi" "$FX_S^" || return 1
+    printf '%s\n' "side$_mi" > "$_mu/side$_mi.txt" || return 1
+    git_c "$_mu" add "side$_mi.txt" || return 1
+    git_c "$_mu" commit -q -m "side $_mi" || return 1
+    git_c "$_mu" checkout -q main || return 1
+    set -- "$@" "side$_mi"
+    _mi=$((_mi + 1))
+  done
+  git_c "$_mu" merge -q --no-ff -m merge "$@" || return 1
+  git_c "$_mu" push -q origin main || return 1
+  FX_M=$(git -C "$_mu" rev-parse HEAD) || return 1
+}
+
 # write_issue <number> <state>: the gh issue view document for the state read (issue-<number>.json).
 write_issue() {
   printf '{"state":"%s"}\n' "$2" > "$TEST_TMP/issue-$1.json" || exit 2
@@ -185,7 +207,7 @@ want() {
 want_green() {
   _gn=$1
   shift
-  want "$_gn" "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" "$@"
+  want "$_gn" "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" "$@"
 }
 
 # assert_case <name> <expected exit> <want name>: the exit code and the exact stdout lines.
@@ -246,7 +268,7 @@ assert_case two-children 0 two-children
 
 # Case 3: the squash holds one extra line, so the patch differs. Only the patch line fails.
 new_case patch-differs extra
-want patch-differs "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" \
+want patch-differs "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: squash differs from branch diff" "OK worktree: $FX_WT clean"
 std_run
 assert_case patch-differs 1 patch-differs
@@ -295,7 +317,7 @@ assert_case runner-absent 0 runner-absent
 new_case branch-tip-missing
 git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
 git -C "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
-want branch-tip-missing "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" \
+want branch-tip-missing "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: branch tip not found" "OK worktree: $FX_WT absent"
 std_run
 assert_case branch-tip-missing 1 branch-tip-missing
@@ -303,7 +325,7 @@ assert_case branch-tip-missing 1 branch-tip-missing
 # Case 10: state OPEN with a null merge commit. The state line wins; the others name the missing commit.
 new_case state-open
 write_merge OPEN null
-want state-open "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want state-open "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 std_run
 assert_case state-open 1 state-open
@@ -311,7 +333,7 @@ assert_case state-open 1 state-open
 # Case 11: state MERGED with a null merge commit fails the merged line with no merge commit.
 new_case merged-null
 write_merge MERGED null
-want merged-null "FAIL merged: no merge commit" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want merged-null "FAIL merged: no merge commit" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 std_run
 assert_case merged-null 1 merged-null
@@ -319,7 +341,7 @@ assert_case merged-null 1 merged-null
 # Case 12: the gh stub exits non-zero. The merged line says gh failed; the rest follow from no merge commit.
 new_case gh-exit
 write_merge MERGED "$FX_S"
-want gh-exit "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want gh-exit "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 export STUB_EXIT=1
 std_run
@@ -329,7 +351,7 @@ assert_case gh-exit 1 gh-exit
 # Case 13: the gh stub prints invalid JSON. The same lines as the non-zero exit.
 new_case gh-invalid-json
 printf '%s\n' 'not json at all' > "$TEST_TMP/bad.json" || exit 2
-want gh-invalid-json "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want gh-invalid-json "FAIL merged: gh failed" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean"
 export STUB_JSON="$TEST_TMP/bad.json"
 std_run
@@ -341,7 +363,7 @@ new_case not-in-origin
 write_merge MERGED "$FX_H"
 H7=$(short7 "$FX_H") || exit 2
 want not-in-origin "OK merged: $FX_H" "$NOTE_FETCH" "FAIL ancestry: $H7 is not in origin/main" \
-  "$PATCH_OK" "OK worktree: $FX_WT clean"
+  "OK parents: $H7 has 1 parent" "$PATCH_OK" "OK worktree: $FX_WT clean"
 std_run
 assert_case not-in-origin 1 not-in-origin
 
@@ -351,6 +373,7 @@ new_case fetch-fails
 write_merge MERGED "$FX_S"
 rm -rf "$FX_ORIGIN" || exit 2
 want fetch-fails "OK merged: $FX_S" "NOTE fetch: ran git fetch origin main" "FAIL ancestry: fetch failed" \
+  "FAIL parents: cannot read the parent count of $S7; stop card for the owner." \
   "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
 std_run
 assert_case fetch-fails 1 fetch-fails
@@ -358,7 +381,7 @@ assert_case fetch-fails 1 fetch-fails
 # Case 16: the local branch tip has an unpushed commit and no -x. The patch uses the local tip and differs.
 new_case local-tip-no-x
 make_local_commit || exit 2
-want local-tip-no-x "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" \
+want local-tip-no-x "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: squash differs from branch diff" "OK worktree: $FX_WT clean"
 std_run
 assert_case local-tip-no-x 1 local-tip-no-x
@@ -457,7 +480,7 @@ assert_case later-main 0 later-main
 # not fetched, the NOTE says so, and the local tip still matches the squash, so every line is OK.
 new_case origin-gone-local-kept
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
-want origin-gone-local-kept "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+want origin-gone-local-kept "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "$PATCH_OK" "OK worktree: $FX_WT clean"
 std_run
 assert_case origin-gone-local-kept 0 origin-gone-local-kept
@@ -468,7 +491,7 @@ new_case origin-gone-local-gone
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
 git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
 git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
-want origin-gone-local-gone "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+want origin-gone-local-gone "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: branch tip not found" "OK worktree: $FX_WT absent"
 std_run
 assert_case origin-gone-local-gone 1 origin-gone-local-gone
@@ -478,7 +501,7 @@ assert_case origin-gone-local-gone 1 origin-gone-local-gone
 new_case origin-gone-x
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
 git_c "$FX_ROOT" update-ref -d "refs/remotes/origin/$FX_BRANCH" || exit 2
-want origin-gone-x "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+want origin-gone-x "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: branch tip not found" "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
 std_run -x "$FX_RECON"
@@ -489,6 +512,7 @@ assert_case origin-gone-x 1 origin-gone-x
 new_case main-gone-on-origin
 git -C "$FX_ORIGIN" update-ref -d refs/heads/main || exit 2
 want main-gone-on-origin "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
+  "FAIL parents: cannot read the parent count of $S7; stop card for the owner." \
   "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
 std_run
 assert_case main-gone-on-origin 1 main-gone-on-origin
@@ -498,7 +522,7 @@ assert_case main-gone-on-origin 1 main-gone-on-origin
 # line is OK.
 new_case branch-fetch-needed
 git_c "$FX_ROOT" update-ref -d "refs/remotes/origin/$FX_BRANCH" || exit 2
-want branch-fetch-needed "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want branch-fetch-needed "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent"
 std_run -x "$FX_RECON"
 assert_case branch-fetch-needed 0 branch-fetch-needed
@@ -517,7 +541,7 @@ _bf_obj="$FX_ORIGIN/objects/$(printf '%s\n' "$_bf_sha" | sed 's/^\(..\)/\1\//')"
 [ -f "$_bf_obj" ] || exit 2
 rm "$_bf_obj" || exit 2
 want branch-fetch-fails "OK merged: $FX_S" "$NOTE_FETCH" "FAIL ancestry: fetch failed" \
-  "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
+  "OK parents: $S7 has 1 parent" "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
 std_run
 assert_case branch-fetch-fails 1 branch-fetch-fails
 
@@ -526,7 +550,7 @@ assert_case branch-fetch-fails 1 branch-fetch-fails
 new_case origin-prefixed-branch
 git -C "$FX_ORIGIN" update-ref "refs/heads/y/$FX_BRANCH" "$FX_H" || exit 2
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
-want origin-prefixed-branch "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want origin-prefixed-branch "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean"
 std_run
 assert_case origin-prefixed-branch 0 origin-prefixed-branch
@@ -536,7 +560,7 @@ assert_case origin-prefixed-branch 0 origin-prefixed-branch
 new_case check-root-slash
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
 printf '%s\n' more >> "$FX_ROOT/.worktrees/$FX_PREFIX-a/file.txt" || exit 2
-want check-root-slash "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want check-root-slash "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "FAIL worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a has  M file.txt, ?? plan.md"
 run_close -r "$FX_ROOT/" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX"
 assert_case check-root-slash 1 check-root-slash
@@ -556,11 +580,71 @@ printf '%s\n' '#!/bin/sh' 'for _a in "$@"; do' '  if [ "$_a" = ls-remote ]; then
   'exec "$CLOSEOUT_TEST_REAL_GIT" "$@"' > "$TEST_TMP/probe-bin/git" || exit 2
 chmod +x "$TEST_TMP/probe-bin/git" || exit 2
 want probe-fails "OK merged: $FX_S" "NOTE fetch: ran git fetch origin main" "FAIL ancestry: fetch failed" \
-  "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
+  "OK parents: $S7 has 1 parent" "FAIL patch: fetch failed" "OK worktree: $FX_WT clean"
 CLOSEOUT_TEST_REAL_GIT=$_rg PATH="$TEST_TMP/probe-bin:$PATH" sh "$SCRIPT" -r "$FX_ROOT" -n 431 -b "$FX_BRANCH" -p "$FX_PREFIX" \
   >"$TEST_TMP/out" 2>"$TEST_TMP/err" </dev/null
 RC=$?
 assert_case probe-fails 1 probe-fails
+
+# Case 43: a --no-ff merge commit with two parents (the squash and one side commit) is the PR's merge commit. The
+# parents line fails with the count and the stop card; the other lines read the merge commit as before.
+new_case two-parents
+make_merge "$TEST_TMP/two-parents/upstream" 1 || exit 2
+write_merge MERGED "$FX_M" || exit 2
+M7=$(short7 "$FX_M") || exit 2
+want two-parents "OK merged: $FX_M" "$NOTE_FETCH" "OK ancestry: $M7 is in origin/main" \
+  "FAIL parents: $M7 has 2 parents; stop card for the owner." "FAIL patch: squash differs from branch diff" \
+  "OK worktree: $FX_WT clean"
+std_run
+assert_case two-parents 1 two-parents
+
+# Case 44: an octopus merge commit with three parents (the squash and two side commits) fails the parents line.
+new_case three-parents
+make_merge "$TEST_TMP/three-parents/upstream" 2 || exit 2
+write_merge MERGED "$FX_M" || exit 2
+M7=$(short7 "$FX_M") || exit 2
+want three-parents "OK merged: $FX_M" "$NOTE_FETCH" "OK ancestry: $M7 is in origin/main" \
+  "FAIL parents: $M7 has 3 parents; stop card for the owner." "FAIL patch: squash differs from branch diff" \
+  "OK worktree: $FX_WT clean"
+std_run
+assert_case three-parents 1 three-parents
+
+# Case 45: the merge sha is not an object in the repository (a bogus sha), so the parent count cannot be read. The
+# ancestry and patch lines also fail; the parents line says the count is unreadable.
+new_case unreadable-merge
+write_merge MERGED 0123456789abcdef0123456789abcdef01234567
+want unreadable-merge "OK merged: 0123456789abcdef0123456789abcdef01234567" "$NOTE_FETCH" \
+  "FAIL ancestry: 0123456 is not in origin/main" \
+  "FAIL parents: cannot read the parent count of 0123456; stop card for the owner." \
+  "FAIL patch: squash differs from branch diff" "OK worktree: $FX_WT clean"
+std_run
+assert_case unreadable-merge 1 unreadable-merge
+
+# Case 46: the merge sha is the root commit of origin/main, which has no parent field, so the parent count cannot be
+# read. The root commit is in origin/main, so ancestry is OK; the patch has no first parent and fails.
+new_case root-commit
+_rc=$(git -C "$FX_ROOT" rev-list --max-parents=0 -n 1 refs/remotes/origin/main) || exit 2
+_rs=$(short7 "$_rc") || exit 2
+write_merge MERGED "$_rc" || exit 2
+want root-commit "OK merged: $_rc" "$NOTE_FETCH" "OK ancestry: $_rs is in origin/main" \
+  "FAIL parents: cannot read the parent count of $_rs; stop card for the owner." \
+  "FAIL patch: squash differs from branch diff" "OK worktree: $FX_WT clean"
+std_run
+assert_case root-commit 1 root-commit
+
+# Case 47: -x and -P together on a clean two-worktree layout. The parents line for the one-parent squash prints
+# between the ancestry line and the patch line; the reconcile worktree holds notes.md untracked, not plan.md.
+new_case x-plan-parents
+rm -f "$FX_WT/plan.md" || exit 2
+printf '%s\n' notes > "$FX_WT/notes.md" || exit 2
+add_reconcile || exit 2
+rm -f "$FX_ROOT/.worktrees/$FX_RECON/plan.md" || exit 2
+printf '%s\n' notes > "$FX_ROOT/.worktrees/$FX_RECON/notes.md" || exit 2
+want x-plan-parents "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" \
+  "OK parents: $S7 has 1 parent" "$PATCH_OK" "OK worktree: $FX_WT clean" \
+  "OK worktree: $FX_ROOT/.worktrees/$FX_RECON clean"
+std_run -x "$FX_RECON" -P notes.md
+assert_case x-plan-parents 0 x-plan-parents
 
 # Group 2: closeout-steps.sh. CLOSEOUT_STEPS=<path> substitutes another steps script. The steps script runs
 # closeout-check.sh next to itself unless CLOSEOUT_CHECK names another check; the cases marked stub name a stub
@@ -703,7 +787,7 @@ add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-b" || exit 2
 check_alone steps-all
 want steps-all \
-  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-b clean" \
@@ -753,7 +837,7 @@ new_case steps-open
 write_merge OPEN null
 steps_prefetch
 check_alone steps-open
-want steps-open "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want steps-open "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean" "FAIL steps: refused, close-out check failed"
 steps_snapshot "$TEST_TMP/before-steps-open" || exit 2
 steps_std
@@ -780,7 +864,7 @@ new_case steps-second-run
 steps_prefetch
 steps_std
 assert_exit "steps-second-run first exit" 0 "$RC"
-want steps-second-run "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" \
+want steps-second-run "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" \
   "FAIL patch: branch tip not found" "OK worktree: $FX_WT absent" "FAIL steps: refused, close-out check failed"
 steps_snapshot "$TEST_TMP/before-steps-second-run" || exit 2
 steps_std
@@ -792,7 +876,7 @@ steps_compare steps-second-run "$TEST_TMP/before-steps-second-run"
 new_case steps-x-local-gone
 git_c "$FX_ROOT" worktree remove --force "$FX_WT" || exit 2
 git_c "$FX_ROOT" branch -q -D "$FX_BRANCH" || exit 2
-want steps-x-local-gone "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want steps-x-local-gone "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT absent" "OK worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
   "OK remove-worktree: $FX_WT absent" "OK remove-worktree: $FX_ROOT/.worktrees/$FX_RECON absent" \
   "OK delete-branch-local: $FX_BRANCH already gone" "OK delete-branch-local: reconcile-$FX_RECON already gone" \
@@ -807,7 +891,7 @@ new_case steps-x-full
 git_c "$FX_ROOT" worktree add -q -b "reconcile-$FX_RECON" "$FX_ROOT/.worktrees/$FX_RECON" "origin/$FX_BRANCH" || exit 2
 printf '%s\n' plan > "$FX_ROOT/.worktrees/$FX_RECON/plan.md" || exit 2
 add_child "$FX_ROOT/.worktrees/$FX_RECON-c" || exit 2
-want steps-x-full "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want steps-x-full "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_RECON clean" \
   "OK worktree: $FX_ROOT/.worktrees/$FX_RECON-c clean" \
@@ -911,7 +995,7 @@ assert_refs steps-ff-fails 0 0 "$_main0" 0
 new_case steps-origin-gone-real
 steps_prefetch
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
-want steps-origin-gone-real "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want steps-origin-gone-real "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
   "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7" \
   "OK issue: #427 CLOSED" "OK flaky: 0"
@@ -925,7 +1009,7 @@ new_case steps-origin-prefixed
 git -C "$FX_ORIGIN" update-ref "refs/heads/y/$FX_BRANCH" "$FX_H" || exit 2
 git -C "$FX_ORIGIN" update-ref -d "refs/heads/$FX_BRANCH" || exit 2
 steps_prefetch
-want steps-origin-prefixed "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+want steps-origin-prefixed "OK merged: $FX_S" "$NOTE_GONE" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK remove-worktree: $FX_WT" "OK delete-branch-local: $FX_BRANCH" \
   "OK delete-branch-origin: $FX_BRANCH already gone" "OK fast-forward: main at $S7" \
   "OK issue: #427 CLOSED" "OK flaky: 0"
@@ -1120,7 +1204,7 @@ write_runs '[{"headSha":"a","conclusion":"failure"},{"headSha":"a","conclusion":
 write_merge OPEN null
 steps_prefetch
 check_alone steps-refused-new-lines
-want steps-refused-new-lines "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" \
+want steps-refused-new-lines "FAIL merged: state is OPEN" "$NOTE_FETCH" "FAIL ancestry: no merge commit" "FAIL parents: no merge commit" \
   "FAIL patch: no merge commit" "OK worktree: $FX_WT clean" "FAIL steps: refused, close-out check failed"
 steps_snapshot "$TEST_TMP/before-steps-refused-new-lines" || exit 2
 steps_std -e 400
@@ -1148,7 +1232,7 @@ steps_usage_case relative-root -r relative/root -n 431 -b "$FX_BRANCH" -p "$FX_P
 new_case steps-root-slash
 add_child "$FX_ROOT/.worktrees/$FX_PREFIX-a" || exit 2
 want steps-root-slash \
-  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "$PATCH_OK" \
+  "OK merged: $FX_S" "$NOTE_FETCH" "OK ancestry: $S7 is in origin/main" "OK parents: $S7 has 1 parent" "$PATCH_OK" \
   "OK worktree: $FX_WT clean" "OK worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a clean" \
   "OK remove-worktree: $FX_WT" "OK remove-worktree: $FX_ROOT/.worktrees/$FX_PREFIX-a" \
   "OK delete-branch-local: $FX_BRANCH" "OK delete-branch-origin: $FX_BRANCH" "OK fast-forward: main at $S7" \
@@ -1180,5 +1264,24 @@ steps_std
 assert_case steps-root-detached 1 steps-root-detached
 check_prefix_eq steps-root-detached
 steps_compare steps-root-detached "$TEST_TMP/before-steps-root-detached"
+
+# Step case 20: the PR's merge commit has two parents. The check fails on the parents line, so the run is refused
+# before any step: no worktree is removed, no branch is deleted and root main does not fast-forward.
+new_case steps-two-parents
+make_merge "$TEST_TMP/steps-two-parents/upstream" 1 || exit 2
+write_merge MERGED "$FX_M" || exit 2
+M7=$(short7 "$FX_M") || exit 2
+steps_prefetch
+_main0=$(git -C "$FX_ROOT" rev-parse refs/heads/main) || exit 2
+check_alone steps-two-parents
+want steps-two-parents "OK merged: $FX_M" "$NOTE_FETCH" "OK ancestry: $M7 is in origin/main" \
+  "FAIL parents: $M7 has 2 parents; stop card for the owner." "FAIL patch: squash differs from branch diff" \
+  "OK worktree: $FX_WT clean" "FAIL steps: refused, close-out check failed"
+steps_snapshot "$TEST_TMP/before-steps-two-parents" || exit 2
+steps_std
+assert_case steps-two-parents 1 steps-two-parents
+check_prefix_eq steps-two-parents
+steps_compare steps-two-parents "$TEST_TMP/before-steps-two-parents"
+assert_refs steps-two-parents 1 1 "$_main0" 1
 
 test_summary

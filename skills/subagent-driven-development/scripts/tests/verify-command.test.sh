@@ -52,6 +52,16 @@ else
   case_fail fail-digits-count "no 'VIOLATION line 1: digit-count' in output: $OUT"
 fi
 
+# Case: each digit-pattern and count-step variant on lines 2 to 4 is flagged (the digit class,
+# the \d pattern, and a bare grep -c with no wc).
+if printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 2: digit-count' &&
+  printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 3: digit-count' &&
+  printf '%s\n' "$OUT" | grep -qF 'VIOLATION line 4: digit-count'; then
+  case_ok fail-digits-count-variants
+else
+  case_fail fail-digits-count-variants "lines 2-4 not all flagged as digit-count: $OUT"
+fi
+
 # Case: the clean fixture passes with exit 0 and no output.
 run_check "$FIX/clean.md"
 if [ "$RC" -ne 0 ]; then

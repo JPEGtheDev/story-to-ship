@@ -1,0 +1,4 @@
+printf "%s\n" PASS > "$EVID"
+echo done 2>&1
+grep -cE "(three|[0-9]+) files" out.txt | wc -l
+grep "[0-9]" out.txt

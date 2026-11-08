@@ -1,6 +1,6 @@
 ---
 title: "Three-Role Loop Reference"
-description: "The three-role loop for a code todo that adds or changes behaviour: when it applies, dispatch order, the role rules for test-writer, pass-maker and refactorer, the test-path predicate, the role-boundary detector, what the detector does not catch, and failure routing."
+description: "The three-role loop for a code todo that adds or changes behavior: when it applies, dispatch order, the role rules for test-writer, pass-maker and refactorer, the test-path predicate, the role-boundary detector, what the detector does not catch, and failure routing."
 domain: skills
 subdomain: subagent-driven-development
 tags: [skills, subagent-driven-development, references, three-role, test-driven-development]
@@ -17,7 +17,7 @@ The three-role loop splits one code todo into three dispatches, each run by a di
 
 Every plan entry carries one marker line, `loop: three-role` or `loop: single`, with a one-line reason. The rule for choosing is in the loop-marker section of the writing-plans skill's todo templates.
 
-- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.
+- `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.
 - `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
 - A todo that mixes code and prose is split into a code todo and a prose todo before dispatch.
 
@@ -29,7 +29,7 @@ Every plan entry carries one marker line, `loop: three-role` or `loop: single`, 
 4. refactorer dispatch: one commit, `refactor(scope): ...`, or no commit.
 5. One spec review over the commits.
 
-The optional stub commit comes before step 2. Type or signature stubs, and build-registration files that the failing-test step (RED) needs in order to fail at run time rather than at compile time, are committed by a pass-maker-role implementer before the test is written. A stub commit holds type or signature stubs and build-registration files only, no behaviour, and the suite stays green (or at least still builds) after it. The stub commit is checked as pass-maker. It is a dispatch of its own, so the test-writer still starts from the stub commit. The stub commit type is `chore(scope): ...`, and the dispatch task must say it is a stub commit.
+The optional stub commit comes before step 2. Type or signature stubs, and build-registration files that the failing-test step (RED) needs in order to fail at run time rather than at compile time, are committed by a pass-maker-role implementer before the test is written. A stub commit holds type or signature stubs and build-registration files only, no behavior, and the suite stays green (or at least still builds) after it. The stub commit is checked as pass-maker. It is a dispatch of its own, so the test-writer still starts from the stub commit. The stub commit type is `chore(scope): ...`, and the dispatch task must say it is a stub commit.
 
 Rules that hold for the whole sequence:
 
@@ -48,7 +48,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Runs the suite: the new test must FAIL with a run-time assertion failure, and no other test may fail. A compile or import error is not a valid RED.
 - Commits `test(scope): ...` with the failure output pasted in the reply.
 - Makes exactly one commit, the test commit; no WIP commit.
-- If the test passes at once, return BLOCKED: the behaviour already exists or the test is wrong. The todo goes back to planning.
+- If the test passes at once, return BLOCKED: the behavior already exists or the test is wrong. The todo goes back to planning.
 
 ### pass-maker
 
@@ -60,7 +60,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Keeps the suite green.
 - Commits `feat(scope): ...` or `fix(scope): ...`.
 - Makes exactly one commit, the passing commit; no WIP commit.
-- For a stub commit (the task says so), it writes type or signature stubs and build-registration files only, with no behaviour, keeps the build and the suite as they were, and commits `chore(scope): ...`.
+- For a stub commit (the task says so), it writes type or signature stubs and build-registration files only, with no behavior, keeps the build and the suite as they were, and commits `chore(scope): ...`.
 - If the test is wrong or a case is missing, return BLOCKED to the coordinator. The coordinator opens a new todo with its own test-writer. The pass-maker never writes the test. The new todo's first dispatch is a test-writer dispatch whose one commit reverts the earlier failing-test commit; the detector checks that commit as test-writer. The new failing test is a second, separate test-writer dispatch based on that revert commit. A todo never ends on a failing suite.
 
 ### refactorer
@@ -71,7 +71,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Keeps the suite green and pastes the run.
 - Commits `refactor(scope): ...`, or reports `no refactor needed: <reason>` and commits nothing.
 - Makes at most one commit, the refactor commit (none when it reports `no refactor needed`); no WIP commit.
-- A behaviour change is a finding.
+- A behavior change is a finding.
 - If the suite turns red, the refactorer reverts its changes before reporting.
 - Before reporting, confirms from the diff that no test file was added, deleted or renamed; a refactorer that commits nothing reviews `git diff` and `git status` instead of `git diff HEAD~1`.
 
@@ -168,11 +168,11 @@ The detector checks which paths each role changed and a few text heuristics. It 
 
 - three different implementers
 - the commit type
-- whether a stub commit holds no behaviour
+- whether a stub commit holds no behavior
 - the pasted RED and GREEN output
 - RED is a run-time assertion failure, not a compile error
 - least code (for example hardcoding the expected value)
-- a refactor that changes behaviour
+- a refactor that changes behavior
 - weakened assertions inside a modified test
 - test helpers outside the test-path predicate
 - skip markers beyond the heuristic list
@@ -183,7 +183,7 @@ The text heuristics have known limits. The skip scan lists annotation and call f
 
 Known misses, each reviewer-judged: (1) an empty refactorer commit passes the script; the dispatcher's `rev-list` count catches it only when the refactorer reported `no refactor needed` (expected 0), and otherwise the reviewer judges it; (2) C# skip markers such as `[Ignore]` and `[Fact(Skip=...)]` are not in the skip scan; (3) replacing one assertion line with another, such as `assertEquals` to `assertTrue`, keeps the assertion count equal. Items (1), (2) and (3) are pinned by fixtures named with the suffix `-MISS` in `../scripts/tests/run.sh`.
 
-The plan checker `../scripts/plan-check.sh` has known limits, each judged by the reviewer: (1) a fence indented by even one space is not recognised, so a column-0 marker inside it counts as a marker (pinned by the `fence-indented-MISS` fixture in `../scripts/tests/run.sh`); (2) a column-0 prose line that starts with `Todo N` or `Task N` counts as an entry header (the line that opens a plan entry); (3) a marker must start at column 0; (4) the text after the marker, such as `-- reason:`, is not checked; (5) a marker before the first header belongs to no entry and is ignored; (6) a fence opener with no closer hides every later entry to the end of the file, and the checker does not warn.
+The plan checker `../scripts/plan-check.sh` has known limits, each judged by the reviewer: (1) a fence indented by even one space is not recognized, so a column-0 marker inside it counts as a marker (pinned by the `fence-indented-MISS` fixture in `../scripts/tests/run.sh`); (2) a column-0 prose line that starts with `Todo N` or `Task N` counts as an entry header (the line that opens a plan entry); (3) a marker must start at column 0; (4) the text after the marker, such as `-- reason:`, is not checked; (5) a marker before the first header belongs to no entry and is ignored; (6) a fence opener with no closer hides every later entry to the end of the file, and the checker does not warn.
 
 The Files, Depends on and Token budget checks look only for a filled line or the line shape, not for real paths, task numbers or correct figures. The placeholder check matches its five items (`TBD`, `TODO`, `implement later`, `fill in details`, `Similar to Task`) exactly and case-sensitively. Fence opener and closer lines are not scanned. Entries are counted by the header rule, so a column-0 prose line that starts `Todo N` also counts toward the 8-entry threshold. Two Token budget lines pass, and so does a malformed line beside a well-formed one. A placeholder inside an indented fence is flagged, pinned by the `ph-indented-fence-MISS` fixture in `../scripts/tests/run.sh`.
 

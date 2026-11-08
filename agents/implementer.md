@@ -92,7 +92,7 @@ The file list is informational and the tool-call estimate is advisory; neither s
 
 Size is set by objective, per the Task Granularity rule in the `writing-plans` skill:
 
-A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
+A todo is one behavior or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
 
 If the task as dispatched carries two independently verifiable objectives, or is one that no single review could judge, return immediately:
 

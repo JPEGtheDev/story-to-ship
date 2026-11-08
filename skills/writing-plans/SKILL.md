@@ -81,7 +81,7 @@ Every todo must contain what an engineer needs to execute it. These are **plan f
 
 Each task MUST be one todo of ordered steps (2-5 minutes each).
 
-A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
+A todo is one behavior or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.
 
 **Context:** Applies to every todo in a plan. File and tool-call counts do not predict whether one review can judge a todo: cutting by count splits one objective across reviews, none of which can judge it whole.
 

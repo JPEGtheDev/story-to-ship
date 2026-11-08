@@ -99,7 +99,7 @@ Before writing the PR, answer:
 7. **Does the drafted PR body state that the owner approved, confirmed, or chose anything?**
    List such sentences:
    `grep -nEi '(owner|user)[^.]{0,60}(approved|confirmed|chose|picked|signed off|ruled)|(approved|confirmed|chosen|signed off) by the (owner|user)' "$PR_BODY_FILE"`
-   Compare each listed sentence against the content of the owner message that did so (find it in this conversation, or in the session transcript file after a compaction; a bare "approve all" means the list it pointed at): every item the sentence says was approved appears in that message, word for word or in plain paraphrase. Text written after that message is labelled in the body as added after approval. If the message cannot be found, delete the sentence or ask the owner to confirm it. A claim of approval over text the owner has not seen is fixed before the PR goes up.
+   Compare each listed sentence against the content of the owner message that did so (find it in this conversation, or in the session transcript file after a compaction; a bare "approve all" means the list it pointed at): every item the sentence says was approved appears in that message, word for word or in plain paraphrase. Text written after that message is labeled in the body as added after approval. If the message cannot be found, delete the sentence or ask the owner to confirm it. A claim of approval over text the owner has not seen is fixed before the PR goes up.
 
 8. **Does the plan file promise an item for the PR body that the drafted body lacks?**
    List the promises, run from the worktree root:

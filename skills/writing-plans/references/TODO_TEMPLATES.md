@@ -58,7 +58,7 @@ The checker also enforces other rules. Start the `Files:`, `Depends on:` and `To
 
 Rule for choosing:
 
-- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.
+- `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.
 - `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
 - A todo mixing code and prose is split into a code todo and a prose todo.
 
@@ -67,7 +67,7 @@ Rule for choosing:
 Three dispatches, each by a different implementer, against the seam named in the seam table:
 
 ```
-Todo N: [Behaviour name]
+Todo N: [Behavior name]
 loop: three-role -- reason: [one line]
 Files:
   - Create: exact/path/to/NewFile.<ext>

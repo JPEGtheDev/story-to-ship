@@ -64,12 +64,23 @@ make_list() {
   done
 }
 
-# make_base REPO WITH_LIST: base commit on branch base holding the real workflow
-# and, when WITH_LIST is 1, a complete checks.list.
+# copy_size_files REPO: copy the five files the size step covers from the real
+# repository into REPO, so the size step's control run can read them.
+copy_size_files() {
+  for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
+    skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
+    skills/running-a-sprint/SKILL.md; do
+    mkdir -p "$1/$(dirname "$path")" && cp "$REPO/$path" "$1/$path" || return 1
+  done
+}
+
+# make_base REPO WITH_LIST: base commit on branch base holding the real workflow,
+# the size step's five covered files and, when WITH_LIST is 1, a complete checks.list.
 make_base() {
   mkdir -p "$1/.github/workflows" "$1/tools/validate_workflow"
   git -C "$1" init -q && git -C "$1" symbolic-ref HEAD refs/heads/base || return 1
   cp "$REAL_WF" "$1/.github/workflows/validate.yml"
+  copy_size_files "$1" || return 1
   if [ "$2" = 1 ]; then
     make_list "$1/.github/workflows/validate.yml" > "$1/tools/validate_workflow/checks.list"
   fi
@@ -326,6 +337,7 @@ list="$repo/tools/validate_workflow/checks.list"
 # Act
 mkdir -p "$repo/.github/workflows" "$repo/tools/validate_workflow"
 cp "$REAL_WF" "$wf"
+copy_size_files "$repo"
 make_list "$wf" > "$list"
 commit_all "$repo" "head: add workflow and list"
 # Assert

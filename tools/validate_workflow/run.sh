@@ -1,5 +1,5 @@
 #!/bin/sh
-# validate-workflow guard (story 447, Todo 1). Compares the head validate workflow
+# validate-workflow guard. Compares the head validate workflow
 # and checks.list with the base and reports:
 #   R1  a base step, covers path or proof entry that the head drops
 #   R2  a pending entry whose reason lacks #<digits>
@@ -100,6 +100,14 @@ has_entry() {
   ' "$3"
 }
 
+# has_covers STEP PATH FILE: exit 0 when FILE holds a covers entry naming STEP and PATH.
+has_covers() {
+  VW_STEP=$1 VW_PATH=$2 awk -F "$TAB" '
+    $1 == "covers" && $2 == ENVIRON["VW_STEP"] && $3 == ENVIRON["VW_PATH"] { found = 1 }
+    END { exit !found }
+  ' "$3"
+}
+
 # in_block STEP PATH BLOCKS: exit 0 when a non-comment line of STEP's block holds PATH.
 in_block() {
   VW_STEP=$1 VW_PATH=$2 awk '
@@ -125,6 +133,8 @@ check_removal() {
       covers)
         in_block "$step" "$detail" "$TMP/head.blocks" ||
           finding R1 "base covers path \"$detail\" of step \"$step\" is absent from the head step block (non-comment line)"
+        has_covers "$step" "$detail" "$TMP/head.list" ||
+          finding R1 "base covers path \"$detail\" of step \"$step\" is absent from the head checks.list"
         ;;
       proof)
         has_entry proof "$step" "$TMP/head.list" ||

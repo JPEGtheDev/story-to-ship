@@ -24,13 +24,13 @@ Stories come from an epic issue's checklist. Read each with `gh issue view <stor
 
 Before a story launches, the launcher reads the story's comments and greps the base branch log for the pull request that delivered it. A story that is done, merged and meets its acceptance criteria is closed by the launcher with no owner question; the launcher's one chat line cites the merged pull request and the criteria check.
 
-A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST, and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery for launched stories; the runner does.
+A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the requirements ceremony) for launched stories; the runner does.
 
 ---
 
 ## Capacity
 
-Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the dependency rule do not gate. Launching a fresh runner for a Discovery stop (the owner question row of `references/HANDBACK_ROUTING.md`) is never gated or deferred by the limit and is exempt from the dependency check against its own held entry; once launched, it counts as working, like a resumed runner. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under the rule on launch questions in Capacity. Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the dependency rule allow.
+Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the dependency rule do not gate. Launching a fresh runner for a Discovery stop (the owner question row of `references/HANDBACK_ROUTING.md`) is never gated or deferred by the limit and is exempt from the dependency check against its own held entry; once launched, it counts as working, like a resumed runner. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under the rule on launch questions in Capacity (`references/MOVED_RATIONALE.md`, Launch question owner text). Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the dependency rule allow.
 
 The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria.
 No other story launches until the pilot hands back PR ready and that hand-back passes the checks in its row of `references/HANDBACK_ROUTING.md`, required lines included. The other pilot and release rules are in `references/PILOT.md`.
@@ -65,7 +65,7 @@ End the turn while runners work. Before the row lookup, every owner message, han
 
 An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner, its ledger state becomes `stopped` so later sweeps skip it, and the launcher tells the owner once. Squash is the merge method close-out accepts; a merge commit stops at step 1, and any other merge, such as a rebase merge, goes on through step 2, which sends it to the owner only on a patch difference. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
-The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`. A stopped PR waits for the owner's answer to the stop, which decides the next step; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
+The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`, so no close-out repeats. A stopped PR waits for the owner's answer to the stop, which decides the next step; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
 
 Verify before relaying anything to the owner:
 
@@ -77,7 +77,7 @@ Verify before relaying anything to the owner:
 
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
-When the session-bootstrap gate prompts again, re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
+When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
 
 An ask about items that exist now is done once, for the items it names; it does not become a standing workflow, and a later item needs its own ask.
 
@@ -85,7 +85,7 @@ An ask about items that exist now is done once, for the items it names; it does 
 
 ## Close-out
 
-Run these in order once origin shows the PR MERGED. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
+Run these in order once origin shows the PR MERGED, whether the sweep or the owner's report found it. Every git call is `git -C <absolute path>`; the main checkout (R below) stays on main.
 
 1. Confirm the merge on origin: `gh pr view <PR number> --json state,mergeCommit` shows MERGED, and `git -C R fetch origin main` then `git -C R merge-base --is-ancestor S origin/main` exits 0 (S is the squash commit). S has one parent (`git -C R rev-list --parents -n 1 S` shows two fields); a merge commit stops here.
 2. Compare patches (squash tree-equality; H is the runner branch tip, or `origin/<branch>` after a fetch for a reconcile replacement): `B=$(git -C R merge-base S^ H); cmp <(git -C R diff $B H | grep -v '^index ') <(git -C R diff S^ S | grep -v '^index ')`. A difference goes to the owner; do not continue.
@@ -93,8 +93,8 @@ Run these in order once origin shows the PR MERGED. Every git call is `git -C <a
 4. Delete the branch locally (`git -C R branch -D <branch>`, and `reconcile-<prefix>` for a reconcile replacement) and on origin with git push origin --delete <branch>, run through `git -C R`.
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified).
-7. Reconcile the PR next to merge against the merged change; the other open sprint PRs wait until they become next; follow `references/RECONCILE.md`.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released. A held story whose "Depends On" line named the merged story launches here, under the Capacity rule.
+7. Reconcile the PR next to merge against the merged change; the other open sprint PRs wait until they become next; follow `references/RECONCILE.md`, which holds all of step 7.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line (`references/PILOT.md`) is released. A held story whose "Depends On" line named the merged story launches here, under the Capacity rule.
 
 A check that fails at a step stops there: the close-out stop card names the failed step, the PR's Ready to merge entry is removed, and nothing is re-run. A stop at step 1 or 2 leaves the branch and worktree in place; a stop at step 3 or later may not, and the card says what remains. A finished close-out gets one chat line to the owner and the same removal.
 
@@ -151,5 +151,7 @@ Related skills: `references/MOVED_RATIONALE.md`, Moved from SKILL.md: related sk
 ---
 
 ## References
+
+Reference files: `references/INDEX.md`.
 
 See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reference descriptions.

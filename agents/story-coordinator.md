@@ -119,7 +119,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Compare the numstat sum with that `<n>`, and on a mismatch report both numbers in the hand-back.
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim (a Discovery stop writes `owner question: Discovery`).
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.
-- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below).
+- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below, when one runs; a clean rebase needs green CI only).
 - Hand back owner question, blocked, cap reached or interim with the pull request still a draft; only PR ready follows `gh pr ready`.
 - When `gh pr ready <n>` fails, hand back blocked with the error text; the pull request stays a draft.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
@@ -158,7 +158,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Fix each finding as a fix round of this reconcile through a fresh implementer; a fresh re-check reviewer follows each fix round.
 - CI failing on the updated head is classified as the Red CI section says; only an own code failure is a fix round of this reconcile. A stale base found after the Update rebase is brought in by merging origin/main without force and counts toward the same limit of 2 stale base merges per story; the Update rebase itself does not count.
 - Re-verify: wait for CI on the updated head and, when a conflict was resolved, re-run the spec review on the resolved hunks.
-- Stage 2 runs as one pass, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files, with a re-check after each fix round (a reconcile is not a new whole-branch pass over the story).
+- Stage 2 runs as one pass, after CI is green on the updated head, over the resolved hunks and the fix rounds' changed files, with a re-check after each fix round (a reconcile is not a new whole-branch pass over the story). A clean rebase with no conflict runs no Stage 2.
 - Hand back kind PR ready with the line `Reconcile: merged PR <n>; files <list>; conflicts resolved <n>; cross-story findings <n>; fix rounds <n>; spec review <verdict>; CI <state>`, every number pasted from a command run that turn, zero written as 0. On a clean rebase with no conflict, the line reads in full: Reconcile: merged PR <n>; files <list>; conflicts resolved 0; cross-story findings 0; fix rounds <n>; spec review not run (clean rebase, no reviewer); CI <state>, with fix rounds <n> counting any own-code CI fix round.
 - Hand back kind owner question when resolving needs dropping one story's intent: run `git -C <feature worktree> rebase --abort` first, write the Reconcile record from the conflicts you saw, and name both intents and the hunk, with options and your recommendation.
 - Any finding or CI failure still open after the third fix round of a reconcile is kind cap reached, with the open findings.

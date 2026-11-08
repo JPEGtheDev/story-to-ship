@@ -22,6 +22,8 @@ Terms are defined in references/MOVED_RATIONALE.md, section Moved from SKILL.md:
 
 Stories come from an epic issue's checklist. Read each with `gh issue view <story> --json body` and find its acceptance criteria.
 
+Before a story launches, the launcher reads the story's comments and greps the base branch log for the pull request that delivered it. A story that is done, merged and meets its acceptance criteria is closed by the launcher with no owner question; the launcher's one chat line cites the merged pull request and the criteria check.
+
 A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST, and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery for launched stories; the runner does.
 
 ---
@@ -76,6 +78,8 @@ Verify before relaying anything to the owner:
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
 When the session-bootstrap gate prompts again, re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
+
+An ask about items that exist now is done once, for the items it names; it does not become a standing workflow, and a later item needs its own ask.
 
 ---
 

@@ -32,7 +32,7 @@
 # closes the common shell routes around the inline-edit guard hook, which
 # counts the coordinator's Edit and Write changes; it does not close every
 # route (see the residuals below). A dispatched subagent
-# keeps today's behaviour for these shapes exactly (new files, appends,
+# keeps today's behavior for these shapes exactly (new files, appends,
 # and exclusive-create opens are allowed for it).
 #
 # No marker and no escape hatch exist. The sanctioned route to overwrite a
@@ -55,7 +55,7 @@
 # target is known to be inside a repository, only a successful git
 # check-ignore match frees it, and any other check-ignore result or error
 # leaves it protected. For the main thread, the scanner denies only the
-# write mechanisms it recognises -- confirmed to get through: `touch`,
+# write mechanisms it recognizes -- confirmed to get through: `touch`,
 # `ln -s` to a new link, `curl -o` and other download-to-file tools, a
 # read-write redirect `<>`, node `fs.appendFileSync` / `fs.openSync(...,
 # 'a')`, and `>&` followed by a file name (which also bypasses the

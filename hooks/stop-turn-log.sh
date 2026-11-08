@@ -3,7 +3,7 @@
 #
 # Reads the Stop hook's JSON payload from stdin and appends one JSONL record describing
 # the turn to a log file, unconditionally, on every invocation. This hook makes no
-# judgement of any kind and NEVER blocks -- it is pure passive logging with no flag or
+# judgment of any kind and NEVER blocks -- it is pure passive logging with no flag or
 # mode gating it on or off.
 #
 # Fail-safe: any error here (missing jq, empty stdin, malformed stdin, unwritable log

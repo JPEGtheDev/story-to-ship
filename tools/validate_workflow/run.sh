@@ -119,12 +119,12 @@ check_removal() {
     fi
   done < "$TMP/base.steps"
 
-  while IFS="$TAB" read -r kind step rest; do
+  while IFS="$TAB" read -r kind step detail; do
     grep -Fxq -- "$step" "$TMP/head.steps" || continue
     case $kind in
       covers)
-        in_block "$step" "$rest" "$TMP/head.blocks" ||
-          finding R1 "base covers path \"$rest\" of step \"$step\" is absent from the head step block (non-comment line)"
+        in_block "$step" "$detail" "$TMP/head.blocks" ||
+          finding R1 "base covers path \"$detail\" of step \"$step\" is absent from the head step block (non-comment line)"
         ;;
       proof)
         has_entry proof "$step" "$TMP/head.list" ||
@@ -152,7 +152,7 @@ check_new_steps() {
 
 # check_list_entries: R5 for each head list entry naming a step absent from the head.
 check_list_entries() {
-  while IFS="$TAB" read -r kind step rest; do
+  while IFS="$TAB" read -r kind step detail; do
     grep -Fxq -- "$step" "$TMP/head.steps" ||
       finding R5 "$kind entry names step \"$step\", which is absent from the head workflow"
   done < "$TMP/head.list"

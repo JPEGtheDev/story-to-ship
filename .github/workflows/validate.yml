@@ -1048,8 +1048,8 @@ jobs:
       # chars/4 estimate) is enforced here only for the core skills listed in
       # the loop below: each was measured and brought under the cap when it
       # was split (honesty from communication; two-stage-review from
-      # subagent-driven-development). running-a-sprint SKILL.md is skipped here
-      # until the sprint skill size story (443) removes the skip. No repo-wide skill-size
+      # subagent-driven-development). running-a-sprint SKILL.md is listed too,
+      # and this check alone holds it under the cap. No repo-wide skill-size
       # cap is CI-enforced; other skills have not been measured against this
       # limit.
       - name: Enforce size cap on core skills
@@ -1057,7 +1057,7 @@ jobs:
           set -e
           limit=20000
           over=0
-          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md; do # skills/running-a-sprint/SKILL.md is skipped until the sprint skill size story (443) removes this skip
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md; do
             size=$(wc -c < "$f")
             if [ "$size" -gt "$limit" ]; then
               echo "FAILED: $f is $size characters, exceeding the $limit-character limit"

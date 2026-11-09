@@ -62,7 +62,7 @@ If RED equals GREEN on the three behaviors, first grep the skills the subject lo
 
 This section defines one Discovery-stop rehearsal: a run in which the subject stops at Discovery with an owner question and hands back. It uses the Fixture, Running and Counting sections above, with the differences listed here.
 
-- Fixture: the sandbox described in the Fixture section, with one difference. The story is story 1's stub story file, and its acceptance criteria hold one question only the owner can answer. Leave out the Feature Specification section that states Discovery ran, because a Discovery stop needs the subject to run Discovery.
+- Fixture: the sandbox described in the Fixture section, with one difference. The story is the stub story file, and its acceptance criteria hold one question only the owner can answer. Leave out the Feature Specification section that states Discovery ran, because a Discovery stop needs the subject to run Discovery.
 - Arms: one run, GREEN arm only (the template as shipped). The two-runs-per-arm rule in the Running section does not apply to this single run, so the run gives no RED comparison and no rate.
 - Subject: one rehearsal-subject agent at Standard tier, run_in_background false, with a dispatch budget of 6, as the Running section states.
 - Counting: count from the subject's transcript, as the Counting section says. Record each item below on its own line, six items in all:

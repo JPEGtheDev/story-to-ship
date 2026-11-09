@@ -45,7 +45,7 @@ set_content() {
 }
 
 # make_list WORKFLOW: print a complete checks.list for every step in WORKFLOW.
-# The size step gets its five covers lines and one proof line; every other step
+# The size step gets its six covers lines and one proof line; every other step
 # gets a pending line citing #455.
 make_list() {
   grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
@@ -534,7 +534,7 @@ commit_all "$repo" "head: control-failing proof, inner guard set"
 check_run "guard skips proofs when INNER=1" "$repo" 0 - inner "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
 
 # Case z: the size step's oversize proof for session-bootstrap, restated explicitly.
-# The step fails on the 20001-byte copy of session-bootstrap, so the must-pass run holds.
+# The step fails on the 20001-byte copy of session-bootstrap, so the must-fail run holds.
 # Arrange
 repo="$TMP/z"
 make_base "$repo" 1

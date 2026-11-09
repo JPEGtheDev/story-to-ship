@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: fix-prompt-quotes-findings
-context:
-  scaffold_script: scaffold.sh

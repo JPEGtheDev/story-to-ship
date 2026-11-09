@@ -74,7 +74,7 @@ parse_list() {
       problem = ""
       if ($1 == "step") want = 2
       else if ($1 == "covers" || $1 == "pending") want = 3
-      else if ($1 == "proof") want = 6
+      else if ($1 == "proof") want = ($5 == "append") ? 7 : 6
       else want = 0
       if ($1 == "proof" && NF == 6 && $6 == "") {
         print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
@@ -88,7 +88,7 @@ parse_list() {
         for (i = 2; i <= NF && problem == ""; i++) {
           if ($i == "") problem = "empty field " i
         }
-        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize") {
+        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && $5 != "append") {
           problem = "unknown proof mode " $5
         }
       }
@@ -308,12 +308,20 @@ copy_tree() {
   cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
 }
 
-# apply_mode FILE MODE: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x.
+# apply_mode FILE MODE TEXT: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x;
+# append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. TEXT reaches
+# awk through ENVIRON, so no shell expands its dollar signs or backslashes.
 # parse_list has already refused any other mode.
 apply_mode() {
   case $2 in
     empty) : > "$1" ;;
     oversize) awk 'BEGIN { s = sprintf("%20001s", ""); gsub(/ /, "x", s); printf "%s", s }' > "$1" ;;
+    append)
+      VW_TEXT=$3 awk 'BEGIN {
+        s = ENVIRON["VW_TEXT"]
+        while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
+        printf "%s\n", s
+      }' >> "$1" ;;
   esac
 }
 
@@ -324,7 +332,7 @@ apply_mode() {
 run_proofs() {
   prepare_tree
   n=0
-  while IFS="$TAB" read -r kind step envs target mode text; do
+  while IFS="$TAB" read -r kind step envs target mode text addtext; do
     [ "$kind" = proof ] || continue
     has_head_step "$step" || continue
     n=$((n + 1))
@@ -345,7 +353,7 @@ run_proofs() {
       finding R2 "proof target \"$target\" of step \"$step\" is absent from the tree"
       continue
     fi
-    apply_mode "$fail/$target" "$mode"
+    apply_mode "$fail/$target" "$mode" "$addtext"
     if ! run_block "$fail" "$envs" "$body" "$TMP/fail.$n.out" &&
       grep -Fq -- "$text" "$TMP/fail.$n.out"; then
       printf 'PROOF ok: %s\n' "$step"

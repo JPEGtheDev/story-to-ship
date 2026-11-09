@@ -10,7 +10,7 @@ related:
 
 # running-a-sprint References Index
 
-These files back the Capacity, Launch, Watch loop and Close-out sections of `../SKILL.md` (`PILOT.md` backs Capacity and Launch, `RECONCILE.md` backs Close-out step 7), and `REHEARSAL.md` backs the check to repeat when the story-coordinator template they depend on changes.
+These files back the Capacity, Launch and Watch loop sections of `../SKILL.md` and the close-out steps in `../../sprint-close-out/SKILL.md` (`PILOT.md` backs Capacity and Launch, `RECONCILE.md` backs Close-out step 7), and `REHEARSAL.md` backs the check to repeat when the story-coordinator template they depend on changes.
 
 ---
 

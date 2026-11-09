@@ -533,10 +533,10 @@ commit_all "$repo" "head: control-failing proof, inner guard set"
 # Assert
 check_run "guard skips proofs when INNER=1" "$repo" 0 - inner "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
 
-# Case z: the size step's oversize proof for session-bootstrap, restated explicitly.
+# Case zz: the size step's oversize proof for session-bootstrap, restated explicitly.
 # Both the control and the must-fail run hold: the step fails on the 20001-byte copy of session-bootstrap.
 # Arrange
-repo="$TMP/z"
+repo="$TMP/zz"
 make_base "$repo" 1
 use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
@@ -545,6 +545,25 @@ set_proof "$list" "$SIZE_STEP" - skills/session-bootstrap/SKILL.md oversize "exc
 commit_all "$repo" "head: session-bootstrap size proof restated"
 # Assert
 check_run "session-bootstrap size proof passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
+
+# Case z: a proof row in append mode with a seventh field of two lines and a dollar sign.
+# The seventh field is passed through ENVIRON so its backslash-n stays literal. The step
+# never reads the target, so the must-fail run passes: the control run passed, then the
+# guard reports that the proof did not fail with the expected output.
+# Arrange
+repo="$TMP/z"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
+  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"]; next }
+  { print }
+' "$list" | set_content "$list"
+commit_all "$repo" "head: append proof with a seventh field"
+# Assert
+check_run "append mode adds two lines with a dollar sign" "$repo" 1 R2 - \
+  "did not fail with the expected output"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

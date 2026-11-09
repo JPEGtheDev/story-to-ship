@@ -1067,8 +1067,9 @@ jobs:
       # chars/4 estimate) is enforced here only for the six core skills listed
       # in the loop below: each was measured and brought under the cap when it
       # was split (honesty from communication; two-stage-review from
-      # subagent-driven-development). running-a-sprint and session-bootstrap
-      # SKILL.md are listed too, and this check alone holds them under the cap.
+      # subagent-driven-development; session-bootstrap from its references).
+      # running-a-sprint SKILL.md is listed too, and this check alone holds it
+      # under the cap.
       # No repo-wide skill-size cap is CI-enforced; other skills have not been
       # measured against this limit.
       - name: Enforce size cap on core skills

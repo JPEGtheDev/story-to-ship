@@ -57,11 +57,13 @@ covers	Enforce size cap on core skills	skills/communication/SKILL.md
 covers	Enforce size cap on core skills	skills/subagent-driven-development/SKILL.md
 covers	Enforce size cap on core skills	skills/two-stage-review/SKILL.md
 covers	Enforce size cap on core skills	skills/running-a-sprint/SKILL.md
+covers	Enforce size cap on core skills	skills/session-bootstrap/SKILL.md
 proof	Check agent templates index matches agents/	IDX_PATH=skills/subagent-driven-development/references/AGENT_TEMPLATES.md	skills/subagent-driven-development/references/AGENT_TEMPLATES.md	empty	index missing or stale row for
 proof	Check the formulation heading is pinned	FORMULATION_PATH=skills/three-amigos/references/FORMULATION.md	skills/three-amigos/references/FORMULATION.md	empty	has no line equal to: ## Formulation
 proof	Check the Discovery formulation check is pinned	CEREMONIES_PATH=skills/three-amigos/references/CEREMONIES.md	skills/three-amigos/references/CEREMONIES.md	empty	has no text containing: **Formulation class (Discovery only):**
 proof	Check the flaky-test rules are pinned	FLAKY_TESTS_PATH=skills/testing/references/FLAKY_TESTS.md	skills/testing/references/FLAKY_TESTS.md	empty	has no line equal to: No automatic retries
 proof	Enforce size cap on core skills	-	skills/honesty/SKILL.md	oversize	exceeding the 20000-character limit
+proof	Enforce size cap on core skills	-	skills/session-bootstrap/SKILL.md	oversize	exceeding the 20000-character limit
 proof	Run validate workflow guard	-	tools/validate_workflow/checks.list	empty	FINDING
 proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	FAIL
 pending	Validate hooks.json	must-fail proof filed in #455

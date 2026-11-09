@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=27
+EXPECTED_CASES=29
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -53,7 +53,7 @@ make_list() {
     if [ "$name" = "$SIZE_STEP" ]; then
       for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
         skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-        skills/running-a-sprint/SKILL.md; do
+        skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
         printf 'covers\t%s\t%s\n' "$name" "$path"
       done
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
@@ -64,18 +64,18 @@ make_list() {
   done
 }
 
-# copy_size_files REPO: copy the five files the size step covers from the real
+# copy_size_files REPO: copy the six files the size step covers from the real
 # repository into REPO, so the size step's control run can read them.
 copy_size_files() {
   for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
     skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-    skills/running-a-sprint/SKILL.md; do
+    skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
     mkdir -p "$1/$(dirname "$path")" && cp "$REPO/$path" "$1/$path" || return 1
   done
 }
 
 # make_base REPO WITH_LIST: base commit on branch base holding the real workflow,
-# the size step's five covered files and, when WITH_LIST is 1, a complete checks.list.
+# the size step's six covered files and, when WITH_LIST is 1, a complete checks.list.
 make_base() {
   mkdir -p "$1/.github/workflows" "$1/tools/validate_workflow"
   git -C "$1" init -q && git -C "$1" symbolic-ref HEAD refs/heads/base || return 1
@@ -532,6 +532,32 @@ set_proof "$list" "Check the flaky-test rules are pinned" \
 commit_all "$repo" "head: control-failing proof, inner guard set"
 # Assert
 check_run "guard skips proofs when INNER=1" "$repo" 0 - inner "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
+
+# Case z: the size step's oversize proof for session-bootstrap, restated explicitly.
+# The step fails on the 20001-byte copy of session-bootstrap, so the must-pass run holds.
+# Arrange
+repo="$TMP/z"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "$SIZE_STEP" - skills/session-bootstrap/SKILL.md oversize "exceeding the 20000-character limit"
+commit_all "$repo" "head: session-bootstrap size proof restated"
+# Assert
+check_run "session-bootstrap size proof passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
+
+# Case z2: a covers path dropped from the size step's for line, for session-bootstrap.
+# Arrange
+repo="$TMP/z2"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '/for f in / && /session-bootstrap/ { sub(/ skills\/session-bootstrap\/SKILL\.md/, "") } { print }' \
+  "$wf" | set_content "$wf"
+commit_all "$repo" "head: drop session-bootstrap from for line"
+# Assert
+check_run "z2 session-bootstrap path dropped" "$repo" 1 R1
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

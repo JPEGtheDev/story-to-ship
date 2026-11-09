@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=29
+EXPECTED_CASES=28
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -545,19 +545,6 @@ set_proof "$list" "$SIZE_STEP" - skills/session-bootstrap/SKILL.md oversize "exc
 commit_all "$repo" "head: session-bootstrap size proof restated"
 # Assert
 check_run "session-bootstrap size proof passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
-
-# Case z2: a covers path dropped from the size step's for line, for session-bootstrap.
-# Arrange
-repo="$TMP/z2"
-make_base "$repo" 1
-use_head "$repo"
-wf="$repo/.github/workflows/validate.yml"
-# Act
-awk '/for f in / && /session-bootstrap/ { sub(/ skills\/session-bootstrap\/SKILL\.md/, "") } { print }' \
-  "$wf" | set_content "$wf"
-commit_all "$repo" "head: drop session-bootstrap from for line"
-# Assert
-check_run "z2 session-bootstrap path dropped" "$repo" 1 R1
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

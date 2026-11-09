@@ -10,9 +10,11 @@ YOU MUST LAUNCH ONE RUNNER PER STORY THAT HAS ACCEPTANCE CRITERIA, VERIFY EVERY 
 No exceptions.
 ```
 
+Violating the letter of this rule is violating the spirit of this rule.
+
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-Terms are defined in references/MOVED_RATIONALE.md, section Moved from SKILL.md: definitions. The launcher plans nothing itself. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill or launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The launcher plans nothing itself. A coordinator subagent never loads this skill or launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
 ---
 
@@ -37,7 +39,7 @@ No other story launches until the pilot hands back PR ready and that hand-back p
 
 Each launch question to the owner uses the wording in `references/MOVED_RATIONALE.md`, section Launch question owner text.
 
-A story whose body has a line "Depends On: #N" naming another open story waits until that story's pull request merges; its ledger entry records "depends on #N" as the reason, and it launches at Close-out step 8 after that merge. A bare #N mention elsewhere in the body does not hold a story. A dependency that is closed unmerged, outside the sprint, or circular is an owner question: the owner decides, and the launcher does not wait forever. The "Files to Create/Modify" list is an optional, informational field; it never holds a launch, and a story with no Files list launches like any other story. Stories that add a skill launch under the same rules as any other story.
+A story whose body has a line "Depends On: #N" naming another open story waits until that story's pull request merges; its ledger entry records "depends on #N" as the reason, and it launches at Close-out step 8 after that merge. A bare #N mention elsewhere in the body does not hold a story. A dependency that is closed unmerged, outside the sprint, or circular is an owner question: the owner decides, and the launcher does not wait forever. The "Files to Create/Modify" list is an optional, informational field; it never holds a launch, and a story with no Files list launches like any other story. Stories that add a skill launch under the same rules as any other story, and the reconcile at merge settles their README and CONTRIBUTING count lines.
 
 ---
 

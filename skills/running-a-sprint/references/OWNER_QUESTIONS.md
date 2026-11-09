@@ -57,6 +57,8 @@ Every card carries these fields, with these exact names:
 
 Required: `number`, `story or topic`, `question`, `options` and `recommendation`. Optional: `status`.
 
+Class fields: `class` is required on an owner question card and on a Discovery card, and is absent from every other card; it is the question's tag from its Questions line (`empirical` or `preference`). `why not settled` is required when the class is `empirical`, holds the run's reason from the same Questions line in one line, and is absent when the class is `preference`. A merge, cap reached or scope card carries neither field.
+
 A launch card also states, for each story it names:
 
 - "working N of L", where N is the number of working runners counted from the ledger re-read this turn and L is the limit now in force.

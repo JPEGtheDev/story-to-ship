@@ -74,7 +74,7 @@ parse_list() {
       problem = ""
       if ($1 == "step") want = 2
       else if ($1 == "covers" || $1 == "pending") want = 3
-      else if ($1 == "proof") want = ($5 == "append") ? 7 : 6
+      else if ($1 == "proof") want = ($5 == "append" || $5 == "insert-before") ? 7 : 6
       else want = 0
       if ($1 == "proof" && NF == 6 && $6 == "") {
         print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
@@ -88,7 +88,7 @@ parse_list() {
         for (i = 2; i <= NF && problem == ""; i++) {
           if ($i == "") problem = "empty field " i
         }
-        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && $5 != "append") {
+        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && $5 != "append" && $5 != "insert-before") {
           problem = "unknown proof mode " $5
         }
       }
@@ -309,7 +309,8 @@ copy_tree() {
 }
 
 # apply_mode FILE MODE TEXT: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x;
-# append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. TEXT reaches
+# append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. insert-before
+# puts TEXT, split the same way, before the last line of FILE. TEXT reaches
 # awk through ENVIRON, so no shell expands its dollar signs or backslashes.
 # parse_list has already refused any other mode.
 apply_mode() {
@@ -322,6 +323,18 @@ apply_mode() {
         while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
         printf "%s\n", s
       }' >> "$1" ;;
+    insert-before)
+      VW_TEXT=$3 awk 'BEGIN {
+        s = ENVIRON["VW_TEXT"]
+        while ((i = index(s, "\\n")) > 0) { add[++n] = substr(s, 1, i - 1); s = substr(s, i + 2) }
+        add[++n] = s
+      }
+      { line[++m] = $0 }
+      END {
+        for (i = 1; i < m; i++) print line[i]
+        for (i = 1; i <= n; i++) print add[i]
+        if (m > 0) print line[m]
+      }' "$1" > "$1.new" && mv "$1.new" "$1" ;;
   esac
 }
 

@@ -119,9 +119,9 @@ Apply this checklist per file (anatomy elements do not apply to reference files)
 - [ ] **Acronym Rule** -- all acronyms spelled out on first use
 - [ ] **Jargon Rule (advisory)** -- terms of art defined on first use (first-use test, VOICE_AUTHORITY_RULES); report file:line per flagged term; advisory, not NEEDS WORK-eligible.
 - [ ] **No absolute paths** -- no `/home/`, `/usr/`, `/root/` literals
-- [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names. (R1)
-- [ ] Shipped text carries no dated snapshot and no owner-set label. (R4)
-- [ ] Shipped skill and agent text names no vendor model name; a model tier is named only by its tier (Economy, Standard, Premium). (R7)
+- [ ] **Shipped text names only shipped checks** -- grep the shipped tree for each named check, mode or role. (R1)
+- [ ] **Dated snapshot or owner-set label** -- shipped text carries neither. (R4)
+- [ ] **Vendor model name** -- shipped skill and agent text names none; a model tier is named only by its tier (Economy, Standard, Premium). (R7)
 - [ ] **No cross-skill file path refs** -- no path or bare file name into another skill's tree (the `../other-skill/references/FILE.md` form is one example); run the Step 4 command from the repository root and adjudicate hits as in the Step 2 item
 - [ ] **Content matches SKILL.md pointer** -- file contains what SKILL.md says it contains
 - [ ] **Size** -- no hard limit for reference files; flag as SIZE ALERT if > 8,000 chars (~2,000 tokens)
@@ -218,7 +218,7 @@ Return findings in EXACTLY this structure:
 | Rehearsal fixture does not contain the rule (R3) | [+]/[-]/N/A | file:line or "no rehearsal" |
 | No dated snapshot or owner-set label (R4) | [+]/[-] | file:line or "no issues found" |
 | Sweep covers only files tracked on main (R5) | [+]/[-]/N/A | file:line or "no sweep" |
-| Bare SKILL.md hit naming another skill is a cross-tree hit (R6) | [+]/[-] | file:line or "no issues found" |
+| Bare SKILL.md hit naming another skill is a cross-tree hit (R6) | [+]/[-]/N/A | file:line or "no cross-skill sweep" |
 | No vendor model name; tiers only (R7) | [+]/[-] | file:line or "no issues found" |
 
 ### Reference Files

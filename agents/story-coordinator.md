@@ -119,7 +119,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Compare the numstat sum with that `<n>`, and on a mismatch report both numbers in the hand-back.
 - Begin every hand-back with a kind line, one of: owner question, PR ready, blocked, cap reached, interim (a Discovery stop writes `owner question: Discovery`).
 - Use owner question for a decision only the owner can make; it carries the options and your recommendation.
-- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below, when one runs; a clean rebase needs green CI only).
+- Use PR ready when the pull request is open, CI is green and the whole-branch Stage 2 has passed (a reconcile: the reconcile Stage 2 below, when one runs; a clean rebase with no fix round needs green CI only).
 - Hand back owner question, blocked, cap reached or interim with the pull request still a draft; only PR ready follows `gh pr ready`.
 - When `gh pr ready <n>` fails, hand back blocked with the error text; the pull request stays a draft.
 - Use blocked when you cannot proceed and no option list helps, for example when the issue has no acceptance criteria.
@@ -151,7 +151,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Append a `## Reconcile record` section to the PR body; never replace an earlier one.
 - The section starts with the line `Merged PR <n>:`, then one bullet per resolved hunk, `<file>: <hunk> -- <reason>`, or the single bullet `no conflicts`.
 - Write the Reconcile record before any owner-question hand-back.
-- A reconcile reviews only the resolved conflict hunks on the conflicting files, plus CI; an overlap that rebases with no conflict needs only the rebase and green CI, with no reviewer.
+- A reconcile reviews only the resolved conflict hunks on the conflicting files, plus CI; a clean rebase with no fix round needs green CI only, with no reviewer.
 - Cross-story check: only when a conflict was resolved, dispatch a fresh spec-compliance-reviewer child at the Standard tier with run_in_background false.
 - Its requirements are the acceptance criteria of both stories; it reads only the resolved conflict hunks on the conflicting files as they stand after the update, and reports each statement in those hunks that now contradicts another statement and each acceptance criterion of either story that those hunks no longer meet.
 - Each finding quotes a file:line pair; a result with no findings lists the hunks read.

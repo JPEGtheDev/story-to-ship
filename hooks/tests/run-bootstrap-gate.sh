@@ -126,7 +126,7 @@ PRE_HOOK="${PRE_HOOK:-$SCRIPT_DIR/../bootstrap-gate-pre.sh}"
 POST_HOOK="${POST_HOOK:-$SCRIPT_DIR/../bootstrap-gate-post.sh}"
 SESSION_START_HOOK="${SESSION_START_HOOK:-$SCRIPT_DIR/../session-start.sh}"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures-bootstrap-gate"
-# RUN_ONLY=<case name> runs one fixture case and skips the mutation case.
+# RUN_ONLY=<case name> runs one fixture case and skips the mutation case and the role-list check.
 RUN_ONLY="${RUN_ONLY:-}"
 
 pass=0
@@ -516,6 +516,7 @@ run_mutant_case() {
     fail=$((fail + 1))
     return
   }
+  trap 'rm -rf "$mutant_root"' INT TERM
   if ! cp -R "$SCRIPT_DIR/.." "$mutant_root/hooks"; then
     echo "FAIL: $name"
     echo "  - cp of the hooks into the mutant copy failed"
@@ -527,7 +528,6 @@ run_mutant_case() {
     "$mutant_root/hooks/session-start.sh" >"$mutant_root/hooks/session-start.sh.new" &&
     mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
 
-  trap 'rm -rf "$mutant_root"' INT TERM
   mutant_out="$(
     PRE_HOOK="$mutant_root/hooks/bootstrap-gate-pre.sh" \
       POST_HOOK="$mutant_root/hooks/bootstrap-gate-post.sh" \
@@ -555,8 +555,7 @@ run_mutant_case() {
 # RELOAD_ROLE_NAMES array must equal the names on the is_role line of
 # bootstrap-gate-pre.sh. A role added to only one copy would lose its hold
 # with no error, so any difference fails. Both files are read from their
-# repo paths (relative to SCRIPT_DIR); the check runs against a temp copy
-# of the tree to prove it can fail.
+# repo paths (relative to SCRIPT_DIR).
 run_role_list_check() {
   local name="role_lists_agree_across_hooks"
   local session_start="$SCRIPT_DIR/../session-start.sh"

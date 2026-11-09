@@ -26,7 +26,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 - About to delete a branch before the lane entries are counted -- STOP. Read the plan file and run the lane count first (step 3).
 - Continuing past a failed step to save time -- STOP. A failed step stops the close-out; the stop card names the step.
 - Treating a merge reported only in chat as MERGED -- STOP. Read origin with gh before any step.
-- Skipping the reconcile of the other open sprint pull requests because they look clean -- STOP. Step 7 runs for each one; follow references/RECONCILE.md through the path in step 7.
+- Skipping the reconcile of the other open sprint pull requests because they look clean -- STOP. Step 7 runs for each one; follow ../running-a-sprint/references/RECONCILE.md through the path in step 7.
 
 ## Rationalization Prevention
 

@@ -26,8 +26,8 @@ fi
 # code, and it fails silently (fail-open) if jq is missing, stdin has no
 # session_id or is not valid JSON, the session_id is outside the allowed
 # characters, neither state-dir variable is resolvable, or the state dir
-# cannot be created or written. The reload part below sets the role and
-# written flag; the banner sentence prints the role and depends on the written
+# cannot be created or written. The reload part below sets the roles and
+# written flag; the banner sentence prints the roles and depends on the written
 # flag -- the exit code still never changes.
 # A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
 # the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
@@ -77,7 +77,7 @@ fi
 # still gets the banner and session-start.md text from the section below.
 # The diagnostic capture block further down must likewise stay above those early exits.
 RELOAD_PENDING_WRITTEN=""
-RELOAD_PENDING_ROLE=""
+RELOAD_PENDING_ROLES=""
 RELOAD_ROLE_NAMES=(running-a-sprint sprint-close-out)
 RELOAD_ACTION_NAMES=(subagent-driven-development using-git-worktrees versioning verification-before-completion writing-skills)
 
@@ -173,15 +173,15 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
         # the role list, one per line, no duplicates. A missing or unreadable
         # loaded list is skipped by the -r test below, so there are no roles
         # and the action names are still written.
-        RELOAD_ROLE=""
+        RELOAD_ROLES=""
         if [[ -r "$RELOAD_LOADED_FILE" ]]; then
           while IFS= read -r RELOAD_LINE || [[ -n "$RELOAD_LINE" ]]; do
             if [[ "$RELOAD_LINE" =~ ^[A-Za-z0-9._-]+$ ]]; then
               for RELOAD_ROLE_NAME in "${RELOAD_ROLE_NAMES[@]}"; do
                 if [[ "$RELOAD_LINE" == "$RELOAD_ROLE_NAME" ]]; then
-                  case $'\n'"$RELOAD_ROLE"$'\n' in
+                  case $'\n'"$RELOAD_ROLES"$'\n' in
                     *$'\n'"$RELOAD_LINE"$'\n'*) ;;
-                    *) RELOAD_ROLE+="${RELOAD_ROLE:+$'\n'}$RELOAD_LINE" ;;
+                    *) RELOAD_ROLES+="${RELOAD_ROLES:+$'\n'}$RELOAD_LINE" ;;
                   esac
                   break
                 fi
@@ -189,7 +189,7 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
             fi
           done <"$RELOAD_LOADED_FILE" 2>/dev/null
         fi
-        RELOAD_SET="$RELOAD_ROLE"
+        RELOAD_SET="$RELOAD_ROLES"
         for RELOAD_ACTION_NAME in "${RELOAD_ACTION_NAMES[@]}"; do
           RELOAD_SET+="${RELOAD_SET:+$'\n'}$RELOAD_ACTION_NAME"
         done
@@ -197,7 +197,7 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
         if { printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE"; } 2>/dev/null &&
           mv -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null; then
           RELOAD_PENDING_WRITTEN=1
-          RELOAD_PENDING_ROLE="$RELOAD_ROLE"
+          RELOAD_PENDING_ROLES="$RELOAD_ROLES"
         else
           rm -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null
         fi
@@ -218,7 +218,7 @@ if [[ ! -f "$MD_FILE" ]]; then
   exit 0
 fi
 
-python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_WRITTEN" "$RELOAD_PENDING_ROLE" << 'PYEOF'
+python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_WRITTEN" "$RELOAD_PENDING_ROLES" << 'PYEOF'
 import json, pathlib, sys
 content = pathlib.Path(sys.argv[1]).read_text()
 raw = sys.argv[2] if len(sys.argv) > 2 else ""

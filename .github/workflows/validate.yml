@@ -48,6 +48,8 @@ jobs:
           shellcheck hooks/tests/run-hooks-json-quoting.sh
           shellcheck tools/first_action_audit/first-action-audit.sh
           shellcheck tools/first_action_audit/tests/run.sh
+          shellcheck tools/validate_workflow/run.sh
+          shellcheck tools/validate_workflow/tests/run.sh
           echo "[+] All shell scripts pass shellcheck"
 
       - name: Run all hook fixture suites
@@ -1343,3 +1345,9 @@ jobs:
             exit 1
           fi
           echo "[+] running-a-sprint SKILL.md has 10 Red Flag bullets and 8 Rationalization Prevention rows"
+
+      - name: Run validate workflow guard
+        run: sh tools/validate_workflow/run.sh
+
+      - name: Run validate workflow guard tests
+        run: sh tools/validate_workflow/tests/run.sh

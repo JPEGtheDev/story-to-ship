@@ -458,6 +458,7 @@ jobs:
           check agents/story-coordinator.md 'A story too big for one pull request is split at Discovery.' 'the runner launches none.' 'Moving criteria unchanged into filed issues under this bullet is the split, not a scope change.'
           check agents/story-coordinator.md 'Size is never a file count: a story is too big when its criteria name more than one independently verifiable objective.'
           check agents/story-coordinator.md 'if a slice has no assigned criteria, the runner stops and hands back kind owner question with no issue filed' 'under a Split heading with the filed issue numbers' 'the runner drafts no criteria' 'cover only that slice' 'under the Capacity section of the running-a-sprint skill'
+          check agents/story-coordinator.md 'keeps the first slice in its own pull request and files each remaining slice as a new story issue in the user-story-generator format'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'A reconcile reviews only the resolved conflict hunks on the conflicting files, plus CI; a clean rebase with no fix round needs green CI only, with no reviewer.' 'so the checks named here are the launcher'
           check agents/story-coordinator.md 'a clean rebase with no fix round needs green CI only' 'A clean rebase with no conflict and no fix round runs no Stage 2.'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'when a conflict was resolved, the reconcile review has passed too.'

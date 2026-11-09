@@ -17,13 +17,13 @@
 # 2. Reload gate (second, only Edit, Write, NotebookEdit, Agent and Bash).
 #    After a compaction or resume, hooks/session-start.sh writes the skills
 #    to re-invoke into .reload-pending-<session_id>, one per line: the
-#    session's role skill (if any) followed by five action skills.
+#    session's role skills (if any) followed by five action skills.
 #    hooks/bootstrap-gate-post.sh removes a name from that file each time the
 #    matching Skill call completes. This gate runs once the bootstrap flag is
 #    absent, or the call is the Skill(session-bootstrap) call. Each pending
 #    name holds only the call it guards:
-#      - role name (running-a-sprint): holds Edit, Write, NotebookEdit, Agent;
-#        never Bash.
+#      - role names (running-a-sprint, sprint-close-out): hold Edit, Write,
+#        NotebookEdit, Agent; never Bash.
 #      - subagent-driven-development, using-git-worktrees: hold Agent.
 #      - writing-skills: holds Edit, Write, NotebookEdit when the path field
 #        (tool_input.file_path, else tool_input.notebook_path) has a directory
@@ -238,9 +238,9 @@ if [[ "$TOOL_NAME" != "Agent" && "$TOOL_NAME" != "Bash" ]]; then
     2>/dev/null)"
 fi
 
-# is_role <name>: succeeds for a role name (the only one is running-a-sprint).
+# is_role <name>: succeeds for a role name (running-a-sprint or sprint-close-out).
 is_role() {
-  [[ "$1" == "running-a-sprint" ]]
+  [[ "$1" == "running-a-sprint" || "$1" == "sprint-close-out" ]]
 }
 
 # holds_call <name>: succeeds when the pending name holds the current call.

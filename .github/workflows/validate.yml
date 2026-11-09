@@ -216,7 +216,7 @@ jobs:
                 echo "BROKEN: $f references $ref (not found at $target)"
                 broken=$((broken + 1))
               fi
-            done < <(grep -o '\(references\|tools\)/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
+            done < <(grep -o '\(\.\./[a-z-]*/\)\?\(references\|tools\)/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
           done
           if [ "$broken" -gt 0 ]; then
             echo "Found $broken broken reference(s)"
@@ -1096,12 +1096,13 @@ jobs:
           echo "[+] flaky-test rule pins are present"
 
       # This 20,000-byte cap (roughly 5,000 tokens at the documented
-      # chars/4 estimate) is enforced here only for the six core skills listed
+      # chars/4 estimate) is enforced here only for the seven core skills listed
       # in the loop below. Three of them were measured and brought under the
       # cap when split: honesty from communication; two-stage-review from
       # subagent-driven-development; session-bootstrap into its references.
-      # running-a-sprint SKILL.md is also listed, and this check alone holds
-      # it under the cap.
+      # running-a-sprint SKILL.md and sprint-close-out SKILL.md (the Close-out
+      # steps moved out of running-a-sprint) are also listed, and this check
+      # alone holds them under the cap.
       # No repo-wide skill-size cap is CI-enforced; other skills have not been
       # measured against this limit.
       - name: Enforce size cap on core skills
@@ -1109,7 +1110,7 @@ jobs:
           set -e
           limit=20000
           over=0
-          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md skills/sprint-close-out/SKILL.md; do
             size=$(wc -c < "$f")
             if [ "$size" -gt "$limit" ]; then
               echo "FAILED: $f is $size characters, exceeding the $limit-character limit"

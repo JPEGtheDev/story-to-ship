@@ -53,7 +53,7 @@ make_list() {
     if [ "$name" = "$SIZE_STEP" ]; then
       for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
         skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-        skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
+        skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md skills/sprint-close-out/SKILL.md; do
         printf 'covers\t%s\t%s\n' "$name" "$path"
       done
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
@@ -69,7 +69,7 @@ make_list() {
 copy_size_files() {
   for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
     skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-    skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
+    skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md skills/sprint-close-out/SKILL.md; do
     mkdir -p "$1/$(dirname "$path")" && cp "$REPO/$path" "$1/$path" || return 1
   done
 }

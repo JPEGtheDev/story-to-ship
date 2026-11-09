@@ -469,6 +469,7 @@ jobs:
           check skills/running-a-sprint/SKILL.md 'The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria.'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'A hand-back of kind owner question, blocked or cap reached from the pilot keeps the pilot held; the answer to it is not a pass.'
           check skills/running-a-sprint/SKILL.md 'Depends On: #N' 'A bare #N mention elsewhere in the body does not hold a story'
+          check skills/running-a-sprint/SKILL.md 'A split issue a runner filed goes through Intake like any story and launches under the Capacity section.'
           check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'Merge order: <n> of <N>'
           check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'read only the resolved conflict hunks on the conflicting files'
           check skills/running-a-sprint/references/RECONCILE.md 'the PR next to merge' 'When `gh pr diff` fails for that PR, compare its Files list'

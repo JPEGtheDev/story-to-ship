@@ -26,6 +26,8 @@ Before a story launches, the launcher reads the story's comments and greps the b
 
 A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the requirements ceremony) for launched stories; the runner does.
 
+A split issue a runner filed goes through Intake like any story and launches under the Capacity section.
+
 ---
 
 ## Capacity

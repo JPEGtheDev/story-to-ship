@@ -91,7 +91,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Keep building: while a question waits, keep planning and building the parts that do not depend on it, and name in the hand-back which parts wait on which question. A runner that needs the owner's answer sends it as an owner question hand-back once the parts that do not depend on it are built, and gets the answer by resume; no hand-back kind is added for a wait.
 - The classification and test-first rules cover the runner's own questions and the Discovery amigos' questions, during Discovery too. The keep-building rule applies only to runners, after Discovery. The Discovery stop does not change, so a Discovery verdict of BACK TO OWNER still stops before planning. Questions raised by implementers or by the launcher are outside this rule. The Discovery stop hand-back (a BACK TO OWNER verdict) is kind owner question.
 
->## Plan check
+## Plan check
 
 - After the plan has passed its review and before the first dispatch, and again after any re-plan, run `sh <skill dir>/scripts/plan-check.sh <plan file>` with the absolute path of the plan file and no cd. `<skill dir>` is the base directory the Skill tool prints when you load the subagent-driven-development skill. Load it first, or reload it after a compaction, when its base directory is not in your context.
 - Paste the command and its exit code in the pull request body, from a run of the command made in the turn that writes the body.

@@ -190,4 +190,4 @@ All done? -> verification-before-completion -> ship
 
 ## Rationale for the completion-claim rule
 
-Runtime user-visible bugs found after a "fully implemented" claim are the direct cost of skipping this load.
+Runtime user-visible bugs found after a "fully implemented" claim are the direct cost of skipping the `verification-before-completion` load.

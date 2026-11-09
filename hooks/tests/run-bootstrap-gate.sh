@@ -510,12 +510,24 @@ run_case() {
 run_mutant_case() {
   local name="two_roles_mutant_second_role_removed_fails"
   local mutant_root mutant_out mutant_exit
-  mutant_root="$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-gate-mutant.XXXXXX")"
-  cp -R "$SCRIPT_DIR/.." "$mutant_root/hooks"
+  mutant_root="$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-gate-mutant.XXXXXX")" || {
+    echo "FAIL: $name"
+    echo "  - mktemp failed"
+    fail=$((fail + 1))
+    return
+  }
+  if ! cp -R "$SCRIPT_DIR/.." "$mutant_root/hooks"; then
+    echo "FAIL: $name"
+    echo "  - cp of the hooks into the mutant copy failed"
+    rm -rf "$mutant_root"
+    fail=$((fail + 1))
+    return
+  fi
   sed -e '/^RELOAD_ROLE_NAMES=/s/ sprint-close-out//' \
     "$mutant_root/hooks/session-start.sh" >"$mutant_root/hooks/session-start.sh.new" &&
     mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
 
+  trap 'rm -rf "$mutant_root"' INT TERM
   mutant_out="$(
     PRE_HOOK="$mutant_root/hooks/bootstrap-gate-pre.sh" \
       POST_HOOK="$mutant_root/hooks/bootstrap-gate-post.sh" \
@@ -524,16 +536,55 @@ run_mutant_case() {
       bash "$SCRIPT_DIR/run-bootstrap-gate.sh" 2>&1
   )"
   mutant_exit=$?
+  trap - INT TERM
   rm -rf "$mutant_root"
 
   if [[ "$mutant_exit" -ne 0 ]] && grep -q '^FAIL: two_roles_loaded_compact_holds_both$' <<<"$mutant_out" &&
-    grep -q 'content mismatch' <<<"$mutant_out"; then
+    grep -qF 'line 2: expected [sprint-close-out]' <<<"$mutant_out"; then
     echo "PASS: $name"
     pass=$((pass + 1))
   else
     echo "FAIL: $name"
-    echo "  - case two_roles_loaded_compact_holds_both did not fail on a content assertion against the mutant copy (exit $mutant_exit)"
+    echo "  - case two_roles_loaded_compact_holds_both did not fail on the second-role assertion (line 2: expected [sprint-close-out]) against the mutant copy (exit $mutant_exit)"
     echo "  - mutant run output: $mutant_out"
+    fail=$((fail + 1))
+  fi
+}
+
+# Role-list consistency check: the role names in session-start.sh's
+# RELOAD_ROLE_NAMES array must equal the names on the is_role line of
+# bootstrap-gate-pre.sh. A role added to only one copy would lose its hold
+# with no error, so any difference fails. Both files are read from their
+# repo paths (relative to SCRIPT_DIR); the check runs against a temp copy
+# of the tree to prove it can fail.
+run_role_list_check() {
+  local name="role_lists_agree_across_hooks"
+  local session_start="$SCRIPT_DIR/../session-start.sh"
+  local pre="$SCRIPT_DIR/../bootstrap-gate-pre.sh"
+  local is_role_pattern="  [[ \"\$1\" == "
+  local reload_line is_role_line reload_names is_role_names
+
+  reload_line="$(grep -E '^RELOAD_ROLE_NAMES=' "$session_start")"
+  is_role_line="$(grep -F -e "$is_role_pattern" "$pre")"
+  if [[ "$(grep -cE '^RELOAD_ROLE_NAMES=' "$session_start")" -ne 1 ||
+    "$(grep -cF -e "$is_role_pattern" "$pre")" -ne 1 ]]; then
+    echo "FAIL: $name"
+    echo "  - expected exactly one RELOAD_ROLE_NAMES line in session-start.sh and one is_role line in bootstrap-gate-pre.sh"
+    fail=$((fail + 1))
+    return
+  fi
+
+  reload_names="$(sed -n 's/^RELOAD_ROLE_NAMES=(\(.*\))$/\1/p' <<<"$reload_line" | tr ' ' '\n' | sort)"
+  is_role_names="$(grep -oE '"[A-Za-z0-9._-]+"' <<<"$is_role_line" | tr -d '"' | sort)"
+
+  if [[ -n "$reload_names" && "$reload_names" == "$is_role_names" ]]; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name"
+    echo "  - session-start.sh RELOAD_ROLE_NAMES: [$(paste -sd' ' <<<"$reload_names")]"
+    echo "  - bootstrap-gate-pre.sh is_role: [$(paste -sd' ' <<<"$is_role_names")]"
+    echo "  - the two role lists must agree"
     fail=$((fail + 1))
   fi
 }
@@ -545,8 +596,16 @@ for case_dir in "$FIXTURES_DIR"/*/; do
   run_case "${case_dir%/}"
 done
 
+# A RUN_ONLY value that matches no fixture case is a typo or a stray variable,
+# not a pass.
+if [[ -n "$RUN_ONLY" && $((pass + fail)) -eq 0 ]]; then
+  echo "FAIL: RUN_ONLY matched no case: $RUN_ONLY"
+  fail=$((fail + 1))
+fi
+
 if [[ -z "$RUN_ONLY" ]]; then
   run_mutant_case
+  run_role_list_check
 fi
 
 echo ""

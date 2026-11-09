@@ -1,6 +1,6 @@
 ---
 type: tool_used
 tool: Agent
-input_match: "Red CI log"
+input_match: "[Rr]ed CI log"
 min: 1
 ---

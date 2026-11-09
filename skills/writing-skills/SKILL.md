@@ -15,6 +15,8 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the writing-skills skill to [create/edit/review] the [skill-name] skill."
 
+Shipped text uses American spelling.
+
 ---
 
 ## BEFORE PROCEEDING

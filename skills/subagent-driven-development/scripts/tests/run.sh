@@ -216,7 +216,7 @@ plan_write "$PLANS/fence-mismatch-closer.md" 'Todo 1: first' '```' '~~~' 'loop: 
 plan_run fence-mismatch-closer "$PLANS/fence-mismatch-closer.md" 1 'VIOLATION Todo 1: first has no loop: marker'
 plan_write "$PLANS/fence-prev-entry.md" 'Todo 1: a' '```' 'loop: single -- reason: y' '```' 'Todo 2: b' 'loop: single -- reason: y'
 plan_run fence-prev-entry "$PLANS/fence-prev-entry.md" 1 'VIOLATION Todo 1: a has no loop: marker'
-# Documented miss: an indented fence is not recognised, so a column-0 marker inside it counts.
+# Documented miss: an indented fence is not recognized, so a column-0 marker inside it counts.
 plan_write "$PLANS/fence-indented-MISS.md" 'Todo 1: first' 'Files: a' 'Depends on: none' '  ```' 'loop: single' '  ```'
 plan_run fence-indented-MISS "$PLANS/fence-indented-MISS.md" 0 'OK plan-check: 1 entries'
 

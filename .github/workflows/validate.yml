@@ -149,11 +149,11 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'if [ -z "$status" ] && [ "$role" != refactorer ]; then echo "VIOLATION $role commit changes nothing"; bad=1; fi'
           check skills/subagent-driven-development/SKILL.md 'see `references/THREE_ROLE_LOOP.md` (three role dispatches, role rules, boundary detector)'
           check skills/writing-plans/references/TODO_TEMPLATES.md 'A todo whose row has a blank cell is not dispatched; it returns to planning.'
-          check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: three-role` when the todo adds or changes behaviour in a non-prose source file of a repo with a runnable test suite.'
+          check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.'
           check skills/writing-plans/references/TODO_TEMPLATES.md '- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.'
           check skills/testing/SKILL.md '**Three-role loop:**'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Editing, deleting or skipping a test is a finding.'
-          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'A behaviour change is a finding.'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'A behavior change is a finding.'
           check agents/implementer.md 'Role: [test-writer | pass-maker | refactorer | single]'
           check agents/implementer.md '{{ROLE_RULES}}'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'the dispatcher fills it with the line `Role: <role>`'
@@ -176,7 +176,7 @@ jobs:
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'bad test-path pattern: $test_re'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'The new failing test is a second, separate test-writer dispatch'
           check agents/story-coordinator.md 'a fresh pass-maker dispatch (one commit, detector run) follows it'
-          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'it writes type or signature stubs and build-registration files only, with no behaviour'
+          check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'it writes type or signature stubs and build-registration files only, with no behavior'
           check skills/subagent-driven-development/SKILL.md 'Every implementer dispatch fills `{{ROLE_RULES}}`'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the test commit; no WIP commit.'
           check skills/subagent-driven-development/references/THREE_ROLE_LOOP.md 'Makes exactly one commit, the passing commit; no WIP commit.'
@@ -361,8 +361,8 @@ jobs:
           checkx skills/writing-plans/references/PLAN_REVIEW.md '### Review-Round Cap' '**Otherwise (no Discovery):**' 'Dispatch BOTH agents in parallel: a **Skeptic Agent** and the **plan-reviewer agent**. Read both verdicts before presenting the plan as final.'
           checkx skills/writing-plans/SKILL.md '**Permissive-clause closure:** when a review finds an ambiguous or permissive clause, close it by deleting the clause, not rewording it -- rewording can make the bypass easier (e.g. "the user asks" -> "the user directs the change" turned a stretch into a bright-line match). If you must reword, test the new wording against the concrete evasion sentence that exploited the old wording.'
           # These pins prove presence and absence of wording only, not that a todo is sized correctly.
-          checkx skills/writing-plans/SKILL.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
-          checkx agents/implementer.md 'A todo is one behaviour or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          checkx skills/writing-plans/SKILL.md 'A todo is one behavior or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
+          checkx agents/implementer.md 'A todo is one behavior or one reviewable change with one objective that one review can judge; split it when it holds two independently verifiable objectives or when one review could not judge it.'
           # Floor, not a full list: catches the known old sizing wording and close paraphrases, not every possible rewording.
           sizing_ban='(at most|no more than|max|<=) ?(2|two) (non-test )?files|(3|three)(\+| or more) (non-test )?files|(25|twenty-five)\+? tool[- ]calls|tool calls? *> *25|<=2 (non-test )?files|3\+ non-test|2 non-test|26\+|25 tool|<=25|exceeds 25|file count|sizing limit'
           checkabsent skills/writing-plans/SKILL.md "$sizing_ban"
@@ -382,7 +382,7 @@ jobs:
           checkx skills/writing-plans/references/DECISION_DEFERRAL.md '## Failure-Path Rules' '- A DEFER whose condition is only vague language, or mixes vague clauses with no measurable clause, is rejected and rewritten as a measurable condition. If no measurable condition can be named, the verdict becomes `[UNCLEAR:] -- answer [question]` where the question asks what would force the decision.' '- A DECIDE NOW that depends on a fact the plan does not state becomes `[UNCLEAR:] -- answer [that fact]` only when it decides, by itself, whether an option satisfies a stated requirement or contradicts one. A fact that only ranks the valid options (every option still works whichever way the fact goes) does not block: pick the simplest option that satisfies every stated requirement and record the unstated fact it assumes as the named risk. An unstated requirement is a missing fact, which the Blocked question catches.' '- A DECIDE NOW with no nameable risk is malformed and is not emitted; the verdict falls to DEFER because nothing forces the decision.' '- An `[UNCLEAR:]` with no named question or contradiction is malformed.' '- A todo that depends on a DEFER component uses that component'\''s simplest valid option and adopts no other option; a todo that needs an option beyond the simplest valid option is rewritten or removed. An `[UNCLEAR:]` component gets no todo until it is resolved.' '- The diagnostic runs after the Situation Gate of writing-plans. For the component it covers, a DEFER verdict wins over that gate'\''s row "Architectural decision".' '- An `[UNCLEAR:]` verdict falls under the writing-plans "Red Flag" on `[UNCLEAR:]` markers: resolve it (ask the owner, the person who assigned the work, or run Discovery, the clarifying step of the three-amigos skill) before the plan is presented, then re-run the three questions for that component.'
           checkx skills/writing-plans/references/DECISION_DEFERRAL.md '## Recording Verdicts' 'Write one line per component in the plan file, before the todos. Each line names the component and its verdict in the exact spelling above.' 'A plan with no significant component records the exact line:' 'Deferral gate: no significant components'
           awk '!b && /^[|] Blocked = yes [|]/ {b=NR} !n && /^[|] Needed = no [|]/ {n=NR} END {exit !(b && n && b < n)}' skills/writing-plans/references/DECISION_DEFERRAL.md || { printf 'FAILED: the Blocked = yes row must come before the Needed = no row in skills/writing-plans/references/DECISION_DEFERRAL.md\n'; missing=$((missing + 1)); }
-          check skills/finishing-a-development-branch/SKILL.md "Text written after that message is labelled in the body as added after approval"
+          check skills/finishing-a-development-branch/SKILL.md "Text written after that message is labeled in the body as added after approval"
           check skills/finishing-a-development-branch/SKILL.md "Every promised item is found in the drafted body file before gh pr create runs"
           check skills/two-stage-review/SKILL.md "SPEC COMPLIANCE FIRST, THEN CODE QUALITY" "{{IMPLEMENTER_EVIDENCE}}" "Adversarial scenario tested" "Canary confirmed"
           check skills/two-stage-review/SKILL.md "A Stage 1 or Stage 2 result whose verdict is missing, or is not one of the verdict values that reviewer's template defines, counts as not passed."
@@ -888,10 +888,10 @@ jobs:
           for s in \
             '## Proof kinds' \
             'Every acceptance criterion is proven by one of three proof kinds. A criterion with no stated proof kind is proven by an automated test. Skill and prompt text is documentation, not shipped code.' \
-            '1. Automated test -- a test kept in the repository that fails before the change and passes after it. It applies to a criterion about behaviour of shipped code (anything a user or another program runs, such as a hook, a tool script or a CI step). Its proof is the test name and its run output.' \
+            '1. Automated test -- a test kept in the repository that fails before the change and passes after it. It applies to a criterion about behavior of shipped code (anything a user or another program runs, such as a hook, a tool script or a CI step). Its proof is the test name and its run output.' \
             '2. Documentation evidence -- it applies to a criterion about the text of a document or skill file. Its proof is the file and line, or a command whose output shows the text.' \
             '3. Throwaway spike -- it applies to a criterion about a one-off investigation whose code is discarded. Its proof is the run command and its output, kept in the pull request or, when there is no pull request, in the issue; the spike code is not merged.' \
-            'A criterion about behaviour of shipped code still requires an automated test; "the test is hard to write" is not a reason to choose another proof kind.' \
+            'A criterion about behavior of shipped code still requires an automated test; "the test is hard to write" is not a reason to choose another proof kind.' \
             'A criterion that fits none of the three proof kinds is proven by an automated test.' \
             'A criterion proven by documentation evidence or a throwaway spike ends with `Proof: documentation` or `Proof: spike`; the label applies to Given/When/Then and plain-language criteria alike.'
           do
@@ -902,7 +902,7 @@ jobs:
           done
           f=skills/user-story-generator/SKILL.md
           for s in \
-            '- Can'\''t name a proof kind that fits an acceptance criterion under the Proof kinds section of the Formulation reference of the three-amigos skill, or the criterion is about behaviour of shipped code and no failing test can be written for it -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behaviour of shipped code always needs an automated test.' \
+            '- Can'\''t name a proof kind that fits an acceptance criterion under the Proof kinds section of the Formulation reference of the three-amigos skill, or the criterion is about behavior of shipped code and no failing test can be written for it -> STOP. Rewrite the criterion until one proof kind can prove it; a criterion about behavior of shipped code always needs an automated test.' \
             '- **Testable** - acceptance criteria are verifiable; for Given/When/Then wording and the proof kinds (automated test, documentation evidence, throwaway spike), load the three-amigos skill and follow its Formulation reference; a criterion proven by documentation evidence or a throwaway spike ends with `Proof: documentation` or `Proof: spike`'
           do
             if ! grep -qxF -- "$s" "$f"; then

@@ -51,6 +51,8 @@ step	Check running-a-sprint SKILL.md row counts
 step	Run validate workflow guard
 step	Run validate workflow guard tests
 step	Check the fresh-runner Discovery rule is pinned once
+step	Check open-question classification wording is pinned
+proof	Check open-question classification wording is pinned	-	agents/story-coordinator.md	empty	has no text containing:
 step	Run verify-command check kept test
 covers	Enforce size cap on core skills	skills/honesty/SKILL.md
 covers	Enforce size cap on core skills	skills/communication/SKILL.md

@@ -120,10 +120,14 @@
 #   STATE_DIR_PARENT  - the sandbox root (one level above STATE_DIR)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PRE_HOOK="$SCRIPT_DIR/../bootstrap-gate-pre.sh"
-POST_HOOK="$SCRIPT_DIR/../bootstrap-gate-post.sh"
-SESSION_START_HOOK="$SCRIPT_DIR/../session-start.sh"
+# Hook paths default to the repo's hooks. An environment variable of the same
+# name replaces the default (the mutation case below points them at a copy).
+PRE_HOOK="${PRE_HOOK:-$SCRIPT_DIR/../bootstrap-gate-pre.sh}"
+POST_HOOK="${POST_HOOK:-$SCRIPT_DIR/../bootstrap-gate-post.sh}"
+SESSION_START_HOOK="${SESSION_START_HOOK:-$SCRIPT_DIR/../session-start.sh}"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures-bootstrap-gate"
+# RUN_ONLY=<case name> runs one fixture case and skips the mutation case.
+RUN_ONLY="${RUN_ONLY:-}"
 
 pass=0
 fail=0
@@ -498,9 +502,52 @@ run_case() {
   rm -rf "$sandbox"
 }
 
+# Mutation case: copies the hooks, drops sprint-close-out from the copy's
+# RELOAD_ROLE_NAMES line, runs the two-roles case (a) against the copy through
+# the hook-path overrides, and passes only when that case FAILS on an
+# assertion. A copy that still passes means the case does not catch the
+# dropped second role: a harness failure.
+run_mutant_case() {
+  local name="two_roles_mutant_second_role_removed_fails"
+  local mutant_root mutant_out mutant_exit
+  mutant_root="$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-gate-mutant.XXXXXX")"
+  cp -R "$SCRIPT_DIR/.." "$mutant_root/hooks"
+  sed -e '/^RELOAD_ROLE_NAMES=/s/ sprint-close-out//' \
+    "$mutant_root/hooks/session-start.sh" >"$mutant_root/hooks/session-start.sh.new" &&
+    mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
+
+  mutant_out="$(
+    PRE_HOOK="$mutant_root/hooks/bootstrap-gate-pre.sh" \
+      POST_HOOK="$mutant_root/hooks/bootstrap-gate-post.sh" \
+      SESSION_START_HOOK="$mutant_root/hooks/session-start.sh" \
+      RUN_ONLY=two_roles_loaded_compact_holds_both \
+      bash "$SCRIPT_DIR/run-bootstrap-gate.sh" 2>&1
+  )"
+  mutant_exit=$?
+  rm -rf "$mutant_root"
+
+  if [[ "$mutant_exit" -ne 0 ]] && grep -q '^FAIL: two_roles_loaded_compact_holds_both$' <<<"$mutant_out" &&
+    grep -q 'content mismatch' <<<"$mutant_out"; then
+    echo "PASS: $name"
+    pass=$((pass + 1))
+  else
+    echo "FAIL: $name"
+    echo "  - case two_roles_loaded_compact_holds_both did not fail on a content assertion against the mutant copy (exit $mutant_exit)"
+    echo "  - mutant run output: $mutant_out"
+    fail=$((fail + 1))
+  fi
+}
+
 for case_dir in "$FIXTURES_DIR"/*/; do
+  if [[ -n "$RUN_ONLY" && "$(basename "${case_dir%/}")" != "$RUN_ONLY" ]]; then
+    continue
+  fi
   run_case "${case_dir%/}"
 done
+
+if [[ -z "$RUN_ONLY" ]]; then
+  run_mutant_case
+fi
 
 echo ""
 echo "Total: $((pass + fail))  Pass: $pass  Fail: $fail"

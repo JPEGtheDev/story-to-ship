@@ -50,6 +50,8 @@ Before dispatching any subagent:
 [+] All 9 met -> dispatch the agent
 [-] Any unmet -> refine the todo, complete the prompt, create the worktree, select the correct agent type, or sweep, verify, and pass/fail-prove the prompt file before dispatching
 
+Other command forms and the script: `references/VERIFY_COMMAND_FORMS.md`, script `scripts/verify-command-check.sh`.
+
 **Unscoped-sweep rule for stale-reference todos:** any todo whose objective is 'fix the remaining/stale X' MUST begin with an unscoped repo-wide sweep; the implementer pastes the sweep command and its full output, and the todo's scope is the adjudicated sweep output -- never a pre-listed file set. Such dispatch prompts MUST NOT contain a 'do not touch any other file' constraint. Stage 1 treats an implementer report lacking the sweep command and its literal output as GAPS. Splitting a 'fix the remaining X' objective into per-site todos with pre-listed files is the same violation -- the sweep still comes first, and the todo set is derived from its adjudicated output.
 
 ---
@@ -127,13 +129,13 @@ See the `using-git-worktrees` skill for full worktree lifecycle, commands, and s
 
 ## Model Selection
 
-See `references/MODEL_SELECTION.md` for the model tier table and the general-purpose and explicit-model rules; concurrency lives in `dispatching-parallel-agents`.
+See `references/MODEL_SELECTION.md` for the model tier table and the general-purpose and explicit-model rules.
 
 ---
 
 ## Rationale, Evidence, Delegation, Anti-Patterns
 
-See `references/SDD_RATIONALE.md` for: why subagents are mandatory, the empirical evidence mandate, delegation quality rules, and anti-patterns.
+See `references/SDD_RATIONALE.md` for the rationale and anti-patterns.
 
 ---
 

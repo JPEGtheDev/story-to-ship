@@ -1203,7 +1203,7 @@ jobs:
 
       - name: Shellcheck role-check scripts
         run: |
-          shellcheck skills/subagent-driven-development/scripts/role-check.sh skills/subagent-driven-development/scripts/plan-check.sh skills/subagent-driven-development/scripts/tests/run.sh
+          shellcheck skills/subagent-driven-development/scripts/role-check.sh skills/subagent-driven-development/scripts/plan-check.sh skills/subagent-driven-development/scripts/tests/run.sh skills/subagent-driven-development/scripts/verify-command-check.sh
           echo "[+] role-check scripts pass shellcheck"
 
       - name: Run role-boundary detector and plan-marker fixtures
@@ -1211,6 +1211,12 @@ jobs:
           set -e
           sh skills/subagent-driven-development/scripts/tests/run.sh
           echo "[+] role-boundary detector and plan-marker fixtures pass"
+
+      - name: Run verify-command check kept test
+        run: |
+          set -e
+          sh skills/subagent-driven-development/scripts/tests/verify-command.test.sh
+          echo "[+] verify-command check kept test passes"
 
       - name: Shellcheck running-a-sprint scripts
         run: |

@@ -520,6 +520,7 @@ run_mutant_case() {
   if ! cp -R "$SCRIPT_DIR/.." "$mutant_root/hooks"; then
     echo "FAIL: $name"
     echo "  - cp of the hooks into the mutant copy failed"
+    trap - INT TERM
     rm -rf "$mutant_root"
     fail=$((fail + 1))
     return

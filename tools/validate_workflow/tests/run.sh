@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=28
+EXPECTED_CASES=29
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -563,6 +563,26 @@ VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FIL
 commit_all "$repo" "head: append proof with a seventh field"
 # Assert
 check_run "append mode adds two lines with a dollar sign" "$repo" 1 R2 - \
+  "did not fail with the expected output"
+
+# Case aa: a proof row in insert-before mode with a seventh field of two lines and a dollar sign.
+# The mode puts the text before the last line of its target, so the target has many lines
+# (SIZE_FILE). The seventh field is passed through ENVIRON so its backslash-n stays literal.
+# The step never reads the target, so the must-fail run passes: the control run passed, then the
+# guard reports that the proof did not fail with the expected output.
+# Arrange
+repo="$TMP/aa"
+make_base "$repo" 1
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
+  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"]; next }
+  { print }
+' "$list" | set_content "$list"
+commit_all "$repo" "head: insert-before proof with a seventh field"
+# Assert
+check_run "insert-before mode puts the text before the last line" "$repo" 1 R2 - \
   "did not fail with the expected output"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then

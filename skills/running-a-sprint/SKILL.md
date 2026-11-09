@@ -14,7 +14,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 **Announce at start:** "I am using the running-a-sprint skill to run a sprint of story issues through runners."
 
-Terms are defined in references/MOVED_RATIONALE.md, section Moved from SKILL.md: definitions. The launcher plans nothing itself. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: launcher role. A coordinator subagent never loads this skill or launches coordinators; a coordinator that finds itself here STOPS and hands back.
+The launcher plans nothing itself. A coordinator subagent never loads this skill or launches coordinators; a coordinator that finds itself here STOPS and hands back.
 
 ---
 
@@ -22,36 +22,40 @@ Terms are defined in references/MOVED_RATIONALE.md, section Moved from SKILL.md:
 
 Stories come from an epic issue's checklist. Read each with `gh issue view <story> --json body` and find its acceptance criteria.
 
-A story with no acceptance criteria is NOT launched. Relay the gap to the owner, recommending routing the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; then the launcher reruns intake at once and launches it if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery (the requirements ceremony) for launched stories; the runner does.
+Before a story launches, the launcher reads the story's comments and greps the base branch log for the pull request that delivered it. A story that is done, merged and meets its acceptance criteria is closed by the launcher with no owner question; the launcher's one chat line cites the merged pull request and the criteria check.
+
+A story with no acceptance criteria is NOT launched. Relay the gap to the owner with the recommendation to route the story through the `user-story-generator` skill, which validates it against INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable), and continue with the other stories. The story stays held until the owner answers its gap; on the answer the launcher runs intake again at once and launches the story if capacity allows and no dependency holds it, otherwise it waits. A runner never drafts acceptance criteria. The launcher does not run Discovery for launched stories; the runner does.
+
+A split issue a runner filed goes through Intake like any story and launches under the Capacity section.
 
 ---
 
 ## Capacity
 
-Launch a story only while fewer than 3 runners are working; the owner may change it. A runner counts as working from launch or any resume until it hands back a kind other than "interim"; one with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner, does not count, and lets the next story launch while the owner reviews. A runner resumed for a fix round, an owner answer or a reconcile counts as working again. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the dependency rule do not gate. Launching a fresh runner for a Discovery stop (the owner question row of `references/HANDBACK_ROUTING.md`) is never gated or deferred by the limit and is exempt from the dependency check against its own held entry; once launched, it counts as working, like a resumed runner. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit; no story launches until the count is below the limit again, except on an owner answer that names the new limit or that launch under the launch-question rule in Capacity (`references/MOVED_RATIONALE.md`, Launch question owner text). Once a hand-back of one of those four kinds passes the checks in its row of `references/HANDBACK_ROUTING.md`, required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story the limit and dependency rule allow.
+Launch a story only while fewer than 3 runners are working; the owner may change the number. A runner counts as working from launch, or from any resume, until it hands back a kind other than "interim"; a runner with no hand-back, including one killed by a rate limit, still counts. A runner that handed back "PR ready", "owner question", "blocked" or "cap reached" is held for the owner and does not count. A reconcile replacement runner (Close-out step 7) is the one launch the limit and the dependency rule do not gate. Launching a fresh runner for a Discovery stop (the owner question row of `references/HANDBACK_ROUTING.md`) is never gated or deferred by the limit and is exempt from the dependency check against its own held entry; once launched, it counts as working, like a resumed runner. The limit gates launches only: a resume is never deferred by the limit, so the working count can pass the limit, and no story launches until it is below the limit again, except on an owner answer that names the new limit or that launch under the rule on launch questions in Capacity (`references/MOVED_RATIONALE.md`, Launch question owner text). Once a hand-back of one of those four kinds has passed the checks in its row of the hand-back routing table (`references/HANDBACK_ROUTING.md`), required lines included, and before the turn ends (or once the pilot line is released), the launcher launches each waiting story that the limit and the dependency rule allow.
 
 The pilot is the first runner a new launcher session launches: the first ready story in plan order that has acceptance criteria.
 No other story launches until the pilot hands back PR ready and that hand-back passes the checks in its row of `references/HANDBACK_ROUTING.md`, required lines included. The other pilot and release rules are in `references/PILOT.md`.
 
 Each launch question to the owner uses the wording in `references/MOVED_RATIONALE.md`, section Launch question owner text.
 
-A story whose body has a line "Depends On: #N" naming another open story waits until that story's PR merges; its ledger entry records "depends on #N" as the reason, and it launches at Close-out step 8 after that merge. A bare #N mention elsewhere in the body does not hold a story. A dependency that is closed unmerged, outside the sprint, or circular is an owner question: the owner decides, and the launcher does not wait forever. The "Files to Create/Modify" list is an optional, informational field that the reconcile (Close-out step 7) and reviewers use; it never holds a launch, and a story with no Files list launches like any other story. A story's scope is the work its acceptance criteria require, not a list of files. Stories that add a skill launch under the same rules, and the reconcile at merge settles their README and CONTRIBUTING count lines.
+A story whose body has a line "Depends On: #N" naming another open story waits until that story's pull request merges; its ledger entry records "depends on #N" as the reason, and it launches at Close-out step 8 after that merge. A bare #N mention elsewhere in the body does not hold a story. A dependency that is closed unmerged, outside the sprint, or circular is an owner question: the owner decides, and the launcher does not wait forever. The "Files to Create/Modify" list is an optional, informational field; it never holds a launch, and a story with no Files list launches like any other story. Stories that add a skill launch under the same rules as any other story, and the reconcile at merge settles their README and CONTRIBUTING count lines.
 
 ---
 
 ## Launch
 
-Keep the sprint ledger (the launcher's record of every runner) in the launcher's plan file, plan.md at the top level of the main checkout. That file is untracked and never committed. Ledger fields are in references/MOVED_RATIONALE.md, section Moved from SKILL.md: ledger fields. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story not yet running (waiting for a slot, waiting on a dependency, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before each dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
+Keep the sprint ledger in the launcher's plan file, plan.md at the top level of the main checkout. That file is untracked and never committed. Ledger fields are in references/MOVED_RATIONALE.md, section Moved from SKILL.md: ledger fields. See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reconcile state, ledger state values. A story not yet running (waiting for a slot, waiting on a dependency, or held at intake) also gets an entry with its reason (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories, an entry with its reason). Before the first launch, copy the predictions from `references/SCORECARD.md` into the ledger. Re-read it after every reload and before each dispatch. The ledger also holds one pilot line (`references/PILOT.md`).
 
-The owner questions page adds five ledger fields, including the Ready to merge entries (one statement per merge-ready PR); `references/OWNER_QUESTIONS.md` (Ledger) defines them.
+The owner questions page adds five ledger fields; `references/OWNER_QUESTIONS.md` (Ledger) defines them.
 
 Launch with one Agent call per story:
 
 - `subagent_type` is `story-coordinator`.
-- `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table and the model it names. Name no vendor model elsewhere.
+- `model` is passed explicitly at the Standard tier; the Model Selection section of the `subagent-driven-development` skill holds the tier table. Name no vendor model elsewhere.
 - `run_in_background` is true, so the launcher gets completion notices. The runner's children run in the foreground inside it.
 - The prompt names `STORY_NUMBER = <n>; REPO_ROOT = <absolute main checkout path>; WORKTREE_PREFIX = <unique stem>` and the scope in one or two sentences. It carries NO rule text. For a fresh runner for a Discovery stop, WORKTREE_PREFIX is the stopped runner's prefix from the ledger, and the launch prompt also carries the Fresh runner text of `references/HANDBACK_ROUTING.md`, which holds the owner's answers and nothing else.
-- The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in a session (L = 6 gives 2); a result below 1 is passed as 1.
+- The prompt also names `PARALLEL_LIMIT = <n>`, with n = floor((20 - L) / L), L being the sprint limit now in force and 20 the cap on subagents running at once in a session; a result below 1 is passed as 1.
 
 See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher creates no runner worktree. Record the runner in the ledger at launch. A fresh runner for a Discovery stop instead reuses the tree and branch named by the stopped runner's prefix.
 
@@ -63,7 +67,7 @@ End the turn while runners work. Before the row lookup, every owner message, han
 
 An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner, its ledger state becomes `stopped` so later sweeps skip it, and the launcher tells the owner once. Squash is the merge method close-out accepts; a merge commit stops at step 1, and any other merge, such as a rebase merge, goes on through step 2, which sends it to the owner only on a patch difference. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
-The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`, so no close-out repeats. A stopped PR waits for the owner's answer, which decides the next step; once that answer leads to the remaining steps being finished, the state becomes `closed out`.
+The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`. A stopped PR waits for the owner's answer to the stop; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
 
 Verify before relaying anything to the owner:
 
@@ -75,7 +79,9 @@ Verify before relaying anything to the owner:
 
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
-When the session-bootstrap gate prompts again (after a compaction or restart drops the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
+When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
+
+An ask about items that exist now is done once, for the items it names; it does not become a standing workflow, and a later item needs its own ask.
 
 ---
 
@@ -90,7 +96,7 @@ Run these in order once origin shows the PR MERGED, whether the sweep or the own
 5. Fast-forward main: `git -C R merge --ff-only origin/main`.
 6. When the story has an epic, tick its checkbox in the epic issue: change `- [ ]` to `- [x]` on the line naming this story's issue number and save the body with `gh issue edit <epic issue number> --body-file <file outside the repository>` (unverified).
 7. Reconcile the PR next to merge against the merged change; the other open sprint PRs wait until they become next; follow `references/RECONCILE.md`, which holds all of step 7.
-8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then rerun intake on each held story whose gap the owner has answered, launch every waiting story the Capacity rules now allow, and do the same when the pilot line is released. A held story whose "Depends On" line named the merged story launches here, under the Capacity rule.
+8. Write the scorecard row from `references/SCORECARD.md` into the ledger, with one `Reconciles:` entry for each Reconcile: line recorded in the runner's ledger entry, and tell the owner, naming the CI flaky and infra-killed counts only when they differ from the last row for that repository; run the auto-merge bar check at every close-out; report the trust number when the owner asks (`references/SCORECARD.md`, Trust number). Then run intake again on each held story whose gap the owner has answered, and launch every waiting story the Capacity rules now allow, and do the same when the pilot line (`references/PILOT.md`) is released.
 
 A check that fails at a step stops there: the close-out stop card names the failed step, the PR's Ready to merge entry is removed, and nothing is re-run. A stop at step 1 or 2 leaves the branch and worktree in place; a stop at step 3 or later may not, and the card says what remains. A finished close-out gets one chat line to the owner and the same removal.
 
@@ -147,5 +153,7 @@ Related skills: `references/MOVED_RATIONALE.md`, Moved from SKILL.md: related sk
 ---
 
 ## References
+
+Reference files: `references/INDEX.md`.
 
 See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: reference descriptions.

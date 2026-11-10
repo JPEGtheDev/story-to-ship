@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=29
+EXPECTED_CASES=30
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -31,6 +31,13 @@ ADD_STEP_AWK='
     added = 1
   }
   { print }'
+
+# Step block for the symlink probe: its run needs skills/honesty/LINK.md to be a link
+# whose target is non-empty. The block is passed through ENVIRON, so it is not escaped.
+PROBE_LINK_BLOCK='      - name: Probe symlink in the tree
+        run: |
+          test -L skills/honesty/LINK.md || { echo "LINK is not a link"; exit 1; }
+          test -s skills/honesty/LINK.md || { echo "LINK target is empty"; exit 1; }'
 
 # commit_all REPO MESSAGE: stage everything and commit, allowing an empty commit.
 commit_all() {
@@ -584,6 +591,27 @@ commit_all "$repo" "head: insert-before proof with a seventh field"
 # Assert
 check_run "insert-before mode puts the text before the last line" "$repo" 1 R2 - \
   "did not fail with the expected output"
+
+# Case ab: a symlink in the tracked tree is copied as a link. The probe step's control run
+# needs skills/honesty/LINK.md to be a link, so it fails unless prepare_tree copies the
+# symlink as a link instead of following it.
+# Arrange
+repo="$TMP/ab"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+ln -s SKILL.md "$repo/skills/honesty/LINK.md" || exit 2
+VW_BLOCK=$PROBE_LINK_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe symlink in the tree\nproof\tProbe symlink in the tree\t-\t%s\tempty\tLINK target is empty\n' \
+  "$SIZE_FILE" >> "$list"
+commit_all "$repo" "head: symlink probe step and proof"
+# Assert
+check_run "symlink in the tree is copied as a link" "$repo" 0 - - "PROOF ok: Probe symlink in the tree"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

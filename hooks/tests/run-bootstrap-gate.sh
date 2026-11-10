@@ -126,7 +126,7 @@ PRE_HOOK="${PRE_HOOK:-$SCRIPT_DIR/../bootstrap-gate-pre.sh}"
 POST_HOOK="${POST_HOOK:-$SCRIPT_DIR/../bootstrap-gate-post.sh}"
 SESSION_START_HOOK="${SESSION_START_HOOK:-$SCRIPT_DIR/../session-start.sh}"
 FIXTURES_DIR="$SCRIPT_DIR/fixtures-bootstrap-gate"
-# RUN_ONLY=<case name> runs one fixture case and skips the mutation case and the role-list check.
+# RUN_ONLY=<case name> runs one fixture case and skips the mutation case.
 RUN_ONLY="${RUN_ONLY:-}"
 
 pass=0

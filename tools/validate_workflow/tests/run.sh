@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=28
+EXPECTED_CASES=36
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -32,6 +32,36 @@ ADD_STEP_AWK='
   }
   { print }'
 
+# Step block for the symlink probe: its run needs skills/honesty/LINK.md to be a link
+# whose target is non-empty. The block is passed through ENVIRON, so it is not escaped.
+PROBE_LINK_BLOCK='      - name: Probe symlink in the tree
+        run: |
+          test -L skills/honesty/LINK.md || { echo "LINK is not a link"; exit 1; }
+          test -s skills/honesty/LINK.md || { echo "LINK target is empty"; exit 1; }'
+
+# Step block for the frontmatter probe: its run reads the frontmatter of agents/implementer.md
+# (up to the second line that is exactly ---) and prints INVALID FRONTMATTER VALUE for a line
+# with a colon followed by a space after the key. Read through a heredoc, so it is not escaped.
+PROBE_FM_BLOCK=$(cat <<'EOF'
+      - name: Probe frontmatter values
+        run: |
+          awk 'NR == 1 && $0 != "---" { exit 1 } NR > 1 && $0 == "---" { exit 0 } /^[a-z-]+: .*: / { print "INVALID FRONTMATTER VALUE: " $0; exit 1 }' agents/implementer.md
+EOF
+)
+
+# Step block for the append and insert-before probes: it reads SIZE_FILE and exits 1 with
+# "echo two" in its output when a line reading exactly "echo two" is present. The unmodified
+# file passes; a mode that writes the line makes the must-fail run fail with "two".
+PROBE_APPEND_BLOCK="      - name: Probe appended line
+        run: |
+          if grep -qx \"echo two\" $SIZE_FILE; then echo \"appended line found: echo two\"; exit 1; fi"
+
+# Step block for the replace probe: its run needs .claude/hooks/session-start.sh to be a link.
+# The replace case turns the link into a regular file, so the probe prints "is not a symlink".
+PROBE_REPLACE_BLOCK='      - name: Probe replaced symlink
+        run: |
+          test -L .claude/hooks/session-start.sh || { echo "session-start.sh is not a symlink"; exit 1; }'
+
 # commit_all REPO MESSAGE: stage everything and commit, allowing an empty commit.
 commit_all() {
   git -C "$1" add -A &&
@@ -44,12 +74,20 @@ set_content() {
   cat > "$TMP/edit.tmp" && mv "$TMP/edit.tmp" "$1"
 }
 
-# make_list WORKFLOW: print a complete checks.list for every step in WORKFLOW.
-# The size step gets its seven covers lines and one proof line; every other step
-# gets a pending line citing #455.
+# make_list WORKFLOW: print one step line for every step in WORKFLOW and nothing else.
 make_list() {
   grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
     printf 'step\t%s\n' "$name"
+  done
+}
+
+# add_rows WORKFLOW WITH_PENDING: print the rows that complete a list made by make_list. The
+# size step gets its seven covers lines and one proof line. When WITH_PENDING is 1, every other
+# step also gets a pending line with a coverage debt reason; without it, no pending line is printed, so a
+# head list written with add_rows holds none. A case that needs a complete list appends this
+# output after make_list.
+add_rows() {
+  grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
     if [ "$name" = "$SIZE_STEP" ]; then
       for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
         skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
@@ -58,8 +96,8 @@ make_list() {
       done
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
         "$name" "$SIZE_FILE"
-    else
-      printf 'pending\t%s\tcoverage debt #455\n' "$name"
+    elif [ "${2:-}" = 1 ]; then
+      printf 'pending\t%s\tcoverage debt\n' "$name"
     fi
   done
 }
@@ -83,21 +121,30 @@ make_base() {
   copy_size_files "$1" || return 1
   if [ "$2" = 1 ]; then
     make_list "$1/.github/workflows/validate.yml" > "$1/tools/validate_workflow/checks.list"
+    add_rows "$1/.github/workflows/validate.yml" 1 >> "$1/tools/validate_workflow/checks.list"
   fi
   commit_all "$1" "base"
 }
 
-# use_head REPO: create branch head at the current base commit.
+# use_head REPO: create branch head at the current base commit, then drop the pending lines
+# from the working-tree checks.list, so the head list holds none. The Act commit of each case
+# carries the dropped lines; the base commit keeps them.
 use_head() {
-  git -C "$1" checkout -q -b head
+  git -C "$1" checkout -q -b head || return 1
+  head_list="$1/tools/validate_workflow/checks.list"
+  if [ -f "$head_list" ]; then
+    awk -F "$(printf '\t')" '$1 != "pending"' "$head_list" | set_content "$head_list"
+  fi
 }
 
 # set_proof LIST STEP ENV TARGET MODE SUBSTRING: replace the pending or proof entry
-# of STEP in LIST with a proof entry built from the arguments.
+# of STEP in LIST with a proof entry built from the arguments. When LIST holds neither
+# for STEP, append one proof entry built from the arguments.
 set_proof() {
   awk -v s="$2" -v e="$3" -v t="$4" -v m="$5" -v x="$6" 'BEGIN { FS = OFS = "\t" }
-    ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, e, t, m, x; next }
+    ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, e, t, m, x; done = 1; next }
     { print }
+    END { if (!done) print "proof", s, e, t, m, x }
   ' "$1" | set_content "$1"
 }
 
@@ -202,12 +249,12 @@ use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 awk -v s="$SIZE_STEP" 'BEGIN { FS = OFS = "\t" }
-  $1 == "proof" && $2 == s { $0 = "pending" OFS $2 OFS "coverage debt #455" }
+  $1 == "proof" && $2 == s { $0 = "pending" OFS $2 OFS "coverage debt" }
   { print }
 ' "$list" | set_content "$list"
 commit_all "$repo" "head: proof downgraded to pending"
 # Assert
-check_run "e proof downgraded" "$repo" 1 R1
+check_run "e proof downgraded" "$repo" 2 - - "malformed head checks.list"
 
 # Case f1: a head step with a proof entry and no step entry.
 # Arrange
@@ -224,7 +271,7 @@ commit_all "$repo" "head: add a step with a proof entry and no step entry"
 # Assert
 check_run "f1 new step with proof, no step entry" "$repo" 1 R3
 
-# Case f2: a new head step with a step entry and neither a proof nor a pending entry.
+# Case f2: a new head step with a step entry and no proof entry.
 # Arrange
 repo="$TMP/f2"
 make_base "$repo" 1
@@ -238,37 +285,6 @@ commit_all "$repo" "head: add a step with a step entry only"
 # Assert
 check_run "f2 new step with step entry only" "$repo" 1 R3
 
-# Case f3: a new head step with a step entry, a proof entry and a pending entry.
-# Arrange
-repo="$TMP/f3"
-make_base "$repo" 1
-use_head "$repo"
-wf="$repo/.github/workflows/validate.yml"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk "$ADD_STEP_AWK" "$wf" | set_content "$wf"
-printf 'step\tProbe new step\nproof\tProbe new step\t-\t%s\toversize\texceeding the 20000-character limit\npending\tProbe new step\tcoverage debt #455\n' \
-  "$SIZE_FILE" >> "$list"
-commit_all "$repo" "head: add a step with a proof and a pending entry"
-# Assert
-check_run "f3 new step with proof and pending" "$repo" 1 R3
-
-# Case g: a new head step with a step entry, a proof entry and a pending entry.
-# The only R3 cause is the pending entry; this case also pins the pending branch.
-# Arrange
-repo="$TMP/g"
-make_base "$repo" 1
-use_head "$repo"
-wf="$repo/.github/workflows/validate.yml"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk "$ADD_STEP_AWK" "$wf" | set_content "$wf"
-printf 'step\tProbe new step\nproof\tProbe new step\t-\t%s\toversize\texceeding the 20000-character limit\npending\tProbe new step\tcoverage debt #455\n' \
-  "$SIZE_FILE" >> "$list"
-commit_all "$repo" "head: add a step with a pending entry and a proof entry"
-# Assert
-check_run "g new step with pending and proof" "$repo" 1 R3
-
 # Case h: a list entry naming a step absent from head.
 # Arrange
 repo="$TMP/h"
@@ -280,21 +296,6 @@ printf 'step\tGhost step that is gone\n' >> "$list"
 commit_all "$repo" "head: list entry for an absent step"
 # Assert
 check_run "h list entry for absent step" "$repo" 1 R5
-
-# Case i: a pending reason with no #<digits>.
-# Arrange
-repo="$TMP/i"
-make_base "$repo" 1
-use_head "$repo"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk 'BEGIN { FS = OFS = "\t" }
-  $1 == "pending" && $2 == "Hook script smoke test" { $3 = "coverage debt" }
-  { print }
-' "$list" | set_content "$list"
-commit_all "$repo" "head: pending reason without an issue number"
-# Assert
-check_run "i pending reason without digits" "$repo" 1 R2
 
 # Case j: a malformed list line (empty step name).
 # Arrange
@@ -320,6 +321,7 @@ wf="$repo/.github/workflows/validate.yml"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 make_list "$wf" > "$list"
+add_rows "$wf" >> "$list"
 commit_all "$repo" "head: add a complete list"
 # Assert
 check_run "k absent base list" "$repo" 0 -
@@ -339,6 +341,7 @@ mkdir -p "$repo/.github/workflows" "$repo/tools/validate_workflow"
 cp "$REAL_WF" "$wf"
 copy_size_files "$repo"
 make_list "$wf" > "$list"
+add_rows "$wf" >> "$list"
 commit_all "$repo" "head: add workflow and list"
 # Assert
 check_run "l absent base workflow" "$repo" 2 -
@@ -533,10 +536,10 @@ commit_all "$repo" "head: control-failing proof, inner guard set"
 # Assert
 check_run "guard skips proofs when INNER=1" "$repo" 0 - inner "PROOF skipped: VALIDATE_WORKFLOW_INNER=1"
 
-# Case z: the size step's oversize proof for session-bootstrap, restated explicitly.
+# Case zz: the size step's oversize proof for session-bootstrap, restated explicitly.
 # Both the control and the must-fail run hold: the step fails on the 20001-byte copy of session-bootstrap.
 # Arrange
-repo="$TMP/z"
+repo="$TMP/zz"
 make_base "$repo" 1
 use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
@@ -545,6 +548,209 @@ set_proof "$list" "$SIZE_STEP" - skills/session-bootstrap/SKILL.md oversize "exc
 commit_all "$repo" "head: session-bootstrap size proof restated"
 # Assert
 check_run "session-bootstrap size proof passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
+
+# Case z: a proof row in append mode with a seventh field of two lines and a dollar sign.
+# A probe step reads SIZE_FILE (PROBE_APPEND_BLOCK). The control run passes; the must-fail
+# run passes only when append wrote "echo two", so a no-op append fails this case.
+# The seventh field is passed through printf %s so its backslash-n stays literal.
+# Arrange
+repo="$TMP/z"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+VW_BLOCK=$PROBE_APPEND_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe appended line\nproof\tProbe appended line\t-\t%s\tappend\ttwo\t%s\n' \
+  "$SIZE_FILE" "echo \$HOME\\necho two" >> "$list"
+commit_all "$repo" "head: append proof with a seventh field"
+# Assert
+check_run "z append mode writes the two lines" "$repo" 0 - - "PROOF ok: Probe appended line"
+
+# Case aa: a proof row in insert-before mode with a seventh field of two lines and a dollar sign.
+# The mode puts the text before the last line of its target, so the target has many lines
+# (SIZE_FILE). The probe step (PROBE_APPEND_BLOCK) passes on the control run and fails on the
+# must-fail run only when insert-before wrote "echo two"; a no-op insert-before fails this case.
+# The seventh field is passed through printf %s so its backslash-n stays literal.
+# Arrange
+repo="$TMP/aa"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+VW_BLOCK=$PROBE_APPEND_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe appended line\nproof\tProbe appended line\t-\t%s\tinsert-before\ttwo\t%s\n' \
+  "$SIZE_FILE" "echo \$HOME\\necho two" >> "$list"
+commit_all "$repo" "head: insert-before proof with a seventh field"
+# Assert
+check_run "aa insert-before mode writes the two lines" "$repo" 0 - - "PROOF ok: Probe appended line"
+
+# Case ab: a symlink in the tracked tree is copied as a link. The probe step's control run
+# needs skills/honesty/LINK.md to be a link, so it fails unless prepare_tree copies the
+# symlink as a link instead of following it.
+# Arrange
+repo="$TMP/ab"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+ln -s SKILL.md "$repo/skills/honesty/LINK.md" || exit 2
+VW_BLOCK=$PROBE_LINK_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe symlink in the tree\nproof\tProbe symlink in the tree\t-\t%s\tempty\tLINK target is empty\n' \
+  "$SIZE_FILE" >> "$list"
+commit_all "$repo" "head: symlink probe step and proof"
+# Assert
+check_run "symlink in the tree is copied as a link" "$repo" 0 - - "PROOF ok: Probe symlink in the tree"
+
+# Case ac: an insert-before-close proof puts a bad value inside the frontmatter range. The probe
+# step reads the frontmatter of agents/implementer.md: the control run passes, and the must-fail
+# run prints INVALID FRONTMATTER VALUE only when the text lands before the closing --- line.
+# Arrange
+repo="$TMP/ac"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+mkdir -p "$repo/agents" && cp "$REPO/agents/implementer.md" "$repo/agents/implementer.md" || exit 2
+# Act
+VW_BLOCK=$PROBE_FM_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe frontmatter values\ncovers\tProbe frontmatter values\tagents/implementer.md\nproof\tProbe frontmatter values\t-\tagents/implementer.md\tinsert-before-close\tINVALID FRONTMATTER VALUE\tprobe: a: b\n' >> "$list"
+commit_all "$repo" "head: frontmatter probe step and proof"
+# Assert
+check_run "insert-before-close puts a bad value inside the frontmatter range" "$repo" 0 - - "PROOF ok: Probe frontmatter values"
+
+# Case ad: a replace proof turns a symlink into a regular file. The probe step's control run
+# finds .claude/hooks/session-start.sh a link, so it passes. The must-fail run replaces the link
+# with a regular file holding "regular file text", so the probe prints "is not a symlink" and exits 1.
+# Arrange
+repo="$TMP/ad"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+mkdir -p "$repo/.claude/hooks" || exit 2
+printf 'real hook\n' > "$repo/.claude/hooks/REAL.sh"
+ln -s REAL.sh "$repo/.claude/hooks/session-start.sh" || exit 2
+VW_BLOCK=$PROBE_REPLACE_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe replaced symlink\ncovers\tProbe replaced symlink\t.claude/hooks/session-start.sh\nproof\tProbe replaced symlink\t-\t.claude/hooks/session-start.sh\treplace\tis not a symlink\tregular file text\n' >> "$list"
+commit_all "$repo" "head: replace probe step and proof"
+# Assert
+check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok: Probe replaced symlink"
+
+# Case pinned-file: a file pinned by a proof of the hand-back step is removed from the head tree. The
+# step's control run fails on the unmodified copy, so the guard reports the proof control failure.
+# Arrange
+repo="$TMP/pinned-file"
+make_base "$repo" 1
+mkdir -p "$repo/skills/running-a-sprint/references" "$repo/agents" &&
+  cp "$REPO/skills/running-a-sprint/references/HANDBACK_ROUTING.md" "$repo/skills/running-a-sprint/references/" &&
+  cp "$REPO/agents/story-coordinator.md" "$repo/agents/" || exit 2
+commit_all "$repo" "base: hand-back step files"
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check hand-back size contract strings" - \
+  skills/running-a-sprint/references/HANDBACK_ROUTING.md empty "is missing required contract string"
+rm -f "$repo/skills/running-a-sprint/references/HANDBACK_ROUTING.md"
+commit_all "$repo" "head: pinned file removed"
+# Assert
+check_run "pinned-file removing a pinned file from the head tree fails proof control" "$repo" 1 R2 - \
+  'proof control for "Check hand-back size contract strings" failed'
+
+# Case issue-citation: no issue-number citation in tools/validate_workflow. The grep reads the head tree
+# (REPO) with the bracket form of the digit class, so this case does not match its own text.
+# grep exit 1 means no line matched and the case passes; exit 0 (a citation) or 2 (grep error) fails.
+# Arrange
+# Act
+CASES=$((CASES + 1))
+grep -rn '#[[:digit:]]' "$REPO/tools/validate_workflow" > "$TMP/issue-citation.out" 2>&1
+rc=$?
+# Assert
+if [ "$rc" -eq 1 ]; then
+  echo "PASS: issue-citation no issue-number citation in tools/validate_workflow"
+else
+  FAILS=$((FAILS + 1))
+  echo "FAIL: issue-citation no issue-number citation in tools/validate_workflow: grep exit $rc"
+  sed -n '1,3p' "$TMP/issue-citation.out" | sed 's/^/  | /'
+fi
+
+# Case key-a: a paths-ignore key added inside the on: block. The guard counts it as on-paths.
+# Arrange
+repo="$TMP/key-a"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  !done && $0 == "  pull_request:" { print; print "    paths-ignore: [docs]"; done = 1; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: paths-ignore in the on block"
+# Assert
+check_run "key-a adding paths-ignore fails" "$repo" 1 R4 - 'head has 1 "on-paths" key(s) against 0 in base'
+
+# Case key-b: continue-on-error added to one step. The guard counts it as step-continue-on-error.
+# Arrange
+repo="$TMP/key-b"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "      - name: Validate hooks.json" { print; print "        continue-on-error: true"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: continue-on-error on a check step"
+# Assert
+check_run "key-b adding continue-on-error to a step fails" "$repo" 1 R4 - \
+  'head has 1 "step-continue-on-error" key(s) against 0 in base'
+
+# Case key-c: a job-level if key added under validate. The guard counts it as job-if.
+# Arrange
+repo="$TMP/key-c"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "    runs-on: ubuntu-latest" { print; print "    if: always()"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: job-level if"
+# Assert
+check_run "key-c adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if" key(s) against 0 in base'
+
+# Case trigger-d: the workflow_dispatch trigger key removed from the on: block. The guard reports
+# it as a base trigger the head drops (R1, check_triggers).
+# Arrange
+repo="$TMP/trigger-d"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '$0 == "  workflow_dispatch:" { next } { print }' "$wf" | set_content "$wf"
+commit_all "$repo" "head: remove the workflow_dispatch trigger"
+# Assert
+check_run "trigger-d removing workflow_dispatch emits FINDING R1" "$repo" 1 R1 - \
+  'base trigger "workflow_dispatch" is absent from the head on: block'
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

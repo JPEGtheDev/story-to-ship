@@ -69,48 +69,154 @@ proof	Enforce size cap on core skills	-	skills/honesty/SKILL.md	oversize	exceedi
 proof	Enforce size cap on core skills	-	skills/session-bootstrap/SKILL.md	oversize	exceeding the 20000-character limit
 proof	Run validate workflow guard	-	tools/validate_workflow/checks.list	empty	FINDING
 proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	FAIL
-pending	Validate hooks.json	must-fail proof filed in #455
-pending	Validate .claude-plugin JSON files	must-fail proof filed in #455
-pending	Shellcheck shell scripts	must-fail proof filed in #455
-pending	Run all hook fixture suites	must-fail proof filed in #455
-pending	Run first-action audit tests	must-fail proof filed in #455
-pending	Stop turn-log wedge safety (empty stdin)	must-fail proof filed in #455
-pending	Enforce pre-message hook word budget	must-fail proof filed in #455
-pending	Check loaded pre-message variants are empty or a single line	must-fail proof filed in #455
-pending	Check three-role loop contract strings	must-fail proof filed in #455
-pending	Check for broken references in skill files	must-fail proof filed in #455
-pending	Validate SKILL.md frontmatter	must-fail proof filed in #455
-pending	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values	must-fail proof filed in #455
-pending	Require one tools line in agents/ frontmatter	must-fail proof filed in #455
-pending	Check agent template contracts	must-fail proof filed in #455
-pending	Check reconcile contract strings	must-fail proof filed in #455
-pending	Check scope contract strings	must-fail proof filed in #455
-pending	Check hand-back size contract strings	must-fail proof filed in #455
-pending	Check child report size cap strings	must-fail proof filed in #455
-pending	Check owner questions page strings	must-fail proof filed in #455
-pending	Check Ready to merge strings	must-fail proof filed in #455
-pending	Check draft pull request rules	must-fail proof filed in #455
-pending	Check owner questions template	must-fail proof filed in #455
-pending	Check parallel todo contract strings	must-fail proof filed in #455
-pending	Check review cadence contract strings	must-fail proof filed in #455
-pending	Check risky-todo rule has no shared-file clause	must-fail proof filed in #455
-pending	Check Discovery example map is pinned	must-fail proof filed in #455
-pending	Check Discovery skeptic check and economy tier are pinned	must-fail proof filed in #455
-pending	Check acceptance proof kinds are pinned	must-fail proof filed in #455
-pending	Check three-amigos reference list names proof kinds for the formulation reference	must-fail proof filed in #455
-pending	Hook script smoke test	must-fail proof filed in #455
-pending	SessionStart source-branch detector	must-fail proof filed in #455
-pending	Verify .claude/hooks symlink integrity	must-fail proof filed in #455
-pending	Check hooks/README.md matches .claude/hooks	must-fail proof filed in #455
-pending	Run session-events converter unit tests	must-fail proof filed in #455
-pending	Run context-measure unit tests	must-fail proof filed in #455
-pending	Run tier usage script unit tests	must-fail proof filed in #455
-pending	Shellcheck role-check scripts	must-fail proof filed in #455
-pending	Run role-boundary detector and plan-marker fixtures	must-fail proof filed in #455
-pending	Shellcheck running-a-sprint scripts	must-fail proof filed in #455
-pending	Run running-a-sprint script tests	must-fail proof filed in #455
-pending	Check the detector in the reference matches the shipped script	must-fail proof filed in #455
-pending	Check plan-check instruction strings	must-fail proof filed in #455
-pending	Check red CI classification strings	must-fail proof filed in #455
-pending	Check Discovery line rule strings	must-fail proof filed in #455
-pending	Check running-a-sprint SKILL.md row counts	must-fail proof filed in #455
+proof	Validate hooks.json	-	hooks/hooks.json	append	parse error	{
+proof	Validate .claude-plugin JSON files	-	.claude-plugin/plugin.json	append	parse error	{
+proof	Shellcheck shell scripts	-	hooks/session-start.sh	append	SC2086	echo $HOME
+proof	Run all hook fixture suites	-	hooks/tests/run-hooks-json-quoting.sh	insert-before	FAILING SUITES:	exit 1
+proof	Run first-action audit tests	-	tools/first_action_audit/tests/fixtures/bad_n_negative/expect_stdout_grep	append	stdout missing expected substring	NO-SUCH-TEXT
+proof	Stop turn-log wedge safety (empty stdin)	-	hooks/stop-turn-log.sh	empty	empty-stdin did not yield {}
+proof	Enforce pre-message hook word budget	-	hooks/pre-message-gates.md	empty	is not smaller than
+proof	Check loaded pre-message variants are empty or a single line	-	hooks/pre-message-loaded.md	append	a loaded variant must be empty or exactly one line	one\ntwo
+proof	Check three-role loop contract strings	-	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md	empty	is missing required contract string
+proof	Check for broken references in skill files	-	skills/honesty/SKILL.md	append	(not found at	see `references/NO_SUCH_FILE.md`
+proof	Validate SKILL.md frontmatter	-	skills/honesty/SKILL.md	empty	has no 'name' field in frontmatter
+proof	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values	-	agents/implementer.md	insert-before-close	INVALID FRONTMATTER VALUE	probe: a: b
+proof	Require one tools line in agents/ frontmatter	-	agents/implementer.md	empty	needs one non-empty tools: line
+proof	Check agent template contracts	-	agents/implementer.md	empty	is missing required contract string
+proof	Check reconcile contract strings	-	skills/running-a-sprint/references/RECONCILE.md	empty	is missing required contract string
+proof	Check scope contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
+proof	Check hand-back size contract strings	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	empty	is missing required contract string
+proof	Check child report size cap strings	-	agents/implementer.md	empty	is missing required contract string
+proof	Check owner questions page strings	-	skills/running-a-sprint/SKILL.md	empty	is missing required contract string
+proof	Check Ready to merge strings	-	skills/running-a-sprint/references/OWNER_QUESTIONS.md	empty	is missing required contract string
+proof	Check draft pull request rules	-	skills/finishing-a-development-branch/SKILL.md	empty	is missing required contract string
+proof	Check owner questions template	-	skills/running-a-sprint/references/owner-questions-template.html	empty	is missing the section heading
+proof	Check parallel todo contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
+proof	Check review cadence contract strings	-	skills/two-stage-review/SKILL.md	empty	is missing required cadence string
+proof	Check risky-todo rule has no shared-file clause	-	skills/two-stage-review/SKILL.md	append	carries the shared-file clause again	another todo
+proof	Check Discovery example map is pinned	-	skills/three-amigos/references/CEREMONIES.md	empty	has no line equal to
+proof	Check Discovery skeptic check and economy tier are pinned	-	skills/three-amigos/references/CEREMONIES.md	empty	has no line equal to
+proof	Check acceptance proof kinds are pinned	-	skills/three-amigos/references/FORMULATION.md	empty	has no line equal to
+proof	Check three-amigos reference list names proof kinds for the formulation reference	-	skills/three-amigos/SKILL.md	empty	has no line equal to
+proof	Hook script smoke test	-	hooks/session-start.sh	append	output is not valid JSON	echo not-json
+proof	SessionStart source-branch detector	-	hooks/session-start.sh	empty	compact source did not produce continuation banner
+proof	Verify .claude/hooks symlink integrity	-	.claude/hooks/session-start.sh	replace	is not a symlink	regular file text
+proof	Check hooks/README.md matches .claude/hooks	-	hooks/README.md	empty	is not documented in hooks/README.md
+proof	Run session-events converter unit tests	-	tools/session_events/test_session_to_events.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+proof	Run context-measure unit tests	-	tools/context_measure/test_context_measure.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+proof	Run tier usage script unit tests	-	tools/tier_usage/test_tier_usage.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+proof	Shellcheck role-check scripts	-	skills/subagent-driven-development/scripts/role-check.sh	append	SC2086	echo $HOME
+proof	Run role-boundary detector and plan-marker fixtures	-	skills/subagent-driven-development/scripts/plan-check.sh	empty	output lacks expected text
+proof	Shellcheck running-a-sprint scripts	-	skills/running-a-sprint/scripts/handback-check.sh	append	SC2086	echo $HOME
+proof	Run running-a-sprint script tests	-	skills/running-a-sprint/scripts/tests/handback-check.test.sh	insert-before	FAIL handback-check.test.sh	TEST_FAIL=1
+proof	Check the detector in the reference matches the shipped script	RUNNER_TEMP=/tmp	skills/subagent-driven-development/scripts/role-check.sh	empty	the fenced detector in THREE_ROLE_LOOP.md differs
+proof	Check plan-check instruction strings	-	agents/story-coordinator.md	empty	is missing required contract string
+proof	Check red CI classification strings	-	agents/story-coordinator.md	empty	has no line equal to: ## Red CI
+proof	Check Discovery line rule strings	-	agents/story-coordinator.md	empty	is missing required contract string
+proof	Check running-a-sprint SKILL.md row counts	-	skills/running-a-sprint/SKILL.md	empty	Red Flag bullets, expected 10
+proof	Check the fresh-runner Discovery rule is pinned once	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	append	occurrences of the fresh-runner rule, expected 1	A Discovery stop with a plan file is answered by a fresh runner for the same story, worktree and branch, and never by resuming the stopped runner.
+proof	Run verify-command check kept test	-	skills/subagent-driven-development/scripts/verify-command-check.sh	empty	FAIL no-argument
+covers	Check loaded pre-message variants are empty or a single line	pre-message-gates-loaded
+covers	Check loaded pre-message variants are empty or a single line	pre-message-loaded
+covers	Check three-role loop contract strings	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md
+covers	Check three-role loop contract strings	skills/subagent-driven-development/SKILL.md
+covers	Check three-role loop contract strings	skills/writing-plans/references/TODO_TEMPLATES.md
+covers	Check three-role loop contract strings	skills/testing/SKILL.md
+covers	Check three-role loop contract strings	agents/implementer.md
+covers	Check three-role loop contract strings	agents/story-coordinator.md
+covers	Check three-role loop contract strings	agents/plan-reviewer.md
+covers	Check three-role loop contract strings	agents/code-quality-reviewer.md
+covers	Check three-role loop contract strings	agents/spec-compliance-reviewer.md
+covers	Check three-role loop contract strings	agents/skill-reviewer.md
+covers	Check agent template contracts	agents/implementer.md
+covers	Check agent template contracts	agents/code-quality-reviewer.md
+covers	Check agent template contracts	agents/skill-reviewer.md
+covers	Check agent template contracts	skills/writing-skills/references/REVIEW_INSTRUCTIONS.md
+covers	Check agent template contracts	agents/postmortem-reviewer.md
+covers	Check agent template contracts	agents/architecture-reviewer.md
+covers	Check agent template contracts	agents/infrastructure-reviewer.md
+covers	Check agent template contracts	skills/infrastructure-review/SKILL.md
+covers	Check agent template contracts	agents/skeptic.md
+covers	Check agent template contracts	skills/writing-plans/references/SKEPTIC_PROMPT.md
+covers	Check agent template contracts	agents/rehearsal-subject.md
+covers	Check agent template contracts	skills/subagent-driven-development/SKILL.md
+covers	Check agent template contracts	skills/writing-plans/SKILL.md
+covers	Check agent template contracts	skills/writing-plans/references/PLAN_REVIEW.md
+covers	Check agent template contracts	skills/three-amigos/references/CEREMONIES.md
+covers	Check agent template contracts	skills/writing-plans/references/DECISION_DEFERRAL.md
+covers	Check agent template contracts	skills/finishing-a-development-branch/SKILL.md
+covers	Check agent template contracts	skills/two-stage-review/SKILL.md
+covers	Check agent template contracts	skills/honesty/SKILL.md
+covers	Check agent template contracts	skills/communication/SKILL.md
+covers	Check agent template contracts	skills/reviewing-outside-contributions/SKILL.md
+covers	Check agent template contracts	skills/self-evaluation/SKILL.md
+covers	Check agent template contracts	skills/versioning/SKILL.md
+covers	Check agent template contracts	skills/execution/SKILL.md
+covers	Check agent template contracts	agents/story-coordinator.md
+covers	Check agent template contracts	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check agent template contracts	skills/running-a-sprint/references/SCORECARD.md
+covers	Check agent template contracts	skills/running-a-sprint/SKILL.md
+covers	Check reconcile contract strings	agents/story-coordinator.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/INDEX.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/MOVED_RATIONALE.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/RECONCILE.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/SCORECARD.md
+covers	Check reconcile contract strings	skills/running-a-sprint/SKILL.md
+covers	Check scope contract strings	agents/story-coordinator.md
+covers	Check scope contract strings	skills/running-a-sprint/references/MOVED_RATIONALE.md
+covers	Check scope contract strings	skills/running-a-sprint/SKILL.md
+covers	Check scope contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check scope contract strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check scope contract strings	skills/two-stage-review/SKILL.md
+covers	Check scope contract strings	skills/two-stage-review/references/REVIEW_LOOP.md
+covers	Check hand-back size contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check hand-back size contract strings	agents/story-coordinator.md
+covers	Check hand-back size contract strings	skills/running-a-sprint/SKILL.md
+covers	Check child report size cap strings	agents/implementer.md
+covers	Check child report size cap strings	skills/two-stage-review/SKILL.md
+covers	Check child report size cap strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check owner questions page strings	skills/running-a-sprint/SKILL.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/INDEX.md
+covers	Check Ready to merge strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check Ready to merge strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check Ready to merge strings	skills/running-a-sprint/SKILL.md
+covers	Check draft pull request rules	skills/finishing-a-development-branch/SKILL.md
+covers	Check draft pull request rules	agents/story-coordinator.md
+covers	Check draft pull request rules	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check draft pull request rules	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check owner questions template	skills/running-a-sprint/references/owner-questions-template.html
+covers	Check parallel todo contract strings	agents/story-coordinator.md
+covers	Check parallel todo contract strings	skills/writing-plans/references/TODO_TEMPLATES.md
+covers	Check parallel todo contract strings	skills/running-a-sprint/SKILL.md
+covers	Check review cadence contract strings	skills/two-stage-review/SKILL.md
+covers	Check review cadence contract strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check review cadence contract strings	skills/subagent-driven-development/SKILL.md
+covers	Check review cadence contract strings	agents/story-coordinator.md
+covers	Check review cadence contract strings	hooks/session-start.md
+covers	Check review cadence contract strings	skills/writing-skills/references/MODEL_COMPATIBILITY.md
+covers	Check review cadence contract strings	skills/user-story-estimation/SKILL.md
+covers	Check risky-todo rule has no shared-file clause	skills/two-stage-review/SKILL.md
+covers	Check risky-todo rule has no shared-file clause	skills/two-stage-review/references/REVIEW_LOOP.md
+covers	Check Discovery example map is pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check Discovery skeptic check and economy tier are pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check Discovery skeptic check and economy tier are pinned	skills/subagent-driven-development/references/MODEL_SELECTION.md
+covers	Check acceptance proof kinds are pinned	skills/three-amigos/references/FORMULATION.md
+covers	Check acceptance proof kinds are pinned	skills/user-story-generator/SKILL.md
+covers	Check acceptance proof kinds are pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check three-amigos reference list names proof kinds for the formulation reference	skills/three-amigos/SKILL.md
+covers	Check hooks/README.md matches .claude/hooks	hooks/README.md
+covers	Check hooks/README.md matches .claude/hooks	.claude/hooks
+covers	Check the detector in the reference matches the shipped script	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md
+covers	Check the detector in the reference matches the shipped script	skills/subagent-driven-development/scripts/role-check.sh
+covers	Check plan-check instruction strings	agents/story-coordinator.md
+covers	Check red CI classification strings	agents/story-coordinator.md
+covers	Check red CI classification strings	skills/two-stage-review/SKILL.md
+covers	Check red CI classification strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check Discovery line rule strings	agents/story-coordinator.md
+covers	Check Discovery line rule strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check running-a-sprint SKILL.md row counts	skills/running-a-sprint/SKILL.md
+covers	Check the fresh-runner Discovery rule is pinned once	skills/running-a-sprint/references/HANDBACK_ROUTING.md

@@ -3,12 +3,13 @@
 # and checks.list with the base and reports:
 #   R1  a base step, covers path or proof entry that the head drops, or a base
 #       trigger (push, pull_request, workflow_dispatch) the head drops
-#   R2  a pending entry whose reason lacks #<digits>, or a proof whose control
-#       run fails or whose must-fail run lacks the expected output
+#   R2  a proof whose control run fails or whose must-fail run lacks the
+#       expected output
 #   R3  a head step with no step entry, or a new head step lacking a proof entry
-#       or carrying a pending entry
 #   R4  a skip key or path filter whose head count exceeds the base count
 #   R5  a list entry naming a step absent from the head workflow
+# A pending entry (coverage debt) is accepted on the base list only; a pending
+# entry on the head list is refused at parse, so the run exits 2.
 # Usage: sh tools/validate_workflow/run.sh
 # Env: VALIDATE_WORKFLOW_ROOT (default: current directory),
 #      VALIDATE_WORKFLOW_BASE (default: origin/main).
@@ -65,22 +66,28 @@ workflow_parse() {
   ' "$1"
 }
 
-# parse_list CHECKS OUT: copy the entries of CHECKS to OUT after the strict check.
-# Blank lines and lines starting with # are skipped. Exits 2 on a malformed line.
+# parse_list CHECKS OUT KIND: copy the entries of CHECKS to OUT after the strict check.
+# KIND is base or head; a pending entry is accepted only for base. Blank lines and lines
+# starting with # are skipped. Exits 2 on a malformed line.
 parse_list() {
-  awk -F "$TAB" '
+  awk -F "$TAB" -v kind="$3" '
+    function takes_text(mode) {
+      return mode == "append" || mode == "insert-before" || mode == "insert-before-close" || mode == "replace"
+    }
     /^#/ || /^[ \t]*$/ { next }
     {
       problem = ""
       if ($1 == "step") want = 2
-      else if ($1 == "covers" || $1 == "pending") want = 3
-      else if ($1 == "proof") want = 6
+      else if ($1 == "covers" || ($1 == "pending" && kind == "base")) want = 3
+      else if ($1 == "proof") want = takes_text($5) ? 7 : 6
       else want = 0
       if ($1 == "proof" && NF == 6 && $6 == "") {
         print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
         exit 2
       }
-      if (want == 0) {
+      if ($1 == "pending" && kind == "head") {
+        problem = "pending is refused on the head list"
+      } else if (want == 0) {
         problem = "unknown type"
       } else if (NF != want) {
         problem = "expected " want " fields"
@@ -88,7 +95,7 @@ parse_list() {
         for (i = 2; i <= NF && problem == ""; i++) {
           if ($i == "") problem = "empty field " i
         }
-        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize") {
+        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && !takes_text($5)) {
           problem = "unknown proof mode " $5
         }
       }
@@ -153,14 +160,14 @@ check_removal() {
         ;;
       proof)
         has_entry proof "$step" "$TMP/head.list" ||
-          finding R1 "base proof entry of step \"$step\" is absent from the head list or downgraded to pending"
+          finding R1 "base proof entry of step \"$step\" is absent from the head list"
         ;;
     esac
   done < "$TMP/base.list"
 }
 
 # check_new_steps: R3 for head steps without a step entry, and for new head steps
-# without a proof entry or with a pending entry.
+# without a proof entry.
 check_new_steps() {
   while IFS= read -r step; do
     has_entry step "$step" "$TMP/head.list" ||
@@ -168,9 +175,6 @@ check_new_steps() {
     if ! grep -Fxq -- "$step" "$TMP/base.steps"; then
       has_entry proof "$step" "$TMP/head.list" ||
         finding R3 "new head step \"$step\" has no proof entry"
-      if has_entry pending "$step" "$TMP/head.list"; then
-        finding R3 "new head step \"$step\" has a pending entry; pending is refused for a new step"
-      fi
     fi
   done < "$TMP/head.steps"
 }
@@ -180,17 +184,6 @@ check_list_entries() {
   while IFS="$TAB" read -r kind step detail; do
     has_head_step "$step" ||
       finding R5 "$kind entry names step \"$step\", which is absent from the head workflow"
-  done < "$TMP/head.list"
-}
-
-# check_pending_reasons: R2 for each head pending entry whose reason lacks #<digits>.
-check_pending_reasons() {
-  while IFS="$TAB" read -r kind step reason; do
-    [ "$kind" = pending ] || continue
-    case $reason in
-      *'#'[0-9]*) ;;
-      *) finding R2 "pending entry for step \"$step\" has no #<digits> issue number in its reason" ;;
-    esac
   done < "$TMP/head.list"
 }
 
@@ -279,7 +272,7 @@ prepare_tree() {
   while IFS= read -r f; do
     [ -f "$ROOT/$f" ] || continue
     mkdir -p "$TMP/tree/$(dirname -- "$f")" || die "cannot make a directory in the proof tree"
-    cp "$ROOT/$f" "$TMP/tree/$f" || die "cannot copy $f into the proof tree"
+    cp -P "$ROOT/$f" "$TMP/tree/$f" || die "cannot copy $f into the proof tree"
   done < "$TMP/tracked"
   if [ -e "$ROOT/.git" ]; then
     cp -R "$ROOT/.git" "$TMP/tree/.git" || die "cannot copy .git into the proof tree"
@@ -308,12 +301,56 @@ copy_tree() {
   cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
 }
 
-# apply_mode FILE MODE: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x.
+# text_lines TEXT: print TEXT, one line per literal backslash-n in TEXT. TEXT reaches awk
+# through ENVIRON, so no shell expands its dollar signs or backslashes.
+text_lines() {
+  VW_TEXT=$1 awk 'BEGIN {
+    s = ENVIRON["VW_TEXT"]
+    while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
+    printf "%s\n", s
+  }'
+}
+
+# apply_mode FILE MODE TEXT: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x;
+# append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. insert-before
+# puts TEXT, split the same way, before the last line of FILE. insert-before-close puts
+# TEXT before the second line of FILE that is exactly ---, the frontmatter closing line; a
+# FILE with no second --- line is left unchanged. replace removes FILE (a link is removed,
+# not its target) and writes TEXT, split the same way as append, as a regular file at its path.
 # parse_list has already refused any other mode.
 apply_mode() {
   case $2 in
     empty) : > "$1" ;;
+    replace) rm -f "$1" && text_lines "$3" > "$1" ;;
     oversize) awk 'BEGIN { s = sprintf("%20001s", ""); gsub(/ /, "x", s); printf "%s", s }' > "$1" ;;
+    append) text_lines "$3" >> "$1" ;;
+    insert-before)
+      VW_TEXT=$3 awk 'BEGIN {
+        s = ENVIRON["VW_TEXT"]
+        while ((i = index(s, "\\n")) > 0) { add[++n] = substr(s, 1, i - 1); s = substr(s, i + 2) }
+        add[++n] = s
+      }
+      { line[++m] = $0 }
+      END {
+        for (i = 1; i < m; i++) print line[i]
+        for (i = 1; i <= n; i++) print add[i]
+        if (m > 0) print line[m]
+      }' "$1" > "$1.new" && mv "$1.new" "$1" ;;
+    insert-before-close)
+      VW_TEXT=$3 awk 'BEGIN {
+        s = ENVIRON["VW_TEXT"]
+        while ((i = index(s, "\\n")) > 0) { add[++n] = substr(s, 1, i - 1); s = substr(s, i + 2) }
+        add[++n] = s
+      }
+      { line[++m] = $0 }
+      END {
+        for (i = 1; i <= m; i++) {
+          if (line[i] == "---" && ++dashes == 2) {
+            for (j = 1; j <= n; j++) print add[j]
+          }
+          print line[i]
+        }
+      }' "$1" > "$1.new" && mv "$1.new" "$1" ;;
   esac
 }
 
@@ -324,7 +361,7 @@ apply_mode() {
 run_proofs() {
   prepare_tree
   n=0
-  while IFS="$TAB" read -r kind step envs target mode text; do
+  while IFS="$TAB" read -r kind step envs target mode text addtext; do
     [ "$kind" = proof ] || continue
     has_head_step "$step" || continue
     n=$((n + 1))
@@ -345,7 +382,7 @@ run_proofs() {
       finding R2 "proof target \"$target\" of step \"$step\" is absent from the tree"
       continue
     fi
-    apply_mode "$fail/$target" "$mode"
+    apply_mode "$fail/$target" "$mode" "$addtext"
     if ! run_block "$fail" "$envs" "$body" "$TMP/fail.$n.out" &&
       grep -Fq -- "$text" "$TMP/fail.$n.out"; then
       printf 'PROOF ok: %s\n' "$step"
@@ -384,13 +421,12 @@ workflow_parse "$ROOT/$WF" "$TMP/head.steps" "$TMP/head.blocks" ||
   die "head workflow has an unrecognized step line"
 workflow_parse "$TMP/base.wf" "$TMP/base.steps" "$TMP/base.blocks" ||
   die "base workflow has an unrecognized step line"
-parse_list "$HEAD_CHECKS" "$TMP/head.list" || die "malformed head checks.list"
-parse_list "$BASE_CHECKS" "$TMP/base.list" || die "malformed base checks.list"
+parse_list "$HEAD_CHECKS" "$TMP/head.list" head || die "malformed head checks.list"
+parse_list "$BASE_CHECKS" "$TMP/base.list" base || die "malformed base checks.list"
 
 check_removal
 check_new_steps
 check_list_entries
-check_pending_reasons
 check_triggers
 check_skip_keys
 

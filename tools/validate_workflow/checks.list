@@ -109,12 +109,12 @@ proof	Shellcheck role-check scripts	-	skills/subagent-driven-development/scripts
 proof	Run role-boundary detector and plan-marker fixtures	-	skills/subagent-driven-development/scripts/plan-check.sh	empty	output lacks expected text
 proof	Shellcheck running-a-sprint scripts	-	skills/running-a-sprint/scripts/handback-check.sh	append	SC2086	echo $HOME
 proof	Run running-a-sprint script tests	-	skills/running-a-sprint/scripts/tests/handback-check.test.sh	insert-before	FAIL handback-check.test.sh	TEST_FAIL=1
-proof	Check the detector in the reference matches the shipped script	-	skills/subagent-driven-development/scripts/role-check.sh	empty	the fenced detector in THREE_ROLE_LOOP.md differs
+proof	Check the detector in the reference matches the shipped script	RUNNER_TEMP=/tmp	skills/subagent-driven-development/scripts/role-check.sh	empty	the fenced detector in THREE_ROLE_LOOP.md differs
 proof	Check plan-check instruction strings	-	agents/story-coordinator.md	empty	is missing required contract string
 proof	Check red CI classification strings	-	agents/story-coordinator.md	empty	has no line equal to: ## Red CI
 proof	Check Discovery line rule strings	-	agents/story-coordinator.md	empty	is missing required contract string
 proof	Check running-a-sprint SKILL.md row counts	-	skills/running-a-sprint/SKILL.md	empty	Red Flag bullets, expected 10
-proof	Check the fresh-runner Discovery rule is pinned once	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	empty	occurrences of the fresh-runner rule, expected 1
+proof	Check the fresh-runner Discovery rule is pinned once	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	append	occurrences of the fresh-runner rule, expected 1	A Discovery stop with a plan file is answered by a fresh runner for the same story, worktree and branch, and never by resuming the stopped runner.
 proof	Run verify-command check kept test	-	skills/subagent-driven-development/scripts/verify-command-check.sh	empty	FAIL no-argument
 covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-gates-loaded.md
 covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-loaded.md

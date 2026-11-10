@@ -49,6 +49,13 @@ PROBE_FM_BLOCK=$(cat <<'EOF'
 EOF
 )
 
+# Step block for the append and insert-before probes: it reads SIZE_FILE and exits 1 with
+# "echo two" in its output when a line reading exactly "echo two" is present. The unmodified
+# file passes; a mode that writes the line makes the must-fail run fail with "two".
+PROBE_APPEND_BLOCK='      - name: Probe appended line
+        run: |
+          if grep -qx "echo two" skills/honesty/SKILL.md; then echo "appended line found: echo two"; exit 1; fi'
+
 # Step block for the replace probe: its run needs .claude/hooks/session-start.sh to be a link.
 # The replace case turns the link into a regular file, so the probe prints "is not a symlink".
 PROBE_REPLACE_BLOCK='      - name: Probe replaced symlink
@@ -264,7 +271,7 @@ commit_all "$repo" "head: add a step with a proof entry and no step entry"
 # Assert
 check_run "f1 new step with proof, no step entry" "$repo" 1 R3
 
-# Case f2: a new head step with a step entry and neither a proof nor a pending entry.
+# Case f2: a new head step with a step entry and no proof entry.
 # Arrange
 repo="$TMP/f2"
 make_base "$repo" 1
@@ -543,45 +550,47 @@ commit_all "$repo" "head: session-bootstrap size proof restated"
 check_run "session-bootstrap size proof passes" "$repo" 0 - - "PROOF ok: $SIZE_STEP"
 
 # Case z: a proof row in append mode with a seventh field of two lines and a dollar sign.
-# The seventh field is passed through ENVIRON so its backslash-n stays literal. The step
-# never reads the target, so the must-fail run passes: the control run passed, then the
-# guard reports that the proof did not fail with the expected output.
+# A probe step reads SIZE_FILE (PROBE_APPEND_BLOCK). The control run passes; the must-fail
+# run passes only when append wrote "echo two", so a no-op append fails this case.
+# The seventh field is passed through printf %s so its backslash-n stays literal.
 # Arrange
 repo="$TMP/z"
 make_base "$repo" 1
 use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
-VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
-  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"]; done = 1; next }
+VW_BLOCK=$PROBE_APPEND_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
   { print }
-  END { if (!done) print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"] }
-' "$list" | set_content "$list"
+' "$wf" | set_content "$wf"
+printf 'step\tProbe appended line\nproof\tProbe appended line\t-\t%s\tappend\ttwo\t%s\n' \
+  "$SIZE_FILE" "echo \$HOME\\necho two" >> "$list"
 commit_all "$repo" "head: append proof with a seventh field"
 # Assert
-check_run "append mode adds two lines with a dollar sign" "$repo" 1 R2 - \
-  "did not fail with the expected output"
+check_run "z append mode writes the two lines" "$repo" 0 - - "PROOF ok: Probe appended line"
 
 # Case aa: a proof row in insert-before mode with a seventh field of two lines and a dollar sign.
 # The mode puts the text before the last line of its target, so the target has many lines
-# (SIZE_FILE). The seventh field is passed through ENVIRON so its backslash-n stays literal.
-# The step never reads the target, so the must-fail run passes: the control run passed, then the
-# guard reports that the proof did not fail with the expected output.
+# (SIZE_FILE). The probe step (PROBE_APPEND_BLOCK) passes on the control run and fails on the
+# must-fail run only when insert-before wrote "echo two"; a no-op insert-before fails this case.
+# The seventh field is passed through printf %s so its backslash-n stays literal.
 # Arrange
 repo="$TMP/aa"
 make_base "$repo" 1
 use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
-VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
-  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"]; done = 1; next }
+VW_BLOCK=$PROBE_APPEND_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
   { print }
-  END { if (!done) print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"] }
-' "$list" | set_content "$list"
+' "$wf" | set_content "$wf"
+printf 'step\tProbe appended line\nproof\tProbe appended line\t-\t%s\tinsert-before\ttwo\t%s\n' \
+  "$SIZE_FILE" "echo \$HOME\\necho two" >> "$list"
 commit_all "$repo" "head: insert-before proof with a seventh field"
 # Assert
-check_run "insert-before mode puts the text before the last line" "$repo" 1 R2 - \
-  "did not fail with the expected output"
+check_run "aa insert-before mode writes the two lines" "$repo" 0 - - "PROOF ok: Probe appended line"
 
 # Case ab: a symlink in the tracked tree is copied as a link. The probe step's control run
 # needs skills/honesty/LINK.md to be a link, so it fails unless prepare_tree copies the
@@ -646,7 +655,7 @@ commit_all "$repo" "head: replace probe step and proof"
 # Assert
 check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok: Probe replaced symlink"
 
-# Case AC3: a file pinned by a proof of the hand-back step is removed from the head tree. The
+# Case pinned-file: a file pinned by a proof of the hand-back step is removed from the head tree. The
 # step's control run fails on the unmodified copy, so the guard reports the proof control failure.
 # Arrange
 repo="$TMP/ac3"
@@ -663,10 +672,10 @@ set_proof "$list" "Check hand-back size contract strings" - \
 rm -f "$repo/skills/running-a-sprint/references/HANDBACK_ROUTING.md"
 commit_all "$repo" "head: pinned file removed"
 # Assert
-check_run "AC3 removing a pinned file from the head tree fails proof control" "$repo" 1 R2 - \
+check_run "pinned-file removing a pinned file from the head tree fails proof control" "$repo" 1 R2 - \
   'proof control for "Check hand-back size contract strings" failed'
 
-# Case AC2: no issue-number citation in tools/validate_workflow. The grep reads the head tree
+# Case issue-citation: no issue-number citation in tools/validate_workflow. The grep reads the head tree
 # (REPO) with the bracket form of the digit class, so this case does not match its own text.
 # grep exit 1 means no line matched and the case passes; exit 0 (a citation) or 2 (grep error) fails.
 # Arrange
@@ -676,14 +685,14 @@ grep -rn '#[[:digit:]]' "$REPO/tools/validate_workflow" > "$TMP/ac2.out" 2>&1
 rc=$?
 # Assert
 if [ "$rc" -eq 1 ]; then
-  echo "PASS: AC2 no issue-number citation in tools/validate_workflow"
+  echo "PASS: issue-citation no issue-number citation in tools/validate_workflow"
 else
   FAILS=$((FAILS + 1))
-  echo "FAIL: AC2 no issue-number citation in tools/validate_workflow: grep exit $rc"
+  echo "FAIL: issue-citation no issue-number citation in tools/validate_workflow: grep exit $rc"
   sed -n '1,3p' "$TMP/ac2.out" | sed 's/^/  | /'
 fi
 
-# Case AC4a: a paths-ignore key added inside the on: block. The guard counts it as on-paths.
+# Case key-a: a paths-ignore key added inside the on: block. The guard counts it as on-paths.
 # Arrange
 repo="$TMP/ac4a"
 make_base "$repo" 1
@@ -696,9 +705,9 @@ awk '
 ' "$wf" | set_content "$wf"
 commit_all "$repo" "head: paths-ignore in the on block"
 # Assert
-check_run "AC4 adding paths-ignore fails" "$repo" 1 R4 - 'head has 1 "on-paths" key(s) against 0 in base'
+check_run "key-a adding paths-ignore fails" "$repo" 1 R4 - 'head has 1 "on-paths" key(s) against 0 in base'
 
-# Case AC4b: continue-on-error added to one step. The guard counts it as step-continue-on-error.
+# Case key-b: continue-on-error added to one step. The guard counts it as step-continue-on-error.
 # Arrange
 repo="$TMP/ac4b"
 make_base "$repo" 1
@@ -711,10 +720,10 @@ awk '
 ' "$wf" | set_content "$wf"
 commit_all "$repo" "head: continue-on-error on a check step"
 # Assert
-check_run "AC4 adding continue-on-error to a step fails" "$repo" 1 R4 - \
+check_run "key-b adding continue-on-error to a step fails" "$repo" 1 R4 - \
   'head has 1 "step-continue-on-error" key(s) against 0 in base'
 
-# Case AC4c: a job-level if key added under validate. The guard counts it as job-if.
+# Case key-c: a job-level if key added under validate. The guard counts it as job-if.
 # Arrange
 repo="$TMP/ac4c"
 make_base "$repo" 1
@@ -727,9 +736,9 @@ awk '
 ' "$wf" | set_content "$wf"
 commit_all "$repo" "head: job-level if"
 # Assert
-check_run "AC4 adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if" key(s) against 0 in base'
+check_run "key-c adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if" key(s) against 0 in base'
 
-# Case AC4d: the workflow_dispatch trigger key removed from the on: block. The guard reports
+# Case trigger-d: the workflow_dispatch trigger key removed from the on: block. The guard reports
 # it as a base trigger the head drops (R1, check_triggers).
 # Arrange
 repo="$TMP/ac4d"
@@ -740,7 +749,7 @@ wf="$repo/.github/workflows/validate.yml"
 awk '$0 == "  workflow_dispatch:" { next } { print }' "$wf" | set_content "$wf"
 commit_all "$repo" "head: remove the workflow_dispatch trigger"
 # Assert
-check_run "AC4 removing workflow_dispatch emits FINDING R1" "$repo" 1 R1 - \
+check_run "trigger-d removing workflow_dispatch emits FINDING R1" "$repo" 1 R1 - \
   'base trigger "workflow_dispatch" is absent from the head on: block'
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then

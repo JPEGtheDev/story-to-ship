@@ -8,6 +8,8 @@
 #   R3  a head step with no step entry, or a new head step lacking a proof entry
 #   R4  a skip key or path filter whose head count exceeds the base count
 #   R5  a list entry naming a step absent from the head workflow
+# A pending entry (coverage debt) is accepted on the base list only; a pending
+# entry on the head list is refused at parse, so the run exits 2.
 # Usage: sh tools/validate_workflow/run.sh
 # Env: VALIDATE_WORKFLOW_ROOT (default: current directory),
 #      VALIDATE_WORKFLOW_BASE (default: origin/main).
@@ -83,7 +85,9 @@ parse_list() {
         print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
         exit 2
       }
-      if (want == 0) {
+      if ($1 == "pending" && kind == "head") {
+        problem = "pending is refused on the head list"
+      } else if (want == 0) {
         problem = "unknown type"
       } else if (NF != want) {
         problem = "expected " want " fields"
@@ -156,7 +160,7 @@ check_removal() {
         ;;
       proof)
         has_entry proof "$step" "$TMP/head.list" ||
-          finding R1 "base proof entry of step \"$step\" is absent from the head list or downgraded to pending"
+          finding R1 "base proof entry of step \"$step\" is absent from the head list"
         ;;
     esac
   done < "$TMP/base.list"

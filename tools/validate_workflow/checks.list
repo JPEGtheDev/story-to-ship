@@ -72,7 +72,7 @@ proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	F
 proof	Validate hooks.json	-	hooks/hooks.json	append	parse error	{
 proof	Validate .claude-plugin JSON files	-	.claude-plugin/plugin.json	append	parse error	{
 proof	Shellcheck shell scripts	-	hooks/session-start.sh	append	SC2086	echo $HOME
-proof	Run all hook fixture suites	-	hooks/tests/run-all.sh	insert-before	FAILING SUITES:	overall_exit=1
+proof	Run all hook fixture suites	-	hooks/tests/run-all.sh	insert-before	FAILING SUITES:	echo "FAILING SUITES:"\nexit 1
 proof	Run first-action audit tests	-	tools/first_action_audit/tests/fixtures/bad_n_negative/expect_stdout_grep	append	stdout missing expected substring	NO-SUCH-TEXT
 proof	Stop turn-log wedge safety (empty stdin)	-	hooks/stop-turn-log.sh	empty	empty-stdin did not yield {}
 proof	Enforce pre-message hook word budget	-	hooks/pre-message-gates.md	empty	is not smaller than

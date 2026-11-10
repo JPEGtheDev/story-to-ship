@@ -65,7 +65,7 @@ See `references/MOVED_RATIONALE.md`, Moved from SKILL.md: worktree, the launcher
 
 End the turn while runners work. Before the row lookup, every owner message, hand-back, restart or page comment runs a sweep: `gh pr view <PR number> --json state` for each open sprint PR in the ledger, and any PR origin shows MERGED is closed out, one at a time in ledger order, after any runner still on it finishes. Look up each hand-back or event in `references/HANDBACK_ROUTING.md` and do what its row says. Never answer from memory.
 
-An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner, its ledger state becomes `stopped` so later sweeps skip it, and the launcher tells the owner once. Squash is the merge method close-out accepts; a merge commit stops at step 1, and any other merge, such as a rebase merge, goes on through step 2, which sends it to the owner only on a patch difference. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
+An owner's "merged" message gets the same check: MERGED on origin runs the close-out; OPEN or CLOSED runs nothing and the owner is told. A failed gh read is never a merge and waits for the next sweep. A sprint PR that origin shows CLOSED without a merge holds its runner, its ledger state becomes `stopped` so later sweeps skip it, and the launcher tells the owner once. Squash is the merge method close-out accepts; a merge commit stops at step 1 of the sprint-close-out skill, and any other merge, such as a rebase merge, goes on through step 2 of the sprint-close-out skill, which sends it to the owner only on a patch difference. The pilot line release (`references/PILOT.md`) also runs on the sweep path.
 
 The ledger keeps one state per PR: `closed out` when a close-out finishes, `stopped` when one stops. The sweep skips a PR whose state is `closed out` or `stopped`. A stopped PR waits for the owner's answer to the stop; when the owner's answer leads to the remaining steps being finished, the state becomes `closed out`.
 
@@ -87,7 +87,7 @@ An ask about items that exist now is done once, for the items it names; it does 
 
 ## Close-out
 
-Once origin shows the PR MERGED, the close-out steps run from the sprint-close-out skill (skills/sprint-close-out/SKILL.md).
+Once origin shows the PR MERGED, the close-out steps run from the sprint-close-out skill.
 
 ## BEFORE PROCEEDING
 

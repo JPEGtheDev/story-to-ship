@@ -51,12 +51,18 @@ set_content() {
   cat > "$TMP/edit.tmp" && mv "$TMP/edit.tmp" "$1"
 }
 
-# make_list WORKFLOW: print a complete checks.list for every step in WORKFLOW.
-# The size step gets its seven covers lines and one proof line; every other step
-# gets a pending line citing #455.
+# make_list WORKFLOW: print one step line for every step in WORKFLOW and nothing else.
 make_list() {
   grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
     printf 'step\t%s\n' "$name"
+  done
+}
+
+# add_rows WORKFLOW: print the rows that complete a list made by make_list. The size
+# step gets its seven covers lines and one proof line; every other step gets a pending
+# line citing #455. A case that needs a complete list appends this output after make_list.
+add_rows() {
+  grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
     if [ "$name" = "$SIZE_STEP" ]; then
       for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
         skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
@@ -90,6 +96,7 @@ make_base() {
   copy_size_files "$1" || return 1
   if [ "$2" = 1 ]; then
     make_list "$1/.github/workflows/validate.yml" > "$1/tools/validate_workflow/checks.list"
+    add_rows "$1/.github/workflows/validate.yml" >> "$1/tools/validate_workflow/checks.list"
   fi
   commit_all "$1" "base"
 }
@@ -327,6 +334,7 @@ wf="$repo/.github/workflows/validate.yml"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 make_list "$wf" > "$list"
+add_rows "$wf" >> "$list"
 commit_all "$repo" "head: add a complete list"
 # Assert
 check_run "k absent base list" "$repo" 0 -
@@ -346,6 +354,7 @@ mkdir -p "$repo/.github/workflows" "$repo/tools/validate_workflow"
 cp "$REAL_WF" "$wf"
 copy_size_files "$repo"
 make_list "$wf" > "$list"
+add_rows "$wf" >> "$list"
 commit_all "$repo" "head: add workflow and list"
 # Assert
 check_run "l absent base workflow" "$repo" 2 -

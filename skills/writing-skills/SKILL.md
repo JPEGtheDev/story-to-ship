@@ -68,7 +68,7 @@ Before creating, editing, or shipping any skill or agent template:
 11. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening, even a permanent one, needs the owner's ruling.
    - [-] Check removed or weakened as a temporary step -> do the replacement work in this PR or drop the change; a same-PR removal -> stop and get the owner's ruling
 
-12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
+12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
    - [-] Enforcement cut or moved for size -> restore it inline
 
 [+] All met -> proceed

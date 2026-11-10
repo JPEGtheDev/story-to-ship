@@ -1095,20 +1095,21 @@ jobs:
           fi
           echo "[+] flaky-test rule pins are present"
 
-      # This 20,000-character cap (roughly 5,000 tokens at the documented
-      # chars/4 estimate) is enforced here only for the core skills listed in
-      # the loop below: each was measured and brought under the cap when it
-      # was split (honesty from communication; two-stage-review from
-      # subagent-driven-development). running-a-sprint SKILL.md is listed too,
-      # and this check alone holds it under the cap. No repo-wide skill-size
-      # cap is CI-enforced; other skills have not been measured against this
-      # limit.
+      # This 20,000-byte cap (roughly 5,000 tokens at the documented
+      # chars/4 estimate) is enforced here only for the six core skills listed
+      # in the loop below. Three of them were measured and brought under the
+      # cap when split: honesty from communication; two-stage-review from
+      # subagent-driven-development; session-bootstrap into its references.
+      # running-a-sprint SKILL.md is also listed, and this check alone holds
+      # it under the cap.
+      # No repo-wide skill-size cap is CI-enforced; other skills have not been
+      # measured against this limit.
       - name: Enforce size cap on core skills
         run: |
           set -e
           limit=20000
           over=0
-          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md; do
+          for f in skills/honesty/SKILL.md skills/communication/SKILL.md skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
             size=$(wc -c < "$f")
             if [ "$size" -gt "$limit" ]; then
               echo "FAILED: $f is $size characters, exceeding the $limit-character limit"

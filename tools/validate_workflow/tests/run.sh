@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=30
+EXPECTED_CASES=31
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -645,6 +645,26 @@ printf 'step\tProbe replaced symlink\ncovers\tProbe replaced symlink\t.claude/ho
 commit_all "$repo" "head: replace probe step and proof"
 # Assert
 check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok: Probe replaced symlink"
+
+# Case AC3: a file pinned by a proof of the hand-back step is removed from the head tree. The
+# step's control run fails on the unmodified copy, so the guard reports the proof control failure.
+# Arrange
+repo="$TMP/ac3"
+make_base "$repo" 1
+mkdir -p "$repo/skills/running-a-sprint/references" "$repo/agents" &&
+  cp "$REPO/skills/running-a-sprint/references/HANDBACK_ROUTING.md" "$repo/skills/running-a-sprint/references/" &&
+  cp "$REPO/agents/story-coordinator.md" "$repo/agents/" || exit 2
+commit_all "$repo" "base: hand-back step files"
+use_head "$repo"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+set_proof "$list" "Check hand-back size contract strings" - \
+  skills/running-a-sprint/references/HANDBACK_ROUTING.md empty "is missing required contract string"
+rm -f "$repo/skills/running-a-sprint/references/HANDBACK_ROUTING.md"
+commit_all "$repo" "head: pinned file removed"
+# Assert
+check_run "AC3 removing a pinned file from the head tree fails proof control" "$repo" 1 R2 - \
+  'proof control for "Check hand-back size contract strings" failed'
 
 # Case AC2: no issue-number citation in tools/validate_workflow. The grep reads the head tree
 # (REPO) with the bracket form of the digit class, so this case does not match its own text.

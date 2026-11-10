@@ -444,7 +444,7 @@ jobs:
           }
           check skills/running-a-sprint/references/MOVED_RATIONALE.md 'reconcile pending' 'Reconcile text' 'reconcile pending after PR <merged PR number>'
           check skills/running-a-sprint/SKILL.md 'is the one launch the limit and the dependency rule do not gate' 'A reconcile replacement is exempt from the dependency check' 'A reconcile replacement (step 7 of the sprint-close-out skill) is exempt from the dependency check.' 'Moved from SKILL.md: reconcile state' 'A dependency that is closed unmerged, outside the sprint, or circular is an owner question'
-          check skills/sprint-close-out/SKILL.md 'follow `../running-a-sprint/references/RECONCILE.md`' 'for a reconcile replacement do this for the dead runner' 'and `reconcile-<prefix>` for a reconcile replacement'
+          check skills/sprint-close-out/SKILL.md "follow the running-a-sprint skill's RECONCILE.md reference" 'for a reconcile replacement do this for the dead runner' 'and `reconcile-<prefix>` for a reconcile replacement'
           # Launcher and Discovery rule lines are pinned in this step too; the step name covers the reconcile lines.
           check skills/running-a-sprint/SKILL.md 'A story that is done, merged and meets its acceptance criteria is closed by the launcher with no owner question;' 'one chat line cites the merged pull request and the criteria check.' 'greps the base branch log for the pull request that delivered it.'
           check skills/running-a-sprint/SKILL.md 'Before a story launches, the launcher reads the story'\''s comments and greps the base branch log for the pull request that delivered it.'

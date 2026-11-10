@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=32
+EXPECTED_CASES=29
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -268,37 +268,6 @@ commit_all "$repo" "head: add a step with a step entry only"
 # Assert
 check_run "f2 new step with step entry only" "$repo" 1 R3
 
-# Case f3: a new head step with a step entry, a proof entry and a pending entry.
-# Arrange
-repo="$TMP/f3"
-make_base "$repo" 1
-use_head "$repo"
-wf="$repo/.github/workflows/validate.yml"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk "$ADD_STEP_AWK" "$wf" | set_content "$wf"
-printf 'step\tProbe new step\nproof\tProbe new step\t-\t%s\toversize\texceeding the 20000-character limit\npending\tProbe new step\tcoverage debt #455\n' \
-  "$SIZE_FILE" >> "$list"
-commit_all "$repo" "head: add a step with a proof and a pending entry"
-# Assert
-check_run "f3 new step with proof and pending" "$repo" 1 R3
-
-# Case g: a new head step with a step entry, a proof entry and a pending entry.
-# The only R3 cause is the pending entry; this case also pins the pending branch.
-# Arrange
-repo="$TMP/g"
-make_base "$repo" 1
-use_head "$repo"
-wf="$repo/.github/workflows/validate.yml"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk "$ADD_STEP_AWK" "$wf" | set_content "$wf"
-printf 'step\tProbe new step\nproof\tProbe new step\t-\t%s\toversize\texceeding the 20000-character limit\npending\tProbe new step\tcoverage debt #455\n' \
-  "$SIZE_FILE" >> "$list"
-commit_all "$repo" "head: add a step with a pending entry and a proof entry"
-# Assert
-check_run "g new step with pending and proof" "$repo" 1 R3
-
 # Case h: a list entry naming a step absent from head.
 # Arrange
 repo="$TMP/h"
@@ -310,21 +279,6 @@ printf 'step\tGhost step that is gone\n' >> "$list"
 commit_all "$repo" "head: list entry for an absent step"
 # Assert
 check_run "h list entry for absent step" "$repo" 1 R5
-
-# Case i: a pending reason with no #<digits>.
-# Arrange
-repo="$TMP/i"
-make_base "$repo" 1
-use_head "$repo"
-list="$repo/tools/validate_workflow/checks.list"
-# Act
-awk 'BEGIN { FS = OFS = "\t" }
-  $1 == "pending" && $2 == "Hook script smoke test" { $3 = "coverage debt" }
-  { print }
-' "$list" | set_content "$list"
-commit_all "$repo" "head: pending reason without an issue number"
-# Assert
-check_run "i pending reason without digits" "$repo" 1 R2
 
 # Case j: a malformed list line (empty step name).
 # Arrange

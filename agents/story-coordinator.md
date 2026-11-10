@@ -21,7 +21,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Invoke the session-bootstrap skill with the Skill tool as the first call alone, then honesty, then communication, then every skill its On Start table names for this work.
 - Inside a subagent no per-prompt gate fires, so nothing reminds you; the compaction hook does fire and lists the skills to reload after a compaction. Re-invoke every skill it lists, plus three-amigos.
 - Reload the skill for that todo's kind of work at every todo pickup and after every resume; the hand-back lists the reloaded skills.
-- A runner's reload text may name a role skill (running-a-sprint); the runner ignores that name, never loads a role skill, and reloads only the action skills its work reaches.
+- A runner's reload text may name a role skill (running-a-sprint); the runner ignores that name, never loads any role skill, and reloads the other skills the rules above name.
 
 ## Git and worktrees
 

@@ -11,7 +11,7 @@
 
 set -u
 
-SENTENCE="A runner's reload text may name a role skill (running-a-sprint); the runner ignores that name, never loads a role skill, and reloads only the action skills its work reaches."
+SENTENCE="A runner's reload text may name a role skill (running-a-sprint); the runner ignores that name, never loads any role skill, and reloads the other skills the rules above name."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE="${STORY_COORDINATOR_TEMPLATE:-$SCRIPT_DIR/../../agents/story-coordinator.md}"

@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=31
+EXPECTED_CASES=34
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -682,6 +682,52 @@ else
   echo "FAIL: AC2 no issue-number citation in tools/validate_workflow: grep exit $rc"
   sed -n '1,3p' "$TMP/ac2.out" | sed 's/^/  | /'
 fi
+
+# Case AC4a: a paths-ignore key added inside the on: block. The guard counts it as on-paths.
+# Arrange
+repo="$TMP/ac4a"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  !done && $0 == "  pull_request:" { print; print "    paths-ignore: [docs]"; done = 1; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: paths-ignore in the on block"
+# Assert
+check_run "AC4 adding paths-ignore fails" "$repo" 1 R4 - 'head has 1 "on-paths" key(s) against 0 in base'
+
+# Case AC4b: continue-on-error added to one step. The guard counts it as step-continue-on-error.
+# Arrange
+repo="$TMP/ac4b"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "      - name: Validate hooks.json" { print; print "        continue-on-error: true"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: continue-on-error on a check step"
+# Assert
+check_run "AC4 adding continue-on-error to a step fails" "$repo" 1 R4 - \
+  'head has 1 "step-continue-on-error" key(s) against 0 in base'
+
+# Case AC4c: a job-level if key added under validate. The guard counts it as job-if.
+# Arrange
+repo="$TMP/ac4c"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '
+  $0 == "    runs-on: ubuntu-latest" { print; print "    if: always()"; next }
+  { print }
+' "$wf" | set_content "$wf"
+commit_all "$repo" "head: job-level if"
+# Assert
+check_run "AC4 adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if" key(s) against 0 in base'
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

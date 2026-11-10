@@ -102,7 +102,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Exit 0: go on to the first dispatch.
 - Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries. The count of 2 re-runs starts again after a re-plan.
 - Exit 2 or any other exit code (127 means the script was not found): hand back blocked with the error text.
-- When a todo adds text to a file that has under 500 bytes of room, an earlier todo moves text out of that file, word for word, so the adding todo starts under the limit. Room is the file's limit, as the Dispatch section's size rule gives it, minus its `wc -c` when the adding todo starts; a file with no limit needs no move. You record the measured room in the plan entry. The move drops no text: every moved line lands word for word in another file.
+- When a todo adds text to a file that has under 500 bytes of room, an earlier todo moves text out of that file, word for word, enough that the added text fits under the limit. Room is the file's limit, as the Dispatch section's size rule gives it, minus its `wc -c`: you measure it at planning, less the bytes that earlier todos add to the file, and measure it again before the adding todo is dispatched. A file with no limit needs no move. You record each measured room in the plan entry. The move drops no text: every moved line lands word for word in another file.
 - A reconcile and a fresh runner with no plan file skip the plan check.
 
 ## Red CI

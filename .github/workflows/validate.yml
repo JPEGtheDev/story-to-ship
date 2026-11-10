@@ -39,6 +39,7 @@ jobs:
           shellcheck hooks/inline-edit-guard.sh
           shellcheck hooks/tests/run.sh
           shellcheck hooks/tests/run-bootstrap-gate.sh
+          shellcheck hooks/tests/run-story-coordinator-template.sh
           shellcheck hooks/tests/run-pre-message.sh
           shellcheck hooks/tests/run-all.sh
           shellcheck hooks/tests/run-skill-map-drift.sh

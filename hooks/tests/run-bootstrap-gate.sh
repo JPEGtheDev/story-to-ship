@@ -503,10 +503,11 @@ run_case() {
 }
 
 # Mutation case: copies the hooks, drops sprint-close-out from the copy's
-# RELOAD_ROLE_NAMES line, runs the two-roles case (a) against the copy through
-# the hook-path overrides, and passes only when that case FAILS on an
-# assertion. A copy that still passes means the case does not catch the
-# dropped second role: a harness failure.
+# RELOAD_ROLE_NAMES array (one line or several), runs the two-roles case (a)
+# against the copy through the hook-path overrides, and passes only when that
+# case FAILS on an assertion. A mutation that changes no byte fails the case
+# with "mutation matched nothing". A copy that still passes means the case does
+# not catch the dropped second role: a harness failure.
 run_mutant_case() {
   local name="two_roles_mutant_second_role_removed_fails"
   local mutant_root mutant_out mutant_exit
@@ -525,9 +526,27 @@ run_mutant_case() {
     fail=$((fail + 1))
     return
   fi
-  sed -e '/^RELOAD_ROLE_NAMES=/s/ *sprint-close-out//' \
-    "$mutant_root/hooks/session-start.sh" >"$mutant_root/hooks/session-start.sh.new" &&
-    mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
+  if ! {
+    cp -- "$mutant_root/hooks/session-start.sh" "$mutant_root/session-start.sh.orig" &&
+      sed -e '/^RELOAD_ROLE_NAMES=(/,/)/s/ *sprint-close-out//' \
+        "$mutant_root/session-start.sh.orig" >"$mutant_root/hooks/session-start.sh.new" &&
+      mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
+  }; then
+    echo "FAIL: $name"
+    echo "  - writing the mutant copy of session-start.sh failed"
+    trap - INT TERM
+    rm -rf "$mutant_root"
+    fail=$((fail + 1))
+    return
+  fi
+  if cmp -s "$mutant_root/session-start.sh.orig" "$mutant_root/hooks/session-start.sh"; then
+    echo "FAIL: $name"
+    echo "  - mutation matched nothing"
+    trap - INT TERM
+    rm -rf "$mutant_root"
+    fail=$((fail + 1))
+    return
+  fi
 
   mutant_out="$(
     PRE_HOOK="$mutant_root/hooks/bootstrap-gate-pre.sh" \

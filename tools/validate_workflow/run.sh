@@ -3,10 +3,9 @@
 # and checks.list with the base and reports:
 #   R1  a base step, covers path or proof entry that the head drops, or a base
 #       trigger (push, pull_request, workflow_dispatch) the head drops
-#   R2  a pending entry whose reason lacks #<digits>, or a proof whose control
-#       run fails or whose must-fail run lacks the expected output
+#   R2  a proof whose control run fails or whose must-fail run lacks the
+#       expected output
 #   R3  a head step with no step entry, or a new head step lacking a proof entry
-#       or carrying a pending entry
 #   R4  a skip key or path filter whose head count exceeds the base count
 #   R5  a list entry naming a step absent from the head workflow
 # Usage: sh tools/validate_workflow/run.sh
@@ -65,15 +64,16 @@ workflow_parse() {
   ' "$1"
 }
 
-# parse_list CHECKS OUT: copy the entries of CHECKS to OUT after the strict check.
-# Blank lines and lines starting with # are skipped. Exits 2 on a malformed line.
+# parse_list CHECKS OUT KIND: copy the entries of CHECKS to OUT after the strict check.
+# KIND is base or head; a pending entry is accepted only for base. Blank lines and lines
+# starting with # are skipped. Exits 2 on a malformed line.
 parse_list() {
-  awk -F "$TAB" '
+  awk -F "$TAB" -v kind="$3" '
     /^#/ || /^[ \t]*$/ { next }
     {
       problem = ""
       if ($1 == "step") want = 2
-      else if ($1 == "covers" || $1 == "pending") want = 3
+      else if ($1 == "covers" || ($1 == "pending" && kind == "base")) want = 3
       else if ($1 == "proof") want = ($5 == "append" || $5 == "insert-before" || $5 == "insert-before-close" || $5 == "replace") ? 7 : 6
       else want = 0
       if ($1 == "proof" && NF == 6 && $6 == "") {
@@ -160,7 +160,7 @@ check_removal() {
 }
 
 # check_new_steps: R3 for head steps without a step entry, and for new head steps
-# without a proof entry or with a pending entry.
+# without a proof entry.
 check_new_steps() {
   while IFS= read -r step; do
     has_entry step "$step" "$TMP/head.list" ||
@@ -168,9 +168,6 @@ check_new_steps() {
     if ! grep -Fxq -- "$step" "$TMP/base.steps"; then
       has_entry proof "$step" "$TMP/head.list" ||
         finding R3 "new head step \"$step\" has no proof entry"
-      if has_entry pending "$step" "$TMP/head.list"; then
-        finding R3 "new head step \"$step\" has a pending entry; pending is refused for a new step"
-      fi
     fi
   done < "$TMP/head.steps"
 }
@@ -180,17 +177,6 @@ check_list_entries() {
   while IFS="$TAB" read -r kind step detail; do
     has_head_step "$step" ||
       finding R5 "$kind entry names step \"$step\", which is absent from the head workflow"
-  done < "$TMP/head.list"
-}
-
-# check_pending_reasons: R2 for each head pending entry whose reason lacks #<digits>.
-check_pending_reasons() {
-  while IFS="$TAB" read -r kind step reason; do
-    [ "$kind" = pending ] || continue
-    case $reason in
-      *'#'[0-9]*) ;;
-      *) finding R2 "pending entry for step \"$step\" has no #<digits> issue number in its reason" ;;
-    esac
   done < "$TMP/head.list"
 }
 
@@ -428,13 +414,12 @@ workflow_parse "$ROOT/$WF" "$TMP/head.steps" "$TMP/head.blocks" ||
   die "head workflow has an unrecognized step line"
 workflow_parse "$TMP/base.wf" "$TMP/base.steps" "$TMP/base.blocks" ||
   die "base workflow has an unrecognized step line"
-parse_list "$HEAD_CHECKS" "$TMP/head.list" || die "malformed head checks.list"
-parse_list "$BASE_CHECKS" "$TMP/base.list" || die "malformed base checks.list"
+parse_list "$HEAD_CHECKS" "$TMP/head.list" head || die "malformed head checks.list"
+parse_list "$BASE_CHECKS" "$TMP/base.list" base || die "malformed base checks.list"
 
 check_removal
 check_new_steps
 check_list_entries
-check_pending_reasons
 check_triggers
 check_skip_keys
 

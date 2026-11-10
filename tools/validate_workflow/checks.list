@@ -60,6 +60,7 @@ covers	Enforce size cap on core skills	skills/subagent-driven-development/SKILL.
 covers	Enforce size cap on core skills	skills/two-stage-review/SKILL.md
 covers	Enforce size cap on core skills	skills/running-a-sprint/SKILL.md
 covers	Enforce size cap on core skills	skills/session-bootstrap/SKILL.md
+covers	Enforce size cap on core skills	skills/sprint-close-out/SKILL.md
 proof	Check agent templates index matches agents/	IDX_PATH=skills/subagent-driven-development/references/AGENT_TEMPLATES.md	skills/subagent-driven-development/references/AGENT_TEMPLATES.md	empty	index missing or stale row for
 proof	Check the formulation heading is pinned	FORMULATION_PATH=skills/three-amigos/references/FORMULATION.md	skills/three-amigos/references/FORMULATION.md	empty	has no line equal to: ## Formulation
 proof	Check the Discovery formulation check is pinned	CEREMONIES_PATH=skills/three-amigos/references/CEREMONIES.md	skills/three-amigos/references/CEREMONIES.md	empty	has no text containing: **Formulation class (Discovery only):**

@@ -45,7 +45,7 @@ set_content() {
 }
 
 # make_list WORKFLOW: print a complete checks.list for every step in WORKFLOW.
-# The size step gets its six covers lines and one proof line; every other step
+# The size step gets its seven covers lines and one proof line; every other step
 # gets a pending line citing #455.
 make_list() {
   grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
@@ -53,7 +53,7 @@ make_list() {
     if [ "$name" = "$SIZE_STEP" ]; then
       for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
         skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-        skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
+        skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md skills/sprint-close-out/SKILL.md; do
         printf 'covers\t%s\t%s\n' "$name" "$path"
       done
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
@@ -64,18 +64,18 @@ make_list() {
   done
 }
 
-# copy_size_files REPO: copy the six files the size step covers from the real
+# copy_size_files REPO: copy the seven files the size step covers from the real
 # repository into REPO, so the size step's control run can read them.
 copy_size_files() {
   for path in skills/honesty/SKILL.md skills/communication/SKILL.md \
     skills/subagent-driven-development/SKILL.md skills/two-stage-review/SKILL.md \
-    skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md; do
+    skills/running-a-sprint/SKILL.md skills/session-bootstrap/SKILL.md skills/sprint-close-out/SKILL.md; do
     mkdir -p "$1/$(dirname "$path")" && cp "$REPO/$path" "$1/$path" || return 1
   done
 }
 
 # make_base REPO WITH_LIST: base commit on branch base holding the real workflow,
-# the size step's six covered files and, when WITH_LIST is 1, a complete checks.list.
+# the size step's seven covered files and, when WITH_LIST is 1, a complete checks.list.
 make_base() {
   mkdir -p "$1/.github/workflows" "$1/tools/validate_workflow"
   git -C "$1" init -q && git -C "$1" symbolic-ref HEAD refs/heads/base || return 1

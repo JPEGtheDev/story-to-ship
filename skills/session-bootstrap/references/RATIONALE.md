@@ -56,3 +56,18 @@ a fresh log line from the hook -- is the only evidence that closes that gap.
 
 Reporting the block with zeroes when there is nothing to report ensures the behavior is
 habitual, not conditional. A conditional habit is skipped exactly when it matters.
+
+---
+
+## Why Role Skills Hold Every Edit and Dispatch
+
+The role skills (`running-a-sprint`, `sprint-close-out`) carry rules no tool call triggers,
+so no action-specific gate can catch their absence; the hook therefore holds Edit, Write,
+NotebookEdit and Agent until each loaded role skill is re-invoked.
+
+---
+
+## Why a Skipped Skill Drops Its Gate
+
+A skill left out drops the gate it carries, including any canary (the status line a
+skill requires before acting).

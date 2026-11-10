@@ -26,8 +26,8 @@ fi
 # code, and it fails silently (fail-open) if jq is missing, stdin has no
 # session_id or is not valid JSON, the session_id is outside the allowed
 # characters, neither state-dir variable is resolvable, or the state dir
-# cannot be created or written. The reload part below sets the role and
-# written flag; the banner sentence prints the role and depends on the written
+# cannot be created or written. The reload part below sets the roles and
+# written flag; the banner sentence prints the roles and depends on the written
 # flag -- the exit code still never changes.
 # A payload with a non-empty agent_id (read with jq -r '.agent_id // empty',
 # the rule bootstrap-gate-pre.sh and bootstrap-gate-post.sh use) comes from a
@@ -46,18 +46,18 @@ fi
 #     block on any source other than compact or resume). This block never
 #     modifies or deletes it on a compact/resume source.
 #   .reload-pending-<session_id> is what a later PreToolUse check reads to
-#     hold tools until each pending name is re-invoked. The role name holds
+#     hold tools until each pending name is re-invoked. Each role name holds
 #     Edit, Write, NotebookEdit and Agent; each action name holds only its
 #     own action (an agent dispatch, git commit or gh pr create, an edit
 #     under skills/ or agents/).
-# On source compact or resume: the pending set is the role skill (if any)
+# On source compact or resume: the pending set is the role skills (if any)
 # followed by the five action skills, one name per line, no blanks, no
-# duplicates. The role is the first line of the loaded list (load order)
+# duplicates. The roles are every line of the loaded list (load order)
 # that matches the charset ^[A-Za-z0-9._-]+$ and is in RELOAD_ROLE_NAMES
-# (running-a-sprint). The action names, in this order, are
+# (running-a-sprint, sprint-close-out). The action names, in this order, are
 # subagent-driven-development, using-git-worktrees, versioning,
 # verification-before-completion, writing-skills. A missing, empty or
-# unreadable loaded list means no role; the five action names are still
+# unreadable loaded list means no roles; the five action names are still
 # written, so the pending file is never empty on these sources. The set
 # replaces the pending file (temp file + mv -f, so a partial write never
 # leaves a half-written file in place; if the write or mv fails, both the
@@ -77,8 +77,8 @@ fi
 # still gets the banner and session-start.md text from the section below.
 # The diagnostic capture block further down must likewise stay above those early exits.
 RELOAD_PENDING_WRITTEN=""
-RELOAD_PENDING_ROLE=""
-RELOAD_ROLE_NAMES=(running-a-sprint)
+RELOAD_PENDING_ROLES=""
+RELOAD_ROLE_NAMES=(running-a-sprint sprint-close-out)
 RELOAD_ACTION_NAMES=(subagent-driven-development using-git-worktrees versioning verification-before-completion writing-skills)
 
 # State dir: BOOTSTRAP_GATE_STATE_DIR, else CLAUDE_PROJECT_DIR/.claude; empty when neither is set.
@@ -169,23 +169,27 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
       RELOAD_LOADED_FILE="$BOOTSTRAP_STATE_DIR/.skills-loaded-$BOOTSTRAP_SESSION_ID"
       RELOAD_PENDING_FILE="$BOOTSTRAP_STATE_DIR/.reload-pending-$BOOTSTRAP_SESSION_ID"
       if [[ "$BOOTSTRAP_SOURCE" == "compact" || "$BOOTSTRAP_SOURCE" == "resume" ]]; then
-        # Role = first valid name in the loaded list that is in the role list.
-        # A missing or unreadable loaded list is skipped by the -r test below,
-        # so there is no role and the action names are still written.
-        RELOAD_ROLE=""
+        # Roles = every valid name in the loaded list (load order) that is in
+        # the role list, one per line, no duplicates. A missing or unreadable
+        # loaded list is skipped by the -r test below, so there are no roles
+        # and the action names are still written.
+        RELOAD_ROLES=""
         if [[ -r "$RELOAD_LOADED_FILE" ]]; then
           while IFS= read -r RELOAD_LINE || [[ -n "$RELOAD_LINE" ]]; do
             if [[ "$RELOAD_LINE" =~ ^[A-Za-z0-9._-]+$ ]]; then
               for RELOAD_ROLE_NAME in "${RELOAD_ROLE_NAMES[@]}"; do
                 if [[ "$RELOAD_LINE" == "$RELOAD_ROLE_NAME" ]]; then
-                  RELOAD_ROLE="$RELOAD_LINE"
-                  break 2
+                  case $'\n'"$RELOAD_ROLES"$'\n' in
+                    *$'\n'"$RELOAD_LINE"$'\n'*) ;;
+                    *) RELOAD_ROLES+="${RELOAD_ROLES:+$'\n'}$RELOAD_LINE" ;;
+                  esac
+                  break
                 fi
               done
             fi
           done <"$RELOAD_LOADED_FILE" 2>/dev/null
         fi
-        RELOAD_SET="$RELOAD_ROLE"
+        RELOAD_SET="$RELOAD_ROLES"
         for RELOAD_ACTION_NAME in "${RELOAD_ACTION_NAMES[@]}"; do
           RELOAD_SET+="${RELOAD_SET:+$'\n'}$RELOAD_ACTION_NAME"
         done
@@ -193,7 +197,7 @@ if command -v jq &>/dev/null && [[ -n "$RAW" ]] && printf '%s' "$RAW" | jq empty
         if { printf '%s\n' "$RELOAD_SET" >"$RELOAD_TMP_FILE"; } 2>/dev/null &&
           mv -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null; then
           RELOAD_PENDING_WRITTEN=1
-          RELOAD_PENDING_ROLE="$RELOAD_ROLE"
+          RELOAD_PENDING_ROLES="$RELOAD_ROLES"
         else
           rm -f -- "$RELOAD_TMP_FILE" "$RELOAD_PENDING_FILE" 2>/dev/null
         fi
@@ -214,12 +218,12 @@ if [[ ! -f "$MD_FILE" ]]; then
   exit 0
 fi
 
-python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_WRITTEN" "$RELOAD_PENDING_ROLE" << 'PYEOF'
+python3 - "$MD_FILE" "$RAW" "$RELOAD_PENDING_WRITTEN" "$RELOAD_PENDING_ROLES" << 'PYEOF'
 import json, pathlib, sys
 content = pathlib.Path(sys.argv[1]).read_text()
 raw = sys.argv[2] if len(sys.argv) > 2 else ""
 reload_written = (sys.argv[3] if len(sys.argv) > 3 else "") != ""
-reload_role = sys.argv[4] if len(sys.argv) > 4 else ""
+reload_roles = [r for r in (sys.argv[4] if len(sys.argv) > 4 else "").split("\n") if r]
 source = ""
 try:
     source = (json.loads(raw).get("source") or "") if raw.strip() else ""
@@ -236,11 +240,18 @@ if source in ("compact", "resume"):
             "skills/ or agents/ until writing-skills is re-invoked. Nothing else "
             "is held; invoke each only when you reach that action."
         )
-        if reload_role:
+        if len(reload_roles) == 1:
             reload_sentence = (
                 " Reload guard: Edit, Write, NotebookEdit and Agent are held "
                 "until the role skill is re-invoked: %s. A dispatch of an agent "
-                "is also %s" % (reload_role, reload_rest)
+                "is also %s" % (reload_roles[0], reload_rest)
+            )
+        elif len(reload_roles) > 1:
+            role_names = ", ".join(reload_roles[:-1]) + " and " + reload_roles[-1]
+            reload_sentence = (
+                " Reload guard: Edit, Write, NotebookEdit and Agent are held "
+                "until each role skill is re-invoked: %s. A dispatch of an agent "
+                "is also %s" % (role_names, reload_rest)
             )
         else:
             reload_sentence = " Reload guard: a dispatch of an agent is " + reload_rest

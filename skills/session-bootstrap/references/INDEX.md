@@ -17,7 +17,7 @@ related:
 | File | Covers |
 |------|--------|
 | `SKILL_DISPATCH_TABLE.md` | Context, forces, and row definitions for the greenfield dispatch rows and the code-writing `exception-philosophy` row in the "On Start" table; also lists the greenfield invocation chain, and the skills routed from a parent skill's gate. Also tags every row core vs. domain and lists the core skills the per-turn routing block in `hooks/pre-message-gates.md` must name -- `hooks/tests/run-skill-map-drift.sh` enforces that contract mechanically |
-| `RATIONALE.md` | Why the SKILL.md rules exist -- invoke-before-acting, skill refresh, why honesty and communication are peers, git status check, why hook fixes need an observed firing, unconditional self-evaluation block |
+| `RATIONALE.md` | Why the SKILL.md rules exist -- invoke-before-acting, skill refresh, why honesty and communication are peers, git status check, why hook fixes need an observed firing, unconditional self-evaluation block, role-skill hold, skipped-skill gate loss |
 | `RELATED_SKILLS.md` | The four skills this skill routes to: self-evaluation, honesty, communication and writing-skills |
 
 ---

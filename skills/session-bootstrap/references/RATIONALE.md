@@ -59,10 +59,11 @@ habitual, not conditional. A conditional habit is skipped exactly when it matter
 
 ---
 
-## Why the Hold Covers Edit, Write, NotebookEdit and Agent
+## Why Role Skills Hold Every Edit and Dispatch
 
-The hook holds Edit, Write, NotebookEdit and Agent until each is re-invoked, because they
-carry rules no tool call triggers.
+The role skills (`running-a-sprint`, `sprint-close-out`) carry rules no tool call triggers,
+so no action-specific gate can catch their absence; the hook therefore holds Edit, Write,
+NotebookEdit and Agent until each role skill is re-invoked.
 
 ---
 

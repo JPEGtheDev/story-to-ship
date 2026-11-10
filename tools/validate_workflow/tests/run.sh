@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=34
+EXPECTED_CASES=35
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -728,6 +728,20 @@ awk '
 commit_all "$repo" "head: job-level if"
 # Assert
 check_run "AC4 adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if" key(s) against 0 in base'
+
+# Case AC4d: the workflow_dispatch trigger key removed from the on: block. The guard reports
+# it as a base trigger the head drops (R1, check_triggers).
+# Arrange
+repo="$TMP/ac4d"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+# Act
+awk '$0 == "  workflow_dispatch:" { next } { print }' "$wf" | set_content "$wf"
+commit_all "$repo" "head: remove the workflow_dispatch trigger"
+# Assert
+check_run "AC4 removing workflow_dispatch emits FINDING R1" "$repo" 1 R1 - \
+  'base trigger "workflow_dispatch" is absent from the head on: block'
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

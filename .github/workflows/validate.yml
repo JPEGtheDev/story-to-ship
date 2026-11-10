@@ -216,7 +216,7 @@ jobs:
                 echo "BROKEN: $f references $ref (not found at $target)"
                 broken=$((broken + 1))
               fi
-            done < <(grep -o '\(\.\./[a-z-]*/\)\?\(references\|tools\)/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
+            done < <(grep -o '\(references\|tools\)/[A-Za-z0-9_./-]*\.md' "$f" | sort -u)
           done
           if [ "$broken" -gt 0 ]; then
             echo "Found $broken broken reference(s)"

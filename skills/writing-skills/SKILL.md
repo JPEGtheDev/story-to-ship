@@ -43,7 +43,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] Ban and substitute co-located in SKILL.md -> proceed
    - [-] Substitute is only in references/ -> move the substitute into SKILL.md before shipping.
 
-5. **Modifying anatomy elements OR adding a Red Flag about anatomy format?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before writing or editing. When the Red Flag makes a format assertion ("MUST be inside/outside X", "MUST appear in Y position"), cite the specific line from `SKILL_ANATOMY_ELEMENTS.md`. A wrong format claim in `writing-skills` becomes the schema that ALL skill reviewers validate against -- propagating the error to every future review.
+5. **Modifying anatomy elements OR adding a Red Flag about anatomy format?** Read `references/SKILL_ANATOMY_ELEMENTS.md` before writing or editing. When the Red Flag makes a format assertion ("MUST be inside/outside X", "MUST appear in Y position"), cite the specific line from `SKILL_ANATOMY_ELEMENTS.md`.
    - Not met -> stop. Read `references/SKILL_ANATOMY_ELEMENTS.md` now. Do not write the Red Flag until the canonical position is verified and cited.
 
 6. **Auditing existing skills?** Load `skill-reviewer` agent template; inject 4 reference files; one agent per skill directory (reviews `SKILL.md` + all `references/` files).
@@ -57,9 +57,12 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] New wording fails the evasion sentence (does not admit it) -> proceed
    - [-] New wording admits the evasion sentence, or the clause grants no permission the rule needs -> delete the clause, or rewrite until it fails the evasion sentence
 
-9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after -- inline relocation can increase the scoped footprint instead of shrinking it.
+9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after.
    - [+] Source section still meets its floor, and extraction (not inline sectioning) was used -> proceed
    - [-] Source section is now below its floor, or the scoped-term footprint increased -> backfill the source section, or move content to a reference file instead
+10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.
+   - [+] every skill that triggers on the signal is covered -> proceed
+   - [-] a routing change leaves a skill whose frontmatter triggers on the same signal uncovered -> grep every skill's frontmatter for the signal and cover each hit
 
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above
@@ -72,7 +75,7 @@ Before creating, editing, or shipping any skill or agent template:
 - Description field contains "covers", "enforces", "provides", "includes" -- **STOP. Rewrite to "Use when [conditions]."**
 - Description starts with "Use when [trigger]" but continues with workflow clauses ("to conduct", "to produce", "to generate", "to create", "to interview") -- **STOP. End the description at the triggering condition. Drop all "to [verb]" workflow suffixes.**
 - Iron Law lacks "letter/spirit" line -- **STOP. Add "Violating the letter of this rule is violating the spirit of this rule." now.**
-- Iron Law letter/spirit line is inside the backtick block -- **STOP. The "Violating the letter..." line MUST appear OUTSIDE the backtick fence, immediately after the closing backtick. Placing it inside the fence before the closing backtick is the most common Iron Law anatomy error.**
+- Iron Law letter/spirit line is inside the backtick block -- **STOP. The "Violating the letter..." line MUST appear OUTSIDE the backtick fence, immediately after the closing backtick.**
 - Iron Law lacks "YOU MUST" and "No exceptions." -- **STOP. Both phrases are required. Add them.**
 - No BEFORE PROCEEDING gate -- **STOP. Add a gate with explicit [+]/[-] branches before shipping.**
 - No rationalization table -- **STOP. Add >=5 rows now. A skill without one is a suggestion.**

@@ -114,3 +114,107 @@ pending	Check plan-check instruction strings	must-fail proof filed in #455
 pending	Check red CI classification strings	must-fail proof filed in #455
 pending	Check Discovery line rule strings	must-fail proof filed in #455
 pending	Check running-a-sprint SKILL.md row counts	must-fail proof filed in #455
+covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-gates-loaded.md
+covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-loaded.md
+covers	Check three-role loop contract strings	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md
+covers	Check three-role loop contract strings	skills/subagent-driven-development/SKILL.md
+covers	Check three-role loop contract strings	skills/writing-plans/references/TODO_TEMPLATES.md
+covers	Check three-role loop contract strings	skills/testing/SKILL.md
+covers	Check three-role loop contract strings	agents/implementer.md
+covers	Check three-role loop contract strings	agents/story-coordinator.md
+covers	Check three-role loop contract strings	agents/plan-reviewer.md
+covers	Check three-role loop contract strings	agents/code-quality-reviewer.md
+covers	Check three-role loop contract strings	agents/spec-compliance-reviewer.md
+covers	Check three-role loop contract strings	agents/skill-reviewer.md
+covers	Check agent template contracts	agents/implementer.md
+covers	Check agent template contracts	agents/code-quality-reviewer.md
+covers	Check agent template contracts	agents/skill-reviewer.md
+covers	Check agent template contracts	skills/writing-skills/references/REVIEW_INSTRUCTIONS.md
+covers	Check agent template contracts	agents/postmortem-reviewer.md
+covers	Check agent template contracts	agents/architecture-reviewer.md
+covers	Check agent template contracts	agents/infrastructure-reviewer.md
+covers	Check agent template contracts	skills/infrastructure-review/SKILL.md
+covers	Check agent template contracts	agents/skeptic.md
+covers	Check agent template contracts	skills/writing-plans/references/SKEPTIC_PROMPT.md
+covers	Check agent template contracts	agents/rehearsal-subject.md
+covers	Check agent template contracts	skills/subagent-driven-development/SKILL.md
+covers	Check agent template contracts	skills/writing-plans/SKILL.md
+covers	Check agent template contracts	skills/writing-plans/references/PLAN_REVIEW.md
+covers	Check agent template contracts	skills/three-amigos/references/CEREMONIES.md
+covers	Check agent template contracts	skills/writing-plans/references/DECISION_DEFERRAL.md
+covers	Check agent template contracts	skills/finishing-a-development-branch/SKILL.md
+covers	Check agent template contracts	skills/two-stage-review/SKILL.md
+covers	Check agent template contracts	skills/honesty/SKILL.md
+covers	Check agent template contracts	skills/communication/SKILL.md
+covers	Check agent template contracts	skills/reviewing-outside-contributions/SKILL.md
+covers	Check agent template contracts	skills/self-evaluation/SKILL.md
+covers	Check agent template contracts	skills/versioning/SKILL.md
+covers	Check agent template contracts	skills/execution/SKILL.md
+covers	Check agent template contracts	agents/story-coordinator.md
+covers	Check agent template contracts	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check agent template contracts	skills/running-a-sprint/references/SCORECARD.md
+covers	Check agent template contracts	skills/running-a-sprint/SKILL.md
+covers	Check reconcile contract strings	agents/story-coordinator.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/INDEX.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/MOVED_RATIONALE.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/RECONCILE.md
+covers	Check reconcile contract strings	skills/running-a-sprint/references/SCORECARD.md
+covers	Check reconcile contract strings	skills/running-a-sprint/SKILL.md
+covers	Check scope contract strings	agents/story-coordinator.md
+covers	Check scope contract strings	skills/running-a-sprint/references/MOVED_RATIONALE.md
+covers	Check scope contract strings	skills/running-a-sprint/SKILL.md
+covers	Check scope contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check scope contract strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check scope contract strings	skills/two-stage-review/SKILL.md
+covers	Check scope contract strings	skills/two-stage-review/references/REVIEW_LOOP.md
+covers	Check hand-back size contract strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check hand-back size contract strings	agents/story-coordinator.md
+covers	Check hand-back size contract strings	skills/running-a-sprint/SKILL.md
+covers	Check child report size cap strings	agents/implementer.md
+covers	Check child report size cap strings	skills/two-stage-review/SKILL.md
+covers	Check child report size cap strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check owner questions page strings	skills/running-a-sprint/SKILL.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check owner questions page strings	skills/running-a-sprint/references/INDEX.md
+covers	Check Ready to merge strings	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check Ready to merge strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check Ready to merge strings	skills/running-a-sprint/SKILL.md
+covers	Check draft pull request rules	skills/finishing-a-development-branch/SKILL.md
+covers	Check draft pull request rules	agents/story-coordinator.md
+covers	Check draft pull request rules	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check draft pull request rules	skills/running-a-sprint/references/OWNER_QUESTIONS.md
+covers	Check owner questions template	skills/running-a-sprint/references/owner-questions-template.html
+covers	Check parallel todo contract strings	agents/story-coordinator.md
+covers	Check parallel todo contract strings	skills/writing-plans/references/TODO_TEMPLATES.md
+covers	Check parallel todo contract strings	skills/running-a-sprint/SKILL.md
+covers	Check review cadence contract strings	skills/two-stage-review/SKILL.md
+covers	Check review cadence contract strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check review cadence contract strings	skills/subagent-driven-development/SKILL.md
+covers	Check review cadence contract strings	agents/story-coordinator.md
+covers	Check review cadence contract strings	hooks/session-start.md
+covers	Check review cadence contract strings	skills/writing-skills/references/MODEL_COMPATIBILITY.md
+covers	Check review cadence contract strings	skills/user-story-estimation/SKILL.md
+covers	Check risky-todo rule has no shared-file clause	skills/two-stage-review/SKILL.md
+covers	Check risky-todo rule has no shared-file clause	skills/two-stage-review/references/REVIEW_LOOP.md
+covers	Check Discovery example map is pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check Discovery skeptic check and economy tier are pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check Discovery skeptic check and economy tier are pinned	skills/subagent-driven-development/references/MODEL_SELECTION.md
+covers	Check acceptance proof kinds are pinned	skills/three-amigos/references/FORMULATION.md
+covers	Check acceptance proof kinds are pinned	skills/user-story-generator/SKILL.md
+covers	Check acceptance proof kinds are pinned	skills/three-amigos/references/CEREMONIES.md
+covers	Check three-amigos reference list names proof kinds for the formulation reference	skills/three-amigos/SKILL.md
+covers	Check hooks/README.md matches .claude/hooks	hooks/README.md
+covers	Check hooks/README.md matches .claude/hooks	.claude/hooks
+covers	Check the detector in the reference matches the shipped script	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md
+covers	Check the detector in the reference matches the shipped script	skills/subagent-driven-development/scripts/role-check.sh
+covers	Check plan-check instruction strings	agents/story-coordinator.md
+covers	Check red CI classification strings	agents/story-coordinator.md
+covers	Check red CI classification strings	skills/two-stage-review/SKILL.md
+covers	Check red CI classification strings	skills/two-stage-review/references/REVIEW_PROTOCOL.md
+covers	Check Discovery line rule strings	agents/story-coordinator.md
+covers	Check Discovery line rule strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+covers	Check running-a-sprint SKILL.md row counts	skills/running-a-sprint/SKILL.md
+covers	Check the fresh-runner Discovery rule is pinned once	skills/running-a-sprint/references/HANDBACK_ROUTING.md

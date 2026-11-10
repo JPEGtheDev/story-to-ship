@@ -77,14 +77,14 @@ proof	Run first-action audit tests	-	tools/first_action_audit/tests/fixtures/bad
 proof	Stop turn-log wedge safety (empty stdin)	-	hooks/stop-turn-log.sh	empty	empty-stdin did not yield {}
 proof	Enforce pre-message hook word budget	-	hooks/pre-message-gates.md	empty	is not smaller than
 proof	Check loaded pre-message variants are empty or a single line	-	hooks/pre-message-loaded.md	append	a loaded variant must be empty or exactly one line	one\ntwo
-pending	Check three-role loop contract strings	must-fail proof filed in #455
-pending	Check for broken references in skill files	must-fail proof filed in #455
-pending	Validate SKILL.md frontmatter	must-fail proof filed in #455
+proof	Check three-role loop contract strings	-	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md	empty	is missing required contract string
+proof	Check for broken references in skill files	-	skills/honesty/SKILL.md	append	(not found at	see `references/NO_SUCH_FILE.md`
+proof	Validate SKILL.md frontmatter	-	skills/honesty/SKILL.md	empty	has no 'name' field in frontmatter
 pending	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values	must-fail proof filed in #455
-pending	Require one tools line in agents/ frontmatter	must-fail proof filed in #455
-pending	Check agent template contracts	must-fail proof filed in #455
-pending	Check reconcile contract strings	must-fail proof filed in #455
-pending	Check scope contract strings	must-fail proof filed in #455
+proof	Require one tools line in agents/ frontmatter	-	agents/implementer.md	empty	needs one non-empty tools: line
+proof	Check agent template contracts	-	agents/implementer.md	empty	is missing required contract string
+proof	Check reconcile contract strings	-	skills/running-a-sprint/references/RECONCILE.md	empty	is missing required contract string
+proof	Check scope contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
 pending	Check hand-back size contract strings	must-fail proof filed in #455
 pending	Check child report size cap strings	must-fail proof filed in #455
 pending	Check owner questions page strings	must-fail proof filed in #455

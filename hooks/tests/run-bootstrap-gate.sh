@@ -528,7 +528,7 @@ run_mutant_case() {
   fi
   if ! {
     cp -- "$mutant_root/hooks/session-start.sh" "$mutant_root/session-start.sh.orig" &&
-      sed -e '/^RELOAD_ROLE_NAMES=(/,/)/s/ *sprint-close-out//' \
+      sed -e '/^RELOAD_ROLE_NAMES=(/{:a' -e '/)/!{N;ba' -e '}' -e 's/ *sprint-close-out//' -e '}' \
         "$mutant_root/session-start.sh.orig" >"$mutant_root/hooks/session-start.sh.new" &&
       mv -f -- "$mutant_root/hooks/session-start.sh.new" "$mutant_root/hooks/session-start.sh"
   }; then

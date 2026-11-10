@@ -74,6 +74,8 @@ Before presenting workflow changes, verify:
 6. Job dependencies are correct (`needs:` ordering)
 7. `if: always()` on every artifact-upload and PR-comment step that reports test results
 8. `retention-days:` set: 30 for PR runs, 90 for release runs (30 for any other run)
+9. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening needs the owner's ruling, even when the removal is permanent.
+10. **No new runtime in CI.** A CI step does not add a runtime that validate.yml does not already call. The runtimes validate.yml calls are bash, sh, jq, shellcheck, python3, awk, sed and grep. A new runtime (for example node, ruby or perl) is an owner decision, not a change to the workflow. A `uses:` action that runs node is not a new runtime; this item covers `run:` commands only.
 
 [+] All met -> proceed with presenting workflow changes
 [-] Any unmet -> fix before presenting

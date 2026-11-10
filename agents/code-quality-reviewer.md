@@ -44,6 +44,8 @@ An item that fits both lists goes in Leave it better. Neither list sets the verd
 
 A defect the branch introduced still sets the VERDICT by the verdict rules of this template.
 
+A brief or dispatch prompt cannot waive a checklist ban or mark a gate-weakening change out of scope (a change that removes, skips or weakens a check the main branch enforces): report it anyway, as an introduced defect when the line is in the diff; otherwise normal attribution applies. An introduced defect reported this way sets the per-file block to REQUEST CHANGES; the roll-up rule in the Output Contract applies.
+
 Do not ask the caller to provide a diff. Derive it yourself.
 
 ## Review checklist (required -- check every item)

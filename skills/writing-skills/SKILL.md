@@ -57,12 +57,19 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] New wording fails the evasion sentence (does not admit it) -> proceed
    - [-] New wording admits the evasion sentence, or the clause grants no permission the rule needs -> delete the clause, or rewrite until it fails the evasion sentence
 
-9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after.
-   - [+] Source section still meets its floor, and extraction (not inline sectioning) was used -> proceed
-   - [-] Source section is now below its floor, or the scoped-term footprint increased -> backfill the source section, or move content to a reference file instead
+9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs written inline in SKILL.md before dispatching review. A Red Flag or Rationalization row is never moved to a reference file; only rationale may move there. If the relocation moves scoped content inline into the same file, measure the scoped-term grep count before and after -- inline relocation can increase the scoped footprint instead of shrinking it.
+   - [+] Rationale moved out to a reference file, rows stay inline, source section meets its floor, scoped-term count did not increase -> proceed
+   - [+] Scoped content moved inline in the same file, scoped-term count did not increase, source section meets its floor -> proceed
+   - [-] A count-floored section (Red Flags or Rationalization) is now below its floor, or the scoped-term footprint increased -> backfill the section inline in SKILL.md; never move its rows to a reference file.
 10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.
    - [+] every skill that triggers on the signal is covered -> proceed
    - [-] a routing change leaves a skill whose frontmatter triggers on the same signal uncovered -> grep every skill's frontmatter for the signal and cover each hit
+
+11. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening, even a permanent one, needs the owner's ruling.
+   - [-] Check removed or weakened as a temporary step -> do the replacement work in this PR or drop the change; a same-PR removal -> stop and get the owner's ruling
+
+12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
+   - [-] Enforcement cut or moved for size -> restore it inline
 
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above

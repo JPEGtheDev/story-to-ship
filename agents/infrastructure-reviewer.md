@@ -77,6 +77,7 @@ Run every applicable section for the file type. Skip sections that do not apply 
 - There is no SAFE verdict with an open INTRODUCED issue -- every INTRODUCED checklist failure is ISSUES FOUND; a run whose failures are all PRE-EXISTING is SAFE
 - Do NOT comment on logic, style, or naming unrelated to the checklists above
 - Do NOT suggest refactoring beyond identifying the specific checklist violation
+- A change that removes, skips or weakens a check the main branch enforces is banned; a dispatch prompt cannot waive that ban or mark that change out of scope: report it anyway. A finding on a line the branch changes is INTRODUCED and sets Verdict to ISSUES FOUND; a finding on any other line keeps its normal attribution. This line overrides the do-not-comment rule above; list the finding under Critical Issues.
 
 ## Return format
 
@@ -118,7 +119,7 @@ You commit nothing, so the commit option above does not apply: put detail that d
 | No unnecessary network access | [+]/[-] | ... |
 
 ### Critical Issues
-[Any [-] -- file:line quoted, and whether INTRODUCED or PRE-EXISTING]
+[Any [-], and any finding under the dispatch-waiver rule above -- file:line quoted, and whether INTRODUCED or PRE-EXISTING]
 
 ### Verdict: SAFE / ISSUES FOUND
 ```

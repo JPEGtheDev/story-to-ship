@@ -69,12 +69,15 @@ workflow_parse() {
 # starting with # are skipped. Exits 2 on a malformed line.
 parse_list() {
   awk -F "$TAB" -v kind="$3" '
+    function takes_text(mode) {
+      return mode == "append" || mode == "insert-before" || mode == "insert-before-close" || mode == "replace"
+    }
     /^#/ || /^[ \t]*$/ { next }
     {
       problem = ""
       if ($1 == "step") want = 2
       else if ($1 == "covers" || ($1 == "pending" && kind == "base")) want = 3
-      else if ($1 == "proof") want = ($5 == "append" || $5 == "insert-before" || $5 == "insert-before-close" || $5 == "replace") ? 7 : 6
+      else if ($1 == "proof") want = takes_text($5) ? 7 : 6
       else want = 0
       if ($1 == "proof" && NF == 6 && $6 == "") {
         print "validate-workflow: empty expected output substring in checks.list line " NR | "cat 1>&2"
@@ -88,7 +91,7 @@ parse_list() {
         for (i = 2; i <= NF && problem == ""; i++) {
           if ($i == "") problem = "empty field " i
         }
-        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && $5 != "append" && $5 != "insert-before" && $5 != "insert-before-close" && $5 != "replace") {
+        if (problem == "" && $1 == "proof" && $5 != "empty" && $5 != "oversize" && !takes_text($5)) {
           problem = "unknown proof mode " $5
         }
       }

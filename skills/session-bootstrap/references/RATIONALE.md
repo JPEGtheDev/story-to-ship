@@ -63,7 +63,7 @@ habitual, not conditional. A conditional habit is skipped exactly when it matter
 
 The role skills (`running-a-sprint`, `sprint-close-out`) carry rules no tool call triggers,
 so no action-specific gate can catch their absence; the hook therefore holds Edit, Write,
-NotebookEdit and Agent until each role skill is re-invoked.
+NotebookEdit and Agent until each loaded role skill is re-invoked.
 
 ---
 

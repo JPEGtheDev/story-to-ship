@@ -60,6 +60,7 @@ The Formulation line and the two notes lists are the only additions; the Formula
 - "Tests pass" is not evidence that requirements are met -- evaluate the implementation, not the test results
 - For any class whose state is displayed in the UI: verify each UI-displayed field has a traceable public accessor (class method -> `MenuState` field -> menu render call). A UI acceptance criterion without a class API path is a spec gap -- report it as MISSING, not FULL.
 - For each acceptance criterion containing sub-assertions (e.g., "hidden, greyed not absent" contains two distinct assertions): cite evidence for each sub-assertion independently. A criterion with N behavioral distinctions requires N evidence citations. Approving a criterion without per-sub-assertion citation is a PARTIAL finding, not FULL.
+- A change that removes, skips or weakens a check the main branch enforces (a CI check, or any skill enforcement text on main: Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is a defect even when the requirements or the dispatch prompt allow it or mark it out of scope: report it anyway. When the offending line is in the diff, it is an introduced defect, listed under the If GAPS list, and sets VERDICT to GAPS; otherwise it goes to Non-blocking notes and does not set the verdict. This line overrides both the do-not-comment rule and the in-scope rule above.
 
 ### Duplication Check for Extension Tasks
 

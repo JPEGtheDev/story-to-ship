@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=30
+EXPECTED_CASES=31
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -38,6 +38,16 @@ PROBE_LINK_BLOCK='      - name: Probe symlink in the tree
         run: |
           test -L skills/honesty/LINK.md || { echo "LINK is not a link"; exit 1; }
           test -s skills/honesty/LINK.md || { echo "LINK target is empty"; exit 1; }'
+
+# Step block for the frontmatter probe: its run reads the frontmatter of agents/implementer.md
+# (up to the second line that is exactly ---) and prints INVALID FRONTMATTER VALUE for a line
+# with a colon followed by a space after the key. Read through a heredoc, so it is not escaped.
+PROBE_FM_BLOCK=$(cat <<'EOF'
+      - name: Probe frontmatter values
+        run: |
+          awk 'NR == 1 && $0 != "---" { exit 1 } NR > 1 && $0 == "---" { exit 0 } /^[a-z-]+: .*: / { print "INVALID FRONTMATTER VALUE: " $0; exit 1 }' agents/implementer.md
+EOF
+)
 
 # commit_all REPO MESSAGE: stage everything and commit, allowing an empty commit.
 commit_all() {
@@ -621,6 +631,26 @@ printf 'step\tProbe symlink in the tree\nproof\tProbe symlink in the tree\t-\t%s
 commit_all "$repo" "head: symlink probe step and proof"
 # Assert
 check_run "symlink in the tree is copied as a link" "$repo" 0 - - "PROOF ok: Probe symlink in the tree"
+
+# Case ac: an insert-before-close proof puts a bad value inside the frontmatter range. The probe
+# step reads the frontmatter of agents/implementer.md: the control run passes, and the must-fail
+# run prints INVALID FRONTMATTER VALUE only when the text lands before the closing --- line.
+# Arrange
+repo="$TMP/ac"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+mkdir -p "$repo/agents" && cp "$REPO/agents/implementer.md" "$repo/agents/implementer.md" || exit 2
+# Act
+VW_BLOCK=$PROBE_FM_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe frontmatter values\ncovers\tProbe frontmatter values\tagents/implementer.md\nproof\tProbe frontmatter values\t-\tagents/implementer.md\tinsert-before-close\tINVALID FRONTMATTER VALUE\tprobe: a: b\n' >> "$list"
+commit_all "$repo" "head: frontmatter probe step and proof"
+# Assert
+check_run "insert-before-close puts a bad value inside the frontmatter range" "$repo" 0 - - "PROOF ok: Probe frontmatter values"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

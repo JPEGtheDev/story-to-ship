@@ -72,7 +72,7 @@ proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	F
 proof	Validate hooks.json	-	hooks/hooks.json	append	parse error	{
 proof	Validate .claude-plugin JSON files	-	.claude-plugin/plugin.json	append	parse error	{
 proof	Shellcheck shell scripts	-	hooks/session-start.sh	append	SC2086	echo $HOME
-proof	Run all hook fixture suites	-	hooks/tests/run-all.sh	insert-before	FAILING SUITES:	echo "FAILING SUITES:"\nexit 1
+proof	Run all hook fixture suites	-	hooks/tests/run-hooks-json-quoting.sh	insert-before	FAILING SUITES:	exit 1
 proof	Run first-action audit tests	-	tools/first_action_audit/tests/fixtures/bad_n_negative/expect_stdout_grep	append	stdout missing expected substring	NO-SUCH-TEXT
 proof	Stop turn-log wedge safety (empty stdin)	-	hooks/stop-turn-log.sh	empty	empty-stdin did not yield {}
 proof	Enforce pre-message hook word budget	-	hooks/pre-message-gates.md	empty	is not smaller than
@@ -102,9 +102,9 @@ proof	Hook script smoke test	-	hooks/session-start.sh	append	output is not valid
 proof	SessionStart source-branch detector	-	hooks/session-start.sh	empty	compact source did not produce continuation banner
 proof	Verify .claude/hooks symlink integrity	-	.claude/hooks/session-start.sh	replace	is not a symlink	regular file text
 proof	Check hooks/README.md matches .claude/hooks	-	hooks/README.md	empty	is not documented in hooks/README.md
-proof	Run session-events converter unit tests	-	tools/session_events/test_session_to_events.py	append	FAILED	raise RuntimeError("must-fail proof")
-proof	Run context-measure unit tests	-	tools/context_measure/test_context_measure.py	append	FAILED	raise RuntimeError("must-fail proof")
-proof	Run tier usage script unit tests	-	tools/tier_usage/test_tier_usage.py	append	FAILED	raise RuntimeError("must-fail proof")
+proof	Run session-events converter unit tests	-	tools/session_events/test_session_to_events.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+proof	Run context-measure unit tests	-	tools/context_measure/test_context_measure.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+proof	Run tier usage script unit tests	-	tools/tier_usage/test_tier_usage.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
 proof	Shellcheck role-check scripts	-	skills/subagent-driven-development/scripts/role-check.sh	append	SC2086	echo $HOME
 proof	Run role-boundary detector and plan-marker fixtures	-	skills/subagent-driven-development/scripts/plan-check.sh	empty	output lacks expected text
 proof	Shellcheck running-a-sprint scripts	-	skills/running-a-sprint/scripts/handback-check.sh	append	SC2086	echo $HOME
@@ -116,8 +116,8 @@ proof	Check Discovery line rule strings	-	agents/story-coordinator.md	empty	is m
 proof	Check running-a-sprint SKILL.md row counts	-	skills/running-a-sprint/SKILL.md	empty	Red Flag bullets, expected 10
 proof	Check the fresh-runner Discovery rule is pinned once	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	append	occurrences of the fresh-runner rule, expected 1	A Discovery stop with a plan file is answered by a fresh runner for the same story, worktree and branch, and never by resuming the stopped runner.
 proof	Run verify-command check kept test	-	skills/subagent-driven-development/scripts/verify-command-check.sh	empty	FAIL no-argument
-covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-gates-loaded.md
-covers	Check loaded pre-message variants are empty or a single line	hooks/pre-message-loaded.md
+covers	Check loaded pre-message variants are empty or a single line	pre-message-gates-loaded
+covers	Check loaded pre-message variants are empty or a single line	pre-message-loaded
 covers	Check three-role loop contract strings	skills/subagent-driven-development/references/THREE_ROLE_LOOP.md
 covers	Check three-role loop contract strings	skills/subagent-driven-development/SKILL.md
 covers	Check three-role loop contract strings	skills/writing-plans/references/TODO_TEMPLATES.md

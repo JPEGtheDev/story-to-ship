@@ -93,13 +93,13 @@ proof	Check draft pull request rules	-	skills/finishing-a-development-branch/SKI
 proof	Check owner questions template	-	skills/running-a-sprint/references/owner-questions-template.html	empty	is missing the section heading
 proof	Check parallel todo contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
 proof	Check review cadence contract strings	-	skills/two-stage-review/SKILL.md	empty	is missing required cadence string
-pending	Check risky-todo rule has no shared-file clause	must-fail proof filed in #455
-pending	Check Discovery example map is pinned	must-fail proof filed in #455
-pending	Check Discovery skeptic check and economy tier are pinned	must-fail proof filed in #455
-pending	Check acceptance proof kinds are pinned	must-fail proof filed in #455
-pending	Check three-amigos reference list names proof kinds for the formulation reference	must-fail proof filed in #455
-pending	Hook script smoke test	must-fail proof filed in #455
-pending	SessionStart source-branch detector	must-fail proof filed in #455
+proof	Check risky-todo rule has no shared-file clause	-	skills/two-stage-review/SKILL.md	append	carries the shared-file clause again	another todo
+proof	Check Discovery example map is pinned	-	skills/three-amigos/references/CEREMONIES.md	empty	has no line equal to
+proof	Check Discovery skeptic check and economy tier are pinned	-	skills/three-amigos/references/CEREMONIES.md	empty	has no line equal to
+proof	Check acceptance proof kinds are pinned	-	skills/three-amigos/references/FORMULATION.md	empty	has no line equal to
+proof	Check three-amigos reference list names proof kinds for the formulation reference	-	skills/three-amigos/SKILL.md	empty	has no line equal to
+proof	Hook script smoke test	-	hooks/session-start.sh	append	output is not valid JSON	echo not-json
+proof	SessionStart source-branch detector	-	hooks/session-start.sh	empty	compact source did not produce continuation banner
 pending	Verify .claude/hooks symlink integrity	must-fail proof filed in #455
 pending	Check hooks/README.md matches .claude/hooks	must-fail proof filed in #455
 pending	Run session-events converter unit tests	must-fail proof filed in #455

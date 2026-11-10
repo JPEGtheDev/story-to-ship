@@ -11,4 +11,4 @@ Item 5: A wrong format claim in `writing-skills` becomes the schema that ALL ski
 
 Item 9: Inline relocation can increase the scoped footprint instead of shrinking it, so the scoped-term grep count is measured before and after.
 
-Red Flag, Iron Law fence: Placing it inside the fence before the closing backtick is the most common Iron Law anatomy error.
+Red Flag, Iron Law fence: Placing the letter/spirit line inside the fence before the closing backtick is the most common Iron Law anatomy error.

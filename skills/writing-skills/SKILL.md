@@ -57,7 +57,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [+] New wording fails the evasion sentence (does not admit it) -> proceed
    - [-] New wording admits the evasion sentence, or the clause grants no permission the rule needs -> delete the clause, or rewrite until it fails the evasion sentence
 
-9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after
+9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs before dispatching review. If the relocation moves scoped content inline into the same file rather than out to an existing reference file, measure the scoped-term grep count before and after.
    - [+] Source section still meets its floor, and extraction (not inline sectioning) was used -> proceed
    - [-] Source section is now below its floor, or the scoped-term footprint increased -> backfill the source section, or move content to a reference file instead
 10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.

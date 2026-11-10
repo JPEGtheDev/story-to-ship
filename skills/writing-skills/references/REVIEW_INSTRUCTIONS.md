@@ -213,7 +213,7 @@ Return findings in EXACTLY this structure:
 | Skill-specific content | [+]/[-] | file:line |
 | Related skill cross-reference | [+]/[-] | file:line |
 | Domain language match | [+]/[-] | file:line or "no issues found" |
-| Shipped text names only shipped checks, modes and roles (R1) | [+]/[-] | file:line |
+| Shipped text names only shipped checks, modes and roles (R1) | [+]/[-] | file:line or "no issues found" |
 | Routing change covers every triggering skill (R2) | [+]/[-]/N/A | file:line or "not a routing change" |
 | Rehearsal fixture does not contain the rule (R3) | [+]/[-]/N/A | file:line or "no rehearsal" |
 | No dated snapshot or owner-set label (R4) | [+]/[-] | file:line or "no issues found" |

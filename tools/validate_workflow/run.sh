@@ -279,7 +279,7 @@ prepare_tree() {
   while IFS= read -r f; do
     [ -f "$ROOT/$f" ] || continue
     mkdir -p "$TMP/tree/$(dirname -- "$f")" || die "cannot make a directory in the proof tree"
-    cp "$ROOT/$f" "$TMP/tree/$f" || die "cannot copy $f into the proof tree"
+    cp -P "$ROOT/$f" "$TMP/tree/$f" || die "cannot copy $f into the proof tree"
   done < "$TMP/tracked"
   if [ -e "$ROOT/.git" ]; then
     cp -R "$ROOT/.git" "$TMP/tree/.git" || die "cannot copy .git into the proof tree"

@@ -58,7 +58,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [-] New wording admits the evasion sentence, or the clause grants no permission the rule needs -> delete the clause, or rewrite until it fails the evasion sentence
 
 9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs written inline in SKILL.md before dispatching review. A Red Flag or Rationalization row is never moved to a reference file; only rationale may move there. If the relocation moves scoped content inline into the same file, measure the scoped-term grep count before and after -- inline relocation can increase the scoped footprint instead of shrinking it.
-   - [+] Rows stay inline, source section meets its floor, scoped-term count did not increase, and extraction (not inline sectioning) was used -> proceed
+   - [+] Rationale moved out to a reference file, rows stay inline, source section meets its floor, scoped-term count did not increase -> proceed
    - [+] The relocated content is rationale, not enforcement, and it moves to references/ -> proceed.
    - [-] A count-floored section (Red Flags or Rationalization) is now below its floor, or the scoped-term footprint increased -> backfill the section inline in SKILL.md; never move its rows to a reference file.
 10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.

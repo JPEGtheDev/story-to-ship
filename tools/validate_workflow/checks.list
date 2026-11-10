@@ -85,14 +85,14 @@ proof	Require one tools line in agents/ frontmatter	-	agents/implementer.md	empt
 proof	Check agent template contracts	-	agents/implementer.md	empty	is missing required contract string
 proof	Check reconcile contract strings	-	skills/running-a-sprint/references/RECONCILE.md	empty	is missing required contract string
 proof	Check scope contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
-pending	Check hand-back size contract strings	must-fail proof filed in #455
-pending	Check child report size cap strings	must-fail proof filed in #455
-pending	Check owner questions page strings	must-fail proof filed in #455
-pending	Check Ready to merge strings	must-fail proof filed in #455
-pending	Check draft pull request rules	must-fail proof filed in #455
-pending	Check owner questions template	must-fail proof filed in #455
-pending	Check parallel todo contract strings	must-fail proof filed in #455
-pending	Check review cadence contract strings	must-fail proof filed in #455
+proof	Check hand-back size contract strings	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	empty	is missing required contract string
+proof	Check child report size cap strings	-	agents/implementer.md	empty	is missing required contract string
+proof	Check owner questions page strings	-	skills/running-a-sprint/SKILL.md	empty	is missing required contract string
+proof	Check Ready to merge strings	-	skills/running-a-sprint/references/OWNER_QUESTIONS.md	empty	is missing required contract string
+proof	Check draft pull request rules	-	skills/finishing-a-development-branch/SKILL.md	empty	is missing required contract string
+proof	Check owner questions template	-	skills/running-a-sprint/references/owner-questions-template.html	empty	is missing the section heading
+proof	Check parallel todo contract strings	-	agents/story-coordinator.md	empty	is missing required contract string
+proof	Check review cadence contract strings	-	skills/two-stage-review/SKILL.md	empty	is missing required cadence string
 pending	Check risky-todo rule has no shared-file clause	must-fail proof filed in #455
 pending	Check Discovery example map is pinned	must-fail proof filed in #455
 pending	Check Discovery skeptic check and economy tier are pinned	must-fail proof filed in #455

@@ -237,7 +237,7 @@ awk -v s="$SIZE_STEP" 'BEGIN { FS = OFS = "\t" }
 ' "$list" | set_content "$list"
 commit_all "$repo" "head: proof downgraded to pending"
 # Assert
-check_run "e proof downgraded" "$repo" 1 R1
+check_run "e proof downgraded" "$repo" 2 - - "malformed head checks.list"
 
 # Case f1: a head step with a proof entry and no step entry.
 # Arrange

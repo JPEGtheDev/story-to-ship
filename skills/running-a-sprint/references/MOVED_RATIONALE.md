@@ -28,7 +28,7 @@ This file holds moved rationale and moved operative passages from `../SKILL.md`,
 **Context:** A hand-back reports green CI and clean counts.
 **Forces:** A runner reads its own output and states it as fact; the launcher is the only party that can check it against the repository.
 
-## Close-out
+## Close-out steps of the sprint-close-out skill
 
 **Context:** The owner merged and the sprint feels finished.
 **Forces:** Each step removes state the next one needs or could be mistaken for, so the order is fixed: the patch comparison needs the runner branch tip, and a deleted branch loses it. A skipped step leaves a stale branch, worktree or conflict that surfaces on a later merge.
@@ -62,8 +62,8 @@ Each clause below was cut from the SKILL.md sentence named in its line, after th
 - Capacity, after "does not count": ", so the next story launches while the owner reviews"
 - Launch, after "is true": ", so the launcher receives completion notices"
 - Watch loop, after "(every skill the compaction hook lists)": ", so the launcher's rules are back before it acts"
-- Close-out step 4, after "for a reconcile replacement": "; the squash leaves it unmerged in git's view"
-- Close-out step 6, after "(unverified)": "; the shell-write guard denies a body file written inside the repository"
+- step 4 of the sprint-close-out skill, after "for a reconcile replacement": "; the squash leaves it unmerged in git's view"
+- step 6 of the sprint-close-out skill, after "(unverified)": "; the shell-write guard denies a body file written inside the repository"
 
 ## Moved from SKILL.md: related skills
 
@@ -78,7 +78,7 @@ Each clause below was cut from the SKILL.md sentence named in its line, after th
 
 - `references/HANDBACK_ROUTING.md` -- the 11-row routing table, required lines, size contract and resume texts
 - `references/OWNER_QUESTIONS.md` -- the owner questions page: cards, layout, numbering, ledger fields, failure handling, worked example
-- `references/RECONCILE.md` -- Close-out step 7: reconciling open sprint PRs after a merge
+- `references/RECONCILE.md` -- step 7 of the sprint-close-out skill: reconciling open sprint PRs after a merge
 - `references/SCORECARD.md` -- predictions, measures, transcript audit, scorecard row
 - `references/REHEARSAL.md` -- coordinator rehearsal, repeated when its template changes
 - `references/MOVED_RATIONALE.md` -- moved pairs and passages, and the Launch question owner text section

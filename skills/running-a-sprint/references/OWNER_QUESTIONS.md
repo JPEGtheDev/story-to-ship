@@ -178,6 +178,6 @@ The values below run through the main steps of this file.
 ## Related
 
 - [HANDBACK_ROUTING.md](HANDBACK_ROUTING.md) -- the hand-back kinds that produce these questions and entries, and the PR ready row that holds the PR ready checks and the reconcile checks
-- [RECONCILE.md](RECONCILE.md) -- the reconcile of other open sprint PRs (Close-out step 7) that a PR waiting on a reconcile goes through before its entry is listed
+- [RECONCILE.md](RECONCILE.md) -- the reconcile of other open sprint PRs (step 7 of the sprint-close-out skill) that a PR waiting on a reconcile goes through before its entry is listed
 - [SCORECARD.md](SCORECARD.md) -- the scorecard the ledger also holds
 - [SKILL.md](../SKILL.md) -- the Capacity and Launch sections this file relies on; the sprint-close-out skill -- the close-out steps this file relies on

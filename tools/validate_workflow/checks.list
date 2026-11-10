@@ -69,14 +69,14 @@ proof	Enforce size cap on core skills	-	skills/honesty/SKILL.md	oversize	exceedi
 proof	Enforce size cap on core skills	-	skills/session-bootstrap/SKILL.md	oversize	exceeding the 20000-character limit
 proof	Run validate workflow guard	-	tools/validate_workflow/checks.list	empty	FINDING
 proof	Run validate workflow guard tests	-	tools/validate_workflow/run.sh	empty	FAIL
-pending	Validate hooks.json	must-fail proof filed in #455
-pending	Validate .claude-plugin JSON files	must-fail proof filed in #455
-pending	Shellcheck shell scripts	must-fail proof filed in #455
-pending	Run all hook fixture suites	must-fail proof filed in #455
-pending	Run first-action audit tests	must-fail proof filed in #455
-pending	Stop turn-log wedge safety (empty stdin)	must-fail proof filed in #455
-pending	Enforce pre-message hook word budget	must-fail proof filed in #455
-pending	Check loaded pre-message variants are empty or a single line	must-fail proof filed in #455
+proof	Validate hooks.json	-	hooks/hooks.json	append	parse error	{
+proof	Validate .claude-plugin JSON files	-	.claude-plugin/plugin.json	append	parse error	{
+proof	Shellcheck shell scripts	-	hooks/session-start.sh	append	SC2086	echo $HOME
+proof	Run all hook fixture suites	-	hooks/tests/run-all.sh	insert-before	FAILING SUITES:	overall_exit=1
+proof	Run first-action audit tests	-	tools/first_action_audit/tests/fixtures/bad_n_negative/expect_stdout_grep	append	stdout missing expected substring	NO-SUCH-TEXT
+proof	Stop turn-log wedge safety (empty stdin)	-	hooks/stop-turn-log.sh	empty	empty-stdin did not yield {}
+proof	Enforce pre-message hook word budget	-	hooks/pre-message-gates.md	empty	is not smaller than
+proof	Check loaded pre-message variants are empty or a single line	-	hooks/pre-message-loaded.md	append	a loaded variant must be empty or exactly one line	one\ntwo
 pending	Check three-role loop contract strings	must-fail proof filed in #455
 pending	Check for broken references in skill files	must-fail proof filed in #455
 pending	Validate SKILL.md frontmatter	must-fail proof filed in #455

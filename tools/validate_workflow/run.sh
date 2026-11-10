@@ -308,30 +308,29 @@ copy_tree() {
   cp -R "$TMP/tree" "$1" || die "cannot copy the proof tree"
 }
 
+# text_lines TEXT: print TEXT, one line per literal backslash-n in TEXT. TEXT reaches awk
+# through ENVIRON, so no shell expands its dollar signs or backslashes.
+text_lines() {
+  VW_TEXT=$1 awk 'BEGIN {
+    s = ENVIRON["VW_TEXT"]
+    while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
+    printf "%s\n", s
+  }'
+}
+
 # apply_mode FILE MODE TEXT: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x;
 # append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. insert-before
 # puts TEXT, split the same way, before the last line of FILE. insert-before-close puts
 # TEXT before the second line of FILE that is exactly ---, the frontmatter closing line; a
 # FILE with no second --- line is left unchanged. replace removes FILE (a link is removed,
 # not its target) and writes TEXT, split the same way as append, as a regular file at its path.
-# TEXT reaches awk through ENVIRON, so no shell expands its dollar signs or backslashes.
 # parse_list has already refused any other mode.
 apply_mode() {
   case $2 in
     empty) : > "$1" ;;
-    replace)
-      rm -f "$1" && VW_TEXT=$3 awk 'BEGIN {
-        s = ENVIRON["VW_TEXT"]
-        while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
-        printf "%s\n", s
-      }' > "$1" ;;
+    replace) rm -f "$1" && text_lines "$3" > "$1" ;;
     oversize) awk 'BEGIN { s = sprintf("%20001s", ""); gsub(/ /, "x", s); printf "%s", s }' > "$1" ;;
-    append)
-      VW_TEXT=$3 awk 'BEGIN {
-        s = ENVIRON["VW_TEXT"]
-        while ((i = index(s, "\\n")) > 0) { printf "%s\n", substr(s, 1, i - 1); s = substr(s, i + 2) }
-        printf "%s\n", s
-      }' >> "$1" ;;
+    append) text_lines "$3" >> "$1" ;;
     insert-before)
       VW_TEXT=$3 awk 'BEGIN {
         s = ENVIRON["VW_TEXT"]

@@ -103,6 +103,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 - Exit 1: for each entry its VIOLATION line names, apply the loop-marker rule in the Dispatch section and write or fix the marker; never pick a value only to pass the check. Then re-run. A third exit 1 (after 2 re-runs) is a cap reached hand-back naming the entries. The count of 2 re-runs starts again after a re-plan.
 - Exit 2 or any other exit code (127 means the script was not found): hand back blocked with the error text.
 - A reconcile and a fresh runner with no plan file skip the plan check.
+- When a todo adds text to a file that has under 500 bytes of room, an earlier todo moves text out of that file, word for word, so the adding todo starts under the limit. Room is the file's limit in `.github/workflows/validate.yml` minus its current `wc -c`; you measure the room and record it in the plan entry. Moved text is never deleted.
 
 ## Red CI
 

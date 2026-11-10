@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=29
+EXPECTED_CASES=30
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -76,7 +76,7 @@ make_list() {
 
 # add_rows WORKFLOW WITH_PENDING: print the rows that complete a list made by make_list. The
 # size step gets its seven covers lines and one proof line. When WITH_PENDING is 1, every other
-# step also gets a pending line citing #455; without it, no pending line is printed, so a
+# step also gets a pending line with a coverage debt reason; without it, no pending line is printed, so a
 # head list written with add_rows holds none. A case that needs a complete list appends this
 # output after make_list.
 add_rows() {
@@ -90,7 +90,7 @@ add_rows() {
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
         "$name" "$SIZE_FILE"
     elif [ "${2:-}" = 1 ]; then
-      printf 'pending\t%s\tcoverage debt #455\n' "$name"
+      printf 'pending\t%s\tcoverage debt\n' "$name"
     fi
   done
 }
@@ -242,7 +242,7 @@ use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 awk -v s="$SIZE_STEP" 'BEGIN { FS = OFS = "\t" }
-  $1 == "proof" && $2 == s { $0 = "pending" OFS $2 OFS "coverage debt #455" }
+  $1 == "proof" && $2 == s { $0 = "pending" OFS $2 OFS "coverage debt" }
   { print }
 ' "$list" | set_content "$list"
 commit_all "$repo" "head: proof downgraded to pending"
@@ -645,6 +645,23 @@ printf 'step\tProbe replaced symlink\ncovers\tProbe replaced symlink\t.claude/ho
 commit_all "$repo" "head: replace probe step and proof"
 # Assert
 check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok: Probe replaced symlink"
+
+# Case AC2: no issue-number citation in tools/validate_workflow. The grep reads the head tree
+# (REPO) with the bracket form of the digit class, so this case does not match its own text.
+# grep exit 1 means no line matched and the case passes; exit 0 (a citation) or 2 (grep error) fails.
+# Arrange
+# Act
+CASES=$((CASES + 1))
+grep -rn '#[[:digit:]]' "$REPO/tools/validate_workflow" > "$TMP/ac2.out" 2>&1
+rc=$?
+# Assert
+if [ "$rc" -eq 1 ]; then
+  echo "PASS: AC2 no issue-number citation in tools/validate_workflow"
+else
+  FAILS=$((FAILS + 1))
+  echo "FAIL: AC2 no issue-number citation in tools/validate_workflow: grep exit $rc"
+  sed -n '1,3p' "$TMP/ac2.out" | sed 's/^/  | /'
+fi
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

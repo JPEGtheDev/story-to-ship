@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=31
+EXPECTED_CASES=32
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -48,6 +48,12 @@ PROBE_FM_BLOCK=$(cat <<'EOF'
           awk 'NR == 1 && $0 != "---" { exit 1 } NR > 1 && $0 == "---" { exit 0 } /^[a-z-]+: .*: / { print "INVALID FRONTMATTER VALUE: " $0; exit 1 }' agents/implementer.md
 EOF
 )
+
+# Step block for the replace probe: its run needs .claude/hooks/session-start.sh to be a link.
+# The replace case turns the link into a regular file, so the probe prints "is not a symlink".
+PROBE_REPLACE_BLOCK='      - name: Probe replaced symlink
+        run: |
+          test -L .claude/hooks/session-start.sh || { echo "session-start.sh is not a symlink"; exit 1; }'
 
 # commit_all REPO MESSAGE: stage everything and commit, allowing an empty commit.
 commit_all() {
@@ -651,6 +657,28 @@ printf 'step\tProbe frontmatter values\ncovers\tProbe frontmatter values\tagents
 commit_all "$repo" "head: frontmatter probe step and proof"
 # Assert
 check_run "insert-before-close puts a bad value inside the frontmatter range" "$repo" 0 - - "PROOF ok: Probe frontmatter values"
+
+# Case ad: a replace proof turns a symlink into a regular file. The probe step's control run
+# finds .claude/hooks/session-start.sh a link, so it passes. The must-fail run replaces the link
+# with a regular file holding "regular file text", so the probe prints "is not a symlink" and exits 1.
+# Arrange
+repo="$TMP/ad"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+# Act
+mkdir -p "$repo/.claude/hooks" || exit 2
+printf 'real hook\n' > "$repo/.claude/hooks/REAL.sh"
+ln -s REAL.sh "$repo/.claude/hooks/session-start.sh" || exit 2
+VW_BLOCK=$PROBE_REPLACE_BLOCK awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe replaced symlink\ncovers\tProbe replaced symlink\t.claude/hooks/session-start.sh\nproof\tProbe replaced symlink\t-\t.claude/hooks/session-start.sh\treplace\tis not a symlink\tregular file text\n' >> "$list"
+commit_all "$repo" "head: replace probe step and proof"
+# Assert
+check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok: Probe replaced symlink"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

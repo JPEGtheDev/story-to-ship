@@ -51,6 +51,8 @@ Answer each question in the following agenda from the `{{PERSONA}}` perspective.
 
 {{AGENDA}}
 
+Open questions (Discovery only): before a question goes under Questions for the user, mark each open question empirical or preference, tagged after its number as the Example map section of the three-amigos skill's ceremonies reference says. `empirical` means a run or a read of the code can show the answer; `preference` means no run can settle it. An `empirical` question whose test fits the bound (one command or script, at most 5 minutes wall time and 20,000 tokens) is run first, from a scratch directory under /tmp, pushing nothing and editing no file in the repository. For every run, whether or not it settled the question, return the command and its output in your findings so the Discovery runner can post them to the issue. List an `empirical` question under Questions for the user only when the run did not settle it, or when no run fits the bound, and end its line with `-- run did not settle it: <why>`; a `preference` question carries no why. Merge, fix-round cap override, scope change and serious blocker carry no tag and no run; list them under Questions for the user as they are.
+
 ## Return Format
 
 ```

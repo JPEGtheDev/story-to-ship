@@ -37,10 +37,18 @@ The example map lives in the Feature Specification, or under `## Discovery Open 
 - `Story:` one sentence naming the behavior.
 - `Rules:` the business rules, one per line, numbered R1, R2.
 - `Examples:` at least one concrete example per rule, a named case with real values, numbered R1-E1, R1-E2.
-- `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.
+- `Questions:` every unanswered question, one per line, numbered Q1, Q2 and tagged `[empirical]` or `[preference]` after the number, or the single word `none`; an `[empirical]` line also ends with `-- run did not settle it: <why>`; an empty or missing line is malformed.
 - `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.
 
 A rule summarizes its examples: state each rule in one sentence and put the detail in its examples. Examples stay at behavior level and obey the grain rule above; a rule with many examples or a map with many rules is a sign to slice the story, and each proposed slice is written as a Question. A rule with no example makes the verdict `BACK TO OWNER` (see the stopping rule). Slicing is optional: record a slice proposal as a Question only when one is made.
+
+### Open questions -- classify and test first
+
+Before a question goes on the Questions line, mark each open question empirical or preference: `empirical` when a run or a read of the code can show the answer, `preference` when no run can settle it. Merge, fix-round cap override, scope change and serious blocker are not Discovery questions; they carry no tag.
+
+Each `empirical` question whose test fits the bound (one command or script, at most 5 minutes wall time and 20,000 tokens) is run first, from a scratch directory under /tmp, pushing nothing and editing no file in the repository. The runner that runs Discovery posts the command and its output to the issue as a comment; an amigo returns them to it in its findings (agents/amigo.md). The question stays on the Questions line only when the run did not settle it, with the reason after `-- run did not settle it:`. These runs happen before the skeptic check, so the skeptic reads the Questions line as it stands after the runs.
+
+The Discovery stop does not change: a `BACK TO OWNER` verdict still stops the run before any planning. This section covers the Discovery amigos and the runner that runs Discovery; questions raised by implementers or by the launcher are outside it.
 
 ### Stopping rule and timebox
 
@@ -101,7 +109,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 2. What are the boundaries? What is explicitly OUT of scope?
 3. What does "done" look like? State 3-5 testable acceptance criteria (Business and Tester: scenario wording per the formulation rules in your read list). Tester: give each criterion's proof kind per the Proof kinds section of the formulation rules in your read list, and flag a criterion whose proof kind does not match that rule.
 4. What are the failure cases? What must happen when things go wrong?
-5. What questions remain unresolved? (Surface to user before proceeding.)
+5. What questions remain unresolved? (Surface to user before proceeding; tag each one `[empirical]` or `[preference]` under the open-questions rule above.)
 6. For each rule, give at least one concrete example with real values; list every rule that has none.
 
 ### Non-UI Adaptation of the Mandatory Questions

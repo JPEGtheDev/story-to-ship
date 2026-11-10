@@ -849,7 +849,7 @@ jobs:
             '- `Story:` one sentence naming the behavior.' \
             '- `Rules:` the business rules, one per line, numbered R1, R2.' \
             '- `Examples:` at least one concrete example per rule, a named case with real values, numbered R1-E1, R1-E2.' \
-            '- `Questions:` every unanswered question, one per line, or the single word `none`; an empty or missing line is malformed.' \
+            '- `Questions:` every unanswered question, one per line, numbered Q1, Q2 and tagged `[empirical]` or `[preference]` after the number, or the single word `none`; an `[empirical]` line also ends with `-- run did not settle it: <why>`; an empty or missing line is malformed.' \
             '- `Verdict:` `READY FOR PLANNING` or `BACK TO OWNER`.'
           do
             if ! grep -qxF -- "$s" "$f"; then
@@ -862,6 +862,38 @@ jobs:
             exit 1
           fi
           echo "[+] Discovery example-map heading and field lines are present"
+
+      # Each pin is file|fixed string; a pin proves the text exists in that file, not where it sits.
+      - name: Check open-question classification wording is pinned
+        run: |
+          missing=0
+          for pin in \
+            'agents/story-coordinator.md|mark each open question empirical or preference' \
+            'skills/three-amigos/references/CEREMONIES.md|mark each open question empirical or preference' \
+            'agents/amigo.md|mark each open question empirical or preference' \
+            'agents/story-coordinator.md|one command or script, at most 5 minutes wall time and 20,000 tokens' \
+            'skills/three-amigos/references/CEREMONIES.md|one command or script, at most 5 minutes wall time and 20,000 tokens' \
+            'agents/story-coordinator.md|the hand-back carries a `Waits on:` line' \
+            'skills/running-a-sprint/references/HANDBACK_ROUTING.md|a `Waits on:` line in the form' \
+            'skills/running-a-sprint/references/OWNER_QUESTIONS.md|Class fields:' \
+            'skills/running-a-sprint/references/OWNER_QUESTIONS.md|`why not settled`' \
+            'skills/running-a-sprint/references/owner-questions-template.html|{{WHY_NOT_SETTLED}}' \
+            'skills/running-a-sprint/references/HANDBACK_ROUTING.md|The launcher copies both onto the card' \
+            'skills/three-amigos/references/CEREMONIES.md|-- run did not settle it:' \
+            'skills/execution/SKILL.md|A serious blocker never carries a question class and is never settled by a test run first'
+          do
+            f=${pin%%|*}
+            s=${pin#*|}
+            if ! grep -qF -- "$s" "$f"; then
+              printf 'FAILED: %s has no text containing: %s\n' "$f" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing open-question classification pin(s)"
+            exit 1
+          fi
+          echo "[+] open-question classification wording is pinned"
 
       # A pin proves the text exists in the file, not where it sits in that file.
       # The skeptic heading is a whole-line match copied verbatim from its source file;

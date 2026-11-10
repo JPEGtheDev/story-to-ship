@@ -59,13 +59,13 @@ Before creating, editing, or shipping any skill or agent template:
 
 9. **Relocating items out of a count-floored section (Red Flags >=5, Rationalization >=5)?** Re-count the section items were moved FROM after the move, and backfill it to the floor with true general analogs written inline in SKILL.md before dispatching review. A Red Flag or Rationalization row is never moved to a reference file; only rationale may move there. If the relocation moves scoped content inline into the same file, measure the scoped-term grep count before and after -- inline relocation can increase the scoped footprint instead of shrinking it.
    - [+] Rationale moved out to a reference file, rows stay inline, source section meets its floor, scoped-term count did not increase -> proceed
-   - [+] The relocated content is rationale, not enforcement, and it moves to references/ -> proceed.
+   - [+] Scoped content moved inline in the same file, scoped-term count did not increase, source section meets its floor -> proceed
    - [-] A count-floored section (Red Flags or Rationalization) is now below its floor, or the scoped-term footprint increased -> backfill the section inline in SKILL.md; never move its rows to a reference file.
 10. **Routing change?** A routing change covers every skill whose frontmatter triggers on the same signal. Check the full checklist in `references/REVIEW_INSTRUCTIONS.md` Step 2.
    - [+] every skill that triggers on the signal is covered -> proceed
    - [-] a routing change leaves a skill whose frontmatter triggers on the same signal uncovered -> grep every skill's frontmatter for the signal and cover each hit
 
-11. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening needs the owner's ruling, even when the removal is permanent.
+11. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening, even a permanent one, needs the owner's ruling.
    - [-] Check removed or weakened as a temporary step -> do the replacement work in this PR or drop the change; a same-PR removal -> stop and get the owner's ruling
 
 [+] All met -> proceed

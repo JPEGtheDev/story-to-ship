@@ -428,6 +428,7 @@ jobs:
           check agents/story-coordinator.md 'none found'
           check agents/story-coordinator.md 'refused for the rest of the run'
           check agents/story-coordinator.md 'wc -c'
+          check agents/story-coordinator.md 'each file the fix edits'
           check agents/story-coordinator.md 'current size in bytes'
           check agents/story-coordinator.md "repeats the todo's verification block"
           check agents/story-coordinator.md 'third prompt'

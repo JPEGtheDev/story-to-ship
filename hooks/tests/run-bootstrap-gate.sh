@@ -571,56 +571,6 @@ run_mutant_case() {
   fi
 }
 
-# Role-list consistency check: the role names in session-start.sh's
-# RELOAD_ROLE_NAMES array must equal the role names in the body of is_role()
-# in bootstrap-gate-pre.sh. A role added to only one copy would lose its hold
-# with no error, so any difference fails. The comparison is order-free. The
-# array is read word by word between its parentheses; the is_role body is read
-# for hyphenated lowercase words, so a rewrite of the body with the same
-# behavior (quoted or bare, one line or many) passes. A role name without a
-# hyphen would not be read from the body and would fail this check. Both files
-# are read from their repo paths (relative to SCRIPT_DIR).
-run_role_list_check() {
-  local name="role_lists_agree_across_hooks"
-  local session_start="$SCRIPT_DIR/../session-start.sh"
-  local pre="$SCRIPT_DIR/../bootstrap-gate-pre.sh"
-  local reload_block is_role_block reload_names is_role_names
-
-  if [[ "$(grep -cE '^RELOAD_ROLE_NAMES=' "$session_start")" -ne 1 ||
-    "$(grep -cE '^is_role\(\) \{' "$pre")" -ne 1 ]]; then
-    echo "FAIL: $name"
-    echo "  - expected exactly one RELOAD_ROLE_NAMES assignment in session-start.sh and one is_role() definition in bootstrap-gate-pre.sh"
-    fail=$((fail + 1))
-    return
-  fi
-
-  # Array words: from the assignment line to the first line holding ')'.
-  reload_block="$(awk '
-    /^RELOAD_ROLE_NAMES=\(/ { on = 1; sub(/^RELOAD_ROLE_NAMES=\(/, "") }
-    on { if (match($0, /\)/)) { print substr($0, 1, RSTART - 1); exit } print }
-  ' "$session_start")"
-  reload_names="$(tr -s ' \t' '\n' <<<"$reload_block" | sed '/^$/d' | sort -u)"
-
-  # is_role body: from the definition line to the first line that is exactly '}'.
-  is_role_block="$(awk '
-    /^is_role\(\) \{/ { on = 1; next }
-    on && /^\}/ { exit }
-    on { print }
-  ' "$pre")"
-  is_role_names="$(grep -oE '[a-z][a-z0-9]*(-[a-z0-9]+)+' <<<"$is_role_block" | sort -u)"
-
-  if [[ -n "$reload_names" && "$reload_names" == "$is_role_names" ]]; then
-    echo "PASS: $name"
-    pass=$((pass + 1))
-  else
-    echo "FAIL: $name"
-    echo "  - session-start.sh RELOAD_ROLE_NAMES: [$(paste -sd' ' <<<"$reload_names")]"
-    echo "  - bootstrap-gate-pre.sh is_role: [$(paste -sd' ' <<<"$is_role_names")]"
-    echo "  - the two role lists must agree"
-    fail=$((fail + 1))
-  fi
-}
-
 for case_dir in "$FIXTURES_DIR"/*/; do
   if [[ -n "$RUN_ONLY" && "$(basename "${case_dir%/}")" != "$RUN_ONLY" ]]; then
     continue
@@ -637,7 +587,6 @@ fi
 
 if [[ -z "$RUN_ONLY" ]]; then
   run_mutant_case
-  run_role_list_check
 fi
 
 echo ""

@@ -74,9 +74,11 @@ make_list() {
   done
 }
 
-# add_rows WORKFLOW: print the rows that complete a list made by make_list. The size
-# step gets its seven covers lines and one proof line; every other step gets a pending
-# line citing #455. A case that needs a complete list appends this output after make_list.
+# add_rows WORKFLOW WITH_PENDING: print the rows that complete a list made by make_list. The
+# size step gets its seven covers lines and one proof line. When WITH_PENDING is 1, every other
+# step also gets a pending line citing #455; without it, no pending line is printed, so a
+# head list written with add_rows holds none. A case that needs a complete list appends this
+# output after make_list.
 add_rows() {
   grep -E '^      - name: ' "$1" | sed 's/^      - name: //' | while IFS= read -r name; do
     if [ "$name" = "$SIZE_STEP" ]; then
@@ -87,7 +89,7 @@ add_rows() {
       done
       printf 'proof\t%s\t-\t%s\toversize\texceeding the 20000-character limit\n' \
         "$name" "$SIZE_FILE"
-    else
+    elif [ "${2:-}" = 1 ]; then
       printf 'pending\t%s\tcoverage debt #455\n' "$name"
     fi
   done
@@ -112,22 +114,30 @@ make_base() {
   copy_size_files "$1" || return 1
   if [ "$2" = 1 ]; then
     make_list "$1/.github/workflows/validate.yml" > "$1/tools/validate_workflow/checks.list"
-    add_rows "$1/.github/workflows/validate.yml" >> "$1/tools/validate_workflow/checks.list"
+    add_rows "$1/.github/workflows/validate.yml" 1 >> "$1/tools/validate_workflow/checks.list"
   fi
   commit_all "$1" "base"
 }
 
-# use_head REPO: create branch head at the current base commit.
+# use_head REPO: create branch head at the current base commit, then drop the pending lines
+# from the working-tree checks.list, so the head list holds none. The Act commit of each case
+# carries the dropped lines; the base commit keeps them.
 use_head() {
-  git -C "$1" checkout -q -b head
+  git -C "$1" checkout -q -b head || return 1
+  head_list="$1/tools/validate_workflow/checks.list"
+  if [ -f "$head_list" ]; then
+    awk -F "$(printf '\t')" '$1 != "pending"' "$head_list" | set_content "$head_list"
+  fi
 }
 
 # set_proof LIST STEP ENV TARGET MODE SUBSTRING: replace the pending or proof entry
-# of STEP in LIST with a proof entry built from the arguments.
+# of STEP in LIST with a proof entry built from the arguments. When LIST holds neither
+# for STEP, append one proof entry built from the arguments.
 set_proof() {
   awk -v s="$2" -v e="$3" -v t="$4" -v m="$5" -v x="$6" 'BEGIN { FS = OFS = "\t" }
-    ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, e, t, m, x; next }
+    ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, e, t, m, x; done = 1; next }
     { print }
+    END { if (!done) print "proof", s, e, t, m, x }
   ' "$1" | set_content "$1"
 }
 
@@ -543,8 +553,9 @@ use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
-  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"]; next }
+  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"]; done = 1; next }
   { print }
+  END { if (!done) print "proof", s, "-", t, "append", "two", ENVIRON["VW_TEXT"] }
 ' "$list" | set_content "$list"
 commit_all "$repo" "head: append proof with a seventh field"
 # Assert
@@ -563,8 +574,9 @@ use_head "$repo"
 list="$repo/tools/validate_workflow/checks.list"
 # Act
 VW_TEXT='echo $HOME\necho two' awk -v s="Hook script smoke test" -v t="$SIZE_FILE" 'BEGIN { FS = OFS = "\t" }
-  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"]; next }
+  ($1 == "pending" || $1 == "proof") && $2 == s { print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"]; done = 1; next }
   { print }
+  END { if (!done) print "proof", s, "-", t, "insert-before", "two", ENVIRON["VW_TEXT"] }
 ' "$list" | set_content "$list"
 commit_all "$repo" "head: insert-before proof with a seventh field"
 # Assert

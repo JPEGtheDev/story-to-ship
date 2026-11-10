@@ -52,9 +52,9 @@ EOF
 # Step block for the append and insert-before probes: it reads SIZE_FILE and exits 1 with
 # "echo two" in its output when a line reading exactly "echo two" is present. The unmodified
 # file passes; a mode that writes the line makes the must-fail run fail with "two".
-PROBE_APPEND_BLOCK='      - name: Probe appended line
+PROBE_APPEND_BLOCK="      - name: Probe appended line
         run: |
-          if grep -qx "echo two" skills/honesty/SKILL.md; then echo "appended line found: echo two"; exit 1; fi'
+          if grep -qx \"echo two\" $SIZE_FILE; then echo \"appended line found: echo two\"; exit 1; fi"
 
 # Step block for the replace probe: its run needs .claude/hooks/session-start.sh to be a link.
 # The replace case turns the link into a regular file, so the probe prints "is not a symlink".
@@ -658,7 +658,7 @@ check_run "replace turns a symlink into a regular file" "$repo" 0 - - "PROOF ok:
 # Case pinned-file: a file pinned by a proof of the hand-back step is removed from the head tree. The
 # step's control run fails on the unmodified copy, so the guard reports the proof control failure.
 # Arrange
-repo="$TMP/ac3"
+repo="$TMP/pinned-file"
 make_base "$repo" 1
 mkdir -p "$repo/skills/running-a-sprint/references" "$repo/agents" &&
   cp "$REPO/skills/running-a-sprint/references/HANDBACK_ROUTING.md" "$repo/skills/running-a-sprint/references/" &&
@@ -681,7 +681,7 @@ check_run "pinned-file removing a pinned file from the head tree fails proof con
 # Arrange
 # Act
 CASES=$((CASES + 1))
-grep -rn '#[[:digit:]]' "$REPO/tools/validate_workflow" > "$TMP/ac2.out" 2>&1
+grep -rn '#[[:digit:]]' "$REPO/tools/validate_workflow" > "$TMP/issue-citation.out" 2>&1
 rc=$?
 # Assert
 if [ "$rc" -eq 1 ]; then
@@ -689,12 +689,12 @@ if [ "$rc" -eq 1 ]; then
 else
   FAILS=$((FAILS + 1))
   echo "FAIL: issue-citation no issue-number citation in tools/validate_workflow: grep exit $rc"
-  sed -n '1,3p' "$TMP/ac2.out" | sed 's/^/  | /'
+  sed -n '1,3p' "$TMP/issue-citation.out" | sed 's/^/  | /'
 fi
 
 # Case key-a: a paths-ignore key added inside the on: block. The guard counts it as on-paths.
 # Arrange
-repo="$TMP/ac4a"
+repo="$TMP/key-a"
 make_base "$repo" 1
 use_head "$repo"
 wf="$repo/.github/workflows/validate.yml"
@@ -709,7 +709,7 @@ check_run "key-a adding paths-ignore fails" "$repo" 1 R4 - 'head has 1 "on-paths
 
 # Case key-b: continue-on-error added to one step. The guard counts it as step-continue-on-error.
 # Arrange
-repo="$TMP/ac4b"
+repo="$TMP/key-b"
 make_base "$repo" 1
 use_head "$repo"
 wf="$repo/.github/workflows/validate.yml"
@@ -725,7 +725,7 @@ check_run "key-b adding continue-on-error to a step fails" "$repo" 1 R4 - \
 
 # Case key-c: a job-level if key added under validate. The guard counts it as job-if.
 # Arrange
-repo="$TMP/ac4c"
+repo="$TMP/key-c"
 make_base "$repo" 1
 use_head "$repo"
 wf="$repo/.github/workflows/validate.yml"
@@ -741,7 +741,7 @@ check_run "key-c adding a job-level if fails" "$repo" 1 R4 - 'head has 1 "job-if
 # Case trigger-d: the workflow_dispatch trigger key removed from the on: block. The guard reports
 # it as a base trigger the head drops (R1, check_triggers).
 # Arrange
-repo="$TMP/ac4d"
+repo="$TMP/trigger-d"
 make_base "$repo" 1
 use_head "$repo"
 wf="$repo/.github/workflows/validate.yml"

@@ -56,3 +56,17 @@ a fresh log line from the hook -- is the only evidence that closes that gap.
 
 Reporting the block with zeroes when there is nothing to report ensures the behavior is
 habitual, not conditional. A conditional habit is skipped exactly when it matters.
+
+---
+
+## Why the Hold Covers Edit, Write, NotebookEdit and Agent
+
+The hook holds Edit, Write, NotebookEdit and Agent until each is re-invoked, because they
+carry rules no tool call triggers.
+
+---
+
+## Why a Skipped Skill Drops Its Gate
+
+A skill left out drops the gate it carries, including any canary (the status line a
+skill requires before acting).

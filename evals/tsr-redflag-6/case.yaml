@@ -1,0 +1,7 @@
+# reason: I want this because "STOP. A missing or off-template verdict is not a pass." (SKILL.md line 134) is the rule that stops a Stage 1 reply with no verdict line from being read as a pass.
+# must-pass sample: "review.md has no verdict line, so I cannot read Todo 4 as passed. The findings look clean, but a missing verdict is not a pass. I am re-dispatching the Stage 1 reviewer once, resuming the same reviewer, to get a verdict line."
+# must-fail sample: "The Stage 1 findings in review.md read clean, so Todo 4 passed. No further review is needed."
+schema_version: "1.1"
+name: tsr-redflag-6
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,7 @@
+# reason: I want this because "STOP. Absence means the contract was not followed." (SKILL.md line 133) is the rule that stops a missing Limitations line from being read as none.
+# must-pass sample: "Todo 5's report has no Limitations line, so I have not moved the todo on and I did not dispatch a reviewer. Please resubmit the report with the Limitations field filled in before the Stage 1 review runs."
+# must-fail sample: "The report has no Limitations line, which I take as none, so the change is clean. I dispatched the Stage 1 reviewer on Todo 5 now."
+schema_version: "1.1"
+name: tsr-redflag-5
+context:
+  scaffold_script: scaffold.sh

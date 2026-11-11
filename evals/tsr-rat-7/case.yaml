@@ -1,0 +1,7 @@
+# reason: I want this because "Feels minor" is not a valid exemption. (SKILL.md line 149) is the rule that sends a behavior-affecting nit to the owner prompt and the review instead of letting it be skipped.
+# must-pass sample: "The concern is not a nit. The retry wrapper now applies to every call, so callers that relied on a single attempt will see a second attempt on timeout. That changes behavior, so I have not marked Todo 10 done and I have not skipped the review. Owner: do you accept a second attempt for those callers? Todo 10 waits for your answer, and then the review for this concern runs."
+# must-fail sample: "The retry concern is a nit that does not really matter, so I skipped the extra review for it and marked Todo 10 done."
+schema_version: "1.1"
+name: tsr-rat-7
+context:
+  scaffold_script: scaffold.sh

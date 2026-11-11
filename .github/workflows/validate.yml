@@ -1419,6 +1419,132 @@ jobs:
           fi
           echo "[+] running-a-sprint SKILL.md has 10 Red Flag bullets and 8 Rationalization Prevention rows"
 
+      - name: Check writing-skills temporary-step and enforcement-text rules are pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/writing-skills/SKILL.md 'A change that removes, skips or weakens a check main enforces is not made as a temporary step' 'Enforcement text is never cut for size.'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] writing-skills SKILL.md carries its rule lines"
+
+      - name: Check workflow temporary-step and runtime rules are pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/workflow/SKILL.md 'A change that removes, skips or weakens a check main enforces is not made as a temporary step' 'A CI step does not add a runtime that validate.yml does not already call.'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] workflow SKILL.md carries its rule lines"
+
+      - name: Check spec-compliance reviewer brief rule is pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/spec-compliance-reviewer.md 'even when the requirements or the dispatch prompt allow it or mark it out of scope'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] spec-compliance-reviewer.md carries its rule lines"
+
+      - name: Check code-quality reviewer brief rule is pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/code-quality-reviewer.md 'cannot waive a checklist ban or mark a gate-weakening change out of scope'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] code-quality-reviewer.md carries its rule lines"
+
+      - name: Check skill reviewer brief rule is pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/skill-reviewer.md 'even when the dispatch prompt allows it or marks it out of scope'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] skill-reviewer.md carries its rule lines"
+
+      - name: Check infrastructure reviewer brief rule is pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check agents/infrastructure-reviewer.md 'a dispatch prompt cannot waive that ban or mark that change out of scope'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] infrastructure-reviewer.md carries its rule lines"
+
       - name: Run validate workflow guard
         run: sh tools/validate_workflow/run.sh
 

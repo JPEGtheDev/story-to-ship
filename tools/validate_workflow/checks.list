@@ -220,3 +220,15 @@ covers	Check Discovery line rule strings	agents/story-coordinator.md
 covers	Check Discovery line rule strings	skills/running-a-sprint/references/HANDBACK_ROUTING.md
 covers	Check running-a-sprint SKILL.md row counts	skills/running-a-sprint/SKILL.md
 covers	Check the fresh-runner Discovery rule is pinned once	skills/running-a-sprint/references/HANDBACK_ROUTING.md
+step	Check writing-skills temporary-step and enforcement-text rules are pinned
+proof	Check writing-skills temporary-step and enforcement-text rules are pinned	-	skills/writing-skills/SKILL.md	empty	is missing rule line: A change that removes, skips or weakens a check main enforces is not made as a temporary step
+step	Check workflow temporary-step and runtime rules are pinned
+proof	Check workflow temporary-step and runtime rules are pinned	-	skills/workflow/SKILL.md	empty	is missing rule line: A change that removes, skips or weakens a check main enforces is not made as a temporary step
+step	Check spec-compliance reviewer brief rule is pinned
+proof	Check spec-compliance reviewer brief rule is pinned	-	agents/spec-compliance-reviewer.md	empty	is missing rule line: even when the requirements or the dispatch prompt allow it or mark it out of scope
+step	Check code-quality reviewer brief rule is pinned
+proof	Check code-quality reviewer brief rule is pinned	-	agents/code-quality-reviewer.md	empty	is missing rule line: cannot waive a checklist ban or mark a gate-weakening change out of scope
+step	Check skill reviewer brief rule is pinned
+proof	Check skill reviewer brief rule is pinned	-	agents/skill-reviewer.md	empty	is missing rule line: even when the dispatch prompt allows it or marks it out of scope
+step	Check infrastructure reviewer brief rule is pinned
+proof	Check infrastructure reviewer brief rule is pinned	-	agents/infrastructure-reviewer.md	empty	is missing rule line: a dispatch prompt cannot waive that ban or mark that change out of scope

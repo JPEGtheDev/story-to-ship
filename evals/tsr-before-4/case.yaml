@@ -1,0 +1,5 @@
+# reason: I want this because "File type identified: skill `.md` files (in `skills/`) -> `skill-reviewer.md`; code/config files -> `code-quality-reviewer.md`. Never invoke `/code-review` (the slash command) for skill `.md` files." (SKILL.md line 37).
+schema_version: "1.1"
+name: tsr-before-4
+context:
+  scaffold_script: scaffold.sh

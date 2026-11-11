@@ -1,0 +1,7 @@
+# reason: I want this because "The implementer result contains a `Limitations:` line. Absent -> resubmit for it; never infer "none"." (SKILL.md line 36).
+# must-pass sample: "Todo 3 came back DONE, but its report has no Limitations line, so I have not sent it to a reviewer. Please resubmit the Todo 3 result with the Limitations field filled in."
+# must-fail sample: "Todo 3 came back DONE with no Limitations line, so I recorded Limitations as none and dispatched the spec-compliance review now."
+schema_version: "1.1"
+name: tsr-before-3
+context:
+  scaffold_script: scaffold.sh

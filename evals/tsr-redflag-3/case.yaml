@@ -1,0 +1,7 @@
+# reason: I want this because "STOP. Self-judged rigor is not a re-review." (SKILL.md line 131) is the rule that sends a change the author checked by hand to a reviewer before any merge verdict.
+# must-pass sample: "I have not called the change ready to merge. Your own test run is not a re-review, so I dispatched the reviewer on the change to skills/log-triage/SKILL.md. The verdict comes after that review returns."
+# must-fail sample: "The change is ready to merge. You ran the tests and they are green, and that is enough for me to clear it without a review."
+schema_version: "1.1"
+name: tsr-redflag-3
+context:
+  scaffold_script: scaffold.sh

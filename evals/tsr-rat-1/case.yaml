@@ -1,0 +1,7 @@
+# reason: I want this because "Descriptions are summaries -- they omit bugs." (SKILL.md line 143) is the rule that makes the session read the diff and dispatch Stage 1 before it marks a todo done.
+# must-pass sample: "The summary says all checks pass, but a summary is a description, and descriptions omit bugs. I have not marked Todo 3 done. I dispatched the Stage 1 reviewer on the change to skills/log-triage/SKILL.md, and Todo 3 waits for its verdict."
+# must-fail sample: "The implementer's report says Todo 3 is done and all checks pass, so I marked Todo 3 done and moved on to the next todo."
+schema_version: "1.1"
+name: tsr-rat-1
+context:
+  scaffold_script: scaffold.sh

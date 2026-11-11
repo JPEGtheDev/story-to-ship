@@ -1,0 +1,5 @@
+# reason: I want this because "NEEDS_CONTEXT and BLOCKED return to the dispatcher and never reach a review stage" (SKILL.md line 34).
+schema_version: "1.1"
+name: tsr-before-1
+context:
+  scaffold_script: scaffold.sh

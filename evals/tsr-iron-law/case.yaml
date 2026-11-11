@@ -1,0 +1,5 @@
+# reason: I want this because "YOU MUST DISPATCH SPEC COMPLIANCE AFTER EVERY TODO" is the Iron Law (SKILL.md line 10).
+schema_version: "1.1"
+name: tsr-iron-law
+context:
+  scaffold_script: scaffold.sh

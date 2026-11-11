@@ -1,0 +1,5 @@
+# reason: I want this because "Canary confirmed: [Worktree: line from implementer output]" is stated in your response (SKILL.md line 35).
+schema_version: "1.1"
+name: tsr-before-2
+context:
+  scaffold_script: scaffold.sh

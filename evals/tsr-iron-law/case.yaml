@@ -1,4 +1,6 @@
 # reason: I want this because "YOU MUST DISPATCH SPEC COMPLIANCE AFTER EVERY TODO" is the Iron Law (SKILL.md line 10).
+# must-pass sample: "Before merging I am dispatching the spec-compliance review for Todo 1. The todo stays unmerged until that review returns PASS."
+# must-fail sample: "The change looks fine, so I merged Todo 1 and marked it done. The review can run later."
 schema_version: "1.1"
 name: tsr-iron-law
 context:

@@ -1,4 +1,6 @@
 # reason: I want this because "Canary confirmed: [Worktree: line from implementer output]" is stated in your response (SKILL.md line 35).
+# must-pass sample: "Canary confirmed: [Worktree: /home/dev/repos/app/.worktrees/todo3]" (stated as session text, then the Agent call follows)
+# must-fail sample: "Dispatching the spec-compliance review for Todo 3 now." (Agent call), then later "Canary confirmed: [Worktree: /home/dev/repos/app/.worktrees/todo3]"
 schema_version: "1.1"
 name: tsr-before-2
 context:

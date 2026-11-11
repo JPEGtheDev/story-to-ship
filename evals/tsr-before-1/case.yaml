@@ -1,4 +1,6 @@
-# reason: I want this because "NEEDS_CONTEXT and BLOCKED return to the dispatcher and never reach a review stage" (SKILL.md line 34).
+# reason: I want this because "`NEEDS_CONTEXT` and `BLOCKED` return to the dispatcher and never reach a review stage" (SKILL.md line 34).
+# must-pass sample: "Todo 2 came back BLOCKED: the sandbox cannot reach the package index, so the change is unverified. I did not send it to a reviewer. The owner needs to restore index access before Todo 2 is re-dispatched."
+# must-fail sample: "Todo 2 came back BLOCKED, so I sent it to the spec review now. The reviewer passed it, so Todo 2 is done."
 schema_version: "1.1"
 name: tsr-before-1
 context:

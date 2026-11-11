@@ -16,7 +16,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 ## a. When It Applies
 
 1. Run this procedure before shipping any edit that shortens or rewords a skill's SKILL.md or references/ text. Step d.1 compares the commit before the edit with the edited tree, so the comparison runs after the edit and before shipping.
-2. Ship the changed skill only when, for every case and on every tier that ran it, the count of passing runs for the new version is at least the old version's count. A passing run is an entry of the case's `arms.with` list whose `passed` field is true. `aggregates.score` is not used for this decision. A first-run drop is not a verdict: step d.7 reruns it, and a drop that the step d.7 rerun confirms blocks the change. There is no tolerance for a confirmed drop.
+2. Ship the changed skill only when, for every case and on every tier that ran it, the count of passing runs for the new version is at least the old version's count. A passing run is an entry of the case's `arms.with` list whose `passed` field is true. `aggregates.score` is not used for this decision. A first-run drop is not a verdict: step d.8 reruns it, and a drop that the step d.8 rerun confirms blocks the change. There is no tolerance for a confirmed drop.
 
 ## b. Consent and Cost
 
@@ -42,7 +42,8 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
    `claude plugin eval <old-path> --runs 10 --model <tier> --judge-model <judge-model> --ablation none --scaffold --allow-tools Edit --no-publish --max-cost-usd <ceiling> --json <old-tier.json>`
    Write the Economy run to `<old-economy.json>` and the Standard run to `<old-standard.json>`.
 3. Run the same command on `<new-path>` at the same two tiers, with `--json <new-economy.json>` and `--json <new-standard.json>`. Keep the same `--runs 10`, `--model`, `--judge-model`, `--scaffold`, and `--allow-tools Edit` on both.
-4. Join each tier's old and new files, once per tier. The join prints one object per case: the case name, the tier, the old passing-run count, the new passing-run count, and `drop`, which is true when the new count is below the old count. A passing run is an entry of `arms.with` whose `passed` field is true; `aggregates.score` is not read.
+4. Run the no-skill checkout the same way as step d.3, at each tier that step d.3 uses, with the same `--runs`, `--model`, `--judge-model`, `--ablation none`, `--scaffold`, `--allow-tools Edit`, `--no-publish`, `--max-cost-usd` and tier flags, writing its own `--json` file (`no-skill.json`; the tier is added to the file name when there is more than one run). Its result is recorded with the comparison. It shows what the skill's text adds. It is not a gate: the ship decision in step a.2 is made by the old-versus-new count join only.
+5. Join each tier's old and new files, once per tier. The join prints one object per case: the case name, the tier, the old passing-run count, the new passing-run count, and `drop`, which is true when the new count is below the old count. A passing run is an entry of `arms.with` whose `passed` field is true; `aggregates.score` is not read.
    ```
    jq -n --arg tier <tier> --slurpfile o <old-tier.json> --slurpfile n <new-tier.json> '
      if ($o[0].cases | length) != ($n[0].cases | length)
@@ -57,18 +58,18 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
          | . + {drop: (.new < .old)} ]'
    ```
    Both files must hold the same number of cases. A case missing from new.json, or present more than once in it, stops the join with an error; it is never skipped.
-5. Escalate to Premium. A case escalates when its Economy verdict and its Standard verdict under the count rule of step a.2 differ: one tier passes it and the other fails it, so `drop` is true on one tier and false on the other. Run each escalated case at the Premium tier: 10 runs per version, with `--model Premium` and `--case <case-name>`, each run with its own ceiling and the owner's consent. Join the Premium files with the step d.4 join. Premium runs no case that did not escalate.
-6. A case whose `drop` is true on any tier is a drop: its new count is below its old count.
-7. For a dropped case, rerun that case once on both checkouts at the tier where it dropped: add `--case <case-name>` and a new `--json` file name. The rerun needs the owner's consent and a ceiling.
-8. If the rerun still shows a drop, the change is blocked.
-9. If the rerun shows no drop, the change may ship. Record the rerun result with the comparison.
+6. Escalate to Premium. A case escalates when its Economy verdict and its Standard verdict under the count rule of step a.2 differ: one tier passes it and the other fails it, so `drop` is true on one tier and false on the other. Run each escalated case at the Premium tier: 10 runs per version, with `--model Premium` and `--case <case-name>`, each run with its own ceiling and the owner's consent. Join the Premium files with the step d.5 join. Premium runs no case that did not escalate.
+7. A case whose `drop` is true on any tier is a drop: its new count is below its old count.
+8. For a dropped case, rerun that case once on both checkouts at the tier where it dropped: add `--case <case-name>` and a new `--json` file name. The rerun needs the owner's consent and a ceiling.
+9. If the rerun still shows a drop, the change is blocked.
+10. If the rerun shows no drop, the change may ship. Record the rerun result with the comparison.
 
 ## e. Why These Flags
 
 1. `--ablation none`: the default compares the plugin against no plugin and makes `tool_used: Skill` graders display-only. A comparison between two plugin versions needs those graders to count. The flag also halves the spend.
 2. `--no-publish`: keeps the HTML report local.
 3. `--scaffold --allow-tools Edit`: `--scaffold` is an opt-in that runs each case's `scaffold.sh` so the case has its test repository (without it the case runs in an empty folder), and the test repository's answers differ from the plugin's own files, so a session that reads the plugin folder instead gets the wrong answer; `--allow-tools Edit` is an operator grant that lets the `session-bootstrap-first` case edit its README; both are part of the owner's consent for the run.
-4. Model tiers: the judge (`--judge-model`) runs at the Premium tier for the first skill whose comparison uses this procedure, and at the Standard setting for each later skill. Sessions (`--model`) run at the Economy tier and at tier Standard, as steps d.2 and d.3 state, and at the Premium tier only for escalated cases (step d.5). Use the same tiers on both checkouts. The tiers are defined in the Model Selection section of the subagent-driven-development skill; this note names tiers only, so the procedure does not change when a model name does.
+4. Model tiers: the judge (`--judge-model`) runs at the Premium tier for the first skill whose comparison uses this procedure, and at the Standard setting for each later skill. Sessions (`--model`) run at the Economy tier and at tier Standard, as steps d.2 and d.3 state, and at the Premium tier only for escalated cases (step d.6). Use the same tiers on both checkouts. The tiers are defined in the Model Selection section of the subagent-driven-development skill; this note names tiers only, so the procedure does not change when a model name does.
 
 ## f. Failure Outcomes
 
@@ -92,7 +93,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 
 ## h. Limits
 
-1. Scores come from model runs. Ten runs per case per tier is the floor.
+1. Scores come from model runs. Ten runs per case per tier is the minimum.
 2. A case that scores the same with and without the plugin (the completion-claim case is one) does not prove the skill text matters.
 3. A passing comparison shows no measured drop. It does not show the text is unneeded.
 4. The join reads cases[].arms.with[].passed; check that field exists in the first --ablation none output before trusting the table.

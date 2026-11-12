@@ -23,7 +23,7 @@ REQS
 cat > diff.patch <<'PATCH'
 --- a/src/fetch.py
 +++ b/src/fetch.py
-@@ -12,1 +12,7 @@ def fetch(url):
+@@ -12,1 +12,8 @@ def fetch(url):
 -    return client.get(url)
 +    attempts = 0
 +    while True:

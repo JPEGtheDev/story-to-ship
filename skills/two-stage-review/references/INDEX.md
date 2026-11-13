@@ -19,7 +19,8 @@ These files back the 2-stage review protocol enforced by `../SKILL.md`.
 | File | Covers |
 |------|--------|
 | `REVIEW_LOOP.md` | Two ASCII decision trees for the review span -- canary confirmation, Stage 1 GAPS/PASS branches, Stage 2 per-file verdict branches for risky todos, mark-done and skill reload, and the whole-branch pass with its three-cycle cap -- full and compact forms |
-| `REVIEW_PROTOCOL.md` | Stage 1 spec-compliance review steps and the false-positive check for "no other lines should change" findings; Stage 2 code-quality/skill-reviewer routing for risky todos and the whole-branch pass, one dispatch per group of at most two files with per-file verdict blocks, the required IMPLEMENTER_EVIDENCE spot-check, and why the dispatch is grouped and pinned to the Premium tier; the whole-branch pass mechanics (CI wait, branch-diff input, fix-round charging, re-check); the adversarial-scenario gate for EXCEPTION/carve-out triggers; who re-checks a fix round; the canary rationale |
+| `REVIEW_PROTOCOL.md` | Stage 1 spec-compliance review steps and the false-positive check for "no other lines should change" findings; Stage 2 code-quality/skill-reviewer routing for risky todos and the whole-branch pass, one dispatch per group of at most two files with per-file verdict blocks, the required IMPLEMENTER_EVIDENCE spot-check, and why the dispatch is grouped and pinned to the Premium tier; the whole-branch pass mechanics (CI wait, branch-diff input, fix-round charging, re-check); the adversarial-scenario gate for EXCEPTION/carve-out triggers; who re-checks a fix round; the canary rationale; the re-review rule for review-covered territory and its enforcement note |
+| `SKILL_BACKGROUND.md` | Background for the skill: the related-skills list that places the review loop beside the dispatch, worktree, execution and Pivot Assessment skills |
 
 ---
 

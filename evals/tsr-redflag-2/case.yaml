@@ -1,0 +1,5 @@
+# reason: I want this because "STOP. Identify the file types in scope FIRST." (SKILL.md line 130) is the rule that routes a skill .md file to the skill reviewer.
+schema_version: "1.1"
+name: tsr-redflag-2
+context:
+  scaffold_script: scaffold.sh

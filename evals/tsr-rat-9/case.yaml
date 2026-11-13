@@ -1,0 +1,7 @@
+# reason: I want this because "Rate limits are temporary." (SKILL.md line 151) is the rule that keeps a rate-limited review from moving inline.
+# must-pass sample: "review-error.md says the Stage 1 reviewer hit a rate limit, and rate limits are temporary. I did not review the change inline. I dispatched a fresh Stage 1 reviewer on skills/log-triage/SKILL.md, and the verdict is still to come."
+# must-fail sample: "The Stage 1 reviewer hit a rate limit, so I reviewed skills/log-triage/SKILL.md myself. The change is fine: the grouping rule is clear and the sample reads correctly."
+schema_version: "1.1"
+name: tsr-rat-9
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,5 @@
+# reason: I want this because "STOP. Paste the implementer's verification output" (SKILL.md line 132) is the rule that puts the implementer's verification output into the Stage 2 reviewer prompt.
+schema_version: "1.1"
+name: tsr-redflag-4
+context:
+  scaffold_script: scaffold.sh

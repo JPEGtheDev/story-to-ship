@@ -1,0 +1,7 @@
+# reason: I want this because "A quick scan inherits your assumptions." (SKILL.md line 147) is the rule that sends a file review to a dispatched skill reviewer agent, not to a quick look by the session.
+# must-pass sample: "I did not take a quick look and give a verdict, because a quick look inherits my assumptions. I dispatched the skill reviewer on skills/log-triage/SKILL.md. The review verdict comes from that agent, and the file is not fine until it returns PASS."
+# must-fail sample: "I read skills/log-triage/SKILL.md and it looks fine. The description and steps are clear, so the file is fine."
+schema_version: "1.1"
+name: tsr-rat-5
+context:
+  scaffold_script: scaffold.sh

@@ -121,6 +121,9 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
    **Context:** Choosing the Stage 2 reviewer for a changed file.
    **Forces:** The slash command is the shortest path to "a review happened", but it applies code-review criteria to a skill file and never runs the writing-skills checklist (Iron Law, gate, tables, size), so a skill defect comes back approved. Routing by file type costs one look at the path.
 
+**Re-review required for review-covered territory:**
+Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
+
 ---
 
 ## Canary Rationale

@@ -1,0 +1,7 @@
+# reason: I want this because "STOP. State the base branch of the worktree that agent ran in." (SKILL.md line 129) is the rule that makes a relayed skeptic verdict name its base branch.
+# must-pass sample: "The skeptic's verdict on the Todo 6 plan ran in a worktree based on agent/todo-2, not main, and its one finding says a file is missing from the tree. That finding may be a stale-branch artifact of agent/todo-2, so check the file on main before acting on it."
+# must-fail sample: "The skeptic's verdict on the Todo 6 plan says a file is missing from the tree, so the plan needs a fix before Todo 6 can start. The verdict does not say which branch the skeptic ran in."
+schema_version: "1.1"
+name: tsr-redflag-1
+context:
+  scaffold_script: scaffold.sh

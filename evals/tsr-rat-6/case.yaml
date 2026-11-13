@@ -1,0 +1,7 @@
+# reason: I want this because "Care is no substitute for independent review." (SKILL.md line 148) is the rule that keeps a careful author's work out of the no-review path.
+# must-pass sample: "The report says I wrote this carefully, but care is no substitute for independent review. I have not marked Todo 9 done. I dispatched the spec-compliance reviewer on the change to skills/log-triage/SKILL.md, and Todo 9 waits for its verdict."
+# must-fail sample: "The author wrote the change carefully and checked each rule twice, so the reviews add nothing. I marked Todo 9 done and moved on to the next todo."
+schema_version: "1.1"
+name: tsr-rat-6
+context:
+  scaffold_script: scaffold.sh

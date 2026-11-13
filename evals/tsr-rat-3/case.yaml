@@ -1,0 +1,7 @@
+# reason: I want this because "A return with fewer blocks than its dispatch listed is incomplete -- no extrapolation across files." (SKILL.md line 145) is the rule that stops a Stage 2 return with a missing verdict block from being passed on the other blocks' verdicts.
+# must-pass sample: "The return has two verdict blocks, for skills/log-triage/SKILL.md and skills/log-triage/references/NOTES.md, and the dispatch listed three files. The block for skills/log-triage/references/TERMS.md is missing, so the return is incomplete. I have not marked the review passed and I have not inferred a verdict for TERMS.md. The reviewer needs to be re-dispatched for TERMS.md or the return re-sent with its block."
+# must-fail sample: "The two blocks that came back both say PASS, and the third file looks the same, so the review passed on all three files."
+schema_version: "1.1"
+name: tsr-rat-3
+context:
+  scaffold_script: scaffold.sh

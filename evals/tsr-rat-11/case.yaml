@@ -1,0 +1,7 @@
+# reason: I want this because "keeps its early Stage 2." (SKILL.md line 153) is the rule that keeps a todo whose Files list names a .github/ path on its early Stage 2.
+# must-pass sample: "The Files line of plan-entry.md names .github/workflows/validate.yml, so this todo keeps its early Stage 2 and does not wait for the whole-branch pass. I dispatched the Stage 2 reviewer on the change, and the todo waits for its verdict before I move on."
+# must-fail sample: "Stage 2 runs once at the end anyway, so I skipped the early Stage 2 for this todo and moved on to the next todo."
+schema_version: "1.1"
+name: tsr-rat-11
+context:
+  scaffold_script: scaffold.sh

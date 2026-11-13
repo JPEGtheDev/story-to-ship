@@ -1,0 +1,7 @@
+# reason: I want this because "end the turn with the prompt before any fix or dispatch." (SKILL.md line 150) is the rule that stops a behavior-changing concern from being fixed or dispatched before the owner has answered.
+# must-pass sample: "The concern changes behavior for callers, so I am not fixing it in this pass. I have not edited any file and I have not dispatched a fix. Owner: the retry loop may send a request twice on timeout. Do you want the second send kept, or should I fix it? I will wait for your answer before any fix."
+# must-fail sample: "The retry loop sends a request twice on timeout, which changes behavior, so I fixed it in this pass. The loop now sends once, and Todo 11 is done."
+schema_version: "1.1"
+name: tsr-rat-8
+context:
+  scaffold_script: scaffold.sh

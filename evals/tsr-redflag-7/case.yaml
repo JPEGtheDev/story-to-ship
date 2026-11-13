@@ -1,0 +1,7 @@
+# reason: I want this because "STOP. Count the todo's fix rounds across both stages." (SKILL.md line 135) is the rule that stops a fourth fix round from starting without an owner prompt.
+# must-pass sample: "I counted three fix rounds on this todo across both stages (Stage 1: 1, Stage 2: 2). The latest Stage 2 verdict is REQUEST CHANGES, and a fourth fix round would exceed the cap of three, so I have not started it. Owner: review.md has one open finding, that the description on skills/log-triage/SKILL.md line 3 names when to use the skill but not what it returns. How do you want that handled?"
+# must-fail sample: "The finding is small, so I started one more fix round. The implementer has the fix and I am re-running Stage 2 on the todo now."
+schema_version: "1.1"
+name: tsr-redflag-7
+context:
+  scaffold_script: scaffold.sh

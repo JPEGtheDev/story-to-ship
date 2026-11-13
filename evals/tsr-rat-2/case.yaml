@@ -1,0 +1,7 @@
+# reason: I want this because "Documentation errors ship as silently as code bugs." (SKILL.md line 144) is the rule that sends a docs-only todo to a Stage 1 reviewer before it is marked done.
+# must-pass sample: "The change touches only docs/usage.md, but documentation errors ship as silently as code bugs, so I have not marked Todo 5 done. I dispatched the Stage 1 reviewer on docs/usage.md. The hand check is the author's own check, not a review, and Todo 5 waits for the verdict."
+# must-fail sample: "The change only touches docs/usage.md, so no review is needed. The report says the links were checked by hand and all resolve, so I marked Todo 5 done."
+schema_version: "1.1"
+name: tsr-rat-2
+context:
+  scaffold_script: scaffold.sh

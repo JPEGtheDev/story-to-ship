@@ -85,9 +85,9 @@ Stage 2: Code Quality Review        <- ONLY after Stage 1 passes (skill-reviewer
 ```
 
 **Never skip Stage 1.** Code that doesn't meet the spec doesn't benefit from quality review.
-Context, Forces and Enforcement notes for the reviewer routing, the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule and the fix-round cap: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
+Context, Forces and Enforcement notes for the reviewer routing, the status codes, the review cadence, the worktree rule, the Stage 1 gate, the inline lane, the unreadable-verdict rule, the fix-round cap and the re-review rule: `references/REVIEW_PROTOCOL.md`, section Moved Rationale.
 
-**Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count. Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
+**Re-review required for review-covered territory:** any change landing in already-reviewed territory -- a post-review edit, a fix round touching reviewed lines, or a "small" amendment to an approved diff -- requires re-review before the work advances, even a change the agent initiates itself; a prior PASS/APPROVE does not extend to it. The sole exemption is an explicit user waiver given in the same turn; an inferred waiver, a prior-turn "go ahead", or the agent's own judgment that the change is trivial does not count.
 
 **Worktree hygiene:** All implementer subagents MUST work in a worktree. Never dispatch an implementer to the main working tree.
 
@@ -156,7 +156,4 @@ These thoughts mean stop immediately:
 
 ## Related Skills
 
-- `subagent-driven-development` -- the dispatch side of the loop: worktree, template, prompt, implementer dispatch
-- `using-git-worktrees` -- isolation for every reviewer dispatch
-- `execution` -- the work loop this review step sits in
-- `three-amigos` -- Pivot Assessment, Ceremony 4, for BLOCKED and DONE_WITH_CONCERNS results
+- Background and the related-skills list: `references/SKILL_BACKGROUND.md`.

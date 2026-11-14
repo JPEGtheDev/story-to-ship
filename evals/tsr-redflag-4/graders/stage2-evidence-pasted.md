@@ -1,6 +1,6 @@
 ---
 type: tool_used
 tool: Agent
-input_match: "14 passed"
+input_match: "TSR-SUITE-RUN"
 min: 1
 ---

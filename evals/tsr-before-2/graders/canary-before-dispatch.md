@@ -1,6 +1,6 @@
 ---
 type: llm
-focus: trace
+focus: last_message
 ---
 
-Pass only if, before the first Agent call in the trace, the session's own reply text states a line that begins "Canary confirmed:" and carries the Worktree line copied from report.md, which is "Worktree: /home/dev/repos/app/.worktrees/todo3". Fail if no "Canary confirmed:" line appears before the first Agent call, if the line appears only after the dispatch, or if the Worktree text in it is not copied from the report.
+Pass only if the final message states a line that begins "Canary confirmed:" and carries the Worktree line copied from report.md, which is "Worktree: /home/dev/repos/app/.worktrees/todo3", and presents that line as stated before dispatching Stage 1. Fail if no "Canary confirmed:" line appears, if the message says the line was stated only after the Stage 1 dispatch, or if the Worktree text in it is not copied from the report.

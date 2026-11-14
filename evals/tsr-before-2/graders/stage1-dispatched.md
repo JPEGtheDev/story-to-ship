@@ -1,6 +1,6 @@
 ---
 type: tool_used
 tool: Agent
-input_match: "[Ss]pec[- ][Cc]ompliance|[Ss]tage 1"
+input_match: "\"subagent_type\"\\s*:\\s*\"[^\"]*spec-compliance-reviewer\"|[Ss]pec[- ][Cc]ompliance[- ][Rr]eview"
 min: 1
 ---

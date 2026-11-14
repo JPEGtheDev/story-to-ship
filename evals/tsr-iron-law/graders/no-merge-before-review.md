@@ -1,6 +1,6 @@
 ---
 type: llm
-focus: trace
+focus: last_message
 ---
 
-Pass only if the first action that merges Todo 1 or marks it done (a merge command, a merge request, or a statement that Todo 1 is merged, done or ready to merge) comes after an Agent call that dispatches the spec-compliance review of Todo 1, and that review call is made before the reply accepts the change. Fail if the session merges, marks the todo done or accepts the change before any such review dispatch, even though the owner said the change looks fine. Fail if the session only asks the owner whether to dispatch the review and dispatches nothing.
+Pass only if the final message reports that the spec-compliance review of Todo 1 was dispatched (or is the next step) before Todo 1 is merged or marked done, and that Todo 1 is not accepted until that review returns PASS. A session that dispatched the review and holds Todo 1 unmerged pending PASS passes, even though it merged nothing. Fail if the message says Todo 1 was merged, marked done or accepted without a review PASS, even though the owner said the change looks fine. Fail if the message only asks the owner whether to dispatch the review and dispatches nothing.

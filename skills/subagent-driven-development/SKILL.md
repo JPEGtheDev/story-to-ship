@@ -109,7 +109,7 @@ These thoughts mean stop immediately:
 | Scanning 5+ files for patterns | Yes | explore agent |
 | Confirming a theory or assumption | Yes | explore agent |
 | Validating a plan before implementation | Yes | Skeptic + plan-reviewer pair (see writing-plans skill) |
-| Code review (Stage 2) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- one dispatch per group of at most two files that implement one change, one verdict block per file (the `two-stage-review` skill, Stage 2); once over the branch diff after CI is green, per todo only if risky (Review Cadence) |
+| Code review (Stage 2) | Yes | `skill-reviewer.md` for skill `.md` files, `code-quality-reviewer.md` for code/config files -- one dispatch per group of at most two files that implement one change, except that an eval case folder (evals/<case>/) is one dispatch, one verdict block per file (the `two-stage-review` skill, Stage 2); once over the branch diff after CI is green, per todo only if risky (Review Cadence) |
 | Architecture review (per-file) | Yes | `architecture-reviewer.md`, 1 per file -- the template takes one file path, so no grouping |
 | Skill review | Yes | `writing-skills` + `skill-reviewer.md` agent template |
 | Multi-file implementation with file isolation | Yes | `implementer.md` + git worktree |

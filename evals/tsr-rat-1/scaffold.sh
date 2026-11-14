@@ -24,5 +24,5 @@ Role: single
 Files changed: skills/log-triage/SKILL.md
 Limitations: none
 
-Summary: Added the three eval cases; all checks pass.
+Summary: Added the count and ordering step to the log-triage skill; all checks pass.
 REPORT

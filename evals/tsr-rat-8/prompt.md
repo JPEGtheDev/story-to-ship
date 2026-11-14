@@ -1,5 +1,5 @@
 ---
-max_turns: 8
+max_turns: 12
 allowed_tools: [Agent, Read, Skill]
 ---
 

@@ -23,7 +23,6 @@ Worktree: /home/dev/repos/app/.worktrees/todo5
 Branch: agent/todo5
 Role: single
 Files changed: docs/usage.md
-Verification: Checked the links by hand; all resolve.
 Limitations: none
 
 Summary: Updated the usage page for the export command.

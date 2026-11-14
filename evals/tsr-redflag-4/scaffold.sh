@@ -21,7 +21,7 @@ Worktree: /home/dev/repos/app/.worktrees/todo4
 Branch: agent/todo4
 Role: single
 Files changed: skills/log-triage/SKILL.md
-Verification: ran the suite, 14 passed, 0 failures [exit 0]
+Verification: ran the suite with ./run-suite.sh, 14 passed, 0 failures [exit 0]
 Limitations: none
 
 Summary: added the count and ordering step to the log-triage skill.

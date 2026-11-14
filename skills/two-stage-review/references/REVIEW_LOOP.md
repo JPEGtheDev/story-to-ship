@@ -29,7 +29,7 @@ Stage 1: Dispatch spec-compliance-reviewer (spec-compliance-reviewer.md)
          +-- Todo risky (a Files entry or a changed file under .github/, hooks/ or agents/) --> Stage 2 right after Stage 1, below
          |
          v
-Stage 2 (risky todo only; the whole-branch pass after the last todo is below): Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one dispatch per group of at most two files that implement one change; one verdict block per file listed
+Stage 2 (risky todo only; the whole-branch pass after the last todo is below): Dispatch `code-quality-reviewer.md` (code/config files) or `skill-reviewer.md` (skill `.md` files) -- one dispatch per group of at most two files that implement one change (the files of an eval case folder go to code-quality-reviewer.md, one dispatch per folder, per the SKILL.md Stage 2 rule); one verdict block per file listed
     |
     +-- Verdict missing or not spelled as the replying reviewer's own template spells it (unreadable, off-template) in any block --> counts as not passed. Re-dispatch once, resuming the same reviewer when possible; this is not a fix round. If the reply is unreadable again --> stop and prompt the owner with the raw reply and the verdict values that reviewer's template defines.
     |
@@ -45,7 +45,7 @@ After the last todo (the whole-branch pass; it is not run per todo):
 CI on the feature branch head: red --> classify it (story-coordinator Red CI section), fix own code first (a CI fix is not a Stage 2 cycle) --> green
          |
          v
-Stage 2 over the branch diff (`git diff --name-only origin/main...HEAD`, minus any file whose latest change came from a risky todo that already passed its Stage 2, grouped as in the Stage 2 rule above: at most two files per dispatch, one block per file; same verdict-block rules, including the unreadable-verdict re-dispatch)
+Stage 2 over the branch diff (`git diff --name-only origin/main...HEAD`, minus any file whose latest change came from a risky todo that already passed its Stage 2, grouped as in the Stage 2 rule above: at most two files per dispatch (an eval case folder is one dispatch of code-quality-reviewer.md, per the SKILL.md Stage 2 rule), one block per file; same verdict-block rules, including the unreadable-verdict re-dispatch)
     |
     +-- Every block APPROVE, APPROVE WITH NITS, PASS, or PASS (size advisory) --> whole-branch pass complete once each nit is fixed or declined with a recorded reason, and any size report is recorded for the owner's decision
     |
@@ -67,7 +67,7 @@ Stage 2 over the branch diff (`git diff --name-only origin/main...HEAD`, minus a
     Stage 1: spec-compliance-reviewer.md -> GAPS? -> implementer fixes -> re-run Stage 1 (fix round, at most 3 fix rounds per todo across both stages; a GAPS needing a fourth fix round -> stop and prompt the owner with the open findings)
               |
               v
-    Stage 2 (risky todo only, right after Stage 1 PASS; other todos go straight to mark-done): `code-quality-reviewer.md` or `skill-reviewer.md` by file type -- at most two files that implement one change per dispatch, one block per file -> any block REQUEST CHANGES / REJECT / NEEDS WORK? -> implementer fixes -> re-run Stage 2 (same fix round count per todo; a Stage 1 re-run forced by this fix belongs to the same round; a not-passed verdict needing a fourth fix round -> stop and prompt the owner with the open findings)
+    Stage 2 (risky todo only, right after Stage 1 PASS; other todos go straight to mark-done): `code-quality-reviewer.md` or `skill-reviewer.md` by file type (the files of an eval case folder go to code-quality-reviewer.md, one dispatch per folder, per the SKILL.md Stage 2 rule) -- at most two files that implement one change per dispatch, one block per file -> any block REQUEST CHANGES / REJECT / NEEDS WORK? -> implementer fixes -> re-run Stage 2 (same fix round count per todo; a Stage 1 re-run forced by this fix belongs to the same round; a not-passed verdict needing a fourth fix round -> stop and prompt the owner with the open findings)
               |
               v
     Mark todo done once each nit is fixed or declined with a recorded reason, and any size report is recorded for the user's decision. Reload skills (session-bootstrap refresh rule).

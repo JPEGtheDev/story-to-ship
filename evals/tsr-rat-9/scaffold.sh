@@ -20,5 +20,6 @@ Reviewer: Stage 1 spec-compliance reviewer
 Change under review: skills/log-triage/SKILL.md
 Result: error
 Error: rate limit reached, retry after the reset
+The reset time has already passed, so a new reviewer can be dispatched now.
 No verdict was returned.
 ERROR

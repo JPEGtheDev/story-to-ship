@@ -27,7 +27,7 @@ REPORT
 cat > requirements.md <<'REQS'
 # Todo 4 requirements
 
-- skills/log-triage/SKILL.md gains a rule that groups repeated errors by their first stack frame.
+- skills/log-triage/SKILL.md is added with a rule that groups repeated errors by their first stack frame.
 - The rule says to read one sample from each group.
 - No other file changes.
 REQS
@@ -48,5 +48,5 @@ cat > stage1.md <<'STAGE1'
 # Todo 4 Stage 1 record
 
 Stage 1 spec compliance review: PASS
-Both requirements in requirements.md are met by diff.patch, and no other file changes.
+All three requirements in requirements.md are met by diff.patch, and no other file changes.
 STAGE1

@@ -26,3 +26,9 @@ Limitations: none
 
 Summary: added the count and ordering step to the log-triage skill. The change edits only that skill file.
 REPORT
+cat > stage1.md <<'STAGE1'
+# Todo 5 Stage 1 record
+
+Stage 1 spec compliance review: PASS
+The count and ordering step is in skills/log-triage/SKILL.md, and no other file changes.
+STAGE1

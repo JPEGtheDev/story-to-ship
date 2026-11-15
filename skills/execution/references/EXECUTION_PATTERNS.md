@@ -156,7 +156,7 @@ After any mistake or user correction:
 | Writing/editing C++ | `code-quality`, `cpp-patterns`, `cpp-safety` |
 | Commits or PRs | `versioning` |
 | CI/CD (Continuous Delivery) work | `workflow` |
-| Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule (an eval case folder, evals/<case>/, is one dispatch instead) |
+| Code review (code/config files) | `code-quality-reviewer` agent template, at most two files per dispatch, grouped per the `two-stage-review` skill's Stage 2 rule |
 | Skill review (skill `.md` files) | `writing-skills` + `skill-reviewer` agent template |
 
 Stale-reference fix scope is governed by the Unscoped-sweep rule for stale-reference todos in `subagent-driven-development`; scope from sweeps, never from known-site lists.

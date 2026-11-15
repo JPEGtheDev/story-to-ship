@@ -48,7 +48,7 @@ See the canonical Red Flags table in `../SKILL.md`.
 |---|---|
 | "I'll check this myself" (for 5+ files) | Fills context, biased by assumptions |
 | Skipping Stage 1 review because "it looks right" | Spec gaps ship; quality review doesn't catch them |
-| One agent reviewing more than two files, or two unrelated ones | Coverage is shallow; the cap is two files that implement one change, each with its own verdict block (an eval case folder, evals/<case>/, is the one exception to the two-file cap: one code-quality-reviewer.md dispatch per folder, still one verdict block per file, per the two-stage-review skill's Stage 2 rule) |
+| One agent reviewing more than two files, or two unrelated ones | Coverage is shallow; the cap is two files that implement one change, each with its own verdict block |
 | Acting on subagent findings without verifying | Subagents can be wrong -- findings are hypotheses |
 | Dispatching without a clear return format | Agent returns noise |
 | Sharing full session history as context | Contaminates search; subagent inherits your assumptions |
@@ -62,4 +62,4 @@ This is the observable signal that step 3 of BEFORE PROCEEDING was executed, not
 
 ## Dispatch Decision Table forces
 
-**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The Dispatch Decision Table in SKILL.md draws the line at read-only work that is small enough to fit, plus one write-side lane the inline-edit guard hook (hooks/inline-edit-guard.sh) enforces: a literal prose edit under the inline-edit caps (30 changed lines in the session, 10 in one file); anything else that writes a file, or reads more than a couple of files, is dispatched.
+**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit, plus one write-side lane the guard hook enforces: a literal prose edit under the caps; anything else that writes a file, or reads more than a couple of files, is dispatched.

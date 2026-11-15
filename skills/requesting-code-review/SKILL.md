@@ -30,7 +30,7 @@ YOU MUST state what to look for in every review request. No exceptions.
 [+] All met -> proceed to request review
 [-] Any unmet -> resolve all unmet items before requesting review
 
-Requesting review against a red CI or an incomplete PR description wastes the reviewer's time and erodes trust.
+Rationale for the rules above: references/RATIONALE.md.
 
 ---
 
@@ -59,7 +59,7 @@ Not all review is equal. State explicitly in the review request:
 
 For non-trivial PRs, dispatch code review agents before requesting human review:
 
-**Rule: every changed file is listed in a review dispatch, at most two files per dispatch, grouped so files that implement one change go together. An eval case folder (evals/<case>/) is the one exception: all its changed files share one code-quality-reviewer.md dispatch, per the two-stage-review skill's Stage 2 rule. Each dispatch returns one verdict block per file (the Stage 2 rule of the `two-stage-review` skill). Identify the file type first, then dispatch the matching template:**
+**Rule: every changed file is listed in a review dispatch, at most two files per dispatch, grouped so files that implement one change go together. An eval case folder (evals/<case>/, the files of one eval test case) is the one exception: all its changed files share one code-quality-reviewer.md dispatch. Each dispatch returns one verdict block per file (the Stage 2 rule of the `two-stage-review` skill). Identify the file type first, then dispatch the matching template:**
 
 - Skill `.md` files (in `skills/`) -> `skill-reviewer.md`
 - Code/config files -> `code-quality-reviewer.md`
@@ -83,17 +83,11 @@ Focus: [specific concern for these files]
 
 **Collect all agent results before acting on any of them.** A REQUEST CHANGES, REJECT, or NEEDS WORK verdict from any agent must be resolved before requesting human review.
 
-**Agent review does NOT replace human review** -- it catches the mechanical issues so human review can focus on design and intent.
-
 ---
 
 ## SHA-Based Dispatch
 
-Always include the commit SHA in review requests and agent dispatches. This ensures:
-
-1. The reviewer knows exactly what they are reviewing
-2. Review comments are anchored to a specific state -- not a moving target
-3. If the branch advances after review is requested, the SHA makes that visible
+Always include the commit SHA in review requests and agent dispatches.
 
 ```bash
 # Get current HEAD SHA for dispatch
@@ -124,8 +118,7 @@ Do not add reviewers as a formality. Each reviewer MUST have a specific reason f
 If a reviewer approves without commenting on the specific concerns you listed:
 
 - Ask explicitly: "Did you have a chance to look at [specific concern]? I marked it in the review focus section."
-- Do not accept a blanket LGTM as coverage of your stated concerns. It means the reviewer had no issues -- it does not mean they checked what you asked them to check.
-
+- Do not accept a blanket LGTM as coverage of your stated concerns.
 ---
 
 ## Red Flags -- STOP

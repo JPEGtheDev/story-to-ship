@@ -26,12 +26,12 @@ Violating the letter of this rule is violating the spirit of this rule.
 
 | Step | Agent | Runs when |
 |------|-------|-----------|
-| 1-3 | Abstractive, Extractive, State/Assign/Action/Complete (SAAC) | Parallel -- after source is in context |
+| 1-3 | Abstractive, Extractive, State/Assign/Action/Complete (SAAC) | First agent alone, then the other two in parallel -- after source is in context |
 | 4 | Synthesizer | After all 3 method agents return |
 | 5 | Claim Enrichment | After synthesizer writes temp file |
 | 6 | Quality Evaluator | After claim enrichment writes enriched temp file |
 
-Partial failure. After the check above passes, or for an exempt template: 1 of 3 methods fails -> synthesizer notes the gap and proceeds. 2+ fail -> halt and report blocked.
+Partial failure. After the first-agent check passes, or for an exempt template: 1 of 3 methods fails -> synthesizer notes the gap and proceeds. 2+ fail -> halt and report blocked.
 
 ---
 
@@ -43,7 +43,7 @@ Before dispatching any agent, verify:
 2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (record `ASK_USER`; ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file)).
 3. `scratch/summaries/` exists for the temp file.
 
-[+] All met -> dispatch one method agent alone first. Before dispatching the other two, check its output: it carries the SOURCE ECHO block and every field its return format lists, and, when the dispatch names an output path, the file exists at that literal path with no unfilled placeholder token in it. If the check passes, dispatch the other two in parallel. A method template that already passed this check in this session is exempt: dispatch all three in parallel. If the check fails, fix the template and run the check again on one method agent before releasing the others. A method agent that returns no final report, or returns BLOCKED or NEEDS_CONTEXT, counts as a failed check.
+[+] All met -> dispatch one method agent alone first. Before the other two are sent, check its output: it carries the SOURCE ECHO block and every field its return format lists. Method agents return text only, so no output-path check applies. State the check and its result in the dispatch turn; the passing agent's output is kept as its work. If the check passes, dispatch the other two in parallel. The check keys on the shared template agents/summarization-method.md and its sha256 (sha256sum): a template whose check already passed in this session with the same sha256 is exempt, and all three run in parallel; a changed sha256 starts a new check, and after a compaction every template is checked again. If the check fails, state the failure in the dispatch turn, fix the template, move the failed output aside, and run the check again on one method agent before releasing the others. A third failed check ends the batch: state the failures and hand the decision to the owner. A method agent that returns no final report, or returns BLOCKED or NEEDS_CONTEXT, counts as a failed check.
 [-] Source missing -> fetch or read the source. Do not dispatch.
 [-] No path and no directory -> record `ASK_USER`. This adds an action and does not block dispatch: dispatch agents 1-3 as normal, then ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file).
 [-] `scratch/summaries/` missing -> create it (`mkdir -p scratch/summaries`), then re-check.
@@ -84,7 +84,7 @@ Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 
 | Excuse | Reality |
 |--------|---------|
-| "Two of the three methods returned, good enough" | All three must report pass or fail. A method still running has not failed -- wait. After the check above passes, or for an exempt template: 1 failed -> proceed with the gap noted; 2+ failed -> halt. |
+| "Two of the three methods returned, good enough" | All three must report pass or fail. A method still running has not failed -- wait. After the first-agent check passes, or for an exempt template: 1 failed -> proceed with the gap noted; 2+ failed -> halt. |
 | "The source was in context from a prior message" | Re-read or re-fetch the full source now. Partial context produces partial summaries. |
 | "I'll derive the output path without asking" | If no path and no directory was given: ask the user after the enriched temp file is written and before dispatching the quality agent (it writes the final file). Do not invent a path. |
 | "The temp file is good enough, skip quality" | The quality gate is mandatory. Temp file is for review only. Final output requires the quality agent to run. |

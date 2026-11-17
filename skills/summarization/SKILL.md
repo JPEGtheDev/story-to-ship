@@ -43,7 +43,8 @@ Before dispatching any agent, verify:
 2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (record `ASK_USER`; ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file)).
 3. `scratch/summaries/` exists for the temp file.
 
-[+] All met -> dispatch one method agent alone first. Before the other two are sent, check its output: it carries the SOURCE ECHO block and every field its return format lists. Method agents return text only, so no output-path check applies. State the check and its result in the dispatch turn; the passing agent's output is kept as its work. If the check passes, dispatch the other two in parallel. The check keys on the shared template agents/summarization-method.md and its sha256 (sha256sum): a template whose check already passed in this session with the same sha256 is exempt, and all three run in parallel; a changed sha256 starts a new check, and after a compaction every template is checked again. If the check fails, state the failure in the dispatch turn, fix the template, move the failed output aside, and run the check again on one method agent before releasing the others. A third failed check ends the batch: state the failures and hand the decision to the owner. A method agent that returns no final report, or returns BLOCKED or NEEDS_CONTEXT, counts as a failed check.
+[+] All met -> dispatch one method agent alone first, then check its output: it carries the SOURCE ECHO block, every field its return contract lists, and, when a dispatch names an output path, the file exists at that literal path and holds no unfilled placeholder token. State the check and its result in the dispatch turn; the passing agent's output is kept as its work. Check passes -> dispatch the other two in parallel. The template agents/summarization-method.md is exempt when its sha256 (sha256sum) already passed this check in this session: dispatch all three in parallel. A changed sha256 starts a new check, and after a compaction every template is checked again.
+[-] First-agent check fails -> state the failure in the dispatch turn, fix the template, move the failed output aside, and run the check again on one method agent before releasing the others. A third failed check ends the batch: state the failures and hand the decision to the user. A method agent that returns no final report, or returns BLOCKED or NEEDS_CONTEXT, counts as a failed check.
 [-] Source missing -> fetch or read the source. Do not dispatch.
 [-] No path and no directory -> record `ASK_USER`. This adds an action and does not block dispatch: dispatch agents 1-3 as normal, then ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file).
 [-] `scratch/summaries/` missing -> create it (`mkdir -p scratch/summaries`), then re-check.
@@ -58,7 +59,7 @@ Before dispatching the synthesizer, state:
 Method agents complete: Abstractive [pass/fail], Extractive [pass/fail], SAAC [pass/fail]
 ```
 
-Why the gate check matters: references/RATIONALE.md.
+This signals all three gates were checked before synthesis. It does not prove method output quality.
 
 ---
 

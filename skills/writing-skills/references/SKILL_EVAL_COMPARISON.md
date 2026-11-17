@@ -23,7 +23,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 1. Every eval run uses model usage. Get the owner's consent for each run before starting it.
 2. Pass a ceiling on every run: `--max-cost-usd <ceiling>`.
 3. Consent for one run does not cover a rerun or a changed command. Ask again.
-4. The comparison has one run per checkout and tier. Each run gets its own ceiling. The comparison runs several invocations, and the total of all paid runs must stay within the total budget the owner sets in the launch file. Before starting a run, if the running total of finished runs (the sum of their `costUsd`) plus that run's ceiling would pass the total budget, stop and return to the owner. Record the running total with the comparison after each invocation.
+4. The comparison has one run per checkout and tier. Each run gets its own ceiling. The comparison runs several invocations, and the total of all paid runs must stay within the total budget. Before starting a run, if the running total of finished runs (the sum of their `costUsd`) plus that run's ceiling would pass the total budget, stop and return to the owner. Record the running total with the comparison after each invocation.
 5. If consent is withheld, no run happens. Do not ship the change on the strength of this procedure.
 6. `--scaffold` runs each case's `scaffold.sh` as bash on the machine as the user running the command. Run evals only on code you have read, including every `scaffold.sh` in both checkouts.
 
@@ -38,7 +38,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
    - **old**: the base commit before the edit, in the old checkout. Make it with `git worktree add <old-path> <base-commit>`, where `<base-commit>` is the commit before the edit.
    - **new**: the edited tree, kept as the new checkout at `<new-path>`.
    - **no-skill**: a copy of the new tree with the skill's own directory removed, so the skill is absent. Its `evals/` directory is identical to the new one (checked in step c.2).
-2. Run the old checkout once at the Economy tier and once at tier Standard, with 10 runs per case. The tiers run are the tiers that load the skill under test; all tiers run on escalation (step d.6). Pass the tier as `--model <tier>`:
+2. Run the old checkout once at the Economy tier and once at tier Standard, with 10 runs per case. The Economy and Standard tiers run, and Premium runs only on escalation (step d.6). Pass the tier as `--model <tier>`:
    `claude plugin eval <old-path> --runs 10 --model <tier> --judge-model <judge-model> --ablation none --scaffold --allow-tools Edit --no-publish --max-cost-usd <ceiling> --json <old-tier.json>`
    Write the Economy run to `<old-economy.json>` and the Standard run to `<old-standard.json>`.
 3. Run the same command on `<new-path>` at the same two tiers, with `--json <new-economy.json>` and `--json <new-standard.json>`. Keep the same `--runs 10`, `--model`, `--judge-model`, `--scaffold`, and `--allow-tools Edit` on both.
@@ -60,18 +60,18 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
          | . + {drop: (.new < .old)} ]'
    ```
    Both files must hold the same number of cases. A case missing from new.json, or present more than once in it, stops the join with an error; it is never skipped.
-6. Escalate to Premium. A case escalates when its Economy verdict and its Standard verdict under the count rule of step a.2 differ: one tier passes it and the other fails it, so `drop` is true on one tier and false on the other. Run each escalated case at the Premium tier: 10 runs per version, with `--model Premium` and `--case <case-name>`, each run with its own ceiling and the owner's consent. Join the Premium files with the step d.5 join. Premium runs no case that did not escalate. Escalation waits for the step d.8 rerun result, so an unconfirmed drop never starts Premium runs. A Premium result decides the tier verdict for that case when it agrees with a single tier; it does not override the count rule of step a.2.
+6. Escalation. A case escalates when its Economy verdict and its Standard verdict under the count rule of step a.2 differ: one tier passes it and the other fails it, so `drop` is true on one tier and false on the other. Premium runs no case that did not escalate. Step d.10 runs the escalated cases at Premium, after the step d.8 rerun.
 7. A case whose `drop` is true on any tier is a drop: its new count is below its old count.
 8. For a dropped case, rerun that case once on both checkouts at the tier where it dropped: add `--case <case-name>` and a new `--json` file name. The rerun needs the owner's consent and a ceiling.
 9. If the rerun still shows a drop, the change is blocked.
-10. If the rerun shows no drop, the change may ship. Record the rerun result with the comparison.
+10. If the rerun shows no drop, the change may ship unless Premium decides against it. Record the rerun result with the comparison. For each escalated case whose rerun shows no drop, run it at Premium: 10 runs per version, with `--model Premium` and `--case <case-name>`, each run with its own ceiling and the owner's consent, then join the Premium files with the step d.5 join. A Premium result decides a case only when the step d.8 rerun does not confirm the Economy and Standard drop. The count rule of step a.2 still governs the ship decision.
 
 ## e. Why These Flags
 
 1. `--ablation none`: the default compares the plugin against no plugin and makes `tool_used: Skill` graders display-only. A comparison between two plugin versions needs those graders to count. The flag also halves the spend.
 2. `--no-publish`: keeps the HTML report local.
 3. `--scaffold --allow-tools Edit`: `--scaffold` is an opt-in that runs each case's `scaffold.sh` so the case has its test repository (without it the case runs in an empty folder), and the test repository's answers differ from the plugin's own files, so a session that reads the plugin folder instead gets the wrong answer; `--allow-tools Edit` is an operator grant that lets the `session-bootstrap-first` case edit its README; both are part of the owner's consent for the run.
-4. Model tiers: the judge (`--judge-model`) runs at the Premium tier for the first three skill comparisons, then at the Standard tier. Sessions (`--model`) run at the Economy tier and at tier Standard, as steps d.2 and d.3 state, and at the Premium tier only for escalated cases (step d.6). Use the same tiers on both checkouts. The tiers are defined in the Model Selection section of the subagent-driven-development skill; this note names tiers only, so the procedure does not change when a model name does.
+4. Model tiers: the judge (`--judge-model`) runs at the Premium tier, then at the Standard tier. Sessions (`--model`) run at the Economy tier and at tier Standard, as steps d.2 and d.3 state, and at the Premium tier only for escalated cases (step d.6). Use the same tiers on both checkouts. The tiers are defined in the Model Selection section of the subagent-driven-development skill; this note names tiers only, so the procedure does not change when a model name does.
 
 ## f. Failure Outcomes
 

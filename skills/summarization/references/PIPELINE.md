@@ -6,7 +6,7 @@ Detailed per-agent prompt structure for the 6-agent summarization pipeline.
 
 ## Agents 1-3: Parallel Method Agents
 
-Dispatch three `summarization-method` agents simultaneously via the Agent tool.
+Dispatch three `summarization-method` agents as a batch via the Agent tool. The batch starts with one first-dispatch check (see the First-Dispatch Check section of the dispatching-parallel-agents skill); the other two agents wait until that check's output passes.
 
 **Each agent receives:**
 - Full source content (paste inline in the prompt -- do not pass a file path)

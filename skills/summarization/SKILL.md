@@ -31,7 +31,7 @@ Violating the letter of this rule is violating the spirit of this rule.
 | 5 | Claim Enrichment | After synthesizer writes temp file |
 | 6 | Quality Evaluator | After claim enrichment writes enriched temp file |
 
-Partial failure: 1 of 3 methods fails -> synthesizer notes the gap and proceeds. 2+ fail -> halt and report blocked.
+Partial failure. After the first-dispatch check passes, or for an exempt template: 1 of 3 methods fails -> synthesizer notes the gap and proceeds. 2+ fail -> halt and report blocked.
 
 ---
 
@@ -84,7 +84,7 @@ Auto-derive rule: "Test Frameworks Overview" -> `test-frameworks-overview.md`
 
 | Excuse | Reality |
 |--------|---------|
-| "Two of the three methods returned, good enough" | All three must report pass or fail. A method still running has not failed -- wait. 1 failed -> proceed with the gap noted; 2+ failed -> halt. |
+| "Two of the three methods returned, good enough" | All three must report pass or fail. A method still running has not failed -- wait. After the first-dispatch check passes, or for an exempt template: 1 failed -> proceed with the gap noted; 2+ failed -> halt. |
 | "The source was in context from a prior message" | Re-read or re-fetch the full source now. Partial context produces partial summaries. |
 | "I'll derive the output path without asking" | If no path and no directory was given: ask the user after the enriched temp file is written and before dispatching the quality agent (it writes the final file). Do not invent a path. |
 | "The temp file is good enough, skip quality" | The quality gate is mandatory. Temp file is for review only. Final output requires the quality agent to run. |

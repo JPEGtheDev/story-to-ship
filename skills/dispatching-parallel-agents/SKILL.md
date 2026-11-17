@@ -47,7 +47,7 @@ See `references/AGENT_CACHING.md` for the agent response caching protocol (postm
 
 ## Agent Type Selection
 
-Before dispatching any agent, select the correct type. The wrong type wastes context and produces lower-quality output.
+Before dispatching any agent, select the correct type.
 
 | Task type | Correct agent | Wrong choice |
 |-----------|--------------|--------------|
@@ -89,7 +89,7 @@ Dispatch agents in parallel when ALL of the following are true:
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (past the limit, dispatch fails with `Concurrent subagent limit reached`; it succeeds again once the running count drops below the limit)
 4. Every agent has its own isolated worktree.
-5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
+5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents.
 
 [+] All met -> dispatch agents
 [-] Any unmet -> resolve the dependency, define the return format, serialize the dispatch, create the missing worktree, or (for a hypothesis-testing batch) dispatch the `skeptic` agent on the experiment design, before proceeding
@@ -163,13 +163,13 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 
 ## First-Dispatch Check
 
-1. A batch of two or more dispatches built from one prompt template starts with the first-dispatch check (one dispatch sent alone to test the template) below. Each template gets its own check; a batch that mixes templates runs one check per template. For a batch of one template, this section overrides only the gate's "[+] All met -> dispatch agents" and the row "YOU MUST run independent tasks in parallel"; every other rule still applies, including the Iron Law, worktree and BEFORE PROCEEDING rules.
+1. A batch of two or more dispatches built from one prompt template starts with the first-dispatch check (one dispatch sent alone to test the template) below. Each template gets its own check; a batch that mixes templates runs one check per template. This section overrides only the gate's "[+] All met -> dispatch agents" and the row "YOU MUST run independent tasks in parallel"; every other rule still applies, including the Iron Law, worktree and BEFORE PROCEEDING rules.
 
 Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.
 
 2. A template whose check already passed in this session is exempt. A template is keyed by the path of its file plus the sha256 of that file (sha256sum). A template that is prompt text with no file is keyed by the sha256 of the template text before any per-dispatch fields are filled in. A changed sha256 starts a new check. After a compaction the session record is lost, so every template runs its check again.
 
-3. The check is mechanical and is stated in the dispatch turn before the batch is released.
+3. The first-dispatch check is mechanical and is stated in the dispatch turn before the batch is released.
    - (a) Only when the dispatch names an output path: the output exists at the literal path named; the path contains no curly brace, no angle bracket, and no uppercase placeholder word the template uses as a token. Before the batch is sent, the dispatcher lists every path in the batch and runs sort then uniq -d over the list, which must print nothing.
    - (b) The template's required fields are present: every field the template's return format lists, except one labeled optional, plus the SOURCE ECHO block for a summarization method agent. A read-only template with no output path skips (a) and runs only (b).
 

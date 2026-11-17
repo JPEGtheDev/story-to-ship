@@ -43,7 +43,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
    Write the Economy run to `<old-economy.json>` and the Standard run to `<old-standard.json>`.
 3. Run the same command on `<new-path>` at the same two tiers, with `--json <new-economy.json>` and `--json <new-standard.json>`. Keep the same `--runs 10`, `--model`, `--judge-model`, `--scaffold`, and `--allow-tools Edit` on both.
 4. Run the no-skill checkout the same way as step d.3, at each tier that step d.3 uses, with the same `--runs`, `--model`, `--judge-model`, `--ablation none`, `--scaffold`, `--allow-tools Edit`, `--no-publish`, `--max-cost-usd` and tier flags, writing its own `--json` file (each tier writes its own file named with the tier, `no-skill-<tier>.json`). Its result is recorded with the comparison. It shows what the skill's text adds. It is not a gate: the ship decision in step a.2 is made by the old-versus-new count join only.
-5. Join each tier's old and new files, once per tier. The join prints one object per case: the case name, the tier, the old passing-run count, the new passing-run count, `drop`, which is true when the new count is below the old count, and the scored-run totals `old_scored` and `new_scored` (entries whose `error` is null). A passing run is an entry of `arms.with` with a null `error` and a `passed` field of true; `aggregates.score` is not read.
+5. Join each tier's old and new files, once per tier. The join prints one object per case: the case name, the tier, the old passing-run count, the new passing-run count, `drop`, which is true when the new count is below the old count, and the scored-run totals `old_scored` and `new_scored` (entries whose `error` is null). A run with a non-null `error` is rerun once first; any run still errored after the rerun is excluded from both passing counts, the join prints `old_scored` and `new_scored`, and the drop test compares passing counts only, so drop is true when the new passing count is below the old passing count. A passing run is an entry of `arms.with` with a null `error` and a `passed` field of true; `aggregates.score` is not read.
    ```
    jq -n --arg tier <tier> --slurpfile o <old-tier.json> --slurpfile n <new-tier.json> '
      if ($o[0].cases | length) != ($n[0].cases | length)
@@ -79,7 +79,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 2. A case without a grader, a bad grader field, or a bad checkout path fails when the suite loads. No verdict exists.
 3. A missing json file means no verdict.
 4. Results are written under `evals/results/` in each checkout. That directory is gitignored.
-5. An arm with a non-null `error` is rerun once. The rerun is a paid run, so step b.3 applies. If it errors again, report it as an arm error with its rerun result in the results. Never score it as 0 of 10.
+5. An arm with a non-null `error` is rerun once. The rerun is a paid run, so step b.3 applies. If it errors again, report it as an arm error with its rerun result in the results. Never score it as 0 of 10. An errored run that is still errored after the rerun is excluded from both counts.
 6. A case that exits 2 on the ceiling is reported as partial, not as a verdict.
 
 ## g. Token Cost

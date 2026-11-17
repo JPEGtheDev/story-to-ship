@@ -161,6 +161,30 @@ See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees
 
 ---
 
+## First-Dispatch Check
+
+1. A batch of two or more dispatches built from one prompt template starts with the first-dispatch check below. Each template gets its own check; a batch that mixes templates runs one check per template. This section overrides the parallel rules above for a batch of one template; the parallel rules still govern batches of different templates.
+
+Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.
+
+2. A template whose check already passed in this session is exempt. A template is keyed by the path of its file plus the sha256 of that file (sha256sum). A template that is prompt text with no file is keyed by the sha256 of the saved prompt file the dispatch points at. A changed sha256 starts a new check. After a compaction the session record is lost, so every template runs its check again.
+
+3. The check is mechanical and is stated in the dispatch turn before the batch is released.
+   - (a) Only when the dispatch names an output path: the output exists at the literal path named; the path contains no curly brace, no angle bracket, and no uppercase placeholder word the template uses as a token. Before the batch is sent, the dispatcher lists every path in the batch and runs sort then uniq -d over the list, which must print nothing.
+   - (b) The template's required fields are present: its unmarked fields, plus the SOURCE ECHO block for a summarization method agent. A read-only template with no output path skips (a) and runs only (b).
+
+4. A failed check: fix the template, re-run the check, and state the failure and the fix in the dispatch turn. Move the failed output aside before the re-run; it is not counted as work. A third failed check of one template ends the batch: state the failures and hand the decision to the owner.
+
+Nothing is released before a pass.
+
+5. A first dispatch that ends with no final report, or returns BLOCKED or NEEDS_CONTEXT, is a failed check.
+
+6. A passed check's output counts as that dispatch's work; the rest of the batch is released under the skill's normal rules (worktree, explicit model, prompt-file sweep).
+
+7. The sprint pilot in `running-a-sprint` is outside this section and keeps its own rule.
+
+---
+
 ## Red Flags -- STOP
 
 | Pattern | Action |

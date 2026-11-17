@@ -1126,7 +1126,7 @@ jobs:
             'Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.' \
             'Nothing is released before a pass.'
           do
-            if ! grep -qF -- "$s" "$f"; then
+            if ! grep -qxF -- "$s" "$f"; then
               printf 'FAILED: %s is missing required contract string: %s\n' "$f" "$s"
               missing=$((missing + 1))
             fi

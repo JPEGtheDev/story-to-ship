@@ -179,7 +179,7 @@ Nothing is released before a pass.
 
 5. A first dispatch that ends with no final report, or returns BLOCKED or NEEDS_CONTEXT, is a failed check.
 
-6. A passed check's output counts as that dispatch's work; the rest of the batch is released under the skill's normal rules (worktree, explicit model, prompt-file sweep).
+6. A passed check's output counts as that dispatch's work; the rest of the batch is released under the skill's normal rules (worktree, explicit model, and the pre-PR hygiene sweep of the finishing-a-development-branch skill).
 
 7. The sprint pilot in `running-a-sprint` is outside this section and keeps its own rule.
 

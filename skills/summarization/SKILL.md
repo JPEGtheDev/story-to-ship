@@ -58,7 +58,7 @@ Before dispatching the synthesizer, state:
 Method agents complete: Abstractive [pass/fail], Extractive [pass/fail], SAAC [pass/fail]
 ```
 
-This signals all three gates were checked before synthesis. It does not prove method output quality.
+Why the gate check matters: references/RATIONALE.md.
 
 ---
 

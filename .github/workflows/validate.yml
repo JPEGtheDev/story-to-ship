@@ -1117,6 +1117,26 @@ jobs:
           fi
           echo "[+] flaky-test rule pins are present"
 
+      - name: Check the first-dispatch check rule is pinned
+        run: |
+          missing=0
+          f="skills/dispatching-parallel-agents/SKILL.md"
+          for s in \
+            '## First-Dispatch Check' \
+            'Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.' \
+            'Nothing is released before a pass.'
+          do
+            if ! grep -qF -- "$s" "$f"; then
+              printf 'FAILED: %s is missing required contract string: %s\n' "$f" "$s"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing first-dispatch check string(s)"
+            exit 1
+          fi
+          echo "[+] first-dispatch check strings are pinned"
+
       # This 20,000-byte cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the seven core skills listed
       # in the loop below. Three of them were measured and brought under the

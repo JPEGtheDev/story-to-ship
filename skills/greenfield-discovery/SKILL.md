@@ -1,7 +1,7 @@
 ---
 name: greenfield-discovery
 license: MIT
-description: Use when the user describes a new project to build from scratch and no ## Domain Model block yet exists in the conversation.
+description: "Use when the user describes a new project to build from scratch and no ## Domain Model block yet exists in the conversation."
 ---
 
 

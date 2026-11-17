@@ -1,7 +1,7 @@
 ---
 name: dispatching-parallel-agents
 license: MIT
-description: Use when multiple independent read-only research tasks can run simultaneously, or when you need to fan out investigation across many files or hypotheses.
+description: Use when multiple independent read-only research tasks can run simultaneously, when you need to fan out investigation across many files or hypotheses, or when a batch of two or more dispatches built from one prompt template is about to be sent.
 ---
 
 

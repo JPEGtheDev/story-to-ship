@@ -6,7 +6,7 @@ Detailed per-agent prompt structure for the 6-agent summarization pipeline.
 
 ## Agents 1-3: Parallel Method Agents
 
-Dispatch three `summarization-method` agents as a batch via the Agent tool. The batch starts with one first-dispatch check (see the First-Dispatch Check section of the dispatching-parallel-agents skill; a template that already passed it this session is exempt); unless exempt, the other two agents wait until that check's output passes.
+Dispatch three `summarization-method` agents as a batch via the Agent tool. Dispatch one agent alone first. Before dispatching the other two, check its output: it carries the SOURCE ECHO block and every field its return format lists, and, when the dispatch names an output path, the file exists at that literal path with no unfilled placeholder token in it. A template that already passed this check in this session is exempt, and all three run in parallel. If the check fails, fix the template and run it again on one agent before releasing the others; no final report, BLOCKED or NEEDS_CONTEXT counts as a failed check.
 
 **Each agent receives:**
 - Full source content (paste inline in the prompt -- do not pass a file path)
@@ -18,8 +18,8 @@ Dispatch three `summarization-method` agents as a batch via the Agent tool. The 
 **Each agent returns:** A single method summary in the format defined by its reference file.
 
 **Partial failure handling:**
-- After the first-dispatch check passes, or for an exempt template, 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
-- After the first-dispatch check passes, or for an exempt template, 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
+- After the check passes, or for an exempt template, 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
+- After the check passes, or for an exempt template, 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
 
 ---
 

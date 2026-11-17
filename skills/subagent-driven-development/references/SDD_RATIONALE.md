@@ -59,7 +59,3 @@ See the canonical Red Flags table in `../SKILL.md`.
 This is the observable signal that step 3 of BEFORE PROCEEDING was executed, not skipped. A less powerful model can produce it mechanically: run step 3, paste the output.
 
 **Note:** The canary raises the cost of skipping for compliant agents -- it is not cryptographically bound to execution.
-
-## Dispatch Decision Table forces
-
-**Forces:** Inline is cheaper and faster and needs no worktree, but it inherits the coordinator's assumptions and reads files into a context that is already large. A dispatch pays a fixed prefix (the agent's skills and template) and a worktree, but returns an independent result. The table draws the line at read-only work that is small enough to fit, plus one write-side lane the guard hook enforces: a literal prose edit under the caps; anything else that writes a file, or reads more than a couple of files, is dispatched.

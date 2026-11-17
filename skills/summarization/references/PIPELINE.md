@@ -18,8 +18,8 @@ Dispatch three `summarization-method` agents as a batch via the Agent tool. The 
 **Each agent returns:** A single method summary in the format defined by its reference file.
 
 **Partial failure handling:**
-- 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
-- 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
+- After the first-dispatch check passes, 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
+- After the first-dispatch check passes, 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
 
 ---
 

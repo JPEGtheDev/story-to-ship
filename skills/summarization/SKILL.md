@@ -43,7 +43,7 @@ Before dispatching any agent, verify:
 2. Output path status is known: explicit path provided, directory provided (auto-derive filename), or nothing provided (record `ASK_USER`; ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file)).
 3. `scratch/summaries/` exists for the temp file.
 
-[+] All met -> dispatch agents 1-3 in parallel. The batch starts with one first-dispatch check (see the First-Dispatch Check section of the dispatching-parallel-agents skill); the other dispatches wait until its output passes that check.
+[+] All met -> dispatch one method agent alone as the first-dispatch check (see the First-Dispatch Check section of the dispatching-parallel-agents skill; a template that already passed it this session is exempt); after it passes, dispatch the other two in parallel.
 [-] Source missing -> fetch or read the source. Do not dispatch.
 [-] No path and no directory -> record `ASK_USER`. This adds an action and does not block dispatch: dispatch agents 1-3 as normal, then ask the user for the directory after the enriched temp file is written and before dispatching the quality agent (it writes the final file).
 [-] `scratch/summaries/` missing -> create it (`mkdir -p scratch/summaries`), then re-check.

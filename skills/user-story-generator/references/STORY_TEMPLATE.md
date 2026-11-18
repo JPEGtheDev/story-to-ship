@@ -48,9 +48,6 @@ Only after the user confirms, generate the story using this template:
 **Constraints:**
 - [Platform requirements, performance targets]
 
-**Files to Create/Modify:**
-- [List of modules with specific file paths]
-
 **Architecture Notes:** [If applicable]
 - [Design patterns, extensibility considerations]
 
@@ -74,7 +71,7 @@ Only after the user confirms, generate the story using this template:
 [Optional: Next steps, related work, or important context]
 ```
 
-**Make the story specific and actionable.** Use concrete metrics, file paths, and technical details where appropriate.
+**Make the story specific and actionable.** Use concrete metrics where appropriate. Discovery finds the files and technical details, so leave them out of the story.
 
 **If the story seems too large (more than one sprint, or an epic)**, mention this after generating and suggest breaking it down:
 > "This is a larger effort that will take more than one sprint. Would you like me to break it into 3-4 smaller, independent stories?"

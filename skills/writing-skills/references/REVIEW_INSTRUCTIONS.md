@@ -72,7 +72,7 @@ item are in the reference sections above.
 ```bash
 F="<resolved review target>"; W=0
 { if [ "$W" = 1 ]; then :; else git diff -U0 "$(git merge-base HEAD origin/main)" -- "$F"; fi; } | awk -v F="$F" -v whole="$W" -v names="$(ls skills | paste -sd'|' -)" '
-/^@@/ { nh++; split($3, a, ","); s = substr(a[1], 2); n = (a[2] == "" ? 1 : a[2]); for (i = 0; i < n; i++) { ch[s + i] = 1; nch++ }; next }
+/^@@/ { nh++; split($3, a, ","); s = substr(a[1], 2); n = (a[2] == "" ? 1 : a[2]); for (i = 0; i < n; i++) { ch[s + i] = 1 }; next }
 END {
   self = ""
   while ((getline l < F) > 0) if (l ~ /^name: /) { self = substr(l, 7); break }
@@ -81,7 +81,7 @@ END {
   gate = 0; ng = 0; ln = 0
   while ((getline l < F) > 0) {
     ln++
-    if (l ~ /^(##|###|####) /) { gate = (l ~ /^(##|###|####) (BEFORE PROCEEDING|Red Flags|Iron Law|Rationalization Prevention)/); if (gate) ng++; continue }
+    if (l ~ /^#+ /) { lv = index(l, " ") - 1; if (l ~ /^(##|###|####) (BEFORE PROCEEDING|Red Flags|Iron Law|Rationalization Prevention)/) { gate = 1; glevel = lv; ng++ } else if (gate && lv <= glevel) gate = 0; continue }
     if (!gate || !(whole == 1 || ch[ln])) continue
     low = tolower(l); name = ""
     for (i = 1; i <= nn; i++) {

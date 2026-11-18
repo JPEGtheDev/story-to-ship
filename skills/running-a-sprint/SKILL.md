@@ -107,6 +107,8 @@ Send exactly one first-dispatch check first, and send no other dispatch from tha
 
 Nothing is released before a pass.
 
+A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): move the failed output aside, fix the template, re-run the check in a fresh worktree, and state the failure and fix in the launcher's turn. A third failed check ends the batch: hand the decision to the owner as an owner question.
+
 The launch prompt does not change for the check. The sprint pilot keeps its own rule. The check result goes in the final hand-back, not as an interim message.
 
 Hold: while the check is pending, the launcher sets the state `first-check-pending` and stores it in the story's plan.md entry as `check: pending`, and the rest of the batch keeps waiting. A repeat of the same hold while the state is set is a no-op. The launcher clears the state when the first launch's output passes, and stores `check: pass`.

@@ -1496,6 +1496,27 @@ jobs:
           fi
           echo "[+] writing-skills SKILL.md carries its rule lines"
 
+      - name: Check gate-reliance row is pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md '- [ ] **Gate relies on another skill'\''s rule** -- run the gate command in the block below this list' '- [ ] **Gate relies on another skill'\''s rule** -- run the Step 2 gate command' 'GATE HEADINGS: '
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] gate-reliance row strings present"
+
       - name: Check workflow temporary-step and runtime rules are pinned
         run: |
           set -e

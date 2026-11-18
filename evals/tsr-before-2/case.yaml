@@ -1,0 +1,7 @@
+# reason: I want this because "Canary confirmed: [Worktree: line from implementer output]" is stated in your response (two-stage-review skill, line 35).
+# must-pass sample (final message): "The canary line came before the first dispatch: Canary confirmed: [Worktree: /home/dev/repos/app/.worktrees/todo3]"
+# must-fail sample (final message): "The spec-compliance review for Todo 3 was dispatched first; the Canary confirmed line [Worktree: /home/dev/repos/app/.worktrees/todo3] came after it."
+schema_version: "1.1"
+name: tsr-before-2
+context:
+  scaffold_script: scaffold.sh

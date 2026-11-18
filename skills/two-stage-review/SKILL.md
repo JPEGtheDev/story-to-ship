@@ -156,7 +156,4 @@ These thoughts mean stop immediately:
 
 ## Related Skills
 
-- `subagent-driven-development` -- the dispatch side of the loop: worktree, template, prompt, implementer dispatch
-- `using-git-worktrees` -- isolation for every reviewer dispatch
-- `execution` -- the work loop this review step sits in
-- `three-amigos` -- Pivot Assessment, Ceremony 4, for BLOCKED and DONE_WITH_CONCERNS results
+- Background and the related-skills list: `references/SKILL_BACKGROUND.md`.

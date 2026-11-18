@@ -103,6 +103,8 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 **Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). On an amigo's first dispatch, a brief contains nothing else; a return dispatch adds only that amigo's batched skeptic findings. Do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
+**Batch of two or more Discovery amigo dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass.
+
 ### Agenda -- Questions
 
 1. What does the user want to be able to DO? (observable behavior, not technical steps)

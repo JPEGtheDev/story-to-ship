@@ -266,6 +266,42 @@ jobs:
           fi
           echo "[+] No agents/ or skills/*/SKILL.md frontmatter value contains an unquoted colon-space"
 
+      - name: 'Reject unquoted " #" in agents/ and SKILL.md frontmatter values'
+        # AGENTS_DIR and SKILLS_DIR exist so the gate-can-fail proofs can point this
+        # step at temp copies; CI never sets them. The name is single-quoted because
+        # a plain scalar cannot hold " #": YAML reads that as the start of a comment.
+        run: |
+          set -e
+          # An unquoted frontmatter value that holds a space and then "#", or that
+          # starts with "#", is not a plain YAML scalar. A tab before "#" counts as
+          # a space. Only the frontmatter is scanned: the scan stops at the second
+          # "---" line and NR is the whole-file line number. Continuation lines of a
+          # multi-line plain value are not checked.
+          pat="^[0-9]+: [A-Za-z_-]+:[[:space:]]+(#|[^\"'[{>|[:space:]].*[[:space:]]#)"
+          fail=0
+          quote_hint=0
+          for f in "${AGENTS_DIR:-agents}"/*.md "${SKILLS_DIR:-skills}"/*/SKILL.md; do
+            hits=$(awk 'NR == 1 && $0 == "---" { fm = 1; next } fm && $0 == "---" { exit } fm { print NR ": " $0 }' "$f" | grep -E "$pat" || true)
+            if [ -n "$hits" ]; then
+              printf '%s\n' "$hits" | while IFS= read -r hit; do
+                printf 'UNQUOTED HASH: %s line %s: %s\n' "$f" "${hit%%:*}" "${hit#*: }"
+              done
+              n=$(printf '%s\n' "$hits" | grep -c .)
+              fail=$((fail + n))
+              case $f in
+                */SKILL.md) quote_hint=1 ;;
+              esac
+            fi
+          done
+          if [ "$fail" -gt 0 ]; then
+            echo "Found $fail frontmatter value(s) with an unquoted \" #\", a leading \"#\", or a tab before \"#\""
+            if [ "$quote_hint" -eq 1 ]; then
+              echo "Hint: quote the whole value"
+            fi
+            exit 1
+          fi
+          echo "[+] No agents/ or skills/*/SKILL.md frontmatter value is an unquoted \" #\" value"
+
       - name: Require one tools line in agents/ frontmatter
         # AGENTS_DIR exists so the gate-can-fail proofs can point this step at a
         # temp copy; CI never sets it. A template with no tools line inherits every

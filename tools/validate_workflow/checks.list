@@ -10,6 +10,7 @@ step	Check three-role loop contract strings
 step	Check for broken references in skill files
 step	Validate SKILL.md frontmatter
 step	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values
+step	'Reject unquoted " #" in agents/ and SKILL.md frontmatter values'
 step	Require one tools line in agents/ frontmatter
 step	Check agent template contracts
 step	Check reconcile contract strings
@@ -81,6 +82,8 @@ proof	Check three-role loop contract strings	-	skills/subagent-driven-developmen
 proof	Check for broken references in skill files	-	skills/honesty/SKILL.md	append	(not found at	see `references/NO_SUCH_FILE.md`
 proof	Validate SKILL.md frontmatter	-	skills/honesty/SKILL.md	empty	has no 'name' field in frontmatter
 proof	Reject unquoted colon-space in agents/ and SKILL.md frontmatter values	-	agents/implementer.md	insert-before-close	INVALID FRONTMATTER VALUE	probe: a: b
+proof	'Reject unquoted " #" in agents/ and SKILL.md frontmatter values'	-	agents/implementer.md	insert-before-close	UNQUOTED HASH	probe: a # b
+proof	'Reject unquoted " #" in agents/ and SKILL.md frontmatter values'	-	agents/implementer.md	insert-before-close	UNQUOTED HASH	probe: #x
 proof	Require one tools line in agents/ frontmatter	-	agents/implementer.md	empty	needs one non-empty tools: line
 proof	Check agent template contracts	-	agents/implementer.md	empty	is missing required contract string
 proof	Check reconcile contract strings	-	skills/running-a-sprint/references/RECONCILE.md	empty	is missing required contract string

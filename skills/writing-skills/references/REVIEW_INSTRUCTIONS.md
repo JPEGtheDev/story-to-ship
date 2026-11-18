@@ -78,10 +78,11 @@ END {
   while ((getline l < F) > 0) if (l ~ /^name: /) { self = substr(l, 7); break }
   close(F)
   nn = split(names, sk, "|")
-  gate = 0; ng = 0; ln = 0
+  gate = 0; ng = 0; ln = 0; fence = 0
   while ((getline l < F) > 0) {
     ln++
-    if (l ~ /^#+ /) { lv = index(l, " ") - 1; if (l ~ /^(##|###|####) (BEFORE PROCEEDING|Red Flags|Iron Law|Rationalization Prevention)/) { gate = 1; glevel = lv; ng++ } else if (gate && lv <= glevel) gate = 0; continue }
+    if (l ~ /^```/) fence = !fence
+    if (!fence && l ~ /^#+ /) { lv = index(l, " ") - 1; if (l ~ /^(##|###|####) (BEFORE PROCEEDING|Red Flags|Iron Law|Rationalization Prevention)/) { if (!gate || lv < glevel) glevel = lv; gate = 1; ng++ } else if (gate && lv <= glevel) gate = 0; continue }
     if (!gate || !(whole == 1 || ch[ln])) continue
     low = tolower(l); name = ""
     for (i = 1; i <= nn; i++) {

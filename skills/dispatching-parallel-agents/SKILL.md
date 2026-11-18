@@ -1,7 +1,7 @@
 ---
 name: dispatching-parallel-agents
 license: MIT
-description: Use when multiple independent read-only research tasks can run simultaneously, or when you need to fan out investigation across many files or hypotheses.
+description: Use when fanning out independent read-only research, or before sending two or more dispatches built from one prompt template.
 ---
 
 
@@ -47,7 +47,7 @@ See `references/AGENT_CACHING.md` for the agent response caching protocol (postm
 
 ## Agent Type Selection
 
-Before dispatching any agent, select the correct type. The wrong type wastes context and produces lower-quality output.
+Before dispatching any agent, select the correct type.
 
 | Task type | Correct agent | Wrong choice |
 |-----------|--------------|--------------|
@@ -58,7 +58,7 @@ Before dispatching any agent, select the correct type. The wrong type wastes con
 | Build, test, or lint execution -- success/failure result only | `general-purpose` with `model` passed explicitly | `general-purpose` with no `model` (inherits the coordinator's tier) |
 | Any read-only + write combination | Separate explorer and implementer agents | One general-purpose for everything |
 
-**Routing rule:** Use the most constrained agent type that can complete the job. `general-purpose` can do everything -- which means it accumulates context, produces serial output, and contaminates findings with session assumptions for work that a constrained agent would complete faster and cleaner.
+**Routing rule:** Use the most constrained agent type that can complete the job. See `references/RATIONALE.md` for why.
 
 ---
 
@@ -89,7 +89,7 @@ Dispatch agents in parallel when ALL of the following are true:
 2. Return format is explicitly defined for every agent before dispatch
 3. No more than 20 agents in flight unless CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS is raised (past the limit, dispatch fails with `Concurrent subagent limit reached`; it succeeds again once the running count drops below the limit)
 4. Every agent has its own isolated worktree.
-5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents. An unreviewed experiment design cannot guarantee it measures what it intends to measure.
+5. If dispatching a batch of agents to test a hypothesis (A/B test, multi-agent experiment): dispatch a design-review Skeptic FIRST before running the test agents.
 
 [+] All met -> dispatch agents
 [-] Any unmet -> resolve the dependency, define the return format, serialize the dispatch, create the missing worktree, or (for a hypothesis-testing batch) dispatch the `skeptic` agent on the experiment design, before proceeding
@@ -115,7 +115,7 @@ Each parallel agent MUST receive:
 3. **An explicit return format** -- tell it exactly what to give back.
 4. **No knowledge of other agents** -- agents do not know about each other.
 
-**Why isolation matters:** Agents that share context inherit your biases and assumptions. Isolated agents search without your anchoring.
+See `references/RATIONALE.md` for why isolation matters.
 
 ---
 
@@ -144,7 +144,7 @@ When any agent cites specific file names, page names, or resource paths as evide
 3. **If verification fails:** REJECT the finding. Record: `REJECTED: [resource] does not exist -- citation unverified.` Do NOT re-dispatch the original agent for the same citation.
 4. **If verification passes:** accept the finding. Note: `VERIFIED: read [path] -- content confirms [claim].`
 
-**Why:** Agents -- especially when working with large archives or documentation sets -- frequently cite plausible-but-nonexistent resources. Treating citations as hypotheses and verifying them before synthesis prevents hallucinated evidence from reaching conclusions.
+See `references/RATIONALE.md` for why citations are verified.
 
 ---
 
@@ -158,6 +158,30 @@ When dispatching parallel agents -- read-only and write agents alike (e.g., mult
 4. After agents complete: review each write agent's diff independently before merging; for read-only agents, verify reported findings against source files before accepting them
 
 See `references/WRITE_AGENTS_SETUP.md` for git commands and `using-git-worktrees` skill for full lifecycle.
+
+---
+
+## First-Dispatch Check
+
+1. A batch of two or more dispatches built from one prompt template starts with the first-dispatch check (one dispatch sent alone to test the template) below. Each template gets its own check; a batch that mixes templates runs one check per template. This section overrides only the gate's "[+] All met -> dispatch agents" and the row "YOU MUST run independent tasks in parallel"; every other rule still applies, including the Iron Law, worktree and BEFORE PROCEEDING rules.
+
+Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.
+
+2. A template whose check already passed in this session is exempt. A template is keyed by the path of its file plus the sha256 of that file (sha256sum). A template that is prompt text with no file is keyed by the sha256 of the template text before any per-dispatch fields are filled in. A changed sha256 starts a new check. After a compaction the session record is lost, so every template runs its check again.
+
+3. The first-dispatch check is mechanical and is stated in the dispatch turn before the batch is released.
+   - (a) Only when the dispatch names an output path: the output exists at the literal path named; the path contains no curly brace, no angle bracket, and no uppercase placeholder word the template uses as a token. Before the batch is sent, the dispatcher lists every path in the batch and runs sort then uniq -d over the list, which must print nothing.
+   - (b) The template's required fields are present: every field the template's return format lists, except one labeled optional, plus the SOURCE ECHO block for a summarization method agent. A read-only template with no output path skips (a) and runs only (b).
+
+4. A failed check: fix the template, re-run the check, and state the failure and the fix in the dispatch turn. Move the failed output aside before the re-run; it is not counted as work. A third failed check of one template ends the batch: state the failures and hand the decision to the owner.
+
+Nothing is released before a pass.
+
+5. A first dispatch that ends with no final report, or returns BLOCKED or NEEDS_CONTEXT, is a failed check.
+
+6. A passed check's output counts as that dispatch's work; the rest of the batch is released under the skill's normal rules (worktree, explicit model, and the pre-PR hygiene sweep of the finishing-a-development-branch skill, run over each prompt file).
+
+7. The sprint pilot in `running-a-sprint` is outside this section and keeps its own rule.
 
 ---
 

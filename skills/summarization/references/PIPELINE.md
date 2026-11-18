@@ -6,7 +6,7 @@ Detailed per-agent prompt structure for the 6-agent summarization pipeline.
 
 ## Agents 1-3: Parallel Method Agents
 
-Dispatch three `summarization-method` agents simultaneously via the Agent tool.
+Dispatch three `summarization-method` agents as a batch via the Agent tool. Dispatch one agent alone first, then check its output: it carries the SOURCE ECHO block, every field its return contract lists, and, when a dispatch names an output path, the file exists at that literal path and holds no unfilled placeholder token. State the check and its result in the dispatch turn; the passing agent's output is kept as its work. Check passes -> dispatch the other two in parallel. The template agents/summarization-method.md is exempt when its SHA-256 hash (Secure Hash Algorithm, computed with sha256sum) already passed this check in this session: dispatch all three in parallel. A changed SHA-256 hash starts a new check, and after a compaction the template is checked again. First-agent check fails -> state the failure in the dispatch turn, fix the template, move the failed output aside, and run the check again on one agent before releasing the others. A third failed check ends the batch: state the failures and hand the decision to the user. A method agent that returns no final report, or returns BLOCKED or NEEDS_CONTEXT, counts as a failed check.
 
 **Each agent receives:**
 - Full source content (paste inline in the prompt -- do not pass a file path)
@@ -18,8 +18,8 @@ Dispatch three `summarization-method` agents simultaneously via the Agent tool.
 **Each agent returns:** A single method summary in the format defined by its reference file.
 
 **Partial failure handling:**
-- 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
-- 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
+- After the first-agent check passes, or for an exempt template, 1 of 3 agents fails -> proceed to synthesizer; synthesizer notes the missing method in the article
+- After the first-agent check passes, or for an exempt template, 2 or more fail -> halt; report "BLOCKED: [N] method agents failed. Cannot synthesize."
 
 ---
 

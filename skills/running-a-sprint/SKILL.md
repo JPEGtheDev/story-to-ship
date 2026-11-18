@@ -94,24 +94,24 @@ Once origin shows the PR MERGED, the close-out steps run from the sprint-close-o
 Before dispatching any runner, answering any hand-back, or closing out any merge:
 
 1. The ledger was re-read this turn and the runner or story is in it.
-2. A launch names `STORY_NUMBER`, `REPO_ROOT`, `WORKTREE_PREFIX` and `PARALLEL_LIMIT`, passes `model` at the Standard tier, sets `run_in_background` true and adds none of the launcher's own rule text (the batch check below runs on the launcher's side and changes nothing in the launch); the story has acceptance criteria and no working runner it depends on, and no "Depends On: #N" line naming another open story, until that story's PR merges. A reconcile replacement is exempt from the dependency check (step 7 of the sprint-close-out skill). Until the pilot passes or a release rule in `references/PILOT.md` ends the hold, only the pilot launches. A fresh runner for a Discovery stop is exempt (Capacity).
+2. A launch names `STORY_NUMBER`, `REPO_ROOT`, `WORKTREE_PREFIX` and `PARALLEL_LIMIT`, passes `model` at the Standard tier, sets `run_in_background` true and carries no rule text; for a batch of two or more launches from one template, the batch check below has passed for that template or the launch is held in state `first-check-pending`; the story has acceptance criteria and no working runner it depends on, and no "Depends On: #N" line naming another open story, until that story's PR merges. A reconcile replacement is exempt from the dependency check (step 7 of the sprint-close-out skill). Until the pilot passes or a release rule in `references/PILOT.md` ends the hold, only the pilot launches. A fresh runner for a Discovery stop is exempt (Capacity).
 3. A hand-back has been looked up in `references/HANDBACK_ROUTING.md`, the row's action, then, for a hand-back of one of the four kinds named in Capacity, the launch check, are the only actions taken, apart from the ledger note for an over-cap hand-back, and the PR number and CI state were re-checked with `gh pr view`.
 4. A close-out starts only after origin shows the PR MERGED (by the sweep or an owner report), and runs in the order of the sprint-close-out skill.
 
 [+] All 4 met -> proceed
 [-] Any unmet -> fix it first: re-read the ledger, look up the row, or relay the question to the owner
 
-**Batch first-dispatch check.** When the launcher sends a batch of 2 or more sprint launches built from one launch template, the launcher runs the check on its side.
+**Batch first-dispatch check.** When the launcher sends a batch of 2 or more sprint launches built from one launch template (the launch prompt text every story in the batch is built from), the launcher runs the check on its side: the first-dispatch check (send one launch first; hold the rest until it passes). The launch prompt is unchanged by it.
 
 Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.
 
-Nothing is released before a pass.
+Nothing is released before a pass. The template key is the launch template's path and sha256; a template whose check already passed in this session is exempt, so later batches from it release without a new check; after a compaction every template runs its check again.
 
-A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): move the failed output aside, fix the template, re-run the check in a fresh worktree, and state the failure and fix in the launcher's turn. A third failed check ends the batch: hand the decision to the owner as an owner question.
+A launch counts as failed when it returns no final report, returns BLOCKED or NEEDS_CONTEXT, or ends in a hand-back of kind blocked or owner question instead of a final report. For a failed check: move the failed output aside, fix the template, re-run the check as a new dispatch, and state the failure and fix in the launcher's turn. A failed launch is not retried with a changed template unless the failure was in the template. A third failed check ends the batch: hand the decision to the owner as an owner question.
 
-The launch prompt does not change for the check. The sprint pilot keeps its own rule. The check result goes in the final hand-back, not as an interim message.
+The pilot gate in `references/PILOT.md` is unchanged and applies in addition to this check; the check adds no exemption to it. The check result goes in the launcher's final report to the owner, not as an interim message.
 
-Hold: while the check is pending, the launcher sets the state `first-check-pending` and stores it in the story's plan.md entry as `check: pending`, and the rest of the batch keeps waiting. A repeat of the same hold while the state is set is a no-op. The launcher clears the state when the first launch's output passes, and stores `check: pass`.
+Hold: while the check is pending, the launcher holds the rest of the batch in state `first-check-pending`, recorded in the sprint ledger's reason field for each held story's waiting entry (`references/MOVED_RATIONALE.md`, Moved from SKILL.md: waiting stories). A repeat of the same hold while the state is set is a no-op. The launcher clears `first-check-pending` when the first launch's output passes.
 
 ---
 

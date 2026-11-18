@@ -71,7 +71,7 @@ Only after the user confirms, generate the story using this template:
 [Optional: Next steps, related work, or important context]
 ```
 
-**Make the story specific and actionable.** Use concrete metrics where appropriate. Discovery finds the files and technical details, so leave them out of the story.
+**Make the story specific and actionable.** Use a concrete metric in every Acceptance Criteria item that has a measurable outcome. Discovery (the `three-amigos` skill's Ceremony 1) finds the file names, edit targets and implementation details, so leave those out of the story; the dependency, constraint and architecture fields of the template stay as they are.
 
 **If the story seems too large (more than one sprint, or an epic)**, mention this after generating and suggest breaking it down:
 > "This is a larger effort that will take more than one sprint. Would you like me to break it into 3-4 smaller, independent stories?"

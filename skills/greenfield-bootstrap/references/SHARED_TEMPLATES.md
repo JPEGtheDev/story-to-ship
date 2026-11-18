@@ -179,9 +179,6 @@ title: "[Story] "
 **Constraints:**
 - [Platform requirements, performance targets]
 
-**Files to Create/Modify:**
-- [List of modules with specific file paths]
-
 ---
 
 ## Definition of Done

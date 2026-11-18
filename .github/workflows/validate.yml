@@ -1173,6 +1173,30 @@ jobs:
           fi
           echo "[+] first-dispatch check strings are pinned"
 
+      - name: Check the first-dispatch check text is pinned in the six batch paths
+        run: |
+          missing=0
+          for f in \
+            skills/running-a-sprint/SKILL.md \
+            agents/story-coordinator.md \
+            skills/two-stage-review/SKILL.md \
+            skills/session-postmortem/references/BATCH_ANALYSIS.md \
+            skills/writing-skills/references/DISPATCH_PATTERN.md \
+            skills/three-amigos/references/CEREMONIES.md
+          do
+            for s in \
+              'Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check.' \
+              'Nothing is released before a pass.'
+            do
+              if ! grep -qF -- "$s" "$f"; then
+                printf 'FAILED: %s is missing required contract string: %s\n' "$f" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          done
+          if [ "$missing" -gt 0 ]; then exit 1; fi
+          echo "first-dispatch check text pinned in six paths"
+
       # This 20,000-byte cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the seven core skills listed
       # in the loop below. Three of them were measured and brought under the

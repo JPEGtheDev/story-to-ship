@@ -56,7 +56,7 @@ item are in the reference sections above.
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
 - [ ] **No cross-skill file path refs** -- other skills referenced by name in prose only, not by `../other-skill/references/FILE.md` paths? Run ``grep -nE "(^|[^A-Za-z-])($(ls skills | paste -sd'|'))(/|\`|[ ]skill)|\.\./[a-z][a-z0-9-]*/(references/|SKILL\.md)" "<resolved review target>" | grep -E "references/|SKILL\.md|[A-Z][A-Z]+_[A-Z_]+\.md"`` -- the command MUST run from the repository root (it lists `skills/`). A hit is a FAIL when the line names a file in another skill's tree; a line that only cites the skill's own `references/` path next to a skill name, or quotes a bad example, is a false positive.
-- [ ] **Gate relies on another skill's rule** -- run the gate command in the block below this list on the resolved review target, from the repository root; a changed gate line that names another skill, or points to another skill's section without naming it, is a FAIL unless it says `Load the <skill> skill now` or `Load `<skill>` now` (either form, any case) or states the rule inline. The command prints candidate lines and the reviewer adjudicates each one; a skill name inside a quoted bad example is exempt. A `pointer:` line is a FAIL only when it points to another skill's material. A SKILL.md whose output prints `GATE HEADINGS: 0` is a FAIL. In a standalone audit with no earlier version (W=1), every gate line counts and each hit is advice, not a FAIL. The output `NO CHANGED LINES` means nothing changed against origin/main. Paste the command output.
+- [ ] **Gate relies on another skill's rule** -- run the gate command in the block below this list on the resolved review target, from the repository root; a changed gate line (a gate line is a line under a `## BEFORE PROCEEDING`, `## Red Flags`, `## Iron Law` or `## Rationalization Prevention` heading, at any of the `##`, `###` or `####` levels) that names another skill, or points to another skill's section without naming it, is a FAIL unless it says `Load the <skill> skill now` or `Load `<skill>` now` (either form, any case) or states the rule inline. The command prints candidate lines and the reviewer adjudicates each one; a skill name inside a quoted bad example is exempt. A `pointer:` line is a FAIL only when it points to another skill's material. A SKILL.md whose output prints `GATE HEADINGS: 0` is a FAIL. In a standalone audit with no earlier version (W=1), every gate line counts and each hit is advice, not a FAIL. The output `NO CHANGED LINES` means nothing changed against the merge-base with origin/main. Paste the command output.
 - [ ] **Skill-specific content** -- no generic placeholder-only examples?
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
@@ -71,8 +71,8 @@ item are in the reference sections above.
 
 ```bash
 F="<resolved review target>"; W=0
-{ if [ "$W" = 1 ]; then :; else git diff -U0 origin/main -- "$F"; fi; } | awk -v F="$F" -v whole="$W" -v names="$(ls skills | paste -sd'|' -)" '
-/^@@/ { split($3, a, ","); s = substr(a[1], 2); n = (a[2] == "" ? 1 : a[2]); for (i = 0; i < n; i++) { ch[s + i] = 1; nch++ }; next }
+{ if [ "$W" = 1 ]; then :; else git diff -U0 "$(git merge-base HEAD origin/main)" -- "$F"; fi; } | awk -v F="$F" -v whole="$W" -v names="$(ls skills | paste -sd'|' -)" '
+/^@@/ { nh++; split($3, a, ","); s = substr(a[1], 2); n = (a[2] == "" ? 1 : a[2]); for (i = 0; i < n; i++) { ch[s + i] = 1; nch++ }; next }
 END {
   self = ""
   while ((getline l < F) > 0) if (l ~ /^name: /) { self = substr(l, 7); break }
@@ -93,7 +93,7 @@ END {
     if (name != "") printf "%d: name=%s: %s\n", ln, name, l
     else if (low ~ /(section|heading|(see|per) the )/) printf "%d: pointer: %s\n", ln, l
   }
-  if (whole != 1 && nch == 0) print "NO CHANGED LINES against origin/main (empty diff, or the base is missing)"
+  if (whole != 1 && nh == 0) print "NO CHANGED LINES against the merge-base with origin/main (empty diff, or the base is missing)"
   printf "GATE HEADINGS: %d\n", ng
 }'
 ```

@@ -25,9 +25,7 @@ CI workflows read code, run tests, and publish artifacts. They never write code.
 
 Stop all merges immediately, except the PR that fixes the red pipeline, which merges as soon as its own checks pass. Fix the broken main pipeline before any other work. No other task takes priority.
 
-A broken main branch pipeline is not a background task. It is the highest-priority item for anyone working on the project. No other PR merges while the pipeline is red; the fix PR merges once its own checks pass. The broken build is the only work that matters until it is fixed.
-
-**Why:** A broken pipeline on main means the deploy safety net is gone. Every merge while it is broken is unverified. The longer it stays broken, the harder the root cause is to identify (multiple changes compound). Fix it immediately, not in the next sprint.
+The reasoning behind this rule is in `references/WORKFLOW_EXAMPLES.md`, section "Why the Broken-Pipeline Rule Is Highest Priority".
 
 ---
 

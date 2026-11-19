@@ -14,7 +14,7 @@ See `references/AGENT_LOGS.md` for Claude Code session log structure.
 
 Dispatch up to 4 reviewer subagents in parallel, each pointed at a different session. Use `postmortem-reviewer.md` for each. Collect results as they complete.
 
-**Before the parallel dispatch above, for a batch of two or more postmortem dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass. A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): fix the template, re-run the check, and state the failure and fix. A third failed check ends the batch: hand the decision to the owner as an owner question.
+**Before the parallel dispatch above, for a batch of two or more postmortem dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass. A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): fix the template, move the failed output aside before the re-run, re-run the check, and state the failure and fix. A third failed check ends the batch: hand the decision to the owner as an owner question. An owner question is a question the owner must answer.
 
 **Priority:**
 1. Sessions with a `postmortem.md` in the session directory but no external review -- direct comparison (highest value)
@@ -25,4 +25,4 @@ Dispatch up to 4 reviewer subagents in parallel, each pointed at a different ses
 
 ## Related Skills
 
-- `dispatching-parallel-agents` -- the first-dispatch check: its pass tests and the exemption for a template already passed this session
+- `dispatching-parallel-agents` -- the first-dispatch check: its pass tests, failure handling and the exemption for a template already passed this session

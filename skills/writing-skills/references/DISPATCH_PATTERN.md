@@ -12,14 +12,14 @@ One agent per skill directory -- the agent reviews `SKILL.md` and every file in 
    - `VOICE_AUTHORITY_RULES.md` -> `{{VOICE_AUTHORITY_RULES}}`
    - `SIZE_AND_COMPRESSION.md` -> `{{SIZE_AND_COMPRESSION}}`
    - `REVIEW_INSTRUCTIONS.md` -> `{{REVIEW_INSTRUCTIONS}}`
+**Before the parallel dispatch of step 2 below, for a batch of two or more skill-reviewer dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. A first-dispatch check is one dispatch sent alone to test the template. Nothing is released before a pass. A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): fix the cause (the dispatch prompt, or the template when the failure is in it), re-run the check, and state the failure and fix. A third failed check ends the batch: hand the decision to the owner as an owner question. An owner question is a question the owner must answer.
+
 2. For each skill: substitute all four reference placeholders for the `skill-reviewer` agent, set the five dispatch placeholders, then dispatch. The agent derives `references/` from `dirname({{SKILL_PATH}})` at runtime.
    - `{{SKILL_PATH}}` -- absolute path to the skill's `SKILL.md` inside the worktree
    - `{{RECENT_CHANGES}}` -- the changes that prompted the audit
    - `{{WORKTREE_PATH}}` -- the pre-created worktree path, e.g. `<repo_root>/.worktrees/<agent-name>`
    - `{{SECOND_PATH}}` -- `none` in this flow; pairing two files that implement one change into one dispatch is the Stage 2 change review the `two-stage-review` skill defines, not an audit
    - `{{IMPLEMENTER_EVIDENCE}}` -- the implementer's pasted verification output, or a statement that no implementer ran for this audit
-
-**Before the parallel dispatch in step 2 above, for a batch of two or more skill-reviewer dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass. A failed check (no final report, BLOCKED, or NEEDS_CONTEXT counts as failed): fix the template, re-run the check, and state the failure and fix. A third failed check ends the batch: hand the decision to the owner as an owner question.
 
 3. For each modified reference file listed in `{{RECENT_CHANGES}}`: dispatch a SEPARATE skill-reviewer agent with that file as `{{SKILL_PATH}}` and `{{SECOND_PATH}}` again `none`. Include the file path explicitly in the prompt. The agent applies the full Step 2 quality checklist (weak language, acronym rule, jargon rule, absolute paths, cross-skill refs, enforcement co-location) adapted for a reference file -- skip anatomy element checks (Iron Law, Announcement, Gate Function, Rationalization Table, Red Flags) since those only apply to SKILL.md.
 4. Collect all reports before acting on any result.

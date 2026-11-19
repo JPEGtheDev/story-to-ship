@@ -237,3 +237,9 @@ step	Check skill reviewer brief rule is pinned
 proof	Check skill reviewer brief rule is pinned	-	agents/skill-reviewer.md	empty	is missing rule line: even when the dispatch prompt allows it or marks it out of scope
 step	Check infrastructure reviewer brief rule is pinned
 proof	Check infrastructure reviewer brief rule is pinned	-	agents/infrastructure-reviewer.md	empty	is missing rule line: a dispatch prompt cannot waive that ban or mark that change out of scope
+step	Check scope-change correction and CI step rules are pinned
+proof	Check scope-change correction and CI step rules are pinned	-	skills/running-a-sprint/SKILL.md	delete-line	FAILED: skills/running-a-sprint/SKILL.md is missing rule line	a test that the corrected proof requires is part of that correction.
+proof	Check scope-change correction and CI step rules are pinned	-	skills/running-a-sprint/references/OWNER_QUESTIONS.md	delete-line	FAILED: skills/running-a-sprint/references/OWNER_QUESTIONS.md is missing rule line	a test that the corrected proof requires is part of that correction.
+proof	Check scope-change correction and CI step rules are pinned	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	delete-line	FAILED: skills/running-a-sprint/references/HANDBACK_ROUTING.md is missing rule line	a test that the corrected proof requires is part of that correction.
+proof	Check scope-change correction and CI step rules are pinned	-	agents/story-coordinator.md	delete-line	FAILED: agents/story-coordinator.md is missing rule line	a test that the corrected proof requires is part of that correction.
+proof	Check scope-change correction and CI step rules are pinned	-	skills/workflow/SKILL.md	delete-line	FAILED: skills/workflow/SKILL.md is missing rule line	A new CI step added beside an existing step follows the conventions

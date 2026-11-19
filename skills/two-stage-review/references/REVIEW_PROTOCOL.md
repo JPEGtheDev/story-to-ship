@@ -93,6 +93,9 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 
 Code that doesn't meet the spec doesn't benefit from quality review.
 
+**Re-review required for review-covered territory:**
+Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
+
 **Inline-lane todos:**
 **Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
 **Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.

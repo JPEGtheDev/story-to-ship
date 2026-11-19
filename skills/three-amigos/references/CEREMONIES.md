@@ -103,7 +103,7 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 **Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). On an amigo's first dispatch, a brief contains nothing else; a return dispatch adds only that amigo's batched skeptic findings. Do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
-**Batch of two or more Discovery amigo dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass.
+**Batch of two or more Discovery amigo dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. Nothing is released before a pass. A first-dispatch check that returns NEEDS_CONTEXT gets one re-dispatch with the missing information. A first-dispatch check with no final report, or one that returns BLOCKED, stops Discovery with a Discovery stop (owner question: Discovery).
 
 ### Agenda -- Questions
 
@@ -245,3 +245,9 @@ Retrospective dispatch prompts supply the evidence record (timeline, artifact pa
 ## Model Selection
 
 Ceremony model tiers and their rationale are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony; do not restate tier assignments or model IDs in this file.
+
+---
+
+## Related Skills
+
+- `dispatching-parallel-agents` -- the first-dispatch check: its pass tests and the exemption for a template already passed this session

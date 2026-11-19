@@ -107,7 +107,7 @@ Send exactly one first-dispatch check first, and send no other dispatch from tha
 
 Nothing is released before a pass. The template key is the sha256 of the launch template text. The check passes when the launch returns a final report that is neither BLOCKED nor NEEDS_CONTEXT. A template whose check already passed in this session is exempt, so later batches from it release without a new check; after a compaction every template runs its check again.
 
-A failed check is exactly one of two things: the launch returns no final report, or the launch returns the implementer status BLOCKED or NEEDS_CONTEXT. A runner hand-back of any other kind (owner question, cap reached, PR ready, interim, blocked) is not a failed check; `references/HANDBACK_ROUTING.md` routes it, and the batch check never re-dispatches it. For a failed check, move the failed output aside, fix the template, and re-run the check; the re-run is the only launch sent from that template until it passes. A third failed check ends the batch: hand the decision to the owner as an owner question.
+A failed check is exactly one of two things: the launch returns no final report, or the launch returns the implementer status BLOCKED or NEEDS_CONTEXT. A runner hand-back of any other kind (owner question, cap reached, PR ready, interim, blocked) is not a failed check; `references/HANDBACK_ROUTING.md` routes it, and the batch check never re-dispatches it. For a failed check, move the failed output aside, fix the template, and re-run the check; the re-run is the only launch sent from that template until it passes. A third failed check ends the batch: hand the decision to the owner as an owner question. A first launch that ends in a hand-back other than a final report, BLOCKED, or NEEDS_CONTEXT leaves the check pending until the owner answers, and is not re-dispatched.
 
 The pilot gate in `references/PILOT.md` is unchanged and applies in addition to this check; the check adds no exemption to it. State the check result in the launcher's turn, once it is known.
 
@@ -148,6 +148,8 @@ Hold: while the check is pending, the launcher holds the rest of the batch in st
 ## Related Skills
 
 Related skills: `references/MOVED_RATIONALE.md`, Moved from SKILL.md: related skills.
+
+- `dispatching-parallel-agents` -- the first-dispatch check: its pass tests and the exemption for a template already passed this session
 
 ---
 

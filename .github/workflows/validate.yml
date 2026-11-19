@@ -1197,8 +1197,11 @@ jobs:
               fi
             done
           done
-          if [ "$missing" -gt 0 ]; then exit 1; fi
-          echo "first-dispatch check text pinned in six paths"
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing missing first-dispatch check string(s) in the six batch paths"
+            exit 1
+          fi
+          echo "[+] first-dispatch check text pinned in six paths"
 
       # This 20,000-byte cap (roughly 5,000 tokens at the documented
       # chars/4 estimate) is enforced here only for the seven core skills listed

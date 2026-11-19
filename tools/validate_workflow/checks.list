@@ -34,6 +34,12 @@ step	Check the Discovery formulation check is pinned
 step	Check the flaky-test rules are pinned
 step	Check the first-dispatch check rule is pinned
 step	Check the first-dispatch check text is pinned in the six batch paths
+covers	Check the first-dispatch check text is pinned in the six batch paths	skills/running-a-sprint/SKILL.md
+covers	Check the first-dispatch check text is pinned in the six batch paths	agents/story-coordinator.md
+covers	Check the first-dispatch check text is pinned in the six batch paths	skills/two-stage-review/SKILL.md
+covers	Check the first-dispatch check text is pinned in the six batch paths	skills/session-postmortem/references/BATCH_ANALYSIS.md
+covers	Check the first-dispatch check text is pinned in the six batch paths	skills/writing-skills/references/DISPATCH_PATTERN.md
+covers	Check the first-dispatch check text is pinned in the six batch paths	skills/three-amigos/references/CEREMONIES.md
 step	Enforce size cap on core skills
 step	Hook script smoke test
 step	SessionStart source-branch detector

@@ -1521,6 +1521,31 @@ jobs:
           fi
           echo "[+] workflow SKILL.md carries its rule lines"
 
+      - name: Check scope-change correction and CI step rules are pinned
+        run: |
+          set -e
+          missing=0
+          check() {
+            file="$1"
+            shift
+            for s in "$@"; do
+              if ! grep -qF -- "$s" "$file"; then
+                printf 'FAILED: %s is missing rule line: %s\n' "$file" "$s"
+                missing=$((missing + 1))
+              fi
+            done
+          }
+          check skills/running-a-sprint/SKILL.md 'Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.'
+          check skills/running-a-sprint/references/OWNER_QUESTIONS.md 'Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.'
+          check skills/running-a-sprint/references/HANDBACK_ROUTING.md 'Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.'
+          check agents/story-coordinator.md 'Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.'
+          check skills/workflow/SKILL.md 'A new CI step added beside an existing step follows the conventions of the step beside it (its failure message form, how its proof rows are written and its pin style) unless the story says otherwise.'
+          if [ "$missing" -gt 0 ]; then
+            echo "Found $missing rule line problem(s)"
+            exit 1
+          fi
+          echo "[+] scope-change correction and CI step rules are pinned"
+
       - name: Check spec-compliance reviewer brief rule is pinned
         run: |
           set -e

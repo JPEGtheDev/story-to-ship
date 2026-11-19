@@ -176,3 +176,11 @@ FAILED=${FAILED:-0}
 ```
 
 **Note:** Don't use `"X tests from"` lines -- gtest outputs one per suite. Always parse the final summary. The `|| true` and `:-0` default make a missing summary line count as 0 under both `bash -e` and `bash -eo pipefail`.
+
+---
+
+## Why the Broken-Pipeline Rule Is Highest Priority
+
+A broken main branch pipeline is not a background task. It is the highest-priority item for anyone working on the project. No other PR merges while the pipeline is red; the fix PR merges once its own checks pass. The broken build is the only work that matters until it is fixed.
+
+**Why:** A broken pipeline on main means the deploy safety net is gone. Every merge while it is broken is unverified. The longer it stays broken, the harder the root cause is to identify (multiple changes compound). Fix it immediately, not in the next sprint.

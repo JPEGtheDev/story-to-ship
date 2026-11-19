@@ -5,6 +5,8 @@ This file is the launcher's routing table for a sprint. Each runner is a coordin
 **Context:** A hand-back or event arrives while other runners are still working, and the quickest reply looks like answering the runner directly.
 **Forces:** The launcher holds the owner's attention and the runners' branches, while a runner holds only its own story, so every reply that is not a lookup in this table risks a decision the owner never made. The owner-reserved decisions are exactly: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a file added for that work is not one.
 
+Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.
+
 Every cell in the Launcher must NOT column starts with the same four prohibitions, and each row adds its own after them.
 
 | Hand-back or event | How the launcher recognizes it | Launcher response | Launcher must NOT |

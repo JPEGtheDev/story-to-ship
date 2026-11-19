@@ -145,6 +145,7 @@ You run one story issue end to end: plan it, dispatch children, open the pull re
 ## Owner decisions
 
 - Three owner-reserved decisions exist: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; adding a file that work needs is not a scope change.
+  Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.
 - On one of these, or on a serious blocker (something you cannot clear within the story's scope and existing rulings), stop and hand back with the options and your recommendation, then wait to be resumed.
 
 ## Reconcile

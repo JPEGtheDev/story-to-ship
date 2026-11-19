@@ -25,9 +25,7 @@ CI workflows read code, run tests, and publish artifacts. They never write code.
 
 Stop all merges immediately, except the PR that fixes the red pipeline, which merges as soon as its own checks pass. Fix the broken main pipeline before any other work. No other task takes priority.
 
-A broken main branch pipeline is not a background task. It is the highest-priority item for anyone working on the project. No other PR merges while the pipeline is red; the fix PR merges once its own checks pass. The broken build is the only work that matters until it is fixed.
-
-**Why:** A broken pipeline on main means the deploy safety net is gone. Every merge while it is broken is unverified. The longer it stays broken, the harder the root cause is to identify (multiple changes compound). Fix it immediately, not in the next sprint.
+The reasoning behind this rule is in `references/WORKFLOW_EXAMPLES.md`, section "Why the Broken-Pipeline Rule Is Highest Priority".
 
 ---
 
@@ -76,6 +74,7 @@ Before presenting workflow changes, verify:
 8. `retention-days:` set: 30 for PR runs, 90 for release runs (30 for any other run)
 9. **No temporary weakening of a check main enforces.** A change that removes, skips or weakens a check main enforces is not made as a temporary step: the replacement work is done in the same PR, or the change is dropped. A check main enforces is any CI check, or any skill enforcement text on main (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function). A same-PR removal or weakening needs the owner's ruling, even when the removal is permanent.
 10. **No new runtime in CI.** A CI step does not add a runtime that validate.yml does not already call. The runtimes validate.yml calls are bash, sh, jq, shellcheck, python3, awk, sed and grep. A new runtime (for example node, ruby or perl) is an owner decision, not a change to the workflow. A `uses:` action that runs node is not a new runtime; this item covers `run:` commands only.
+11. A new CI step added beside an existing step follows the conventions of the step beside it (its failure message form, how its proof rows are written and its pin style) unless the story says otherwise.
 
 [+] All met -> proceed with presenting workflow changes
 [-] Any unmet -> fix before presenting

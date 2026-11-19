@@ -79,6 +79,8 @@ Verify before relaying anything to the owner:
 
 The owner decides three things: merge, fix-round cap override, scope change. A scope change is a change to the work the story's acceptance criteria require, such as changing an acceptance criterion or adding behavior the story does not name; a runner adding a file that work needs is not one and needs no owner question. The launcher never decides them, never merges, and never treats silence as consent.
 
+Correcting a proof label in a story, or adding a missing one, to the proof kind the Proof kinds section of the three-amigos Formulation reference requires is a correction, not a scope change, and needs no owner question; a test that the corrected proof requires is part of that correction.
+
 When the session-bootstrap gate prompts again (after a compaction or restart has dropped the launcher's loaded skills), re-invoke session-bootstrap alone, then honesty, communication and the reload set (every skill the compaction hook lists).
 
 An ask about items that exist now is done once, for the items it names; it does not become a standing workflow, and a later item needs its own ask.

@@ -72,7 +72,7 @@ workflow_parse() {
 parse_list() {
   awk -F "$TAB" -v kind="$3" '
     function takes_text(mode) {
-      return mode == "append" || mode == "insert-before" || mode == "insert-before-close" || mode == "replace"
+      return mode == "append" || mode == "insert-before" || mode == "insert-before-close" || mode == "replace" || mode == "delete-line"
     }
     /^#/ || /^[ \t]*$/ { next }
     {
@@ -311,16 +311,31 @@ text_lines() {
   }'
 }
 
+# need_one_line FILE TEXT NAME: die (exit 2) unless FILE has exactly one line that holds TEXT
+# as a literal substring; NAME is the repo-relative path of FILE, used in the message.
+need_one_line() {
+  vw_hits=$(VW_TEXT=$2 awk 'index($0, ENVIRON["VW_TEXT"]) > 0 { n++ } END { print n + 0 }' "$1") ||
+    die "cannot count the matching lines of $3"
+  [ "$vw_hits" -eq 1 ] || die "delete-line in $3 needs exactly one matching line, found $vw_hits"
+}
+
 # apply_mode FILE MODE TEXT: empty truncates FILE to 0 bytes; oversize writes 20001 bytes of x;
 # append adds TEXT to the end of FILE, one line per literal backslash-n in TEXT. insert-before
 # puts TEXT, split the same way, before the last line of FILE. insert-before-close puts
 # TEXT before the second line of FILE that is exactly ---, the frontmatter closing line; a
 # FILE with no second --- line is left unchanged. replace removes FILE (a link is removed,
 # not its target) and writes TEXT, split the same way as append, as a regular file at its path.
-# parse_list has already refused any other mode.
+# delete-line removes the one line of FILE that holds TEXT as a literal substring (not a regular
+# expression); the count of matching lines must be exactly one, else the run exits 2. NAME is the
+# repo-relative path of FILE, used in that message. parse_list has already refused any other mode.
+# The need_one_line call in the delete-line arm is a deliberate guard: run_proofs runs the same check
+# first, so apply_mode never deletes from a file where TEXT matches other than one line.
 apply_mode() {
   case $2 in
     empty) : > "$1" ;;
+    delete-line)
+      need_one_line "$1" "$3" "$4"
+      VW_TEXT=$3 awk 'index($0, ENVIRON["VW_TEXT"]) == 0' "$1" > "$1.new" && mv "$1.new" "$1" ;;
     replace) rm -f "$1" && text_lines "$3" > "$1" ;;
     oversize) awk 'BEGIN { s = sprintf("%20001s", ""); gsub(/ /, "x", s); printf "%s", s }' > "$1" ;;
     append) text_lines "$3" >> "$1" ;;
@@ -370,6 +385,9 @@ run_proofs() {
       finding R2 "proof for \"$step\" has no run block in the head workflow"
       continue
     fi
+    if [ "$mode" = delete-line ] && [ -f "$ROOT/$target" ]; then
+      need_one_line "$ROOT/$target" "$addtext" "$target"
+    fi
     ctl=$TMP/control.$n
     copy_tree "$ctl"
     if ! run_block "$ctl" "$envs" "$body" "$TMP/control.$n.out"; then
@@ -382,7 +400,7 @@ run_proofs() {
       finding R2 "proof target \"$target\" of step \"$step\" is absent from the tree"
       continue
     fi
-    apply_mode "$fail/$target" "$mode" "$addtext"
+    apply_mode "$fail/$target" "$mode" "$addtext" "$target"
     if ! run_block "$fail" "$envs" "$body" "$TMP/fail.$n.out" &&
       grep -Fq -- "$text" "$TMP/fail.$n.out"; then
       printf 'PROOF ok: %s\n' "$step"

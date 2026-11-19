@@ -55,7 +55,7 @@ If a story violates INVEST, fix it or suggest breaking it down.
 
 ### Include Concrete Details for Your Project
 
-When generating stories, reference project-specific files, naming conventions, CI requirements, and test framework conventions.
+When generating stories, state the behavior and outcomes in concrete terms, and leave out file names and edit targets: Discovery finds the files.
 
 ## Common Edge Cases
 

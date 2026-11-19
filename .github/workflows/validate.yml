@@ -449,6 +449,10 @@ jobs:
           checkabsent agents/story-coordinator.md 'discovery-records|committed before the push that opens|exempt from this check'
           checkabsent skills/running-a-sprint/references/HANDBACK_ROUTING.md 'discovery-records'
           checkabsent skills/running-a-sprint/SKILL.md 'discovery-records'
+          checkabsent skills/user-story-generator/references/STORY_TEMPLATE.md 'Files to Create/Modify'
+          checkabsent skills/user-story-generator/references/STORY_TEMPLATE.md 'specific file paths'
+          checkabsent skills/greenfield-bootstrap/references/SHARED_TEMPLATES.md 'Files to Create/Modify'
+          checkabsent skills/greenfield-bootstrap/references/SHARED_TEMPLATES.md 'specific file paths'
           # Shipped-text review rules: pins detect deleted wording only, not whether a reviewer applies the rule.
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "- [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names."
           check skills/writing-skills/references/REVIEW_INSTRUCTIONS.md "- [ ] A routing change covers every skill whose frontmatter triggers on the same signal."

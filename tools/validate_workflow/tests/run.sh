@@ -14,7 +14,7 @@ RUN="$REPO/tools/validate_workflow/run.sh"
 REAL_WF="$REPO/.github/workflows/validate.yml"
 SIZE_STEP="Enforce size cap on core skills"
 SIZE_FILE="skills/honesty/SKILL.md"
-EXPECTED_CASES=36
+EXPECTED_CASES=40
 
 TMP=$(mktemp -d) || exit 2
 trap 'rm -rf "$TMP"' EXIT
@@ -751,6 +751,90 @@ commit_all "$repo" "head: remove the workflow_dispatch trigger"
 # Assert
 check_run "trigger-d removing workflow_dispatch emits FINDING R1" "$repo" 1 R1 - \
   'base trigger "workflow_dispatch" is absent from the head on: block'
+
+# Case delete-a: a delete-line proof removes the one line that holds TEXT. The probe step fails
+# once the line is absent, so the control run (line present) passes and the must-fail run fails.
+# Arrange
+repo="$TMP/delete-a"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+printf 'keep one\ndrop me\nkeep two\n' > "$repo/skills/honesty/LINES.txt" || exit 2
+# Act
+VW_BLOCK='      - name: Probe deleted line
+        run: |
+          grep -qF "drop me" skills/honesty/LINES.txt || { echo "line is absent"; exit 1; }' awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe deleted line\nproof\tProbe deleted line\t-\tskills/honesty/LINES.txt\tdelete-line\tline is absent\tdrop me\n' >> "$list"
+commit_all "$repo" "head: delete-line probe step and proof"
+# Assert
+check_run "delete-a delete-line removes exactly one line" "$repo" 0 - - "PROOF ok: Probe deleted line"
+
+# Case delete-b: a delete-line proof whose TEXT matches no line stops the guard with exit 2.
+# Arrange
+repo="$TMP/delete-b"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+printf 'keep one\nkeep two\n' > "$repo/skills/honesty/LINES.txt" || exit 2
+# Act
+VW_BLOCK='      - name: Probe deleted line
+        run: |
+          grep -qF "drop me" skills/honesty/LINES.txt || { echo "line is absent"; exit 1; }' awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe deleted line\nproof\tProbe deleted line\t-\tskills/honesty/LINES.txt\tdelete-line\tline is absent\tdrop me\n' >> "$list"
+commit_all "$repo" "head: delete-line proof with no matching line"
+# Assert
+check_run "delete-b delete-line with zero matching lines exits 2" "$repo" 2 - - \
+  "validate-workflow: delete-line in skills/honesty/LINES.txt needs exactly one matching line, found 0"
+
+# Case delete-c: a delete-line proof whose TEXT matches two lines stops the guard with exit 2.
+# Arrange
+repo="$TMP/delete-c"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+printf 'drop me\nkeep\ndrop me\n' > "$repo/skills/honesty/LINES.txt" || exit 2
+# Act
+VW_BLOCK='      - name: Probe deleted line
+        run: |
+          grep -qF "drop me" skills/honesty/LINES.txt || { echo "line is absent"; exit 1; }' awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe deleted line\nproof\tProbe deleted line\t-\tskills/honesty/LINES.txt\tdelete-line\tline is absent\tdrop me\n' >> "$list"
+commit_all "$repo" "head: delete-line proof with two matching lines"
+# Assert
+check_run "delete-c delete-line with two matching lines exits 2" "$repo" 2 - - \
+  "validate-workflow: delete-line in skills/honesty/LINES.txt needs exactly one matching line, found 2"
+
+# Case delete-d: a delete-line proof row with six fields is refused at parse, because the mode
+# takes a seventh field for TEXT.
+# Arrange
+repo="$TMP/delete-d"
+make_base "$repo" 1
+use_head "$repo"
+wf="$repo/.github/workflows/validate.yml"
+list="$repo/tools/validate_workflow/checks.list"
+printf 'drop me\nkeep\n' > "$repo/skills/honesty/LINES.txt" || exit 2
+# Act
+VW_BLOCK='      - name: Probe deleted line
+        run: |
+          grep -qF "drop me" skills/honesty/LINES.txt || { echo "line is absent"; exit 1; }' awk '
+  !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
+  { print }
+' "$wf" | set_content "$wf"
+printf 'step\tProbe deleted line\nproof\tProbe deleted line\t-\tskills/honesty/LINES.txt\tdelete-line\tdrop me\n' >> "$list"
+commit_all "$repo" "head: delete-line proof with six fields"
+# Assert
+check_run "delete-d delete-line with six fields exits 2 at parse" "$repo" 2 - - "expected 7 fields"
 
 if [ "$CASES" -ne "$EXPECTED_CASES" ]; then
   echo "FAIL: suite: ran $CASES cases, expected $EXPECTED_CASES"

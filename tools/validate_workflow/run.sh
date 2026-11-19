@@ -328,6 +328,8 @@ need_one_line() {
 # delete-line removes the one line of FILE that holds TEXT as a literal substring (not a regular
 # expression); the count of matching lines must be exactly one, else the run exits 2. NAME is the
 # repo-relative path of FILE, used in that message. parse_list has already refused any other mode.
+# The need_one_line call in the delete-line arm is a deliberate guard: run_proofs runs the same check
+# first, so apply_mode never deletes from a file where TEXT matches other than one line.
 apply_mode() {
   case $2 in
     empty) : > "$1" ;;

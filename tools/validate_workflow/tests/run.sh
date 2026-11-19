@@ -764,6 +764,7 @@ printf 'keep one\ndrop me\nkeep two\n' > "$repo/skills/honesty/LINES.txt" || exi
 # Act
 VW_BLOCK='      - name: Probe deleted line
         run: |
+          grep -qF "keep one" skills/honesty/LINES.txt && grep -qF "keep two" skills/honesty/LINES.txt || { echo "kept lines missing"; exit 1; }
           grep -qF "drop me" skills/honesty/LINES.txt || { echo "line is absent"; exit 1; }' awk '
   !added && /^      - name: / { print ENVIRON["VW_BLOCK"]; print ""; added = 1 }
   { print }

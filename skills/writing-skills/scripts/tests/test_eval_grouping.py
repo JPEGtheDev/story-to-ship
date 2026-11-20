@@ -725,6 +725,44 @@ class TestMain(unittest.TestCase):
         self.assertIn("c1: excluded: no signal", lines)
         self.assertEqual([line for line in lines if line.startswith("group kept")], [])
 
+    def test_main_threeSharedLabelsWithFourthMissing_groupsCases(self):
+        # Arrange: cases c1 and c2 hold identical records under the first three labels, so they correlate at 1.0
+        # over those three shared labels; c2 has no run under the fourth label, tsr-before-3
+        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
+        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
+        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
+        records_before_3 = [_record(True), _record(False), _record(True), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            path_c = os.path.join(tmp, "tsr_before_2.json")
+            path_d = os.path.join(tmp, "tsr_before_3.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
+            with open(path_c, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
+            with open(path_d, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_3}), handle)
+            argv = [
+                "no-skill=" + path_a,
+                "tsr-before-1=" + path_b,
+                "tsr-before-2=" + path_c,
+                "tsr-before-3=" + path_d,
+            ]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the group lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and c2 is grouped with c1 on the three labels they share
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        lines = out.getvalue().splitlines()
+        self.assertIn("group kept c1: c2", lines)
+        self.assertIn("c2: excluded: grouped with c1", lines)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -184,20 +184,7 @@ def main(argv: list) -> int:
         if row["note"]:
             line += f" ({row['note']})"
         print(line)
-    rates = {}
     all_cases = sorted({case for label_cases in columns.values() for case in label_cases})
-    for case in all_cases:
-        outcomes = {label: columns[label].get(case) for label in columns}
-        if all(outcomes.values()):
-            rates[case] = {label: sum(values) / len(values) for label, values in outcomes.items()}
-    grouped = set()
-    for kept, members in group_cases(rates, 0.9, 3):
-        if not members:
-            continue
-        print(f"group kept {kept}: {', '.join(members)}")
-        for member in members:
-            print(f"{member}: excluded: grouped with {kept}")
-            grouped.add(member)
     pooled_rates = {
         case: {
             label: sum(columns[label][case]) / len(columns[label][case])
@@ -206,6 +193,14 @@ def main(argv: list) -> int:
         }
         for case in all_cases
     }
+    grouped = set()
+    for kept, members in group_cases(pooled_rates, 0.9, 3):
+        if not members:
+            continue
+        print(f"group kept {kept}: {', '.join(members)}")
+        for member in members:
+            print(f"{member}: excluded: grouped with {kept}")
+            grouped.add(member)
     for case in all_cases:
         case_rates = pooled_rates[case]
         if case in grouped or len(set(case_rates.values())) <= 1:

@@ -65,8 +65,13 @@ def pool_columns(paths_by_label: dict) -> dict:
     return pooled
 
 
-def zero_event_bound(n: int) -> float:
-    """Return the zero-event bound for a case that logged n runs with no events."""
+def zero_event_bound(n: int) -> "float | None":
+    """Return the zero-event bound for a case that logged n runs with no events.
+
+    Returns None when n is 0: a case with no runs has no bound and no verdict.
+    """
+    if n == 0:
+        return None
     return 1 - 0.05 ** (1 / n)
 
 

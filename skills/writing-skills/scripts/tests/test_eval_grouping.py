@@ -181,5 +181,21 @@ class TestZeroEventBound(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class TestReportRows(unittest.TestCase):
+    def test_reportRows_constantWithNoSkill_isExcludedNoSignal(self):
+        # Arrange: case c1 has the same pass rate in the no-skill and tsr-before-1 labels, so it is constant
+        columns = {"no-skill": {"c1": [True, False, True, False]}, "tsr-before-1": {"c1": [True, False, True, False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the c1 row is labeled as excluded with no verdict
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertEqual(row["label"], "excluded: no signal")
+        self.assertIsNone(row["verdict"])
+
+
 if __name__ == "__main__":
     unittest.main()

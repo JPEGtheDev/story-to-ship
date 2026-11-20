@@ -870,7 +870,7 @@ class TestMain(unittest.TestCase):
         self.assertIn(expected, out_forward.getvalue().splitlines())
         self.assertIn(expected, out_reverse.getvalue().splitlines())
 
-    def test_main_singletonCase_printsNoGroupLine(self):
+    def test_main_singletonCase_printsNoMembersGroupLine(self):
         # Arrange: case c1 is non-constant and is the only case, so it is grouped with nothing
         with tempfile.TemporaryDirectory() as tmp:
             path_a = os.path.join(tmp, "no_skill.json")
@@ -885,12 +885,12 @@ class TestMain(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 result, error = _attempt(eg.main, argv)
 
-        # Assert: no error, main returns 0, and no line announces a group kept
+        # Assert: no error, main returns 0, and the kept singleton c1 has its group line with no members
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 0)
-        self.assertEqual([line for line in out.getvalue().splitlines() if line.startswith("group kept")], [])
+        self.assertIn("group kept c1: none", out.getvalue().splitlines())
 
-    def test_main_noSignalCase_printsNoGroupLine(self):
+    def test_main_noSignalCase_printsNoMembersGroupLine(self):
         # Arrange: case c1 has the same pass rate in both labels, so it is a no-signal case
         records = [_record(True), _record(False), _record(True), _record(False)]
         with tempfile.TemporaryDirectory() as tmp:
@@ -906,12 +906,12 @@ class TestMain(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 result, error = _attempt(eg.main, argv)
 
-        # Assert: no error, main returns 0, c1 is excluded as no signal, and no line announces a group kept
+        # Assert: no error, main returns 0, c1 is excluded as no signal, and the kept c1 has its group line with no members
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 0)
         lines = out.getvalue().splitlines()
         self.assertIn("c1: excluded: no signal", lines)
-        self.assertEqual([line for line in lines if line.startswith("group kept")], [])
+        self.assertIn("group kept c1: none", lines)
 
     def test_main_threeSharedLabelsWithFourthMissing_groupsCases(self):
         # Arrange: cases c1 and c2 hold identical records under the first three labels, so they correlate at 1.0

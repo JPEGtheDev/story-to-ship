@@ -203,9 +203,8 @@ def main(argv: list) -> int:
     }
     grouped = set()
     for kept, members in group_cases(pooled_rates, 0.9, 3):
-        if not members:
-            continue
-        print(f"group kept {kept}: {', '.join(members)}")
+        members_text = ", ".join(members) or "none"
+        print(f"group kept {kept}: {members_text}")
         for member in members:
             print(f"{member}: excluded: grouped with {kept}")
             grouped.add(member)

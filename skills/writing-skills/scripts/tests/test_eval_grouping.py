@@ -330,6 +330,33 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("c1: excluded: no signal", out.getvalue())
 
+    def test_main_cleanRun_printsGroupLine(self):
+        # Arrange: three clean run files, one per label; cases c1 and c2 hold identical records in each file,
+        # so their pass rates match in every label and they correlate at 1.0
+        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
+        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
+        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            path_c = os.path.join(tmp, "tsr_before_2.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
+            with open(path_c, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the group line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and the output carries the group line with c2 as c1's member
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertIn("group kept c1: c2", out.getvalue().splitlines())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -158,8 +158,10 @@ def main(argv: list) -> int:
         print("usage: eval_grouping.py label=path [label=path ...]", file=sys.stderr)
         return 2
     failed = False
+    paths_by_label = {}
     for item in argv:
-        _label, path = item.split("=", 1)
+        label, path = item.split("=", 1)
+        paths_by_label.setdefault(label, []).append(path)
         try:
             read_run_file(path)
         except RunFileError:
@@ -167,7 +169,14 @@ def main(argv: list) -> int:
             failed = True
     if failed:
         return 1
-    raise NotImplementedError
+    for row in report_rows(pool_columns(paths_by_label)):
+        line = f"{row['case']}: {row['label']}"
+        if row["bound"] is not None:
+            line += f" bound {row['bound']:.3f}"
+        if row["note"]:
+            line += f" ({row['note']})"
+        print(line)
+    return 0
 
 
 if __name__ == "__main__":

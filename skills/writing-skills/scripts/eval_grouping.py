@@ -95,8 +95,31 @@ def correlation(a: list, b: list) -> "float | None":
 
 
 def group_cases(rates: dict, threshold: float, min_shared: int) -> list:
-    """Group cases whose pairwise correlation reaches threshold over min_shared runs."""
-    raise NotImplementedError
+    """Group cases whose pairwise correlation reaches threshold over min_shared runs.
+
+    Cases are visited in the key order of rates. Each case is compared only with
+    the kept cases, in kept order; it joins the first kept case whose correlation
+    with it is at least threshold, and otherwise becomes a new kept case. Labels
+    shared by two cases are compared in sorted order; fewer than min_shared shared
+    labels, or a None correlation, never joins. Returns [(kept case, members)].
+    """
+    kept = []
+    for case, case_rates in rates.items():
+        for kept_case, members in kept:
+            kept_rates = rates[kept_case]
+            shared = sorted(set(case_rates) & set(kept_rates))
+            if len(shared) < min_shared:
+                continue
+            value = correlation(
+                [case_rates[label] for label in shared],
+                [kept_rates[label] for label in shared],
+            )
+            if value is not None and value >= threshold:
+                members.append(case)
+                break
+        else:
+            kept.append((case, []))
+    return kept
 
 
 def report_rows(columns: dict) -> list:

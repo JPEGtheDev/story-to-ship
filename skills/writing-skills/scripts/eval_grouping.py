@@ -157,6 +157,16 @@ def main(argv: list) -> int:
     if not argv or any("=" not in item for item in argv):
         print("usage: eval_grouping.py label=path [label=path ...]", file=sys.stderr)
         return 2
+    failed = False
+    for item in argv:
+        _label, path = item.split("=", 1)
+        try:
+            read_run_file(path)
+        except RunFileError:
+            print(f"{path}: error, no verdict")
+            failed = True
+    if failed:
+        return 1
     raise NotImplementedError
 
 

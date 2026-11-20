@@ -39,11 +39,11 @@ def read_run_file(path: str) -> dict:
             raise RunFileError(f"run file {path} has a case without arms.with[] records")
         column = columns.setdefault(case["name"], [])
         for record in records:
-            if not isinstance(record, dict) or "scored" not in record or "passed" not in record:
+            if not isinstance(record, dict) or "passed" not in record:
                 raise RunFileError(f"run file {path} has a malformed record in case {case['name']}")
             if record.get("error") is not None:
                 raise RunFileError(f"run file {path} has an errored record in case {case['name']}")
-            if record["scored"]:
+            if record.get("scored", True):
                 column.append(record["passed"])
     return columns
 

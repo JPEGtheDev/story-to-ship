@@ -351,26 +351,31 @@ class TestMain(unittest.TestCase):
         self.assertIn(missing + ": error, no verdict", out.getvalue())
 
     def test_main_badFileKeepsOtherCases(self):
-        # Arrange: a readable no-skill file holding case c1, and a tsr-before-1 file that is not JSON
+        # Arrange: readable no-skill and tsr-before-2 files both holding a constant case c1, and a
+        # tsr-before-1 file that is not JSON
+        constant = [_record(True), _record(True), _record(True), _record(True)]
         with tempfile.TemporaryDirectory() as tmp:
             good = os.path.join(tmp, "no_skill.json")
             bad = os.path.join(tmp, "tsr_before_1.json")
+            good_two = os.path.join(tmp, "tsr_before_2.json")
             with open(good, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": [_record(True), _record(False)]}), handle)
+                json.dump(_run_doc({"c1": constant}), handle)
             with open(bad, "w", encoding="utf-8") as handle:
                 handle.write("not json")
-            argv = ["no-skill=" + good, "tsr-before-1=" + bad]
+            with open(good_two, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": constant}), handle)
+            argv = ["no-skill=" + good, "tsr-before-1=" + bad, "tsr-before-2=" + good_two]
 
             # Act: call main through the error-capturing helper, with stdout captured to read the output lines
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 result, error = _attempt(eg.main, argv)
 
-        # Assert: no error, main returns 1, the bad file is named with no verdict, and c1 still prints its row
+        # Assert: no error, main returns 1, the bad file is named with no verdict, and c1 still gets its no-signal row
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 1)
         lines = out.getvalue().splitlines()
         self.assertIn(bad + ": error, no verdict", lines)
-        self.assertIn("c1: excluded: no signal", lines)
+        self.assertTrue(any(line.startswith("c1: excluded: no signal") for line in lines), lines)
 
     def test_main_cleanRun_printsNoSignalLine(self):
         # Arrange: two clean run files, no-skill and tsr-before-1, both holding case c1 with the same pass pattern
@@ -630,6 +635,52 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 1)
         self.assertIn(path + ": error, no verdict", out.getvalue().splitlines())
+
+    def test_main_caseWithNoScoredRuns_isNotExcludedAsNoSignal(self):
+        # Arrange: case z has only unscored records under both labels, so it has no scored run anywhere
+        unscored = [_record(True, scored=False), _record(False, scored=False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"z": unscored}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"z": unscored}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-case lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, z prints no-runs lines under both labels, and no no-signal line
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        lines = out.getvalue().splitlines()
+        self.assertNotIn("z: excluded: no signal", lines)
+        self.assertIn("z: no runs under no-skill", lines)
+        self.assertIn("z: no runs under tsr-before-1", lines)
+
+    def test_main_caseUnderOneLabelOnly_isNotExcludedAsNoSignal(self):
+        # Arrange: case only holds scored runs under no-skill; case c1 holds scored runs under tsr-before-1 only
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"only": [_record(True), _record(True)]}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(False)]}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-case lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, only is not excluded as no signal, and it names the label it lacks
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        lines = out.getvalue().splitlines()
+        self.assertNotIn("only: excluded: no signal", lines)
+        self.assertIn("only: no runs under tsr-before-1", lines)
 
 
 if __name__ == "__main__":

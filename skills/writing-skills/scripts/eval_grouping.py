@@ -127,11 +127,14 @@ def group_cases(rates: dict, threshold: float, min_shared: int) -> list:
 def report_rows(columns: dict) -> list:
     """Build the printable report rows from pooled columns.
 
-    A case with the same pass rate in every label, and a label starting with
-    "no-skill", gets an "excluded: no signal" row with no verdict and no bound.
-    A case with the same pass rate in every label and no label starting with
-    "no-skill" gets an "unclassified: run no-skill first" row with no verdict,
-    no bound and an empty note; it is kept, not excluded.
+    A case is classified only when every label holds a scored run for it. A case
+    missing a label, or with no scored run under some label, gets no row here;
+    main prints its "no runs under" line instead. A classified case with the same
+    pass rate in every label, and a label starting with "no-skill", gets an
+    "excluded: no signal" row with no verdict and no bound. A classified case with
+    the same pass rate in every label and no label starting with "no-skill" gets
+    an "unclassified: run no-skill first" row with no verdict, no bound and an
+    empty note; it is kept, not excluded.
     """
     rates_by_case = {}
     runs_by_case = {}
@@ -141,6 +144,8 @@ def report_rows(columns: dict) -> list:
             runs_by_case.setdefault(case, len(outcomes))
     rows = []
     for case, rates in rates_by_case.items():
+        if len(rates) != len(columns) or None in rates.values():
+            continue
         if len(set(rates.values())) != 1:
             continue
         edge = next(iter(rates.values())) in (0, 1)
@@ -235,8 +240,8 @@ def main(argv: list) -> int:
         if uncorrelated:
             print(f"{case}: not groupable")
     for label in sorted(columns):
-        for case in sorted(columns[label]):
-            if not columns[label][case]:
+        for case in all_cases:
+            if not columns[label].get(case):
                 print(f"{case}: no runs under {label}")
     return 1 if failed else 0
 

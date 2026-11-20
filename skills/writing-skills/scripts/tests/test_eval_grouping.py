@@ -309,6 +309,28 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertIn(missing + ": error, no verdict", out.getvalue())
 
+    def test_main_badFileKeepsOtherCases(self):
+        # Arrange: a readable no-skill file holding case c1, and a tsr-before-1 file that is not JSON
+        with tempfile.TemporaryDirectory() as tmp:
+            good = os.path.join(tmp, "no_skill.json")
+            bad = os.path.join(tmp, "tsr_before_1.json")
+            with open(good, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(False)]}), handle)
+            with open(bad, "w", encoding="utf-8") as handle:
+                handle.write("not json")
+            argv = ["no-skill=" + good, "tsr-before-1=" + bad]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 1, the bad file is named with no verdict, and c1 still prints its row
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 1)
+        lines = out.getvalue().splitlines()
+        self.assertIn(bad + ": error, no verdict", lines)
+        self.assertIn("c1: excluded: no signal", lines)
+
     def test_main_cleanRun_printsNoSignalLine(self):
         # Arrange: two clean run files, no-skill and tsr-before-1, both holding case c1 with the same pass pattern
         records = [_record(True), _record(False), _record(True), _record(False)]

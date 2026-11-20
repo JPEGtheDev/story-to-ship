@@ -428,6 +428,38 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("c3: not groupable", out.getvalue().splitlines())
 
+    def test_main_caseWithNoRuns_printsNoRunsLine(self):
+        # Arrange: two label files. In no-skill, c2 has two records that are both unscored, so its
+        # pooled list for no-skill is empty. In tsr-before-1, c2 has one scored pass and one scored fail.
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(
+                    _run_doc(
+                        {
+                            "c1": [_record(True), _record(False)],
+                            "c2": [_record(True, scored=False), _record(True, scored=False)],
+                        }
+                    ),
+                    handle,
+                )
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(
+                    _run_doc({"c1": [_record(True), _record(True)], "c2": [_record(True), _record(False)]}),
+                    handle,
+                )
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-case lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and the output carries the no-runs line for c2 under no-skill
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertIn("c2: no runs under no-skill", out.getvalue().splitlines())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -379,6 +379,35 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("group kept c1: c2", out.getvalue().splitlines())
 
+    def test_main_groupedAwayCasePrintsExcludedLine(self):
+        # Arrange: the same three clean run files as test_main_cleanRun_printsGroupLine, so c2 is grouped
+        # away under c1 and must also print its own excluded line
+        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
+        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
+        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            path_c = os.path.join(tmp, "tsr_before_2.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
+            with open(path_c, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, the group line keeps c1 with c2, and c2 prints its excluded line
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        lines = out.getvalue().splitlines()
+        self.assertIn("group kept c1: c2", lines)
+        self.assertIn("c2: excluded: grouped with c1", lines)
+
     def test_main_nonConstantCase_printsVaries(self):
         # Arrange: two cases that are non-constant across the three labels; their rate vectors
         # correlate at -1, below the 0.9 threshold, so they are not grouped

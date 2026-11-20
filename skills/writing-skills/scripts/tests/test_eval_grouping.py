@@ -378,6 +378,25 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 2)
 
+    def test_main_emptyPath_returnsUsageCode(self):
+        # Arrange: a valid no-skill run file, and a second label whose path is empty
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "no_skill.json")
+            with open(path, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True)]}), handle)
+            argv = ["no-skill=" + path, "tsr-before-1="]
+
+            # Act: call main through the error-capturing helper, with stderr and stdout captured to read the usage line and the output
+            with contextlib.redirect_stderr(io.StringIO()) as err:
+                with contextlib.redirect_stdout(io.StringIO()) as out:
+                    result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, the usage code 2 is returned, the usage line is the only stderr text, and no per-file verdict is printed
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
+        self.assertEqual(err.getvalue(), "usage: eval_grouping.py label=path [label=path ...]\n")
+        self.assertNotIn(": error, no verdict", out.getvalue())
+
     def test_main_missingRunFile_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file path that does not exist
         missing = "/nonexistent-dir-for-missing-run/missing.json"

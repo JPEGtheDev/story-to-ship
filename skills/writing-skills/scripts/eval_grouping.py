@@ -102,14 +102,16 @@ def report_rows(columns: dict) -> list:
             runs_by_case.setdefault(case, len(outcomes))
     rows = []
     for case, rates in rates_by_case.items():
-        constant = len(set(rates.values())) == 1
-        edge = constant and next(iter(rates.values())) in (0, 1)
+        if len(set(rates.values())) != 1:
+            continue
+        edge = next(iter(rates.values())) in (0, 1)
         bound = zero_event_bound(runs_by_case[case]) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""
-        if constant and any(label.startswith("no-skill") for label in rates):
-            rows.append({"case": case, "label": "excluded: no signal", "verdict": None, "bound": bound, "note": note})
-        elif constant:
-            rows.append({"case": case, "label": "unclassified: run no-skill first", "verdict": None, "bound": bound, "note": note})
+        if any(label.startswith("no-skill") for label in rates):
+            row_label = "excluded: no signal"
+        else:
+            row_label = "unclassified: run no-skill first"
+        rows.append({"case": case, "label": row_label, "verdict": None, "bound": bound, "note": note})
     return rows
 
 

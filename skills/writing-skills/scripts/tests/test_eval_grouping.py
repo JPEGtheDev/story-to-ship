@@ -52,6 +52,18 @@ class TestReadRunFile(unittest.TestCase):
         self.assertIsNone(error, f"read_run_file raised {type(error).__name__}: {error}")
         self.assertEqual(result, {"c1": [True, False]})
 
+    def test_readRunFile_recordWithoutScoredKey_isCounted(self):
+        # Arrange: case c1 has one record with no scored key, which counts as scored
+        doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": True, "score": 1, "error": None}]}}]}
+        path = self._write("run.json", json.dumps(doc))
+
+        # Act: read the run file
+        result, error = _attempt(eg.read_run_file, path)
+
+        # Assert: no error, and the record is counted as a pass in the column
+        self.assertIsNone(error, f"read_run_file raised {type(error).__name__}: {error}")
+        self.assertEqual(result, {"c1": [True]})
+
     def test_readRunFile_missingFile_raisesRunFileErrorNamingFile(self):
         # Arrange: a path that does not exist
         path = os.path.join(self._tmp.name, "absent.json")

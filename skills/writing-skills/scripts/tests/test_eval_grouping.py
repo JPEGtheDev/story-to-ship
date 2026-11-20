@@ -312,6 +312,30 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 2)
 
+    def test_main_argumentWithoutEquals_returnsUsageCode(self):
+        # Arrange: one argument with no label=path separator
+        argv = ["run.json"]
+
+        # Act: call main through the error-capturing helper, with stderr captured so the usage line stays out of the output
+        with contextlib.redirect_stderr(io.StringIO()):
+            result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, and the usage code 2 is returned
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
+
+    def test_main_emptyLabel_returnsUsageCode(self):
+        # Arrange: one argument whose label is empty, so the path has no label
+        argv = ["=/nonexistent-dir-for-empty-label/run.json"]
+
+        # Act: call main through the error-capturing helper, with stderr captured so the usage line stays out of the output
+        with contextlib.redirect_stderr(io.StringIO()):
+            result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, and the usage code 2 is returned instead of reading the file
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
+
     def test_main_missingRunFile_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file path that does not exist
         missing = "/nonexistent-dir-for-s503/missing.json"

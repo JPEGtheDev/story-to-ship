@@ -156,7 +156,8 @@ def report_rows(columns: dict) -> list:
 
 def main(argv: list) -> int:
     """Run the report for the given run files and return a process exit code."""
-    if not argv or any("=" not in item for item in argv):
+    parts = [item.partition("=") for item in argv]
+    if not argv or any(not sep or not label for label, sep, _ in parts):
         print("usage: eval_grouping.py label=path [label=path ...]", file=sys.stderr)
         return 2
     failed = False

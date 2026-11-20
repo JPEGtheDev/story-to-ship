@@ -225,5 +225,19 @@ class TestReportRows(unittest.TestCase):
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
 
+class TestCorrelation(unittest.TestCase):
+    def test_correlation_perfectLinearCopy_isOne(self):
+        # Arrange: b is an exact linear copy of a (b = 2 * a + 1)
+        a = [0.1, 0.4, 0.5, 0.9]
+        b = [2 * x + 1 for x in a]
+
+        # Act: call correlation through the error-capturing helper
+        result, error = _attempt(eg.correlation, a, b)
+
+        # Assert: no error, and the correlation is 1.0 to 9 places
+        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
+        self.assertAlmostEqual(result, 1.0, places=9)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -75,8 +75,13 @@ def zero_event_bound(n: int) -> "float | None":
     return 1 - 0.05 ** (1 / n)
 
 
-def correlation(a: list, b: list) -> float:
-    """Return the correlation between two equal-length outcome lists."""
+def correlation(a: list, b: list) -> "float | None":
+    """Return the correlation between two equal-length outcome lists.
+
+    Returns None when the lists have fewer than three entries.
+    """
+    if len(a) < 3:
+        return None
     n = len(a)
     mean_a = sum(a) / n
     mean_b = sum(b) / n

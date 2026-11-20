@@ -86,8 +86,20 @@ def group_cases(rates: dict, threshold: float, min_shared: int) -> list:
 
 
 def report_rows(columns: dict) -> list:
-    """Build the printable report rows from pooled columns."""
-    raise NotImplementedError
+    """Build the printable report rows from pooled columns.
+
+    A case with the same pass rate in every label, and a label starting with
+    "no-skill", gets an "excluded: no signal" row with no verdict and no bound.
+    """
+    rates_by_case = {}
+    for label, cases in columns.items():
+        for case, outcomes in cases.items():
+            rates_by_case.setdefault(case, {})[label] = sum(outcomes) / len(outcomes) if outcomes else None
+    rows = []
+    for case, rates in rates_by_case.items():
+        if len(set(rates.values())) == 1 and any(label.startswith("no-skill") for label in rates):
+            rows.append({"case": case, "label": "excluded: no signal", "verdict": None, "bound": None, "note": ""})
+    return rows
 
 
 def main(argv: list) -> int:

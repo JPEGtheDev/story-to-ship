@@ -1,4 +1,4 @@
-"""Tests for reading claude plugin eval run files and pooling their columns."""
+"""Tests for eval_grouping: run-file reading, pooling, bounds, correlation, grouping and the main report."""
 
 import contextlib
 import io
@@ -17,7 +17,7 @@ def _attempt(fn, *args):
     """Call fn and return (result, error); error is None when the call succeeded."""
     try:
         return fn(*args), None
-    except Exception as exc:  # the stub raises NotImplementedError
+    except Exception as exc:
         return None, exc
 
 
@@ -71,11 +71,10 @@ class TestReadRunFile(unittest.TestCase):
         path = os.path.join(self._tmp.name, "absent.json")
 
         # Act: read the missing file
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(eg.RunFileError) as ctx:
             eg.read_run_file(path)
 
-        # Assert: the error type is RunFileError and it names the file
-        self.assertEqual(type(ctx.exception).__name__, "RunFileError")
+        # Assert: the error is a RunFileError and it names the file
         self.assertIn(path, str(ctx.exception))
 
     def test_readRunFile_unparsableJson_raisesRunFileErrorNamingFile(self):
@@ -83,11 +82,10 @@ class TestReadRunFile(unittest.TestCase):
         path = self._write("broken.json", "{not json")
 
         # Act: read the unparsable file
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(eg.RunFileError) as ctx:
             eg.read_run_file(path)
 
-        # Assert: the error type is RunFileError and it names the file
-        self.assertEqual(type(ctx.exception).__name__, "RunFileError")
+        # Assert: the error is a RunFileError and it names the file
         self.assertIn(path, str(ctx.exception))
 
     def test_readRunFile_wrongShape_raisesRunFileErrorNamingFile(self):
@@ -95,11 +93,10 @@ class TestReadRunFile(unittest.TestCase):
         path = self._write("shape.json", json.dumps({"results": [1, 2, 3]}))
 
         # Act: read the wrong-shape file
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(eg.RunFileError) as ctx:
             eg.read_run_file(path)
 
-        # Assert: the error type is RunFileError and it names the file
-        self.assertEqual(type(ctx.exception).__name__, "RunFileError")
+        # Assert: the error is a RunFileError and it names the file
         self.assertIn(path, str(ctx.exception))
 
     def test_readRunFile_recordWithError_raisesRunFileErrorNamingFile(self):
@@ -108,11 +105,10 @@ class TestReadRunFile(unittest.TestCase):
         path = self._write("errored.json", json.dumps(doc))
 
         # Act: read the errored file
-        with self.assertRaises(Exception) as ctx:
+        with self.assertRaises(eg.RunFileError) as ctx:
             eg.read_run_file(path)
 
-        # Assert: the error type is RunFileError and it names the file
-        self.assertEqual(type(ctx.exception).__name__, "RunFileError")
+        # Assert: the error is a RunFileError and it names the file
         self.assertIn(path, str(ctx.exception))
 
     def test_readRunFile_nonDictCaseEntry_raisesRunFileError(self):
@@ -312,7 +308,7 @@ class TestCorrelation(unittest.TestCase):
 
 
 class TestGroupCases(unittest.TestCase):
-    def test_groupCases_transitivityNotUsed_planOrder(self):
+    def test_groupCases_transitiveMatchBelowThreshold_keepsCaseSeparate(self):
         # Arrange: A~B is 0.9827 and A~C is 0.8367 (below 0.9), so C must not join A through B
         rates = {
             "A": {"l1": 0.1, "l2": 0.2, "l3": 0.3, "l4": 0.4},
@@ -367,7 +363,7 @@ class TestMain(unittest.TestCase):
 
     def test_main_missingRunFile_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file path that does not exist
-        missing = "/nonexistent-dir-for-s503/missing.json"
+        missing = "/nonexistent-dir-for-missing-run/missing.json"
         argv = ["tsr-before-1=" + missing]
 
         # Act: call main through the error-capturing helper, with stdout captured to read the per-file line

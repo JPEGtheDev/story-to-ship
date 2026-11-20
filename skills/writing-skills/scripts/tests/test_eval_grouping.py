@@ -196,6 +196,20 @@ class TestReportRows(unittest.TestCase):
         self.assertEqual(row["label"], "excluded: no signal")
         self.assertIsNone(row["verdict"])
 
+    def test_reportRows_constantWithoutNoSkill_isUnclassified(self):
+        # Arrange: case c1 has the same pass rate in both labels, and no label starts with "no-skill"
+        columns = {"tsr-before-1": {"c1": [True, False, True, False]}, "tsr-before-2": {"c1": [True, False, True, False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the c1 row is kept as unclassified with no verdict
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertEqual(row["label"], "unclassified: run no-skill first")
+        self.assertIsNone(row["verdict"])
+
 
 if __name__ == "__main__":
     unittest.main()

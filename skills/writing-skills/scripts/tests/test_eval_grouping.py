@@ -493,6 +493,25 @@ class TestMain(unittest.TestCase):
         self.assertIn(bad + ": error, no verdict", lines)
         self.assertTrue(any(line.startswith("c1: excluded: no signal") for line in lines), lines)
 
+    def test_main_oneUsableLabel_printsOnlyErrorLines(self):
+        # Arrange: no-skill holds a readable constant case c1; tsr-before-1 points at a missing file, so only one label is usable
+        constant = [_record(True), _record(True), _record(True), _record(True)]
+        missing = "/nonexistent-dir-for-one-usable-label/tsr_before_1.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            good = os.path.join(tmp, "no_skill.json")
+            with open(good, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": constant}), handle)
+            argv = ["no-skill=" + good, "tsr-before-1=" + missing]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read every output line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 1, and the only output line is the error line for the unreadable file
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 1)
+        self.assertEqual(out.getvalue().splitlines(), [missing + ": error, no verdict"])
+
     def test_main_cleanRun_printsNoSignalLine(self):
         # Arrange: two clean run files, no-skill and tsr-before-1, both holding case c1 with the same pass pattern
         records = [_record(True), _record(False), _record(True), _record(False)]

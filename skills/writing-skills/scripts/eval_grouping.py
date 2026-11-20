@@ -182,6 +182,8 @@ def main(argv: list) -> int:
             failed = True
             continue
         columns_by_label.setdefault(label, []).append(file_columns)
+    if len(columns_by_label) < 2:
+        return 1
     columns = pool_columns(columns_by_label)
     for row in report_rows(columns):
         line = f"{row['case']}: {row['label']}"

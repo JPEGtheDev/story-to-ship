@@ -161,14 +161,13 @@ def main(argv: list) -> int:
     paths_by_label = {}
     for item in argv:
         label, path = item.split("=", 1)
-        paths_by_label.setdefault(label, []).append(path)
         try:
             read_run_file(path)
         except RunFileError:
             print(f"{path}: error, no verdict")
             failed = True
-    if failed:
-        return 1
+            continue
+        paths_by_label.setdefault(label, []).append(path)
     columns = pool_columns(paths_by_label)
     for row in report_rows(columns):
         line = f"{row['case']}: {row['label']}"
@@ -232,7 +231,7 @@ def main(argv: list) -> int:
         for case in sorted(columns[label]):
             if not columns[label][case]:
                 print(f"{case}: no runs under {label}")
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

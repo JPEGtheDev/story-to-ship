@@ -201,21 +201,20 @@ def main(argv: list) -> int:
             if value is not None:
                 print(f"{case}: varies")
                 break
-    pooled_cases = sorted({case for label_cases in columns.values() for case in label_cases})
     pooled_rates = {
         case: {
             label: sum(columns[label][case]) / len(columns[label][case])
             for label in columns
             if columns[label].get(case)
         }
-        for case in pooled_cases
+        for case in all_cases
     }
-    for case in pooled_cases:
+    for case in all_cases:
         case_rates = pooled_rates[case]
         if len(set(case_rates.values())) <= 1:
             continue
         uncorrelated = True
-        for other in pooled_cases:
+        for other in all_cases:
             if other == case:
                 continue
             other_rates = pooled_rates[other]

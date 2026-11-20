@@ -389,6 +389,45 @@ class TestMain(unittest.TestCase):
         self.assertIn("c1: varies", lines)
         self.assertIn("c2: varies", lines)
 
+    def test_main_uncorrelatedCase_printsNotGroupable(self):
+        # Arrange: c1 and c2 appear in all three labels; c3 appears only in no-skill and tsr-before-1.
+        # c3 is not constant across its two labels (rates 0.25 and 0.5), and it shares only two labels
+        # with each other case, below the three the correlation needs, so its correlation is None.
+        records_no_skill_c1 = [_record(True), _record(False), _record(True), _record(False)]
+        records_before_1_c1 = [_record(True), _record(True), _record(True), _record(False)]
+        records_before_2_c1 = [_record(True), _record(False), _record(False), _record(False)]
+        records_no_skill_c2 = [_record(True), _record(False), _record(True), _record(False)]
+        records_before_1_c2 = [_record(True), _record(False), _record(False), _record(False)]
+        records_before_2_c2 = [_record(True), _record(True), _record(True), _record(False)]
+        records_no_skill_c3 = [_record(True), _record(False), _record(False), _record(False)]
+        records_before_1_c3 = [_record(True), _record(True), _record(False), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            path_c = os.path.join(tmp, "tsr_before_2.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(
+                    _run_doc({"c1": records_no_skill_c1, "c2": records_no_skill_c2, "c3": records_no_skill_c3}),
+                    handle,
+                )
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(
+                    _run_doc({"c1": records_before_1_c1, "c2": records_before_1_c2, "c3": records_before_1_c3}),
+                    handle,
+                )
+            with open(path_c, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records_before_2_c1, "c2": records_before_2_c2}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-case lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and the output carries the not groupable line for c3
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertIn("c3: not groupable", out.getvalue().splitlines())
+
 
 if __name__ == "__main__":
     unittest.main()

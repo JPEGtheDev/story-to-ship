@@ -397,10 +397,52 @@ class TestMain(unittest.TestCase):
         self.assertEqual(err.getvalue(), "usage: eval_grouping.py label=path [label=path ...]\n")
         self.assertNotIn(": error, no verdict", out.getvalue())
 
+    def test_main_singleLabel_returnsUsageCode(self):
+        # Arrange: one valid run file under one label, so no case can be compared with another label
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "no_skill.json")
+            with open(path, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(True)]}), handle)
+            argv = ["no-skill=" + path]
+
+            # Act: call main through the error-capturing helper, with stderr and stdout captured to read the usage line and the output
+            with contextlib.redirect_stderr(io.StringIO()) as err:
+                with contextlib.redirect_stdout(io.StringIO()) as out:
+                    result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, the usage code 2 is returned, the usage line is the only stderr text, and no case line is printed
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
+        self.assertEqual(err.getvalue(), "usage: eval_grouping.py label=path [label=path ...]\n")
+        self.assertEqual(out.getvalue(), "")
+
+    def test_main_oneLabelTwoFiles_returnsUsageCode(self):
+        # Arrange: two valid run files, both under the same label, so the run still has only one label
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill_a.json")
+            path_b = os.path.join(tmp, "no_skill_b.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(True)]}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(False), _record(False)]}), handle)
+            argv = ["no-skill=" + path_a, "no-skill=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stderr and stdout captured to read the usage line and the output
+            with contextlib.redirect_stderr(io.StringIO()) as err:
+                with contextlib.redirect_stdout(io.StringIO()) as out:
+                    result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, the usage code 2 is returned, the usage line is the only stderr text, and no case line is printed
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
+        self.assertEqual(err.getvalue(), "usage: eval_grouping.py label=path [label=path ...]\n")
+        self.assertEqual(out.getvalue(), "")
+
     def test_main_missingRunFile_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file path that does not exist
         missing = "/nonexistent-dir-for-missing-run/missing.json"
-        argv = ["tsr-before-1=" + missing]
+        other_missing = "/nonexistent-dir-for-missing-run/other.json"
+        argv = ["tsr-before-1=" + missing, "no-skill=" + other_missing]
 
         # Act: call main through the error-capturing helper, with stdout captured to read the per-file line
         with contextlib.redirect_stdout(io.StringIO()) as out:
@@ -661,16 +703,21 @@ class TestMain(unittest.TestCase):
 
     @unittest.skipUnless(os.path.isdir("/dev/fd"), "needs /dev/fd to pass a pipe as a path")
     def test_main_pipeArgument_printsNormalOutput(self):
-        # Arrange: a run file written into a pipe, which can be read only once
+        # Arrange: a run file written into a pipe, which can be read only once, and a second label's
+        # regular file with the same records, so case c1 is classified under two labels
         doc = json.dumps(_run_doc({"c1": [_record(True), _record(False), _record(True), _record(False)]}))
         read_fd, write_fd = os.pipe()
         os.write(write_fd, doc.encode("utf-8"))
         os.close(write_fd)
-        argv = ["no-skill=/dev/fd/" + str(read_fd)]
         try:
-            # Act: call main with the pipe as the run file, with stdout captured to read the per-case line
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
+            with tempfile.TemporaryDirectory() as tmp:
+                path_b = os.path.join(tmp, "tsr_before_1.json")
+                with open(path_b, "w", encoding="utf-8") as handle:
+                    handle.write(doc)
+                argv = ["no-skill=/dev/fd/" + str(read_fd), "tsr-before-1=" + path_b]
+                # Act: call main with the pipe as the no-skill run file, with stdout captured to read the per-case line
+                with contextlib.redirect_stdout(io.StringIO()) as out:
+                    result, error = _attempt(eg.main, argv)
         finally:
             os.close(read_fd)
 
@@ -686,7 +733,7 @@ class TestMain(unittest.TestCase):
             doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": None, "score": 0, "error": None}]}}]}
             with open(path, "w", encoding="utf-8") as handle:
                 json.dump(doc, handle)
-            argv = ["no-skill=" + path]
+            argv = ["no-skill=" + path, "tsr-before-1=" + path]
 
             # Act: call main through the error-capturing helper, with stdout captured to read the per-file line
             with contextlib.redirect_stdout(io.StringIO()) as out:

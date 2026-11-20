@@ -131,12 +131,13 @@ def report_rows(columns: dict) -> list:
     missing a label, or with no scored run under some label, gets no row here;
     main prints its "no runs under" line instead. A classified case with the same
     pass rate in every label, and a label starting with "no-skill", gets an
-    "excluded: no signal" row with no verdict and no bound. A classified case with
-    the same pass rate in every label and no label starting with "no-skill" gets
-    an "unclassified: run no-skill first" row with no verdict, no bound and an
-    empty note; it is kept, not excluded. A row whose rate is 0 or 1 carries
-    the bound 1 - 0.05 ** (1/n), with n the smallest run count among the labels
-    for that case. The smallest n gives the widest bound, the conservative choice,
+    "excluded: no signal" row. A classified case with the same pass rate in every
+    label and no label starting with "no-skill" gets an "unclassified: run no-skill
+    first" row; it is kept, not excluded. Each row carries no verdict. A row whose
+    rate is 0 or 1 carries the bound 1 - 0.05 ** (1/n), with n the smallest run
+    count among the labels for that case, and the note "not evidence of keeping
+    the behavior". A row whose rate is neither 0 nor 1 carries no bound and an
+    empty note. The smallest n gives the widest bound, the conservative choice,
     and the minimum does not depend on argument order.
     """
     rates_by_case = {}

@@ -309,6 +309,27 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertIn(missing + ": error, no verdict", out.getvalue())
 
+    def test_main_cleanRun_printsNoSignalLine(self):
+        # Arrange: two clean run files, no-skill and tsr-before-1, both holding case c1 with the same pass pattern
+        records = [_record(True), _record(False), _record(True), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-case line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and the output carries the no-signal line for c1
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertIn("c1: excluded: no signal", out.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

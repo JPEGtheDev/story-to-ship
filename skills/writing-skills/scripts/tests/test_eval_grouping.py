@@ -263,5 +263,22 @@ class TestCorrelation(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class TestGroupCases(unittest.TestCase):
+    def test_groupCases_transitivityNotUsed_planOrder(self):
+        # Arrange: A~B is 0.9827 and A~C is 0.8367 (below 0.9), so C must not join A through B
+        rates = {
+            "A": {"l1": 0.1, "l2": 0.2, "l3": 0.3, "l4": 0.4},
+            "B": {"l1": 0.1, "l2": 0.2, "l3": 0.3, "l4": 0.5},
+            "C": {"l1": 0.1, "l2": 0.3, "l3": 0.2, "l4": 0.6},
+        }
+
+        # Act: group the cases at threshold 0.9 over 3 shared labels
+        result, error = _attempt(eg.group_cases, rates, 0.9, 3)
+
+        # Assert: no error, A is kept with B as its member, and C is kept with no members
+        self.assertIsNone(error, f"group_cases raised {type(error).__name__}: {error}")
+        self.assertEqual(result, [("A", ["B"]), ("C", [])])
+
+
 if __name__ == "__main__":
     unittest.main()

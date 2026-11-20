@@ -77,7 +77,13 @@ def zero_event_bound(n: int) -> "float | None":
 
 def correlation(a: list, b: list) -> float:
     """Return the correlation between two equal-length outcome lists."""
-    raise NotImplementedError
+    n = len(a)
+    mean_a = sum(a) / n
+    mean_b = sum(b) / n
+    cov = sum((x - mean_a) * (y - mean_b) for x, y in zip(a, b))
+    var_a = sum((x - mean_a) ** 2 for x in a)
+    var_b = sum((y - mean_b) ** 2 for y in b)
+    return cov / (var_a * var_b) ** 0.5
 
 
 def group_cases(rates: dict, threshold: float, min_shared: int) -> list:

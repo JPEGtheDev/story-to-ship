@@ -192,7 +192,9 @@ def main(argv: list) -> int:
             rates[case] = {label: sum(values) / len(values) for label, values in outcomes.items()}
     grouped = set()
     for kept, members in group_cases(rates, 0.9, 3):
-        print(f"group kept {kept}: {', '.join(members) if members else 'none'}")
+        if not members:
+            continue
+        print(f"group kept {kept}: {', '.join(members)}")
         for member in members:
             print(f"{member}: excluded: grouped with {kept}")
             grouped.add(member)

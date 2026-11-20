@@ -682,6 +682,49 @@ class TestMain(unittest.TestCase):
         self.assertNotIn("only: excluded: no signal", lines)
         self.assertIn("only: no runs under tsr-before-1", lines)
 
+    def test_main_singletonCase_printsNoGroupLine(self):
+        # Arrange: case c1 is non-constant and is the only case, so it is grouped with nothing
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(False), _record(True), _record(False)]}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True), _record(True), _record(True), _record(False)]}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, and no line announces a group kept
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertEqual([line for line in out.getvalue().splitlines() if line.startswith("group kept")], [])
+
+    def test_main_noSignalCase_printsNoGroupLine(self):
+        # Arrange: case c1 has the same pass rate in both labels, so it is a no-signal case
+        records = [_record(True), _record(False), _record(True), _record(False)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": records}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 0, c1 is excluded as no signal, and no line announces a group kept
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        lines = out.getvalue().splitlines()
+        self.assertIn("c1: excluded: no signal", lines)
+        self.assertEqual([line for line in lines if line.startswith("group kept")], [])
+
 
 if __name__ == "__main__":
     unittest.main()

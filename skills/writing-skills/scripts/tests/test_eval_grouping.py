@@ -1,5 +1,7 @@
 """Tests for reading claude plugin eval run files and pooling their columns."""
 
+import contextlib
+import io
 import json
 import os
 import sys
@@ -278,6 +280,20 @@ class TestGroupCases(unittest.TestCase):
         # Assert: no error, A is kept with B as its member, and C is kept with no members
         self.assertIsNone(error, f"group_cases raised {type(error).__name__}: {error}")
         self.assertEqual(result, [("A", ["B"]), ("C", [])])
+
+
+class TestMain(unittest.TestCase):
+    def test_main_noArguments_returnsUsageCode(self):
+        # Arrange: no run files, so argv holds no label=path items
+        argv = []
+
+        # Act: call main through the error-capturing helper, with stderr captured so the usage line stays out of the output
+        with contextlib.redirect_stderr(io.StringIO()):
+            result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, and the usage code 2 is returned
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 2)
 
 
 if __name__ == "__main__":

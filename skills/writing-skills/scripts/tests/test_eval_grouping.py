@@ -243,6 +243,35 @@ class TestReportRows(unittest.TestCase):
         self.assertIn("not evidence of keeping the behavior", row["note"])
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
+    def test_reportRows_unequalRunCounts_boundUsesFirstSortedLabelCount(self):
+        # Arrange: case c1 is constant at 0 under both labels; tsr-before-1 holds 10 runs and no-skill holds 4
+        columns = {
+            "tsr-before-1": {"c1": [False] * 10},
+            "no-skill": {"c1": [False] * 4},
+        }
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the bound uses n = 4, the run count of no-skill, the first label in sorted order
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
+
+    def test_reportRows_allPassRow_carriesBoundForRunCount(self):
+        # Arrange: case c1 passes in every run of both labels, so it is constant at 1 with n = 4 per column
+        columns = {"no-skill": {"c1": [True] * 4}, "tsr-before-1": {"c1": [True] * 4}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the c1 row carries the all-event bound 1 - 0.05 ** (1/n) for n = 4
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
+
 
 class TestCorrelation(unittest.TestCase):
     def test_correlation_perfectLinearCopy_isOne(self):
@@ -681,6 +710,33 @@ class TestMain(unittest.TestCase):
         lines = out.getvalue().splitlines()
         self.assertNotIn("only: excluded: no signal", lines)
         self.assertIn("only: no runs under tsr-before-1", lines)
+
+    def test_main_unequalRunCountsBothOrders_printsSameBoundLine(self):
+        # Arrange: case c1 fails every run; no-skill holds 4 runs and tsr-before-1 holds 10
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(False)] * 4}), handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(False)] * 10}), handle)
+            argv_forward = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+            argv_reverse = ["tsr-before-1=" + path_b, "no-skill=" + path_a]
+
+            # Act: call main in both argument orders, with stdout captured to read the per-case lines
+            with contextlib.redirect_stdout(io.StringIO()) as out_forward:
+                result_forward, error_forward = _attempt(eg.main, argv_forward)
+            with contextlib.redirect_stdout(io.StringIO()) as out_reverse:
+                result_reverse, error_reverse = _attempt(eg.main, argv_reverse)
+
+        # Assert: no error in either order, and both orders print the bound for n = 4, the no-skill run count
+        self.assertIsNone(error_forward, f"main raised {type(error_forward).__name__}: {error_forward}")
+        self.assertIsNone(error_reverse, f"main raised {type(error_reverse).__name__}: {error_reverse}")
+        self.assertEqual(result_forward, 0)
+        self.assertEqual(result_reverse, 0)
+        expected = "c1: excluded: no signal bound 0.527 (not evidence of keeping the behavior)"
+        self.assertIn(expected, out_forward.getvalue().splitlines())
+        self.assertIn(expected, out_reverse.getvalue().splitlines())
 
     def test_main_singletonCase_printsNoGroupLine(self):
         # Arrange: case c1 is non-constant and is the only case, so it is grouped with nothing

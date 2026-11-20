@@ -134,14 +134,14 @@ def report_rows(columns: dict) -> list:
     "excluded: no signal" row with no verdict and no bound. A classified case with
     the same pass rate in every label and no label starting with "no-skill" gets
     an "unclassified: run no-skill first" row with no verdict, no bound and an
-    empty note; it is kept, not excluded.
+    empty note; it is kept, not excluded. A row whose rate is 0 or 1 carries
+    the bound 1 - 0.05 ** (1/n), with n the run count under the first label in
+    sorted order, so the bound does not depend on argument order.
     """
     rates_by_case = {}
-    runs_by_case = {}
-    for label, cases in columns.items():
-        for case, outcomes in cases.items():
+    for label in sorted(columns):
+        for case, outcomes in columns[label].items():
             rates_by_case.setdefault(case, {})[label] = sum(outcomes) / len(outcomes) if outcomes else None
-            runs_by_case.setdefault(case, len(outcomes))
     rows = []
     for case, rates in rates_by_case.items():
         if len(rates) != len(columns) or None in rates.values():
@@ -149,7 +149,7 @@ def report_rows(columns: dict) -> list:
         if len(set(rates.values())) != 1:
             continue
         edge = next(iter(rates.values())) in (0, 1)
-        bound = zero_event_bound(runs_by_case[case]) if edge else None
+        bound = zero_event_bound(len(columns[min(columns)][case])) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""
         if any(label.startswith("no-skill") for label in rates):
             row_label = "excluded: no signal"

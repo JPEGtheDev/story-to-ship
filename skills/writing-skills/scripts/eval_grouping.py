@@ -169,13 +169,22 @@ def main(argv: list) -> int:
             failed = True
     if failed:
         return 1
-    for row in report_rows(pool_columns(paths_by_label)):
+    columns = pool_columns(paths_by_label)
+    for row in report_rows(columns):
         line = f"{row['case']}: {row['label']}"
         if row["bound"] is not None:
             line += f" bound {row['bound']:.3f}"
         if row["note"]:
             line += f" ({row['note']})"
         print(line)
+    rates = {}
+    all_cases = sorted({case for label_cases in columns.values() for case in label_cases})
+    for case in all_cases:
+        outcomes = {label: columns[label].get(case) for label in columns}
+        if all(outcomes.values()):
+            rates[case] = {label: sum(values) / len(values) for label, values in outcomes.items()}
+    for kept, members in group_cases(rates, 0.9, 3):
+        print(f"group kept {kept}: {', '.join(members) if members else 'none'}")
     return 0
 
 

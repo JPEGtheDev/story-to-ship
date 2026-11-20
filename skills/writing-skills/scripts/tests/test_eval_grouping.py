@@ -295,6 +295,20 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 2)
 
+    def test_main_missingRunFile_printsNoVerdictAndReturnsOne(self):
+        # Arrange: a run file path that does not exist
+        missing = "/nonexistent-dir-for-s503/missing.json"
+        argv = ["tsr-before-1=" + missing]
+
+        # Act: call main through the error-capturing helper, with stdout captured to read the per-file line
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, main returns 1, and the output names the missing file with no verdict
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 1)
+        self.assertIn(missing + ": error, no verdict", out.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

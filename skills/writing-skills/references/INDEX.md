@@ -26,7 +26,7 @@ All files here are either injected into skill-reviewer agents at dispatch time o
 | `DISPATCH_PATTERN.md` | Step-by-step dispatch instructions for auditing skills; read before dispatching any skill-reviewer agent |
 | `TIERED_REFERENCE_MODEL.md` | How to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading |
 | `REFERENCE_INDEX_FORMAT.md` | Required format for `references/INDEX.md` files -- YAML frontmatter template, file table rules, Related section rules, and complete template; read before creating or updating any INDEX.md |
-| `SKILL_EVAL_COMPARISON.md` | Old-versus-new eval comparison before a skill is shortened or reworded -- `claude plugin eval` flags, consent and cost ceilings, the per-case score join, the no-drop rule, and recording on-invoke token cost with `claude plugin details` |
+| `SKILL_EVAL_COMPARISON.md` | Procedure for comparing a shortened or reworded skill against its prior text with claude plugin eval: consent and cost ceilings, the score join, the no-drop rule, the flag rationale, on-invoke token cost from claude plugin details, the rule of three for zero-event and all-event pairs, and the labels and grouping (`excluded: no signal`; `excluded: grouped with <kept>`; `unclassified: run no-skill first`; `error, no verdict`). |
 | `SKILL_WRITING_RATIONALE.md` | Rationale for three gate clauses moved out of `SKILL.md` -- why a wrong anatomy format claim propagates to every review, why inline relocation can grow the scoped footprint, and why the Iron Law letter line belongs outside the fence |
 
 ---

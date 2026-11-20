@@ -49,17 +49,19 @@ def read_run_file(path: str) -> dict:
     return columns
 
 
-def pool_columns(paths_by_label: dict) -> dict:
+def pool_columns(columns_by_label: dict) -> dict:
     """Pool the per-case run columns of several run files, keyed by label.
 
-    Returns {label: {case: [bool, ...]}}; a case found in several files under
-    one label has its outcome lists concatenated in path order.
+    Takes {label: [file columns, ...]}, where each file columns dict is a
+    read_run_file result, so each file is read once and a pipe works. Returns
+    {label: {case: [bool, ...]}}; a case found in several files under one label
+    has its outcome lists concatenated in file order.
     """
     pooled = {}
-    for label, paths in paths_by_label.items():
+    for label, files_columns in columns_by_label.items():
         merged = {}
-        for path in paths:
-            for case, outcomes in read_run_file(path).items():
+        for file_columns in files_columns:
+            for case, outcomes in file_columns.items():
                 merged.setdefault(case, []).extend(outcomes)
         pooled[label] = merged
     return pooled
@@ -158,17 +160,17 @@ def main(argv: list) -> int:
         print("usage: eval_grouping.py label=path [label=path ...]", file=sys.stderr)
         return 2
     failed = False
-    paths_by_label = {}
+    columns_by_label = {}
     for item in argv:
         label, path = item.split("=", 1)
         try:
-            read_run_file(path)
+            file_columns = read_run_file(path)
         except RunFileError:
             print(f"{path}: error, no verdict")
             failed = True
             continue
-        paths_by_label.setdefault(label, []).append(path)
-    columns = pool_columns(paths_by_label)
+        columns_by_label.setdefault(label, []).append(file_columns)
+    columns = pool_columns(columns_by_label)
     for row in report_rows(columns):
         line = f"{row['case']}: {row['label']}"
         if row["bound"] is not None:

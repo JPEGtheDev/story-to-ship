@@ -149,28 +149,27 @@ class TestReadRunFile(unittest.TestCase):
 
 
 class TestPoolColumns(unittest.TestCase):
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-
-    def _write(self, name, doc):
-        path = os.path.join(self._tmp.name, name)
-        with open(path, "w", encoding="utf-8") as handle:
-            json.dump(doc, handle)
-        return path
-
     def test_poolColumns_repeatedLabel_mergesCaseColumns(self):
-        # Arrange: two files under one label, each holding a different case
-        first = self._write("run1.json", _run_doc({"c1": [_record(True)]}))
-        second = self._write("run2.json", _run_doc({"c2": [_record(False)]}))
-        paths_by_label = {"baseline": [first, second]}
+        # Arrange: two already-read files under one label, each holding a different case
+        columns_by_label = {"baseline": [{"c1": [True]}, {"c2": [False]}]}
 
         # Act: pool the columns for the label
-        result, error = _attempt(eg.pool_columns, paths_by_label)
+        result, error = _attempt(eg.pool_columns, columns_by_label)
 
         # Assert: one dict for the label holding both cases' columns
         self.assertIsNone(error, f"pool_columns raised {type(error).__name__}: {error}")
         self.assertEqual(result, {"baseline": {"c1": [True], "c2": [False]}})
+
+    def test_poolColumns_twoLabels_concatenatesInPathOrderPerLabel(self):
+        # Arrange: label a has two files holding case c1 in path order; label b has one file
+        columns_by_label = {"a": [{"c1": [True]}, {"c1": [False]}], "b": [{"c1": [True, True]}]}
+
+        # Act: pool the columns across the two labels
+        result, error = _attempt(eg.pool_columns, columns_by_label)
+
+        # Assert: label a concatenates its files in path order, and label b stays separate
+        self.assertIsNone(error, f"pool_columns raised {type(error).__name__}: {error}")
+        self.assertEqual(result, {"a": {"c1": [True, False]}, "b": {"c1": [True, True]}})
 
 
 class TestZeroEventBound(unittest.TestCase):
@@ -569,6 +568,26 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("c2: no runs under no-skill", out.getvalue().splitlines())
 
+
+    @unittest.skipUnless(os.path.isdir("/dev/fd"), "needs /dev/fd to pass a pipe as a path")
+    def test_main_pipeArgument_printsNormalOutput(self):
+        # Arrange: a run file written into a pipe, which can be read only once
+        doc = json.dumps(_run_doc({"c1": [_record(True), _record(False), _record(True), _record(False)]}))
+        read_fd, write_fd = os.pipe()
+        os.write(write_fd, doc.encode("utf-8"))
+        os.close(write_fd)
+        argv = ["no-skill=/dev/fd/" + str(read_fd)]
+        try:
+            # Act: call main with the pipe as the run file, with stdout captured to read the per-case line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+        finally:
+            os.close(read_fd)
+
+        # Assert: no traceback, main returns 0, and the output carries the no-signal line for c1
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 0)
+        self.assertIn("c1: excluded: no signal", out.getvalue())
 
     def test_main_nullPassed_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file whose only record has passed set to null

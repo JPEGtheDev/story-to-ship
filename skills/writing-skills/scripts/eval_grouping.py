@@ -184,22 +184,6 @@ def main(argv: list) -> int:
             rates[case] = {label: sum(values) / len(values) for label, values in outcomes.items()}
     for kept, members in group_cases(rates, 0.9, 3):
         print(f"group kept {kept}: {', '.join(members) if members else 'none'}")
-    for case in sorted(rates):
-        case_rates = rates[case]
-        if len(set(case_rates.values())) == 1:
-            continue
-        for other in sorted(rates):
-            if other == case:
-                continue
-            other_rates = rates[other]
-            shared = sorted(set(case_rates) & set(other_rates))
-            value = correlation(
-                [case_rates[label] for label in shared],
-                [other_rates[label] for label in shared],
-            )
-            if value is not None:
-                print(f"{case}: varies")
-                break
     pooled_rates = {
         case: {
             label: sum(columns[label][case]) / len(columns[label][case])
@@ -208,6 +192,22 @@ def main(argv: list) -> int:
         }
         for case in all_cases
     }
+    for case in all_cases:
+        case_rates = pooled_rates[case]
+        if len(set(case_rates.values())) <= 1:
+            continue
+        for other in all_cases:
+            if other == case:
+                continue
+            other_rates = pooled_rates[other]
+            shared = sorted(set(case_rates) & set(other_rates))
+            value = correlation(
+                [case_rates[label] for label in shared],
+                [other_rates[label] for label in shared],
+            )
+            if value is not None:
+                print(f"{case}: varies")
+                break
     for case in all_cases:
         case_rates = pooled_rates[case]
         if len(set(case_rates.values())) <= 1:

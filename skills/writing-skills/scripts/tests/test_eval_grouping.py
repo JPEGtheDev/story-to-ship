@@ -238,6 +238,18 @@ class TestCorrelation(unittest.TestCase):
         self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
         self.assertAlmostEqual(result, 1.0, places=9)
 
+    def test_correlation_twoSharedColumns_isNone(self):
+        # Arrange: two shared columns, which is fewer than the three the correlation needs
+        a = [0.1, 0.9]
+        b = [0.2, 0.8]
+
+        # Act: call correlation through the error-capturing helper
+        result, error = _attempt(eg.correlation, a, b)
+
+        # Assert: no error, and the correlation is None
+        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
+        self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()

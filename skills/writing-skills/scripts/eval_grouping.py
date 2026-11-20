@@ -135,8 +135,9 @@ def report_rows(columns: dict) -> list:
     the same pass rate in every label and no label starting with "no-skill" gets
     an "unclassified: run no-skill first" row with no verdict, no bound and an
     empty note; it is kept, not excluded. A row whose rate is 0 or 1 carries
-    the bound 1 - 0.05 ** (1/n), with n the run count under the first label in
-    sorted order, so the bound does not depend on argument order.
+    the bound 1 - 0.05 ** (1/n), with n the smallest run count among the labels
+    for that case. The smallest n gives the widest bound, the conservative choice,
+    and the minimum does not depend on argument order.
     """
     rates_by_case = {}
     for label in sorted(columns):
@@ -149,7 +150,7 @@ def report_rows(columns: dict) -> list:
         if len(set(rates.values())) != 1:
             continue
         edge = next(iter(rates.values())) in (0, 1)
-        bound = zero_event_bound(len(columns[min(columns)][case])) if edge else None
+        bound = zero_event_bound(min(len(columns[label][case]) for label in columns)) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""
         if any(label.startswith("no-skill") for label in rates):
             row_label = "excluded: no signal"

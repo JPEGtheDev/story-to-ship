@@ -255,6 +255,23 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNotNone(row, "no row for case c1")
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
+    def test_reportRows_unequalRunCounts_boundUsesSmallestLabelCount(self):
+        # Arrange: case c1 fails in every run under both labels; label a holds 10 runs and label b holds 4
+        columns = {
+            "a": {"c1": [False] * 10},
+            "b": {"c1": [False] * 4},
+        }
+        expected_bound = 1 - 0.05 ** (1 / 4)
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the bound uses n = 4, the smallest run count among the labels
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertAlmostEqual(row["bound"], expected_bound, places=3)
+
     def test_reportRows_allPassRow_carriesBoundForRunCount(self):
         # Arrange: case c1 passes in every run of both labels, so it is constant at 1 with n = 4 per column
         columns = {"no-skill": {"c1": [True] * 4}, "tsr-before-1": {"c1": [True] * 4}}

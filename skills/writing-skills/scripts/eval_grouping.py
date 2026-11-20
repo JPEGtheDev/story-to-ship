@@ -67,7 +67,7 @@ def pool_columns(paths_by_label: dict) -> dict:
 
 def zero_event_bound(n: int) -> float:
     """Return the zero-event bound for a case that logged n runs with no events."""
-    raise NotImplementedError
+    return 1 - 0.05 ** (1 / n)
 
 
 def correlation(a: list, b: list) -> float:

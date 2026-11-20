@@ -250,6 +250,18 @@ class TestCorrelation(unittest.TestCase):
         self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
         self.assertIsNone(result)
 
+    def test_correlation_zeroVariance_isNone(self):
+        # Arrange: a is constant (zero variance), so its correlation with b is undefined
+        a = [0.5, 0.5, 0.5]
+        b = [0.1, 0.2, 0.3]
+
+        # Act: call correlation through the error-capturing helper
+        result, error = _attempt(eg.correlation, a, b)
+
+        # Assert: no error, and the correlation is None
+        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
+        self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -154,6 +154,9 @@ def report_rows(columns: dict) -> list:
 
 def main(argv: list) -> int:
     """Run the report for the given run files and return a process exit code."""
+    if not argv or any("=" not in item for item in argv):
+        print("usage: eval_grouping.py label=path [label=path ...]", file=sys.stderr)
+        return 2
     raise NotImplementedError
 
 

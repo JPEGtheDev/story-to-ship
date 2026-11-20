@@ -182,8 +182,12 @@ def main(argv: list) -> int:
         outcomes = {label: columns[label].get(case) for label in columns}
         if all(outcomes.values()):
             rates[case] = {label: sum(values) / len(values) for label, values in outcomes.items()}
+    grouped = set()
     for kept, members in group_cases(rates, 0.9, 3):
         print(f"group kept {kept}: {', '.join(members) if members else 'none'}")
+        for member in members:
+            print(f"{member}: excluded: grouped with {kept}")
+            grouped.add(member)
     pooled_rates = {
         case: {
             label: sum(columns[label][case]) / len(columns[label][case])
@@ -194,7 +198,7 @@ def main(argv: list) -> int:
     }
     for case in all_cases:
         case_rates = pooled_rates[case]
-        if len(set(case_rates.values())) <= 1:
+        if case in grouped or len(set(case_rates.values())) <= 1:
             continue
         for other in all_cases:
             if other == case:
@@ -210,7 +214,7 @@ def main(argv: list) -> int:
                 break
     for case in all_cases:
         case_rates = pooled_rates[case]
-        if len(set(case_rates.values())) <= 1:
+        if case in grouped or len(set(case_rates.values())) <= 1:
             continue
         uncorrelated = True
         for other in all_cases:

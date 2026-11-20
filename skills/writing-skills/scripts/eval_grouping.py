@@ -17,7 +17,8 @@ def read_run_file(path: str) -> dict:
 
     Records with scored false are skipped. Raises RunFileError naming the path
     when the file is missing, unparsable, lacks cases[].arms.with[] records, or
-    holds a record whose passed is not a bool or whose error is not null.
+    holds a record whose passed is not a bool, whose scored is present and not a
+    bool, or whose error is not null.
     """
     try:
         with open(path, encoding="utf-8") as handle:
@@ -44,6 +45,8 @@ def read_run_file(path: str) -> dict:
                 raise RunFileError(f"run file {path} has a malformed record in case {name}")
             if record.get("error") is not None:
                 raise RunFileError(f"run file {path} has an errored record in case {name}")
+            if "scored" in record and not isinstance(record["scored"], bool):
+                raise RunFileError(f"run file {path} has a non-bool scored value in case {name}")
             if record.get("scored", True):
                 column.append(record["passed"])
     return columns

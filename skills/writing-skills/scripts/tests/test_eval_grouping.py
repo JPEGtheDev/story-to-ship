@@ -134,6 +134,19 @@ class TestReadRunFile(unittest.TestCase):
         with self.assertRaises(eg.RunFileError):
             eg.read_run_file(path)
 
+    def test_readRunFile_stringScored_raisesRunFileErrorNamingFileAndCase(self):
+        # Arrange: case c1 has one record whose scored value is the string "false"
+        doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": True, "score": 1, "error": None, "scored": "false"}]}}]}
+        path = self._write("string_scored.json", json.dumps(doc))
+
+        # Act: read the file whose scored value is not a bool
+        with self.assertRaises(eg.RunFileError) as ctx:
+            eg.read_run_file(path)
+
+        # Assert: the error names the file and the case, so the record is not silently counted as scored
+        self.assertIn(path, str(ctx.exception))
+        self.assertIn("c1", str(ctx.exception))
+
     def test_readRunFile_stringPassed_raisesRunFileError(self):
         # Arrange: case c1 has one record whose passed value is the string "yes"
         doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": "yes", "score": 1, "error": None}]}}]}
@@ -725,6 +738,27 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 0)
         self.assertIn("c1: excluded: no signal", out.getvalue())
+
+    def test_main_nonBoolScored_printsNoVerdictAndReturnsOne(self):
+        # Arrange: a no-skill run file whose only record has scored set to the string "false", and a clean tsr-before-1 file
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": True, "score": 1, "error": None, "scored": "false"}]}}]}
+            with open(path_a, "w", encoding="utf-8") as handle:
+                json.dump(doc, handle)
+            with open(path_b, "w", encoding="utf-8") as handle:
+                json.dump(_run_doc({"c1": [_record(True)]}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-file line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no traceback, main returns 1, and the output names the non-bool file with no verdict
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 1)
+        self.assertIn(path_a + ": error, no verdict", out.getvalue().splitlines())
 
     def test_main_nullPassed_printsNoVerdictAndReturnsOne(self):
         # Arrange: a run file whose only record has passed set to null

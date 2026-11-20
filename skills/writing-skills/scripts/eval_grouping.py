@@ -35,9 +35,9 @@ def read_run_file(path: str) -> dict:
     for case in cases:
         arms = case.get("arms") if isinstance(case, dict) else None
         records = arms.get("with") if isinstance(arms, dict) else None
-        if not isinstance(case.get("name"), str) or not isinstance(records, list):
+        name = case.get("name") if isinstance(case, dict) else None
+        if not isinstance(name, str) or not isinstance(records, list):
             raise RunFileError(f"run file {path} has a case without arms.with[] records")
-        name = case["name"]
         column = columns.setdefault(name, [])
         for record in records:
             if not isinstance(record, dict) or "passed" not in record:

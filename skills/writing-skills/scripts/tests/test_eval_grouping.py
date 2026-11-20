@@ -169,6 +169,17 @@ class TestZeroEventBound(unittest.TestCase):
         self.assertAlmostEqual(result_five, 0.451, places=3)
         self.assertAlmostEqual(result_thirty, 0.095, places=3)
 
+    def test_zeroEventBound_zeroRuns_returnsNone(self):
+        # Arrange: a case that logged zero runs, so there is no bound to compute
+        run_count_zero = 0
+
+        # Act: call the bound for zero runs through the error-capturing helper
+        result, error = _attempt(eg.zero_event_bound, run_count_zero)
+
+        # Assert: no error (no division by zero), and no bound and no verdict is returned
+        self.assertIsNone(error, f"zero_event_bound raised {type(error).__name__}: {error}")
+        self.assertIsNone(result)
+
 
 if __name__ == "__main__":
     unittest.main()

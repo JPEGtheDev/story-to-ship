@@ -129,6 +129,24 @@ class TestReadRunFile(unittest.TestCase):
             f"expected RunFileError, got {type(error).__name__}: {error}",
         )
 
+    def test_readRunFile_nullPassed_raisesRunFileError(self):
+        # Arrange: case c1 has one record whose passed value is null
+        doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": None, "score": 0, "error": None}]}}]}
+        path = self._write("null_passed.json", json.dumps(doc))
+
+        # Act & Assert: reading the file raises RunFileError, not a later TypeError from summing the column
+        with self.assertRaises(eg.RunFileError):
+            eg.read_run_file(path)
+
+    def test_readRunFile_stringPassed_raisesRunFileError(self):
+        # Arrange: case c1 has one record whose passed value is the string "yes"
+        doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": "yes", "score": 1, "error": None}]}}]}
+        path = self._write("string_passed.json", json.dumps(doc))
+
+        # Act & Assert: reading the file raises RunFileError, not a later TypeError from summing the column
+        with self.assertRaises(eg.RunFileError):
+            eg.read_run_file(path)
+
 
 class TestPoolColumns(unittest.TestCase):
     def setUp(self):
@@ -550,6 +568,25 @@ class TestMain(unittest.TestCase):
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 0)
         self.assertIn("c2: no runs under no-skill", out.getvalue().splitlines())
+
+
+    def test_main_nullPassed_printsNoVerdictAndReturnsOne(self):
+        # Arrange: a run file whose only record has passed set to null
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "null_passed.json")
+            doc = {"cases": [{"name": "c1", "arms": {"with": [{"passed": None, "score": 0, "error": None}]}}]}
+            with open(path, "w", encoding="utf-8") as handle:
+                json.dump(doc, handle)
+            argv = ["no-skill=" + path]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read the per-file line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no traceback, main returns 1, and the output names the file with no verdict
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertEqual(result, 1)
+        self.assertIn(path + ": error, no verdict", out.getvalue().splitlines())
 
 
 if __name__ == "__main__":

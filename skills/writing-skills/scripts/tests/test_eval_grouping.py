@@ -210,6 +210,20 @@ class TestReportRows(unittest.TestCase):
         self.assertEqual(row["label"], "unclassified: run no-skill first")
         self.assertIsNone(row["verdict"])
 
+    def test_reportRows_constantZero_carriesBoundAndNote(self):
+        # Arrange: case c1 passes in no run of either column, so it is constant at 0 with n = 4 per column
+        columns = {"no-skill": {"c1": [False, False, False, False]}, "tsr-before-1": {"c1": [False, False, False, False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the c1 row carries the note and the zero-event bound for n = 4
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertIn("not evidence of keeping the behavior", row["note"])
+        self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -185,7 +185,10 @@ def main(argv: list) -> int:
     if len(columns_by_label) < 2:
         return 1
     columns = pool_columns(columns_by_label)
+    no_signal = set()
     for row in report_rows(columns):
+        if row["label"] == "excluded: no signal":
+            no_signal.add(row["case"])
         line = f"{row['case']}: {row['label']}"
         if row["bound"] is not None:
             line += f" bound {row['bound']:.3f}"
@@ -203,6 +206,8 @@ def main(argv: list) -> int:
     }
     grouped = set()
     for kept, members in group_cases(pooled_rates, 0.9, 3):
+        if not members and kept in no_signal:
+            continue
         members_text = ", ".join(members) or "none"
         print(f"group kept {kept}: {members_text}")
         for member in members:

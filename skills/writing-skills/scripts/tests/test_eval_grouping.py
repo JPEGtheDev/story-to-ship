@@ -890,7 +890,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertIn("group kept c1: none", out.getvalue().splitlines())
 
-    def test_main_noSignalCase_printsNoMembersGroupLine(self):
+    def test_main_noSignalCase_printsNoGroupLine(self):
         # Arrange: case c1 has the same pass rate in both labels, so it is a no-signal case
         records = [_record(True), _record(False), _record(True), _record(False)]
         with tempfile.TemporaryDirectory() as tmp:
@@ -906,12 +906,13 @@ class TestMain(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as out:
                 result, error = _attempt(eg.main, argv)
 
-        # Assert: no error, main returns 0, c1 is excluded as no signal, and the kept c1 has its group line with no members
+        # Assert: no error, main returns 0, c1 is excluded as no signal, and no group line is printed for it
         self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
         self.assertEqual(result, 0)
         lines = out.getvalue().splitlines()
         self.assertIn("c1: excluded: no signal", lines)
-        self.assertIn("group kept c1: none", lines)
+        self.assertNotIn("group kept c1: none", lines)
+        self.assertFalse([line for line in lines if line.startswith("group kept")])
 
     def test_main_threeSharedLabelsWithFourthMissing_groupsCases(self):
         # Arrange: cases c1 and c2 hold identical records under the first three labels, so they correlate at 1.0

@@ -153,5 +153,22 @@ class TestPoolColumns(unittest.TestCase):
         self.assertEqual(result, {"baseline": {"c1": [True], "c2": [False]}})
 
 
+class TestZeroEventBound(unittest.TestCase):
+    def test_zeroEventBound_fiveAndThirtyRuns_matchExactBound(self):
+        # Arrange: run counts 5 and 30; expected bounds 1 - 0.05 ** (1/n) are 0.451 and 0.095
+        run_count_five = 5
+        run_count_thirty = 30
+
+        # Act: call the bound for each run count through the error-capturing helper
+        result_five, error_five = _attempt(eg.zero_event_bound, run_count_five)
+        result_thirty, error_thirty = _attempt(eg.zero_event_bound, run_count_thirty)
+
+        # Assert: neither call raised, and each value matches its expected bound to 3 places
+        self.assertIsNone(error_five, f"zero_event_bound raised {type(error_five).__name__}: {error_five}")
+        self.assertIsNone(error_thirty, f"zero_event_bound raised {type(error_thirty).__name__}: {error_thirty}")
+        self.assertAlmostEqual(result_five, 0.451, places=3)
+        self.assertAlmostEqual(result_thirty, 0.095, places=3)
+
+
 if __name__ == "__main__":
     unittest.main()

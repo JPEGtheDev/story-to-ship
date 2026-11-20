@@ -90,6 +90,9 @@ def report_rows(columns: dict) -> list:
 
     A case with the same pass rate in every label, and a label starting with
     "no-skill", gets an "excluded: no signal" row with no verdict and no bound.
+    A case with the same pass rate in every label and no label starting with
+    "no-skill" gets an "unclassified: run no-skill first" row with no verdict,
+    no bound and an empty note; it is kept, not excluded.
     """
     rates_by_case = {}
     for label, cases in columns.items():
@@ -99,6 +102,8 @@ def report_rows(columns: dict) -> list:
     for case, rates in rates_by_case.items():
         if len(set(rates.values())) == 1 and any(label.startswith("no-skill") for label in rates):
             rows.append({"case": case, "label": "excluded: no signal", "verdict": None, "bound": None, "note": ""})
+        elif len(set(rates.values())) == 1:
+            rows.append({"case": case, "label": "unclassified: run no-skill first", "verdict": None, "bound": None, "note": ""})
     return rows
 
 

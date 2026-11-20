@@ -229,6 +229,10 @@ def main(argv: list) -> int:
                 break
         if uncorrelated:
             print(f"{case}: not groupable")
+    for label in sorted(columns):
+        for case in sorted(columns[label]):
+            if not columns[label][case]:
+                print(f"{case}: no runs under {label}")
     return 0
 
 

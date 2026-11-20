@@ -113,6 +113,20 @@ class TestReadRunFile(unittest.TestCase):
         self.assertEqual(type(ctx.exception).__name__, "RunFileError")
         self.assertIn(path, str(ctx.exception))
 
+    def test_readRunFile_nonDictCaseEntry_raisesRunFileError(self):
+        # Arrange: a run file whose cases list holds a bare integer instead of a case object
+        path = self._write("nondict.json", '{"cases": [5]}')
+
+        # Act: read the file with the non-dict case entry
+        result, error = _attempt(eg.read_run_file, path)
+
+        # Assert: the error is a RunFileError, not an AttributeError from case.get
+        self.assertIsInstance(
+            error,
+            eg.RunFileError,
+            f"expected RunFileError, got {type(error).__name__}: {error}",
+        )
+
 
 class TestPoolColumns(unittest.TestCase):
     def setUp(self):

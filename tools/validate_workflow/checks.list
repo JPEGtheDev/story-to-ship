@@ -243,3 +243,7 @@ proof	Check scope-change correction and CI step rules are pinned	-	skills/runnin
 proof	Check scope-change correction and CI step rules are pinned	-	skills/running-a-sprint/references/HANDBACK_ROUTING.md	delete-line	FAILED: skills/running-a-sprint/references/HANDBACK_ROUTING.md is missing rule line	a test that the corrected proof requires is part of that correction.
 proof	Check scope-change correction and CI step rules are pinned	-	agents/story-coordinator.md	delete-line	FAILED: agents/story-coordinator.md is missing rule line	a test that the corrected proof requires is part of that correction.
 proof	Check scope-change correction and CI step rules are pinned	-	skills/workflow/SKILL.md	delete-line	FAILED: skills/workflow/SKILL.md is missing rule line	A new CI step added beside an existing step follows the conventions
+step	Run eval grouping unit tests
+proof	Run eval grouping unit tests	-	skills/writing-skills/scripts/tests/test_eval_grouping.py	append	FAILED	class MustFailProof(unittest.TestCase):\n    def test_must_fail(self):\n        self.fail("must-fail proof")
+step	Check eval comparison contract strings
+proof	Check eval comparison contract strings	-	skills/writing-skills/references/SKILL_EVAL_COMPARISON.md	delete-line	FAILED: skills/writing-skills/references/SKILL_EVAL_COMPARISON.md is missing required contract string	Exact one-sided 95 percent bound

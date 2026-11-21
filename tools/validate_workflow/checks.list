@@ -227,6 +227,8 @@ covers	Check running-a-sprint SKILL.md row counts	skills/running-a-sprint/SKILL.
 covers	Check the fresh-runner Discovery rule is pinned once	skills/running-a-sprint/references/HANDBACK_ROUTING.md
 step	Check writing-skills temporary-step and enforcement-text rules are pinned
 proof	Check writing-skills temporary-step and enforcement-text rules are pinned	-	skills/writing-skills/SKILL.md	empty	is missing rule line: A change that removes, skips or weakens a check main enforces is not made as a temporary step
+step	Check gate-reliance row is pinned
+proof	Check gate-reliance row is pinned	-	skills/writing-skills/references/REVIEW_INSTRUCTIONS.md	empty	is missing rule line: - [ ] **Gate relies on another skill's rule**
 step	Check workflow temporary-step and runtime rules are pinned
 proof	Check workflow temporary-step and runtime rules are pinned	-	skills/workflow/SKILL.md	empty	is missing rule line: A change that removes, skips or weakens a check main enforces is not made as a temporary step
 step	Check spec-compliance reviewer brief rule is pinned

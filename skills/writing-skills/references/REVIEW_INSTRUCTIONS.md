@@ -56,6 +56,7 @@ item are in the reference sections above.
 - [ ] **Jargon Rule (advisory)** -- every term of art defined on first use per VOICE_AUTHORITY_RULES (first-use test: would an agent with no project context know what this term means here)? Report each flagged term with file:line; findings are advisory and do not alone trigger NEEDS WORK.
 - [ ] **No absolute paths** -- no literal `/home/`, `/usr/`, `/root/` or machine-specific prefixes?
 - [ ] **No cross-skill file path refs** -- other skills referenced by name in prose only, not by `../other-skill/references/FILE.md` paths? Run ``grep -nE "(^|[^A-Za-z-])($(ls skills | paste -sd'|'))(/|\`|[ ]skill)|\.\./[a-z][a-z0-9-]*/(references/|SKILL\.md)" "<resolved review target>" | grep -E "references/|SKILL\.md|[A-Z][A-Z]+_[A-Z_]+\.md"`` -- the command MUST run from the repository root (it lists `skills/`). A hit is a FAIL when the line names a file in another skill's tree; a line that only cites the skill's own `references/` path next to a skill name, or quotes a bad example, is a false positive.
+- [ ] **Gate relies on another skill's rule** -- run the gate command in the block below this list on the resolved review target, from the repository root; a changed gate line (a gate line is a line under a `## BEFORE PROCEEDING`, `## Red Flags`, `## Iron Law` or `## Rationalization Prevention` heading, at any of the `##`, `###` or `####` levels) that names another skill, or points to another skill's section without naming it, is a FAIL unless it says `Load the <skill> skill now` or `Load `<skill>` now` (either form, any case) or states the rule inline. The command prints candidate lines and the reviewer adjudicates each one; a skill name inside a quoted bad example is exempt. A `pointer:` line is a FAIL only when it points to another skill's material. A SKILL.md whose output prints `GATE HEADINGS: 0` is a FAIL. In a standalone audit with no earlier version (W=1), every gate line counts and each hit is advice, not a FAIL. The output `NO CHANGED LINES` means nothing changed against the merge-base with origin/main. Paste the command output.
 - [ ] **Skill-specific content** -- no generic placeholder-only examples?
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
@@ -67,6 +68,36 @@ item are in the reference sections above.
 - [ ] A dead-code or dangling-reference sweep covers only files tracked on main. Applies when a sweep is part of the review. Otherwise mark N/A. (R5)
 - [ ] In a cross-skill sweep, a bare SKILL.md hit that names another skill is a real cross-tree hit. Applies when a cross-skill sweep is part of the review. Otherwise mark N/A. (R6)
 - [ ] Shipped skill and agent text names no vendor model name; a model tier is named only by its tier (Economy, Standard, Premium). (R7)
+
+```bash
+F="<resolved review target>"; W=0
+{ if [ "$W" = 1 ]; then :; else git diff -U0 "$(git merge-base HEAD origin/main)" -- "$F"; fi; } | awk -v F="$F" -v whole="$W" -v names="$(ls skills | paste -sd'|' -)" '
+/^@@/ { nh++; split($3, a, ","); s = substr(a[1], 2); n = (a[2] == "" ? 1 : a[2]); for (i = 0; i < n; i++) { ch[s + i] = 1 }; next }
+END {
+  self = ""
+  while ((getline l < F) > 0) if (l ~ /^name: /) { self = substr(l, 7); break }
+  close(F)
+  nn = split(names, sk, "|")
+  gate = 0; ng = 0; ln = 0; fence = 0
+  while ((getline l < F) > 0) {
+    ln++
+    if (l ~ /^```/) fence = !fence
+    if (!fence && l ~ /^#+ /) { lv = index(l, " ") - 1; if (l ~ /^(##|###|####) (BEFORE PROCEEDING|Red Flags|Iron Law|Rationalization Prevention)/) { if (!gate || lv < glevel) glevel = lv; gate = 1; ng++ } else if (gate && lv <= glevel) gate = 0; continue }
+    if (!gate || !(whole == 1 || ch[ln])) continue
+    low = tolower(l); name = ""
+    for (i = 1; i <= nn; i++) {
+      s = sk[i]
+      if (s == self) continue
+      if (match(low, "load (the )?\140?" s "\140?( skill)? now")) continue
+      if (match(low, "(^|[^a-z-])" s "( skill|\140|/)") || (s ~ /-/ && match(low, "(^|[^a-z-])" s "([^a-z-]|$)"))) { name = s; break }
+    }
+    if (name != "") printf "%d: name=%s: %s\n", ln, name, l
+    else if (low ~ /(section|heading|(see|per) the )/) printf "%d: pointer: %s\n", ln, l
+  }
+  if (whole != 1 && nh == 0) print "NO CHANGED LINES against the merge-base with origin/main (empty diff, or the base is missing)"
+  printf "GATE HEADINGS: %d\n", ng
+}'
+```
 
 [+] All pass -> proceed to Step 3
 [-] Any unmet -> record every failing item; continue through all steps before filing verdict
@@ -123,6 +154,7 @@ Apply this checklist per file (anatomy elements do not apply to reference files)
 - [ ] **Dated snapshot or owner-set label** -- shipped text carries neither. (R4)
 - [ ] **Vendor model name** -- shipped skill and agent text names none; a model tier is named only by its tier (Economy, Standard, Premium). (R7)
 - [ ] **No cross-skill file path refs** -- no path or bare file name into another skill's tree (the `../other-skill/references/FILE.md` form is one example); run the Step 4 command from the repository root and adjudicate hits as in the Step 2 item
+- [ ] **Gate relies on another skill's rule** -- run the Step 2 gate command with F set to the reference file path, on the file when it prints `GATE HEADINGS` with a count above 0; a reference file with no gate heading is not checked. Same FAIL rule as the Step 2 item.
 - [ ] **Content matches SKILL.md pointer** -- file contains what SKILL.md says it contains
 - [ ] **Size** -- no hard limit for reference files; flag as SIZE ALERT if > 8,000 chars (~2,000 tokens)
 
@@ -210,6 +242,7 @@ Return findings in EXACTLY this structure:
 | Jargon Rule (advisory) | [+]/[-] | file:line or "no issues found" |
 | No absolute paths | [+]/[-] | grep output or "no issues found" |
 | No cross-skill path refs | [+]/[-] | grep output or file:line |
+| Gate relies on another skill's rule | [+]/[-] | gate command output (file:line per hit) or "NO CHANGED LINES" |
 | Skill-specific content | [+]/[-] | file:line |
 | Related skill cross-reference | [+]/[-] | file:line |
 | Domain language match | [+]/[-] | file:line or "no issues found" |
@@ -232,6 +265,7 @@ Return findings in EXACTLY this structure:
 | Jargon Rule (advisory) | [+]/[-] | file:line or "no issues" |
 | No absolute paths | [+]/[-] | "no instances" or file:line |
 | No cross-skill path refs | [+]/[-] | "no instances" or file:line |
+| Gate relies on another skill's rule | [+]/[-]/not checked | gate command output (file:line per hit), or "not checked" when no gate heading |
 | Content matches SKILL.md pointer | [+]/[-] | note what was expected vs. found |
 | Shipped text names only shipped checks, modes and roles (R1) | [+]/[-] | "no instances" or file:line |
 | No dated snapshot or owner-set label (R4) | [+]/[-] | "no instances" or file:line |

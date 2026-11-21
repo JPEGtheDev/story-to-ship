@@ -2,6 +2,7 @@
 type: tool_used
 tool: Bash
 input_match: '(^|[;&|]\s*|\bthen\s+)\s*cd\s+[^\n;&|]+(&&|;)\s*git\s+(?!-C\b)'
+min: 0
 max: 0
 ---
 

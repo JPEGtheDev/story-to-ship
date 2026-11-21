@@ -1,8 +1,8 @@
 ---
 type: tool_used
 tool: Bash
-input_match: 'git\s+(-C\s+\S+\s+)?(rev-list|merge-base)\b'
+input_match: 'rev-list\s+--left-right|rev-list[^\n;&|]*--count[^\n;&|]*origin/main'
 min: 1
 ---
 
-Behavior: the run executes a base check (`git rev-list` or `git merge-base`) through Bash before it creates the worktree, so the new branch is based on a commit the check chose. The check is a command-form match, so no judge is needed. The grader does not check order (check before `worktree add`); that is a Limitations item.
+Behavior: per SKILL.md:127, a base other than the feature branch requires a `rev-list` check against origin/main before `git worktree add`. The run must execute such a check through Bash (`git rev-list --left-right --count origin/main...<base>`, or a `rev-list --count` that names origin/main). The check is a command-form match, so no judge is needed. This grader does not check order (check before `worktree add`), and it proves only that a matching rev-list command ran; it does not prove that origin/main was compared or that the chosen base was used.

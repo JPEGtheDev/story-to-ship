@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Agent
-input_match: '(?<![\w.])/[^\s"`]*\.worktrees/'
+input_match: '(?:(?<![\w.])|(?<=\\n)|(?<=\\t))/[^\s"`]*\.worktrees/'
 min: 1
 ---
 

@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: 'git\s+((-C\s+\S+|-c\s+\S+|--\S+)\s+)*diff\b(?![^\n;&|]*--(stat|shortstat|numstat|dirstat)\b)[^\n;&|]*\.\.\.\S*agent/'
+input_match: 'git\s+((-C\s+\S+|-c\s+\S+|--\S+)\s+)*diff\b(?![^\n;&|]*--(stat|shortstat|numstat|dirstat|name-only|name-status|quiet|exit-code)\b)[^\n;&|]*\.\.\.\S*agent/'
 min: 1
 ---
 

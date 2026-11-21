@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '(^|"command":\s*"|&&|;|\|\|?)\s*git\s+(-C\s+\S+\s+)?worktree\s+remove\b'
+input_match: '(^|"command":\s*"|&&|;|\|\|?|\n|\\n)\s*git\s+(-C\s+\S+\s+)?worktree\s+remove\b'
 min: 1
 ---
 

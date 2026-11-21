@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: 'worktree\s+add(?:[^\n;&|\\]|\\\n)*\.worktrees/'
+input_match: 'worktree\s+add(?:[^\n;&|\\]|\\"|\\\n|\\\\\\n)*\.worktrees/'
 min: 1
 ---
 

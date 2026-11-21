@@ -18,9 +18,23 @@ PLAN
 git add -A
 git commit -q -m "chore: seed repo"
 git checkout -q -b agent/row-export main
-printf 'def export_csv(rows):\n    return ""\n' > src/export_csv.py
-git add src/export_csv.py
-git commit -q -m "feat: csv export stub"
+cat > src/export.py <<'PY'
+import csv
+import io
+
+
+def export_csv(rows):
+    """Return rows as CSV text; the header comes from the first row's keys."""
+    if not rows:
+        return ""
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=list(rows[0].keys()))
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue()
+PY
+git add src/export.py
+git commit -q -m "feat: csv export for the row list"
 git checkout -q main
 git init -q --bare .git/remote.git
 git remote add origin .git/remote.git

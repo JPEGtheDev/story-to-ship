@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: 'git\s+(-C\s+\S+\s+)?(checkout|switch)\b(?=[^\n;&|]*\s(-[bBcC]|--detach|--orphan)(\s|$)|\s+(-\S*\s+)*(?!main(\s|$|[;&|"\\]))[^-\s])|gh\s+pr\s+checkout\b'
+input_match: 'git\s+(-C\s+\S+\s+)?(checkout|switch)\b(?=[^\n;&|"\\]*\s(-[bBcC]|--detach|--orphan)(\s|$|["\\])|\s+(-\S*\s+)*(?!main(\s|$|[;&|"\\]))[^-\s])|gh\s+pr\s+checkout\b'
 min: 0
 max: 0
 ---

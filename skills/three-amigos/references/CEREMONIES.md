@@ -103,6 +103,8 @@ The skeptic gives no APPROVE or REJECT verdict; the map verdict stays `READY FOR
 
 **Focused brief (each Discovery amigo):** a brief names one persona lens, the source file paths to read, and the agenda items that amigo answers: items 1-6 of the agenda below plus the two mandatory extras defined in `SKILL.md` under "Discovery -- Mandatory Agenda Questions" (field optionality, entry paths). On an amigo's first dispatch, a brief contains nothing else; a return dispatch adds only that amigo's batched skeptic findings. Do not paste ceremony prose into the prompt. Discovery amigo calls at the economy tier pass `model` explicitly, which overrides the agent template's pin.
 
+**Before the three simultaneous amigo dispatches of the Worktree Dispatch Protocol in `SKILL.md`, for a batch of two or more Discovery amigo dispatches from one template:** Send exactly one first-dispatch check first, and send no other dispatch from that template until its output passes the check. The check is one of the three amigo dispatches: a passed check's output is that amigo's one dispatch, and the other two are then sent together. A first-dispatch check is one dispatch sent alone to test the template. Nothing is released before a pass. A first-dispatch check that returns NEEDS_CONTEXT gets one re-dispatch with the missing information. Every result that is not a pass stops Discovery with a Discovery stop: a missing required field, a NEEDS_CONTEXT that comes back again after that one re-dispatch, a BLOCKED reply, or no final report. A Discovery stop adds a Question under `## Discovery Open Items` with verdict `BACK TO OWNER`, as the skeptic routing does, and hands back the kind `owner question: Discovery`.
+
 ### Agenda -- Questions
 
 1. What does the user want to be able to DO? (observable behavior, not technical steps)
@@ -243,3 +245,9 @@ Retrospective dispatch prompts supply the evidence record (timeline, artifact pa
 ## Model Selection
 
 Ceremony model tiers and their rationale are defined once in the `subagent-driven-development` skill (Model Selection, Tier Assignments table). Load that skill for the current tier per ceremony; do not restate tier assignments or model IDs in this file.
+
+---
+
+## Related Skills
+
+- `dispatching-parallel-agents` -- the first-dispatch check: its pass tests and the exemption for a template already passed this session

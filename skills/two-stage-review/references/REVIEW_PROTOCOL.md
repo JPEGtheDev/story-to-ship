@@ -91,6 +91,11 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 **Context:** An implementer result is in hand and the quality review looks like the faster path.
 **Forces:** Stage 2 checks how a change is written, not whether it is the change asked for, so a well-written wrong change passes it; running Stage 1 first spends the quality review only on work known to match the spec.
 
+Code that doesn't meet the spec doesn't benefit from quality review.
+
+**Re-review required for review-covered territory:**
+Enforcement is procedural: a post-review commit touching reviewed territory with no re-review dispatch in the transcript is the checkable signal.
+
 **Inline-lane todos:**
 **Context:** The coordinator made a todo's edit itself instead of dispatching an implementer.
 **Forces:** The coordinator's own check inherits the assumptions that wrote the edit, which is what the two stages exist to catch, and a named route in the status entry gives the audit one field to compare with the transcript.
@@ -99,6 +104,8 @@ These notes moved word for word from SKILL.md to keep the skill under the core-s
 **Enforcement is procedural/self-check:** CI pins the wording only; behavior is read from the transcript.
 **Context:** A reviewer reply arrives with a missing, mis-cased, unlisted, or foreign verdict.
 **Forces:** A missing verdict reads as a finished review and becomes a silent pass; exact matching makes the check a lookup, and one resumed re-dispatch recovers a reviewer that only mis-formatted its reply.
+
+This rule generalizes the incomplete-review clauses above to a missing or unlisted verdict at either stage.
 
 **Fix-round cap:**
 **Enforcement is procedural/self-check:** CI pins the wording only; the transcript shows whether round three stops for a prompt.

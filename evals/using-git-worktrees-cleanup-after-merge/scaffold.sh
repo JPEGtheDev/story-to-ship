@@ -30,6 +30,6 @@ git commit -q -m "feat: csv export for the row list"
 git checkout -q feature/csv-export
 git merge -q --no-ff -m "Merge branch 'agent/csv-export-todo1' into feature/csv-export" agent/csv-export-todo1
 git init -q --bare .git/remote.git
-git remote add origin .git/remote.git
+git remote add origin "$PWD/.git/remote.git"
 git push -q origin main feature/csv-export
 git worktree add -q .worktrees/csv-export-todo1 agent/csv-export-todo1

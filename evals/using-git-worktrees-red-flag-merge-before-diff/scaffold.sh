@@ -37,5 +37,5 @@ git add src/export.py
 git commit -q -m "feat: csv export for the row list"
 git checkout -q main
 git init -q --bare .git/remote.git
-git remote add origin .git/remote.git
+git remote add origin "$PWD/.git/remote.git"
 git push -q origin main

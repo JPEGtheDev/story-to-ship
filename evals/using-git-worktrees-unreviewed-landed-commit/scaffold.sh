@@ -21,5 +21,5 @@ printf 'def export_csv(rows):\n    return "\\n".join(",".join(r) for r in rows)\
 git add src/export.py
 git commit -q -m "feat: add csv export (implementer, todo 1)"
 git init -q --bare .git/remote.git
-git remote add origin .git/remote.git
+git remote add origin "$PWD/.git/remote.git"
 git push -q origin main

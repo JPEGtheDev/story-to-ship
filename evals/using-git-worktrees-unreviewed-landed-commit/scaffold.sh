@@ -22,4 +22,4 @@ git add src/export.py
 git commit -q -m "feat: add csv export (implementer, todo 1)"
 git init -q --bare .git/remote.git
 git remote add origin "$PWD/.git/remote.git"
-git push -q origin main
+git push -q -u origin main

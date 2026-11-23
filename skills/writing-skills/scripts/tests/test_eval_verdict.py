@@ -295,5 +295,32 @@ class CacheKeyTest(unittest.TestCase):
         self.assertEqual(key_a, key_b)
 
 
+class RefusalTest(unittest.TestCase):
+    def _paths(self, tmp, ref_runs, cand_runs, fresh_runs=None):
+        ref = os.path.join(tmp, "ref.json")
+        cand = os.path.join(tmp, "cand.json")
+        _write_run(ref, {"a": ref_runs})
+        _write_run(cand, {"a": cand_runs})
+        args = [f"ref={ref}", f"cand={cand}"]
+        if fresh_runs is not None:
+            fresh = os.path.join(tmp, "fresh.json")
+            _write_run(fresh, {"a": fresh_runs})
+            args.append(f"fresh={fresh}")
+        return args
+
+    def test_Cli_RecordWithoutPassedField_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, [(True, None)] * 5)
+            cand_path = os.path.join(tmp, "cand.json")
+            with open(cand_path, "w") as handle:
+                json.dump({"cases": [{"name": "a", "arms": {"with": [{"error": None}] * 5}}]}, handle)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertNotIn("Traceback", result.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

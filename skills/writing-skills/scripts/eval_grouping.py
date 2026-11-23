@@ -152,6 +152,10 @@ def report_rows(columns: dict) -> list:
         if len(rates) != len(columns) or None in rates.values():
             continue
         if len(set(rates.values())) != 1:
+            base = [rate for label, rate in rates.items() if label.startswith("no-skill")]
+            current = [rate for label, rate in rates.items() if not label.startswith("no-skill")]
+            if base and current and min(current) > max(base):
+                rows.append({"case": case, "label": "separating", "verdict": None, "bound": None, "note": ""})
             continue
         edge = next(iter(rates.values())) in (0, 1)
         bound = zero_event_bound(min(len(columns[label][case]) for label in columns)) if edge else None

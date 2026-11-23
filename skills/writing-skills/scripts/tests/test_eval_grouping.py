@@ -303,6 +303,19 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNotNone(row, "no row for case c1")
         self.assertEqual(row["label"], "weak")
 
+    def test_reportRows_currentPassesTwentySevenOfThirty_isNotWeak(self):
+        # Arrange: case c1 passes 27 of 30 (exactly 90 percent) under the current skill and 10 of 30 under no-skill
+        columns = {"no-skill": {"c1": [True] * 10 + [False] * 20}, "tsr-before-1": {"c1": [True] * 27 + [False] * 3}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and the c1 row is not labeled weak because the current skill passes at 90 percent
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertNotEqual(row["label"], "weak")
+
     def test_reportRows_unequalRunCounts_boundUsesSmallestLabelCountWhenNoSkillIsFirst(self):
         # Arrange: case c1 is constant at 0 under both labels; tsr-before-1 holds 10 runs and no-skill holds 4
         columns = {

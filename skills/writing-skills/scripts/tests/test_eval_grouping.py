@@ -277,18 +277,18 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNotNone(row, "no row for case c1")
         self.assertEqual(row["label"], "model default")
 
-    def test_reportRows_noSkillPassesMoreThanCurrent_isModelDefault(self):
-        # Arrange: case c1 passes 4 of 4 under no-skill and 1 of 4 under the current skill, so no-skill is strictly higher
+    def test_reportRows_noSkillPassesMoreThanCurrentAndCurrentIsWeak_isWeak(self):
+        # Arrange: case c1 passes 4 of 4 under no-skill and 1 of 4 under the current skill, so no-skill is strictly higher and the current skill is under 90 percent
         columns = {"no-skill": {"c1": [True, True, True, True]}, "tsr-before-1": {"c1": [True, False, False, False]}}
 
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and the c1 row is labeled model default because no-skill passes at least as often
+        # Assert: no error, and the c1 row is labeled weak, because weak takes precedence over model default
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
-        self.assertEqual(row["label"], "model default")
+        self.assertEqual(row["label"], "weak")
 
     def test_reportRows_unequalRunCounts_boundUsesSmallestLabelCountWhenNoSkillIsFirst(self):
         # Arrange: case c1 is constant at 0 under both labels; tsr-before-1 holds 10 runs and no-skill holds 4

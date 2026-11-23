@@ -81,6 +81,16 @@ def _parse_path(argument, key):
     return argument[len(key) + 1:]
 
 
+def _kept(runs, name, label, path):
+    """Return the kept records of a case, printing its dropped count; exit 2 if none are kept."""
+    kept, dropped = runs[name]
+    if dropped:
+        print(f"{name}: dropped {dropped} ({label})")
+    if not kept:
+        _fail(f"case {name} keeps zero runs in the {label} file {path}")
+    return kept
+
+
 def main(argv=None):
     """Print one line per candidate case: name, p, stage verdict; exit 2 on bad input."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -89,9 +99,12 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if len(args.paths) not in (2, 3):
         _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH]")
-    ref = read_run_records(_parse_path(args.paths[0], "ref"))
-    cand = read_run_records(_parse_path(args.paths[1], "cand"))
-    fresh = read_run_records(_parse_path(args.paths[2], "fresh")) if len(args.paths) == 3 else None
+    ref_path = _parse_path(args.paths[0], "ref")
+    cand_path = _parse_path(args.paths[1], "cand")
+    fresh_path = _parse_path(args.paths[2], "fresh") if len(args.paths) == 3 else None
+    ref = read_run_records(ref_path)
+    cand = read_run_records(cand_path)
+    fresh = read_run_records(fresh_path) if fresh_path else None
     partial = False
     for name, (cand_kept, dropped) in cand.items():
         if name not in ref:
@@ -103,12 +116,14 @@ def main(argv=None):
             print(f"{name}: rerun, {cand_n} of {args.stage} runs after dropped errors")
             partial = True
             continue
-        ref_pass, ref_n = _counts(ref[name][0])
+        ref_pass, ref_n = _counts(_kept(ref, name, "reference", ref_path))
         p = fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
         verdict = stage_verdict(args.stage, ref_pass, ref_n, cand_pass, cand_n)
         line = f"{name}: p={p:.6f} {verdict}"
         if verdict == "LOSS" and fresh is not None and name in fresh:
-            fresh_pass, fresh_n = _counts(fresh[name][0])
+            fresh_pass, fresh_n = _counts(_kept(fresh, name, "fresh", fresh_path))
+            if fresh_n < args.stage:
+                _fail(f"case {name} keeps {fresh_n} of {args.stage} runs in the fresh file {fresh_path}")
             line += f" confirm={confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n)}"
         print(line)
     if partial:

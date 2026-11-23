@@ -48,24 +48,32 @@ def read_run_records(path):
     return kept, len(records) - len(kept)
 
 
+def _fail(message):
+    """Print an error to stderr and exit 2."""
+    print(f"error: {message}", file=sys.stderr)
+    sys.exit(2)
+
+
+def validate_run_file(path, stage):
+    """Exit 2 unless path is a valid JSON run file with at least stage records."""
+    if not os.path.isfile(path):
+        _fail(f"run file not found: {path}")
+    try:
+        with open(path) as handle:
+            records = json.load(handle)
+    except json.JSONDecodeError as error:
+        _fail(f"run file is not valid JSON: {error}")
+    if len(records) < stage:
+        _fail(f"run file has {len(records)} records, stage {stage} needs {stage}")
+
+
 def main(argv=None):
     """Parse the command line; an invalid stage makes argparse exit 2."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", type=int, choices=(5, 15, 30), required=True)
     parser.add_argument("run_file")
     args = parser.parse_args(argv)
-    if not os.path.isfile(args.run_file):
-        print(f"error: run file not found: {args.run_file}", file=sys.stderr)
-        sys.exit(2)
-    try:
-        with open(args.run_file) as handle:
-            records = json.load(handle)
-    except json.JSONDecodeError as error:
-        print(f"error: run file is not valid JSON: {error}", file=sys.stderr)
-        sys.exit(2)
-    if len(records) < args.stage:
-        print(f"error: run file has {len(records)} records, stage {args.stage} needs {args.stage}", file=sys.stderr)
-        sys.exit(2)
+    validate_run_file(args.run_file, args.stage)
     _, dropped = read_run_records(args.run_file)
     print(f"dropped {dropped}")
     return args

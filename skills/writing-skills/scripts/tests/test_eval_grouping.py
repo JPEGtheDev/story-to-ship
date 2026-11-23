@@ -223,6 +223,7 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNotNone(row, "no row for case c1")
         self.assertEqual(row["label"], "unclassified: run no-skill first")
         self.assertIsNone(row["verdict"])
+        self.assertIsNone(row["bound"])
 
     def test_reportRows_ratesDifferWithNoNoSkillLabel_isUnclassified(self):
         # Arrange: case c1 passes 10 of 10 under tsr-a and 9 of 10 under tsr-b; no label starts with no-skill
@@ -255,7 +256,9 @@ class TestReportRows(unittest.TestCase):
 
         # Assert: no error, and c1 has exactly one row, labeled model default
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
-        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["model default"])
+        rows = [r for r in result if r["case"] == "c1"]
+        self.assertEqual([r["label"] for r in rows], ["model default"])
+        self.assertIsNone(rows[0]["bound"])
 
     def test_reportRows_constantZero_isWeakWithoutBound(self):
         # Arrange: case c1 passes in no run of either column, so it is constant at 0 under no-skill and the current label
@@ -397,7 +400,92 @@ class TestReportRows(unittest.TestCase):
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
 
+    def test_reportRows_equalNonEdgeRateModelDefault_hasNoBoundAndNoNote(self):
+        # Arrange: case c1 passes 9 of 10 under both labels, an equal rate that is neither 0 nor 1
+        columns = {"no-skill": {"c1": [True] * 9 + [False]}, "tsr-before-1": {"c1": [True] * 9 + [False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, a model default row with no bound and an empty note
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        row = next((r for r in result if r["case"] == "c1"), None)
+        self.assertIsNotNone(row, "no row for case c1")
+        self.assertEqual(row["label"], "model default")
+        self.assertIsNone(row["bound"])
+        self.assertEqual(row["note"], "")
+
+    def test_reportRows_twoNoSkillLabelsAndCurrentAboveBoth_isSeparating(self):
+        # Arrange: no-skill-a passes 2 of 10, no-skill-b passes 5 of 10, current passes 10 of 10
+        columns = {
+            "no-skill-a": {"c1": [True] * 2 + [False] * 8},
+            "no-skill-b": {"c1": [True] * 5 + [False] * 5},
+            "tsr-before-1": {"c1": [True] * 10},
+        }
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and current is above the highest base rate, so the row is separating
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["separating"])
+
+    def test_reportRows_twoNoSkillLabelsAndCurrentBetweenThem_isModelDefault(self):
+        # Arrange: no-skill-a passes 2 of 10, no-skill-b passes 10 of 10, current passes 9 of 10, above only one
+        columns = {
+            "no-skill-a": {"c1": [True] * 2 + [False] * 8},
+            "no-skill-b": {"c1": [True] * 10},
+            "tsr-before-1": {"c1": [True] * 9 + [False]},
+        }
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and current is below the highest base rate, so the row is not separating
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["model default"])
+
+
 class TestMain(unittest.TestCase):
+    def _run_main(self, label_runs):
+        """Run main on one run file per label holding case c1; return the printed lines."""
+        with tempfile.TemporaryDirectory() as tmp:
+            argv = []
+            for label, runs in label_runs.items():
+                path = os.path.join(tmp, label + ".json")
+                with open(path, "w", encoding="utf-8") as handle:
+                    json.dump(_run_doc({"c1": [_record(x) for x in runs]}), handle)
+                argv.append(label + "=" + path)
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                _, error = _attempt(eg.main, argv)
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        return out.getvalue().splitlines()
+
+    def test_main_equalEdgeRateWithNoSkill_printsBoundAndNotEvidenceNote(self):
+        # Arrange: c1 passes 4 of 4 under no-skill and under tsr-before-1, a shared rate of 1
+        runs = {"no-skill": [True] * 4, "tsr-before-1": [True] * 4}
+
+        # Act: run main and read the printed lines
+        lines = self._run_main(runs)
+
+        # Assert: the c1 line names the bound and the not-evidence note
+        line = next((x for x in lines if x.startswith("c1:")), "")
+        self.assertIn("model default bound 0.527", line)
+        self.assertIn("(not evidence of keeping the behavior)", line)
+
+    def test_main_equalNonEdgeRate_printsNoBoundAndNoNote(self):
+        # Arrange: c1 passes 9 of 10 under both labels, a shared rate that is neither 0 nor 1
+        runs = {"no-skill": [True] * 9 + [False], "tsr-before-1": [True] * 9 + [False]}
+
+        # Act: run main and read the printed lines
+        lines = self._run_main(runs)
+
+        # Assert: the c1 line is the bare label, with no bound and no note
+        self.assertIn("c1: model default", lines)
+        for line in lines:
+            self.assertNotIn("bound", line)
+            self.assertNotIn("not evidence", line)
+
     def test_main_noArguments_returnsUsageCode(self):
         # Arrange: no run files, so argv holds no label=path items
         argv = []

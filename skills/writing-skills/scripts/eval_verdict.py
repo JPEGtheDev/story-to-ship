@@ -1,5 +1,6 @@
 """Stage verdicts for skill eval comparisons (standard library only)."""
 import argparse
+import hashlib
 import json
 from math import comb
 
@@ -23,6 +24,12 @@ def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
     if stage == 15 and cand_pass != cand_n and cand_pass * ref_n < ref_pass * cand_n:
         return "NEXT"
     return "HOLD"
+
+
+def cache_key(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version):
+    """Return a SHA-256 hex digest of the run inputs; any changed field changes it."""
+    fields = (case_hash, plugin_commit, model_id, judge_model_id, claude_code_version)
+    return hashlib.sha256("\0".join(fields).encode("utf-8")).hexdigest()
 
 
 def confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):

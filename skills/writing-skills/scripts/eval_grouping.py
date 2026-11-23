@@ -154,7 +154,9 @@ def report_rows(columns: dict) -> list:
         if len(set(rates.values())) != 1:
             base = [rate for label, rate in rates.items() if label.startswith("no-skill")]
             current = [rate for label, rate in rates.items() if not label.startswith("no-skill")]
-            if base and current and min(current) > max(base):
+            if current and min(current) < 0.9:
+                rows.append({"case": case, "label": "weak", "verdict": None, "bound": None, "note": ""})
+            elif base and current and min(current) > max(base):
                 rows.append({"case": case, "label": "separating", "verdict": None, "bound": None, "note": ""})
             elif base and current:
                 rows.append({"case": case, "label": "model default", "verdict": None, "bound": None, "note": ""})

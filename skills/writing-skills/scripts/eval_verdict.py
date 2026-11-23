@@ -112,6 +112,8 @@ def main(argv=None):
         if dropped:
             print(f"{name}: dropped {dropped}")
         cand_pass, cand_n = _counts(cand_kept)
+        if cand_n > args.stage:
+            _fail(f"case {name} has {cand_n} runs in the candidate file {cand_path}, more than stage {args.stage}")
         if cand_n < args.stage:
             print(f"{name}: rerun, {cand_n} of {args.stage} runs after dropped errors")
             partial = True

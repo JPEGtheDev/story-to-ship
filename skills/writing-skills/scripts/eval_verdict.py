@@ -59,9 +59,12 @@ def main(argv=None):
         sys.exit(2)
     try:
         with open(args.run_file) as handle:
-            json.load(handle)
+            records = json.load(handle)
     except json.JSONDecodeError as error:
         print(f"error: run file is not valid JSON: {error}", file=sys.stderr)
+        sys.exit(2)
+    if len(records) < args.stage:
+        print(f"error: run file has {len(records)} records, stage {args.stage} needs {args.stage}", file=sys.stderr)
         sys.exit(2)
     return args
 

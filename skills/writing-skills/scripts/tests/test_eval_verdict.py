@@ -321,6 +321,62 @@ class RefusalTest(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_Cli_AllErrorReference_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(None, "timeout")] * 30, [(True, None)] * 5)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("a", result.stderr)
+        self.assertIn("ref.json", result.stderr)
+
+    def test_Cli_AllErrorFresh_ExitsTwo(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(None, "timeout")] * 30)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("fresh.json", result.stderr)
+
+    def test_Cli_FreshBatchShorterThanStage_ExitsTwo(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(False, None)] * 3)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertNotIn("confirm=", result.stdout)
+
+    def test_Cli_FreshBatchWithDroppedRuns_PrintsDroppedCount(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        fresh = [(None, "timeout")] * 2 + [(False, None)] * 28
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, fresh)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn("a: dropped 2", result.stdout)
+        self.assertIn("confirm=LOSS", result.stdout)
+
+    def test_Cli_ReferenceWithDroppedRuns_PrintsDroppedCount(self):
+        # Arrange
+        ref = [(None, "timeout")] * 2 + [(True, None)] * 28
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, ref, [(True, None)] * 5)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertIn("a: dropped 2", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

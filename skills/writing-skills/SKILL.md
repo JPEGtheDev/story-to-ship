@@ -119,4 +119,5 @@ Related skills: `documentation`, `self-evaluation`; dispatch the `skill-reviewer
 - `references/REVIEW_INSTRUCTIONS.md` -- review process, checklist, qualitative questions, return format; injected into `skill-reviewer` agent at dispatch time
 - `references/DISPATCH_PATTERN.md` -- step-by-step dispatch instructions; read before auditing any skill
 - `references/TIERED_REFERENCE_MODEL.md` -- how to structure skills with universal + paradigm-specific reference tiers; read when a skill needs conditional reference loading
+- `references/SKILL_EVAL_COMPARISON.md` -- procedure for comparing a shortened or reworded skill against its prior text; read before shipping an edit that shortens or rewords a skill
 - `references/REFERENCE_INDEX_FORMAT.md` -- required format for references/INDEX.md files (YAML frontmatter, file table, Related section); read before creating or updating any INDEX.md

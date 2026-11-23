@@ -284,6 +284,27 @@ class CacheKeyTest(unittest.TestCase):
         self.assertIsNotNone(key_a)
         self.assertNotEqual(key_a, key_b)
 
+    def _assert_field_changes_key(self, index):
+        base = ["case-hash", "plugin-commit", "model-a", "judge-model", "1.0.0"]
+        changed = list(base)
+        changed[index] = base[index] + "-changed"
+        key_a = _cache_key(*base)
+        key_b = _cache_key(*changed)
+        self.assertIsNotNone(key_a)
+        self.assertNotEqual(key_a, key_b)
+
+    def test_CacheKey_CaseFileHashesChange_ReturnsDifferentKey(self):
+        self._assert_field_changes_key(0)
+
+    def test_CacheKey_PluginCommitChanges_ReturnsDifferentKey(self):
+        self._assert_field_changes_key(1)
+
+    def test_CacheKey_JudgeModelIdChanges_ReturnsDifferentKey(self):
+        self._assert_field_changes_key(3)
+
+    def test_CacheKey_ClaudeCodeVersionChanges_ReturnsDifferentKey(self):
+        self._assert_field_changes_key(4)
+
     def test_CacheKey_SameInputsRepeat_ReturnsSameKey(self):
         # Arrange
         inputs = ("case-hash", "plugin-commit", "model-a", "judge-model", "1.0.0")
@@ -307,6 +328,28 @@ class RefusalTest(unittest.TestCase):
             _write_run(fresh, {"a": fresh_runs})
             args.append(f"fresh={fresh}")
         return args
+
+    def test_Cli_FreshBatchConfirmsLoss_PrintsConfirmLoss(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(False, None)] * 30)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn("a: p=0.001528 LOSS confirm=LOSS", result.stdout)
+
+    def test_Cli_FreshBatchDoesNotConfirm_PrintsConfirmHold(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(True, None)] * 30)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn("a: p=0.001528 LOSS confirm=HOLD", result.stdout)
 
     def test_Cli_RecordWithoutPassedField_ExitsTwo(self):
         # Arrange

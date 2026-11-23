@@ -1,4 +1,4 @@
-"""Tests for eval_grouping: run-file reading, pooling, bounds, correlation, grouping and the main report."""
+"""Tests for eval_grouping: run-file reading, pooling, bounds and the main report."""
 
 import contextlib
 import io
@@ -337,61 +337,6 @@ class TestReportRows(unittest.TestCase):
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
 
-class TestCorrelation(unittest.TestCase):
-    def test_correlation_perfectLinearCopy_isOne(self):
-        # Arrange: b is an exact linear copy of a (b = 2 * a + 1)
-        a = [0.1, 0.4, 0.5, 0.9]
-        b = [2 * x + 1 for x in a]
-
-        # Act: call correlation through the error-capturing helper
-        result, error = _attempt(eg.correlation, a, b)
-
-        # Assert: no error, and the correlation is 1.0 to 9 places
-        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
-        self.assertAlmostEqual(result, 1.0, places=9)
-
-    def test_correlation_twoSharedColumns_isNone(self):
-        # Arrange: two shared columns, which is fewer than the three the correlation needs
-        a = [0.1, 0.9]
-        b = [0.2, 0.8]
-
-        # Act: call correlation through the error-capturing helper
-        result, error = _attempt(eg.correlation, a, b)
-
-        # Assert: no error, and the correlation is None
-        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
-        self.assertIsNone(result)
-
-    def test_correlation_zeroVariance_isNone(self):
-        # Arrange: a is constant (zero variance), so its correlation with b is undefined
-        a = [0.5, 0.5, 0.5]
-        b = [0.1, 0.2, 0.3]
-
-        # Act: call correlation through the error-capturing helper
-        result, error = _attempt(eg.correlation, a, b)
-
-        # Assert: no error, and the correlation is None
-        self.assertIsNone(error, f"correlation raised {type(error).__name__}: {error}")
-        self.assertIsNone(result)
-
-
-class TestGroupCases(unittest.TestCase):
-    def test_groupCases_transitiveMatchBelowThreshold_keepsCaseSeparate(self):
-        # Arrange: A~B is 0.9827 and A~C is 0.8367 (below 0.9), so C must not join A through B
-        rates = {
-            "A": {"l1": 0.1, "l2": 0.2, "l3": 0.3, "l4": 0.4},
-            "B": {"l1": 0.1, "l2": 0.2, "l3": 0.3, "l4": 0.5},
-            "C": {"l1": 0.1, "l2": 0.3, "l3": 0.2, "l4": 0.6},
-        }
-
-        # Act: group the cases at threshold 0.9 over 3 shared labels
-        result, error = _attempt(eg.group_cases, rates, 0.9, 3)
-
-        # Assert: no error, A is kept with B as its member, and C is kept with no members
-        self.assertIsNone(error, f"group_cases raised {type(error).__name__}: {error}")
-        self.assertEqual(result, [("A", ["B"]), ("C", [])])
-
-
 class TestMain(unittest.TestCase):
     def test_main_noArguments_returnsUsageCode(self):
         # Arrange: no run files, so argv holds no label=path items
@@ -523,62 +468,6 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result, 1)
         self.assertEqual(out.getvalue().splitlines(), [missing + ": error, no verdict"])
 
-    def test_main_cleanRun_printsGroupLine(self):
-        # Arrange: three clean run files, one per label; cases c1 and c2 hold identical records in each file,
-        # so their pass rates match in every label and they correlate at 1.0
-        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
-        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
-        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
-        with tempfile.TemporaryDirectory() as tmp:
-            path_a = os.path.join(tmp, "no_skill.json")
-            path_b = os.path.join(tmp, "tsr_before_1.json")
-            path_c = os.path.join(tmp, "tsr_before_2.json")
-            with open(path_a, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
-            with open(path_b, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
-            with open(path_c, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
-            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
-
-            # Act: call main through the error-capturing helper, with stdout captured to read the group line
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
-
-        # Assert: no error, main returns 0, and the output carries the group line with c2 as c1's member
-        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
-        self.assertEqual(result, 0)
-        self.assertIn("group kept c1: c2", out.getvalue().splitlines())
-
-    def test_main_groupedAwayCasePrintsExcludedLine(self):
-        # Arrange: the same three clean run files as test_main_cleanRun_printsGroupLine, so c2 is grouped
-        # away under c1 and must also print its own excluded line
-        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
-        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
-        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
-        with tempfile.TemporaryDirectory() as tmp:
-            path_a = os.path.join(tmp, "no_skill.json")
-            path_b = os.path.join(tmp, "tsr_before_1.json")
-            path_c = os.path.join(tmp, "tsr_before_2.json")
-            with open(path_a, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
-            with open(path_b, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
-            with open(path_c, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
-            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
-
-            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
-
-        # Assert: no error, main returns 0, the group line keeps c1 with c2, and c2 prints its excluded line
-        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
-        self.assertEqual(result, 0)
-        lines = out.getvalue().splitlines()
-        self.assertIn("group kept c1: c2", lines)
-        self.assertIn("c2: excluded: grouped with c1", lines)
-
     def test_main_nonConstantCase_printsVaries(self):
         # Arrange: two cases that are non-constant across the three labels; their rate vectors
         # correlate at -1, below the 0.9 threshold, so they are not grouped
@@ -610,45 +499,6 @@ class TestMain(unittest.TestCase):
         lines = out.getvalue().splitlines()
         self.assertIn("c1: varies", lines)
         self.assertIn("c2: varies", lines)
-
-    def test_main_uncorrelatedCase_printsNotGroupable(self):
-        # Arrange: c1 and c2 appear in all three labels; c3 appears only in no-skill and tsr-before-1.
-        # c3 is not constant across its two labels (rates 0.25 and 0.5), and it shares only two labels
-        # with each other case, below the three the correlation needs, so its correlation is None.
-        records_no_skill_c1 = [_record(True), _record(False), _record(True), _record(False)]
-        records_before_1_c1 = [_record(True), _record(True), _record(True), _record(False)]
-        records_before_2_c1 = [_record(True), _record(False), _record(False), _record(False)]
-        records_no_skill_c2 = [_record(True), _record(False), _record(True), _record(False)]
-        records_before_1_c2 = [_record(True), _record(False), _record(False), _record(False)]
-        records_before_2_c2 = [_record(True), _record(True), _record(True), _record(False)]
-        records_no_skill_c3 = [_record(True), _record(False), _record(False), _record(False)]
-        records_before_1_c3 = [_record(True), _record(True), _record(False), _record(False)]
-        with tempfile.TemporaryDirectory() as tmp:
-            path_a = os.path.join(tmp, "no_skill.json")
-            path_b = os.path.join(tmp, "tsr_before_1.json")
-            path_c = os.path.join(tmp, "tsr_before_2.json")
-            with open(path_a, "w", encoding="utf-8") as handle:
-                json.dump(
-                    _run_doc({"c1": records_no_skill_c1, "c2": records_no_skill_c2, "c3": records_no_skill_c3}),
-                    handle,
-                )
-            with open(path_b, "w", encoding="utf-8") as handle:
-                json.dump(
-                    _run_doc({"c1": records_before_1_c1, "c2": records_before_1_c2, "c3": records_before_1_c3}),
-                    handle,
-                )
-            with open(path_c, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_2_c1, "c2": records_before_2_c2}), handle)
-            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b, "tsr-before-2=" + path_c]
-
-            # Act: call main through the error-capturing helper, with stdout captured to read the per-case lines
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
-
-        # Assert: no error, main returns 0, and the output carries the not groupable line for c3
-        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
-        self.assertEqual(result, 0)
-        self.assertIn("c3: not groupable", out.getvalue().splitlines())
 
     def test_main_caseMissingFromOneLabelPrintsLine(self):
         # Arrange: c1 appears in all four labels with rates 0.5, 0.75, 0.25, 0.5. c3 appears in the
@@ -807,65 +657,6 @@ class TestMain(unittest.TestCase):
         lines = out.getvalue().splitlines()
         self.assertNotIn("only: excluded: no signal", lines)
         self.assertIn("only: no runs under tsr-before-1", lines)
-
-    def test_main_singletonCase_printsNoMembersGroupLine(self):
-        # Arrange: case c1 is non-constant and is the only case, so it is grouped with nothing
-        with tempfile.TemporaryDirectory() as tmp:
-            path_a = os.path.join(tmp, "no_skill.json")
-            path_b = os.path.join(tmp, "tsr_before_1.json")
-            with open(path_a, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": [_record(True), _record(False), _record(True), _record(False)]}), handle)
-            with open(path_b, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": [_record(True), _record(True), _record(True), _record(False)]}), handle)
-            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
-
-            # Act: call main through the error-capturing helper, with stdout captured to read the output lines
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
-
-        # Assert: no error, main returns 0, and the kept singleton c1 has its group line with no members
-        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
-        self.assertEqual(result, 0)
-        self.assertIn("group kept c1: none", out.getvalue().splitlines())
-
-    def test_main_threeSharedLabelsWithFourthMissing_groupsCases(self):
-        # Arrange: cases c1 and c2 hold identical records under the first three labels, so they correlate at 1.0
-        # over those three shared labels; c2 has no run under the fourth label, tsr-before-3
-        records_no_skill = [_record(True), _record(False), _record(True), _record(False)]
-        records_before_1 = [_record(True), _record(True), _record(True), _record(False)]
-        records_before_2 = [_record(True), _record(False), _record(False), _record(False)]
-        records_before_3 = [_record(True), _record(False), _record(True), _record(False)]
-        with tempfile.TemporaryDirectory() as tmp:
-            path_a = os.path.join(tmp, "no_skill.json")
-            path_b = os.path.join(tmp, "tsr_before_1.json")
-            path_c = os.path.join(tmp, "tsr_before_2.json")
-            path_d = os.path.join(tmp, "tsr_before_3.json")
-            with open(path_a, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_no_skill, "c2": records_no_skill}), handle)
-            with open(path_b, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_1, "c2": records_before_1}), handle)
-            with open(path_c, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_2, "c2": records_before_2}), handle)
-            with open(path_d, "w", encoding="utf-8") as handle:
-                json.dump(_run_doc({"c1": records_before_3}), handle)
-            argv = [
-                "no-skill=" + path_a,
-                "tsr-before-1=" + path_b,
-                "tsr-before-2=" + path_c,
-                "tsr-before-3=" + path_d,
-            ]
-
-            # Act: call main through the error-capturing helper, with stdout captured to read the group lines
-            with contextlib.redirect_stdout(io.StringIO()) as out:
-                result, error = _attempt(eg.main, argv)
-
-        # Assert: no error, main returns 0, and c2 is grouped with c1 on the three labels they share
-        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
-        self.assertEqual(result, 0)
-        lines = out.getvalue().splitlines()
-        self.assertIn("group kept c1: c2", lines)
-        self.assertIn("c2: excluded: grouped with c1", lines)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -233,7 +233,7 @@ class CliTest(unittest.TestCase):
             result = _run_cli("--stage", "5", ref, cand)
         # Assert
         self.assertEqual(2, result.returncode)
-        self.assertIn("rerun", result.stdout)
+        self.assertIn("rerun", result.stderr)
         self.assertNotIn("LOSS", result.stdout)
         self.assertNotIn("NEXT", result.stdout)
 
@@ -276,7 +276,7 @@ class CliTest(unittest.TestCase):
             result = _run_cli("--stage", "5", ref, cand)
         # Assert
         self.assertIn("a: dropped 1", result.stdout)
-        self.assertIn("rerun", result.stdout)
+        self.assertIn("rerun", result.stderr)
 
     def test_Cli_TwoOfFiveAgainst30Of30_PrintsPAndLoss(self):
         # Arrange

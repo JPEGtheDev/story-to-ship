@@ -224,6 +224,39 @@ class TestReportRows(unittest.TestCase):
         self.assertEqual(row["label"], "unclassified: run no-skill first")
         self.assertIsNone(row["verdict"])
 
+    def test_reportRows_ratesDifferWithNoNoSkillLabel_isUnclassified(self):
+        # Arrange: case c1 passes 10 of 10 under tsr-a and 9 of 10 under tsr-b; no label starts with no-skill
+        columns = {"tsr-a": {"c1": [True] * 10}, "tsr-b": {"c1": [True] * 9 + [False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and c1 has exactly one row, labeled unclassified
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["unclassified: run no-skill first"])
+
+    def test_reportRows_ratesDifferWithTwoNoSkillLabels_isUnclassified(self):
+        # Arrange: case c1 differs between two labels that both start with no-skill; no current label exists
+        columns = {"no-skill-a": {"c1": [True] * 10}, "no-skill-b": {"c1": [True] * 9 + [False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and c1 has exactly one row, labeled unclassified
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["unclassified: run no-skill first"])
+
+    def test_reportRows_currentAtNinetyPercentBelowNoSkill_isModelDefault(self):
+        # Arrange: current passes 9 of 10 (0.9, not under 90 percent) and no-skill passes 10 of 10
+        columns = {"no-skill": {"c1": [True] * 10}, "tsr-before-1": {"c1": [True] * 9 + [False]}}
+
+        # Act: build the report rows through the error-capturing helper
+        result, error = _attempt(eg.report_rows, columns)
+
+        # Assert: no error, and c1 has exactly one row, labeled model default
+        self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["model default"])
+
     def test_reportRows_constantZero_carriesBoundAndNote(self):
         # Arrange: case c1 passes in no run of either column, so it is constant at 0 with n = 4 per column
         columns = {"no-skill": {"c1": [False, False, False, False]}, "tsr-before-1": {"c1": [False, False, False, False]}}

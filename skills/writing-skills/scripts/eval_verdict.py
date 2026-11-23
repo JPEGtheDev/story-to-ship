@@ -6,6 +6,9 @@ import os
 import sys
 from math import comb
 
+# Procedure step d.7: a LOSS is confirmed by a batch of exactly this many fresh runs.
+FRESH_BATCH_RUNS = 30
+
 
 def fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n):
     """P(candidate has at least its observed failures) given the pooled totals."""
@@ -118,17 +121,19 @@ def main(argv=None):
         if cand_n > args.stage:
             _fail(f"case {name} has {cand_n} runs in the candidate file {cand_path}, more than stage {args.stage}")
         if cand_n < args.stage:
-            print(f"{name}: rerun, {cand_n} of {args.stage} runs after dropped errors")
+            print(f"{name}: rerun, {cand_n} of {args.stage} runs after dropped errors", file=sys.stderr)
             partial = True
             continue
         ref_pass, ref_n = _counts(_kept(ref, name, "reference", ref_path))
         p = fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
         verdict = stage_verdict(args.stage, ref_pass, ref_n, cand_pass, cand_n)
         line = f"{name}: p={p:.6f} {verdict}"
-        if verdict == "LOSS" and fresh is not None and name in fresh:
+        if verdict == "LOSS" and fresh is not None:
+            if name not in fresh:
+                _fail(f"case {name} is missing from the fresh file {fresh_path}")
             fresh_pass, fresh_n = _counts(_kept(fresh, name, "fresh", fresh_path))
-            if fresh_n < args.stage:
-                _fail(f"case {name} keeps {fresh_n} of {args.stage} runs in the fresh file {fresh_path}")
+            if fresh_n != FRESH_BATCH_RUNS:
+                _fail(f"case {name} keeps {fresh_n} of {FRESH_BATCH_RUNS} runs in the fresh file {fresh_path}")
             line += f" confirm={confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n)}"
         print(line)
     if partial:

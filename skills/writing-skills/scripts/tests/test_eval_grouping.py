@@ -612,5 +612,27 @@ class TestMain(unittest.TestCase):
         self.assertNotIn("only: excluded: no signal", lines)
         self.assertIn("only: no runs under tsr-before-1", lines)
 
+    def test_main_twoCasesAcrossLabels_printsNoGroupedWithLine(self):
+        # Arrange: two cases c1 and c2 that are constant and identical under both labels, so the old output would have grouped them
+        constant = [_record(True), _record(True), _record(True), _record(True)]
+        with tempfile.TemporaryDirectory() as tmp:
+            path_a = os.path.join(tmp, "no_skill.json")
+            path_b = os.path.join(tmp, "tsr_before_1.json")
+            for path in (path_a, path_b):
+                with open(path, "w", encoding="utf-8") as handle:
+                    json.dump(_run_doc({"c1": constant, "c2": constant}), handle)
+            argv = ["no-skill=" + path_a, "tsr-before-1=" + path_b]
+
+            # Act: call main through the error-capturing helper, with stdout captured to read every output line
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                result, error = _attempt(eg.main, argv)
+
+        # Assert: no error, output exists, and no output line contains "grouped with"
+        self.assertIsNone(error, f"main raised {type(error).__name__}: {error}")
+        self.assertTrue(out.getvalue().strip(), "main printed nothing")
+        for line in out.getvalue().splitlines():
+            self.assertNotIn("grouped with", line)
+
+
 if __name__ == "__main__":
     unittest.main()

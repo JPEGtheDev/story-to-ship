@@ -21,3 +21,9 @@ def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
     if stage == 15 and cand_pass != cand_n and cand_pass * ref_n < ref_pass * cand_n:
         return "NEXT"
     return "HOLD"
+
+
+def confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):
+    """Return LOSS or HOLD for a fresh batch checked against the reference."""
+    p = fisher_one_sided(ref_pass, ref_n, fresh_pass, fresh_n)
+    return "LOSS" if p <= 0.05 else "HOLD"

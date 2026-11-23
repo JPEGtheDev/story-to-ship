@@ -41,6 +41,12 @@ def _read_run_records(path):
     return None if fn is None else fn(path)
 
 
+def _cache_key(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version):
+    module = _load()
+    fn = getattr(module, "cache_key", None)
+    return None if fn is None else fn(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version)
+
+
 class StageVerdictTest(unittest.TestCase):
     def test_StageVerdict_Stage5TwoOfFiveAgainst30Of30_ReturnsLoss(self):
         # Arrange
@@ -186,6 +192,18 @@ class CliTest(unittest.TestCase):
 
         # Assert
         self.assertEqual(2, result.returncode)
+
+
+class CacheKeyTest(unittest.TestCase):
+    def test_CacheKey_ModelIdChanges_ReturnsDifferentKey(self):
+        # Arrange
+        others = ("case-hash", "plugin-commit", "judge-model", "1.0.0")
+        # Act
+        key_a = _cache_key(others[0], others[1], "model-a", others[2], others[3])
+        key_b = _cache_key(others[0], others[1], "model-b", others[2], others[3])
+        # Assert
+        self.assertIsNotNone(key_a)
+        self.assertNotEqual(key_a, key_b)
 
 
 if __name__ == "__main__":

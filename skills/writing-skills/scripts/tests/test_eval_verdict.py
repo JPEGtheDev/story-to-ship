@@ -216,6 +216,23 @@ class CliTest(unittest.TestCase):
         # Assert
         self.assertEqual(2, result.returncode)
 
+    def test_Cli_MalformedJsonRunFile_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            run_file = os.path.join(tmp, "run.json")
+            with open(run_file, "w") as handle:
+                handle.write("{not json")
+
+            # Act
+            result = subprocess.run(
+                [sys.executable, MODULE_PATH, "--stage", "5", run_file],
+                capture_output=True,
+                text=True,
+            )
+
+        # Assert
+        self.assertEqual(2, result.returncode)
+
 
 class CacheKeyTest(unittest.TestCase):
     def test_CacheKey_ModelIdChanges_ReturnsDifferentKey(self):

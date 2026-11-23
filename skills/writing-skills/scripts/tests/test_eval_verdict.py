@@ -201,6 +201,21 @@ class CliTest(unittest.TestCase):
         # Assert
         self.assertEqual(2, result.returncode)
 
+    def test_Cli_MissingRunFile_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            missing_file = os.path.join(tmp, "absent.json")
+
+            # Act
+            result = subprocess.run(
+                [sys.executable, MODULE_PATH, "--stage", "5", missing_file],
+                capture_output=True,
+                text=True,
+            )
+
+        # Assert
+        self.assertEqual(2, result.returncode)
+
 
 class CacheKeyTest(unittest.TestCase):
     def test_CacheKey_ModelIdChanges_ReturnsDifferentKey(self):

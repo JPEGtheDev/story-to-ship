@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: using-git-worktrees-simple-task-excuse-v2
+context:
+  scaffold_script: scaffold.sh

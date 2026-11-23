@@ -1,4 +1,5 @@
 """Stage verdicts for skill eval comparisons (standard library only)."""
+import argparse
 import json
 from math import comb
 
@@ -36,3 +37,15 @@ def read_run_records(path):
         records = json.load(handle)
     kept = [record for record in records if record.get("error") is None]
     return kept, len(records) - len(kept)
+
+
+def main(argv=None):
+    """Parse the command line; an invalid stage makes argparse exit 2."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage", type=int, choices=(5, 15, 30), required=True)
+    parser.add_argument("run_file")
+    return parser.parse_args(argv)
+
+
+if __name__ == "__main__":
+    main()

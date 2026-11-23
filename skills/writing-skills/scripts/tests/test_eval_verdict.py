@@ -25,6 +25,12 @@ def _p(ref_pass, ref_n, cand_pass, cand_n):
     return None if module is None else module.fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
 
 
+def _confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):
+    module = _load()
+    fn = getattr(module, "confirm_verdict", None)
+    return None if fn is None else fn(fresh_pass, fresh_n, ref_pass, ref_n)
+
+
 class StageVerdictTest(unittest.TestCase):
     def test_StageVerdict_Stage5TwoOfFiveAgainst30Of30_ReturnsLoss(self):
         # Arrange
@@ -118,6 +124,16 @@ class StageVerdictTest(unittest.TestCase):
         # Assert
         self.assertEqual("HOLD", verdict)
         self.assertAlmostEqual(0.0562, p, places=4)
+
+
+class ConfirmVerdictTest(unittest.TestCase):
+    def test_ConfirmVerdict_Fresh26Of30Against30Of30PAboveZeroPointZeroFive_ReturnsHold(self):
+        # Arrange: fresh 26/30 against reference 30/30 gives exact one-sided p = 0.0562
+        fresh, ref = (26, 30), (30, 30)
+        # Act
+        verdict = _confirm_verdict(*fresh, *ref)
+        # Assert
+        self.assertEqual("HOLD", verdict)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 import importlib.util
+import json
 import os
+import tempfile
 import unittest
 
 MODULE_PATH = os.path.join(os.path.dirname(__file__), "..", "eval_verdict.py")
@@ -29,6 +31,12 @@ def _confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):
     module = _load()
     fn = getattr(module, "confirm_verdict", None)
     return None if fn is None else fn(fresh_pass, fresh_n, ref_pass, ref_n)
+
+
+def _read_run_records(path):
+    module = _load()
+    fn = getattr(module, "read_run_records", None)
+    return None if fn is None else fn(path)
 
 
 class StageVerdictTest(unittest.TestCase):
@@ -134,6 +142,29 @@ class ConfirmVerdictTest(unittest.TestCase):
         verdict = _confirm_verdict(*fresh, *ref)
         # Assert
         self.assertEqual("HOLD", verdict)
+
+
+class ReadRunRecordsTest(unittest.TestCase):
+    def test_ReadRunRecords_FiveRecordsOneWithError_ReturnsFourKeptAndOneDropped(self):
+        # Arrange
+        records = [
+            {"case": "a", "pass": True, "error": None},
+            {"case": "b", "pass": False, "error": None},
+            {"case": "c", "pass": True, "error": "timeout"},
+            {"case": "d", "pass": True, "error": None},
+            {"case": "e", "pass": True, "error": None},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "run.json")
+            with open(path, "w") as handle:
+                json.dump(records, handle)
+            # Act
+            result = _read_run_records(path)
+        # Assert
+        self.assertIsNotNone(result)
+        kept, dropped = result
+        self.assertEqual(4, len(kept))
+        self.assertEqual(1, dropped)
 
 
 if __name__ == "__main__":

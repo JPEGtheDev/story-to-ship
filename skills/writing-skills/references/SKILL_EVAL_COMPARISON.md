@@ -1,6 +1,6 @@
 ---
 title: "Old-Versus-New Eval Comparison"
-description: "Procedure for comparing a shortened or reworded skill against its prior text with claude plugin eval: consent and cost ceilings, the score join, the no-drop rule, the flag rationale, on-invoke token cost from claude plugin details, the rule of three for zero-event and all-event pairs, the stage rules (5, 15 and 30 cumulative runs), the confirmation batch, the verdict script, and the grouping labels (separating, model default, weak, error, no-runs)."
+description: "Procedure for comparing a shortened or reworded skill against its prior text with claude plugin eval: consent and cost ceilings, the score join, the no-drop rule, the flag rationale, on-invoke token cost from claude plugin details, the rule of three for zero-event and all-event pairs, the stage rules (5, 15 and 30 cumulative runs), the confirmation batch, the verdict script, and the grouping labels (separating, model default, weak, error, no-runs), and the case, grader, judge, cache and regression rules."
 domain: skills
 subdomain: writing-skills
 tags: [skills, writing-skills, references, eval, token-cost]
@@ -104,3 +104,34 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 7. Pool only across grader rounds with identical grader files. The caller chooses the labels, and the script does not check grader files.
 8. Make one default-ablation run per case, when a case is first classified or when its grader changes. Keep `--ablation none` for comparisons (section d).
 9. Cached reference results are keyed by the SHA-256 of the case file hashes, the plugin commit, the model id, the judge model id and the Claude Code version (`cache_key` in `eval_verdict.py`). A cached result is reused until any of those changes, then rerun.
+
+## j. Case, Grader, Judge, Cache and Regression Rules
+
+### Cases
+
+1. A rule gets a case only after a no-skill session first showed its failure. Run 5 runs per situation per arm; count each failure type. Example: 5 no-skill runs, 3 fail at the same step: that failure type has count 3, and the case cites that session.
+2. Put every rule in one bin: separating (kept), model default (text deleted, case kept) or weak (not a gate). Section i, item 2 defines the bins.
+3. A case prompt names no action. Before any run, a fresh reviewer agent reads the prompt and confirms it names no action. Example: the prompt "Create the worktree for branch s530" fails the second reader because it names the action.
+
+### Graders
+
+4. Each case pairs one outcome grader (the end state) with one process grader (how the session got there). Put a never-does-X grader beside a positive grader for the same behavior.
+5. A grader never copies a string from a run output. Hash the case files (`prompt.md`, `graders/*.md`, `case.yaml`, `scaffold.sh`); the hashes feed the cache key (item 12).
+6. A grader counts only after it passes a saved current-skill session and fails a saved no-skill session.
+
+### Judge
+
+7. A model judge reads a short final answer or one file and returns pass or fail. Pin its tier, the same on both checkouts.
+8. A judge blocks a merge only after it agrees with 27 of 30 owner-labeled passes and 27 of 30 owner-labeled fails. Fewer on either side and the judge does not block.
+
+### Cache and recorded fields
+
+9. A cached result is reused until the cache key changes (section i, item 9). The cache key is the SHA-256 of the case file hashes, the plugin commit, the model id, the judge model id and the Claude Code version, as computed by `cache_key` in `eval_verdict.py`.
+10. A case the current skill passes in under 90 percent of runs is weak and is not a gate. Example: a cached result of 26 of 30 (86.7 percent) with an unchanged case hash is reused, and the case is not a gate.
+11. Record with each result: the model, the harness, the prompt and the permissions. The run's model id and the judge model id go in the record as fields, not in this file.
+12. A run with a non-null error is dropped before counting and rerun.
+
+### Regression
+
+13. When the model id or the Claude Code version changes, run 15 runs per model default test with no skill. A test below 15 of 15 gets a 30-run check. If the loss stands, put one standalone line back into the skill and record it next to that case. A passing case gets no line.
+14. Record preflight (free disk, free inodes, login, usage limit) before each paid batch. Zero free inodes: the batch does not start, and the record shows 0.

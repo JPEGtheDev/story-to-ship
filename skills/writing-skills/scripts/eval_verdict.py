@@ -57,6 +57,12 @@ def main(argv=None):
     if not os.path.isfile(args.run_file):
         print(f"error: run file not found: {args.run_file}", file=sys.stderr)
         sys.exit(2)
+    try:
+        with open(args.run_file) as handle:
+            json.load(handle)
+    except json.JSONDecodeError as error:
+        print(f"error: run file is not valid JSON: {error}", file=sys.stderr)
+        sys.exit(2)
     return args
 
 

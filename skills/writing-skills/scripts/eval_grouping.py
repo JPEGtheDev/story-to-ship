@@ -117,8 +117,9 @@ def report_rows(columns: dict) -> list:
         edge = next(iter(rates.values())) in (0, 1)
         bound = zero_event_bound(min(len(columns[label][case]) for label in columns)) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""
-        if any(label.startswith("no-skill") for label in rates):
-            row_label = "model default"
+        current = [rate for label, rate in rates.items() if not label.startswith("no-skill")]
+        if len(current) < len(rates):
+            row_label = "weak" if current and min(current) < 0.9 else "model default"
         else:
             row_label = "unclassified: run no-skill first"
         rows.append({"case": case, "label": row_label, "verdict": None, "bound": bound, "note": note})

@@ -59,6 +59,8 @@ def read_run_records(path):
             if not isinstance(records, list):
                 raise TypeError("arms.with is not a list")
             kept = [record for record in records if record.get("error") is None]
+            if any(not isinstance(record.get("passed"), bool) for record in kept):
+                raise TypeError("a kept record has a missing or non-boolean passed field")
             result[case["name"]] = (kept, len(records) - len(kept))
     except json.JSONDecodeError as error:
         _fail(f"run file is not valid JSON: {error}")

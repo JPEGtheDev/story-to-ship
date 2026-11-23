@@ -257,19 +257,20 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["model default"])
 
-    def test_reportRows_constantZero_carriesBoundAndNote(self):
-        # Arrange: case c1 passes in no run of either column, so it is constant at 0 with n = 4 per column
+    def test_reportRows_constantZero_isWeakWithoutBound(self):
+        # Arrange: case c1 passes in no run of either column, so it is constant at 0 under no-skill and the current label
         columns = {"no-skill": {"c1": [False, False, False, False]}, "tsr-before-1": {"c1": [False, False, False, False]}}
 
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and the c1 row carries the note and the zero-event bound for n = 4
+        # Assert: no error, and the c1 row is labeled weak and carries no bound and no note
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
-        self.assertIn("not evidence of keeping the behavior", row["note"])
-        self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
+        self.assertEqual(row["label"], "weak")
+        self.assertIsNone(row["bound"])
+        self.assertEqual(row["note"], "")
 
     def test_reportRows_currentPassesMoreThanNoSkill_isSeparating(self):
         # Arrange: case c1 passes 4 of 4 under the current skill and 1 of 4 under no-skill
@@ -347,13 +348,13 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
-        self.assertNotEqual(row["label"], "weak")
+        self.assertEqual(row["label"], "separating")
 
     def test_reportRows_unequalRunCounts_boundUsesSmallestLabelCountWhenNoSkillIsFirst(self):
-        # Arrange: case c1 is constant at 0 under both labels; tsr-before-1 holds 10 runs and no-skill holds 4
+        # Arrange: case c1 is constant at 1 under both labels; tsr-before-1 holds 10 runs and no-skill holds 4
         columns = {
-            "tsr-before-1": {"c1": [False] * 10},
-            "no-skill": {"c1": [False] * 4},
+            "tsr-before-1": {"c1": [True] * 10},
+            "no-skill": {"c1": [True] * 4},
         }
 
         # Act: build the report rows through the error-capturing helper

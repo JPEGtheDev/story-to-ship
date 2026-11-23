@@ -63,6 +63,62 @@ class StageVerdictTest(unittest.TestCase):
         # Assert
         self.assertEqual("HOLD", verdict)
 
+    def test_StageVerdict_Stage1513Of15Against30Of30_ReturnsNext(self):
+        # Arrange
+        stage, ref, cand = 15, (30, 30), (13, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        p = _p(*ref, *cand)
+        # Assert
+        self.assertEqual("NEXT", verdict)
+        self.assertAlmostEqual(0.106061, p, places=6)
+
+    def test_StageVerdict_Stage1514Of15Against30Of30_ReturnsNext(self):
+        # Arrange
+        stage, ref, cand = 15, (30, 30), (14, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        p = _p(*ref, *cand)
+        # Assert
+        self.assertEqual("NEXT", verdict)
+        self.assertAlmostEqual(0.333333, p, places=6)
+
+    def test_StageVerdict_Stage1513Of15Against27Of30_ReturnsNext(self):
+        # Arrange
+        stage, ref, cand = 15, (27, 30), (13, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        # Assert
+        self.assertEqual("NEXT", verdict)
+
+    def test_StageVerdict_Stage1514Of15Against27Of30_ReturnsHold(self):
+        # Arrange
+        stage, ref, cand = 15, (27, 30), (14, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        # Assert
+        self.assertEqual("HOLD", verdict)
+
+    def test_StageVerdict_Stage3025Of30Against30Of30_ReturnsLoss(self):
+        # Arrange
+        stage, ref, cand = 30, (30, 30), (25, 30)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        p = _p(*ref, *cand)
+        # Assert
+        self.assertEqual("LOSS", verdict)
+        self.assertAlmostEqual(0.026093, p, places=6)
+
+    def test_StageVerdict_Stage3026Of30Against30Of30_ReturnsHold(self):
+        # Arrange
+        stage, ref, cand = 30, (30, 30), (26, 30)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        p = _p(*ref, *cand)
+        # Assert
+        self.assertEqual("HOLD", verdict)
+        self.assertAlmostEqual(0.0562, p, places=4)
+
 
 if __name__ == "__main__":
     unittest.main()

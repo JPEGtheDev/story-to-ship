@@ -2,6 +2,8 @@
 import argparse
 import hashlib
 import json
+import os
+import sys
 from math import comb
 
 
@@ -51,7 +53,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", type=int, choices=(5, 15, 30), required=True)
     parser.add_argument("run_file")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if not os.path.isfile(args.run_file):
+        print(f"error: run file not found: {args.run_file}", file=sys.stderr)
+        sys.exit(2)
+    return args
 
 
 if __name__ == "__main__":

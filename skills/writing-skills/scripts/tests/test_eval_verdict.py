@@ -151,6 +151,14 @@ class ConfirmVerdictTest(unittest.TestCase):
         # Assert
         self.assertEqual("HOLD", verdict)
 
+    def test_ConfirmVerdict_Fresh0Of30Against30Of30PBelowZeroPointZeroFive_ReturnsLoss(self):
+        # Arrange: fresh 0/30 against reference 30/30 gives one-sided p far below 0.05
+        fresh, ref = (0, 30), (30, 30)
+        # Act
+        verdict = _confirm_verdict(*fresh, *ref)
+        # Assert
+        self.assertEqual("LOSS", verdict)
+
 
 class ReadRunRecordsTest(unittest.TestCase):
     def test_ReadRunRecords_FiveRecordsOneWithError_ReturnsFourKeptAndOneDropped(self):

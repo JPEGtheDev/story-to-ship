@@ -28,9 +28,9 @@ def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
     return "HOLD"
 
 
-def cache_key(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version):
+def cache_key(case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version):
     """Return a SHA-256 hex digest of the run inputs; any changed field changes it."""
-    fields = (case_hash, plugin_commit, model_id, judge_model_id, claude_code_version)
+    fields = (case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version)
     return hashlib.sha256("\0".join(fields).encode("utf-8")).hexdigest()
 
 
@@ -40,43 +40,77 @@ def confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):
     return "LOSS" if p <= 0.05 else "HOLD"
 
 
-def read_run_records(path):
-    """Read a JSON run file; return (kept_records, dropped_count) with error records dropped."""
-    with open(path) as handle:
-        records = json.load(handle)
-    kept = [record for record in records if record.get("error") is None]
-    return kept, len(records) - len(kept)
-
-
 def _fail(message):
     """Print an error to stderr and exit 2."""
     print(f"error: {message}", file=sys.stderr)
     sys.exit(2)
 
 
-def validate_run_file(path, stage):
-    """Exit 2 unless path is a valid JSON run file with at least stage records."""
+def read_run_records(path):
+    """Read a run file; return {name: (kept_records, dropped_count)}, dropping error records."""
     if not os.path.isfile(path):
         _fail(f"run file not found: {path}")
     try:
         with open(path) as handle:
-            records = json.load(handle)
+            data = json.load(handle)
+        result = {}
+        for case in data["cases"]:
+            records = case["arms"]["with"]
+            if not isinstance(records, list):
+                raise TypeError("arms.with is not a list")
+            kept = [record for record in records if record.get("error") is None]
+            result[case["name"]] = (kept, len(records) - len(kept))
     except json.JSONDecodeError as error:
         _fail(f"run file is not valid JSON: {error}")
-    if len(records) < stage:
-        _fail(f"run file has {len(records)} records, stage {stage} needs {stage}")
+    except (KeyError, TypeError, AttributeError) as error:
+        _fail(f"run file {path} has a case with no arms.with list or a bad schema: {error!r}")
+    return result
+
+
+def _counts(records):
+    """Return (passed, total) for kept records."""
+    return sum(1 for record in records if record["passed"]), len(records)
+
+
+def _parse_path(argument, key):
+    """Return the PATH of a key=PATH argument, or exit 2."""
+    if not argument.startswith(key + "="):
+        _fail(f"expected {key}=PATH, got {argument}")
+    return argument[len(key) + 1:]
 
 
 def main(argv=None):
-    """Parse the command line; an invalid stage makes argparse exit 2."""
+    """Print one line per candidate case: name, p, stage verdict; exit 2 on bad input."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", type=int, choices=(5, 15, 30), required=True)
-    parser.add_argument("run_file")
+    parser.add_argument("paths", nargs="+", help="ref=PATH cand=PATH [fresh=PATH]")
     args = parser.parse_args(argv)
-    validate_run_file(args.run_file, args.stage)
-    _, dropped = read_run_records(args.run_file)
-    print(f"dropped {dropped}")
-    return args
+    if len(args.paths) not in (2, 3):
+        _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH]")
+    ref = read_run_records(_parse_path(args.paths[0], "ref"))
+    cand = read_run_records(_parse_path(args.paths[1], "cand"))
+    fresh = read_run_records(_parse_path(args.paths[2], "fresh")) if len(args.paths) == 3 else None
+    partial = False
+    for name, (cand_kept, dropped) in cand.items():
+        if name not in ref:
+            _fail(f"case {name} is missing from the reference file")
+        if dropped:
+            print(f"{name}: dropped {dropped}")
+        cand_pass, cand_n = _counts(cand_kept)
+        if cand_n < args.stage:
+            print(f"{name}: rerun, {cand_n} of {args.stage} runs after dropped errors")
+            partial = True
+            continue
+        ref_pass, ref_n = _counts(ref[name][0])
+        p = fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
+        verdict = stage_verdict(args.stage, ref_pass, ref_n, cand_pass, cand_n)
+        line = f"{name}: p={p:.6f} {verdict}"
+        if verdict == "LOSS" and fresh is not None and name in fresh:
+            fresh_pass, fresh_n = _counts(fresh[name][0])
+            line += f" confirm={confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n)}"
+        print(line)
+    if partial:
+        sys.exit(2)
 
 
 if __name__ == "__main__":

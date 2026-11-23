@@ -41,10 +41,10 @@ def _read_run_records(path):
     return None if fn is None else fn(path)
 
 
-def _cache_key(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version):
+def _cache_key(case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version):
     module = _load()
     fn = getattr(module, "cache_key", None)
-    return None if fn is None else fn(case_hash, plugin_commit, model_id, judge_model_id, claude_code_version)
+    return None if fn is None else fn(case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version)
 
 
 class StageVerdictTest(unittest.TestCase):
@@ -160,119 +160,117 @@ class ConfirmVerdictTest(unittest.TestCase):
         self.assertEqual("LOSS", verdict)
 
 
+def _write_run(path, cases):
+    """Write a run file in the cases[].arms.with[] schema; cases is {name: [(passed, error)]}."""
+    data = {
+        "cases": [
+            {"name": name, "arms": {"with": [{"passed": p, "error": e} for p, e in runs]}}
+            for name, runs in cases.items()
+        ]
+    }
+    with open(path, "w") as handle:
+        json.dump(data, handle)
+
+
+def _run_cli(*args):
+    return subprocess.run([sys.executable, MODULE_PATH, *args], capture_output=True, text=True)
+
+
 class ReadRunRecordsTest(unittest.TestCase):
     def test_ReadRunRecords_FiveRecordsOneWithError_ReturnsFourKeptAndOneDropped(self):
         # Arrange
-        records = [
-            {"case": "a", "pass": True, "error": None},
-            {"case": "b", "pass": False, "error": None},
-            {"case": "c", "pass": True, "error": "timeout"},
-            {"case": "d", "pass": True, "error": None},
-            {"case": "e", "pass": True, "error": None},
-        ]
+        runs = [(True, None), (False, None), (True, "timeout"), (True, None), (True, None)]
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "run.json")
-            with open(path, "w") as handle:
-                json.dump(records, handle)
+            _write_run(path, {"a": runs})
             # Act
             result = _read_run_records(path)
         # Assert
         self.assertIsNotNone(result)
-        kept, dropped = result
+        kept, dropped = result["a"]
         self.assertEqual(4, len(kept))
         self.assertEqual(1, dropped)
 
 
 class CliTest(unittest.TestCase):
+    def _files(self, tmp, cand_runs):
+        ref = os.path.join(tmp, "ref.json")
+        cand = os.path.join(tmp, "cand.json")
+        _write_run(ref, {"a": [(True, None)] * 30})
+        _write_run(cand, {"a": cand_runs})
+        return f"ref={ref}", f"cand={cand}", cand
+
     def test_Cli_BadStageArgument_ExitsTwo(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:
-            run_file = os.path.join(tmp, "run.json")
-            with open(run_file, "w") as handle:
-                handle.write("{}")
-
+            ref, cand, _ = self._files(tmp, [(True, None)] * 5)
             # Act
-            result = subprocess.run(
-                [sys.executable, MODULE_PATH, "--stage", "7", run_file],
-                capture_output=True,
-                text=True,
-            )
-
+            result = _run_cli("--stage", "7", ref, cand)
         # Assert
         self.assertEqual(2, result.returncode)
 
     def test_Cli_PartialStageRunFile_ExitsTwo(self):
         # Arrange
-        records = [
-            {"arm": "with", "pass": True, "error": None},
-            {"arm": "with", "pass": False, "error": None},
-            {"arm": "with", "pass": True, "error": None},
-        ]
         with tempfile.TemporaryDirectory() as tmp:
-            run_file = os.path.join(tmp, "run.json")
-            with open(run_file, "w") as handle:
-                json.dump(records, handle)
-
+            ref, cand, _ = self._files(tmp, [(True, None), (False, None), (True, None)])
             # Act
-            result = subprocess.run(
-                [sys.executable, MODULE_PATH, "--stage", "5", run_file],
-                capture_output=True,
-                text=True,
-            )
-
+            result = _run_cli("--stage", "5", ref, cand)
         # Assert
         self.assertEqual(2, result.returncode)
+        self.assertIn("rerun", result.stdout)
+        self.assertNotIn("LOSS", result.stdout)
+        self.assertNotIn("NEXT", result.stdout)
 
     def test_Cli_MissingRunFile_ExitsTwo(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:
-            missing_file = os.path.join(tmp, "absent.json")
-
+            ref, _, _ = self._files(tmp, [(True, None)] * 5)
             # Act
-            result = subprocess.run(
-                [sys.executable, MODULE_PATH, "--stage", "5", missing_file],
-                capture_output=True,
-                text=True,
-            )
-
+            result = _run_cli("--stage", "5", ref, "cand=" + os.path.join(tmp, "absent.json"))
         # Assert
         self.assertEqual(2, result.returncode)
 
     def test_Cli_MalformedJsonRunFile_ExitsTwo(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:
-            run_file = os.path.join(tmp, "run.json")
-            with open(run_file, "w") as handle:
+            ref, cand, cand_path = self._files(tmp, [(True, None)] * 5)
+            with open(cand_path, "w") as handle:
                 handle.write("{not json")
-
             # Act
-            result = subprocess.run(
-                [sys.executable, MODULE_PATH, "--stage", "5", run_file],
-                capture_output=True,
-                text=True,
-            )
+            result = _run_cli("--stage", "5", ref, cand)
+        # Assert
+        self.assertEqual(2, result.returncode)
 
+    def test_Cli_CaseWithoutArmsWithList_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            ref, cand, cand_path = self._files(tmp, [(True, None)] * 5)
+            with open(cand_path, "w") as handle:
+                json.dump({"cases": [{"name": "a", "arms": {}}]}, handle)
+            # Act
+            result = _run_cli("--stage", "5", ref, cand)
         # Assert
         self.assertEqual(2, result.returncode)
 
     def test_Cli_OneErrorRecordInFive_PrintsDroppedCount(self):
         # Arrange
-        records = [{"arm": "with", "pass": None, "error": "timeout"}]
-        records += [{"arm": "with", "pass": True, "error": None} for _ in range(4)]
         with tempfile.TemporaryDirectory() as tmp:
-            run_file = os.path.join(tmp, "run.json")
-            with open(run_file, "w") as handle:
-                json.dump(records, handle)
-
+            ref, cand, _ = self._files(tmp, [(None, "timeout")] + [(True, None)] * 4)
             # Act
-            result = subprocess.run(
-                [sys.executable, MODULE_PATH, "--stage", "5", run_file],
-                capture_output=True,
-                text=True,
-            )
-
+            result = _run_cli("--stage", "5", ref, cand)
         # Assert
-        self.assertIn("dropped 1", result.stdout)
+        self.assertIn("a: dropped 1", result.stdout)
+        self.assertIn("rerun", result.stdout)
+
+    def test_Cli_TwoOfFiveAgainst30Of30_PrintsPAndLoss(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            ref, cand, _ = self._files(tmp, [(True, None)] * 2 + [(False, None)] * 3)
+            # Act
+            result = _run_cli("--stage", "5", ref, cand)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn("a: p=0.001528 LOSS", result.stdout)
 
 
 class CacheKeyTest(unittest.TestCase):
@@ -285,6 +283,16 @@ class CacheKeyTest(unittest.TestCase):
         # Assert
         self.assertIsNotNone(key_a)
         self.assertNotEqual(key_a, key_b)
+
+    def test_CacheKey_SameInputsRepeat_ReturnsSameKey(self):
+        # Arrange
+        inputs = ("case-hash", "plugin-commit", "model-a", "judge-model", "1.0.0")
+        # Act
+        key_a = _cache_key(*inputs)
+        key_b = _cache_key(*inputs)
+        # Assert
+        self.assertIsNotNone(key_a)
+        self.assertEqual(key_a, key_b)
 
 
 if __name__ == "__main__":

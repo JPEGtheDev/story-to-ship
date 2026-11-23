@@ -1,4 +1,5 @@
 """Stage verdicts for skill eval comparisons (standard library only)."""
+import json
 from math import comb
 
 
@@ -27,3 +28,11 @@ def confirm_verdict(fresh_pass, fresh_n, ref_pass, ref_n):
     """Return LOSS or HOLD for a fresh batch checked against the reference."""
     p = fisher_one_sided(ref_pass, ref_n, fresh_pass, fresh_n)
     return "LOSS" if p <= 0.05 else "HOLD"
+
+
+def read_run_records(path):
+    """Read a JSON run file; return (kept_records, dropped_count) with error records dropped."""
+    with open(path) as handle:
+        records = json.load(handle)
+    kept = [record for record in records if record.get("error") is None]
+    return kept, len(records) - len(kept)

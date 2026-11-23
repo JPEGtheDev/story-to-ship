@@ -29,7 +29,10 @@ def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
 
 
 def cache_key(case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version):
-    """Return a SHA-256 hex digest of the run inputs; any changed field changes it."""
+    """Return a SHA-256 hex digest of the run inputs; any changed field changes it.
+
+    case_file_hashes is one string (join per-file hashes before calling); a list raises TypeError.
+    """
     fields = (case_file_hashes, plugin_commit, model_id, judge_model_id, claude_code_version)
     return hashlib.sha256("\0".join(fields).encode("utf-8")).hexdigest()
 

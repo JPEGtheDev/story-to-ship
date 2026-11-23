@@ -1,6 +1,8 @@
 import importlib.util
 import json
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -165,6 +167,25 @@ class ReadRunRecordsTest(unittest.TestCase):
         kept, dropped = result
         self.assertEqual(4, len(kept))
         self.assertEqual(1, dropped)
+
+
+class CliTest(unittest.TestCase):
+    def test_Cli_BadStageArgument_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            run_file = os.path.join(tmp, "run.json")
+            with open(run_file, "w") as handle:
+                handle.write("{}")
+
+            # Act
+            result = subprocess.run(
+                [sys.executable, MODULE_PATH, "--stage", "7", run_file],
+                capture_output=True,
+                text=True,
+            )
+
+        # Assert
+        self.assertEqual(2, result.returncode)
 
 
 if __name__ == "__main__":

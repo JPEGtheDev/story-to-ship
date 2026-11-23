@@ -1335,7 +1335,7 @@ jobs:
               fi
             done
           }
-          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'excluded: no signal' 'excluded: grouped with' 'unclassified: run no-skill first' 'error, no verdict' '14 runs per kept case' 'identical grader files' 'full suite before each ship' 'one default-ablation run per case' 'gates a ship at the full-suite interval'
+          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'error, no verdict' 'identical grader files' 'one default-ablation run per case' '`<case>: separating`' '`<case>: model default`' '`<case>: weak`' '27 of 30 owner-labeled passes' 'scripts/eval_verdict.py --stage <5|15|30>'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing eval comparison contract string(s)"
             exit 1
@@ -1357,10 +1357,10 @@ jobs:
           python3 -m unittest discover -s tools/tier_usage -p 'test_*.py'
           echo "[+] tier usage script unit tests pass"
 
-      - name: Run eval grouping unit tests
+      - name: Run eval comparison unit tests
         run: |
           python3 -m unittest discover -s skills/writing-skills/scripts/tests -p 'test_*.py'
-          echo "[+] eval grouping unit tests pass"
+          echo "[+] eval comparison unit tests pass"
 
       - name: Shellcheck role-check scripts
         run: |

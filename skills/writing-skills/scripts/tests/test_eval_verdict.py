@@ -201,6 +201,28 @@ class CliTest(unittest.TestCase):
         # Assert
         self.assertEqual(2, result.returncode)
 
+    def test_Cli_PartialStageRunFile_ExitsTwo(self):
+        # Arrange
+        records = [
+            {"arm": "with", "pass": True, "error": None},
+            {"arm": "with", "pass": False, "error": None},
+            {"arm": "with", "pass": True, "error": None},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            run_file = os.path.join(tmp, "run.json")
+            with open(run_file, "w") as handle:
+                json.dump(records, handle)
+
+            # Act
+            result = subprocess.run(
+                [sys.executable, MODULE_PATH, "--stage", "5", run_file],
+                capture_output=True,
+                text=True,
+            )
+
+        # Assert
+        self.assertEqual(2, result.returncode)
+
     def test_Cli_MissingRunFile_ExitsTwo(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:

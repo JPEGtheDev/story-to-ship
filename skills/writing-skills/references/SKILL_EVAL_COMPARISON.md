@@ -111,7 +111,7 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 
 1. A rule gets a case only after a no-skill session first showed its failure. Run 5 runs per situation per arm; count each failure type. Example: 5 no-skill runs, 3 fail at the same step: that failure type has count 3, and the case cites that session.
 2. Put every rule in one bin: separating (kept), model default (text deleted, case kept) or weak (not a gate). Section i, item 2 defines the bins.
-3. A case prompt names no action. Before any run, a fresh reviewer agent reads the prompt and confirms it names no action. Example: the prompt "Create the worktree for branch s530" fails the second reader because it names the action.
+3. A case prompt names no action. Before any run, a fresh reviewer agent reads the prompt and confirms it names no action. Example: the prompt "Create the worktree for branch feature-x" fails the second reader because it names the action.
 
 ### Graders
 

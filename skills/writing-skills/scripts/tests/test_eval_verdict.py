@@ -425,6 +425,18 @@ class RefusalTest(unittest.TestCase):
         self.assertNotIn("confirm=", result.stdout)
         self.assertIn("case a keeps 5 of 30", result.stderr)
 
+    def test_Cli_FreshBatchOfThirtyOneRuns_ExitsTwoNamingCaseAndCount(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(False, None)] * 31)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertNotIn("confirm=", result.stdout)
+        self.assertIn("case a keeps 31 of 30", result.stderr)
+
     def test_Cli_LossCaseMissingFromFreshFile_ExitsTwoNamingCase(self):
         # Arrange
         cand = [(True, None)] * 2 + [(False, None)] * 3

@@ -66,6 +66,8 @@ def main(argv=None):
     if len(records) < args.stage:
         print(f"error: run file has {len(records)} records, stage {args.stage} needs {args.stage}", file=sys.stderr)
         sys.exit(2)
+    _, dropped = read_run_records(args.run_file)
+    print(f"dropped {dropped}")
     return args
 
 

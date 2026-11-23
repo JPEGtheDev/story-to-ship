@@ -121,6 +121,22 @@ class StageVerdictTest(unittest.TestCase):
         # Assert
         self.assertEqual("HOLD", verdict)
 
+    def test_StageVerdict_Stage1514Of15Against28Of30_ReturnsHold(self):
+        # Arrange
+        stage, ref, cand = 15, (28, 30), (14, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        # Assert
+        self.assertEqual("HOLD", verdict)
+
+    def test_StageVerdict_Stage1513Of15Against28Of30_ReturnsNext(self):
+        # Arrange
+        stage, ref, cand = 15, (28, 30), (13, 15)
+        # Act
+        verdict = _stage_verdict(stage, *ref, *cand)
+        # Assert
+        self.assertEqual("NEXT", verdict)
+
     def test_StageVerdict_Stage3025Of30Against30Of30_ReturnsLoss(self):
         # Arrange
         stage, ref, cand = 30, (30, 30), (25, 30)
@@ -397,17 +413,66 @@ class RefusalTest(unittest.TestCase):
         self.assertEqual(2, result.returncode)
         self.assertNotIn("confirm=", result.stdout)
 
+    def test_Cli_FreshBatchOfFiveRuns_ExitsTwoNamingCaseAndCount(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand, [(True, None)] * 4 + [(False, None)])
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertNotIn("confirm=", result.stdout)
+        self.assertIn("case a keeps 5 of 30", result.stderr)
+
+    def test_Cli_LossCaseMissingFromFreshFile_ExitsTwoNamingCase(self):
+        # Arrange
+        cand = [(True, None)] * 2 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, cand)
+            fresh = os.path.join(tmp, "fresh.json")
+            _write_run(fresh, {"other": [(True, None)] * 30})
+            # Act
+            result = _run_cli("--stage", "5", *args, f"fresh={fresh}")
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("case a is missing from the fresh file", result.stderr)
+
+    def test_Cli_CandidateCaseMissingFromReference_ExitsTwoWithMessage(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            ref = os.path.join(tmp, "ref.json")
+            cand = os.path.join(tmp, "cand.json")
+            _write_run(ref, {"other": [(True, None)] * 30})
+            _write_run(cand, {"a": [(True, None)] * 5})
+            # Act
+            result = _run_cli("--stage", "5", f"ref={ref}", f"cand={cand}")
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("case a is missing from the reference file", result.stderr)
+
+    def test_Cli_CandidateKeepsZeroRuns_ExitsTwoWithMessageOnStderr(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, [(None, "timeout")] * 5)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("a: rerun, 0 of 5 runs", result.stderr)
+        self.assertNotIn("rerun", result.stdout)
+
     def test_Cli_FreshBatchWithDroppedRuns_PrintsDroppedCount(self):
         # Arrange
         cand = [(True, None)] * 2 + [(False, None)] * 3
-        fresh = [(None, "timeout")] * 2 + [(False, None)] * 28
+        fresh = [(None, "timeout")] * 2 + [(False, None)] * 30
         with tempfile.TemporaryDirectory() as tmp:
             args = self._paths(tmp, [(True, None)] * 30, cand, fresh)
             # Act
             result = _run_cli("--stage", "5", *args)
         # Assert
         self.assertEqual(0, result.returncode)
-        self.assertIn("a: dropped 2", result.stdout)
+        self.assertIn("a: dropped 2 (fresh)", result.stdout)
         self.assertIn("confirm=LOSS", result.stdout)
 
     def test_Cli_ReferenceWithDroppedRuns_PrintsDroppedCount(self):
@@ -418,7 +483,7 @@ class RefusalTest(unittest.TestCase):
             # Act
             result = _run_cli("--stage", "5", *args)
         # Assert
-        self.assertIn("a: dropped 2", result.stdout)
+        self.assertIn("a: dropped 2 (reference)", result.stdout)
 
     def test_Cli_CandidateWithMoreRunsThanStage_ExitsTwo(self):
         # Arrange

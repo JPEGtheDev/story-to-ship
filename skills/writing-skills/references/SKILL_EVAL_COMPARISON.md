@@ -134,4 +134,10 @@ Use this procedure before shipping an edit that shortens or rewords a skill. It 
 ### Regression
 
 13. When the model id or the Claude Code version changes, run 15 runs per model default test with no skill. A test below 15 of 15 gets a 30-run check. If the loss stands, put one standalone line back into the skill and record it next to that case. A passing case gets no line.
-14. Record preflight (free disk, free inodes, login, usage limit) before each paid batch. Zero free inodes: the batch does not start, and the record shows 0.
+14. Record preflight before each paid batch, as section k, item 3 states.
+
+## k. Rebuild, Size Report and Preflight
+
+1. Start a rebuild with an empty skill body and the description unchanged. Run each kept case against the cached reference in stages (section i). Add a line only for a case that fails. Each added line is a standalone unqualified rule that fixes the lowest-passing case, with no condition that points at another line. Record the line in the rebuild log next to its case. A case that passes gets no line. Example: a case that passed 3 of 5 gets a line, and the log lists that line next to that case.
+2. Report the on-invoke size before and after the rebuild: tokens and bytes for each, and the cut in percent. The report states no pass or fail on the cut. Example: a 70 percent cut is shown as 70 percent, with no pass or fail. Keep the hook text unchanged during the rebuild. State in the report that the result holds for the current hook text and model tier.
+3. Before each paid batch, record free disk, free inodes, login and the usage limit. If free inodes is zero, the batch does not start, and the record shows 0.

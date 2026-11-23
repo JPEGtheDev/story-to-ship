@@ -154,10 +154,6 @@ def main(argv: list) -> int:
             line += f" ({row['note']})"
         print(line)
     all_cases = sorted({case for label_cases in columns.values() for case in label_cases})
-    for case in all_cases:
-        case_rates = {label: sum(columns[label][case]) / len(columns[label][case]) for label in columns if columns[label].get(case)}
-        if len(set(case_rates.values())) > 1:
-            print(f"{case}: varies")
     for label in sorted(columns):
         for case in all_cases:
             if not columns[label].get(case):

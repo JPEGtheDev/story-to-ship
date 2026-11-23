@@ -134,7 +134,7 @@ def report_rows(columns: dict) -> list:
     missing a label, or with no scored run under some label, gets no row here;
     main prints its "no runs under" line instead. A classified case with the same
     pass rate in every label, and a label starting with "no-skill", gets an
-    "excluded: no signal" row. A classified case with the same pass rate in every
+    "model default" row. A classified case with the same pass rate in every
     label and no label starting with "no-skill" gets an "unclassified: run no-skill
     first" row; it is kept, not excluded. Each row carries no verdict. A row whose
     rate is 0 or 1 carries the bound 1 - 0.05 ** (1/n), with n the smallest run
@@ -161,7 +161,7 @@ def report_rows(columns: dict) -> list:
         bound = zero_event_bound(min(len(columns[label][case]) for label in columns)) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""
         if any(label.startswith("no-skill") for label in rates):
-            row_label = "excluded: no signal"
+            row_label = "model default"
         else:
             row_label = "unclassified: run no-skill first"
         rows.append({"case": case, "label": row_label, "verdict": None, "bound": bound, "note": note})
@@ -191,7 +191,7 @@ def main(argv: list) -> int:
     columns = pool_columns(columns_by_label)
     no_signal = set()
     for row in report_rows(columns):
-        if row["label"] == "excluded: no signal":
+        if row["label"] == "model default":
             no_signal.add(row["case"])
         line = f"{row['case']}: {row['label']}"
         if row["bound"] is not None:

@@ -377,6 +377,25 @@ class RefusalTest(unittest.TestCase):
         # Assert
         self.assertIn("a: dropped 2", result.stdout)
 
+    def test_Cli_CandidateWithMoreRunsThanStage_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, [(True, None)] * 6)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(2, result.returncode)
+
+    def test_Cli_FiveOfFiveAgainst30Of30_PrintsNextAtStage5(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            args = self._paths(tmp, [(True, None)] * 30, [(True, None)] * 5)
+            # Act
+            result = _run_cli("--stage", "5", *args)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn("a: p=1.000000 NEXT", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

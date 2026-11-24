@@ -1,0 +1,1 @@
+replace_all on a CRLF prose file: 3 occurrences of a multi-line old_string at 4 changed lines each = 12 > cap 10, denied. Pins that the occurrence count uses text-mode (LF-normalized) reads; with newline="" the count is 0 and the multiplier falls to 1 (allowed at 4).

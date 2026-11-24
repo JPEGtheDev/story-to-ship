@@ -1,0 +1,1 @@
+mixed-ending add: a CRLF top-level .gitignore gets the one-line .worktrees/ add with an LF newline. Denied by the carriage-return check in is_worktrees_ignore_add; without that check the line diff matches and the add is allowed.

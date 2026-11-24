@@ -169,6 +169,72 @@ check_output_owner() {
   fi
 }
 
+# Prints the declared output-fields value of the template for type $1, or
+# nothing. Status 0 with a value, 1 for no template, 2 for no declarations,
+# 3 for a malformed line. The type loses everything up to its last colon; a
+# type that is empty or holds a slash or `..` has no template.
+declared_fields() {
+  local type="${1##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
+  local file line value
+  if [[ -z "$dir" || -z "$type" || "$type" == */* || "$type" == *..* ]]; then
+    return 1
+  fi
+  file="$dir/$type.md"
+  [[ -f "$file" && -r "$file" ]] || return 1
+  line="$(tr -d '\r' <"$file" | awk '/^---[[:space:]]*$/ {n++; next} n == 1' |
+    grep -m 1 '^output-fields:')" || return 2
+  value="${line#output-fields:}"
+  if [[ ! "$value" =~ ^[[:space:]]*\"([^\"]+)\"[[:space:]]*$ ]]; then
+    return 3
+  fi
+  value="${BASH_REMATCH[1]}"
+  if [[ "$value" == '|'* || "$value" == *'|' || "$value" == *'||'* ]]; then
+    return 3
+  fi
+  printf '%s' "$value"
+}
+
+# True when some line of $1 starts, after optional spaces or tabs, with the
+# literal text $2.
+has_field_line() {
+  local text="$1" field="$2" row
+  while IFS= read -r row || [[ -n "$row" ]]; do
+    row="${row#"${row%%[! $'\t']*}"}"
+    [[ "$row" == "$field"* ]] && return 0
+  done <<<"$text"
+  return 1
+}
+
+# Checks the output fields the template of the dispatch type declares. The
+# text is the output file when there is an Output path line, else the last
+# assistant message; an unusable output file leaves the earlier failure only.
+# Appends to "failed" and to "note" of the caller.
+check_declared_fields() {
+  local type="$1" path="$2" cwd="$3" stop="$4" fields text full field status=0
+  local -a items
+  fields="$(declared_fields "$type")" || status=$?
+  if [[ "$status" -ne 0 ]]; then
+    case "$status" in
+      1) note="${note:+$note; }no template" ;;
+      2) note="${note:+$note; }no declarations" ;;
+      *) failed+=("output-fields line is malformed in ${type##*:}.md") ;;
+    esac
+    return 0
+  fi
+  if [[ -n "$path" ]]; then
+    has_placeholder "$path" && return 0
+    full="$(resolve_path "$path" "$cwd")"
+    [[ -f "$full" && -r "$full" ]] || return 0
+    text="$(cat "$full")" || return 0
+  else
+    text="$(jq -r '.last_assistant_message // empty' <<<"$stop" 2>/dev/null)" || return 1
+  fi
+  IFS='|' read -r -a items <<<"$fields"
+  for field in "${items[@]}"; do
+    has_field_line "$text" "$field" || failed+=("output lacks required field: $field")
+  done
+}
+
 # build_record ID POST STOP: POST and STOP are the two parked payloads.
 build_record() {
   local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd note=""
@@ -181,6 +247,7 @@ build_record() {
   check_output_path "$output_path" "$cwd"
   check_output_owner "$output_path" "$cwd" "$dispatch_id"
   [[ -n "$output_path" && -z "$dispatch_id" ]] && note="ownership not checked"
+  check_declared_fields "$type" "$output_path" "$cwd" "$stop" || return 1
   printf '%s\n' "${failed[@]}" | jq -n -c -R --arg d "$dispatch_id" --arg a "$id" \
     --arg s "$type" --arg o "$output_path" --arg t "$now" --arg n "$note" \
     '[inputs | select(. != "")] as $f

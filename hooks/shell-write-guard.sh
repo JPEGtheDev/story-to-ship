@@ -35,10 +35,15 @@
 # keeps today's behavior for these shapes exactly (new files, appends,
 # and exclusive-create opens are allowed for it).
 #
-# No marker and no escape hatch exist. The sanctioned route to overwrite a
-# protected file is the Edit or Write tool (Read the file first, then Edit
-# or Write it); there is no env var, no inline comment, and no config
-# option that lifts this guard for a specific command.
+# One shape is allowed on the main thread: `echo` or `printf` whose only
+# payload is the literal `.worktrees/` (quoted or bare), appended with `>>`
+# to the top-level .gitignore (is_gitignore_worktrees_append). Every other
+# shape is denied, including `>` or `>|` onto that file, a different
+# payload, a nested .gitignore, and any other target. No other escape
+# hatch exists: there is no env var, no inline comment, and no config
+# option that lifts this guard for a specific command. The sanctioned
+# route to overwrite a protected file is the Edit or Write tool (Read the
+# file first, then Edit or Write it).
 #
 # Residual (disclosed, not silent -- see the python scanner below for the
 # exhaustive candidate-target rule list): git checkout/restore onto a
@@ -746,6 +751,54 @@ def check_candidate(raw_token, mechanism, base, top_cwd):
     raise DenyFound(overwrite_reason(realpath, mechanism))
 
 
+def is_gitignore_worktrees_append(tokens, i, base, top_cwd):
+    """True only for the one allowed main-thread shape: the segment is
+    exactly `echo` or `printf` with the literal payload `.worktrees/`
+    (quoted or bare), followed by `>>` and a literal target that resolves
+    to the top-level .gitignore. tokens[i] is the redirect operator.
+    Every other shape returns False, so the caller falls through to
+    check_candidate and its deny."""
+    if not MAIN_THREAD or len(tokens) != 4 or i != 2:
+        return False
+    (k0, cmd), (k1, payload), (k2, op), (k3, target) = tokens
+    if k0 != "word" or k1 != "word" or k2 != "op" or k3 != "word":
+        return False
+    if op != ">>" or not cmd.literal or cmd.text not in ("echo", "printf"):
+        return False
+    if not payload.literal or payload.text != ".worktrees/":
+        return False
+    if not target.literal:
+        return False
+
+    expanded = expand_home(target.text)
+    if os.path.isabs(expanded):
+        path = os.path.normpath(expanded)
+    elif base is None or not os.path.isabs(base):
+        return False
+    else:
+        path = os.path.normpath(os.path.join(base, expanded))
+    # A missing file or a symlink is not the plain top-level file; it
+    # falls through to check_candidate.
+    if not os.path.isfile(path) or os.path.islink(path):
+        return False
+
+    try:
+        top = subprocess.run(
+            ["git", "-C", top_cwd, "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, timeout=2,
+        )
+    except Exception:
+        return False
+    if top.returncode != 0:
+        return False
+
+    top_gitignore = os.path.join(
+        os.path.realpath(top.stdout.strip()), ".gitignore")
+    target_file = os.path.join(
+        os.path.realpath(os.path.dirname(path)), os.path.basename(path))
+    return target_file == top_gitignore
+
+
 def is_flag(tok):
     return tok.literal and tok.text.startswith("-") and tok.text != "-"
 
@@ -982,7 +1035,8 @@ def process_segment(segment, base, top_cwd):
                 (MAIN_THREAD and base_op == ">>")
             if is_write_redirect and i + 1 < n and tokens[i + 1][0] == "word":
                 target = tokens[i + 1][1]
-                check_candidate(target, "redirect", base, top_cwd)
+                if not is_gitignore_worktrees_append(tokens, i, base, top_cwd):
+                    check_candidate(target, "redirect", base, top_cwd)
         i += 1
 
     # --- mechanism-specific candidates: each branch is a dispatch to its

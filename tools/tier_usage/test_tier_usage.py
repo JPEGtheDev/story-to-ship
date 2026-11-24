@@ -636,7 +636,15 @@ class TierShapeTests(unittest.TestCase):
 
     def test_LoadTiers_ValidShape_Accepted(self):
         # Arrange
-        spec = {"match": ["x"], "rates_per_million": {"input": 3, "output": 15.5}}
+        spec = {
+            "match": ["x"],
+            "rates_per_million": {
+                "input": 3,
+                "cache_write": 3.75,
+                "cache_read": 0.3,
+                "output": 15.5,
+            },
+        }
         # Act
         loaded = load_tier_spec(spec)
         # Assert
@@ -654,6 +662,37 @@ class TierShapeTests(unittest.TestCase):
         # Assert
         self.assertEqual(code, 2)
         self.assertIn("'economy'", err)
+
+    def test_Main_InvalidRateSet_ExitsTwoNamingTierAndKey(self):
+        # Arrange
+        full = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        cases = [
+            ("empty", {}, None),
+            (
+                "missing cache_read",
+                {k: v for k, v in full.items() if k != "cache_read"},
+                "cache_read",
+            ),
+            ("unknown key", dict(full, outupt=1), "outupt"),
+        ]
+        for key in full:
+            cases.append(("negative " + key, dict(full, **{key: -1}), key))
+        for label, rates, key in cases:
+            with self.subTest(label):
+                with tempfile.TemporaryDirectory() as tmp:
+                    os.makedirs(os.path.join(tmp, "subagents"))
+                    tiers_path = write_tiers(
+                        tmp, {"economy": {"match": ["x"], "rates_per_million": rates}}
+                    )
+                    # Act
+                    code, out, err = run_main([tmp, "--tiers", tiers_path])
+                # Assert
+                self.assertEqual(code, 2)
+                self.assertEqual(out, "")
+                self.assertIn("'economy'", err)
+                self.assertIn("'rates_per_million'", err)
+                if key is not None:
+                    self.assertIn("'%s'" % key, err)
 
 
 class VendorNameTests(unittest.TestCase):

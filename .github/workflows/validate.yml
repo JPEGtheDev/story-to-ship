@@ -1377,8 +1377,16 @@ jobs:
                 ;;
               *)
                 everyday_count=$((everyday_count + 1))
-                if ! has_everyday "$ct" && ! has_everyday "$pt"; then
-                  echo "FAILED: $f is an everyday case but neither case.yaml nor prompt.md tags list 'everyday'"
+                # A prompt.md tags line, when present, is the effective tags line; case.yaml tags apply only without one.
+                if [ -n "$pt" ]; then
+                  eff="$pt"
+                  eff_file="$(dirname "$f")/prompt.md"
+                else
+                  eff="$ct"
+                  eff_file="$f"
+                fi
+                if ! has_everyday "$eff"; then
+                  echo "FAILED: $eff_file is the effective tags source for everyday case $f but its tags line does not list 'everyday'"
                   bad=$((bad + 1))
                 fi
                 if grep -qE '^bin: model default$|^skip:$' "$f"; then

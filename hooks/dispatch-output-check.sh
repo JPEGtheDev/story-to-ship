@@ -25,18 +25,22 @@ now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # --- read payload -----------------------------------------------------------
 
 event_name() {
-  jq -r '.hook_event_name // empty' <<<"$1"
+  jq -r '.hook_event_name // empty' <<<"$1" 2>/dev/null
 }
 
 # Prints the agent id this event joins on, or nothing when the event is not
-# a dispatch event or the id is unusable as a file name.
+# a dispatch event or the id is unusable as a file name. Returns 1 when a
+# jq read fails (a field of the wrong type); jq never prints an error.
 event_agent_id() {
-  local payload="$1" event agent_id=""
-  event="$(event_name "$payload")"
+  local payload="$1" event tool agent_id=""
+  event="$(event_name "$payload")" || return 1
   if [[ "$event" == "SubagentStop" ]]; then
-    agent_id="$(jq -r '.agent_id // empty' <<<"$payload")"
-  elif [[ "$event" == "PostToolUse" && "$(jq -r '.tool_name // empty' <<<"$payload")" == "Agent" ]]; then
-    agent_id="$(jq -r '.tool_response.agentId // empty' <<<"$payload")"
+    agent_id="$(jq -r '.agent_id // empty' <<<"$payload" 2>/dev/null)" || return 1
+  elif [[ "$event" == "PostToolUse" ]]; then
+    tool="$(jq -r '.tool_name // empty' <<<"$payload" 2>/dev/null)" || return 1
+    if [[ "$tool" == "Agent" ]]; then
+      agent_id="$(jq -r '.tool_response.agentId // empty' <<<"$payload" 2>/dev/null)" || return 1
+    fi
   fi
   [[ "$agent_id" == */* ]] && agent_id=""
   printf '%s' "$agent_id"
@@ -104,15 +108,20 @@ append_record() {
 
 # --- fail closed ------------------------------------------------------------
 
+# fail_closed MESSAGE REASON [AGENT_ID]: one stderr line, one fail record.
+# With an agent id the record also carries agent_id, dispatch_id and
+# subagent_type. A failed write adds no output of its own.
 fail_closed() {
-  local message="$1" reason="$2"
+  local message="$1" reason="$2" agent_id="${3:-}" record
   echo "dispatch-output-check: $message" >&2
   if command -v jq >/dev/null 2>&1; then
-    jq -n -c --arg r "$reason" --arg t "$now" \
-      '{verdict:"fail",failed:[$r],time:$t}' >>"$RECORDS" 2>/dev/null
+    record="$(jq -n -c --arg r "$reason" --arg t "$now" --arg a "$agent_id" \
+      '{verdict:"fail",failed:[$r],time:$t}
+       | if $a == "" then . else {dispatch_id:"",agent_id:$a,subagent_type:"unknown"} + . end' 2>/dev/null)"
   else
-    printf '{"verdict":"fail","failed":["%s"],"time":"%s"}\n' "$reason" "$now" >>"$RECORDS" 2>/dev/null
+    record="$(printf '{"verdict":"fail","failed":["%s"],"time":"%s"}' "$reason" "$now")"
   fi
+  { printf '%s\n' "$record" >>"$RECORDS"; } 2>/dev/null
 }
 
 # --- main -------------------------------------------------------------------
@@ -131,12 +140,19 @@ main() {
     fail_closed "jq not found; cannot check dispatch" "jq missing"
     return 0
   fi
-  if ! jq -e . >/dev/null 2>&1 <<<"$payload"; then
+  if ! jq empty >/dev/null 2>&1 <<<"$payload"; then
     fail_closed "stdin is not valid JSON" "bad json"
     return 0
   fi
+  if ! jq -e 'type == "object"' >/dev/null 2>&1 <<<"$payload"; then
+    fail_closed "stdin is not a JSON object" "bad payload"
+    return 0
+  fi
 
-  id="$(event_agent_id "$payload")"
+  id="$(event_agent_id "$payload")" || {
+    fail_closed "bad payload" "bad payload"
+    return 0
+  }
   [[ -z "$id" ]] && return 0
 
   claim="$PENDING/$id.claim.$$"
@@ -147,7 +163,7 @@ main() {
   post="$payload"
   [[ "$(event_name "$payload")" == "SubagentStop" ]] && post="$parked"
   record="$(build_record "$id" "$post")" || {
-    fail_closed "bad payload" "bad payload"
+    fail_closed "bad payload" "bad payload" "$id"
     return 0
   }
   append_record "$record"

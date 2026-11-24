@@ -19,10 +19,11 @@
 #                             The token @OUT@ becomes $tmp/files, a per-case dir
 #                             outside the state dir that always exists; the shared
 #                             payloads name @OUT@/out-100.md as their output file
-#                             and each case that expects it present creates it in
-#                             setup with printf 'Dispatch id: D-100\n'
-#                             >"$tmp/files/out-100.md" (an empty file fails the
-#                             ownership check).
+#                             and each case whose output file reaches the ownership
+#                             check creates it in setup with printf 'Dispatch id:
+#                             D-100\n' >"$tmp/files/out-100.md" (an empty file
+#                             fails that check). Cases that never reach the check
+#                             (no jq, unwritable records file) may create it empty.
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
 #   simultaneous           - "PAIRS ROUNDS [dup]": per round, start both events

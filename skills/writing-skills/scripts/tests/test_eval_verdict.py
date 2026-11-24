@@ -63,13 +63,38 @@ class StageVerdictTest(unittest.TestCase):
         self.assertIsNotNone(p)
         self.assertAlmostEqual(0.001528, p, places=6)
 
-    def test_StageVerdict_Stage5ThreeOfFiveAgainst30Of30_ReturnsNext(self):
-        # Arrange / Act
+    def test_StageVerdict_Stage5ThreeOfFiveAgainst30Of30_ReturnsEdit(self):
+        # Arrange
+        expected_verdict = "EDIT"
+        expected_p = 0.016807
+        # Act
         verdict = _stage_verdict(5, 30, 30, 3, 5)
         p = _p(30, 30, 3, 5)
         # Assert
-        self.assertEqual("NEXT", verdict)
-        self.assertAlmostEqual(0.016807, p, places=6)
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
+
+    def test_StageVerdict_Stage5FourOfFiveAgainst30Of30_ReturnsEdit(self):
+        # Arrange
+        expected_verdict = "EDIT"
+        expected_p = 0.142857
+        # Act
+        verdict = _stage_verdict(5, 30, 30, 4, 5)
+        p = _p(30, 30, 4, 5)
+        # Assert
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
+
+    def test_StageVerdict_Stage5OneOfFiveAgainst30Of30_ReturnsLoss(self):
+        # Arrange
+        expected_verdict = "LOSS"
+        expected_p = 0.000095
+        # Act
+        verdict = _stage_verdict(5, 30, 30, 1, 5)
+        p = _p(30, 30, 1, 5)
+        # Assert
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
 
     def test_StageVerdict_Stage15TwelveOfFifteenAgainst30Of30_ReturnsLoss(self):
         # Arrange / Act
@@ -215,6 +240,17 @@ class CliTest(unittest.TestCase):
         _write_run(ref, {"a": [(True, None)] * 30})
         _write_run(cand, {"a": cand_runs})
         return f"ref={ref}", f"cand={cand}", cand
+
+    def test_Cli_FourOfFiveAgainst30Of30_PrintsPAndEdit(self):
+        # Arrange
+        expected_line = "a: p=0.142857 EDIT"
+        with tempfile.TemporaryDirectory() as tmp:
+            ref, cand, _ = self._files(tmp, [(True, None)] * 4 + [(False, None)])
+            # Act
+            result = _run_cli("--stage", "5", ref, cand)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
 
     def test_Cli_BadStageArgument_ExitsTwo(self):
         # Arrange

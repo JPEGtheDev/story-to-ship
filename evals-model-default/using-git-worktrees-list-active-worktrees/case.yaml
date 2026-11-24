@@ -8,4 +8,4 @@ skip:
   claude_code_version: 2.1.331
   with_skill: 28/30
   without_skill: 30/30
-  source: re-run 2026-11-24 under the current graders, branch commit 3285172
+  source: re-run 2026-11-24, 30 runs per arm, graders unchanged since the counts were recorded

@@ -1384,7 +1384,7 @@ jobs:
             exit 1
           fi
           if [ "$default_count" -ne 16 ] || [ "$model_count" -ne 4 ]; then
-            echo "FAILED: expected 16 default and 4 model-default eval case folders; found $default_count and $model_count -- the counts here must change with the folder listing in the eval case folders"
+            echo "FAILED: expected 16 default and 4 model-default eval case folders; found $default_count and $model_count -- update the 16 and 4 in this step of .github/workflows/validate.yml when a case folder is added, removed or moved"
             exit 1
           fi
           echo "[+] eval case folders match"

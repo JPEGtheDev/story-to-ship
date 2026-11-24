@@ -1,0 +1,4 @@
+(.[0]|keys|sort)==["agent_id","dispatch_id","failed","output_path","subagent_type","time","verdict"] or (.[0]|keys|sort)==["agent_id","dispatch_id","failed","note","output_path","subagent_type","time","verdict"]
+(.[0]|(.dispatch_id|type)=="string" and (.agent_id|type)=="string" and (.subagent_type|type)=="string" and (.failed|type)=="array" and (.time|type)=="string")
+.[0].output_path=="/tmp/dc/out-100.md" and .[0].subagent_type=="general-purpose"
+.[0].time|test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$")

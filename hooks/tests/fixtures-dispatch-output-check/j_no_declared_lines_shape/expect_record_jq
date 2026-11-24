@@ -1,0 +1,1 @@
+.[0]|(has("output_path")|not) and .dispatch_id=="" and .subagent_type=="unknown" and .agent_id=="bbbb00000000000b2"

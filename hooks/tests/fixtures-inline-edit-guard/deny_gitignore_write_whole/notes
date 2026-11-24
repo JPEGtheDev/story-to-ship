@@ -1,0 +1,1 @@
+a Write tool call overwriting top-level .gitignore with build/ and .worktrees/ is denied; Write is not the allowed route

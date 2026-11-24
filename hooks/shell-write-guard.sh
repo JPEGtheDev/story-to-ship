@@ -35,10 +35,19 @@
 # keeps today's behavior for these shapes exactly (new files, appends,
 # and exclusive-create opens are allowed for it).
 #
-# No marker and no escape hatch exist. The sanctioned route to overwrite a
-# protected file is the Edit or Write tool (Read the file first, then Edit
-# or Write it); there is no env var, no inline comment, and no config
-# option that lifts this guard for a specific command.
+# One shape is allowed on the main thread: a command that is a single
+# top-level segment, `echo` or `printf` whose only payload is the literal
+# `.worktrees/` (quoted or bare), appended with `>>` to the top-level
+# .gitignore (is_gitignore_worktrees_append). The allowed shape is top-level
+# only: a subshell `( )`, a command substitution `$( )` or backticks, and a
+# `bash -c` or `eval` body are denied even when they hold the same append.
+# Every other shape is also denied, including a command with any other
+# segment (after `;`, `&&`, `||`, `|`, `&`, or a newline), `>` or `>|` onto
+# that file, a different payload, a nested .gitignore, and any other target.
+# No other escape hatch exists: there is no env var, no inline comment, and
+# no config option that lifts this guard for a specific command. The sanctioned
+# route to overwrite a protected file is the Edit or Write tool (Read the
+# file first, then Edit or Write it).
 #
 # Residual (disclosed, not silent -- see the python scanner below for the
 # exhaustive candidate-target rule list): git checkout/restore onto a
@@ -355,12 +364,14 @@ class Segment(object):
         self.heredoc_bodies = []
 
 
-def tokenize_and_scan(text, base, top_cwd):
+def tokenize_and_scan(text, base, top_cwd, nested=False):
     """Recursive-descent scan of one chunk of shell text.
 
     Returns None (allow) or raises DenyFound with the first denial found,
     scanning in segment (i.e. left-to-right, top-to-bottom) order. Also
-    may raise ParseError for an unterminated construct.
+    may raise ParseError for an unterminated construct. nested is True for
+    every recursive scan (subshell, command substitution, bash -c or eval
+    body); the single-segment allowance applies only at depth 0.
     """
     n = len(text)
     i = 0
@@ -431,7 +442,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # not just copied through as opaque text.
                     cur.literal = False
                     inner, end2 = find_matching_paren(text, j + 1)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     buf.append(text[j:end2])
                     j = end2
                     continue
@@ -441,7 +452,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # backtick instead of a matching close paren.
                     cur.literal = False
                     inner, end2 = find_matching_backtick(text, j)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     buf.append(text[j:end2])
                     j = end2
                     continue
@@ -518,7 +529,7 @@ def tokenize_and_scan(text, base, top_cwd):
             start_word()
             cur.literal = False
             inner, end = find_matching_paren(text, i + 1)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             cur.text += text[i:end]
             i = end
             continue
@@ -532,7 +543,7 @@ def tokenize_and_scan(text, base, top_cwd):
             flush_word()
             finalize_segment()
             inner, end = find_matching_paren(text, i)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             i = end
             continue
 
@@ -555,7 +566,7 @@ def tokenize_and_scan(text, base, top_cwd):
             start_word()
             cur.literal = False
             inner, end = find_matching_backtick(text, i)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             cur.text += text[i:end]
             i = end
             continue
@@ -570,7 +581,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # process substitution: skip as a nested segment group,
                     # never a file target.
                     inner, pend = find_matching_paren(text, end - 1)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     i = pend
                     continue
                 if op_base in ("<<", "<<-"):
@@ -604,8 +615,9 @@ def tokenize_and_scan(text, base, top_cwd):
         raise ParseError("unterminated heredoc")
     finalize_segment()
 
+    single_segment = not nested and len(segments) == 1
     for segment in segments:
-        base = process_segment(segment, base, top_cwd)
+        base = process_segment(segment, base, top_cwd, single_segment)
     return None
 
 
@@ -744,6 +756,58 @@ def check_candidate(raw_token, mechanism, base, top_cwd):
         return
 
     raise DenyFound(overwrite_reason(realpath, mechanism))
+
+
+def is_gitignore_worktrees_append(tokens, i, base, top_cwd, single_segment):
+    """True only for the one allowed main-thread shape: the whole command is
+    a single segment that is exactly `echo` or `printf` with the literal
+    payload `.worktrees/` (quoted or bare), followed by `>>` and a literal
+    target that resolves to the top-level .gitignore. tokens[i] is the
+    redirect operator. single_segment is False when the command has any
+    other segment (after `;`, `&&`, `||`, `|`, `&`, or a newline), and also
+    when the scan is nested (a subshell, a command substitution, or a
+    bash -c or eval body): tokenize_and_scan computes it that way.
+    Every other shape returns False, so the caller falls through to
+    check_candidate and its deny."""
+    if not MAIN_THREAD or not single_segment or len(tokens) != 4 or i != 2:
+        return False
+    (k0, cmd), (k1, payload), (k2, op), (k3, target) = tokens
+    if k0 != "word" or k1 != "word" or k2 != "op" or k3 != "word":
+        return False
+    if op != ">>" or not cmd.literal or cmd.text not in ("echo", "printf"):
+        return False
+    if not payload.literal or payload.text != ".worktrees/":
+        return False
+    if not target.literal:
+        return False
+
+    expanded = expand_home(target.text)
+    if os.path.isabs(expanded):
+        path = os.path.normpath(expanded)
+    elif base is None or not os.path.isabs(base):
+        return False
+    else:
+        path = os.path.normpath(os.path.join(base, expanded))
+    # A missing file or a symlink is not the plain top-level file; it
+    # falls through to check_candidate.
+    if not os.path.isfile(path) or os.path.islink(path):
+        return False
+
+    try:
+        top = subprocess.run(
+            ["git", "-C", top_cwd, "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, timeout=2,
+        )
+    except Exception:
+        return False
+    if top.returncode != 0:
+        return False
+
+    top_gitignore = os.path.join(
+        os.path.realpath(top.stdout.strip()), ".gitignore")
+    target_file = os.path.join(
+        os.path.realpath(os.path.dirname(path)), os.path.basename(path))
+    return target_file == top_gitignore
 
 
 def is_flag(tok):
@@ -939,15 +1003,15 @@ def check_nested_shells(tokens, base, top_cwd):
                     tokens[i + 1][1].literal and tokens[i + 1][1].text == "-c" and
                     i + 2 < n and tokens[i + 2][0] == "word"):
                 nested_text = tokens[i + 2][1].text
-                tokenize_and_scan(nested_text, base, top_cwd)
+                tokenize_and_scan(nested_text, base, top_cwd, nested=True)
         if kind == "word" and tok.literal and tok.text == "eval":
             rest_words = [t.text for t in words_only(tokens[i + 1:])]
             if rest_words:
-                tokenize_and_scan(" ".join(rest_words), base, top_cwd)
+                tokenize_and_scan(" ".join(rest_words), base, top_cwd, nested=True)
         i += 1
 
 
-def process_segment(segment, base, top_cwd):
+def process_segment(segment, base, top_cwd, single_segment):
     tokens = segment.tokens
 
     cmd_idx = leading_command_word(tokens)
@@ -982,7 +1046,9 @@ def process_segment(segment, base, top_cwd):
                 (MAIN_THREAD and base_op == ">>")
             if is_write_redirect and i + 1 < n and tokens[i + 1][0] == "word":
                 target = tokens[i + 1][1]
-                check_candidate(target, "redirect", base, top_cwd)
+                if not is_gitignore_worktrees_append(
+                        tokens, i, base, top_cwd, single_segment):
+                    check_candidate(target, "redirect", base, top_cwd)
         i += 1
 
     # --- mechanism-specific candidates: each branch is a dispatch to its

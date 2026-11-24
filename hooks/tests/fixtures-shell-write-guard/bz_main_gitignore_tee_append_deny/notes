@@ -1,0 +1,1 @@
+A main-thread pipe into tee -a onto the top-level .gitignore of the sandbox repo must be DENIED; tee is not the allowed route (only the echo or printf >> append is). Characterization pin: the guard denies it today, so this case PASSES on this commit.

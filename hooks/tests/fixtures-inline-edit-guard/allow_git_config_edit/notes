@@ -1,0 +1,1 @@
+an Edit of .git/config is allowed and not counted, as today: a path inside the .git directory resolves outside any git repository and is exempt

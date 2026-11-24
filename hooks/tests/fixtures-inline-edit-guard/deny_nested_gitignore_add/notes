@@ -1,0 +1,1 @@
+adding .worktrees/ to a nested sub/.gitignore is denied; only the top-level .gitignore is allowed that add

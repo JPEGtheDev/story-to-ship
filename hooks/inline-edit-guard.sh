@@ -22,9 +22,13 @@
 # Other exemptions, decided inside the python scanner: a path that resolves
 # outside any git repository (including a path inside a repository's .git
 # directory, where `git rev-parse --show-toplevel` fails); a path matched
-# by that repository's .gitignore (via `git check-ignore`); and the
+# by that repository's .gitignore (via `git check-ignore`); the
 # repository's own top-level plan.md specifically (a plan.md in a
-# subdirectory is an ordinary file).
+# subdirectory is an ordinary file); and one Edit that adds the single
+# line `.worktrees/` to the top-level .gitignore (no replace_all, no
+# existing `.worktrees/` line, no carriage return in the file). Any other
+# edit of a file named .gitignore, including a basename .gitignore in a
+# subdirectory, is denied with the no-extension reason.
 #
 # What counts, and against what: the change is measured as a line diff
 # (insertions plus deletions, via difflib.unified_diff with no context) of
@@ -208,6 +212,43 @@ def read_text(path):
         return None
 
 
+def read_raw(path):
+    # Keeps carriage returns (newline=""), so a CRLF file is visible as CRLF.
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
+            return f.read()
+    except OSError:
+        return None
+
+
+def is_worktrees_ignore_add(top, real, tool_name, tool_input):
+    try:
+        if tool_name != "Edit":
+            return False
+        if real != os.path.join(os.path.realpath(top), ".gitignore"):
+            return False
+        if tool_input.get("replace_all") is True:
+            return False
+        old_string = tool_input.get("old_string")
+        new_string = tool_input.get("new_string")
+        if not isinstance(old_string, str) or not isinstance(new_string, str):
+            return False
+        old = read_raw(real)
+        if old is None or old_string == "" or old.count(old_string) != 1:
+            return False
+        if "\r" in old:
+            return False
+        new = old.replace(old_string, new_string, 1)
+        old_body = old[:-1] if old.endswith("\n") else old
+        new_body = new[:-1] if new.endswith("\n") else new
+        old_lines = old_body.split("\n") if old_body else []
+        if ".worktrees/" in old_lines:
+            return False
+        return new_body.split("\n") == old_lines + [".worktrees/"]
+    except Exception:
+        return False
+
+
 def load_ledger(ledger_path, real):
     per_file = 0
     session = 0
@@ -277,8 +318,13 @@ def main():
     if real == os.path.join(top, "plan.md"):
         return
 
+    if is_worktrees_ignore_add(top, real, tool_name, tool_input):
+        return
+
     ext = os.path.splitext(real)[1]
     ext = ext[1:] if ext.startswith(".") else ext
+    if os.path.basename(file_path) == ".gitignore":
+        ext = ""
     extensions = prose_extensions()
     if ext.lower() not in [e.lower() for e in extensions]:
         ext_display = ext if ext else "(none)"

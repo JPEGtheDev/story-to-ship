@@ -1,0 +1,1 @@
+at top level: no top-level .gitignore exists (no_top_gitignore), and a Write creating it with .worktrees/ is denied. Expected to pass today (a missing file is already denied): a pin, not RED. The sub/ case in deny_gitignore_write_create pins the nested form.

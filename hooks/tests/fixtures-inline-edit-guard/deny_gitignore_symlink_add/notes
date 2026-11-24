@@ -1,0 +1,1 @@
+a .gitignore that is a symlink to another file is denied when adding .worktrees/, because its real path is not the top-level .gitignore. This fixture pins the nested form (sub/.gitignore); the top-level form is pinned by deny_gitignore_symlink_add_top

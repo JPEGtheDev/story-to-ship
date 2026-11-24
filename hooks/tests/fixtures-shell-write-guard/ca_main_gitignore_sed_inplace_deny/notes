@@ -1,0 +1,1 @@
+A main-thread sed -i that appends .worktrees/ to the top-level .gitignore of the sandbox repo must be DENIED; sed -i is an in-place edit outside the allowed echo or printf append. Characterization pin: the guard denies it today, so this case PASSES on this commit.

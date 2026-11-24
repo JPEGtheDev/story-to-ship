@@ -23,6 +23,12 @@
 #   repo/               - a directory tree copied into the temp repo before
 #                          `git add -A && git commit` (so its files are
 #                          tracked at commit time).
+#   no_top_gitignore    - flag file (content ignored). The runner normally
+#                          writes a top-level .gitignore ("scratch/") before
+#                          copying repo/; with this flag it writes none, so a
+#                          case can model a missing top-level .gitignore, or
+#                          ship one via repo/ or symlinks (a symlink named
+#                          .gitignore would otherwise collide with it).
 #   symlinks            - one "<link-relative-path> <target-relative-path>"
 #                          pair per line; each is created inside the temp
 #                          repo with `ln -s <target> <link>` before the
@@ -161,7 +167,9 @@ run_case() {
     set -e
     cd "$repo"
     git init -q
-    printf 'scratch/\n' >.gitignore
+    if [[ ! -f "$case_dir/no_top_gitignore" ]]; then
+      printf 'scratch/\n' >.gitignore
+    fi
     if [[ -d "$case_dir/repo" ]]; then
       cp -r "$case_dir/repo/." .
     fi

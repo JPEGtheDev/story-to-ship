@@ -575,6 +575,30 @@ def _todo_owners(rows):
     return owners
 
 
+def _cost_cells(counted, todo_count):
+    """Return the (cost_usd, cost_per_todo_usd) cells for the counted rows."""
+    priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
+    unpriced = len(counted) - len(priced)
+    total = sum(priced)
+    partial = bool(priced) and unpriced > 0
+    if partial:
+        cost = "partial: %s (%d of %d rows unpriced)" % (
+            round(total, 4),
+            unpriced,
+            len(counted),
+        )
+    else:
+        cost = round(total, 4) if priced else NO_RATES
+
+    if not todo_count:
+        return cost, NOT_APPLICABLE
+    if partial:
+        return cost, "partial"
+    if priced:
+        return cost, round(total / todo_count, 4)
+    return cost, NO_RATES
+
+
 def _summary_entry(runner, tier, members, owners, todo_count):
     """Return one summary dict for the rows of a single (runner, tier) group.
 
@@ -589,18 +613,7 @@ def _summary_entry(runner, tier, members, owners, todo_count):
         for row in counted
     )
     est_output = sum(row["est_output_tokens"] for row in counted)
-    priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
-    unpriced = len(counted) - len(priced)
-    total = sum(priced)
-    partial = bool(priced) and unpriced > 0
-    if partial:
-        cost = "partial: %s (%d of %d rows unpriced)" % (
-            round(total, 4),
-            unpriced,
-            len(counted),
-        )
-    else:
-        cost = round(total, 4) if priced else NO_RATES
+    cost, per_todo_usd = _cost_cells(counted, todo_count)
 
     assigned = [
         owner
@@ -609,15 +622,8 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     ]
     if todo_count:
         per_todo_tokens = "%.1f" % (input_side / todo_count)
-        if partial:
-            per_todo_usd = "partial"
-        elif priced:
-            per_todo_usd = round(total / todo_count, 4)
-        else:
-            per_todo_usd = NO_RATES
     else:
         per_todo_tokens = NOT_APPLICABLE
-        per_todo_usd = NOT_APPLICABLE
 
     yes = sum(1 for owner in assigned if owner["first_stage1_pass"] == "yes")
     no = sum(1 for owner in assigned if owner["first_stage1_pass"] == "no")

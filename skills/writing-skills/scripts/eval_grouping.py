@@ -95,11 +95,11 @@ def report_rows(columns: dict) -> list:
        equal or differ.
     3. "separating": the rates differ and the lowest current rate is above the
        highest base rate.
-    4. "model default": every other case with a base and a current label.
+    4. "expected default behavior": every other case with a base and a current label.
 
     No row carries a verdict. A row carries the bound 1 - 0.05 ** (1/n) and the
     note "not evidence of keeping the behavior" only when all labels share one
-    rate of 0 or 1 and the label is "model default" or "unclassified: run
+    rate of 0 or 1 and the label is "expected default behavior" or "unclassified: run
     no-skill first"; n is the smallest run count among the labels for that case.
     The smallest n gives the widest bound, the conservative choice, and the
     minimum does not depend on argument order. Every other row, "weak" and
@@ -123,7 +123,7 @@ def report_rows(columns: dict) -> list:
         elif not equal and min(current) > max(base):
             row_label = "separating"
         else:
-            row_label = "model default"
+            row_label = "expected default behavior"
         edge = equal and next(iter(rates.values())) in (0, 1) and row_label != "weak"
         bound = zero_event_bound(min(len(columns[label][case]) for label in columns)) if edge else None
         note = "not evidence of keeping the behavior" if edge else ""

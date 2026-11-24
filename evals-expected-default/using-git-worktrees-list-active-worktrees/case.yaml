@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: using-git-worktrees-list-active-worktrees
+context:
+  scaffold_script: scaffold.sh
+bin: expected default behavior
+skip:
+  model: haiku
+  claude_code_version: 2.1.331
+  with_skill: 28/30
+  without_skill: 30/30
+  source: re-run 2026-11-24, 30 runs per arm, graders unchanged since the counts were recorded

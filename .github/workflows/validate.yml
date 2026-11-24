@@ -1335,12 +1335,59 @@ jobs:
               fi
             done
           }
-          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'verdict:"error, no verdict"' '`<path>: error, no verdict`' 'identical grader files' 'one default-ablation run per case' '`<case>: separating`' '`<case>: model default`' '`<case>: weak`' '`<case>: unclassified: run no-skill first`' '27 of 30 owner-labeled passes' 'scripts/eval_verdict.py --stage <5|15|30>' 'is 5 runs on the targeted cases only' 'A targeted case under 5 of 5 gets the stage-5 verdict, which is LOSS when p is at most 0.01 and EDIT otherwise; a case with EDIT goes back to editing.' 'Those stages run on targeted cases only' 'run the whole suite once with 30 runs per case, through `--suite`' 'A targeted case labeled weak (section i, item 5) runs focused 5-run cycles like any other targeted case under the same 5-cycle cap, a cycle passes only when it reaches 5 of 5, and a cycle under 5 of 5 goes back to editing, as an EDIT case does, and the case repeats until a cycle reaches 5 of 5 or the cap, because a weak case carries no stage verdict and is not judged by the stage-5 LOSS or EDIT rule; at the cap without 5 of 5 the case goes to an owner question and blocks shipping.'
+          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'verdict:"error, no verdict"' '`<path>: error, no verdict`' 'identical grader files' 'one default-ablation run per case' '`<case>: separating`' '`<case>: expected default behavior`' '`<case>: weak`' '`<case>: unclassified: run no-skill first`' '27 of 30 owner-labeled passes' 'scripts/eval_verdict.py --stage <5|15|30>' 'is 5 runs on the targeted cases only' 'A targeted case under 5 of 5 gets the stage-5 verdict, which is LOSS when p is at most 0.01 and EDIT otherwise; a case with EDIT goes back to editing.' 'Those stages run on targeted cases only' 'run the whole suite once with 30 runs per case. Two separate forms apply.' 'The `eval_verdict.py --suite` form compares a reference file with a candidate file and selects nothing.' 'A targeted case labeled weak (section i, item 5) runs focused 5-run cycles like any other targeted case under the same 5-cycle cap, a cycle passes only when it reaches 5 of 5, and a cycle under 5 of 5 goes back to editing, as an EDIT case does, and the case repeats until a cycle reaches 5 of 5 or the cap, because a weak case carries no stage verdict and is not judged by the stage-5 LOSS or EDIT rule; at the cap without 5 of 5 the case goes to an owner question and blocks shipping.' 'Skip rule. A case whose 30-run reference labels it expected default behavior' 'loses its label if the drop stands' 'reported to the owner as a skip candidate' 'The output form of `eval_verdict.py` does not change.' 'No eval cases found'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing eval comparison contract string(s)"
             exit 1
           fi
           echo "[+] Eval comparison contract strings present"
+
+      - name: Check eval case folders
+        run: |
+          set -eu
+          default_count=0
+          expected_count=0
+          bad=0
+          # Default folder: no 'bin: expected default behavior' line and no 'skip:' line.
+          for d in evals/*/; do
+            name=$(basename "$d")
+            if [ "$name" = results ] || [ ! -f "${d%/}/case.yaml" ]; then
+              continue
+            fi
+            f="${d%/}/case.yaml"
+            default_count=$((default_count + 1))
+            if grep -qE '^bin: expected default behavior$|^skip:$' "$f"; then
+              echo "FAILED: $f is a default eval case but has a 'bin: expected default behavior' or 'skip:' line"
+              bad=$((bad + 1))
+            fi
+          done
+          # Expected-default folder: 'bin: expected default behavior' and a complete skip block.
+          for d in evals-expected-default/*/; do
+            name=$(basename "$d")
+            if [ "$name" = results ] || [ ! -f "${d%/}/case.yaml" ]; then
+              continue
+            fi
+            f="${d%/}/case.yaml"
+            expected_count=$((expected_count + 1))
+            for pat in '^bin: expected default behavior$' '^skip:$' '^ *model:' '^ *claude_code_version:' '^ *with_skill:' '^ *without_skill:' '^ *source:'; do
+              if ! grep -qE -- "$pat" "$f"; then
+                echo "FAILED: $f is an expected-default eval case but has no line matching: $pat"
+                bad=$((bad + 1))
+              fi
+            done
+          done
+          echo "default eval case folders: $default_count"
+          echo "expected-default eval case folders: $expected_count"
+          echo "total eval case folders: $((default_count + expected_count))"
+          if [ "$bad" -gt 0 ]; then
+            echo "Found $bad eval case folder problem(s)"
+            exit 1
+          fi
+          if [ "$default_count" -ne 16 ] || [ "$expected_count" -ne 4 ]; then
+            echo "FAILED: expected 16 default and 4 expected-default eval case folders; found $default_count and $expected_count -- update the 16 and 4 in this step of .github/workflows/validate.yml when a case folder is added, removed or moved"
+            exit 1
+          fi
+          echo "[+] eval case folders match"
 
       - name: Run session-events converter unit tests
         run: |

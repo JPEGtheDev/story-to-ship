@@ -247,17 +247,17 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["unclassified: run no-skill first"])
 
-    def test_reportRows_currentAtNinetyPercentBelowNoSkill_isModelDefault(self):
+    def test_reportRows_currentAtNinetyPercentBelowNoSkill_isExpectedDefault(self):
         # Arrange: current passes 9 of 10 (0.9, not under 90 percent) and no-skill passes 10 of 10
         columns = {"no-skill": {"c1": [True] * 10}, "tsr-before-1": {"c1": [True] * 9 + [False]}}
 
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and c1 has exactly one row, labeled model default
+        # Assert: no error, and c1 has exactly one row, labeled expected default behavior
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         rows = [r for r in result if r["case"] == "c1"]
-        self.assertEqual([r["label"] for r in rows], ["model default"])
+        self.assertEqual([r["label"] for r in rows], ["expected default behavior"])
         self.assertIsNone(rows[0]["bound"])
 
     def test_reportRows_constantZero_isWeakWithoutBound(self):
@@ -301,18 +301,18 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNotNone(row, "no row for case c1")
         self.assertEqual(row["label"], "weak")
 
-    def test_reportRows_noSkillPassesAsOftenAsCurrent_isModelDefault(self):
+    def test_reportRows_noSkillPassesAsOftenAsCurrent_isExpectedDefault(self):
         # Arrange: case c1 passes 4 of 4 under both no-skill and the current skill, so the rates are equal
         columns = {"no-skill": {"c1": [True] * 4}, "tsr-before-1": {"c1": [True] * 4}}
 
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and the c1 row is labeled model default because no-skill passes at least as often
+        # Assert: no error, and the c1 row is labeled expected default behavior because no-skill passes at least as often
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
-        self.assertEqual(row["label"], "model default")
+        self.assertEqual(row["label"], "expected default behavior")
 
     def test_reportRows_noSkillPassesMoreThanCurrentAndCurrentIsWeak_isWeak(self):
         # Arrange: case c1 passes 4 of 4 under no-skill and 1 of 4 under the current skill, so no-skill is strictly higher and the current skill is under 90 percent
@@ -321,7 +321,7 @@ class TestReportRows(unittest.TestCase):
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and the c1 row is labeled weak, because weak takes precedence over model default
+        # Assert: no error, and the c1 row is labeled weak, because weak takes precedence over expected default behavior
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
@@ -334,7 +334,7 @@ class TestReportRows(unittest.TestCase):
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, and the c1 row is labeled weak, because weak takes precedence over model default on equal rates
+        # Assert: no error, and the c1 row is labeled weak, because weak takes precedence over expected default behavior on equal rates
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
@@ -400,18 +400,18 @@ class TestReportRows(unittest.TestCase):
         self.assertAlmostEqual(row["bound"], 1 - 0.05 ** (1 / 4), places=3)
 
 
-    def test_reportRows_equalNonEdgeRateModelDefault_hasNoBoundAndNoNote(self):
+    def test_reportRows_equalNonEdgeRateExpectedDefault_hasNoBoundAndNoNote(self):
         # Arrange: case c1 passes 9 of 10 under both labels, an equal rate that is neither 0 nor 1
         columns = {"no-skill": {"c1": [True] * 9 + [False]}, "tsr-before-1": {"c1": [True] * 9 + [False]}}
 
         # Act: build the report rows through the error-capturing helper
         result, error = _attempt(eg.report_rows, columns)
 
-        # Assert: no error, a model default row with no bound and an empty note
+        # Assert: no error, a expected default behavior row with no bound and an empty note
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         row = next((r for r in result if r["case"] == "c1"), None)
         self.assertIsNotNone(row, "no row for case c1")
-        self.assertEqual(row["label"], "model default")
+        self.assertEqual(row["label"], "expected default behavior")
         self.assertIsNone(row["bound"])
         self.assertEqual(row["note"], "")
 
@@ -430,7 +430,7 @@ class TestReportRows(unittest.TestCase):
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
         self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["separating"])
 
-    def test_reportRows_twoNoSkillLabelsAndCurrentBetweenThem_isModelDefault(self):
+    def test_reportRows_twoNoSkillLabelsAndCurrentBetweenThem_isExpectedDefault(self):
         # Arrange: no-skill-a passes 2 of 10, no-skill-b passes 10 of 10, current passes 9 of 10, above only one
         columns = {
             "no-skill-a": {"c1": [True] * 2 + [False] * 8},
@@ -443,7 +443,7 @@ class TestReportRows(unittest.TestCase):
 
         # Assert: no error, and current is below the highest base rate, so the row is not separating
         self.assertIsNone(error, f"report_rows raised {type(error).__name__}: {error}")
-        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["model default"])
+        self.assertEqual([r["label"] for r in result if r["case"] == "c1"], ["expected default behavior"])
 
 
 class TestMain(unittest.TestCase):
@@ -470,7 +470,7 @@ class TestMain(unittest.TestCase):
 
         # Assert: the c1 line names the bound and the not-evidence note
         line = next((x for x in lines if x.startswith("c1:")), "")
-        self.assertIn("model default bound 0.527", line)
+        self.assertIn("expected default behavior bound 0.527", line)
         self.assertIn("(not evidence of keeping the behavior)", line)
 
     def test_main_equalNonEdgeRate_printsNoBoundAndNoNote(self):
@@ -481,7 +481,7 @@ class TestMain(unittest.TestCase):
         lines = self._run_main(runs)
 
         # Assert: the c1 line is the bare label, with no bound and no note
-        self.assertIn("c1: model default", lines)
+        self.assertIn("c1: expected default behavior", lines)
         for line in lines:
             self.assertNotIn("bound", line)
             self.assertNotIn("not evidence", line)

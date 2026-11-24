@@ -1,0 +1,2 @@
+mkdir -p "$STATE/out"
+: >"$STATE/out/present.md"

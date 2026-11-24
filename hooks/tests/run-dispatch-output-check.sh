@@ -13,6 +13,9 @@
 #   payloads               - names of files under fixtures-dispatch-output-check/
 #                             payloads/, one per line, fed to the hook in order,
 #                             one hook run per payload.
+#                             A payload file may contain the token @STATE@; the
+#                             runner replaces it with the case's $STATE before
+#                             feeding it (use setup to create files there).
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
 #   simultaneous           - "PAIRS ROUNDS [dup]": per round, start both events
@@ -70,6 +73,12 @@ make_nojq_bin() {
 # nojq_bin and case_env.
 run_hook() {
   local payload="$1"
+  if grep -qF '@STATE@' "$payload"; then
+    local subbed
+    subbed="$(mktemp "$tmp/out/sub.XXXXXX")"
+    sed "s|@STATE@|$STATE|g" "$payload" >"$subbed"
+    payload="$subbed"
+  fi
   (
     export DISPATCH_CHECK_STATE_DIR="$STATE"
     export DISPATCH_CHECK_AGENTS_DIR="$tmp/agents"

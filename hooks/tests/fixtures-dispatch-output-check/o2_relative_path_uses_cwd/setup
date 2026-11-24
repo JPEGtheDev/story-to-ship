@@ -1,0 +1,2 @@
+mkdir -p "$STATE/cwd/out"
+: >"$STATE/cwd/out/ref-07.md"

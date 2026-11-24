@@ -18,7 +18,7 @@ The three-role loop splits one code todo into three dispatches, each run by a di
 Every plan entry carries one marker line, `loop: three-role` or `loop: single`, with a one-line reason. The rule for choosing is in the loop-marker section of the writing-plans skill's todo templates.
 
 - `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.
-- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
+- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, a todo whose test pins behavior that already exists, fix rounds after the end review, and reconcile fix rounds.
 - A todo that mixes code and prose is split into a code todo and a prose todo before dispatch.
 
 ## 2. Dispatch order
@@ -77,7 +77,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 
 ### single
 
-- For a code todo: writes the failing test first, watches it fail for the expected reason, implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`.
+- For a code todo: writes the failing test first, watches it fail for the expected reason (a test that pins behavior that already exists gets the testing skill's scratch edit proof instead), implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`.
 - For a prose, config, pure refactor or deletion todo: writes no test first, runs the todo's own checks, and uses the conventional commit type that fits (`docs`, `chore`, `refactor`, `ci`, and so on).
 
 ## 4. Test-path predicate

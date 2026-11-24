@@ -64,13 +64,18 @@ park_payload() {
 }
 
 # Claims the parked event into the file $3. With none parked, parks ours;
-# losing that race means the other event is now parked, so loop and claim it.
-# Returns 0 only when a parked event was claimed.
+# losing that race, or re-parking over a duplicate of our own kind while the
+# slot filled meanwhile, means the other event is now parked: claim again, up
+# to 3 attempts. Returns 0 only when a parked event of the other kind was
+# claimed (it is left in $3).
 claim_parked() {
   local payload="$1" id="$2" claim="$3"
   for _ in 1 2 3; do
     if mv "$PENDING/$id" "$claim" 2>/dev/null; then
-      return 0
+      if [[ "$(event_name "$(cat "$claim")")" != "$(event_name "$payload")" ]]; then
+        return 0
+      fi
+      # A duplicate of the parked kind: replace it with ours.
     fi
     park_payload "$payload" "$id" "$claim" && return 1
   done
@@ -81,18 +86,20 @@ claim_parked() {
 
 build_record() {
   local id="$1" post="$2" prompt dispatch_id output_path type
-  prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post")"
+  prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
   dispatch_id="$(message_line "$prompt" 'Dispatch id')"
   output_path="$(message_line "$prompt" 'Output path')"
-  type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post")"
+  type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   jq -n -c --arg d "$dispatch_id" --arg a "$id" --arg s "$type" \
     --arg o "$output_path" --arg t "$now" \
     '{dispatch_id:$d,agent_id:$a,subagent_type:$s,verdict:"pass",failed:[],time:$t}
-     | if $o == "" then . else .output_path = $o end'
+     | if $o == "" then . else .output_path = $o end' 2>/dev/null
 }
 
 append_record() {
-  printf '%s\n' "$1" >>"$RECORDS"
+  if ! { printf '%s\n' "$1" >>"$RECORDS"; } 2>/dev/null; then
+    echo "dispatch-output-check: cannot write records file" >&2
+  fi
 }
 
 # --- fail closed ------------------------------------------------------------
@@ -111,7 +118,7 @@ fail_closed() {
 # --- main -------------------------------------------------------------------
 
 main() {
-  local payload id claim parked post
+  local payload id claim parked post record
   payload="$(cat)"
   mkdir -p "$PENDING" 2>/dev/null
   if [[ ! -d "$PENDING" || ! -w "$PENDING" ]]; then
@@ -135,16 +142,15 @@ main() {
   claim="$PENDING/$id.claim.$$"
   claim_parked "$payload" "$id" "$claim" || return 0
   parked="$(cat "$claim")"
-  if [[ "$(event_name "$parked")" == "$(event_name "$payload")" ]]; then
-    # A duplicate of the parked kind: replace it with ours.
-    park_payload "$payload" "$id" "$claim"
-    return 0
-  fi
   rm -f "$claim"
 
   post="$payload"
   [[ "$(event_name "$payload")" == "SubagentStop" ]] && post="$parked"
-  append_record "$(build_record "$id" "$post")"
+  record="$(build_record "$id" "$post")" || {
+    fail_closed "bad payload" "bad payload"
+    return 0
+  }
+  append_record "$record"
 }
 
 main

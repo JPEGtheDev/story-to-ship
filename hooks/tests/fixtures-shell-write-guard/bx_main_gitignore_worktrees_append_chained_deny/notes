@@ -1,0 +1,1 @@
+Pins R2-S2: a main-thread chained command `echo '.worktrees/' >> .gitignore; rm x` on the top-level .gitignore of the sandbox repo must be DENIED. The allowed single append (bw_) is judged one segment at a time, so the chained form currently slips through the guard. Expected to FAIL today: the guard allows it, so stdout is empty instead of a deny JSON.

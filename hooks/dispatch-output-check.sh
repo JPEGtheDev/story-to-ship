@@ -114,6 +114,10 @@ main() {
   local payload id claim parked post
   payload="$(cat)"
   mkdir -p "$PENDING" 2>/dev/null
+  if [[ ! -d "$PENDING" || ! -w "$PENDING" ]]; then
+    echo "dispatch-output-check: state dir $PENDING is not a writable directory" >&2
+    return 0
+  fi
   sweep_stale_pending
 
   if ! command -v jq >/dev/null 2>&1; then

@@ -1,5 +1,5 @@
 ---
-max_turns: 15
+max_turns: 16
 allowed_tools: [Read, Glob, Grep, Edit, Write, Bash, Skill]
 description: Tests whether a session that adds a test of already-working code shows evidence that the test can fail before it claims the work is done. The case has one untested function and one passing test of another.
 tags: [testing]

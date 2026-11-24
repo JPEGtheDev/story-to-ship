@@ -37,6 +37,7 @@ import math
 import os
 import re
 import sys
+import time
 
 DEFAULT_TIERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiers.json")
 COLUMNS = [
@@ -706,6 +707,13 @@ def no_rates_notice(tiers, tiers_path):
     )
 
 
+def price_file_line(tiers_path):
+    """Return the line naming the price file and its UTC modified date."""
+    mtime = os.stat(tiers_path).st_mtime
+    date = time.strftime("%Y-%m-%d", time.gmtime(mtime))
+    return f"# price file: {tiers_path}; modified {date} UTC"
+
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description="Print one tier usage row per subagent dispatch in a session folder."
@@ -725,6 +733,7 @@ def main(argv):
 
     rows, counts = collect(args.session_dir, tiers)
     sys.stdout.write(render(rows, counts))
+    sys.stdout.write(price_file_line(args.tiers) + "\n")
     notice = no_rates_notice(tiers, args.tiers)
     if notice:
         sys.stdout.write(notice + "\n")

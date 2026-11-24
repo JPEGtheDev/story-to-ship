@@ -109,7 +109,11 @@ def run_main(argv):
 
 
 def without_tier_notice(out):
-    return [line for line in out.splitlines() if not line.startswith("# tiers with no rates")]
+    return [
+        line
+        for line in out.splitlines()
+        if not line.startswith(("# tiers with no rates", "# price file:"))
+    ]
 
 
 def tier_of(lines, meta=None):
@@ -1715,6 +1719,89 @@ class SummaryOutputTests(unittest.TestCase):
             self.assertEqual((len(skipped), len(notice), len(summary)), (1, 1, 1))
             self.assertLess(skipped[0], notice[0])
             self.assertLess(notice[0], summary[0])
+
+    def test_Main_PriceFile_LinePrintsPathAndModifiedDateBetweenRowsAndSummary(self):
+        price_marker = "# price file"
+        price_prefix = price_marker + ": "
+        # 2026-01-02 12:00:00 UTC, fixed so the expected date does not depend on the time zone
+        stamp = 1767355200
+        expected_date = "2026-01-02"
+
+        def price_line_for(path):
+            return "%s%s; modified %s UTC" % (price_prefix, path, expected_date)
+
+        complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        with self.subTest("line names the tiers path and the UTC modified date"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": complete},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                os.utime(tiers_path, (stamp, stamp))
+                expected_line = price_line_for(tiers_path)
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertEqual(out.splitlines().count(expected_line), 1)
+        with self.subTest("line sits after skipped, before summary and the no-rates notice"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": None},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                os.utime(tiers_path, (stamp, stamp))
+                expected_line = price_line_for(tiers_path)
+                notice_prefix = "# tiers with no rates: "
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            lines = out.splitlines()
+            skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
+            price = [index for index, line in enumerate(lines) if line == expected_line]
+            notice = [index for index, line in enumerate(lines) if line.startswith(notice_prefix)]
+            summary = [index for index, line in enumerate(lines) if line.startswith("# summary")]
+            self.assertEqual((len(skipped), len(price), len(notice), len(summary)), (1, 1, 1, 1))
+            self.assertLess(skipped[0], price[0])
+            self.assertLess(price[0], notice[0])
+            self.assertLess(price[0], summary[0])
+        with self.subTest("no --tiers option prints the shipped path and a date"):
+            # Arrange
+            expected_prefix = price_prefix + tier_usage.DEFAULT_TIERS + "; modified "
+            expected_suffix = " UTC"
+            # Act
+            code, out, _ = run_main([BASIC])
+            # Assert
+            self.assertEqual(code, 0)
+            matches = [line for line in out.splitlines() if line.startswith(expected_prefix)]
+            self.assertEqual(len(matches), 1)
+            line = matches[0]
+            self.assertTrue(line.endswith(expected_suffix), line)
+            middle = line[len(expected_prefix) : -len(expected_suffix)]
+            self.assertIsNotNone(re.fullmatch(r"\d{4}-\d{2}-\d{2}", middle), middle)
+        with self.subTest("unreadable tiers file exits 2 with no price line"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = os.path.join(tmp, "tiers.json")
+                with open(tiers_path, "w", encoding="utf-8") as handle:
+                    handle.write("not json")
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 2)
+            price_lines = [line for line in out.splitlines() if line.startswith(price_marker)]
+            self.assertEqual(price_lines, [])
 
 
 if __name__ == "__main__":

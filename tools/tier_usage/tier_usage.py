@@ -675,6 +675,20 @@ def render_summary(summary):
     return "\n".join(lines) + "\n"
 
 
+def no_rates_notice(tiers, tiers_path):
+    """Return the one-line notice naming tiers without rates, or "" when none lack them."""
+    missing = [name for name, spec in tiers.items() if spec.get("rates_per_million") is None]
+    if not missing:
+        return ""
+    return (
+        "# tiers with no rates: "
+        + ", ".join(missing)
+        + "; set rates_per_million for each in "
+        + tiers_path
+        + ", or pass --tiers FILE to use a file outside the repo"
+    )
+
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description="Print one tier usage row per subagent dispatch in a session folder."
@@ -694,6 +708,9 @@ def main(argv):
 
     rows, counts = collect(args.session_dir, tiers)
     sys.stdout.write(render(rows, counts))
+    notice = no_rates_notice(tiers, args.tiers)
+    if notice:
+        sys.stdout.write(notice + "\n")
     sys.stdout.write("\n")
     sys.stdout.write(render_summary(summarize(rows)))
     return 0

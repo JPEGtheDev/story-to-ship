@@ -129,35 +129,24 @@ def _check_tier(name, spec):
     rates = spec.get("rates_per_million")
     if rates is None:
         return
+    field = f"tier {name!r} field 'rates_per_million'"
     if not isinstance(rates, dict):
-        raise ValueError(
-            f"tier {name!r} field 'rates_per_million' must be null or an object"
-        )
+        raise ValueError(f"{field} must be null or an object")
     for key, value in rates.items():
         if not _is_number(value) or not math.isfinite(value):
-            raise ValueError(
-                f"tier {name!r} field 'rates_per_million' key {key!r} "
-                "must be a finite number"
-            )
+            raise ValueError(f"{field} key {key!r} must be a finite number")
     if not rates:
-        raise ValueError(f"tier {name!r} field 'rates_per_million' must not be empty")
+        raise ValueError(f"{field} must not be empty")
     required = tuple(RATE_KEY_FOR_USAGE.values())
     for key in rates:
         if key not in required:
-            raise ValueError(
-                f"tier {name!r} field 'rates_per_million' has unknown key {key!r}"
-            )
+            raise ValueError(f"{field} has unknown key {key!r}")
     for key in required:
         if key not in rates:
-            raise ValueError(
-                f"tier {name!r} field 'rates_per_million' is missing key {key!r}"
-            )
+            raise ValueError(f"{field} is missing key {key!r}")
     for key in required:
         if rates[key] < 0:
-            raise ValueError(
-                f"tier {name!r} field 'rates_per_million' key {key!r} "
-                "must not be negative"
-            )
+            raise ValueError(f"{field} key {key!r} must not be negative")
 
 
 def load_tiers(path):

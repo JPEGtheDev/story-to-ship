@@ -20,10 +20,12 @@ def fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n):
 
 
 def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
-    """Return LOSS, HOLD or NEXT for a stage of 5, 15 or 30 runs."""
+    """Return LOSS, EDIT, HOLD or NEXT for a stage of 5, 15 or 30 runs."""
     p = fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
     if stage == 5:
-        return "LOSS" if p <= 0.01 else "NEXT"
+        if cand_pass == cand_n:
+            return "NEXT"
+        return "LOSS" if p <= 0.01 else "EDIT"
     if p <= 0.05:
         return "LOSS"
     if stage == 15 and cand_pass != cand_n and cand_pass * ref_n < ref_pass * cand_n:

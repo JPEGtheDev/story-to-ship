@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["output file is not readable: "+.[0].output_path]

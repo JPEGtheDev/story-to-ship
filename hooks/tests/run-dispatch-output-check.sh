@@ -20,7 +20,9 @@
 #                             outside the state dir that always exists; the shared
 #                             payloads name @OUT@/out-100.md as their output file
 #                             and each case that expects it present creates it in
-#                             setup (: >"$tmp/files/out-100.md").
+#                             setup with printf 'Dispatch id: D-100\n'
+#                             >"$tmp/files/out-100.md" (an empty file fails the
+#                             ownership check).
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
 #   simultaneous           - "PAIRS ROUNDS [dup]": per round, start both events

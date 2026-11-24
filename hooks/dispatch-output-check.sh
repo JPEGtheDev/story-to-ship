@@ -11,11 +11,13 @@
 # produces a record. Parked files older than 1 hour are swept on every run.
 #
 # The dispatch message lines `Dispatch id:` and `Output path:` are read from
-# tool_input.prompt (each optional). The verdict is always pass with an empty
-# failed list until the checks are added.
+# tool_input.prompt (each optional). Each check appends to the failed list;
+# the verdict is fail when the list is non-empty.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
-# jq or unparseable stdin writes a message to stderr and a fail record.
+# jq, unparseable stdin or a payload that is not a JSON object writes a
+# message to stderr and a fail record. A records file that cannot be written
+# gives the stderr message `cannot write records file` and no record.
 
 STATE="${DISPATCH_CHECK_STATE_DIR:-${CLAUDE_PROJECT_DIR:-.}/.claude}"
 RECORDS="$STATE/dispatch-check-records.jsonl"
@@ -88,15 +90,46 @@ claim_parked() {
 
 # --- build and append record ------------------------------------------------
 
+# The directory a relative path is resolved in: the SubagentStop payload cwd,
+# else the PostToolUse payload cwd, else the current directory.
+payload_cwd() {
+  local dir="" payload
+  for payload in "$1" "$2"; do
+    dir="$(jq -r '.cwd // empty' <<<"$payload" 2>/dev/null)" || return 1
+    [[ -n "$dir" ]] && break
+  done
+  printf '%s' "${dir:-.}"
+}
+
+# Each check appends its failure strings to the array "failed" of the caller.
+check_output_path() {
+  local path="$1" cwd="$2" full="$1"
+  [[ -z "$path" ]] && return 0
+  if [[ "$path" == *[\{\}\<\>]* ]]; then
+    failed+=("output path has a placeholder: $path")
+    return 0
+  fi
+  [[ "$path" != /* ]] && full="$cwd/$path"
+  if [[ ! -f "$full" ]]; then
+    failed+=("output file missing: $path")
+  fi
+}
+
+# build_record ID POST STOP: POST and STOP are the two parked payloads.
 build_record() {
-  local id="$1" post="$2" prompt dispatch_id output_path type
+  local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd
+  local -a failed=()
   prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
   dispatch_id="$(message_line "$prompt" 'Dispatch id')"
-  output_path="$(message_line "$prompt" 'Output path')"
+  output_path="$(message_line "$prompt" 'Output path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
-  jq -n -c --arg d "$dispatch_id" --arg a "$id" --arg s "$type" \
-    --arg o "$output_path" --arg t "$now" \
-    '{dispatch_id:$d,agent_id:$a,subagent_type:$s,verdict:"pass",failed:[],time:$t}
+  cwd="$(payload_cwd "$stop" "$post")" || return 1
+  check_output_path "$output_path" "$cwd"
+  printf '%s\n' "${failed[@]}" | jq -n -c -R --arg d "$dispatch_id" --arg a "$id" \
+    --arg s "$type" --arg o "$output_path" --arg t "$now" \
+    '[inputs | select(. != "")] as $f
+     | {dispatch_id:$d,agent_id:$a,subagent_type:$s,
+        verdict:(if ($f | length) > 0 then "fail" else "pass" end),failed:$f,time:$t}
      | if $o == "" then . else .output_path = $o end' 2>/dev/null
 }
 
@@ -127,7 +160,7 @@ fail_closed() {
 # --- main -------------------------------------------------------------------
 
 main() {
-  local payload id claim parked post record
+  local payload id claim parked post stop record
   payload="$(cat)"
   mkdir -p "$PENDING" 2>/dev/null
   if [[ ! -d "$PENDING" || ! -w "$PENDING" ]]; then
@@ -161,8 +194,12 @@ main() {
   rm -f "$claim"
 
   post="$payload"
-  [[ "$(event_name "$payload")" == "SubagentStop" ]] && post="$parked"
-  record="$(build_record "$id" "$post")" || {
+  stop="$parked"
+  if [[ "$(event_name "$payload")" == "SubagentStop" ]]; then
+    post="$parked"
+    stop="$payload"
+  fi
+  record="$(build_record "$id" "$post" "$stop")" || {
     fail_closed "bad payload" "bad payload" "$id"
     return 0
   }

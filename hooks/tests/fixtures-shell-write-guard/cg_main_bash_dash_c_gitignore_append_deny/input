@@ -1,0 +1,1 @@
+{"session_id":"sess-cg","hook_event_name":"PreToolUse","tool_name":"Bash","cwd":"__CWD__","tool_input":{"command":"bash -c \"echo '.worktrees/' >> .gitignore\"; ls x"}}

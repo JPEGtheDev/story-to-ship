@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: testing-existing-behavior-breaking-edit
+context:
+  scaffold_script: scaffold.sh

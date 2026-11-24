@@ -26,6 +26,9 @@
 #   expect_exit            - exact exit code of every run (default 0).
 #   expect_stdout_empty    - when present, stdout of every run must be empty.
 #   expect_stderr_nonempty - when present, some run must print to stderr.
+#   expect_stderr_grep     - fixed substrings that must appear in stderr.
+#   expect_stderr_absent   - fixed substrings that must not appear in stderr.
+#   expect_stderr_lines    - exact number of lines in stderr (all runs joined).
 #   expect_records         - exact number of lines in the record file (a missing
 #                             file counts as 0).
 #   expect_record_jq       - one jq -e filter per line, applied to the array of
@@ -209,6 +212,35 @@ run_case() {
     reasons+=("stderr empty, expected a message")
   fi
 
+  local want_text
+  if [[ -f "$case_dir/expect_stderr_grep" ]]; then
+    while IFS= read -r want_text; do
+      [[ -z "$want_text" ]] && continue
+      if ! grep -qF -- "$want_text" <<<"$stderr_all"; then
+        ok=0
+        reasons+=("stderr missing substring: $want_text")
+      fi
+    done <"$case_dir/expect_stderr_grep"
+  fi
+  if [[ -f "$case_dir/expect_stderr_absent" ]]; then
+    while IFS= read -r want_text; do
+      [[ -z "$want_text" ]] && continue
+      if grep -qF -- "$want_text" <<<"$stderr_all"; then
+        ok=0
+        reasons+=("stderr has forbidden substring: $want_text")
+      fi
+    done <"$case_dir/expect_stderr_absent"
+  fi
+  if [[ -f "$case_dir/expect_stderr_lines" ]]; then
+    local want_lines got_lines=0
+    want_lines="$(tr -d '[:space:]' <"$case_dir/expect_stderr_lines")"
+    [[ -n "$stderr_all" ]] && got_lines="$(printf '%s\n' "$stderr_all" | wc -l | tr -d '[:space:]')"
+    if [[ "$got_lines" -ne "$want_lines" ]]; then
+      ok=0
+      reasons+=("stderr line count: expected $want_lines got $got_lines")
+    fi
+  fi
+
   local records="$STATE/dispatch-check-records.jsonl"
   local actual_records=0
   [[ -f "$records" ]] && actual_records="$(wc -l <"$records" | tr -d '[:space:]')"
@@ -283,6 +315,7 @@ run_case() {
     done <"$case_dir/expect_absent"
   fi
 
+  chmod -R u+rwx "$tmp" 2>/dev/null
   rm -rf "$tmp"
 
   if [[ "$ok" -eq 1 ]]; then

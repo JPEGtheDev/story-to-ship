@@ -590,8 +590,17 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     )
     est_output = sum(row["est_output_tokens"] for row in counted)
     priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
+    unpriced = len(counted) - len(priced)
     total = sum(priced)
-    cost = round(total, 4) if priced else NO_RATES
+    partial = bool(priced) and unpriced > 0
+    if partial:
+        cost = "partial: %s (%d of %d rows unpriced)" % (
+            round(total, 4),
+            unpriced,
+            len(counted),
+        )
+    else:
+        cost = round(total, 4) if priced else NO_RATES
 
     assigned = [
         owner
@@ -600,7 +609,9 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     ]
     if todo_count:
         per_todo_tokens = "%.1f" % (input_side / todo_count)
-        if priced:
+        if partial:
+            per_todo_usd = "partial"
+        elif priced:
             per_todo_usd = round(total / todo_count, 4)
         else:
             per_todo_usd = NO_RATES

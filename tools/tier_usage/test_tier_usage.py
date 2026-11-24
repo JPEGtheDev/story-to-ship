@@ -654,6 +654,17 @@ class TierShapeTests(unittest.TestCase):
         # Assert
         self.assertEqual(loaded["economy"]["match"], ["x"])
 
+    def test_ShippedTiers_NoRatesInRepo_EveryTierHasNullRates(self):
+        # Arrange
+        path = TIERS_FILE
+        # Act
+        tiers = tier_usage.load_tiers(path)
+        # Assert
+        self.assertTrue(tiers)
+        for name, spec in tiers.items():
+            with self.subTest(tier=name):
+                self.assertIsNone(spec["rates_per_million"], "tier '%s'" % name)
+
     def test_Main_BadRateValue_ExitsTwoWithMessage(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:

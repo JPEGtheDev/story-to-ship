@@ -71,11 +71,11 @@ Before creating, editing, or shipping any skill or agent template:
 12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
    - [-] Enforcement cut or moved for size -> restore it inline
 
-13. **Shortening, rewording, or adding a rule line to a skill?** Run the old-versus-new eval comparison of `references/SKILL_EVAL_COMPARISON.md` before shipping.
+13. **Shortening, rewording, or adding a rule line to a skill?** Before shipping, run the old-versus-new eval comparison of `references/SKILL_EVAL_COMPARISON.md` for a shortened or reworded line, and name the failing case for an added rule line.
    - A rule line is added only for a case that fails without the skill: write the case, show the no-skill failure, then add the rule line.
    - After an earlier comparison, test a change on its targeted cases first: 5 runs per case until each passes 5 of 5, then the 15-run and 30-run stages, then the whole suite; run the pre-ship check before each ship.
    - A pair with 0 passes in both arms, or all passes in both arms, is not evidence that the new text keeps the behavior.
-   - [-] No comparison record, or a confirmed LOSS -> do not ship the change
+   - [-] No comparison record for a shortened or reworded line, no failing case for an added rule line, or a confirmed LOSS -> do not ship the change
 
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above

@@ -16,6 +16,11 @@
 #                             A payload file may contain the token @STATE@; the
 #                             runner replaces it with the case's $STATE before
 #                             feeding it (use setup to create files there).
+#                             The token @OUT@ becomes $tmp/files, a per-case dir
+#                             outside the state dir that always exists; the shared
+#                             payloads name @OUT@/out-100.md as their output file
+#                             and each case that expects it present creates it in
+#                             setup (: >"$tmp/files/out-100.md").
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
 #   simultaneous           - "PAIRS ROUNDS [dup]": per round, start both events
@@ -73,10 +78,10 @@ make_nojq_bin() {
 # nojq_bin and case_env.
 run_hook() {
   local payload="$1"
-  if grep -qF '@STATE@' "$payload"; then
+  if grep -qF -e '@STATE@' -e '@OUT@' "$payload"; then
     local subbed
     subbed="$(mktemp "$tmp/out/sub.XXXXXX")"
-    sed "s|@STATE@|$STATE|g" "$payload" >"$subbed"
+    sed -e "s|@STATE@|$STATE|g" -e "s|@OUT@|$tmp/files|g" "$payload" >"$subbed"
     payload="$subbed"
   fi
   (
@@ -119,7 +124,7 @@ run_case() {
   fi
 
   tmp="$(mktemp -d)"
-  mkdir -p "$tmp/agents" "$tmp/project" "$tmp/out"
+  mkdir -p "$tmp/agents" "$tmp/project" "$tmp/out" "$tmp/files"
   STATE="$tmp/state"
   if [[ -f "$case_dir/state_subdir" ]]; then
     STATE="$tmp/$(tr -d '[:space:]' <"$case_dir/state_subdir")"

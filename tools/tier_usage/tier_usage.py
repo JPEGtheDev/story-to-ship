@@ -139,6 +139,25 @@ def _check_tier(name, spec):
                 f"tier {name!r} field 'rates_per_million' key {key!r} "
                 "must be a finite number"
             )
+    if not rates:
+        raise ValueError(f"tier {name!r} field 'rates_per_million' must not be empty")
+    required = tuple(RATE_KEY_FOR_USAGE.values())
+    for key in rates:
+        if key not in required:
+            raise ValueError(
+                f"tier {name!r} field 'rates_per_million' has unknown key {key!r}"
+            )
+    for key in required:
+        if key not in rates:
+            raise ValueError(
+                f"tier {name!r} field 'rates_per_million' is missing key {key!r}"
+            )
+    for key in required:
+        if rates[key] < 0:
+            raise ValueError(
+                f"tier {name!r} field 'rates_per_million' key {key!r} "
+                "must not be negative"
+            )
 
 
 def load_tiers(path):
@@ -146,8 +165,12 @@ def load_tiers(path):
 
     Raises ValueError when the "tiers" value is not an object of objects, when a
     "match" is not a list of non-empty strings, or when "rates_per_million" is
-    neither null nor an object whose values are all finite numbers (bool and
-    NaN or infinity excluded).
+    neither null nor an object. A non-null "rates_per_million" object must have
+    exactly the keys RATE_KEY_FOR_USAGE.values() (input, cache_write, cache_read,
+    output): an empty object, an unknown key, or a missing key is refused, with
+    the unknown key reported before the first missing key in that order. Every
+    value must be a finite number, not a bool, and not negative (0 and -0.0 are
+    allowed).
     """
     with open(path, encoding="utf-8") as handle:
         data = json.load(handle)

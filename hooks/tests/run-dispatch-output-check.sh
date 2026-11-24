@@ -8,8 +8,8 @@
 # (DISPATCH_CHECK_STATE_DIR) and the runner asserts the record file as well
 # as stdout, stderr and the exit code.
 #
-# Case directory contract (every file optional except one of payloads or
-# concurrent):
+# Case directory contract (every file optional except one of payloads,
+# concurrent or simultaneous):
 #   payloads               - names of files under fixtures-dispatch-output-check/
 #                             payloads/, one per line, fed to the hook in order,
 #                             one hook run per payload.
@@ -24,7 +24,8 @@
 #   state_subdir           - use $tmp/<value> (not yet created) as the state dir.
 #   no_jq                  - when present, run with a PATH that lacks jq.
 #   expect_exit            - exact exit code of every run (default 0).
-#   expect_stdout_empty    - when present, stdout of every run must be empty.
+#   expect_stdout_empty    - when present, stdout of every run must be empty
+#                             (byte-exact: the stdout file must have size 0).
 #   expect_stderr_nonempty - when present, some run must print to stderr.
 #   expect_stderr_grep     - fixed substrings that must appear in stderr.
 #   expect_stderr_absent   - fixed substrings that must not appear in stderr.
@@ -37,6 +38,7 @@
 #   expect_parked          - agent ids whose parked file must exist.
 #   expect_parked_grep     - lines "agent id:substring"; the parked file must
 #                             contain the substring.
+#   expect_parked_count    - exact number of files in the pending dir.
 #   expect_no_parked       - when present, the pending dir holds no file.
 #   expect_absent          - parked file names that must not exist.
 
@@ -123,7 +125,9 @@ run_case() {
   local expect_exit=0
   [[ -f "$case_dir/expect_exit" ]] && expect_exit="$(tr -d '[:space:]' <"$case_dir/expect_exit")"
 
-  local n=0 stdout_all="" stderr_all="" rc
+  local n=0 stderr_all="" rc
+  local stdout_file="$tmp/out/stdout.all"
+  : >"$stdout_file"
   if [[ -f "$case_dir/concurrent" ]]; then
     local count i kind id
     count="$(tr -d '[:space:]' <"$case_dir/concurrent")"
@@ -144,7 +148,7 @@ run_case() {
     for ((i = 1; i <= count; i++)); do
       for kind in p s; do
         n=$((n + 1))
-        stdout_all+="$(cat "$tmp/out/$kind$i.out")"
+        cat "$tmp/out/$kind$i.out" >>"$stdout_file"
         stderr_all+="$(cat "$tmp/out/$kind$i.err")"
         rc="$(cat "$tmp/out/$kind$i.rc")"
         if [[ "$rc" -ne "$expect_exit" ]]; then
@@ -178,7 +182,7 @@ run_case() {
       for ((i = 1; i <= pairs; i++)); do
         for kind in p s; do
           n=$((n + 1))
-          stdout_all+="$(cat "$tmp/out/$kind$r-$i.out")"
+          cat "$tmp/out/$kind$r-$i.out" >>"$stdout_file"
           stderr_all+="$(cat "$tmp/out/$kind$r-$i.err")"
           rc="$(cat "$tmp/out/$kind$r-$i.rc")"
           if [[ "$rc" -ne "$expect_exit" ]]; then
@@ -193,7 +197,7 @@ run_case() {
     while IFS= read -r payload; do
       [[ -z "$payload" ]] && continue
       n=$((n + 1))
-      stdout_all+="$(run_hook "$PAYLOADS/$payload" 2>"$tmp/out/err$n")"
+      run_hook "$PAYLOADS/$payload" >>"$stdout_file" 2>"$tmp/out/err$n"
       rc=$?
       stderr_all+="$(cat "$tmp/out/err$n")"
       if [[ "$rc" -ne "$expect_exit" ]]; then
@@ -203,9 +207,9 @@ run_case() {
     done <"$case_dir/payloads"
   fi
 
-  if [[ -f "$case_dir/expect_stdout_empty" && -n "$stdout_all" ]]; then
+  if [[ -f "$case_dir/expect_stdout_empty" && -s "$stdout_file" ]]; then
     ok=0
-    reasons+=("stdout not empty: [$stdout_all]")
+    reasons+=("stdout not empty: $(wc -c <"$stdout_file" | tr -d '[:space:]') bytes")
   fi
   if [[ -f "$case_dir/expect_stderr_nonempty" && -z "$stderr_all" ]]; then
     ok=0
@@ -295,6 +299,15 @@ run_case() {
         reasons+=("parked file ${entry%%:*} missing substring ${entry#*:}")
       fi
     done <"$case_dir/expect_parked_grep"
+  fi
+  if [[ -f "$case_dir/expect_parked_count" ]]; then
+    local want_parked got_parked=0
+    want_parked="$(tr -d '[:space:]' <"$case_dir/expect_parked_count")"
+    [[ -d "$pending" ]] && got_parked="$(find "$pending" -type f | wc -l | tr -d '[:space:]')"
+    if [[ "$got_parked" -ne "$want_parked" ]]; then
+      ok=0
+      reasons+=("parked file count: expected $want_parked got $got_parked")
+    fi
   fi
   if [[ -f "$case_dir/expect_no_parked" && -d "$pending" ]]; then
     local left

@@ -107,6 +107,10 @@ def run_main(argv):
     return code, out.getvalue(), err.getvalue()
 
 
+def without_tier_notice(out):
+    return [line for line in out.splitlines() if not line.startswith("# tiers with no rates")]
+
+
 def tier_of(lines, meta=None):
     if meta is None:
         meta = {"agentType": "implementer"}
@@ -428,7 +432,7 @@ class EmptyFolderTests(unittest.TestCase):
             os.makedirs(os.path.join(tmp, "subagents"))
             code, out, _ = run_main([tmp])
         self.assertEqual(code, 0)
-        lines = out.splitlines()
+        lines = without_tier_notice(out)
         self.assertEqual(lines[0], "\t".join(tier_usage.COLUMNS))
         self.assertTrue(lines[-4].startswith("# skipped"), lines[-4])
         self.assertEqual(lines[-3], "")
@@ -1484,7 +1488,7 @@ class SummaryOutputTests(unittest.TestCase):
     def test_Main_FullFixtureOrder_RowsThenSkippedThenBlankThenSummary(self):
         code, out, _ = run_main([FULL])
         self.assertEqual(code, 0)
-        lines = out.splitlines()
+        lines = without_tier_notice(out)
         skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
         self.assertEqual(len(skipped), 1)
         at = skipped[0]

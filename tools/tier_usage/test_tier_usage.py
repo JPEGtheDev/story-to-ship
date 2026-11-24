@@ -1493,6 +1493,71 @@ class SummaryOutputTests(unittest.TestCase):
         self.assertTrue(lines[at + 2].startswith("# summary"), lines[at + 2])
         self.assertEqual(lines[at + 3], "\t".join(tier_usage.SUMMARY_COLUMNS))
 
+    def test_Main_TiersWithoutRates_NoticeNamesTiersAndFile(self):
+        # Arrange
+        notice_prefix = "# tiers with no rates: "
+        notice_suffix = (
+            "; set rates_per_million for each in %s, or pass --tiers FILE "
+            "to use a file outside the repo"
+        )
+        complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        default_notice = notice_prefix + "economy, standard, premium" + notice_suffix % TIERS_FILE
+        summary_marker = "# summary per runner per tier"
+        with self.subTest("shipped tiers file names all three tiers"):
+            # Act
+            code, out, _ = run_main([BASIC])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertIn(default_notice, out.splitlines())
+        with self.subTest("economy complete, standard null, premium absent"):
+            with tempfile.TemporaryDirectory() as tmp:
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": None},
+                        "premium": {"match": [FAMILY_C]},
+                    },
+                )
+                expected_notice = (
+                    notice_prefix + "standard, premium" + notice_suffix % tiers_path
+                )
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertIn(expected_notice, out.splitlines())
+        with self.subTest("all three tiers complete"):
+            with tempfile.TemporaryDirectory() as tmp:
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": complete},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            notice_lines = [
+                line for line in out.splitlines() if line.startswith("# tiers with no rates")
+            ]
+            self.assertEqual(notice_lines, [])
+        with self.subTest("notice sits between skipped line and summary"):
+            # Act
+            code, out, _ = run_main([BASIC])
+            lines = out.splitlines()
+            # Assert
+            self.assertEqual(code, 0)
+            skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
+            notice = [index for index, line in enumerate(lines) if line.startswith(notice_prefix)]
+            summary = [index for index, line in enumerate(lines) if line.startswith(summary_marker)]
+            self.assertEqual((len(skipped), len(notice), len(summary)), (1, 1, 1))
+            self.assertLess(skipped[0], notice[0])
+            self.assertLess(notice[0], summary[0])
+
 
 if __name__ == "__main__":
     unittest.main()

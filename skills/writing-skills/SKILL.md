@@ -112,7 +112,7 @@ Before creating, editing, or shipping any skill or agent template:
 | "Context and Forces are extra writing overhead" | Rules without context misfire in edge cases. The overhead forces clarity about when the rule applies. |
 | "This rule could just live in the hook or per-turn context instead of a skill" | Identical content enforces worse as ambient per-turn text -- it habituates into wallpaper with no auditable loaded state. Keep hot-path text a minimal tripwire that forces a `Skill` call; keep rule bodies in the skill itself; keep rationale and why-text in the skill's own references/ files; recovery from mid-session drift is re-invoking the skill, not re-injecting text. |
 | "We can dedup this by pointing to another skill's table instead of duplicating it" | Never replace a skill's enforcement content (ban tables, gates, Red Flags, rationalization rows) with a pointer to another skill's material -- a dangling pointer enforces nothing, a drifted duplicate still enforces. Accept the duplication and align copies at review time; peer listings in a Related Skills section are still fine. |
-| "The line is obviously right, so it needs no failing case" | A line for a behavior the model already shows costs tokens and is unmeasured | Run the no-skill case; add the line only when it fails |
+| "The line is obviously right, so it needs no failing case" | A line for a behavior the model already shows costs tokens and is unmeasured; run the no-skill case and add the line only when it fails |
 
 ---
 

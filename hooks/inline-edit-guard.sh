@@ -212,7 +212,7 @@ def is_worktrees_ignore_add(top, real, tool_name, tool_input):
     try:
         if tool_name != "Edit":
             return False
-        if real != os.path.realpath(os.path.join(top, ".gitignore")):
+        if real != os.path.join(os.path.realpath(top), ".gitignore"):
             return False
         if tool_input.get("replace_all") is True:
             return False
@@ -308,6 +308,8 @@ def main():
 
     ext = os.path.splitext(real)[1]
     ext = ext[1:] if ext.startswith(".") else ext
+    if os.path.basename(file_path) == ".gitignore":
+        ext = ""
     extensions = prose_extensions()
     if ext.lower() not in [e.lower() for e in extensions]:
         ext_display = ext if ext else "(none)"

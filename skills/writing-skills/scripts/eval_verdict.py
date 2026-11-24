@@ -8,6 +8,8 @@ from math import comb
 
 # Procedure step d.7: a LOSS is confirmed by a batch of exactly this many fresh runs.
 FRESH_BATCH_RUNS = 30
+# Suite mode: every case is run this many times on each side.
+SUITE_RUNS = 30
 
 
 def fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n):
@@ -20,10 +22,12 @@ def fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n):
 
 
 def stage_verdict(stage, ref_pass, ref_n, cand_pass, cand_n):
-    """Return LOSS, HOLD or NEXT for a stage of 5, 15 or 30 runs."""
+    """Return LOSS, EDIT, HOLD or NEXT for a stage of 5, 15 or 30 runs."""
     p = fisher_one_sided(ref_pass, ref_n, cand_pass, cand_n)
     if stage == 5:
-        return "LOSS" if p <= 0.01 else "NEXT"
+        if cand_pass == cand_n:
+            return "NEXT"
+        return "LOSS" if p <= 0.01 else "EDIT"
     if p <= 0.05:
         return "LOSS"
     if stage == 15 and cand_pass != cand_n and cand_pass * ref_n < ref_pass * cand_n:
@@ -97,19 +101,61 @@ def _kept(runs, name, label, path):
     return kept
 
 
+def _check_same_cases(ref, cand, ref_path, cand_path):
+    """Exit 2 when the reference and candidate files do not hold the same case names."""
+    for name in cand:
+        if name not in ref:
+            _fail(f"case {name} is missing from the reference file {ref_path}")
+    for name in ref:
+        if name not in cand:
+            _fail(f"case {name} is missing from the candidate file {cand_path}")
+
+
+def _suite_lines(ref, cand, ref_path, cand_path):
+    """Print one line per case plus a summary; exit 2 on a case-set mismatch or a bad run count."""
+    _check_same_cases(ref, cand, ref_path, cand_path)
+    partial = False
+    below = 0
+    lines = []
+    for name in cand:
+        cand_pass, cand_n = _counts(_kept(cand, name, "candidate", cand_path))
+        if cand_n > SUITE_RUNS:
+            _fail(f"case {name} keeps {cand_n} of {SUITE_RUNS}")
+        if cand_n < SUITE_RUNS:
+            print(f"case {name} keeps {cand_n} of {SUITE_RUNS}, rerun", file=sys.stderr)
+            partial = True
+            continue
+        ref_pass, ref_n = _counts(_kept(ref, name, "reference", ref_path))
+        is_below = cand_pass * ref_n < ref_pass * cand_n
+        below += is_below
+        lines.append(f"{name}: ref={ref_pass}/{ref_n} cand={cand_pass}/{cand_n} {'BELOW' if is_below else 'OK'}")
+    for line in lines:
+        print(line)
+    print(f"below reference: {below}")
+    if partial:
+        sys.exit(2)
+
+
 def main(argv=None):
-    """Print one line per candidate case: name, p, stage verdict; exit 2 on bad input."""
+    """Run --stage N (per case: name, p, verdict) or --suite (per case: counts, OK or BELOW); exit 2 on bad input."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", type=int, choices=(5, 15, 30), required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--stage", type=int, choices=(5, 15, 30))
+    mode.add_argument("--suite", action="store_true", help="30-run suite check, no fresh=PATH")
     parser.add_argument("paths", nargs="+", help="ref=PATH cand=PATH [fresh=PATH]")
     args = parser.parse_args(argv)
     if len(args.paths) not in (2, 3):
-        _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH]")
+        _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH] | --suite ref=PATH cand=PATH")
     ref_path = _parse_path(args.paths[0], "ref")
     cand_path = _parse_path(args.paths[1], "cand")
     fresh_path = _parse_path(args.paths[2], "fresh") if len(args.paths) == 3 else None
+    if args.suite and fresh_path:
+        _fail("--suite does not take a fresh=PATH argument")
     ref = read_run_records(ref_path)
     cand = read_run_records(cand_path)
+    if args.suite:
+        _suite_lines(ref, cand, ref_path, cand_path)
+        return
     fresh = read_run_records(fresh_path) if fresh_path else None
     partial = False
     for name, (cand_kept, dropped) in cand.items():

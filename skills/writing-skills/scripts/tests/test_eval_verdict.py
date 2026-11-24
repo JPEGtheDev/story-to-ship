@@ -63,13 +63,38 @@ class StageVerdictTest(unittest.TestCase):
         self.assertIsNotNone(p)
         self.assertAlmostEqual(0.001528, p, places=6)
 
-    def test_StageVerdict_Stage5ThreeOfFiveAgainst30Of30_ReturnsNext(self):
-        # Arrange / Act
+    def test_StageVerdict_Stage5ThreeOfFiveAgainst30Of30_ReturnsEdit(self):
+        # Arrange
+        expected_verdict = "EDIT"
+        expected_p = 0.016807
+        # Act
         verdict = _stage_verdict(5, 30, 30, 3, 5)
         p = _p(30, 30, 3, 5)
         # Assert
-        self.assertEqual("NEXT", verdict)
-        self.assertAlmostEqual(0.016807, p, places=6)
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
+
+    def test_StageVerdict_Stage5FourOfFiveAgainst30Of30_ReturnsEdit(self):
+        # Arrange
+        expected_verdict = "EDIT"
+        expected_p = 0.142857
+        # Act
+        verdict = _stage_verdict(5, 30, 30, 4, 5)
+        p = _p(30, 30, 4, 5)
+        # Assert
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
+
+    def test_StageVerdict_Stage5OneOfFiveAgainst30Of30_ReturnsLoss(self):
+        # Arrange
+        expected_verdict = "LOSS"
+        expected_p = 0.000095
+        # Act
+        verdict = _stage_verdict(5, 30, 30, 1, 5)
+        p = _p(30, 30, 1, 5)
+        # Assert
+        self.assertEqual(expected_verdict, verdict)
+        self.assertAlmostEqual(expected_p, p, places=6)
 
     def test_StageVerdict_Stage15TwelveOfFifteenAgainst30Of30_ReturnsLoss(self):
         # Arrange / Act
@@ -215,6 +240,17 @@ class CliTest(unittest.TestCase):
         _write_run(ref, {"a": [(True, None)] * 30})
         _write_run(cand, {"a": cand_runs})
         return f"ref={ref}", f"cand={cand}", cand
+
+    def test_Cli_FourOfFiveAgainst30Of30_PrintsPAndEdit(self):
+        # Arrange
+        expected_line = "a: p=0.142857 EDIT"
+        with tempfile.TemporaryDirectory() as tmp:
+            ref, cand, _ = self._files(tmp, [(True, None)] * 4 + [(False, None)])
+            # Act
+            result = _run_cli("--stage", "5", ref, cand)
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
 
     def test_Cli_BadStageArgument_ExitsTwo(self):
         # Arrange
@@ -515,6 +551,144 @@ class RefusalTest(unittest.TestCase):
         # Assert
         self.assertEqual(0, result.returncode)
         self.assertIn("a: p=1.000000 NEXT", result.stdout)
+
+
+class SuiteModeTest(unittest.TestCase):
+    def _suite(self, tmp, ref_cases, cand_cases, *extra):
+        ref = os.path.join(tmp, "ref.json")
+        cand = os.path.join(tmp, "cand.json")
+        _write_run(ref, ref_cases)
+        _write_run(cand, cand_cases)
+        return _run_cli("--suite", f"ref={ref}", f"cand={cand}", *extra)
+
+    def _assert_exit_two_by_suite_logic(self, result):
+        self.assertEqual(2, result.returncode)
+        self.assertNotIn("unrecognized arguments", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_Suite_ThirtyOfThirtyAgainst30Of30_PrintsOkAndBelowReferenceZero(self):
+        # Arrange
+        expected_line = "a: ref=30/30 cand=30/30 OK"
+        expected_summary = "below reference: 0"
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": [(True, None)] * 30})
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
+        self.assertIn(expected_summary, result.stdout)
+
+    def test_Suite_TwentySevenOfThirtyAgainst30Of30_PrintsBelowAndBelowReferenceOne(self):
+        # Arrange
+        expected_line = "a: ref=30/30 cand=27/30 BELOW"
+        expected_summary = "below reference: 1"
+        cand = [(True, None)] * 27 + [(False, None)] * 3
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": cand})
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
+        self.assertIn(expected_summary, result.stdout)
+
+    def test_Suite_CandidateKeeps29Runs_ExitsTwoNamingCase(self):
+        # Arrange
+        expected_message = "case a keeps 29 of 30"
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": [(True, None)] * 29})
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn(expected_message, result.stderr)
+
+    def test_Suite_CandidateKeeps31Runs_ExitsTwo(self):
+        # Arrange
+        ref, cand = [(True, None)] * 30, [(True, None)] * 31
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": ref}, {"a": cand})
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn("error: case a keeps 31 of 30", result.stderr)
+
+    def test_Suite_CandidateCaseMissingFromReference_ExitsTwo(self):
+        # Arrange
+        ref = {"a": [(True, None)] * 30}
+        cand = {"a": [(True, None)] * 30, "b": [(True, None)] * 30}
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, ref, cand)
+            ref_path = os.path.join(tmp, "ref.json")
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn(f"case b is missing from the reference file {ref_path}", result.stderr)
+
+    def test_Suite_ReferenceCaseMissingFromCandidate_ExitsTwo(self):
+        # Arrange
+        ref = {"a": [(True, None)] * 30, "b": [(True, None)] * 30}
+        cand = {"a": [(True, None)] * 30}
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, ref, cand)
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn("case b", result.stderr)
+
+    def test_Suite_DroppedErroredCandidateRun_PrintsDroppedCountNamingCase(self):
+        # Arrange
+        expected_line = "a: dropped 1"
+        cand = [(None, "timeout")] + [(True, None)] * 30
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": cand})
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
+        self.assertIn("a: ref=30/30 cand=30/30 OK", result.stdout)
+
+    def test_Suite_Reference29Of29Candidate29Of30_PrintsBelowByCrossMultiplication(self):
+        # Arrange: 29*29 < 29*30 is BELOW, though 29 < 29 is false
+        expected_line = "a: ref=29/29 cand=29/30 BELOW"
+        cand = [(True, None)] * 29 + [(False, None)]
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 29}, {"a": cand})
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
+        self.assertIn("below reference: 1", result.stdout)
+
+    def test_Suite_PartialCaseAWithCompleteCaseB_ExitsTwoAndStillPrintsCaseB(self):
+        # Arrange
+        ref = {"a": [(True, None)] * 30, "b": [(True, None)] * 30}
+        cand = {"a": [(True, None)] * 29, "b": [(True, None)] * 30}
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, ref, cand)
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn("case a keeps 29 of 30, rerun", result.stderr)
+        self.assertIn("b: ref=30/30 cand=30/30 OK", result.stdout)
+
+    def test_Suite_CombinedWithStage_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": [(True, None)] * 30}, "--stage", "5")
+        # Assert
+        self.assertEqual(2, result.returncode)
+        self.assertIn("not allowed with", result.stderr)
+
+    def test_Suite_WithFreshPath_ExitsTwo(self):
+        # Arrange
+        with tempfile.TemporaryDirectory() as tmp:
+            fresh = os.path.join(tmp, "fresh.json")
+            _write_run(fresh, {"a": [(True, None)] * 30})
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": [(True, None)] * 30}, f"fresh={fresh}")
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn("fresh", result.stderr)
 
 
 if __name__ == "__main__":

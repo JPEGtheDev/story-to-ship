@@ -1,0 +1,2 @@
+(.[0].verdict=="fail" and .[0].failed==["output first line lacks Dispatch id a.b"])
+(.[1].verdict=="pass" and .[1].failed==[])

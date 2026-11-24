@@ -1,0 +1,2 @@
+printf 'axb\n' >"$tmp/files/litx.md"
+printf 'a.b\n' >"$tmp/files/litok.md"

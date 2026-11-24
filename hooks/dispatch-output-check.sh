@@ -46,22 +46,32 @@ elif [[ "$event" == "PostToolUse" && "$(jq -r '.tool_name // empty' <<<"$payload
 fi
 [[ -z "$id" || "$id" == */* ]] && exit 0
 
-# Claim the parked event. With none parked, or one of the same kind (a
-# duplicate), park ours and stop; otherwise the pair is complete.
+# Claim the parked event. With none parked, park ours with an atomic
+# create-if-absent (ln fails when the name exists); losing that race means the
+# other event is now parked, so loop and claim it. A parked event of the same
+# kind (a duplicate) is replaced by ours; otherwise the pair is complete.
 post="$payload"
 claim="$PENDING/$id.claim.$$"
-if mv "$PENDING/$id" "$claim" 2>/dev/null; then
-  parked="$(cat "$claim")"
-  if [[ "$(jq -r '.hook_event_name // empty' <<<"$parked")" == "$event" ]]; then
-    printf '%s' "$payload" >"$claim" && mv "$claim" "$PENDING/$id"
-    exit 0
+claimed=""
+for _ in 1 2 3; do
+  if mv "$PENDING/$id" "$claim" 2>/dev/null; then
+    claimed=1
+    break
   fi
+  printf '%s' "$payload" >"$claim" && ln "$claim" "$PENDING/$id" 2>/dev/null
+  parked_ok=$?
   rm -f "$claim"
-  [[ "$event" == "SubagentStop" ]] && post="$parked"
-else
-  printf '%s' "$payload" >"$claim" && mv "$claim" "$PENDING/$id"
+  [[ $parked_ok -eq 0 ]] && exit 0
+done
+[[ -z "$claimed" ]] && exit 0
+parked="$(cat "$claim")"
+if [[ "$(jq -r '.hook_event_name // empty' <<<"$parked")" == "$event" ]]; then
+  printf '%s' "$payload" >"$claim" && ln "$claim" "$PENDING/$id" 2>/dev/null
+  rm -f "$claim"
   exit 0
 fi
+rm -f "$claim"
+[[ "$event" == "SubagentStop" ]] && post="$parked"
 
 prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post")"
 dispatch_id="$(sed -n 's/^Dispatch id: *//p' <<<"$prompt" | head -n 1 | tr -d '\r')"

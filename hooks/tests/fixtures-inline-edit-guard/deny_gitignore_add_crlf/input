@@ -1,0 +1,1 @@
+{"session_id":"sess-1","hook_event_name":"PreToolUse","tool_name":"Edit","tool_input":{"file_path":"__REPO__/.gitignore","old_string":"node_modules/","new_string":"node_modules/\n.worktrees/"}}

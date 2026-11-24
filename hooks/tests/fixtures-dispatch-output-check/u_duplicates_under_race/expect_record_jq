@@ -1,0 +1,1 @@
+length==200 and all(.[]; .verdict=="pass") and ([.[].agent_id]|unique|length)==200

@@ -15,9 +15,11 @@
 #                             one hook run per payload.
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
-#   simultaneous           - "PAIRS ROUNDS": per round, start both events of
-#                             every pair as separate background jobs at once
-#                             (fresh agent ids each round), then wait.
+#   simultaneous           - "PAIRS ROUNDS [dup]": per round, start both events
+#                             of every pair as separate background jobs at once
+#                             (fresh agent ids each round), then wait. With
+#                             dup, each pair also gets a duplicate PostToolUse
+#                             job started at the same time.
 #   env                    - KEY=VALUE lines exported for every hook run.
 #   setup                  - bash snippet sourced before the runs; $STATE is
 #                             the state dir.
@@ -29,7 +31,8 @@
 #   expect_stderr_nonempty - when present, some run must print to stderr.
 #   expect_stderr_grep     - fixed substrings that must appear in stderr.
 #   expect_stderr_absent   - fixed substrings that must not appear in stderr.
-#   expect_stderr_lines    - exact number of lines in stderr (all runs joined).
+#   expect_stderr_lines    - exact number of lines in stderr (all runs joined, a
+#                             newline ends each run that printed).
 #   expect_records         - exact number of lines in the record file (a missing
 #                             file counts as 0).
 #   expect_record_jq       - one jq -e filter per line, applied to the array of
@@ -81,6 +84,14 @@ run_hook() {
     done
     "$BASH_BIN" "$HOOK" <"$payload"
   )
+}
+
+# Appends the stderr file $1 to stderr_all (a variable of run_case), ending
+# each non-empty run with a newline so runs never join into one line.
+add_stderr() {
+  local text
+  text="$(cat "$1")"
+  [[ -n "$text" ]] && stderr_all+="$text"$'\n'
 }
 
 run_case() {
@@ -149,7 +160,7 @@ run_case() {
       for kind in p s; do
         n=$((n + 1))
         cat "$tmp/out/$kind$i.out" >>"$stdout_file"
-        stderr_all+="$(cat "$tmp/out/$kind$i.err")"
+        add_stderr "$tmp/out/$kind$i.err"
         rc="$(cat "$tmp/out/$kind$i.rc")"
         if [[ "$rc" -ne "$expect_exit" ]]; then
           ok=0
@@ -158,8 +169,10 @@ run_case() {
       done
     done
   elif [[ -f "$case_dir/simultaneous" ]]; then
-    local pairs rounds r i kind id
-    read -r pairs rounds <"$case_dir/simultaneous"
+    local pairs rounds dup kinds r i kind id
+    read -r pairs rounds dup <"$case_dir/simultaneous"
+    kinds="p s"
+    [[ "$dup" == "dup" ]] && kinds="p s d"
     for ((r = 1; r <= rounds; r++)); do
       for ((i = 1; i <= pairs; i++)); do
         id="$(printf 'dddd%02d%07d' "$r" "$i")"
@@ -167,9 +180,10 @@ run_case() {
         "$JQ_BIN" -c --arg id "$id" '.tool_response.agentId=$id' "$PAYLOADS/async-post.json" >"$tmp/out/p$r-$i.json"
         # shellcheck disable=SC2016
         "$JQ_BIN" -c --arg id "$id" '.agent_id=$id' "$PAYLOADS/stop.json" >"$tmp/out/s$r-$i.json"
+        cp "$tmp/out/p$r-$i.json" "$tmp/out/d$r-$i.json"
       done
       for ((i = 1; i <= pairs; i++)); do
-        for kind in p s; do
+        for kind in $kinds; do
           (
             run_hook "$tmp/out/$kind$r-$i.json" >"$tmp/out/$kind$r-$i.out" 2>"$tmp/out/$kind$r-$i.err"
             echo $? >"$tmp/out/$kind$r-$i.rc"
@@ -180,10 +194,10 @@ run_case() {
     done
     for ((r = 1; r <= rounds; r++)); do
       for ((i = 1; i <= pairs; i++)); do
-        for kind in p s; do
+        for kind in $kinds; do
           n=$((n + 1))
           cat "$tmp/out/$kind$r-$i.out" >>"$stdout_file"
-          stderr_all+="$(cat "$tmp/out/$kind$r-$i.err")"
+          add_stderr "$tmp/out/$kind$r-$i.err"
           rc="$(cat "$tmp/out/$kind$r-$i.rc")"
           if [[ "$rc" -ne "$expect_exit" ]]; then
             ok=0
@@ -199,7 +213,7 @@ run_case() {
       n=$((n + 1))
       run_hook "$PAYLOADS/$payload" >>"$stdout_file" 2>"$tmp/out/err$n"
       rc=$?
-      stderr_all+="$(cat "$tmp/out/err$n")"
+      add_stderr "$tmp/out/err$n"
       if [[ "$rc" -ne "$expect_exit" ]]; then
         ok=0
         reasons+=("exit code mismatch on run $n ($payload): expected $expect_exit got $rc")
@@ -238,7 +252,7 @@ run_case() {
   if [[ -f "$case_dir/expect_stderr_lines" ]]; then
     local want_lines got_lines=0
     want_lines="$(tr -d '[:space:]' <"$case_dir/expect_stderr_lines")"
-    [[ -n "$stderr_all" ]] && got_lines="$(printf '%s\n' "$stderr_all" | wc -l | tr -d '[:space:]')"
+    [[ -n "$stderr_all" ]] && got_lines="$(printf '%s' "$stderr_all" | wc -l | tr -d '[:space:]')"
     if [[ "$got_lines" -ne "$want_lines" ]]; then
       ok=0
       reasons+=("stderr line count: expected $want_lines got $got_lines")

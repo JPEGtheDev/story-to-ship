@@ -1,0 +1,1 @@
+length==120 and (map(select(.agent_id|type=="string"))|length)==120 and ([.[].agent_id]|unique|length)==120

@@ -15,6 +15,9 @@
 #                             one hook run per payload.
 #   concurrent             - N: run N pairs (async PostToolUse + SubagentStop,
 #                             agent id rewritten per pair) as background jobs.
+#   simultaneous           - "PAIRS ROUNDS": per round, start both events of
+#                             every pair as separate background jobs at once
+#                             (fresh agent ids each round), then wait.
 #   env                    - KEY=VALUE lines exported for every hook run.
 #   setup                  - bash snippet sourced before the runs; $STATE is
 #                             the state dir.
@@ -31,6 +34,7 @@
 #   expect_parked          - agent ids whose parked file must exist.
 #   expect_parked_grep     - lines "agent id:substring"; the parked file must
 #                             contain the substring.
+#   expect_no_parked       - when present, the pending dir holds no file.
 #   expect_absent          - parked file names that must not exist.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -146,6 +150,41 @@ run_case() {
         fi
       done
     done
+  elif [[ -f "$case_dir/simultaneous" ]]; then
+    local pairs rounds r i kind id
+    read -r pairs rounds <"$case_dir/simultaneous"
+    for ((r = 1; r <= rounds; r++)); do
+      for ((i = 1; i <= pairs; i++)); do
+        id="$(printf 'dddd%02d%07d' "$r" "$i")"
+        # shellcheck disable=SC2016
+        "$JQ_BIN" -c --arg id "$id" '.tool_response.agentId=$id' "$PAYLOADS/async-post.json" >"$tmp/out/p$r-$i.json"
+        # shellcheck disable=SC2016
+        "$JQ_BIN" -c --arg id "$id" '.agent_id=$id' "$PAYLOADS/stop.json" >"$tmp/out/s$r-$i.json"
+      done
+      for ((i = 1; i <= pairs; i++)); do
+        for kind in p s; do
+          (
+            run_hook "$tmp/out/$kind$r-$i.json" >"$tmp/out/$kind$r-$i.out" 2>"$tmp/out/$kind$r-$i.err"
+            echo $? >"$tmp/out/$kind$r-$i.rc"
+          ) &
+        done
+      done
+      wait
+    done
+    for ((r = 1; r <= rounds; r++)); do
+      for ((i = 1; i <= pairs; i++)); do
+        for kind in p s; do
+          n=$((n + 1))
+          stdout_all+="$(cat "$tmp/out/$kind$r-$i.out")"
+          stderr_all+="$(cat "$tmp/out/$kind$r-$i.err")"
+          rc="$(cat "$tmp/out/$kind$r-$i.rc")"
+          if [[ "$rc" -ne "$expect_exit" ]]; then
+            ok=0
+            reasons+=("exit code mismatch on $kind$r-$i: expected $expect_exit got $rc")
+          fi
+        done
+      done
+    done
   else
     local payload
     while IFS= read -r payload; do
@@ -224,6 +263,14 @@ run_case() {
         reasons+=("parked file ${entry%%:*} missing substring ${entry#*:}")
       fi
     done <"$case_dir/expect_parked_grep"
+  fi
+  if [[ -f "$case_dir/expect_no_parked" && -d "$pending" ]]; then
+    local left
+    left="$(find "$pending" -type f | wc -l | tr -d '[:space:]')"
+    if [[ "$left" -ne 0 ]]; then
+      ok=0
+      reasons+=("parked files left behind: $left")
+    fi
   fi
   if [[ -f "$case_dir/expect_absent" ]]; then
     local gone

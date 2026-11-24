@@ -36,14 +36,16 @@
 # and exclusive-create opens are allowed for it).
 #
 # One shape is allowed on the main thread: a command that is a single
-# segment, `echo` or `printf` whose only payload is the literal `.worktrees/`
-# (quoted or bare), appended with `>>` to the top-level .gitignore
-# (is_gitignore_worktrees_append). Every other shape is denied, including a
-# command with any other segment (after `;`, `&&`, `||`, `|`, `&`, or a
-# newline), `>` or `>|` onto that file, a different payload, a nested
-# .gitignore, and any other target. No other escape
-# hatch exists: there is no env var, no inline comment, and no config
-# option that lifts this guard for a specific command. The sanctioned
+# top-level segment, `echo` or `printf` whose only payload is the literal
+# `.worktrees/` (quoted or bare), appended with `>>` to the top-level
+# .gitignore (is_gitignore_worktrees_append). The allowed shape is top-level
+# only: a subshell `( )`, a command substitution `$( )` or backticks, and a
+# `bash -c` or `eval` body are denied even when they hold the same append.
+# Every other shape is also denied, including a command with any other
+# segment (after `;`, `&&`, `||`, `|`, `&`, or a newline), `>` or `>|` onto
+# that file, a different payload, a nested .gitignore, and any other target.
+# No other escape hatch exists: there is no env var, no inline comment, and
+# no config option that lifts this guard for a specific command. The sanctioned
 # route to overwrite a protected file is the Edit or Write tool (Read the
 # file first, then Edit or Write it).
 #
@@ -362,12 +364,14 @@ class Segment(object):
         self.heredoc_bodies = []
 
 
-def tokenize_and_scan(text, base, top_cwd):
+def tokenize_and_scan(text, base, top_cwd, nested=False):
     """Recursive-descent scan of one chunk of shell text.
 
     Returns None (allow) or raises DenyFound with the first denial found,
     scanning in segment (i.e. left-to-right, top-to-bottom) order. Also
-    may raise ParseError for an unterminated construct.
+    may raise ParseError for an unterminated construct. nested is True for
+    every recursive scan (subshell, command substitution, bash -c or eval
+    body); the single-segment allowance applies only at depth 0.
     """
     n = len(text)
     i = 0
@@ -438,7 +442,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # not just copied through as opaque text.
                     cur.literal = False
                     inner, end2 = find_matching_paren(text, j + 1)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     buf.append(text[j:end2])
                     j = end2
                     continue
@@ -448,7 +452,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # backtick instead of a matching close paren.
                     cur.literal = False
                     inner, end2 = find_matching_backtick(text, j)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     buf.append(text[j:end2])
                     j = end2
                     continue
@@ -525,7 +529,7 @@ def tokenize_and_scan(text, base, top_cwd):
             start_word()
             cur.literal = False
             inner, end = find_matching_paren(text, i + 1)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             cur.text += text[i:end]
             i = end
             continue
@@ -539,7 +543,7 @@ def tokenize_and_scan(text, base, top_cwd):
             flush_word()
             finalize_segment()
             inner, end = find_matching_paren(text, i)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             i = end
             continue
 
@@ -562,7 +566,7 @@ def tokenize_and_scan(text, base, top_cwd):
             start_word()
             cur.literal = False
             inner, end = find_matching_backtick(text, i)
-            tokenize_and_scan(inner, base, top_cwd)
+            tokenize_and_scan(inner, base, top_cwd, nested=True)
             cur.text += text[i:end]
             i = end
             continue
@@ -577,7 +581,7 @@ def tokenize_and_scan(text, base, top_cwd):
                     # process substitution: skip as a nested segment group,
                     # never a file target.
                     inner, pend = find_matching_paren(text, end - 1)
-                    tokenize_and_scan(inner, base, top_cwd)
+                    tokenize_and_scan(inner, base, top_cwd, nested=True)
                     i = pend
                     continue
                 if op_base in ("<<", "<<-"):
@@ -611,7 +615,7 @@ def tokenize_and_scan(text, base, top_cwd):
         raise ParseError("unterminated heredoc")
     finalize_segment()
 
-    single_segment = len(segments) == 1
+    single_segment = not nested and len(segments) == 1
     for segment in segments:
         base = process_segment(segment, base, top_cwd, single_segment)
     return None
@@ -760,7 +764,9 @@ def is_gitignore_worktrees_append(tokens, i, base, top_cwd, single_segment):
     payload `.worktrees/` (quoted or bare), followed by `>>` and a literal
     target that resolves to the top-level .gitignore. tokens[i] is the
     redirect operator. single_segment is False when the command has any
-    other segment (after `;`, `&&`, `||`, `|`, `&`, or a newline).
+    other segment (after `;`, `&&`, `||`, `|`, `&`, or a newline), and also
+    when the scan is nested (a subshell, a command substitution, or a
+    bash -c or eval body): tokenize_and_scan computes it that way.
     Every other shape returns False, so the caller falls through to
     check_candidate and its deny."""
     if not MAIN_THREAD or not single_segment or len(tokens) != 4 or i != 2:
@@ -997,11 +1003,11 @@ def check_nested_shells(tokens, base, top_cwd):
                     tokens[i + 1][1].literal and tokens[i + 1][1].text == "-c" and
                     i + 2 < n and tokens[i + 2][0] == "word"):
                 nested_text = tokens[i + 2][1].text
-                tokenize_and_scan(nested_text, base, top_cwd)
+                tokenize_and_scan(nested_text, base, top_cwd, nested=True)
         if kind == "word" and tok.literal and tok.text == "eval":
             rest_words = [t.text for t in words_only(tokens[i + 1:])]
             if rest_words:
-                tokenize_and_scan(" ".join(rest_words), base, top_cwd)
+                tokenize_and_scan(" ".join(rest_words), base, top_cwd, nested=True)
         i += 1
 
 

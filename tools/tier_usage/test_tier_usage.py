@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -665,6 +666,29 @@ class TierShapeTests(unittest.TestCase):
             with self.subTest(tier=name):
                 self.assertIsNone(spec["rates_per_million"], "tier '%s'" % name)
 
+    def test_ShippedFiles_NoDollarFigure_HoldsNoPriceFigure(self):
+        # Arrange
+        shipped = sorted(
+            name
+            for name in os.listdir(HERE)
+            if not name.startswith("test_")
+            and os.path.isfile(os.path.join(HERE, name))
+        )
+        self.assertIn("tier_usage.py", shipped)
+        self.assertIn("tiers.json", shipped)
+        # Act
+        texts = {}
+        for name in shipped:
+            with open(os.path.join(HERE, name), encoding="utf-8") as handle:
+                texts[name] = handle.read()
+        # Assert
+        for name, text in texts.items():
+            with self.subTest(file=name):
+                self.assertIsNone(
+                    re.search(r"\$\s*\d", text),
+                    "%s holds a dollar figure" % name,
+                )
+
     def test_Main_BadRateValue_ExitsTwoWithMessage(self):
         # Arrange
         with tempfile.TemporaryDirectory() as tmp:
@@ -708,6 +732,8 @@ class TierShapeTests(unittest.TestCase):
                 self.assertIn("'rates_per_million'", err)
                 if key is not None:
                     self.assertIn("'%s'" % key, err)
+                if key is None:
+                    self.assertIn("must not be empty", err)
 
     def test_LoadTiers_UnknownAndMissingKey_NamesUnknownKeyFirst(self):
         # Arrange
@@ -1510,7 +1536,7 @@ class SummaryTests(unittest.TestCase):
         def group_entry(rows):
             return summary_entry_for(tier_usage.summarize(rows), runner, tier)
 
-        with self.subTest("one priced and one unpriced row"):
+        with self.subTest("one priced and several unpriced rows"):
             rows, _ = collect_rows(FULL)
             group = counted_group_rows(rows)
             self.assertEqual(len(group), counted_in_group)
@@ -1629,8 +1655,8 @@ class SummaryOutputTests(unittest.TestCase):
         # Arrange
         notice_prefix = "# tiers with no rates: "
         notice_suffix = (
-            "; set rates_per_million for each in %s, or pass --tiers FILE "
-            "to use a file outside the repo"
+            "; %s holds no rates for them, pass --tiers FILE "
+            "with a complete rate set for each"
         )
         complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
         default_notice = notice_prefix + "economy, standard, premium" + notice_suffix % TIERS_FILE

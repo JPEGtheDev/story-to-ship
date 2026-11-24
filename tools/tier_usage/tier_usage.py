@@ -701,8 +701,8 @@ def no_rates_notice(tiers, tiers_path):
         return ""
     names = ", ".join(missing)
     return (
-        f"# tiers with no rates: {names}; set rates_per_million for each in "
-        f"{tiers_path}, or pass --tiers FILE to use a file outside the repo"
+        f"# tiers with no rates: {names}; {tiers_path} holds no rates for them, "
+        "pass --tiers FILE with a complete rate set for each"
     )
 
 

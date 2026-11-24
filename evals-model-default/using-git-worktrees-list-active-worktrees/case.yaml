@@ -5,7 +5,7 @@ context:
 bin: model default
 skip:
   model: haiku
-  claude_code_version: 2.1.330
-  with_skill: 30/30
+  claude_code_version: 2.1.331
+  with_skill: 28/30
   without_skill: 30/30
-  source: /tmp/claude-1000/-home-JPEG-Projects-story-to-ship/bb4ec238-f0f8-4ce1-8dbb-9877cdfc40b7/scratchpad/p2-4/p2-5b/list-active-worktrees-v2.json
+  source: re-run 2026-11-24 under the current graders, 30 runs per arm, claude 2.1.331, model haiku; raw run file not kept in the repository

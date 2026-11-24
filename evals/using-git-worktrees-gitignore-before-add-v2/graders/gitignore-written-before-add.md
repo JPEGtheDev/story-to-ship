@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^(?:(?!"command":"(?:[^"\\\n]|\\.)*worktree add)[\s\S])*"command":"(?=(?:(?!worktree add)(?:[^"\\\n]|\\.))*\.worktrees)(?:(?!worktree add|(?:\bcd|\\[nrt]cd)(?![\w./-]))(?:[^"\\\n]|\\.))*(?:>>?\s*(?:\\"[^"\\]*|\''[^\'']*|[^\s"\\\'']*)(?:(?<![^\s"\''=>|&;])|(?<=[\s"\''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-])|\btee\b\s+(?:(?:-\w+|--[\w-]*)\s+)*(?:\\"[^"\\]*|\''[^\'']*|[^\s"\\\'';|&]*)(?:(?<![^\s"\''=>|&;])|(?<=[\s"\''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-])|\bsed\s+-i(?:[^"\\\n]|\\.)*(?:(?<![^\s"\''=>|&;])|(?<=[\s"\''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-]))(?:[^"\\\n]|\\.)*(?:worktree add|"[\s\S]*?"command":"(?:[^"\\\n]|\\.)*worktree add)'
+pattern: '^(?:(?!"command":"(?:[^"\\\n]|\\.)*worktree add)[\s\S])*"command":"(?=(?:(?!worktree add)(?:[^"\\\n]|\\.))*\.worktrees)(?:(?!worktree add|(?:\bcd|\\[nrt]cd)(?![\w./-]))(?:[^"\\\n]|\\.))*(?:>>?\s*(?:\\"[^"\\]*|''[^'']*|[^\s"\\'']*)(?:(?<![^\s"''=>|&;])|(?<=[\s"''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-])|\btee\b\s+(?:(?:-\w+|--[\w-]*)\s+)*(?:\\"[^"\\]*|''[^'']*|[^\s"\\'';|&]*)(?:(?<![^\s"''=>|&;])|(?<=[\s"''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-])|\bsed\s+-i(?:[^"\\\n]|\\.)*(?:(?<![^\s"''=>|&;])|(?<=[\s"''=>|&;]\./))\.git(?:ignore|/info/exclude)(?![\w.-]))(?:[^"\\\n]|\\.)*(?:worktree add|"[\s\S]*?"command":"(?:[^"\\\n]|\\.)*worktree add)'
 match: contains
 target: trace
 ---

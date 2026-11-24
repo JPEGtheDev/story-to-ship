@@ -1,2 +1,2 @@
 mkdir -p "$STATE/out"
-: >"$STATE/out/a.md"
+printf 'Dispatch id: O-7\n' >"$STATE/out/a.md"

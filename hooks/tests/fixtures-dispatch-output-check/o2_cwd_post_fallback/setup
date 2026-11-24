@@ -1,2 +1,2 @@
 mkdir -p "$tmp/files/cwd-post-only/out"
-: >"$tmp/files/cwd-post-only/out/ref-11.md"
+printf 'Dispatch id: O-11\n' >"$tmp/files/cwd-post-only/out/ref-11.md"

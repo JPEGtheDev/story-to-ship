@@ -676,16 +676,16 @@ def render_summary(summary):
 
 
 def no_rates_notice(tiers, tiers_path):
-    """Return the one-line notice naming tiers without rates, or "" when none lack them."""
-    missing = [name for name, spec in tiers.items() if spec.get("rates_per_million") is None]
+    """Return the notice naming tiers without rates, or "" when none lack them."""
+    missing = [
+        name for name, spec in tiers.items() if spec.get("rates_per_million") is None
+    ]
     if not missing:
         return ""
+    names = ", ".join(missing)
     return (
-        "# tiers with no rates: "
-        + ", ".join(missing)
-        + "; set rates_per_million for each in "
-        + tiers_path
-        + ", or pass --tiers FILE to use a file outside the repo"
+        f"# tiers with no rates: {names}; set rates_per_million for each in "
+        f"{tiers_path}, or pass --tiers FILE to use a file outside the repo"
     )
 
 

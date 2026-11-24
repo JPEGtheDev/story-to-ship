@@ -102,16 +102,30 @@ payload_cwd() {
   printf '%s' "${dir:-.}"
 }
 
-# Each check appends its failure strings to the array "failed" of the caller.
+# True when the path still holds an unfilled template placeholder.
+has_placeholder() {
+  [[ "$1" == *[\{\}\<\>]* ]]
+}
+
+# resolve_path PATH CWD: PATH as is when absolute, else under CWD.
+resolve_path() {
+  if [[ "$1" == /* ]]; then
+    printf '%s' "$1"
+  else
+    printf '%s/%s' "$2" "$1"
+  fi
+}
+
+# Each check takes its inputs as arguments and appends its failure strings to
+# the array "failed" of the caller.
 check_output_path() {
-  local path="$1" cwd="$2" full="$1"
+  local path="$1" cwd="$2"
   [[ -z "$path" ]] && return 0
-  if [[ "$path" == *[\{\}\<\>]* ]]; then
+  if has_placeholder "$path"; then
     failed+=("output path has a placeholder: $path")
     return 0
   fi
-  [[ "$path" != /* ]] && full="$cwd/$path"
-  if [[ ! -f "$full" ]]; then
+  if [[ ! -f "$(resolve_path "$path" "$cwd")" ]]; then
     failed+=("output file missing: $path")
   fi
 }
@@ -137,9 +151,10 @@ has_whole_token() {
 # Checks that the first line of the output file carries the dispatch id.
 # Runs only for an existing regular file at a path without a placeholder.
 check_output_owner() {
-  local path="$1" cwd="$2" id="$3" full="$1" first=""
-  [[ -z "$path" || -z "$id" || "$path" == *[\{\}\<\>]* ]] && return 0
-  [[ "$path" != /* ]] && full="$cwd/$path"
+  local path="$1" cwd="$2" id="$3" full first=""
+  [[ -z "$path" || -z "$id" ]] && return 0
+  has_placeholder "$path" && return 0
+  full="$(resolve_path "$path" "$cwd")"
   [[ -f "$full" ]] || return 0
   IFS= read -r first <"$full" || true
   first="${first%$'\r'}"

@@ -1335,7 +1335,7 @@ jobs:
               fi
             done
           }
-          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'verdict:"error, no verdict"' '`<path>: error, no verdict`' 'identical grader files' 'one default-ablation run per case' '`<case>: separating`' '`<case>: model default`' '`<case>: weak`' '`<case>: unclassified: run no-skill first`' '27 of 30 owner-labeled passes' 'scripts/eval_verdict.py --stage <5|15|30>'
+          check skills/writing-skills/references/SKILL_EVAL_COMPARISON.md 'Exact one-sided 95 percent bound' 'A 0-vs-0 or n-vs-n pair is not evidence that the new text keeps the behavior.' 'verdict:"error, no verdict"' '`<path>: error, no verdict`' 'identical grader files' 'one default-ablation run per case' '`<case>: separating`' '`<case>: model default`' '`<case>: weak`' '`<case>: unclassified: run no-skill first`' '27 of 30 owner-labeled passes' 'scripts/eval_verdict.py --stage <5|15|30>' 'is 5 runs on the targeted cases only' 'A targeted case under 5 of 5 gets the verdict EDIT' 'Those stages run on targeted cases only' 'run the whole suite once with 30 runs per case, through `--suite`'
           if [ "$missing" -gt 0 ]; then
             echo "Found $missing missing eval comparison contract string(s)"
             exit 1

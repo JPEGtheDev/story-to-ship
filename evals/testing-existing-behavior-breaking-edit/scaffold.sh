@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 mkdir -p src tests
-printf 'src/\ntests/\n' > .gitignore
+printf '*\n' > ../.gitignore
 cat > src/pricing.py <<'PRICING'
 def apply_discount(total, discount):
     return total - discount

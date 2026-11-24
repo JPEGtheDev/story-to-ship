@@ -101,11 +101,11 @@ def _kept(runs, name, label, path):
     return kept
 
 
-def _check_same_cases(ref, cand, cand_path):
+def _check_same_cases(ref, cand, ref_path, cand_path):
     """Exit 2 when the reference and candidate files do not hold the same case names."""
     for name in cand:
         if name not in ref:
-            _fail(f"case {name} is missing from the reference file")
+            _fail(f"case {name} is missing from the reference file {ref_path}")
     for name in ref:
         if name not in cand:
             _fail(f"case {name} is missing from the candidate file {cand_path}")
@@ -113,7 +113,7 @@ def _check_same_cases(ref, cand, cand_path):
 
 def _suite_lines(ref, cand, ref_path, cand_path):
     """Print one line per case plus a summary; exit 2 on a case-set mismatch or a bad run count."""
-    _check_same_cases(ref, cand, cand_path)
+    _check_same_cases(ref, cand, ref_path, cand_path)
     partial = False
     below = 0
     lines = []
@@ -137,7 +137,7 @@ def _suite_lines(ref, cand, ref_path, cand_path):
 
 
 def main(argv=None):
-    """Print one line per candidate case: name, p, stage verdict; exit 2 on bad input."""
+    """Run --stage N (per case: name, p, verdict) or --suite (per case: counts, OK or BELOW); exit 2 on bad input."""
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--stage", type=int, choices=(5, 15, 30))
@@ -145,7 +145,7 @@ def main(argv=None):
     parser.add_argument("paths", nargs="+", help="ref=PATH cand=PATH [fresh=PATH]")
     args = parser.parse_args(argv)
     if len(args.paths) not in (2, 3):
-        _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH]")
+        _fail("usage: --stage N ref=PATH cand=PATH [fresh=PATH] | --suite ref=PATH cand=PATH")
     ref_path = _parse_path(args.paths[0], "ref")
     cand_path = _parse_path(args.paths[1], "cand")
     fresh_path = _parse_path(args.paths[2], "fresh") if len(args.paths) == 3 else None

@@ -609,7 +609,7 @@ class SuiteModeTest(unittest.TestCase):
             result = self._suite(tmp, {"a": ref}, {"a": cand})
         # Assert
         self._assert_exit_two_by_suite_logic(result)
-        self.assertIn("case a", result.stderr)
+        self.assertIn("error: case a keeps 31 of 30", result.stderr)
 
     def test_Suite_CandidateCaseMissingFromReference_ExitsTwo(self):
         # Arrange
@@ -618,9 +618,10 @@ class SuiteModeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             # Act
             result = self._suite(tmp, ref, cand)
+            ref_path = os.path.join(tmp, "ref.json")
         # Assert
         self._assert_exit_two_by_suite_logic(result)
-        self.assertIn("case b is missing from the reference file", result.stderr)
+        self.assertIn(f"case b is missing from the reference file {ref_path}", result.stderr)
 
     def test_Suite_ReferenceCaseMissingFromCandidate_ExitsTwo(self):
         # Arrange
@@ -641,7 +642,33 @@ class SuiteModeTest(unittest.TestCase):
             # Act
             result = self._suite(tmp, {"a": [(True, None)] * 30}, {"a": cand})
         # Assert
+        self.assertEqual(0, result.returncode)
         self.assertIn(expected_line, result.stdout)
+        self.assertIn("a: ref=30/30 cand=30/30 OK", result.stdout)
+
+    def test_Suite_Reference29Of29Candidate29Of30_PrintsBelowByCrossMultiplication(self):
+        # Arrange: 29*29 < 29*30 is BELOW, though 29 < 29 is false
+        expected_line = "a: ref=29/29 cand=29/30 BELOW"
+        cand = [(True, None)] * 29 + [(False, None)]
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, {"a": [(True, None)] * 29}, {"a": cand})
+        # Assert
+        self.assertEqual(0, result.returncode)
+        self.assertIn(expected_line, result.stdout)
+        self.assertIn("below reference: 1", result.stdout)
+
+    def test_Suite_PartialCaseAWithCompleteCaseB_ExitsTwoAndStillPrintsCaseB(self):
+        # Arrange
+        ref = {"a": [(True, None)] * 30, "b": [(True, None)] * 30}
+        cand = {"a": [(True, None)] * 29, "b": [(True, None)] * 30}
+        with tempfile.TemporaryDirectory() as tmp:
+            # Act
+            result = self._suite(tmp, ref, cand)
+        # Assert
+        self._assert_exit_two_by_suite_logic(result)
+        self.assertIn("case a keeps 29 of 30, rerun", result.stderr)
+        self.assertIn("b: ref=30/30 cand=30/30 OK", result.stdout)
 
     def test_Suite_CombinedWithStage_ExitsTwo(self):
         # Arrange

@@ -8,4 +8,4 @@ skip:
   claude_code_version: 2.1.330
   with_skill: 30/30
   without_skill: 30/30
-  source: story 531 PR 535 comparison, 30 runs per arm, claude 2.1.330, model haiku; the raw run file is not kept in the repository
+  source: run 2026-11-23, 30 runs per arm, raw run file not kept in the repository

@@ -101,14 +101,19 @@ def _kept(runs, name, label, path):
     return kept
 
 
-def _suite_lines(ref, cand, ref_path, cand_path):
-    """Print one line per case plus a summary; exit 2 on a case-set mismatch or a bad run count."""
+def _check_same_cases(ref, cand, cand_path):
+    """Exit 2 when the reference and candidate files do not hold the same case names."""
     for name in cand:
         if name not in ref:
             _fail(f"case {name} is missing from the reference file")
     for name in ref:
         if name not in cand:
             _fail(f"case {name} is missing from the candidate file {cand_path}")
+
+
+def _suite_lines(ref, cand, ref_path, cand_path):
+    """Print one line per case plus a summary; exit 2 on a case-set mismatch or a bad run count."""
+    _check_same_cases(ref, cand, cand_path)
     partial = False
     below = 0
     lines = []
@@ -151,7 +156,7 @@ def main(argv=None):
     if args.suite:
         _suite_lines(ref, cand, ref_path, cand_path)
         return
-    fresh =read_run_records(fresh_path) if fresh_path else None
+    fresh = read_run_records(fresh_path) if fresh_path else None
     partial = False
     for name, (cand_kept, dropped) in cand.items():
         if name not in ref:

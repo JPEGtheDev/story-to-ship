@@ -28,7 +28,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [-] -> write a reference doc in the relevant skill's `references/` instead; do not create a skill
 
 2. **6-element anatomy check** -- all 6 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
-   - FRONTMATTER: `name` + `description` starting with "Use when..."; quote a description that holds a colon followed by a space
+   - FRONTMATTER: `name` + `description` starting with "Use when..."; quote a description that holds a colon followed by a space, a # after a space or tab, or starts with #
    - IRON LAW: ALL CAPS rule + "Violating the letter..." line + "YOU MUST" + "No exceptions."
    - ANNOUNCEMENT: `**Announce at start:** "I am using the [skill] to [purpose]."`
    - GATE FUNCTION: `## BEFORE PROCEEDING` with numbered conditions + [+]/[-] branches
@@ -71,9 +71,9 @@ Before creating, editing, or shipping any skill or agent template:
 12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
    - [-] Enforcement cut or moved for size -> restore it inline
 
-13. **Shortening, rewording, or adding a line to a skill?** Run the old-versus-new eval comparison of `references/SKILL_EVAL_COMPARISON.md` before shipping.
-   - A line is added only for a case that fails without the skill: write the case, show the no-skill failure, then add the line.
-   - Test a change on its targeted cases first: 5 runs per case until each passes 5 of 5, then the pre-ship check, then the whole suite.
+13. **Shortening, rewording, or adding a rule line to a skill?** Run the old-versus-new eval comparison of `references/SKILL_EVAL_COMPARISON.md` before shipping.
+   - A rule line is added only for a case that fails without the skill: write the case, show the no-skill failure, then add the rule line.
+   - After an earlier comparison, test a change on its targeted cases first: 5 runs per case until each passes 5 of 5, then the 15-run and 30-run stages, then the whole suite; run the pre-ship check before each ship.
    - A pair with 0 passes in both arms, or all passes in both arms, is not evidence that the new text keeps the behavior.
    - [-] No comparison record, or a confirmed LOSS -> do not ship the change
 

@@ -28,7 +28,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [-] -> write a reference doc in the relevant skill's `references/` instead; do not create a skill
 
 2. **6-element anatomy check** -- all 6 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
-   - FRONTMATTER: `name` + `description` starting with "Use when..."
+   - FRONTMATTER: `name` + `description` starting with "Use when..."; quote a description that holds a colon followed by a space
    - IRON LAW: ALL CAPS rule + "Violating the letter..." line + "YOU MUST" + "No exceptions."
    - ANNOUNCEMENT: `**Announce at start:** "I am using the [skill] to [purpose]."`
    - GATE FUNCTION: `## BEFORE PROCEEDING` with numbered conditions + [+]/[-] branches
@@ -71,6 +71,12 @@ Before creating, editing, or shipping any skill or agent template:
 12. **Enforcement text is never cut for size.** Enforcement text (Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is never cut or moved to a reference file to meet a size target. Red Flag and Rationalization rows stay inline in SKILL.md. Rationale may still move to references/.
    - [-] Enforcement cut or moved for size -> restore it inline
 
+13. **Shortening, rewording, or adding a line to a skill?** Run the old-versus-new eval comparison of `references/SKILL_EVAL_COMPARISON.md` before shipping.
+   - A line is added only for a case that fails without the skill: write the case, show the no-skill failure, then add the line.
+   - Test a change on its targeted cases first: 5 runs per case until each passes 5 of 5, then the pre-ship check, then the whole suite.
+   - A pair with 0 passes in both arms, or all passes in both arms, is not evidence that the new text keeps the behavior.
+   - [-] No comparison record, or a confirmed LOSS -> do not ship the change
+
 [+] All met -> proceed
 [-] Any unmet -> see the "Not met ->" instruction on the failing condition above
 
@@ -90,6 +96,7 @@ Before creating, editing, or shipping any skill or agent template:
 - Skill or reference file contains non-ASCII characters -- **STOP. Replace non-ASCII arrows, em/en-dashes, math operators, and box-drawing chars with ASCII equivalents (-> -- - <= >= != | - +) before committing.**
 - Skill frontmatter contains a `version:` field -- **STOP. Remove it. Skills carry no version field; git history is the version record. Never write a bump-the-skill-version step into a Definition of Done or checklist.**
 - Skill or reference file states a behavioral claim about a command or tool ("command X does Y") that was reasoned about rather than run -- **STOP. Verify it by running the command, per the honesty skill's evidence rules; a reasoned-not-run claim is an unverified claim.**
+- Adding a rule line to a skill with no case that fails without it -- **STOP. Write the case and show the no-skill failure first; a case the model passes with no skill text gets no line.**
 
 ---
 
@@ -105,6 +112,7 @@ Before creating, editing, or shipping any skill or agent template:
 | "Context and Forces are extra writing overhead" | Rules without context misfire in edge cases. The overhead forces clarity about when the rule applies. |
 | "This rule could just live in the hook or per-turn context instead of a skill" | Identical content enforces worse as ambient per-turn text -- it habituates into wallpaper with no auditable loaded state. Keep hot-path text a minimal tripwire that forces a `Skill` call; keep rule bodies in the skill itself; keep rationale and why-text in the skill's own references/ files; recovery from mid-session drift is re-invoking the skill, not re-injecting text. |
 | "We can dedup this by pointing to another skill's table instead of duplicating it" | Never replace a skill's enforcement content (ban tables, gates, Red Flags, rationalization rows) with a pointer to another skill's material -- a dangling pointer enforces nothing, a drifted duplicate still enforces. Accept the duplication and align copies at review time; peer listings in a Related Skills section are still fine. |
+| "The line is obviously right, so it needs no failing case" | A line for a behavior the model already shows costs tokens and is unmeasured | Run the no-skill case; add the line only when it fails |
 
 ---
 

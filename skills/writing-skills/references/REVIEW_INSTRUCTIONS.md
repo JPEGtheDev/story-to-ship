@@ -43,7 +43,7 @@ substitute exactly as printed.
 Run every item. Mark [+] (pass) or [-] (fail) with file:line evidence. Criteria for each
 item are in the reference sections above.
 
-- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters; a description holding a colon followed by a space, a # after a space or tab, or starting with # is quoted?
+- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters; a description holding a colon followed by a space, ending with a colon, holding a # after a space or tab, or starting with # is quoted?
 - [ ] **Size** -- apply four levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max but at or under 5,000 tokens = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale only) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user. A redundant enforcement rule is never cuttable content: list each as a removal candidate under either verdict (under PASS (size advisory) when no cuttable content exists; alongside NEEDS WORK when cuttable rationale exists), and never cut one without user confirmation; (4) above 5,000 tokens (hard limit) = NEEDS WORK regardless of content value -- skill will not load correctly in all agent implementations.
 - [ ] **Iron Law block** -- backtick-wrapped; ALL CAPS rule; `YOU MUST`; `No exceptions.`; all INSIDE the backtick block?
 - [ ] **Iron Law letter/spirit line** -- "Violating the letter of this rule is violating the spirit of this rule." present?
@@ -133,6 +133,7 @@ Reference file issues that trigger NEEDS WORK on the overall verdict:
 - Absolute paths
 - Cross-skill file path references
 - Content that contradicts or is absent from what SKILL.md says it contains
+- Eval evidence marked [-] (the Step 2 item, applied to the rule lines the reference file diff changes)
 
 Size alerts on reference files are informational only -- not a NEEDS WORK trigger.
 

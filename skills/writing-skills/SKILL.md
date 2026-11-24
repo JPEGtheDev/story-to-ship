@@ -28,7 +28,7 @@ Before creating, editing, or shipping any skill or agent template:
    - [-] -> write a reference doc in the relevant skill's `references/` instead; do not create a skill
 
 2. **6-element anatomy check** -- all 6 MUST be present (full schemas in `references/SKILL_ANATOMY_ELEMENTS.md`):
-   - FRONTMATTER: `name` + `description` starting with "Use when..."; quote a description that holds a colon followed by a space, a # after a space or tab, or starts with #
+   - FRONTMATTER: `name` + `description` starting with "Use when..."; quote a description that holds a colon followed by a space, ends with a colon, has a # after a space or tab, or starts with #
    - IRON LAW: ALL CAPS rule + "Violating the letter..." line + "YOU MUST" + "No exceptions."
    - ANNOUNCEMENT: `**Announce at start:** "I am using the [skill] to [purpose]."`
    - GATE FUNCTION: `## BEFORE PROCEEDING` with numbered conditions + [+]/[-] branches

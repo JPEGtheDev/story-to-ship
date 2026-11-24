@@ -1342,72 +1342,52 @@ jobs:
           fi
           echo "[+] Eval comparison contract strings present"
 
-      - name: Check eval case tags and skip blocks
+      - name: Check eval case folders
         run: |
-          set -e
-          skip_count=0
-          everyday_count=0
-          total=0
+          set -eu
+          default_count=0
+          model_count=0
           bad=0
-          # Prints the tags line from the prompt.md frontmatter (between the first two --- lines).
-          prompt_tags() {
-            sed -n '1{/^---$/!q};2,/^---$/{/^tags:/p}' "$1"
-          }
-          # Succeeds when a tags line lists the everyday tag as a whole item.
-          has_everyday() {
-            printf '%s\n' "$1" | grep -qE '^tags:.*[][ ,]everyday[],]'
-          }
-          for f in evals/*/case.yaml; do
-            total=$((total + 1))
-            pt=$(prompt_tags "$(dirname "$f")/prompt.md")
-            ct=$(grep -E '^tags:' "$f" || true)
-            case "$f" in
-              evals/using-git-worktrees-iron-law/case.yaml|evals/using-git-worktrees-list-active-worktrees/case.yaml|evals/using-git-worktrees-before-proceeding-path/case.yaml|evals/using-git-worktrees-list-count-check/case.yaml)
-                skip_count=$((skip_count + 1))
-                for pat in '^bin: model default$' '^skip:$' '^ *model:' '^ *claude_code_version:' '^ *with_skill:' '^ *without_skill:'; do
-                  if ! grep -qE -- "$pat" "$f"; then
-                    echo "FAILED: $f is a skip case but has no line matching: $pat"
-                    bad=$((bad + 1))
-                  fi
-                done
-                if grep -q 'everyday' "$f" || has_everyday "$pt"; then
-                  echo "FAILED: $f is a skip case but case.yaml or prompt.md carries 'everyday'"
-                  bad=$((bad + 1))
-                fi
-                ;;
-              *)
-                everyday_count=$((everyday_count + 1))
-                # A prompt.md tags line, when present, is the effective tags line; case.yaml tags apply only without one.
-                if [ -n "$pt" ]; then
-                  eff="$pt"
-                  eff_file="$(dirname "$f")/prompt.md"
-                else
-                  eff="$ct"
-                  eff_file="$f"
-                fi
-                if ! has_everyday "$eff"; then
-                  echo "FAILED: $eff_file is the effective tags source for everyday case $f but its tags line does not list 'everyday'"
-                  bad=$((bad + 1))
-                fi
-                if grep -qE '^bin: model default$|^skip:$' "$f"; then
-                  echo "FAILED: $f is an everyday case but has a 'skip:' or 'bin: model default' marker"
-                  bad=$((bad + 1))
-                fi
-                ;;
-            esac
+          # Default folder: no 'bin: model default' line and no 'skip:' line.
+          for d in evals/*/; do
+            name=$(basename "$d")
+            if [ "$name" = results ] || [ ! -f "${d%/}/case.yaml" ]; then
+              continue
+            fi
+            f="${d%/}/case.yaml"
+            default_count=$((default_count + 1))
+            if grep -qE '^bin: model default$|^skip:$' "$f"; then
+              echo "FAILED: $f is a default eval case but has a 'bin: model default' or 'skip:' line"
+              bad=$((bad + 1))
+            fi
           done
-          echo "skip case folders checked: $skip_count"
-          echo "everyday case folders checked: $everyday_count"
-          echo "total case files: $total"
+          # Model-default folder: 'bin: model default' and a complete skip block.
+          for d in evals-model-default/*/; do
+            name=$(basename "$d")
+            if [ "$name" = results ] || [ ! -f "${d%/}/case.yaml" ]; then
+              continue
+            fi
+            f="${d%/}/case.yaml"
+            model_count=$((model_count + 1))
+            for pat in '^bin: model default$' '^skip:$' '^ *model:' '^ *claude_code_version:' '^ *with_skill:' '^ *without_skill:' '^ *source:'; do
+              if ! grep -qE -- "$pat" "$f"; then
+                echo "FAILED: $f is a model-default eval case but has no line matching: $pat"
+                bad=$((bad + 1))
+              fi
+            done
+          done
+          echo "default eval case folders: $default_count"
+          echo "model-default eval case folders: $model_count"
+          echo "total eval case folders: $((default_count + model_count))"
           if [ "$bad" -gt 0 ]; then
-            echo "Found $bad eval case tag or skip block problem(s)"
+            echo "Found $bad eval case folder problem(s)"
             exit 1
           fi
-          if [ "$total" -ne 20 ] || [ "$everyday_count" -ne 16 ] || [ "$skip_count" -ne 4 ]; then
-            echo "FAILED: expected 20 case files, 16 everyday, 4 skip; found $total, $everyday_count, $skip_count"
+          if [ "$default_count" -ne 16 ] || [ "$model_count" -ne 4 ]; then
+            echo "FAILED: expected 16 default and 4 model-default eval case folders; found $default_count and $model_count"
             exit 1
           fi
-          echo "[+] eval case tags and skip blocks match"
+          echo "[+] eval case folders match"
 
       - name: Run session-events converter unit tests
         run: |

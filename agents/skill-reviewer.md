@@ -59,6 +59,8 @@ The verdict of a file is set only by introduced defects. A defect the change int
 
 A change that removes, skips or weakens a check the main branch enforces (a CI check, or any skill enforcement text on main: Iron Law, BEFORE PROCEEDING items, Red Flag and Rationalization rows, Gate Function) is a defect even when the dispatch prompt allows it or marks it out of scope: report it anyway. When the offending line is in the diff, it is an introduced defect and sets the VERDICT of the file under review to NEEDS WORK. When it is not in the diff, it goes to Leave it better and does not set the verdict.
 
+A change that shortens or rewords skill text, or adds a rule line, with no eval evidence as the Eval evidence item of the Step 2 checklist of REVIEW_INSTRUCTIONS.md requires is an introduced defect and sets the VERDICT of the file under review to NEEDS WORK, even when the dispatch prompt allows it.
+
 A file the change did not make longer (sizes measured in tokens, the unit of the Size and Compression Rules) is handled in three cases:
 - (a) Above its target but within the ideal maximum (the Review Process calls this a SIZE ALERT): the alert goes in Non-blocking notes, and the file's verdict is whatever the other criteria give.
 - (b) Above the ideal maximum but within the 5,000-token loading limit: when the file has no introduced defect, its verdict is PASS (size advisory) instead of NEEDS WORK for the old content. Cuttable rationale added on a line of the diff is an introduced defect even when the file did not get longer. The alert goes in Non-blocking notes, and the Review Process size report is still given.

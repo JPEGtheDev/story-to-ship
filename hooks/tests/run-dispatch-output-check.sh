@@ -29,6 +29,9 @@
 #                             dup, each pair also gets a duplicate PostToolUse
 #                             job started at the same time.
 #   env                    - KEY=VALUE lines exported for every hook run.
+#   workdir                - a directory under $tmp/files (the @OUT@ dir), created
+#                             in setup; every hook run starts with it as its
+#                             working directory (default: the runner's own).
 #   setup                  - bash snippet sourced before the runs; $STATE is
 #                             the state dir.
 #   state_subdir           - use $tmp/<value> (not yet created) as the state dir.
@@ -75,7 +78,7 @@ make_nojq_bin() {
 }
 
 # Runs the hook on one payload file; uses the per-case globals tmp, STATE,
-# nojq_bin and case_env.
+# nojq_bin, workdir and case_env.
 run_hook() {
   local payload="$1"
   if grep -qF -e '@STATE@' -e '@OUT@' "$payload"; then
@@ -96,6 +99,9 @@ run_hook() {
     for line in "${case_env[@]}"; do
       export "${line?}"
     done
+    if [[ -n "$workdir" ]]; then
+      cd "$tmp/files/$workdir" || exit 97
+    fi
     "$BASH_BIN" "$HOOK" <"$payload"
   )
 }
@@ -136,6 +142,8 @@ run_case() {
     nojq_bin="$tmp/bin"
     make_nojq_bin "$nojq_bin"
   fi
+  workdir=""
+  [[ -f "$case_dir/workdir" ]] && workdir="$(tr -d '[:space:]' <"$case_dir/workdir")"
   case_env=()
   if [[ -f "$case_dir/env" ]]; then
     while IFS= read -r line; do

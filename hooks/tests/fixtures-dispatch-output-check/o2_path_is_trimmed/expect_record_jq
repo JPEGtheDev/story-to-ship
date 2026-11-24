@@ -1,1 +1,1 @@
-.[0].verdict=="pass" and .[0].failed==[] and (.[0].output_path|contains("/out/a.md"))
+.[0].verdict=="pass" and .[0].failed==[] and (.[0].output_path|endswith("/out/a.md"))

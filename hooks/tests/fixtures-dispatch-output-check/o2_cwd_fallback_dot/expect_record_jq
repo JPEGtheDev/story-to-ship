@@ -1,0 +1,1 @@
+.[0].dispatch_id=="O-10" and .[0].verdict=="pass" and .[0].failed==[] and .[0].output_path=="rel-ref.md"

@@ -1,0 +1,2 @@
+mkdir -p "$tmp/files/wd"
+: >"$tmp/files/wd/rel-ref.md"

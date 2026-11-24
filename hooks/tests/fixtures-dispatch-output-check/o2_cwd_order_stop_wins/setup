@@ -1,0 +1,2 @@
+mkdir -p "$tmp/files/cwd-stop/out" "$tmp/files/cwd-post"
+: >"$tmp/files/cwd-stop/out/ref-09.md"

@@ -1,1 +1,1 @@
-.[0].verdict=="pass" and .[0].failed==[] and .[0].output_path==(.[0].output_path|select(endswith("/out/present.md")))
+.[0].verdict=="pass" and .[0].failed==[] and (.[0].output_path|endswith("/out/present.md"))

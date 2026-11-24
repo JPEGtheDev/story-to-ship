@@ -32,4 +32,6 @@ git merge -q --no-ff -m "Merge branch 'agent/csv-export-todo1' into feature/csv-
 git init -q --bare .git/remote.git
 git remote add origin "$PWD/.git/remote.git"
 git push -q origin main feature/csv-export
+git branch agent/csv-export-todo2 feature/csv-export
+git worktree add -q .worktrees/csv-export-todo2 agent/csv-export-todo2
 git worktree add -q .worktrees/csv-export-todo1 agent/csv-export-todo1

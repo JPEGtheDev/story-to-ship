@@ -206,6 +206,15 @@ def read_lines(path):
 
 def read_text(path):
     try:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            return f.read()
+    except OSError:
+        return None
+
+
+def read_raw(path):
+    # Keeps carriage returns (newline=""), so a CRLF file is visible as CRLF.
+    try:
         with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
             return f.read()
     except OSError:
@@ -224,7 +233,7 @@ def is_worktrees_ignore_add(top, real, tool_name, tool_input):
         new_string = tool_input.get("new_string")
         if not isinstance(old_string, str) or not isinstance(new_string, str):
             return False
-        old = read_text(real)
+        old = read_raw(real)
         if old is None or old_string == "" or old.count(old_string) != 1:
             return False
         if "\r" in old:

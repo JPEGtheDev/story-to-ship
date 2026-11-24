@@ -1,0 +1,1 @@
+an Edit adding two lines to top-level .gitignore is denied, even when one of them is .worktrees/

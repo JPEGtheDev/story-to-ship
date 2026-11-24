@@ -1,0 +1,1 @@
+adding .worktrees/ again when top-level .gitignore already holds it is denied

@@ -1,0 +1,1 @@
+a Write creating a .gitignore that does not exist yet with .worktrees/ is denied. The runner always creates a top-level .gitignore, so the missing file is sub/.gitignore

@@ -17,7 +17,8 @@
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a
 # message to stderr and a fail record. A records file that cannot be written
-# gives the stderr message `cannot write records file` and no record.
+# gives the stderr message `cannot write records file` for a paired record
+# only; on the fail-closed path a failed write adds no output of its own.
 
 STATE="${DISPATCH_CHECK_STATE_DIR:-${CLAUDE_PROJECT_DIR:-.}/.claude}"
 RECORDS="$STATE/dispatch-check-records.jsonl"
@@ -115,9 +116,43 @@ check_output_path() {
   fi
 }
 
+# True when the literal string $2 occurs in $1 not adjacent to a letter or
+# digit on either side.
+has_whole_token() {
+  local rest="$1" id="$2" prev="" before after left
+  while [[ "$rest" == *"$id"* ]]; do
+    before="${rest%%"$id"*}"
+    after="${rest#*"$id"}"
+    left="${before: -1}"
+    [[ -z "$before" ]] && left="$prev"
+    if [[ ! "$left" =~ [[:alnum:]] && ! "${after:0:1}" =~ [[:alnum:]] ]]; then
+      return 0
+    fi
+    prev="${id:0:1}"
+    rest="${id:1}${after}"
+  done
+  return 1
+}
+
+# Checks that the first line of the output file carries the dispatch id.
+# Runs only for an existing regular file at a path without a placeholder.
+check_output_owner() {
+  local path="$1" cwd="$2" id="$3" full="$1" first=""
+  [[ -z "$path" || -z "$id" || "$path" == *[\{\}\<\>]* ]] && return 0
+  [[ "$path" != /* ]] && full="$cwd/$path"
+  [[ -f "$full" ]] || return 0
+  IFS= read -r first <"$full" || true
+  first="${first%$'\r'}"
+  if [[ ! "$first" =~ [^[:space:]] ]]; then
+    failed+=("output first line is empty: $path")
+  elif ! has_whole_token "$first" "$id"; then
+    failed+=("output first line lacks Dispatch id $id")
+  fi
+}
+
 # build_record ID POST STOP: POST and STOP are the two parked payloads.
 build_record() {
-  local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd
+  local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd note=""
   local -a failed=()
   prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
   dispatch_id="$(message_line "$prompt" 'Dispatch id')"
@@ -125,12 +160,15 @@ build_record() {
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   cwd="$(payload_cwd "$stop" "$post")" || return 1
   check_output_path "$output_path" "$cwd"
+  check_output_owner "$output_path" "$cwd" "$dispatch_id"
+  [[ -n "$output_path" && -z "$dispatch_id" ]] && note="ownership not checked"
   printf '%s\n' "${failed[@]}" | jq -n -c -R --arg d "$dispatch_id" --arg a "$id" \
-    --arg s "$type" --arg o "$output_path" --arg t "$now" \
+    --arg s "$type" --arg o "$output_path" --arg t "$now" --arg n "$note" \
     '[inputs | select(. != "")] as $f
      | {dispatch_id:$d,agent_id:$a,subagent_type:$s,
         verdict:(if ($f | length) > 0 then "fail" else "pass" end),failed:$f,time:$t}
-     | if $o == "" then . else .output_path = $o end' 2>/dev/null
+     | if $o == "" then . else .output_path = $o end
+     | if $n == "" then . else .note = $n end' 2>/dev/null
 }
 
 append_record() {

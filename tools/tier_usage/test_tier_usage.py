@@ -1465,6 +1465,80 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(entry["est_output_tokens"], 0)
         self.assertEqual(entry["cost_usd"], NO_RATES)
 
+    def test_Summary_PricedAndUnpricedRows_TotalSaysPartial(self):
+        # Arrange
+        runner = "a1:story-coordinator"
+        tier = "economy"
+        # FULL_SUMMARY_LINES gives this group five counted rows (3663 tokens over
+        # 5 dispatches) and this runner three attributed todos (3663 / 1221.0).
+        counted_in_group = 5
+        todos_in_runner = 3
+        priced_cost = 1.5
+        partial_text = "partial: 1.5 (4 of 5 rows unpriced)"
+
+        def counted_group_rows(rows):
+            return [
+                row
+                for row in rows
+                if row["runner"] == runner
+                and row["tier"] == tier
+                and row["input_tokens"] is not None
+            ]
+
+        def group_entry(rows):
+            return summary_entry_for(tier_usage.summarize(rows), runner, tier)
+
+        with self.subTest("one priced and one unpriced row"):
+            rows, _ = collect_rows(FULL)
+            group = counted_group_rows(rows)
+            self.assertEqual(len(group), counted_in_group)
+            group[0]["cost_usd"] = priced_cost
+            for row in group[1:]:
+                row["cost_usd"] = NO_RATES
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], partial_text)
+            self.assertEqual(entry["cost_per_todo_usd"], "partial")
+
+        with self.subTest("same group plus a row without usage"):
+            rows, _ = collect_rows(FULL)
+            group = counted_group_rows(rows)
+            self.assertEqual(len(group), counted_in_group)
+            group[0]["cost_usd"] = priced_cost
+            for row in group[1:]:
+                row["cost_usd"] = NO_RATES
+            no_usage = dict(group[0])
+            no_usage["input_tokens"] = None
+            no_usage["cost_usd"] = None
+            no_usage["first_ts"] = None
+            rows.append(no_usage)
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], partial_text)
+            self.assertEqual(entry["cost_per_todo_usd"], "partial")
+
+        with self.subTest("all rows priced"):
+            rows, _ = collect_rows(FULL)
+            for row in counted_group_rows(rows):
+                row["cost_usd"] = priced_cost
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], 1.5 * counted_in_group)
+            total = 1.5 * counted_in_group
+            self.assertEqual(entry["cost_per_todo_usd"], round(total / todos_in_runner, 4))
+
+        with self.subTest("all rows unpriced"):
+            rows, _ = collect_rows(FULL)
+            for row in counted_group_rows(rows):
+                row["cost_usd"] = NO_RATES
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], NO_RATES)
+
 
 class SummaryOutputTests(unittest.TestCase):
     def test_Main_NoRows_SummaryIsHeaderOnlyAndExitZero(self):

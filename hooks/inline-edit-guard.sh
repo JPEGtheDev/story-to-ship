@@ -208,6 +208,32 @@ def read_text(path):
         return None
 
 
+def is_worktrees_ignore_add(top, real, tool_name, tool_input):
+    try:
+        if tool_name != "Edit":
+            return False
+        if real != os.path.realpath(os.path.join(top, ".gitignore")):
+            return False
+        if tool_input.get("replace_all") is True:
+            return False
+        old_string = tool_input.get("old_string")
+        new_string = tool_input.get("new_string")
+        if not isinstance(old_string, str) or not isinstance(new_string, str):
+            return False
+        old = read_text(real)
+        if old is None or old_string == "" or old.count(old_string) != 1:
+            return False
+        new = old.replace(old_string, new_string, 1)
+        old_body = old[:-1] if old.endswith("\n") else old
+        new_body = new[:-1] if new.endswith("\n") else new
+        old_lines = old_body.split("\n") if old_body else []
+        if ".worktrees/" in old_lines:
+            return False
+        return new_body.split("\n") == old_lines + [".worktrees/"]
+    except Exception:
+        return False
+
+
 def load_ledger(ledger_path, real):
     per_file = 0
     session = 0
@@ -275,6 +301,9 @@ def main():
         pass
 
     if real == os.path.join(top, "plan.md"):
+        return
+
+    if is_worktrees_ignore_add(top, real, tool_name, tool_input):
         return
 
     ext = os.path.splitext(real)[1]

@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 set -eu
-git init -q -b main
-git config user.email eval@example.invalid
-git config user.name eval
 mkdir -p src tests
 cat > src/pricing.py <<'PRICING'
 def apply_discount(total, discount):
@@ -26,5 +23,3 @@ class ShippingTests(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 TESTS
-git add -A
-git commit -q -m "chore: seed repo"

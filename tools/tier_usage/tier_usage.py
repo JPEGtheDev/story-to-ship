@@ -37,6 +37,7 @@ import math
 import os
 import re
 import sys
+import time
 
 DEFAULT_TIERS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiers.json")
 COLUMNS = [
@@ -129,16 +130,24 @@ def _check_tier(name, spec):
     rates = spec.get("rates_per_million")
     if rates is None:
         return
+    field = f"tier {name!r} field 'rates_per_million'"
     if not isinstance(rates, dict):
-        raise ValueError(
-            f"tier {name!r} field 'rates_per_million' must be null or an object"
-        )
+        raise ValueError(f"{field} must be null or an object")
     for key, value in rates.items():
         if not _is_number(value) or not math.isfinite(value):
-            raise ValueError(
-                f"tier {name!r} field 'rates_per_million' key {key!r} "
-                "must be a finite number"
-            )
+            raise ValueError(f"{field} key {key!r} must be a finite number")
+    if not rates:
+        raise ValueError(f"{field} must not be empty")
+    required = tuple(RATE_KEY_FOR_USAGE.values())
+    for key in rates:
+        if key not in required:
+            raise ValueError(f"{field} has unknown key {key!r}")
+    for key in required:
+        if key not in rates:
+            raise ValueError(f"{field} is missing key {key!r}")
+    for key in required:
+        if rates[key] < 0:
+            raise ValueError(f"{field} key {key!r} must not be negative")
 
 
 def load_tiers(path):
@@ -146,8 +155,12 @@ def load_tiers(path):
 
     Raises ValueError when the "tiers" value is not an object of objects, when a
     "match" is not a list of non-empty strings, or when "rates_per_million" is
-    neither null nor an object whose values are all finite numbers (bool and
-    NaN or infinity excluded).
+    neither null nor an object. A non-null "rates_per_million" object must have
+    exactly the keys RATE_KEY_FOR_USAGE.values() (input, cache_write, cache_read,
+    output): an empty object, an unknown key, or a missing key is refused, with
+    the unknown key reported before the first missing key in that order. Every
+    value must be a finite number, not a bool, and not negative (0 and -0.0 are
+    allowed).
     """
     with open(path, encoding="utf-8") as handle:
         data = json.load(handle)
@@ -563,6 +576,30 @@ def _todo_owners(rows):
     return owners
 
 
+def _cost_cells(counted, todo_count):
+    """Return the (cost_usd, cost_per_todo_usd) cells for the counted rows."""
+    priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
+    unpriced = len(counted) - len(priced)
+    total = sum(priced)
+    partial = bool(priced) and unpriced > 0
+    if partial:
+        cost = "partial: %s (%d of %d rows unpriced)" % (
+            round(total, 4),
+            unpriced,
+            len(counted),
+        )
+    else:
+        cost = round(total, 4) if priced else NO_RATES
+
+    if not todo_count:
+        return cost, NOT_APPLICABLE
+    if partial:
+        return cost, "partial"
+    if priced:
+        return cost, round(total / todo_count, 4)
+    return cost, NO_RATES
+
+
 def _summary_entry(runner, tier, members, owners, todo_count):
     """Return one summary dict for the rows of a single (runner, tier) group.
 
@@ -577,9 +614,7 @@ def _summary_entry(runner, tier, members, owners, todo_count):
         for row in counted
     )
     est_output = sum(row["est_output_tokens"] for row in counted)
-    priced = [row["cost_usd"] for row in counted if _is_number(row["cost_usd"])]
-    total = sum(priced)
-    cost = round(total, 4) if priced else NO_RATES
+    cost, per_todo_usd = _cost_cells(counted, todo_count)
 
     assigned = [
         owner
@@ -588,13 +623,8 @@ def _summary_entry(runner, tier, members, owners, todo_count):
     ]
     if todo_count:
         per_todo_tokens = "%.1f" % (input_side / todo_count)
-        if priced:
-            per_todo_usd = round(total / todo_count, 4)
-        else:
-            per_todo_usd = NO_RATES
     else:
         per_todo_tokens = NOT_APPLICABLE
-        per_todo_usd = NOT_APPLICABLE
 
     yes = sum(1 for owner in assigned if owner["first_stage1_pass"] == "yes")
     no = sum(1 for owner in assigned if owner["first_stage1_pass"] == "no")
@@ -663,6 +693,27 @@ def render_summary(summary):
     return "\n".join(lines) + "\n"
 
 
+def no_rates_notice(tiers, tiers_path):
+    """Return the notice naming tiers without rates, or "" when none lack them."""
+    missing = [
+        name for name, spec in tiers.items() if spec.get("rates_per_million") is None
+    ]
+    if not missing:
+        return ""
+    names = ", ".join(missing)
+    return (
+        f"# tiers with no rates: {names}; {tiers_path} holds no rates for them, "
+        "pass --tiers FILE with a complete rate set for each"
+    )
+
+
+def price_file_line(tiers_path):
+    """Return the line naming the price file and its UTC modified date."""
+    mtime = os.stat(tiers_path).st_mtime
+    date = time.strftime("%Y-%m-%d", time.gmtime(mtime))
+    return f"# price file: {tiers_path}; modified {date} UTC"
+
+
 def main(argv):
     parser = argparse.ArgumentParser(
         description="Print one tier usage row per subagent dispatch in a session folder."
@@ -682,6 +733,10 @@ def main(argv):
 
     rows, counts = collect(args.session_dir, tiers)
     sys.stdout.write(render(rows, counts))
+    sys.stdout.write(price_file_line(args.tiers) + "\n")
+    notice = no_rates_notice(tiers, args.tiers)
+    if notice:
+        sys.stdout.write(notice + "\n")
     sys.stdout.write("\n")
     sys.stdout.write(render_summary(summarize(rows)))
     return 0

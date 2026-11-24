@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -105,6 +106,14 @@ def run_main(argv):
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         code = tier_usage.main(argv)
     return code, out.getvalue(), err.getvalue()
+
+
+def without_tier_notice(out):
+    return [
+        line
+        for line in out.splitlines()
+        if not line.startswith(("# tiers with no rates", "# price file:"))
+    ]
 
 
 def tier_of(lines, meta=None):
@@ -428,7 +437,7 @@ class EmptyFolderTests(unittest.TestCase):
             os.makedirs(os.path.join(tmp, "subagents"))
             code, out, _ = run_main([tmp])
         self.assertEqual(code, 0)
-        lines = out.splitlines()
+        lines = without_tier_notice(out)
         self.assertEqual(lines[0], "\t".join(tier_usage.COLUMNS))
         self.assertTrue(lines[-4].startswith("# skipped"), lines[-4])
         self.assertEqual(lines[-3], "")
@@ -636,11 +645,53 @@ class TierShapeTests(unittest.TestCase):
 
     def test_LoadTiers_ValidShape_Accepted(self):
         # Arrange
-        spec = {"match": ["x"], "rates_per_million": {"input": 3, "output": 15.5}}
+        spec = {
+            "match": ["x"],
+            "rates_per_million": {
+                "input": 3,
+                "cache_write": 3.75,
+                "cache_read": 0.3,
+                "output": 15.5,
+            },
+        }
         # Act
         loaded = load_tier_spec(spec)
         # Assert
         self.assertEqual(loaded["economy"]["match"], ["x"])
+
+    def test_ShippedTiers_NoRatesInRepo_EveryTierHasNullRates(self):
+        # Arrange
+        path = TIERS_FILE
+        # Act
+        tiers = tier_usage.load_tiers(path)
+        # Assert
+        self.assertTrue(tiers)
+        for name, spec in tiers.items():
+            with self.subTest(tier=name):
+                self.assertIsNone(spec["rates_per_million"], "tier '%s'" % name)
+
+    def test_ShippedFiles_NoDollarFigure_HoldsNoPriceFigure(self):
+        # Arrange
+        shipped = sorted(
+            name
+            for name in os.listdir(HERE)
+            if not name.startswith("test_")
+            and os.path.isfile(os.path.join(HERE, name))
+        )
+        self.assertIn("tier_usage.py", shipped)
+        self.assertIn("tiers.json", shipped)
+        # Act
+        texts = {}
+        for name in shipped:
+            with open(os.path.join(HERE, name), encoding="utf-8") as handle:
+                texts[name] = handle.read()
+        # Assert
+        for name, text in texts.items():
+            with self.subTest(file=name):
+                self.assertIsNone(
+                    re.search(r"\$\s*\d", text),
+                    "%s holds a dollar figure" % name,
+                )
 
     def test_Main_BadRateValue_ExitsTwoWithMessage(self):
         # Arrange
@@ -654,6 +705,50 @@ class TierShapeTests(unittest.TestCase):
         # Assert
         self.assertEqual(code, 2)
         self.assertIn("'economy'", err)
+
+    def test_Main_InvalidRateSet_ExitsTwoNamingTierAndKey(self):
+        # Arrange
+        full = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        cases = [
+            ("empty", {}, None),
+            (
+                "missing cache_read",
+                {k: v for k, v in full.items() if k != "cache_read"},
+                "cache_read",
+            ),
+            ("unknown key", dict(full, outupt=1), "outupt"),
+        ]
+        for key in full:
+            cases.append(("negative " + key, dict(full, **{key: -1}), key))
+        for label, rates, key in cases:
+            with self.subTest(label):
+                with tempfile.TemporaryDirectory() as tmp:
+                    os.makedirs(os.path.join(tmp, "subagents"))
+                    tiers_path = write_tiers(
+                        tmp, {"economy": {"match": ["x"], "rates_per_million": rates}}
+                    )
+                    # Act
+                    code, out, err = run_main([tmp, "--tiers", tiers_path])
+                # Assert
+                self.assertEqual(code, 2)
+                self.assertEqual(out, "")
+                self.assertIn("'economy'", err)
+                self.assertIn("'rates_per_million'", err)
+                if key is not None:
+                    self.assertIn("'%s'" % key, err)
+                if key is None:
+                    self.assertIn("must not be empty", err)
+
+    def test_LoadTiers_UnknownAndMissingKey_NamesUnknownKeyFirst(self):
+        # Arrange
+        rates = {"input": 1, "cache_write": 1, "outupt": 1}
+        spec = {"match": ["x"], "rates_per_million": rates}
+        # Act
+        with self.assertRaises(ValueError) as caught:
+            load_tier_spec(spec)
+        # Assert
+        self.assertIn("unknown key 'outupt'", str(caught.exception))
+        self.assertNotIn("missing", str(caught.exception))
 
 
 class VendorNameTests(unittest.TestCase):
@@ -1422,6 +1517,112 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(entry["est_output_tokens"], 0)
         self.assertEqual(entry["cost_usd"], NO_RATES)
 
+    def test_Summary_PricedAndUnpricedRows_TotalSaysPartial(self):
+        # Arrange
+        runner = "a1:story-coordinator"
+        tier = "economy"
+        # FULL_SUMMARY_LINES gives this group five counted rows (3663 tokens over
+        # 5 dispatches) and this runner three attributed todos (3663 / 1221.0).
+        counted_in_group = 5
+        todos_in_runner = 3
+        priced_cost = 1.5
+        partial_text = "partial: 1.5 (4 of 5 rows unpriced)"
+
+        def counted_group_rows(rows):
+            return [
+                row
+                for row in rows
+                if row["runner"] == runner
+                and row["tier"] == tier
+                and row["input_tokens"] is not None
+            ]
+
+        def group_entry(rows):
+            return summary_entry_for(tier_usage.summarize(rows), runner, tier)
+
+        with self.subTest("one priced and several unpriced rows"):
+            rows, _ = collect_rows(FULL)
+            group = counted_group_rows(rows)
+            self.assertEqual(len(group), counted_in_group)
+            group[0]["cost_usd"] = priced_cost
+            for row in group[1:]:
+                row["cost_usd"] = NO_RATES
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], partial_text)
+            self.assertEqual(entry["cost_per_todo_usd"], "partial")
+
+        with self.subTest("same group plus a row without usage"):
+            rows, _ = collect_rows(FULL)
+            group = counted_group_rows(rows)
+            self.assertEqual(len(group), counted_in_group)
+            group[0]["cost_usd"] = priced_cost
+            for row in group[1:]:
+                row["cost_usd"] = NO_RATES
+            no_usage = dict(group[0])
+            no_usage["input_tokens"] = None
+            no_usage["cost_usd"] = None
+            no_usage["first_ts"] = None
+            rows.append(no_usage)
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], partial_text)
+            self.assertEqual(entry["cost_per_todo_usd"], "partial")
+
+        with self.subTest("all rows priced"):
+            rows, _ = collect_rows(FULL)
+            for row in counted_group_rows(rows):
+                row["cost_usd"] = priced_cost
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], 1.5 * counted_in_group)
+            total = 1.5 * counted_in_group
+            self.assertEqual(entry["cost_per_todo_usd"], round(total / todos_in_runner, 4))
+
+        with self.subTest("all rows unpriced"):
+            # Arrange
+            expected_per_todo_usd = NO_RATES
+            rows, _ = collect_rows(FULL)
+            for row in counted_group_rows(rows):
+                row["cost_usd"] = NO_RATES
+            # Act
+            entry = group_entry(rows)
+            # Assert
+            self.assertEqual(entry["cost_usd"], NO_RATES)
+            self.assertEqual(entry["cost_per_todo_usd"], expected_per_todo_usd)
+
+    def test_Summary_AllPricedPlusRowWithoutUsage_TotalIsPlainSum(self):
+        # Arrange
+        runner = "a1:story-coordinator"
+        tier = "economy"
+        # FULL_SUMMARY_LINES gives this group five counted rows.
+        counted_in_group = 5
+        priced_cost = 1.5
+        rows, _ = collect_rows(FULL)
+        group = [
+            row
+            for row in rows
+            if row["runner"] == runner
+            and row["tier"] == tier
+            and row["input_tokens"] is not None
+        ]
+        self.assertEqual(len(group), counted_in_group)
+        for row in group:
+            row["cost_usd"] = priced_cost
+        no_usage = dict(group[0])
+        no_usage["input_tokens"] = None
+        no_usage["cost_usd"] = None
+        no_usage["first_ts"] = None
+        rows.append(no_usage)
+        # Act
+        entry = summary_entry_for(tier_usage.summarize(rows), runner, tier)
+        # Assert
+        self.assertEqual(entry["cost_usd"], priced_cost * counted_in_group)
+        self.assertNotIn("partial", str(entry["cost_usd"]))
+
 
 class SummaryOutputTests(unittest.TestCase):
     def test_Main_NoRows_SummaryIsHeaderOnlyAndExitZero(self):
@@ -1445,7 +1646,7 @@ class SummaryOutputTests(unittest.TestCase):
     def test_Main_FullFixtureOrder_RowsThenSkippedThenBlankThenSummary(self):
         code, out, _ = run_main([FULL])
         self.assertEqual(code, 0)
-        lines = out.splitlines()
+        lines = without_tier_notice(out)
         skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
         self.assertEqual(len(skipped), 1)
         at = skipped[0]
@@ -1453,6 +1654,154 @@ class SummaryOutputTests(unittest.TestCase):
         self.assertEqual(lines[at + 1], "")
         self.assertTrue(lines[at + 2].startswith("# summary"), lines[at + 2])
         self.assertEqual(lines[at + 3], "\t".join(tier_usage.SUMMARY_COLUMNS))
+
+    def test_Main_TiersWithoutRates_NoticeNamesTiersAndFile(self):
+        # Arrange
+        notice_prefix = "# tiers with no rates: "
+        notice_suffix = (
+            "; %s holds no rates for them, pass --tiers FILE "
+            "with a complete rate set for each"
+        )
+        complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        default_notice = notice_prefix + "economy, standard, premium" + notice_suffix % TIERS_FILE
+        summary_marker = "# summary per runner per tier"
+        with self.subTest("shipped tiers file names all three tiers"):
+            # Act
+            code, out, _ = run_main([BASIC])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertIn(default_notice, out.splitlines())
+        with self.subTest("economy complete, standard null, premium absent"):
+            with tempfile.TemporaryDirectory() as tmp:
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": None},
+                        "premium": {"match": [FAMILY_C]},
+                    },
+                )
+                expected_notice = (
+                    notice_prefix + "standard, premium" + notice_suffix % tiers_path
+                )
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertIn(expected_notice, out.splitlines())
+        with self.subTest("all three tiers complete"):
+            with tempfile.TemporaryDirectory() as tmp:
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": complete},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            notice_lines = [
+                line for line in out.splitlines() if line.startswith("# tiers with no rates")
+            ]
+            self.assertEqual(notice_lines, [])
+        with self.subTest("notice sits between skipped line and summary"):
+            # Act
+            code, out, _ = run_main([BASIC])
+            lines = out.splitlines()
+            # Assert
+            self.assertEqual(code, 0)
+            skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
+            notice = [index for index, line in enumerate(lines) if line.startswith(notice_prefix)]
+            summary = [index for index, line in enumerate(lines) if line.startswith(summary_marker)]
+            self.assertEqual((len(skipped), len(notice), len(summary)), (1, 1, 1))
+            self.assertLess(skipped[0], notice[0])
+            self.assertLess(notice[0], summary[0])
+
+    def test_Main_PriceFile_LinePrintsPathAndModifiedDateBetweenRowsAndSummary(self):
+        price_marker = "# price file"
+        price_prefix = price_marker + ": "
+        # 2026-01-02 12:00:00 UTC, fixed so the expected date does not depend on the time zone
+        stamp = 1767355200
+        expected_date = "2026-01-02"
+
+        def price_line_for(path):
+            return "%s%s; modified %s UTC" % (price_prefix, path, expected_date)
+
+        complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
+        with self.subTest("line names the tiers path and the UTC modified date"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": complete},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                os.utime(tiers_path, (stamp, stamp))
+                expected_line = price_line_for(tiers_path)
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            self.assertEqual(out.splitlines().count(expected_line), 1)
+        with self.subTest("line sits after skipped, before summary and the no-rates notice"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = write_tiers(
+                    tmp,
+                    {
+                        "economy": {"match": [FAMILY_A], "rates_per_million": complete},
+                        "standard": {"match": [FAMILY_B], "rates_per_million": None},
+                        "premium": {"match": [FAMILY_C], "rates_per_million": complete},
+                    },
+                )
+                os.utime(tiers_path, (stamp, stamp))
+                expected_line = price_line_for(tiers_path)
+                notice_prefix = "# tiers with no rates: "
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 0)
+            lines = out.splitlines()
+            skipped = [index for index, line in enumerate(lines) if line.startswith("# skipped")]
+            price = [index for index, line in enumerate(lines) if line == expected_line]
+            notice = [index for index, line in enumerate(lines) if line.startswith(notice_prefix)]
+            summary = [index for index, line in enumerate(lines) if line.startswith("# summary")]
+            self.assertEqual((len(skipped), len(price), len(notice), len(summary)), (1, 1, 1, 1))
+            self.assertLess(skipped[0], price[0])
+            self.assertLess(price[0], notice[0])
+            self.assertLess(price[0], summary[0])
+        with self.subTest("no --tiers option prints the shipped path and a date"):
+            # Arrange
+            expected_prefix = price_prefix + tier_usage.DEFAULT_TIERS + "; modified "
+            expected_suffix = " UTC"
+            # Act
+            code, out, _ = run_main([BASIC])
+            # Assert
+            self.assertEqual(code, 0)
+            matches = [line for line in out.splitlines() if line.startswith(expected_prefix)]
+            self.assertEqual(len(matches), 1)
+            line = matches[0]
+            self.assertTrue(line.endswith(expected_suffix), line)
+            middle = line[len(expected_prefix) : -len(expected_suffix)]
+            self.assertIsNotNone(re.fullmatch(r"\d{4}-\d{2}-\d{2}", middle), middle)
+        with self.subTest("unreadable tiers file exits 2 with no price line"):
+            with tempfile.TemporaryDirectory() as tmp:
+                # Arrange
+                tiers_path = os.path.join(tmp, "tiers.json")
+                with open(tiers_path, "w", encoding="utf-8") as handle:
+                    handle.write("not json")
+                # Act
+                code, out, _ = run_main([BASIC, "--tiers", tiers_path])
+            # Assert
+            self.assertEqual(code, 2)
+            price_lines = [line for line in out.splitlines() if line.startswith(price_marker)]
+            self.assertEqual(price_lines, [])
 
 
 if __name__ == "__main__":

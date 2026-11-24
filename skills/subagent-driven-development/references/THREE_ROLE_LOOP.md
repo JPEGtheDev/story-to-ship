@@ -77,7 +77,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 
 ### single
 
-- For a code todo: writes the failing test first, watches it fail for the expected reason (a test that pins behavior that already exists gets the testing skill's scratch edit proof instead), implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`.
+- For a code todo: writes the failing test first, watches it fail for the expected reason, implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`. For a todo whose test pins behavior that already exists, the testing skill's scratch edit proof replaces the failing run, no production code is written, and the commit is `test(scope): ...`.
 - For a prose, config, pure refactor or deletion todo: writes no test first, runs the todo's own checks, and uses the conventional commit type that fits (`docs`, `chore`, `refactor`, `ci`, and so on).
 
 ## 4. Test-path predicate

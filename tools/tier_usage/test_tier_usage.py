@@ -1726,6 +1726,10 @@ class SummaryOutputTests(unittest.TestCase):
         # 2026-01-02 12:00:00 UTC, fixed so the expected date does not depend on the time zone
         stamp = 1767355200
         expected_date = "2026-01-02"
+
+        def price_line_for(path):
+            return "%s%s; modified %s UTC" % (price_prefix, path, expected_date)
+
         complete = {"input": 1, "cache_write": 1, "cache_read": 1, "output": 1}
         with self.subTest("line names the tiers path and the UTC modified date"):
             with tempfile.TemporaryDirectory() as tmp:
@@ -1739,7 +1743,7 @@ class SummaryOutputTests(unittest.TestCase):
                     },
                 )
                 os.utime(tiers_path, (stamp, stamp))
-                expected_line = "%s%s; modified %s UTC" % (price_prefix, tiers_path, expected_date)
+                expected_line = price_line_for(tiers_path)
                 # Act
                 code, out, _ = run_main([BASIC, "--tiers", tiers_path])
             # Assert
@@ -1757,7 +1761,7 @@ class SummaryOutputTests(unittest.TestCase):
                     },
                 )
                 os.utime(tiers_path, (stamp, stamp))
-                expected_line = "%s%s; modified %s UTC" % (price_prefix, tiers_path, expected_date)
+                expected_line = price_line_for(tiers_path)
                 notice_prefix = "# tiers with no rates: "
                 # Act
                 code, out, _ = run_main([BASIC, "--tiers", tiers_path])
@@ -1792,11 +1796,10 @@ class SummaryOutputTests(unittest.TestCase):
                 tiers_path = os.path.join(tmp, "tiers.json")
                 with open(tiers_path, "w", encoding="utf-8") as handle:
                     handle.write("not json")
-                expected_code = 2
                 # Act
                 code, out, _ = run_main([BASIC, "--tiers", tiers_path])
             # Assert
-            self.assertEqual(code, expected_code)
+            self.assertEqual(code, 2)
             price_lines = [line for line in out.splitlines() if line.startswith(price_marker)]
             self.assertEqual(price_lines, [])
 

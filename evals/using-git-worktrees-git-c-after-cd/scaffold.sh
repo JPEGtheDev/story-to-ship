@@ -11,3 +11,4 @@ git commit -q -m "chore: seed repo"
 git branch feature/csv-export main
 mkdir -p .worktrees
 git worktree add -q .worktrees/csv-export-todo1 -b agent/csv-export-todo1 feature/csv-export
+printf 'print("csv")\n' > .worktrees/csv-export-todo1/src/export.py

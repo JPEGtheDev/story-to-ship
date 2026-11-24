@@ -1,10 +1,10 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '(^|"command":\s*"|&&|;|\|\|?|\n|\\n)\s*git\s+(-C\s+\S+\s+)?worktree\s+remove\b'
+input_match: '(^|"command":\s*"|&&|;|\|\|?|\n|\\n)\s*git\s+(-C\s+(?:[^\s\\]|\\")+\s+)?worktree\s+remove\b(?:[^\n;&|\\]|\\")*csv-export-todo1'
 min: 1
 ---
 
-Behavior: after the Todo 1 branch is merged, the run removes the implementer's worktree with `git worktree remove` of `.worktrees/csv-export-todo1`. A run that leaves the worktree alive and says it will clean up later fails, because no `git worktree remove` command runs. The check is a command form, so no judge is needed.
+Behavior: after the Todo 1 branch is merged, the run issues a `git worktree remove` command that names `csv-export-todo1`. The grader reads the command text only. It does not check that the command succeeded or that the worktree is gone afterward. The check is a command form, so no judge is needed.
 
-Limitation of a min-1 check: the command form is checked, not its target or order. It proves a `git worktree remove` command ran, not that it targeted `.worktrees/csv-export-todo1` or ran after the merge. The merge is done by the scaffold before the run starts, so the order is fixed.
+Limitation: a command that names the path after a `;`, `&` or `|` is not matched, and the order against the Todo 2 dispatch is not checked. The merge and both worktrees are made by the scaffold before the run starts.

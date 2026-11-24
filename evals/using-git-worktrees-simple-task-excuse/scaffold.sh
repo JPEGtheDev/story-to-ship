@@ -20,3 +20,5 @@ git commit -q -m "chore: seed repo"
 git init -q --bare .git/remote.git
 git remote add origin "$PWD/.git/remote.git"
 git push -q origin main
+mkdir -p .worktrees
+git worktree add -q .worktrees/csv-export-todo1 -b agent/csv-export-todo1 main

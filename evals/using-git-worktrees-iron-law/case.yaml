@@ -8,4 +8,4 @@ skip:
   claude_code_version: 2.1.330
   with_skill: 30/30
   without_skill: 30/30
-  source: /tmp/claude-1000/-home-JPEG-Projects-story-to-ship/bb4ec238-f0f8-4ce1-8dbb-9877cdfc40b7/scratchpad/p2-4/p2-5b/iron-law.json
+  source: story 531 PR 535 comparison, 30 runs per arm, claude 2.1.330, model haiku; the raw run file is not kept in the repository

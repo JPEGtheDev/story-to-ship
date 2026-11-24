@@ -709,6 +709,17 @@ class TierShapeTests(unittest.TestCase):
                 if key is not None:
                     self.assertIn("'%s'" % key, err)
 
+    def test_LoadTiers_UnknownAndMissingKey_NamesUnknownKeyFirst(self):
+        # Arrange
+        rates = {"input": 1, "cache_write": 1, "outupt": 1}
+        spec = {"match": ["x"], "rates_per_million": rates}
+        # Act
+        with self.assertRaises(ValueError) as caught:
+            load_tier_spec(spec)
+        # Assert
+        self.assertIn("unknown key 'outupt'", str(caught.exception))
+        self.assertNotIn("missing", str(caught.exception))
+
 
 class VendorNameTests(unittest.TestCase):
     def test_ScriptAndTestText_ContainsNoFamilyName(self):
@@ -1542,6 +1553,8 @@ class SummaryTests(unittest.TestCase):
             self.assertEqual(entry["cost_per_todo_usd"], round(total / todos_in_runner, 4))
 
         with self.subTest("all rows unpriced"):
+            # Arrange
+            expected_per_todo_usd = NO_RATES
             rows, _ = collect_rows(FULL)
             for row in counted_group_rows(rows):
                 row["cost_usd"] = NO_RATES
@@ -1549,6 +1562,36 @@ class SummaryTests(unittest.TestCase):
             entry = group_entry(rows)
             # Assert
             self.assertEqual(entry["cost_usd"], NO_RATES)
+            self.assertEqual(entry["cost_per_todo_usd"], expected_per_todo_usd)
+
+    def test_Summary_AllPricedPlusRowWithoutUsage_TotalIsPlainSum(self):
+        # Arrange
+        runner = "a1:story-coordinator"
+        tier = "economy"
+        # FULL_SUMMARY_LINES gives this group five counted rows.
+        counted_in_group = 5
+        priced_cost = 1.5
+        rows, _ = collect_rows(FULL)
+        group = [
+            row
+            for row in rows
+            if row["runner"] == runner
+            and row["tier"] == tier
+            and row["input_tokens"] is not None
+        ]
+        self.assertEqual(len(group), counted_in_group)
+        for row in group:
+            row["cost_usd"] = priced_cost
+        no_usage = dict(group[0])
+        no_usage["input_tokens"] = None
+        no_usage["cost_usd"] = None
+        no_usage["first_ts"] = None
+        rows.append(no_usage)
+        # Act
+        entry = summary_entry_for(tier_usage.summarize(rows), runner, tier)
+        # Assert
+        self.assertEqual(entry["cost_usd"], priced_cost * counted_in_group)
+        self.assertNotIn("partial", str(entry["cost_usd"]))
 
 
 class SummaryOutputTests(unittest.TestCase):

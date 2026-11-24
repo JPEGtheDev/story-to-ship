@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 mkdir -p src tests
+# The eval sandbox is a git repository the harness creates; ignore it all so the plugin write guards, which exempt ignored paths, do not block a case that measures the testing skill.
 printf '*\n' > ../.gitignore
 cat > src/pricing.py <<'PRICING'
 def apply_discount(total, discount):

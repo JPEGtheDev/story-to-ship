@@ -43,7 +43,7 @@ substitute exactly as printed.
 Run every item. Mark [+] (pass) or [-] (fail) with file:line evidence. Criteria for each
 item are in the reference sections above.
 
-- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters?
+- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters; a description holding a colon followed by a space is quoted?
 - [ ] **Size** -- apply four levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max but at or under 5,000 tokens = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale only) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user. A redundant enforcement rule is never cuttable content: list each as a removal candidate under either verdict (under PASS (size advisory) when no cuttable content exists; alongside NEEDS WORK when cuttable rationale exists), and never cut one without user confirmation; (4) above 5,000 tokens (hard limit) = NEEDS WORK regardless of content value -- skill will not load correctly in all agent implementations.
 - [ ] **Iron Law block** -- backtick-wrapped; ALL CAPS rule; `YOU MUST`; `No exceptions.`; all INSIDE the backtick block?
 - [ ] **Iron Law letter/spirit line** -- "Violating the letter of this rule is violating the spirit of this rule." present?
@@ -60,6 +60,7 @@ item are in the reference sections above.
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
 - [ ] **Enforcement co-location** -- every banned phrase or prohibited action has its safe substitute in SKILL.md, not behind a references/ pointer?
+- [ ] **Eval evidence** -- when the diff shortens or rewords skill text (any changed line in a rule body), does {{IMPLEMENTER_EVIDENCE}} hold the old-versus-new comparison record of SKILL_EVAL_COMPARISON.md with no confirmed LOSS? When the diff adds a rule line, does the evidence name the case that fails without the skill? A missing record (evidence absent, "none", or a statement that no implementer ran), a confirmed LOSS, or a pair with 0 passes in both arms or all passes in both arms offered as proof is a FAIL on the line the diff adds. Mark N/A only when the diff neither shortens, rewords nor adds a rule line.
 - [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names. (R1)
 - [ ] A routing change covers every skill whose frontmatter triggers on the same signal. Applies when the change is a routing change. Otherwise mark N/A. (R2)
 - [ ] A rehearsal fixture must not already contain the rule it is meant to catch; a RED catch on a clean fixture means the amendment is redundant. Applies when a rehearsal is part of the review. Otherwise mark N/A. (R3)
@@ -203,6 +204,7 @@ Return findings in EXACTLY this structure:
 | Iron Law letter/spirit line | [+]/[-] | file:line |
 | Announcement explicit | [+]/[-] | file:line |
 | Gate Function BEFORE PROCEEDING | [+]/[-] | file:line |
+| Eval evidence | [+]/[-]/N/A | file:line |
 | Rationalization >=5 rows | [+]/[-] | file:line |
 | Red Flags >=5 items | [+]/[-] | file:line |
 | No weak language | [+]/[-] | grep output or "no instances found" |

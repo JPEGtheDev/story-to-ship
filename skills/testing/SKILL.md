@@ -31,7 +31,7 @@ If you wrote code before the test: **Delete it. Start over.** No exceptions.
 
 **RED -> GREEN -> REFACTOR. In that order. Every time.**
 
-- **RED:** Write one failing test. Name it per the Naming Convention section. YOU MUST SEE IT FAIL -- confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong. Fix it before writing production code.
+- **RED:** Write one failing test. Name it per the Naming Convention section. YOU MUST SEE IT FAIL -- confirm it fails for the expected reason, not a compile error. If it passes immediately: the test is wrong (unless the exception below applies). Fix it before writing production code. **One exception:** a new test of behavior that already exists may pass on its first run, but only with a scratch edit proof: a scratch edit that breaks that behavior makes this test fail, and the failing run names the test; show the edit and the failing run (command and output); revert the edit and show that `cmp` of the file against its saved copy prints nothing. A run that times out or fails to build is not a failing run. A test of existing behavior without this proof is not accepted.
 - **GREEN:** Write the simplest code to make it pass. ALL tests must pass (not just the new one).
 - **REFACTOR:** Remove duplication, improve names. Never add behavior. Tests stay green throughout.
 
@@ -81,7 +81,7 @@ Before presenting tests, verify:
 3. Expected values are named variables in Arrange (not inline literals in Assert)
 4. One logical concept per test
 5. Depended-upon behavior is tested: any behavior your code relies on has a test; if behavior can change and no test breaks, it was untested. Full text: `references/TESTING_PATTERNS.md`.
-6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken)
+6. Saw the new test FAIL before writing production code (confirms the test can detect failure; a test that passes immediately is broken, unless the RED rule's exception applies)
 7. Unit (Small) tests mock external dependencies (database, file input/output (I/O)); integration (Medium) tests may use local files. Use the least sophisticated double that answers the question, and mock the role (interface), not the concrete object. Full text: `references/TESTING_PATTERNS.md`.
 8. No testing of external libraries (standard library, third-party code)
 9. Group related configuration into plain data structures instead of flat variables
@@ -117,7 +117,7 @@ If you catch yourself thinking any of these, STOP and take the action the item n
 - "The visual regression test will cover this"
 - "It's too complex to unit test with a database double" (write a database double; that is what doubles are for)
 - "I already manually tested it"
-- Test passes immediately without seeing it fail first -- fix the test
+- Test passes immediately without seeing it fail first -- fix the test (unless the RED rule's exception applies)
 - Fixed a bug without writing a regression test that reproduces it first
 - A test double (mock or stub) that only ever returns happy-path values -- STOP. A double exists to FORCE the rare condition (error return, timeout, boundary value) deterministically on every run. Add the failure-forcing case, or state in the test why the double's collaborator cannot fail.
 - A test that mirrors the implementation's structure, or that you could only write by reading the source -- it tests a coincidence, not a contract; rewrite the test from the requirements. Full text: `references/TESTING_PATTERNS.md`.

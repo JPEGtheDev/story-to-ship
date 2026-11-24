@@ -48,7 +48,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Runs the suite: the new test must FAIL with a run-time assertion failure, and no other test may fail. A compile or import error is not a valid RED.
 - Commits `test(scope): ...` with the failure output pasted in the reply.
 - Makes exactly one commit, the test commit; no WIP commit.
-- If the test passes at once, return BLOCKED: the behavior already exists or the test is wrong. The todo goes back to planning.
+- If the test passes at once, return BLOCKED: the behavior already exists or the test is wrong. The todo goes back to planning. A todo whose test pins behavior that already exists is a `loop: single` todo, not a three-role todo: its scratch edit proof (the testing skill's RED rule) changes a non-test file, and a test-writer changes test files only.
 
 ### pass-maker
 

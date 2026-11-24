@@ -22,9 +22,13 @@
 # Other exemptions, decided inside the python scanner: a path that resolves
 # outside any git repository (including a path inside a repository's .git
 # directory, where `git rev-parse --show-toplevel` fails); a path matched
-# by that repository's .gitignore (via `git check-ignore`); and the
+# by that repository's .gitignore (via `git check-ignore`); the
 # repository's own top-level plan.md specifically (a plan.md in a
-# subdirectory is an ordinary file).
+# subdirectory is an ordinary file); and one Edit that adds the single
+# line `.worktrees/` to the top-level .gitignore (no replace_all, no
+# existing `.worktrees/` line, no carriage return in the file). Any other
+# edit of a file named .gitignore, including a basename .gitignore in a
+# subdirectory, is denied with the no-extension reason.
 #
 # What counts, and against what: the change is measured as a line diff
 # (insertions plus deletions, via difflib.unified_diff with no context) of
@@ -202,7 +206,7 @@ def read_lines(path):
 
 def read_text(path):
     try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
+        with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
             return f.read()
     except OSError:
         return None
@@ -222,6 +226,8 @@ def is_worktrees_ignore_add(top, real, tool_name, tool_input):
             return False
         old = read_text(real)
         if old is None or old_string == "" or old.count(old_string) != 1:
+            return False
+        if "\r" in old:
             return False
         new = old.replace(old_string, new_string, 1)
         old_body = old[:-1] if old.endswith("\n") else old

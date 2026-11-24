@@ -149,15 +149,19 @@ has_whole_token() {
 }
 
 # Checks that the first line of the output file carries the dispatch id.
-# Runs only for an existing regular file at a path without a placeholder.
+# Runs only for an existing regular file at a path without a placeholder; an
+# unreadable file fails with its own message.
 check_output_owner() {
   local path="$1" cwd="$2" id="$3" full first=""
   [[ -z "$path" || -z "$id" ]] && return 0
   has_placeholder "$path" && return 0
   full="$(resolve_path "$path" "$cwd")"
   [[ -f "$full" ]] || return 0
+  if [[ ! -r "$full" ]]; then
+    failed+=("output file is not readable: $path")
+    return 0
+  fi
   IFS= read -r first <"$full" || true
-  first="${first%$'\r'}"
   if [[ ! "$first" =~ [^[:space:]] ]]; then
     failed+=("output first line is empty: $path")
   elif ! has_whole_token "$first" "$id"; then
@@ -170,7 +174,7 @@ build_record() {
   local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd note=""
   local -a failed=()
   prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
-  dispatch_id="$(message_line "$prompt" 'Dispatch id')"
+  dispatch_id="$(message_line "$prompt" 'Dispatch id' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   output_path="$(message_line "$prompt" 'Output path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   cwd="$(payload_cwd "$stop" "$post")" || return 1

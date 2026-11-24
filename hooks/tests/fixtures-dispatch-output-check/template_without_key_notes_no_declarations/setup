@@ -1,0 +1,2 @@
+printf -- '---\nname: reviewer\noutput-quotes: "A"\n---\nbody\n' >"$tmp/agents/reviewer.md"
+printf 'Dispatch id: D-100\nanything\n' >"$tmp/files/out-100.md"

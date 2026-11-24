@@ -1,0 +1,1 @@
+printf -- '%s\n' '---' 'output-fields: "SOURCE ECHO:|VERDICT:"' '---' 'body' >"$tmp/agents/reviewer.md"

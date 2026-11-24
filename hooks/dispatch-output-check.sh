@@ -11,8 +11,12 @@
 # produces a record. Parked files older than 1 hour are swept on every run.
 #
 # The dispatch message lines `Dispatch id:` and `Output path:` are read from
-# tool_input.prompt (each optional). Each check appends to the failed list;
-# the verdict is fail when the list is non-empty.
+# tool_input.prompt (each optional). The checks are: the Output path file
+# exists, its first line carries the dispatch id, and the output (that file,
+# else the last assistant message) has a line for each field the agent
+# template declares as output-fields. Each check appends to the failed list;
+# the verdict is fail when the list is non-empty. A check that cannot run
+# adds a note to the record instead.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a
@@ -116,6 +120,22 @@ resolve_path() {
   fi
 }
 
+# resolve_output_file PATH CWD: prints the resolved path when PATH has no
+# placeholder and names an existing regular file; else prints nothing and
+# returns 1.
+resolve_output_file() {
+  local full
+  has_placeholder "$1" && return 1
+  full="$(resolve_path "$1" "$2")"
+  [[ -f "$full" ]] || return 1
+  printf '%s' "$full"
+}
+
+# add_note TEXT: appends TEXT to the "note" of the caller, with "; " between.
+add_note() {
+  note="${note:+$note; }$1"
+}
+
 # Each check takes its inputs as arguments and appends its failure strings to
 # the array "failed" of the caller.
 check_output_path() {
@@ -154,9 +174,7 @@ has_whole_token() {
 check_output_owner() {
   local path="$1" cwd="$2" id="$3" full first=""
   [[ -z "$path" || -z "$id" ]] && return 0
-  has_placeholder "$path" && return 0
-  full="$(resolve_path "$path" "$cwd")"
-  [[ -f "$full" ]] || return 0
+  full="$(resolve_output_file "$path" "$cwd")" || return 0
   if [[ ! -r "$full" ]]; then
     failed+=("output file is not readable: $path")
     return 0
@@ -169,34 +187,38 @@ check_output_owner() {
   fi
 }
 
+# Status codes of template_output_fields.
+readonly FIELDS_NO_TEMPLATE=1 FIELDS_NO_DECLARATION=2 FIELDS_MALFORMED=3
+
 # Prints the declared output-fields value of the template for type $1, or
-# nothing. Status 0 with a value, 1 for no template, 2 for no declarations,
-# 3 for a malformed line. The type loses everything up to its last colon; a
-# type that is empty or holds a slash or `..` has no template.
-declared_fields() {
+# nothing. Status 0 with a value, else FIELDS_NO_TEMPLATE,
+# FIELDS_NO_DECLARATION or FIELDS_MALFORMED (a bad line). The type loses
+# everything up to its last colon; a type that is empty or holds a slash or
+# `..` has no template.
+template_output_fields() {
   local type="${1##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
   local file line value
   if [[ -z "$dir" || -z "$type" || "$type" == */* || "$type" == *..* ]]; then
-    return 1
+    return "$FIELDS_NO_TEMPLATE"
   fi
   file="$dir/$type.md"
-  [[ -f "$file" && -r "$file" ]] || return 1
+  [[ -f "$file" && -r "$file" ]] || return "$FIELDS_NO_TEMPLATE"
   line="$(tr -d '\r' <"$file" | awk '/^---[[:space:]]*$/ {n++; next} n == 1' |
-    grep -m 1 '^output-fields:')" || return 2
+    grep -m 1 '^output-fields:')" || return "$FIELDS_NO_DECLARATION"
   value="${line#output-fields:}"
   if [[ ! "$value" =~ ^[[:space:]]*\"([^\"]+)\"[[:space:]]*$ ]]; then
-    return 3
+    return "$FIELDS_MALFORMED"
   fi
   value="${BASH_REMATCH[1]}"
   if [[ "$value" == '|'* || "$value" == *'|' || "$value" == *'||'* ]]; then
-    return 3
+    return "$FIELDS_MALFORMED"
   fi
   printf '%s' "$value"
 }
 
 # True when some line of $1 starts, after optional spaces or tabs, with the
 # literal text $2.
-has_field_line() {
+has_line_starting_with() {
   local text="$1" field="$2" row
   while IFS= read -r row || [[ -n "$row" ]]; do
     row="${row#"${row%%[! $'\t']*}"}"
@@ -208,30 +230,30 @@ has_field_line() {
 # Checks the output fields the template of the dispatch type declares. The
 # text is the output file when there is an Output path line, else the last
 # assistant message; an unusable output file leaves the earlier failure only.
-# Appends to "failed" and to "note" of the caller.
+# Appends to "failed" and "note" of the caller. Returns 1 when the payload
+# cannot be read.
 check_declared_fields() {
   local type="$1" path="$2" cwd="$3" stop="$4" fields text full field status=0
   local -a items
-  fields="$(declared_fields "$type")" || status=$?
+  fields="$(template_output_fields "$type")" || status=$?
   if [[ "$status" -ne 0 ]]; then
     case "$status" in
-      1) note="${note:+$note; }no template" ;;
-      2) note="${note:+$note; }no declarations" ;;
+      "$FIELDS_NO_TEMPLATE") add_note "no template" ;;
+      "$FIELDS_NO_DECLARATION") add_note "no declarations" ;;
       *) failed+=("output-fields line is malformed in ${type##*:}.md") ;;
     esac
     return 0
   fi
   if [[ -n "$path" ]]; then
-    has_placeholder "$path" && return 0
-    full="$(resolve_path "$path" "$cwd")"
-    [[ -f "$full" && -r "$full" ]] || return 0
+    full="$(resolve_output_file "$path" "$cwd")" || return 0
+    [[ -r "$full" ]] || return 0
     text="$(cat "$full")" || return 0
   else
     text="$(jq -r '.last_assistant_message // empty' <<<"$stop" 2>/dev/null)" || return 1
   fi
   IFS='|' read -r -a items <<<"$fields"
   for field in "${items[@]}"; do
-    has_field_line "$text" "$field" || failed+=("output lacks required field: $field")
+    has_line_starting_with "$text" "$field" || failed+=("output lacks required field: $field")
   done
 }
 

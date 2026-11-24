@@ -1,0 +1,1 @@
+A clobber redirect (>|) of the top-level .gitignore with the .worktrees/ line, from the main thread, must be DENIED. The guard denies it today, so this case PASSES on this commit (characterization pin: the recorded deviation for deny pins).

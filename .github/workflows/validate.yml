@@ -1349,8 +1349,18 @@ jobs:
           everyday_count=0
           total=0
           bad=0
+          # Prints the tags line from the prompt.md frontmatter (between the first two --- lines).
+          prompt_tags() {
+            sed -n '1{/^---$/!q};2,/^---$/{/^tags:/p}' "$1"
+          }
+          # Succeeds when a tags line lists the everyday tag as a whole item.
+          has_everyday() {
+            printf '%s\n' "$1" | grep -qE '^tags:.*[][ ,]everyday[],]'
+          }
           for f in evals/*/case.yaml; do
             total=$((total + 1))
+            pt=$(prompt_tags "$(dirname "$f")/prompt.md")
+            ct=$(grep -E '^tags:' "$f" || true)
             case "$f" in
               evals/using-git-worktrees-iron-law/case.yaml|evals/using-git-worktrees-list-active-worktrees/case.yaml|evals/using-git-worktrees-before-proceeding-path/case.yaml|evals/using-git-worktrees-list-count-check/case.yaml)
                 skip_count=$((skip_count + 1))
@@ -1360,19 +1370,19 @@ jobs:
                     bad=$((bad + 1))
                   fi
                 done
-                if grep -q 'everyday' "$f"; then
-                  echo "FAILED: $f is a skip case but has a line containing 'everyday'"
+                if grep -q 'everyday' "$f" || has_everyday "$pt"; then
+                  echo "FAILED: $f is a skip case but case.yaml or prompt.md carries 'everyday'"
                   bad=$((bad + 1))
                 fi
                 ;;
               *)
                 everyday_count=$((everyday_count + 1))
-                if ! grep -qxF 'tags: [everyday]' "$f"; then
-                  echo "FAILED: $f is an everyday case but has no line 'tags: [everyday]'"
+                if ! has_everyday "$ct" && ! has_everyday "$pt"; then
+                  echo "FAILED: $f is an everyday case but neither case.yaml nor prompt.md tags list 'everyday'"
                   bad=$((bad + 1))
                 fi
-                if grep -qxF 'skip:' "$f"; then
-                  echo "FAILED: $f is an everyday case but has a 'skip:' line"
+                if grep -qE '^bin: model default$|^skip:$' "$f"; then
+                  echo "FAILED: $f is an everyday case but has a 'skip:' or 'bin: model default' marker"
                   bad=$((bad + 1))
                 fi
                 ;;

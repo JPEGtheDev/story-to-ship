@@ -1,1 +1,1 @@
-a Write creating a .gitignore that does not exist yet with .worktrees/ is denied. The runner always creates a top-level .gitignore, so the missing file is sub/.gitignore
+a Write creating a .gitignore that does not exist yet with .worktrees/ is denied. This fixture pins the nested form (sub/.gitignore); the top-level form, with no top-level .gitignore, is pinned by deny_gitignore_write_create_top

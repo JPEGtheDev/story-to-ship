@@ -44,7 +44,7 @@ The main context's edits, commits, and pushes for the feature happen in `.worktr
 
 ### Create
 
-If Step 1's check fails, add the line `.worktrees/` to the top-level `.gitignore` with one Edit of that file; the inline-edit guard hook allows that one added line. Then run the check again.
+If Step 1's check fails, append `.worktrees/` as the new last line of the top-level `.gitignore` with one Edit of that file, without replace_all; the inline-edit guard hook allows that one added line. Then run the check again.
 
 ```bash
 # Step 1: Verify .worktrees is gitignored

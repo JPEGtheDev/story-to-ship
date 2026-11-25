@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-inquiry-rationale-only
+description: A why-question about a design choice is answered with the rationale and its evidence, with no edit, no commit and no apology.
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

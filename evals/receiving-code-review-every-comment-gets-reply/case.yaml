@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-every-comment-gets-reply
+description: Every review comment gets its own substantive reply; a bare thanks or LGTM is not a response.
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

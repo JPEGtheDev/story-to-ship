@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-user-comment-propose-stop
+description: A review comment from the user is answered with the check, an assessment and a proposal, with no fix commit or dispatch in that turn.
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

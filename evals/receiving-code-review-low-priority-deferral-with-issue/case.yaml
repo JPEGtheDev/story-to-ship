@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-low-priority-deferral-with-issue
+description: A valid but low-priority comment outside the PR purpose is acknowledged, the deferral is explained and a tracking issue is referenced.
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

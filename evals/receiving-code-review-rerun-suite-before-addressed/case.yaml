@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-rerun-suite-before-addressed
+description: After fixing a reported defect the full test suite is re-run and its result is reported before the comment is called addressed.
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

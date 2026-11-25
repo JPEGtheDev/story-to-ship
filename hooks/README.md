@@ -44,7 +44,7 @@ Current per-prompt behavior: once the required skills are loaded, the per-prompt
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). `dispatch-output-check.sh` is shipped through `hooks.json` and is not mirrored in `.claude/hooks`. Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the thirteen mirrored `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen mirrored files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). `dispatch-output-check.sh` is shipped through `hooks.json` and is not mirrored in `.claude/hooks`. Edit files here; never edit through the mirror.
 
 A checkout with both the plugin registration (`hooks/hooks.json`) and the local registration (`.claude/settings.json`) active runs each hook registered in both files twice for one event. The eight scripts registered in both, each with the same event and matcher, are `session-start.sh` (SessionStart), `pre-message-gates.sh` and `pre-message.sh` (UserPromptSubmit), `bootstrap-gate-pre.sh` (PreToolUse, no matcher), `workflow-model-guard.sh` (PreToolUse, matcher `Workflow`), `shell-write-guard.sh` (PreToolUse, matcher `Bash`), `inline-edit-guard.sh` (PreToolUse, matcher `Edit|Write`), and `bootstrap-gate-post.sh` (PostToolUse, matcher `Skill`); `stop-turn-log.sh` is registered locally only. This README accounts for two effects: the inline-edit guard writes its ledger row twice, and its reader counts a row that repeats the previous row exactly once (see the inline-edit-guard.sh section below); and `session-start.sh` appends two lines per event to each of its two logs, described in the state paragraph below.
 
@@ -130,7 +130,7 @@ This guard is fail-open: missing `jq`, malformed stdin, and a Workflow invocatio
 
 A PostToolUse (matcher `Agent`) and SubagentStop hook that checks the output of each returned subagent dispatch and appends one JSON record line per pairing of a dispatch's two events. It never blocks: it always exits 0.
 
-Events and join key: PostToolUse carries the agent id as `tool_response.agentId`, SubagentStop as `agent_id`. The first event of a dispatch is parked as `.dispatch-check-pending/<agent id>` under the state directory (parked files older than 1 hour are swept on every run); the second event claims it and runs the checks. A SubagentStop with no PostToolUse never produces a record.
+Events and join key: PostToolUse carries the agent id as `tool_response.agentId`, SubagentStop as `agent_id`. The first event of a dispatch is parked as `.dispatch-check-pending/<agent id>` under the state directory (parked files older than 1 hour are swept on every run that gets past the state dir check); the second event claims it and runs the checks. A SubagentStop with no PostToolUse never produces a record.
 
 Dispatch message lines, each optional, read from `tool_input.prompt` on PostToolUse:
 

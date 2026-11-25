@@ -6,6 +6,7 @@
 # Checks, per hook command read from hooks/hooks.json:
 #   1. Quoting: each ${CLAUDE_PLUGIN_ROOT} is immediately preceded by a double
 #      quote character.
+#
 #   2. Runtime: the command runs with sh -c and CLAUDE_PLUGIN_ROOT set to a
 #      temp path that contains a space ("a b"), and prints exactly "ran" from
 #      a stub hook script.

@@ -323,7 +323,7 @@ check_declared_fields() {
 # removed, runs of spaces and tabs collapse to one space, ends are trimmed.
 # Case is kept.
 normalize_text() {
-  tr '\r\n' '  ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[ \t]+/ /g; s/^ //; s/ $//'
+  tr '\r\n' '  ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[[:blank:]]+/ /g; s/^ //; s/ $//'
 }
 
 # Sets "source_text" of the caller to the normalized text of the source file.

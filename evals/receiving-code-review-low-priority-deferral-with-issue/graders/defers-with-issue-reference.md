@@ -11,4 +11,4 @@ The final message is the reply posted on a review thread that raises a valid but
 
 A bare "I will address this separately" or "will do in a follow-up" with no tracking issue named fails. A reply that says the item was fixed in this PR fails.
 
-Limitation: `gh` cannot reach GitHub in this scaffold, so no issue can truly exist. The judge reads only the final message, so it never sees a `gh issue create` attempt; it accepts a named tracking-issue reference in the text, and cannot tell a reference that points at a real issue from an invented number.
+Limitation: no GitHub repository exists behind this scaffold (the remote is a local bare repository), so no issue can truly exist. The judge reads only the final message, so it never sees a `gh issue create` attempt; it accepts a named tracking-issue reference in the text, and cannot tell a reference that points at a real issue from an invented number.

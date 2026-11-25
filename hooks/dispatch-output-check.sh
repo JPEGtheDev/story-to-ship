@@ -20,7 +20,9 @@
 #   occur in the file named by the `Source path:` line, both normalized
 #   (markup removed, whitespace collapsed).
 # Each check appends to the failed list; the verdict is fail when the list is
-# non-empty. A check that cannot run adds a note to the record instead.
+# non-empty. A check with no template or no declaration to run adds a note to
+# the record instead; the quotes check also fails when it cannot read its
+# source.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a
@@ -30,8 +32,8 @@
 #
 # The agent template for a dispatch is $DISPATCH_CHECK_AGENTS_DIR/<type>.md;
 # the directory defaults to ${CLAUDE_PLUGIN_ROOT}/agents. With neither set
-# there is no template and the field check is skipped with the note
-# "no template".
+# there is no template and the fields check and the quotes check are skipped
+# with the note "no template".
 
 STATE="${DISPATCH_CHECK_STATE_DIR:-${CLAUDE_PROJECT_DIR:-.}/.claude}"
 RECORDS="$STATE/dispatch-check-records.jsonl"
@@ -314,7 +316,7 @@ normalize_text() {
   tr '\r\n' '  ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[ \t]+/ /g; s/^ //; s/ $//'
 }
 
-# Sets "source" of the caller to the normalized text of the source file.
+# Sets "source_text" of the caller to the normalized text of the source file.
 # Returns 1 after adding a failure to "failed" when the file cannot supply
 # text: no path, a placeholder, missing, unreadable or empty.
 read_quote_source() {
@@ -336,8 +338,8 @@ read_quote_source() {
     failed+=("source file is not readable: $path")
     return 1
   fi
-  source="$(normalize_text <"$full")"
-  if [[ -z "$source" ]]; then
+  source_text="$(normalize_text <"$full")"
+  if [[ -z "$source_text" ]]; then
     failed+=("source file is empty: $path")
     return 1
   fi
@@ -347,13 +349,13 @@ read_quote_source() {
 # occurs, normalized, as a literal substring of the normalized source file.
 # Appends to "failed" of the caller.
 check_declared_quotes() {
-  local type="$1" source_path="$2" cwd="$3" source quote norm
+  local type="$1" source_path="$2" cwd="$3" source_text quote norm
   local -a items
   load_declaration output-quotes "$type" || return 0
   read_quote_source "$source_path" "$cwd" || return 0
   for quote in "${items[@]}"; do
     norm="$(normalize_text <<<"$quote")"
-    if [[ -z "$norm" || "$source" != *"$norm"* ]]; then
+    if [[ -z "$norm" || "$source_text" != *"$norm"* ]]; then
       failed+=("output quote not found in source: $quote")
     fi
   done

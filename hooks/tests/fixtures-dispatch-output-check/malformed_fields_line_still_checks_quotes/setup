@@ -1,2 +1,2 @@
 printf -- '%s\n' '---' 'output-fields: A|B' 'output-quotes: "absent"' '---' 'body' >"$tmp/agents/reviewer.md"
-printf 'something else\n' >"$tmp/files/src.md"
+printf 'something else.\n' >"$tmp/files/src.md"

@@ -1,2 +1,2 @@
 printf -- '%s\n' '---' 'output-quotes: "zeta|present|alpha"' '---' 'body' >"$tmp/agents/reviewer.md"
-printf 'present here\n' >"$tmp/files/src.md"
+printf 'present here.\n' >"$tmp/files/src.md"

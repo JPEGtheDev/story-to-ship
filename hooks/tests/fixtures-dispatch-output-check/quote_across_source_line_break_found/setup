@@ -1,2 +1,2 @@
 printf -- '%s\n' '---' 'output-quotes: "red fox jumps"' '---' 'body' >"$tmp/agents/reviewer.md"
-printf 'a red fox\njumps high\n' >"$tmp/files/src.md"
+printf 'a red fox\njumps high.\n' >"$tmp/files/src.md"

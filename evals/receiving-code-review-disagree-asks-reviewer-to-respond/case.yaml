@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagree-asks-reviewer-to-respond
-description: "RC-25 disagree-asks-reviewer-to-respond: after disagreeing, the reply asks the reviewer to respond and does not close the thread (protocol step 3)."
+description: "RC-25 disagree-asks-reviewer-to-respond: after disagreeing, the reply asks the reviewer to respond and does not close the thread (protocol step 3). Current state (first look, 5 runs per arm, no pass bar): with skill 1/5, without skill 1/5; first failing no-skill session claude-eval-rQMSmN (run 1): states a position or an offer and never asks the reviewer to respond (4 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

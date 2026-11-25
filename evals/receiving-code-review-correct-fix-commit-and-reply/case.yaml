@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-correct-fix-commit-and-reply
-description: RC-03 Correct -- I missed this row, the defect is acknowledged, fixed and committed, and the reply thanks the reviewer specifically for the catch.
+description: "RC-03 Correct -- I missed this row, the defect is acknowledged, fixed and committed, and the reply thanks the reviewer specifically for the catch. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-Yaqv6m (run 0): fix not committed or not reported as committed (5 of 5 no-skill runs; the sandbox .git is read-only in some sessions)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

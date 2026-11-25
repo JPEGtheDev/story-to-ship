@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-bug-phrased-as-question
-description: RC-04 Bug report phrased as a question row, a why-question that points at a missing check is fixed and committed like a defect.
+description: "RC-04 Bug report phrased as a question row, a why-question that points at a missing check is fixed and committed like a defect. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-3iohHr (run 0): fix made but the reply is not judged a defect fix with a commit (5 of 5 no-skill runs; the sandbox .git is read-only in some sessions)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

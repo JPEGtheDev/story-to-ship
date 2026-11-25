@@ -17,7 +17,7 @@ printf 'y\n' > .worktrees/story-7/b.txt
 git -C .worktrees/story-7 add -A
 git -C .worktrees/story-7 commit -q -m "feat: story 7"
 # Sprint PR 12 is MERGED as a squash commit S, but S carries one line the runner branch lacks.
-git merge -q --squash agent/story-7 2>/dev/null
+git merge -q --squash agent/story-7 >/dev/null 2>&1
 printf 'extra\n' >> a.txt
 git add -A
 git commit -q -m "feat: story 7 (#12)"
@@ -25,6 +25,7 @@ S=$(git rev-parse HEAD)
 git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
+# The run makes the directory read-only; this lets the skill's step-1 git fetch succeed without writing.
 ln -sf /dev/null .git/FETCH_HEAD
 mkdir -p "$HOME/bin" "$HOME/ghstate"
 printf '{"state":"MERGED","mergeCommit":{"oid":"%s"}}\n' "$S" > "$HOME/ghstate/pr-12.json"

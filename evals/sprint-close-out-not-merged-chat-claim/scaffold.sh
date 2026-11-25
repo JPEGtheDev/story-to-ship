@@ -19,6 +19,7 @@ git -C .worktrees/story-7 commit -q -m "feat: story 7"
 mkdir -p "$HOME/bin" "$HOME/ghstate"
 git -C .worktrees/story-7 push -q origin agent/story-7
 git fetch -q origin
+# The run makes the directory read-only; this lets the skill's step-1 git fetch succeed without writing.
 ln -sf /dev/null .git/FETCH_HEAD
 printf '{"state":"OPEN","mergeCommit":null}\n' > "$HOME/ghstate/pr-12.json"
 printf '{"body":"Epic\\n- [ ] #7 story\\n- [ ] #8 other\\n"}\n' > "$HOME/ghstate/issue-9.json"

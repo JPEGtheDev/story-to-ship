@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-defect-not-minimized
-description: "RC-23 defect-not-minimized: a real defect reported in a mild tone is treated as a defect, not framed as a nit or a preference. Current state (first look, 5 runs per arm, no pass bar): with skill 2/5, without skill 4/5, 1 errored run counted as not passed; first failing no-skill session claude-eval-vvg1Ba (run 4): reply says "worse than a nit", which the wording pattern matches although the reply treats the finding as a defect (1 of 5 no-skill runs)."
+description: "RC-23 defect-not-minimized: a real defect reported in a mild tone is treated as a defect, not framed as a nit or a preference. Current state (first look, 5 runs per arm, no pass bar): with skill 2/5, without skill 4/5, 1 errored run counted as not passed; first failing no-skill session claude-eval-vvg1Ba (run 4): reply says worse than a nit, which the wording pattern matches although the reply treats the finding as a defect (1 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

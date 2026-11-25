@@ -43,7 +43,7 @@ substitute exactly as printed.
 Run every item. Mark [+] (pass) or [-] (fail) with file:line evidence. Criteria for each
 item are in the reference sections above.
 
-- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters?
+- [ ] **Frontmatter** -- `name:` and `description: Use when...` present, valid, under 200 characters; a description holding a colon followed by a space, ending with a colon, holding a # after a space or tab, or starting with # is quoted?
 - [ ] **Size** -- apply four levels from SIZE_AND_COMPRESSION: (1) at or under Target = OK; (2) above Target but at or under Ideal max = SIZE ALERT (note it, not a NEEDS WORK blocker); (3) above Ideal max but at or under 5,000 tokens = run Content Value Test from SIZE_AND_COMPRESSION. If cuttable content (rationale only) exists: NEEDS WORK. If no cuttable content exists: PASS (size advisory) -- report minimum functional size and options to user. A redundant enforcement rule is never cuttable content: list each as a removal candidate under either verdict (under PASS (size advisory) when no cuttable content exists; alongside NEEDS WORK when cuttable rationale exists), and never cut one without user confirmation; (4) above 5,000 tokens (hard limit) = NEEDS WORK regardless of content value -- skill will not load correctly in all agent implementations.
 - [ ] **Iron Law block** -- backtick-wrapped; ALL CAPS rule; `YOU MUST`; `No exceptions.`; all INSIDE the backtick block?
 - [ ] **Iron Law letter/spirit line** -- "Violating the letter of this rule is violating the spirit of this rule." present?
@@ -60,6 +60,7 @@ item are in the reference sections above.
 - [ ] **Related skill cross-reference** -- at least one related skill named?
 - [ ] **Domain language** -- matches skill scope; no wrong-platform commands or terminology?
 - [ ] **Enforcement co-location** -- every banned phrase or prohibited action has its safe substitute in SKILL.md, not behind a references/ pointer?
+- [ ] **Eval evidence** -- when the diff shortens or rewords skill text (any changed line in a rule body), does the Implementer Evidence section hold the old-versus-new comparison record of SKILL_EVAL_COMPARISON.md with no confirmed LOSS? When the diff adds a rule line, does the evidence name the case that fails without the skill? A missing record (evidence absent, "none", or a statement that no implementer ran), a confirmed LOSS, or a pair with 0 passes in both arms or all passes in both arms offered as proof is a FAIL on the line the diff adds, or on the first changed line when the diff only deletes lines. Mark N/A only when the diff neither shortens, rewords nor adds a rule line.
 - [ ] Shipped text names only checks, modes and roles that ship; grep the shipped tree for each one it names. (R1)
 - [ ] A routing change covers every skill whose frontmatter triggers on the same signal. Applies when the change is a routing change. Otherwise mark N/A. (R2)
 - [ ] A rehearsal fixture must not already contain the rule it is meant to catch; a RED catch on a clean fixture means the amendment is redundant. Applies when a rehearsal is part of the review. Otherwise mark N/A. (R3)
@@ -125,12 +126,14 @@ Apply this checklist per file (anatomy elements do not apply to reference files)
 - [ ] **No cross-skill file path refs** -- no path or bare file name into another skill's tree (the `../other-skill/references/FILE.md` form is one example); run the Step 4 command from the repository root and adjudicate hits as in the Step 2 item
 - [ ] **Content matches SKILL.md pointer** -- file contains what SKILL.md says it contains
 - [ ] **Size** -- no hard limit for reference files; flag as SIZE ALERT if > 8,000 chars (~2,000 tokens)
+- [ ] **Eval evidence** -- same test as the Step 2 item of that name, applied to the rule lines this file's diff shortens, rewords, deletes or adds; N/A when the diff changes none of them.
 
 Reference file issues that trigger NEEDS WORK on the overall verdict:
 - Weak language in rule bodies
 - Absolute paths
 - Cross-skill file path references
 - Content that contradicts or is absent from what SKILL.md says it contains
+- Eval evidence marked [-] (the Step 2 item, applied to the rule lines the reference file diff changes)
 
 Size alerts on reference files are informational only -- not a NEEDS WORK trigger.
 
@@ -203,6 +206,7 @@ Return findings in EXACTLY this structure:
 | Iron Law letter/spirit line | [+]/[-] | file:line |
 | Announcement explicit | [+]/[-] | file:line |
 | Gate Function BEFORE PROCEEDING | [+]/[-] | file:line |
+| Eval evidence | [+]/[-]/N/A | file:line |
 | Rationalization >=5 rows | [+]/[-] | file:line |
 | Red Flags >=5 items | [+]/[-] | file:line |
 | No weak language | [+]/[-] | grep output or "no instances found" |
@@ -236,6 +240,7 @@ Return findings in EXACTLY this structure:
 | Shipped text names only shipped checks, modes and roles (R1) | [+]/[-] | "no instances" or file:line |
 | No dated snapshot or owner-set label (R4) | [+]/[-] | "no instances" or file:line |
 | No vendor model name; tiers only (R7) | [+]/[-] | "no instances" or file:line |
+| Eval evidence (reference file) | [+]/[-]/N/A | file:line or "no rule-line change" |
 | Size | OK / SIZE ALERT | [N chars, ~N tokens] |
 
 ### Issues Found

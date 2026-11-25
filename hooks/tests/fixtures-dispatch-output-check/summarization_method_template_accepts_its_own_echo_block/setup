@@ -1,0 +1,2 @@
+cp "$SCRIPT_DIR/../../agents/summarization-method.md" "$tmp/agents/summarization-method.md"
+cp "$case_dir/own-post.json" "$case_dir/own-stop.json" "$tmp/out/"

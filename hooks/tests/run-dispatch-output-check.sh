@@ -6,7 +6,7 @@
 # style. Unlike that stateless hook, this one joins two events by agent id
 # and writes a record file, so every case gets its own mktemp -d state dir
 # (DISPATCH_CHECK_STATE_DIR) and the runner asserts the record file as well
-# as stdout, stderr and the exit code.
+# as stdout (empty, or the JSON values it prints), stderr and the exit code.
 #
 # Case directory contract (every file optional except one of payloads,
 # concurrent or simultaneous):
@@ -42,6 +42,11 @@
 #   expect_exit            - exact exit code of every run (default 0).
 #   expect_stdout_empty    - when present, stdout of every run must be empty
 #                             (byte-exact: the stdout file must have size 0).
+#   expect_stdout_jq       - one jq -e filter per line, applied to the array of
+#                             all JSON values printed on stdout over the whole
+#                             case (jq -s on the case's stdout; empty stdout
+#                             gives []). A false filter, or stdout that is not
+#                             valid JSON values, fails the case.
 #   expect_stderr_nonempty - when present, some run must print to stderr.
 #   expect_stderr_grep     - fixed substrings that must appear in stderr.
 #   expect_stderr_absent   - fixed substrings that must not appear in stderr.
@@ -249,6 +254,16 @@ run_case() {
   if [[ -f "$case_dir/expect_stdout_empty" && -s "$stdout_file" ]]; then
     ok=0
     reasons+=("stdout not empty: $(wc -c <"$stdout_file" | tr -d '[:space:]') bytes")
+  fi
+  if [[ -f "$case_dir/expect_stdout_jq" ]]; then
+    local stdout_filter
+    while IFS= read -r stdout_filter; do
+      [[ -z "$stdout_filter" ]] && continue
+      if ! "$JQ_BIN" -s -e "$stdout_filter" "$stdout_file" >/dev/null 2>&1; then
+        ok=0
+        reasons+=("stdout check failed: $stdout_filter")
+      fi
+    done <"$case_dir/expect_stdout_jq"
   fi
   if [[ -f "$case_dir/expect_stderr_nonempty" && -z "$stderr_all" ]]; then
     ok=0

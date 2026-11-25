@@ -21,6 +21,7 @@ S=$(git rev-parse HEAD)
 git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
+ln -sf /dev/null .git/FETCH_HEAD
 # The runner worktree holds only its untracked plan file.
 H7=$(git -C .worktrees/story-7 rev-parse --short HEAD)
 cat > .worktrees/story-7/plan-story-7.md <<P

@@ -128,7 +128,7 @@ This guard is fail-open: missing `jq`, malformed stdin, and a Workflow invocatio
 
 ## dispatch-output-check.sh
 
-A PostToolUse (matcher `Agent`) and SubagentStop hook that checks the output of each returned subagent dispatch and appends one JSON record line per dispatch. It never blocks: it always exits 0.
+A PostToolUse (matcher `Agent`) and SubagentStop hook that checks the output of each returned subagent dispatch and appends one JSON record line per pairing of a dispatch's two events. It never blocks: it always exits 0.
 
 Events and join key: PostToolUse carries the agent id as `tool_response.agentId`, SubagentStop as `agent_id`. The first event of a dispatch is parked as `.dispatch-check-pending/<agent id>` under the state directory (parked files older than 1 hour are swept on every run); the second event claims it and runs the checks. A SubagentStop with no PostToolUse never produces a record.
 

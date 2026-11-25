@@ -5,6 +5,7 @@ git config user.email eval@example.invalid
 git config user.name eval
 mkdir -p src tests review
 : > src/__init__.py
+: > tests/__init__.py
 printf "# Demo\n" > README.md
 git add -A
 git commit -q -m "chore: seed repo"

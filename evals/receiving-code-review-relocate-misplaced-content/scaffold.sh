@@ -58,8 +58,8 @@ MD
 cat > review/threads.md <<'MD'
 Thread T1
 From: @alice (teammate reviewer)
-File: README.md, line 10
-Comment: The shipping rates table belongs in docs/pricing.md, not here.
+File: README.md, line 9
+Comment: The README covers installation only, and the shipping rates table is not installation content.
 MD
 git add -A
 git commit -q -m "feat: document shipping rates"

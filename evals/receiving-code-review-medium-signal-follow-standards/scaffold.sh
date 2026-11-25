@@ -58,7 +58,7 @@ PY
 cat > review/threads.md <<'MD'
 Thread T1
 From: @alice (teammate reviewer)
-File: src/inventory.py, line 12
+File: src/inventory.py, line 11
 
 The name of this function does not fit with the rest of the module.
 MD

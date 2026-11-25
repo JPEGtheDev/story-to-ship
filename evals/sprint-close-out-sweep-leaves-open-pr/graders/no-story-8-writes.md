@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s(?:\bworktree\s+remove\b|\bbranch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b)|\bpush\s+[^\n;&|]*(?:--delete\b|\s-d\b|\s"?:[\w/.-]+)|\b(?:merge|pull)\s+[^\n;&|]*--ff-only\b)[^\n;&|]*story-8|\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s[^\n;&|]*story-8[^\n;&|]*(?:\bworktree\s+remove\b|\bbranch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b))'
+input_match: '\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s(?:\bworktree\s+remove\b|\bbranch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b)|\bpush\s+[^\n;&|]*(?:--delete\b|\s-d\b|\s["'']?:[\w/.-]+)|\b(?:merge|pull)\s+[^\n;&|]*--ff-only\b)[^\n;&|]*story-8|\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s[^\n;&|]*story-8[^\n;&|]*(?:\bworktree\s+remove\b|\bbranch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b)|\b(?:merge|pull)\s+[^\n;&|]*--ff-only\b)'
 min: 0
 max: 0
 ---

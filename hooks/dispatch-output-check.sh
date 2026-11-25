@@ -10,15 +10,17 @@
 # atomic mv and writes the record. A SubagentStop with no PostToolUse never
 # produces a record. Parked files older than 1 hour are swept on every run.
 #
-# The dispatch message lines `Dispatch id:` and `Output path:` are read from
-# tool_input.prompt (each optional). The checks are: the Output path file
-# exists, its first line carries the dispatch id, and the output (that file,
-# else the last assistant message) has a line for each field the agent
-# template declares as output-fields. Each quote the template declares as
-# output-quotes must occur in the file named by the `Source path:` line, both
-# normalized (markup removed, whitespace collapsed). Each check appends to the
-# failed list; the verdict is fail when the list is non-empty. A check that cannot run
-# adds a note to the record instead.
+# The dispatch message lines `Dispatch id:`, `Output path:` and `Source path:`
+# are read from tool_input.prompt (each optional). The checks are:
+# - the Output path file exists and is readable, and its first line carries
+#   the dispatch id;
+# - the output (that file, else the last assistant message) has a line for
+#   each field the agent template declares as output-fields;
+# - the quotes check: each quote the template declares as output-quotes must
+#   occur in the file named by the `Source path:` line, both normalized
+#   (markup removed, whitespace collapsed).
+# Each check appends to the failed list; the verdict is fail when the list is
+# non-empty. A check that cannot run adds a note to the record instead.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a
@@ -60,9 +62,11 @@ event_agent_id() {
   printf '%s' "$agent_id"
 }
 
-# First line of the dispatch message that starts with the given label.
+# First line of the dispatch message $1 that starts with the label $2, with
+# the label, carriage returns and surrounding blanks removed.
 message_line() {
-  sed -n "s/^$2: *//p" <<<"$1" | head -n 1 | tr -d '\r'
+  sed -n "s/^$2: *//p" <<<"$1" | head -n 1 | tr -d '\r' |
+    sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
 }
 
 # --- park and claim ---------------------------------------------------------
@@ -208,11 +212,12 @@ readonly DECL_NO_TEMPLATE=1 DECL_NO_DECLARATION=2 DECL_MALFORMED=3
 # nothing. Status 0 with a value, else DECL_NO_TEMPLATE, DECL_NO_DECLARATION
 # or DECL_MALFORMED (a bad line, a second line, an item with a leading or
 # trailing space or tab, or frontmatter that opens with `---`, never closes
-# and holds a line for KEY). A file with no leading `---` has no declaration. The type loses
-# everything up to its last colon; a type that is empty or holds a slash or
-# `..` has no template.
+# and holds a line for KEY). A file with no leading `---` has no declaration.
+# The type loses everything up to its last colon; a type that is empty or
+# holds a slash or `..` has no template.
 template_declaration() {
-  local key="$1" type="${2##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
+  local key="$1" type="${2##*:}"
+  local dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
   local file line value
   if [[ -z "$dir" || -z "$type" || "$type" == */* || "$type" == *..* ]]; then
     return "$DECL_NO_TEMPLATE"
@@ -247,9 +252,25 @@ note_declarations() {
   template_declaration output-quotes "$1" >/dev/null || quotes_status=$?
   if [[ "$fields_status" -eq "$DECL_NO_TEMPLATE" ]]; then
     add_note "no template"
-  elif [[ "$fields_status" -eq "$DECL_NO_DECLARATION" && "$quotes_status" -eq "$DECL_NO_DECLARATION" ]]; then
+  elif [[ "$fields_status" -eq "$DECL_NO_DECLARATION" &&
+    "$quotes_status" -eq "$DECL_NO_DECLARATION" ]]; then
     add_note "no declarations"
   fi
+}
+
+# load_declaration KEY TYPE: sets the array "items" of the caller to the
+# items declared for KEY in the template for TYPE. A malformed declaration
+# appends its failure to "failed" of the caller. Returns 1 when there is
+# nothing to check: no template, no declaration or a malformed one.
+load_declaration() {
+  local key="$1" type="$2" declared status=0
+  declared="$(template_declaration "$key" "$type")" || status=$?
+  if [[ "$status" -ne 0 ]]; then
+    [[ "$status" -eq "$DECL_MALFORMED" ]] &&
+      failed+=("$key line is malformed in ${type##*:}.md")
+    return 1
+  fi
+  IFS='|' read -r -a items <<<"$declared"
 }
 
 # True when some line of $1 starts, after optional spaces or tabs, with the
@@ -270,14 +291,9 @@ has_line_starting_with() {
 # Appends to "failed" of the caller. Returns 1 when the payload cannot be
 # read.
 check_declared_fields() {
-  local type="$1" path="$2" cwd="$3" stop="$4" fields text full field status=0
+  local type="$1" path="$2" cwd="$3" stop="$4" text full field
   local -a items
-  fields="$(template_declaration output-fields "$type")" || status=$?
-  if [[ "$status" -ne 0 ]]; then
-    [[ "$status" -eq "$DECL_MALFORMED" ]] &&
-      failed+=("output-fields line is malformed in ${type##*:}.md")
-    return 0
-  fi
+  load_declaration output-fields "$type" || return 0
   if [[ -n "$path" ]]; then
     full="$(resolve_output_file "$path" "$cwd")" || return 0
     [[ -r "$full" ]] || return 0
@@ -285,7 +301,6 @@ check_declared_fields() {
   else
     text="$(jq -r '.last_assistant_message // empty' <<<"$stop" 2>/dev/null)" || return 1
   fi
-  IFS='|' read -r -a items <<<"$fields"
   for field in "${items[@]}"; do
     has_line_starting_with "$text" "$field" || failed+=("output lacks required field: $field")
   done
@@ -332,16 +347,10 @@ read_quote_source() {
 # occurs, normalized, as a literal substring of the normalized source file.
 # Appends to "failed" of the caller.
 check_declared_quotes() {
-  local type="$1" source_path="$2" cwd="$3" quotes source quote norm status=0
+  local type="$1" source_path="$2" cwd="$3" source quote norm
   local -a items
-  quotes="$(template_declaration output-quotes "$type")" || status=$?
-  if [[ "$status" -ne 0 ]]; then
-    [[ "$status" -eq "$DECL_MALFORMED" ]] &&
-      failed+=("output-quotes line is malformed in ${type##*:}.md")
-    return 0
-  fi
+  load_declaration output-quotes "$type" || return 0
   read_quote_source "$source_path" "$cwd" || return 0
-  IFS='|' read -r -a items <<<"$quotes"
   for quote in "${items[@]}"; do
     norm="$(normalize_text <<<"$quote")"
     if [[ -z "$norm" || "$source" != *"$norm"* ]]; then
@@ -355,9 +364,9 @@ build_record() {
   local id="$1" post="$2" stop="$3" prompt dispatch_id output_path source_path type cwd note=""
   local -a failed=()
   prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
-  dispatch_id="$(message_line "$prompt" 'Dispatch id' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-  output_path="$(message_line "$prompt" 'Output path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-  source_path="$(message_line "$prompt" 'Source path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  dispatch_id="$(message_line "$prompt" 'Dispatch id')"
+  output_path="$(message_line "$prompt" 'Output path')"
+  source_path="$(message_line "$prompt" 'Source path')"
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   cwd="$(payload_cwd "$stop" "$post")" || return 1
   check_output_path "$output_path" "$cwd"

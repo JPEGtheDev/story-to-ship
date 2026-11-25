@@ -2,6 +2,7 @@
 name: summarization-method
 model: sonnet
 tools: Read
+output-fields: "SOURCE ECHO:|First 10 words:|Last 10 words:"
 description: Use when running one summarization method -- Abstractive, Extractive, or State/Assign/Action/Complete (SAAC) -- over an injected source.
 ---
 

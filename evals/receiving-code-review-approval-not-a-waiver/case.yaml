@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-approval-not-a-waiver
-description: An approval that carries a fix list does not waive the list; every item is handled.
+description: RC-10 red flag, an approval that carries a fix list does not skip the list.
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

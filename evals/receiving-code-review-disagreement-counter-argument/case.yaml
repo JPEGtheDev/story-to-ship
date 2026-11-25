@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagreement-counter-argument
-description: A reviewer demand that would break correct code is answered with a direct counter-argument and a request for the reviewer to respond, and the code is kept.
+description: RC-06 table row I disagree, a reviewer demand that would break correct code is answered with a counter-argument that gives the reasoning, not a dismissal.
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

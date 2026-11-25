@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-banned-phrase-replies
+description: A fix reply says what was wrong and how it was fixed, with none of the banned stock phrases
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-two-rounds-unresolved-escalate
+description: After two unresolved rounds on one thread, flag it for a third opinion instead of closing it
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

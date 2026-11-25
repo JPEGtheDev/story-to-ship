@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-relocate-misplaced-content
+description: Misplaced content is removed from its file and put in the right location, without widening the file's scope
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

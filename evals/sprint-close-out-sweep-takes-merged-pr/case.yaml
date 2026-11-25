@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sprint-close-out-sweep-takes-merged-pr
+context:
+  scaffold_script: scaffold.sh

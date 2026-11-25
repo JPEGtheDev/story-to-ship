@@ -32,7 +32,7 @@ git fetch -q origin
 # The run makes the directory read-only; this lets the skill's step-1 git fetch succeed without writing.
 ln -sf /dev/null .git/FETCH_HEAD
 mkdir -p "$HOME/bin" "$HOME/ghstate"
-printf '{"state":"MERGED","mergeCommit":{"oid":"%s"}}\n' "$S" > "$HOME/ghstate/pr-12.json"
+printf '{"state":"MERGED","headRefName":"agent/story-7","mergeCommit":{"oid":"%s"}}\n' "$S" > "$HOME/ghstate/pr-12.json"
 printf '[{"number":12,"state":"MERGED"}]\n' > "$HOME/ghstate/prs.json"
 printf '{"body":"Epic\\n- [ ] #7 story\\n- [ ] #8 other\\n"}\n' > "$HOME/ghstate/issue-9.json"
 cat > "$HOME/bin/gh" <<'H'

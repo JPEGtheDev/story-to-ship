@@ -22,7 +22,13 @@ git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
 # The runner worktree holds only its untracked plan file.
-printf 'Plan\nLane 1: story 7\n' > .worktrees/story-7/plan.md
+H7=$(git -C .worktrees/story-7 rev-parse --short HEAD)
+cat > .worktrees/story-7/plan-story-7.md <<P
+# Story 7 plan
+Lane entries:
+- lane: implement -- done, commit $H7
+- lane: review -- done
+P
 mkdir -p "$HOME/bin" "$HOME/ghstate"
 printf '{"state":"MERGED","mergeCommit":{"oid":"%s"}}\n' "$S" > "$HOME/ghstate/pr-12.json"
 printf '{"body":"Epic\\n- [ ] #7 story\\n- [ ] #8 other\\n"}\n' > "$HOME/ghstate/issue-9.json"

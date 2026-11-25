@@ -44,7 +44,7 @@ Current per-prompt behavior: once the required skills are loaded, the per-prompt
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). `dispatch-output-check.sh` is shipped through `hooks.json` and is not mirrored in `.claude/hooks`. Edit files here; never edit through the mirror.
 
 A checkout with both the plugin registration (`hooks/hooks.json`) and the local registration (`.claude/settings.json`) active runs each hook registered in both files twice for one event. The eight scripts registered in both, each with the same event and matcher, are `session-start.sh` (SessionStart), `pre-message-gates.sh` and `pre-message.sh` (UserPromptSubmit), `bootstrap-gate-pre.sh` (PreToolUse, no matcher), `workflow-model-guard.sh` (PreToolUse, matcher `Workflow`), `shell-write-guard.sh` (PreToolUse, matcher `Bash`), `inline-edit-guard.sh` (PreToolUse, matcher `Edit|Write`), and `bootstrap-gate-post.sh` (PostToolUse, matcher `Skill`); `stop-turn-log.sh` is registered locally only. This README accounts for two effects: the inline-edit guard writes its ledger row twice, and its reader counts a row that repeats the previous row exactly once (see the inline-edit-guard.sh section below); and `session-start.sh` appends two lines per event to each of its two logs, described in the state paragraph below.
 
@@ -146,12 +146,12 @@ Checks and failure strings (the verdict is `fail` when any string is produced):
 - Ownership: `output first line is empty: <path>`, `output first line lacks Dispatch id <id>`. The id must appear on the first line as a whole token, with no letter or digit next to it.
 - Fields: `output lacks required field: <field>` for each `output-fields` item that no line of the output starts with, after optional spaces or tabs. The output is the Output path file when there is an Output path line, else the last assistant message.
 - Quotes: `output quote not found in source: <quote>` for each `output-quotes` item that is not a substring of the Source path file, both normalized (markup removed, whitespace collapsed, case kept). Also `no source path for declared quotes`, `source path has a placeholder: <path>`, `source file missing: <path>`, `source file is not readable: <path>`, `source file is empty: <path>`.
-- Truncated source: `source truncated: <path>` when the normalized source text does not end in one of `. ! ? : ) " ` ] } * _`.
+- Truncated source: `source truncated: <path>` when the normalized source text does not end in one of `` . ! ? : ) " ` ] } * _ ``.
 - Declarations: `output-fields line is malformed in <type>.md` or `output-quotes line is malformed in <type>.md` for a declaration that does not match the format below.
 
 Notes, set instead of a failure when a check has nothing to run, joined with `; `: `ownership not checked` (an Output path line with no Dispatch id line), `no template` (no template file for the subagent type), `no declarations` (the template declares neither key).
 
-Record: one JSON line per check, appended to `dispatch-check-records.jsonl` under `$DISPATCH_CHECK_STATE_DIR` (default `$CLAUDE_PROJECT_DIR/.claude`), built by `jq`. Fields: `dispatch_id` (`""` with no Dispatch id line), `agent_id`, `subagent_type` (`unknown` when absent), `output_path` (omitted with no Output path line), `verdict` (`pass` or `fail`), `failed` (array of strings, empty on a pass), `note` (omitted when empty), `time` (ISO-8601 UTC). A records file that cannot be written gives the stderr line `dispatch-output-check: cannot write records file`.
+Record: one JSON line per pairing, appended to `dispatch-check-records.jsonl` under `$DISPATCH_CHECK_STATE_DIR` (default `$CLAUDE_PROJECT_DIR/.claude`), built by `jq`. Fields: `dispatch_id` (`""` with no Dispatch id line), `agent_id`, `subagent_type` (`unknown` when absent), `output_path` (omitted with no Output path line), `verdict` (`pass` or `fail`), `failed` (array of strings, empty on a pass), `note` (omitted when empty), `time` (ISO-8601 UTC). When a paired record cannot be written, the hook prints `dispatch-output-check: cannot write records file` to stderr.
 
 Template declarations: the template for a dispatch is `<type>.md` in `$DISPATCH_CHECK_AGENTS_DIR` (default `${CLAUDE_PLUGIN_ROOT}/agents`); a namespaced type such as `plugin:agent` uses the part after the last colon. Two optional frontmatter keys, each on a single line, with the value in double quotes and the items separated by a vertical bar:
 
@@ -162,7 +162,7 @@ output-quotes: "first quote|second quote"
 
 The double quotes are required, and an item cannot hold a double quote. They also keep a value that holds a colon valid YAML, for example `output-fields: "Verdict:|Findings"`. An item with a leading or trailing space or tab, an empty item, a second line for the key, or a frontmatter that opens, never closes and holds a line for the key is malformed.
 
-Fail closed: a missing `jq`, stdin that is not valid JSON, or a payload that is not a JSON object writes a message to stderr and a `fail` record with the failed string `jq missing`, `bad json` or `bad payload`; a payload whose fields cannot be read after the join gives `bad payload` with the agent id. The hook still exits 0.
+Fail closed: the hook writes a one-line message to stderr and a `fail` record with a single failed string, then exits 0. The string depends on the input: `jq missing` when `jq` is not installed; `bad json` when stdin is text that is not valid JSON; `bad payload` when stdin is empty or valid JSON that is not an object, or when a field of the event has the wrong type. A fail-closed record holds only `verdict`, `failed` and `time`, with no `agent_id`, except when the fields of a joined pair cannot be read: that `bad payload` record also holds `dispatch_id` (empty), `agent_id` and `subagent_type` (`unknown`). With `jq` missing every event writes such a record, so one dispatch leaves two records with no `agent_id`. A fail-closed record that cannot be written adds no output. If the state directory cannot be created or written, the hook prints `dispatch-output-check: state dir <path> is not a writable directory` to stderr, runs no check and writes no record.
 
 Stdout: one compact JSON line only when PostToolUse is the second event and the verdict is `fail`: a `hookSpecificOutput` with `additionalContext` `Dispatch output check failed (agent <id>): <failed strings joined with "; ">`. Every other run prints nothing.
 
@@ -172,7 +172,7 @@ Limits:
 - An output edited after its check is not re-checked.
 - A failure reaches the model only when PostToolUse is the second event; when SubagentStop is second, the record is written and nothing is printed.
 - Workflow `agent()` calls are not Agent tool calls and are never recorded.
-- The record file is shared with the sibling hook stories as a proposal.
+- Other hooks may read the records file; its fields are not yet a stable format.
 
 ## shell-write-guard.sh
 

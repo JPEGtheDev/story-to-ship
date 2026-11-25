@@ -168,7 +168,7 @@ Stdout: one compact JSON line only when PostToolUse is the second event and the 
 
 Limits:
 
-- A dispatcher that never writes the message lines is not caught: with no Output path line only the fields check runs, on the last assistant message.
+- A dispatcher that never writes the message lines is not caught: with no Output path line the output-path checks are skipped and the fields check runs on the last assistant message, and a template that declares `output-quotes` still fails with `no source path for declared quotes` when the message has no Source path line.
 - An output edited after its check is not re-checked.
 - A failure reaches the model only when PostToolUse is the second event; when SubagentStop is second, the record is written and nothing is printed.
 - Workflow `agent()` calls are not Agent tool calls and are never recorded.

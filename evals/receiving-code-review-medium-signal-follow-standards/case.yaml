@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-medium-signal-follow-standards
+description: "RC-21 medium-signal-follow-standards: naming that violates a documented standard is brought in line with the standard, citing it."
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

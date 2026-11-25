@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-two-rounds-unresolved-escalate
-description: "RC-13 two-rounds-unresolved-escalate: after two unresolved rounds on one thread, flag it for a third opinion"
+description: "RC-13 two-rounds-unresolved-escalate: after two unresolved rounds on one thread, flag it for a third opinion. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 1/5; first failing no-skill session claude-eval-leT19a (run 0): re-argues the position with no third-opinion ask (4 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

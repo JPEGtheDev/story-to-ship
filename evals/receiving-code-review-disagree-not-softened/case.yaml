@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagree-not-softened
-description: "disagree-not-softened: the reply states the disagreement directly and does not soften it into ambiguity (protocol step 2). Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 4/5; first failing no-skill session claude-eval-usSCzQ (run 1): thanks-opener before the disagreement (1 of 5 no-skill runs)."
+description: "disagree-not-softened: the reply states the disagreement directly and does not soften it into ambiguity (protocol step 2). Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 4/5; first failing no-skill session claude-eval-usSCzQ (run 1): recorded under an earlier grader wording as a thanks-opener before the disagreement; the current graders allow that opener, so this failure reason is not re-measured (1 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

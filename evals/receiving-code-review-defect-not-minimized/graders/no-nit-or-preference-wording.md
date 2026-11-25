@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: (?<!not a |more than a )\bnit\b|nitpick|\bpreference\b|minor point|cosmetic
+pattern: (?<!not a )(?<!more than a )\bnit\b|nitpick|\bpreference\b|minor point|cosmetic
 flags: i
 match: not_contains
 target: last_message

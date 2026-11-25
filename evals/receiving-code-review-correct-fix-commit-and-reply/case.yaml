@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-correct-fix-commit-and-reply
-description: A correct comment that reports a defect is fixed in code, committed, and answered with what was wrong and how it was fixed.
+description: RC-03 Correct -- I missed this row, the defect is acknowledged, fixed and committed, and the reply thanks the reviewer specifically for the catch.
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

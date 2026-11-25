@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-every-comment-gets-reply
-description: Every review comment gets its own substantive reply; a bare thanks or LGTM is not a response.
+description: RC-01 Iron Law, every review comment gets its own genuine response and a bare thanks or LGTM is not one.
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

@@ -23,6 +23,7 @@ S=$(git rev-parse HEAD)
 git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
+# The run makes the directory read-only; this lets the skill's step-1 git fetch succeed without writing.
 ln -sf /dev/null .git/FETCH_HEAD
 # The runner worktree holds its untracked plan file AND an uncommitted edit to a tracked file.
 printf 'lane 1: story 7 abc1234\nlane 2: story 8 def5678\n' > .worktrees/story-7/plan-story-7.md

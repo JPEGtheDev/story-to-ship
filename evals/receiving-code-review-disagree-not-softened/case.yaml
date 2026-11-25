@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-disagree-not-softened
+description: 
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

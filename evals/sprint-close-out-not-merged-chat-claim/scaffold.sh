@@ -15,8 +15,11 @@ printf 'y\n' > .worktrees/story-7/b.txt
 git -C .worktrees/story-7 add -A
 git -C .worktrees/story-7 commit -q -m "feat: story 7"
 # Sprint PR 12 is still OPEN on origin: no squash commit exists, and the runner
-# branch and worktree are still in place.
+# branch and worktree are still in place; the branch is pushed to origin.
 mkdir -p "$HOME/bin" "$HOME/ghstate"
+git -C .worktrees/story-7 push -q origin agent/story-7
+git fetch -q origin
+ln -sf /dev/null .git/FETCH_HEAD
 printf '{"state":"OPEN","mergeCommit":null}\n' > "$HOME/ghstate/pr-12.json"
 printf '{"body":"Epic\\n- [ ] #7 story\\n- [ ] #8 other\\n"}\n' > "$HOME/ghstate/issue-9.json"
 cat > "$HOME/bin/gh" <<'G'

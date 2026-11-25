@@ -14,8 +14,10 @@
 # tool_input.prompt (each optional). The checks are: the Output path file
 # exists, its first line carries the dispatch id, and the output (that file,
 # else the last assistant message) has a line for each field the agent
-# template declares as output-fields. Each check appends to the failed list;
-# the verdict is fail when the list is non-empty. A check that cannot run
+# template declares as output-fields. Each quote the template declares as
+# output-quotes must occur in the file named by the `Source path:` line, both
+# normalized (markup removed, whitespace collapsed). Each check appends to the
+# failed list; the verdict is fail when the list is non-empty. A check that cannot run
 # adds a note to the record instead.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
@@ -198,41 +200,56 @@ check_output_owner() {
   fi
 }
 
-# Status codes of template_output_fields.
-readonly FIELDS_NO_TEMPLATE=1 FIELDS_NO_DECLARATION=2 FIELDS_MALFORMED=3
+# Status codes of template_declaration.
+readonly DECL_NO_TEMPLATE=1 DECL_NO_DECLARATION=2 DECL_MALFORMED=3
 
-# Prints the declared output-fields value of the template for type $1, or
-# nothing. Status 0 with a value, else FIELDS_NO_TEMPLATE,
-# FIELDS_NO_DECLARATION or FIELDS_MALFORMED (a bad line, a second line, an
-# item with a leading or trailing space or tab, or frontmatter that opens
-# with `---` and never closes). A file with no leading `---` has no
-# declaration. The type loses everything up to its last colon; a type that is
-# empty or holds a slash or `..` has no template.
-template_output_fields() {
-  local type="${1##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
+# template_declaration KEY TYPE: prints the declared value of the frontmatter
+# key KEY (output-fields or output-quotes) in the template for type TYPE, or
+# nothing. Status 0 with a value, else DECL_NO_TEMPLATE, DECL_NO_DECLARATION
+# or DECL_MALFORMED (a bad line, a second line, an item with a leading or
+# trailing space or tab, or frontmatter that opens with `---`, never closes
+# and holds a line for KEY). A file with no leading `---` has no declaration. The type loses
+# everything up to its last colon; a type that is empty or holds a slash or
+# `..` has no template.
+template_declaration() {
+  local key="$1" type="${2##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
   local file line value
   if [[ -z "$dir" || -z "$type" || "$type" == */* || "$type" == *..* ]]; then
-    return "$FIELDS_NO_TEMPLATE"
+    return "$DECL_NO_TEMPLATE"
   fi
   file="$dir/$type.md"
-  [[ -f "$file" && -r "$file" ]] || return "$FIELDS_NO_TEMPLATE"
-  line="$(tr -d '\r' <"$file" | awk '
+  [[ -f "$file" && -r "$file" ]] || return "$DECL_NO_TEMPLATE"
+  line="$(tr -d '\r' <"$file" | awk -v key="$key:" '
     NR == 1 { if ($0 !~ /^---[[:space:]]*$/) exit; open = 1; next }
     /^---[[:space:]]*$/ { closed = 1; exit }
-    /^output-fields:/ { print }
-    END { exit (open && !closed) }')" || return "$FIELDS_MALFORMED"
-  [[ -z "$line" ]] && return "$FIELDS_NO_DECLARATION"
-  [[ "$line" == *$'\n'* ]] && return "$FIELDS_MALFORMED"
-  value="${line#output-fields:}"
+    index($0, key) == 1 { print; found = 1 }
+    END { exit (open && !closed && found) }')" || return "$DECL_MALFORMED"
+  [[ -z "$line" ]] && return "$DECL_NO_DECLARATION"
+  [[ "$line" == *$'\n'* ]] && return "$DECL_MALFORMED"
+  value="${line#"$key:"}"
   if [[ ! "$value" =~ ^[[:space:]]*\"([^\"]+)\"[[:space:]]*$ ]]; then
-    return "$FIELDS_MALFORMED"
+    return "$DECL_MALFORMED"
   fi
   value="${BASH_REMATCH[1]}"
   if [[ "$value" == '|'* || "$value" == *'|' || "$value" == *'||'* ||
     "$value" =~ ^[[:blank:]]|[[:blank:]]$|[[:blank:]]\||\|[[:blank:]] ]]; then
-    return "$FIELDS_MALFORMED"
+    return "$DECL_MALFORMED"
   fi
   printf '%s' "$value"
+}
+
+# Adds the record note for the declarations of type $1: "no template" when
+# there is no template, "no declarations" when the template declares neither
+# key. A template with one key adds no note.
+note_declarations() {
+  local fields_status=0 quotes_status=0
+  template_declaration output-fields "$1" >/dev/null || fields_status=$?
+  template_declaration output-quotes "$1" >/dev/null || quotes_status=$?
+  if [[ "$fields_status" -eq "$DECL_NO_TEMPLATE" ]]; then
+    add_note "no template"
+  elif [[ "$fields_status" -eq "$DECL_NO_DECLARATION" && "$quotes_status" -eq "$DECL_NO_DECLARATION" ]]; then
+    add_note "no declarations"
+  fi
 }
 
 # True when some line of $1 starts, after optional spaces or tabs, with the
@@ -250,18 +267,15 @@ has_line_starting_with() {
 # text is the output file when there is an Output path line, else the last
 # assistant message; a missing or unreadable output file is reported by
 # check_output_path and check_output_readable, so this check adds nothing.
-# Appends to "failed" and "note" of the caller. Returns 1 when the payload
-# cannot be read.
+# Appends to "failed" of the caller. Returns 1 when the payload cannot be
+# read.
 check_declared_fields() {
   local type="$1" path="$2" cwd="$3" stop="$4" fields text full field status=0
   local -a items
-  fields="$(template_output_fields "$type")" || status=$?
+  fields="$(template_declaration output-fields "$type")" || status=$?
   if [[ "$status" -ne 0 ]]; then
-    case "$status" in
-      "$FIELDS_NO_TEMPLATE") add_note "no template" ;;
-      "$FIELDS_NO_DECLARATION") add_note "no declarations" ;;
-      *) failed+=("output-fields line is malformed in ${type##*:}.md") ;;
-    esac
+    [[ "$status" -eq "$DECL_MALFORMED" ]] &&
+      failed+=("output-fields line is malformed in ${type##*:}.md")
     return 0
   fi
   if [[ -n "$path" ]]; then
@@ -277,20 +291,81 @@ check_declared_fields() {
   done
 }
 
+# Prints stdin as one normalized line: newlines become spaces, markup (`<`
+# followed by a letter, `/` or `!`, up to the next `>`) is removed, runs of
+# spaces and tabs collapse to one space, ends are trimmed. Case is kept.
+normalize_text() {
+  tr '\n' ' ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[ \t]+/ /g; s/^ //; s/ $//'
+}
+
+# Sets "source" of the caller to the normalized text of the source file.
+# Returns 1 after adding a failure to "failed" when the file cannot supply
+# text: no path, a placeholder, missing, unreadable or empty.
+read_quote_source() {
+  local path="$1" cwd="$2" full
+  if [[ -z "$path" ]]; then
+    failed+=("no source path for declared quotes")
+    return 1
+  fi
+  if has_placeholder "$path"; then
+    failed+=("source path has a placeholder: $path")
+    return 1
+  fi
+  full="$(resolve_path "$path" "$cwd")"
+  if [[ ! -f "$full" ]]; then
+    failed+=("source file missing: $path")
+    return 1
+  fi
+  if [[ ! -r "$full" ]]; then
+    failed+=("source file is not readable: $path")
+    return 1
+  fi
+  source="$(normalize_text <"$full")"
+  if [[ -z "$source" ]]; then
+    failed+=("source file is empty: $path")
+    return 1
+  fi
+}
+
+# Checks that every output quote the template of the dispatch type declares
+# occurs, normalized, as a literal substring of the normalized source file.
+# Appends to "failed" of the caller.
+check_declared_quotes() {
+  local type="$1" source_path="$2" cwd="$3" quotes source quote norm status=0
+  local -a items
+  quotes="$(template_declaration output-quotes "$type")" || status=$?
+  if [[ "$status" -ne 0 ]]; then
+    [[ "$status" -eq "$DECL_MALFORMED" ]] &&
+      failed+=("output-quotes line is malformed in ${type##*:}.md")
+    return 0
+  fi
+  read_quote_source "$source_path" "$cwd" || return 0
+  IFS='|' read -r -a items <<<"$quotes"
+  for quote in "${items[@]}"; do
+    norm="$(normalize_text <<<"$quote")"
+    if [[ -z "$norm" || "$source" != *"$norm"* ]]; then
+      failed+=("output quote not found in source: $quote")
+    fi
+  done
+}
+
 # build_record ID POST STOP: POST and STOP are the two parked payloads.
 build_record() {
-  local id="$1" post="$2" stop="$3" prompt dispatch_id output_path type cwd note=""
+  local id="$1" post="$2" stop="$3" prompt dispatch_id output_path source_path type cwd note=""
   local -a failed=()
   prompt="$(jq -r '.tool_input.prompt // empty' <<<"$post" 2>/dev/null)" || return 1
   dispatch_id="$(message_line "$prompt" 'Dispatch id' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   output_path="$(message_line "$prompt" 'Output path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  source_path="$(message_line "$prompt" 'Source path' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   cwd="$(payload_cwd "$stop" "$post")" || return 1
   check_output_path "$output_path" "$cwd"
   check_output_readable "$output_path" "$cwd"
   check_output_owner "$output_path" "$cwd" "$dispatch_id"
   [[ -n "$output_path" && -z "$dispatch_id" ]] && note="ownership not checked"
+  note_declarations "$type"
   check_declared_fields "$type" "$output_path" "$cwd" "$stop" || return 1
+  check_declared_quotes "$type" "$source_path" "$cwd"
   printf '%s\n' "${failed[@]}" | jq -n -c -R --arg d "$dispatch_id" --arg a "$id" \
     --arg s "$type" --arg o "$output_path" --arg t "$now" --arg n "$note" \
     '[inputs | select(. != "")] as $f

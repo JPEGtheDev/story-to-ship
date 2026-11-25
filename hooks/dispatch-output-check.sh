@@ -27,8 +27,7 @@
 # whose source ends mid-sentence, fails instead.
 #
 # Fail closed, never block: the hook always exits 0. Its stdout is empty
-# except for one JSON line when a pair checked on the PostToolUse event
-# fails (see below). Missing jq, unparseable stdin or a payload that is not
+# except for the line described under "Surfacing a failure". Missing jq, unparseable stdin or a payload that is not
 # a JSON object writes a message to stderr and a fail record. A records
 # file that cannot be written gives the stderr message `cannot write
 # records file` for a paired record only; on the fail-closed path a failed
@@ -443,7 +442,7 @@ fail_closed() {
 # --- main -------------------------------------------------------------------
 
 main() {
-  local payload id claim parked post stop record
+  local payload event id claim parked post stop record
   payload="$(cat)"
   mkdir -p "$PENDING" 2>/dev/null
   if [[ ! -d "$PENDING" || ! -w "$PENDING" ]]; then
@@ -470,6 +469,7 @@ main() {
     return 0
   }
   [[ -z "$id" ]] && return 0
+  event="$(event_name "$payload")"
 
   claim="$PENDING/$id.claim.$$"
   claim_parked "$payload" "$id" "$claim" || return 0
@@ -478,7 +478,7 @@ main() {
 
   post="$payload"
   stop="$parked"
-  if [[ "$(event_name "$payload")" == "SubagentStop" ]]; then
+  if [[ "$event" == "SubagentStop" ]]; then
     post="$parked"
     stop="$payload"
   fi
@@ -487,9 +487,7 @@ main() {
     return 0
   }
   append_record "$record"
-  if [[ "$(event_name "$payload")" == "PostToolUse" ]]; then
-    print_failure_context "$record"
-  fi
+  [[ "$event" == "PostToolUse" ]] && print_failure_context "$record"
   return 0
 }
 

@@ -364,6 +364,7 @@ check_source_complete() {
 
 # Checks that every output quote the template of the dispatch type declares
 # occurs, normalized, as a literal substring of the normalized source file.
+# It also fails a source that looks truncated, through check_source_complete.
 # Appends to "failed" of the caller.
 check_declared_quotes() {
   local type="$1" source_path="$2" cwd="$3" source_text quote norm

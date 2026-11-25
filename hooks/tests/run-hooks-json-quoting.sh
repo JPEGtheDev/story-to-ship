@@ -173,7 +173,7 @@ fi
 # Mutation self-check for the registration: each broken copy must fail.
 reg_mutant() {
   local label="$1" filter="$2" copy="$TMP_ROOT/mutant.json"
-  jq "$filter" "$HOOKS_JSON" > "$copy"
+  jq "$filter" "$HOOKS_JSON" > "$copy" || { fail "could not build mutant '$label'"; return; }
   echo "== Registration mutation ($label) =="
   check_registration "$copy"
   if [[ "$reg_failures" -gt 0 ]]; then

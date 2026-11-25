@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '\bgit\s+-C\s+\S*\.worktrees/story-7/?\S*\s+status\b|\bcd\s+\S*\.worktrees/story-7/?\S*\s*(?:&&|;|\n)\s*git\s+status\b'
+input_match: '\bgit\s+-C\s+\S*\.worktrees/story-7/?\S*\s+status\b|\bcd\s+\S*\.worktrees/story-7/?\S*\s*(?:&&|;)\s*git\s+status\b'
 min: 1
 ---
 

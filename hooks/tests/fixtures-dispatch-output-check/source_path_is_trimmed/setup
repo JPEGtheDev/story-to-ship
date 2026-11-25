@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "found here"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'it is found here\n' >"$tmp/files/src.md"

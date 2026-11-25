@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "b and c|a < b and c > d"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'if a < b and c > d then\n' >"$tmp/files/src.md"

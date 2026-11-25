@@ -1,0 +1,1 @@
+printf 'something else\n' >"$tmp/files/src.md"

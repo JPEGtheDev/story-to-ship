@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "f(x)|[1]|a*b"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'call f(x) with [1] and a*b\n' >"$tmp/files/src.md"

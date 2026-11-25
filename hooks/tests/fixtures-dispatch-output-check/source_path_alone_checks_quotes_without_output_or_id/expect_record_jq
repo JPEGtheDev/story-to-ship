@@ -1,0 +1,1 @@
+.[0].dispatch_id=="" and (.[0]|has("output_path")|not) and .[0].verdict=="fail" and .[0].failed==["output quote not found in source: absent"]

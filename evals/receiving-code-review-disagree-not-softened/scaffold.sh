@@ -54,9 +54,8 @@ File: src/ranking.py, line 3
 
 Use scores.sort(reverse=True) here instead of sorted(). The copy is wasted work, and sorting in place is the cheaper way to do it.
 MD
-MSG="add top_scores ranking helper"
 git add -A
-git commit -q -m "feat: $MSG"
+git commit -q -m "feat: add top_scores ranking helper"
 git init -q --bare .git/remote.git
 git remote add origin "$PWD/.git/remote.git"
 git push -q origin main feature

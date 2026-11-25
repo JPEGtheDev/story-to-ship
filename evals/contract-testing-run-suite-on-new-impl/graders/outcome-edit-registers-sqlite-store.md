@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Edit
-input_match: '"file_path"\s*:\s*"(?:[^"\\]|\\.)*?/tests/test_store_contract\.py"(?:,"[a-z_]+"\s*:\s*(?:"(?:[^"\\]|\\.)*"|true|false))*,"new_string"\s*:\s*"(?:[^"\\]|\\.)*?IMPLEMENTATIONS\s*\+?=\s*\[(?:[^\]\\]|\\.)*?\w*[Ss]qlite'
+input_match: '"file_path"\s*:\s*"(?:[^"\\]|\\.)*?/tests/test_store_contract\.py"(?:,"[a-z_]+"\s*:\s*(?:"(?:[^"\\]|\\.)*"|true|false))*,"new_string"\s*:\s*"(?:[^"\\]|\\.)*?IMPLEMENTATIONS\s*\+?=\s*\[(?:[^\]\\"]|\\.)*?\w*[Ss]qlite'
 min: 1
 ---
 

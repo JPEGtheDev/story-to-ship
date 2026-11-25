@@ -78,31 +78,34 @@ IMPLEMENTATIONS = [make_file_store]
 class StoreContractTest(unittest.TestCase):
     def each_store(self):
         for factory in IMPLEMENTATIONS:
-            with self.subTest(implementation=factory.__name__):
-                with tempfile.TemporaryDirectory() as directory:
-                    yield factory(directory)
+            with tempfile.TemporaryDirectory() as directory:
+                yield factory.__name__, factory(directory)
 
     def test_get_missing_key_returns_none(self):
-        for store in self.each_store():
-            self.assertIsNone(store.get("absent"))
+        for name, store in self.each_store():
+            with self.subTest(implementation=name):
+                self.assertIsNone(store.get("absent"))
 
     def test_put_then_get_returns_value(self):
-        for store in self.each_store():
-            store.put("a", "one")
-            self.assertEqual(store.get("a"), "one")
+        for name, store in self.each_store():
+            with self.subTest(implementation=name):
+                store.put("a", "one")
+                self.assertEqual(store.get("a"), "one")
 
     def test_delete_removes_key_and_missing_delete_is_safe(self):
-        for store in self.each_store():
-            store.put("a", "one")
-            store.delete("a")
-            store.delete("a")
-            self.assertIsNone(store.get("a"))
+        for name, store in self.each_store():
+            with self.subTest(implementation=name):
+                store.put("a", "one")
+                store.delete("a")
+                store.delete("a")
+                self.assertIsNone(store.get("a"))
 
     def test_keys_are_sorted(self):
-        for store in self.each_store():
-            store.put("b", 2)
-            store.put("a", 1)
-            self.assertEqual(store.keys(), ["a", "b"])
+        for name, store in self.each_store():
+            with self.subTest(implementation=name):
+                store.put("b", 2)
+                store.put("a", 1)
+                self.assertEqual(store.keys(), ["a", "b"])
 
 
 if __name__ == "__main__":

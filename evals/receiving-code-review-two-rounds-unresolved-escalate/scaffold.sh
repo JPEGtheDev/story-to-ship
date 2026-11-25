@@ -3,7 +3,7 @@ set -eu
 git init -q -b main
 git config user.email eval@example.invalid
 git config user.name eval
-mkdir -p src tests review docs
+mkdir -p src tests review
 touch src/__init__.py
 cat > src/money.py <<'PY'
 """Money helpers."""

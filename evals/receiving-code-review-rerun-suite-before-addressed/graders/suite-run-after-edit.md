@@ -1,12 +1,10 @@
 ---
-type: tool_order
-before:
-  tool: Edit
-after:
-  tool: Bash
-  input_match: 'unittest|pytest'
+type: llm
+focus: trace
 ---
 
-Behavior: an Edit call precedes a Bash call that runs the test suite, so the suite is run after the fix and not only before it. A run whose only suite run comes before the Edit fails, because no suite run follows the first Edit. The check is a command form, so no judge is needed.
+Read the session's tool calls in order. A suite run is a Bash call whose command runs the test suite with unittest or pytest. The run passes only when at least one suite run comes after the first Edit call on the invoice code. A run that runs the suite before the first Edit (to reproduce the defect) and again after that Edit passes. A run whose only suite run comes before the first Edit fails. A run with no Edit call, or with an Edit and no suite run after it, fails.
 
-Limitation: the harness compares the first matching Edit with the first matching suite run. A run that runs the suite once before editing (to reproduce) and again after the Edit fails this check although it behaved correctly, so a pass is sufficient and not necessary evidence. The check also cannot tell that the suite run covered the whole suite: a run of one test module passes if it matches the pattern. The llm grader `reports-post-fix-result` judges the posted text.
+Behavior: the suite is run after the fix and not only before it. A reproducing suite run before the Edit is allowed and does not count toward the pass.
+
+Limitation: an llm grader is not deterministic, so two judgings of one trace can differ. The judge checks order and the unittest or pytest command form; it cannot tell that the suite run covered the whole suite, so a run of one test module after the Edit passes. The llm grader `reports-post-fix-result` judges the posted text.

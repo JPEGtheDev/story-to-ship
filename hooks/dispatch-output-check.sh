@@ -291,11 +291,12 @@ check_declared_fields() {
   done
 }
 
-# Prints stdin as one normalized line: newlines become spaces, markup (`<`
-# followed by a letter, `/` or `!`, up to the next `>`) is removed, runs of
-# spaces and tabs collapse to one space, ends are trimmed. Case is kept.
+# Prints stdin as one normalized line: newlines and carriage returns become
+# spaces, markup (`<` followed by a letter, `/` or `!`, up to the next `>`) is
+# removed, runs of spaces and tabs collapse to one space, ends are trimmed.
+# Case is kept.
 normalize_text() {
-  tr '\n' ' ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[ \t]+/ /g; s/^ //; s/ $//'
+  tr '\r\n' '  ' | sed -E 's/<[A-Za-z\/!][^>]*>//g; s/[ \t]+/ /g; s/^ //; s/ $//'
 }
 
 # Sets "source" of the caller to the normalized text of the source file.

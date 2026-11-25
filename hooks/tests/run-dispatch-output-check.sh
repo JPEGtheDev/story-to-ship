@@ -38,7 +38,10 @@
 #                             in setup; every hook run starts with it as its
 #                             working directory (default: the runner's own).
 #   setup                  - bash snippet sourced before the runs; $STATE is
-#                             the state dir.
+#                             the state dir. It also sees $SCRIPT_DIR (the hooks/tests
+#                             directory) and $tmp; payload names listed in payloads
+#                             are looked up in the case's payload directory first,
+#                             then under $tmp/out, where setup can write payloads.
 #   state_subdir           - use $tmp/<value> (not yet created) as the state dir.
 #   no_jq                  - when present, run with a PATH that lacks jq.
 #   expect_exit            - exact exit code of every run (default 0).

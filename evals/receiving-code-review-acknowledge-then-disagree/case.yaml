@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-acknowledge-then-disagree
-description: "acknowledge-then-disagree: the reply says what the reviewer found before it disagrees. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 3/5; first failing no-skill session claude-eval-JvnhgN (run 0): refusal stated before the reviewer's finding is named (2 of 5 no-skill runs)."
+description: "acknowledge-then-disagree: the reply says what the reviewer found before or while it disagrees. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 3/5; first failing no-skill session claude-eval-JvnhgN (run 0): refusal stated before the reviewer's finding is named (2 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

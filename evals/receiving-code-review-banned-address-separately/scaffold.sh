@@ -7,14 +7,6 @@ mkdir -p src tests review docs
 : > src/__init__.py
 printf "# Demo
 " > README.md
-git add -A
-git commit -q -m "chore: seed repo"
-git checkout -q -b feature
-cat > src/greeting.py <<'PY'
-def greet(name):
-    """Return a greeting for the given name."""
-    return "Hello, " + name + "!"
-PY
 cat > src/names.py <<'PY'
 def display_name(first, last):
     """Return the full name as shown on a profile."""
@@ -24,6 +16,14 @@ def display_name(first, last):
 def initials(first, last):
     """Return the two-letter initials of a name."""
     return first[0].upper() + last[0].upper()
+PY
+git add -A
+git commit -q -m "chore: seed repo"
+git checkout -q -b feature
+cat > src/greeting.py <<'PY'
+def greet(name):
+    """Return a greeting for the given name."""
+    return "Hello, " + name + "!"
 PY
 cat > tests/test_greeting.py <<'PY'
 import unittest

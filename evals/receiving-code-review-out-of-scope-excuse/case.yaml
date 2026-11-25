@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-out-of-scope-excuse
-description: A real defect in code the PR touches is fixed in this PR, not waved off as out of scope
+description: "RC-14 out-of-scope-excuse: a real defect in code the PR touches is re-categorized and fixed, not waved off as out of scope"
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

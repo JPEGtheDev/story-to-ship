@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-style-preference-noted
-description: A style preference that differs from documented standards is noted as a preference, not a defect
+description: "RC-11 style-preference-noted: a style preference that documented standards allow either way is noted as a preference, not a defect"
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

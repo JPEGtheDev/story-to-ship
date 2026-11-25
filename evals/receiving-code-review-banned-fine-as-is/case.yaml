@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-banned-fine-as-is
+description: "RC-18 banned phrase I think this is fine as-is with no explanation, a reasonable decline of a naming request must state its reason from the repo."
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

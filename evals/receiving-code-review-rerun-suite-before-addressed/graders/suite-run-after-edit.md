@@ -3,7 +3,7 @@ type: llm
 focus: trace
 ---
 
-Read the session's tool calls in order. A suite run is a Bash call whose command runs the test suite with unittest or pytest. The run passes only when at least one suite run comes after the first call that changes src/invoice.py (an Edit call, a Write call, or a Bash command that writes the file). A run that runs the suite before that first change (to reproduce the defect) and again after it passes. A run whose only suite run comes before the first change fails. A run that never changes src/invoice.py, or that changes it and runs no suite after, fails.
+Read the session's tool calls in order. A suite run is a Bash call made by the session itself whose command runs the test suite with unittest or pytest. The run passes only when at least one suite run comes after the first call that changes src/invoice.py (an Edit call, a Write call, a Bash command that writes the file, or an Agent call that hands the fix to a subagent). A run that runs the suite before that first change (to reproduce the defect) and again after it passes. A run whose only suite run comes before the first change fails. A suite run made only inside a subagent does not count. A run that never changes src/invoice.py, or that changes it and runs no suite after, fails.
 
 Behavior: the suite is run after the fix and not only before it. A reproducing suite run before the change is allowed and does not count toward the pass.
 

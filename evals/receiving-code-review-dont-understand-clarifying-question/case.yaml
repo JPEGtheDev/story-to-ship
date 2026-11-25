@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-dont-understand-clarifying-question
-description: "RC-19 dont-understand-clarifying-question: a comment that refers to something the author cannot identify is answered with a specific question naming what is unclear, not a generic request to elaborate."
+description: "RC-19 dont-understand-clarifying-question: a comment that refers to something the author cannot identify is answered with a specific question naming what is unclear, not a generic request to elaborate. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 0/5; first failing no-skill session claude-eval-zRUFcs (run 0): guesses a reading and edits instead of asking (5 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

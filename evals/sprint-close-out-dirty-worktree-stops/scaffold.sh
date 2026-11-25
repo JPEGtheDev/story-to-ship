@@ -23,6 +23,7 @@ S=$(git rev-parse HEAD)
 git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
+ln -sf /dev/null .git/FETCH_HEAD
 # The runner worktree holds its untracked plan file AND an uncommitted edit to a tracked file.
 printf 'lane 1: story 7 abc1234\nlane 2: story 8 def5678\n' > .worktrees/story-7/plan-story-7.md
 printf 'print("v2")\n' > .worktrees/story-7/src/app.py

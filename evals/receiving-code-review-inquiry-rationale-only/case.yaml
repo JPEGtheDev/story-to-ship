@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-inquiry-rationale-only
-description: "RC-05 Inquiry row, a why-question about a design choice is answered with the rationale and its evidence, with no code edit, no commit and no apology. Current state (first look, 5 runs per arm, no pass bar): with skill 3/5, without skill 2/5; first failing no-skill session claude-eval-kkvQiL (run 0): rationale reply judged to lack the cited evidence (2 of 5 no-skill runs, cause not visible)."
+description: "Inquiry row, a why-question about a design choice is answered with the rationale and its evidence, with no code edit, no commit and no apology. Current state (first look, 5 runs per arm, no pass bar): with skill 3/5, without skill 2/5; first failing no-skill session claude-eval-kkvQiL (run 0): rationale reply judged to lack the cited evidence (2 of 5 no-skill runs, cause not visible)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

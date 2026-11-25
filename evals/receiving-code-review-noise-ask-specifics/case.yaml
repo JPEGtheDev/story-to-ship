@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-noise-ask-specifics
-description: "RC-07 signal table row Noise, a comment with no claim is answered by asking for specifics. Current state (first look, 5 runs per arm, no pass bar): with skill 3/5, without skill 3/5; first failing no-skill session claude-eval-kSLqRg (run 2): guesses a defect and edits instead of asking (1 run) or speculates with no direct question (1 run)."
+description: "signal table row Noise, a comment with no claim is answered by asking for specifics. Current state (first look, 5 runs per arm, no pass bar): with skill 3/5, without skill 3/5; first failing no-skill session claude-eval-kSLqRg (run 2): guesses a defect and edits instead of asking (1 run) or speculates with no direct question (1 run)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

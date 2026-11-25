@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-high-signal-not-deferred
-description: "RC-20 high-signal-not-deferred: a comment that points to a line and explains its consequence is fixed in this pull request and never deferred as low priority. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
+description: "high-signal-not-deferred: a comment that points to a line and explains its consequence is fixed in this pull request and never deferred as low priority. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

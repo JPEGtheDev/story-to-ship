@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-out-of-scope-excuse
-description: "RC-14 out-of-scope-excuse: a real defect in code the PR touches is re-categorized and fixed, not waved off as out of scope. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-ruyMS5 (run 0): declines the fix as out of scope with no edit (5 of 5 no-skill runs)."
+description: "out-of-scope-excuse: a real defect in code the PR touches is re-categorized and fixed, not waved off as out of scope. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-ruyMS5 (run 0): declines the fix as out of scope with no edit (5 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

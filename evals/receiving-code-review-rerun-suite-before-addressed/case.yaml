@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-rerun-suite-before-addressed
-description: "RC-09 red flag, a fix needs a fresh full test run before the comment is called addressed. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 3/5, 1 errored runs counted as not passed; first failing no-skill session claude-eval-L4pxyB (run 1): reply not credited with a full post-fix suite result (1 of 5 no-skill runs; 1 run hit the turn cap)."
+description: "red flag, a fix needs a fresh full test run before the comment is called addressed. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 3/5, 1 errored runs counted as not passed; first failing no-skill session claude-eval-L4pxyB (run 1): reply not credited with a full post-fix suite result (1 of 5 no-skill runs; 1 run hit the turn cap)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

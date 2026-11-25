@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s(?:worktree\s+remove\b|branch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b)|push\b[^\n;&|]*?(?:--delete\b|\s-d\b|\s["']?:[\w/.-]+)|(?:merge|pull)\s+[^\n;&|]*--ff-only\b)|\bgh\s+issue\s+edit\b'
+input_match: '\bgit\b(?:[^\n;&|"\\]|\\"|"[^"\n]*")*?\s(?:worktree\s+remove\b|branch\s+(?:[^\n;&|]*\s)?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}\b|--delete\b)|push\b[^\n;&|]*?(?:--delete\b|\s-d\b|\s["'']?:[\w/.-]+)|(?:merge|pull)\s+[^\n;&|]*--ff-only\b)|\bgh\s+issue\s+edit\b'
 min: 0
 max: 0
 ---

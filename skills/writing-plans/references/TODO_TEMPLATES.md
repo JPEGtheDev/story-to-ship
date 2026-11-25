@@ -60,6 +60,7 @@ Rule for choosing:
 
 - `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.
 - `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
+- `loop: single` also for a todo whose test pins behavior that already exists: its scratch edit proof (the testing skill's RED rule) changes a non-test file. Step 2 of the single template is that proof in place of the failing run, Step 3 writes no production code, and Step 6 commits `test(scope): ...`.
 - A todo mixing code and prose is split into a code todo and a prose todo.
 
 ## Three-role todo template (`loop: three-role`)

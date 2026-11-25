@@ -18,7 +18,7 @@ The three-role loop splits one code todo into three dispatches, each run by a di
 Every plan entry carries one marker line, `loop: three-role` or `loop: single`, with a one-line reason. The rule for choosing is in the loop-marker section of the writing-plans skill's todo templates.
 
 - `loop: three-role` when the todo adds or changes behavior in a non-prose source file of a repo with a runnable test suite.
-- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, fix rounds after the end review, and reconcile fix rounds.
+- `loop: single` for prose, config, a repo with no runnable suite, a pure refactor or deletion, a todo whose test pins behavior that already exists, fix rounds after the end review, and reconcile fix rounds.
 - A todo that mixes code and prose is split into a code todo and a prose todo before dispatch.
 
 ## 2. Dispatch order
@@ -48,7 +48,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 - Runs the suite: the new test must FAIL with a run-time assertion failure, and no other test may fail. A compile or import error is not a valid RED.
 - Commits `test(scope): ...` with the failure output pasted in the reply.
 - Makes exactly one commit, the test commit; no WIP commit.
-- If the test passes at once, return BLOCKED: the behavior already exists or the test is wrong. The todo goes back to planning.
+- If the test passes at once, return BLOCKED: the behavior already exists or the test is wrong. The todo goes back to planning. A todo whose test pins behavior that already exists is a `loop: single` todo, not a three-role todo: its scratch edit proof (the testing skill's RED rule) changes a non-test file, and a test-writer changes test files only.
 
 ### pass-maker
 
@@ -77,7 +77,7 @@ The implementer template carries one slot, `{{ROLE_RULES}}`; the dispatcher fill
 
 ### single
 
-- For a code todo: writes the failing test first, watches it fail for the expected reason, implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`.
+- For a code todo: writes the failing test first, watches it fail for the expected reason, implements, refactors, runs the full suite green, and commits `feat(scope): ...` or `fix(scope): ...`. For a todo whose test pins behavior that already exists, the testing skill's scratch edit proof replaces the failing run, no production code is written, and the commit is `test(scope): ...`.
 - For a prose, config, pure refactor or deletion todo: writes no test first, runs the todo's own checks, and uses the conventional commit type that fits (`docs`, `chore`, `refactor`, `ci`, and so on).
 
 ## 4. Test-path predicate

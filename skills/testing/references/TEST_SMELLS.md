@@ -521,7 +521,7 @@ If a test has always passed:
 
 **Fix:**
 - **RED-first discipline:** Write the test FIRST, see it fail, understand the failure, THEN write code.
-- If a test passes immediately without changes: the test is wrong. Fix it before writing production code.
+- If a test passes immediately without changes: the test is wrong. Fix it before writing production code. Exception: a new test of behavior that already exists may pass on its first run when a scratch edit that breaks that behavior makes the test fail (the failing run names the test), the edit and run are shown, and the revert is checked with `cmp`. The testing skill's RED rule states the exception in full.
 - Verify each test can actually detect breakage: intentionally break the production code and confirm the test fails.
 
 ---

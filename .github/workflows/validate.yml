@@ -1383,8 +1383,8 @@ jobs:
             echo "Found $bad eval case folder problem(s)"
             exit 1
           fi
-          if [ "$default_count" -ne 25 ] || [ "$expected_count" -ne 4 ]; then
-            echo "FAILED: expected 25 default and 4 expected-default eval case folders; found $default_count and $expected_count -- update the 25 and 4 in this step of .github/workflows/validate.yml when a case folder is added, removed or moved"
+          if [ "$default_count" -ne 26 ] || [ "$expected_count" -ne 4 ]; then
+            echo "FAILED: expected 26 default and 4 expected-default eval case folders; found $default_count and $expected_count -- update the 26 and 4 in this step of .github/workflows/validate.yml when a case folder is added, removed or moved"
             exit 1
           fi
           echo "[+] eval case folders match"

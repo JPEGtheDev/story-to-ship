@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-acknowledge-then-disagree
-description: 
+description: "RC-27 acknowledge-then-disagree: the reply says what the reviewer found before it disagrees."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

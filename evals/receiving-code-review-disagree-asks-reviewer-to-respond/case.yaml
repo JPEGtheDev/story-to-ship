@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagree-asks-reviewer-to-respond
-description: 
+description: "RC-25 disagree-asks-reviewer-to-respond: after disagreeing, the reply asks the reviewer to respond and does not close the thread (protocol step 3)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagree-attack-ideas
-description: 
+description: "RC-26 disagree-attack-ideas: the reply to a curt reviewer disagrees with the approach as a consequence, never with the person (protocol step 1)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

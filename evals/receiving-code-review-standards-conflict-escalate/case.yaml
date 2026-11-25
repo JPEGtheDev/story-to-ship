@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-standards-conflict-escalate
-description: 
+description: "RC-28 standards-conflict-escalate: when two project documents conflict, the reply names the conflict and asks a maintainer to decide."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

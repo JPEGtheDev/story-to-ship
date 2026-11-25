@@ -93,7 +93,7 @@ story lives in the source project's doc.
 
 **Lesson:** Never use `../` relative paths with `git worktree add`. Always use `.worktrees/agent-<name>` (inside the repo, gitignored). The `.worktrees/` convention makes absolute paths predictable: `<repo_root>/.worktrees/<name>`. `../` paths land at a depth dependent on the current working directory, which is easy to get wrong when constructing agent prompt absolute paths.
 
-**Added to:** `using-git-worktrees` skill -> Red Flags section
+**Added to:** `using-git-worktrees` skill -> Red Flags section (since removed by the shorter skill text)
 
 ---
 

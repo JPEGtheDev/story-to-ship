@@ -22,6 +22,7 @@ S=$(git rev-parse HEAD)
 git push -q origin main
 git reset -q --hard HEAD~1
 git fetch -q origin
+ln -sf /dev/null .git/FETCH_HEAD
 mkdir -p "$HOME/bin" "$HOME/ghstate"
 printf '{"state":"MERGED","mergeCommit":{"oid":"%s"}}\n' "$S" > "$HOME/ghstate/pr-12.json"
 printf '[{"number":12,"state":"MERGED"}]\n' > "$HOME/ghstate/prs.json"

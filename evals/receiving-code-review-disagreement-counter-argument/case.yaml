@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagreement-counter-argument
-description: "table row I disagree, a reviewer demand that would break correct code is answered with a counter-argument that gives the reasoning, not a dismissal. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
+description: "The \"I disagree -- have a counter-argument\" row: a reviewer demand that would break correct code is answered with a counter-argument that gives the reasoning, not a dismissal. Current state (first look, 5 runs per arm, no pass bar): with skill 5/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

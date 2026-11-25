@@ -56,7 +56,7 @@ There is no test for an empty cart.
 
 Thread T3
 From: @alice (teammate reviewer)
-File: src/cart.py line 8
+File: src/cart.py line 7
 Two blank lines between top-level functions would match the rest of our modules.
 MD
 git add -A

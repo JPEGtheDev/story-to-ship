@@ -29,9 +29,6 @@ import report
 
 
 class TestReport(unittest.TestCase):
-    def test_single_day(self):
-        self.assertEqual(report.day_rows(3, 3), ["day-3"])
-
     def test_row_count_for_a_week(self):
         self.assertEqual(report.row_count(1, 7), 7)
 

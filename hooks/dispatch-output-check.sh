@@ -22,7 +22,7 @@
 # Each check appends to the failed list; the verdict is fail when the list is
 # non-empty. A check with no template or no declaration to run adds a note to
 # the record instead; the quotes check also fails when it cannot read its
-# source.
+# source or when the source ends mid-sentence.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a
@@ -345,6 +345,13 @@ read_quote_source() {
   fi
 }
 
+# Fails a source whose normalized text does not end in one of . ! ? : ) " `
+# ] } * _ (matched as literal text). Appends to "failed" of the caller.
+check_source_complete() {
+  local last="${1: -1}" allowed='.!?:)"`]}*_'
+  [[ "$allowed" == *"$last"* ]] || failed+=("source truncated: $2")
+}
+
 # Checks that every output quote the template of the dispatch type declares
 # occurs, normalized, as a literal substring of the normalized source file.
 # Appends to "failed" of the caller.
@@ -353,6 +360,7 @@ check_declared_quotes() {
   local -a items
   load_declaration output-quotes "$type" || return 0
   read_quote_source "$source_path" "$cwd" || return 0
+  check_source_complete "$source_text" "$source_path"
   for quote in "${items[@]}"; do
     norm="$(normalize_text <<<"$quote")"
     if [[ -z "$norm" || "$source_text" != *"$norm"* ]]; then

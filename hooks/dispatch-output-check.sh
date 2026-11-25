@@ -20,9 +20,11 @@
 #   occur in the file named by the `Source path:` line, both normalized
 #   (markup removed, whitespace collapsed).
 # Each check appends to the failed list; the verdict is fail when the list is
-# non-empty. A check with no template or no declaration to run adds a note to
-# the record instead; the quotes check also fails when it cannot read its
-# source or when the source ends mid-sentence.
+# non-empty. A check that has nothing to run adds a note to the record
+# instead: "no template" without a template, "no declarations" when the
+# template declares neither key, and "ownership not checked" for an Output
+# path with no Dispatch id. A quotes check that cannot read its source, or
+# whose source ends mid-sentence, fails instead.
 #
 # Fail closed, never block: the hook always exits 0 with empty stdout. Missing
 # jq, unparseable stdin or a payload that is not a JSON object writes a

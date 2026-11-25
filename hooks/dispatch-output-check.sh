@@ -23,6 +23,11 @@
 # message to stderr and a fail record. A records file that cannot be written
 # gives the stderr message `cannot write records file` for a paired record
 # only; on the fail-closed path a failed write adds no output of its own.
+#
+# The agent template for a dispatch is $DISPATCH_CHECK_AGENTS_DIR/<type>.md;
+# the directory defaults to ${CLAUDE_PLUGIN_ROOT}/agents. With neither set
+# there is no template and the field check is skipped with the note
+# "no template".
 
 STATE="${DISPATCH_CHECK_STATE_DIR:-${CLAUDE_PROJECT_DIR:-.}/.claude}"
 RECORDS="$STATE/dispatch-check-records.jsonl"
@@ -168,17 +173,23 @@ has_whole_token() {
   return 1
 }
 
+# Fails an existing regular file at a path without a placeholder that cannot
+# be read. The one place that reports it, with or without a dispatch id.
+check_output_readable() {
+  local path="$1" cwd="$2" full
+  [[ -z "$path" ]] && return 0
+  full="$(resolve_output_file "$path" "$cwd")" || return 0
+  [[ -r "$full" ]] || failed+=("output file is not readable: $path")
+}
+
 # Checks that the first line of the output file carries the dispatch id.
-# Runs only for an existing regular file at a path without a placeholder; an
-# unreadable file fails with its own message.
+# Runs only for a readable existing regular file at a path without a
+# placeholder.
 check_output_owner() {
   local path="$1" cwd="$2" id="$3" full first=""
   [[ -z "$path" || -z "$id" ]] && return 0
   full="$(resolve_output_file "$path" "$cwd")" || return 0
-  if [[ ! -r "$full" ]]; then
-    failed+=("output file is not readable: $path")
-    return 0
-  fi
+  [[ -r "$full" ]] || return 0
   IFS= read -r first <"$full" || true
   if [[ ! "$first" =~ [^[:space:]] ]]; then
     failed+=("output first line is empty: $path")
@@ -192,9 +203,11 @@ readonly FIELDS_NO_TEMPLATE=1 FIELDS_NO_DECLARATION=2 FIELDS_MALFORMED=3
 
 # Prints the declared output-fields value of the template for type $1, or
 # nothing. Status 0 with a value, else FIELDS_NO_TEMPLATE,
-# FIELDS_NO_DECLARATION or FIELDS_MALFORMED (a bad line). The type loses
-# everything up to its last colon; a type that is empty or holds a slash or
-# `..` has no template.
+# FIELDS_NO_DECLARATION or FIELDS_MALFORMED (a bad line, a second line, an
+# item with a leading or trailing space or tab, or frontmatter that opens
+# with `---` and never closes). A file with no leading `---` has no
+# declaration. The type loses everything up to its last colon; a type that is
+# empty or holds a slash or `..` has no template.
 template_output_fields() {
   local type="${1##*:}" dir="${DISPATCH_CHECK_AGENTS_DIR:-${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/agents}}"
   local file line value
@@ -203,14 +216,20 @@ template_output_fields() {
   fi
   file="$dir/$type.md"
   [[ -f "$file" && -r "$file" ]] || return "$FIELDS_NO_TEMPLATE"
-  line="$(tr -d '\r' <"$file" | awk '/^---[[:space:]]*$/ {n++; next} n == 1' |
-    grep -m 1 '^output-fields:')" || return "$FIELDS_NO_DECLARATION"
+  line="$(tr -d '\r' <"$file" | awk '
+    NR == 1 { if ($0 !~ /^---[[:space:]]*$/) exit; open = 1; next }
+    /^---[[:space:]]*$/ { closed = 1; exit }
+    /^output-fields:/ { print }
+    END { exit (open && !closed) }')" || return "$FIELDS_MALFORMED"
+  [[ -z "$line" ]] && return "$FIELDS_NO_DECLARATION"
+  [[ "$line" == *$'\n'* ]] && return "$FIELDS_MALFORMED"
   value="${line#output-fields:}"
   if [[ ! "$value" =~ ^[[:space:]]*\"([^\"]+)\"[[:space:]]*$ ]]; then
     return "$FIELDS_MALFORMED"
   fi
   value="${BASH_REMATCH[1]}"
-  if [[ "$value" == '|'* || "$value" == *'|' || "$value" == *'||'* ]]; then
+  if [[ "$value" == '|'* || "$value" == *'|' || "$value" == *'||'* ||
+    "$value" =~ ^[[:blank:]]|[[:blank:]]$|[[:blank:]]\||\|[[:blank:]] ]]; then
     return "$FIELDS_MALFORMED"
   fi
   printf '%s' "$value"
@@ -229,7 +248,8 @@ has_line_starting_with() {
 
 # Checks the output fields the template of the dispatch type declares. The
 # text is the output file when there is an Output path line, else the last
-# assistant message; an unusable output file leaves the earlier failure only.
+# assistant message; a missing or unreadable output file is reported by
+# check_output_path and check_output_readable, so this check adds nothing.
 # Appends to "failed" and "note" of the caller. Returns 1 when the payload
 # cannot be read.
 check_declared_fields() {
@@ -267,6 +287,7 @@ build_record() {
   type="$(jq -r '.tool_input.subagent_type // "unknown"' <<<"$post" 2>/dev/null)" || return 1
   cwd="$(payload_cwd "$stop" "$post")" || return 1
   check_output_path "$output_path" "$cwd"
+  check_output_readable "$output_path" "$cwd"
   check_output_owner "$output_path" "$cwd" "$dispatch_id"
   [[ -n "$output_path" && -z "$dispatch_id" ]] && note="ownership not checked"
   check_declared_fields "$type" "$output_path" "$cwd" "$stop" || return 1

@@ -1,0 +1,8 @@
+# A 70000-character relative Output path that does not exist: the fail record
+# is over 128 KB, past the Linux single-argument limit. The post payload is
+# built at run time under $tmp/out (nothing large is kept in the repo).
+big="docs/$(head -c 69992 /dev/zero | tr '\0' 'x').md"
+"$JQ_BIN" -c --arg p "$big" \
+  '.tool_input.prompt = "Review.\nDispatch id: Q-1\nOutput path: " + $p
+   | .tool_response.prompt = .tool_input.prompt' \
+  "$PAYLOADS/quotepath-post.json" >"$tmp/out/big-post.json"

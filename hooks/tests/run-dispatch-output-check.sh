@@ -12,7 +12,9 @@
 # concurrent or simultaneous):
 #   payloads               - names of files under fixtures-dispatch-output-check/
 #                             payloads/, one per line, fed to the hook in order,
-#                             one hook run per payload.
+#                             one hook run per payload. A name missing there is
+#                             looked up under $tmp/out, where setup can write a
+#                             payload too big to keep in the repo.
 #                             A payload file may contain the token @STATE@; the
 #                             runner replaces it with the case's $STATE before
 #                             feeding it (use setup to create files there).
@@ -47,6 +49,11 @@
 #                             case (jq -s on the case's stdout; empty stdout
 #                             gives []). A false filter, or stdout that is not
 #                             valid JSON values, fails the case.
+#   expect_stdout_lines    - exact number N of newline-terminated lines in the
+#                             stdout of the whole case (all runs joined, wc -l
+#                             semantics); non-empty stdout that does not end in
+#                             a newline also fails. jq -s cannot see line shape,
+#                             so this pins "one compact JSON line per failure".
 #   expect_stderr_nonempty - when present, some run must print to stderr.
 #   expect_stderr_grep     - fixed substrings that must appear in stderr.
 #   expect_stderr_absent   - fixed substrings that must not appear in stderr.
@@ -241,7 +248,9 @@ run_case() {
     while IFS= read -r payload; do
       [[ -z "$payload" ]] && continue
       n=$((n + 1))
-      run_hook "$PAYLOADS/$payload" >>"$stdout_file" 2>"$tmp/out/err$n"
+      local payload_path="$PAYLOADS/$payload"
+      [[ -f "$payload_path" ]] || payload_path="$tmp/out/$payload"
+      run_hook "$payload_path" >>"$stdout_file" 2>"$tmp/out/err$n"
       rc=$?
       add_stderr "$tmp/out/err$n"
       if [[ "$rc" -ne "$expect_exit" ]]; then
@@ -264,6 +273,19 @@ run_case() {
         reasons+=("stdout check failed: $stdout_filter")
       fi
     done <"$case_dir/expect_stdout_jq"
+  fi
+  if [[ -f "$case_dir/expect_stdout_lines" ]]; then
+    local want_out got_out
+    want_out="$(tr -d '[:space:]' <"$case_dir/expect_stdout_lines")"
+    got_out="$(wc -l <"$stdout_file" | tr -d '[:space:]')"
+    if [[ "$got_out" -ne "$want_out" ]]; then
+      ok=0
+      reasons+=("stdout line count: expected $want_out got $got_out")
+    fi
+    if [[ -s "$stdout_file" && -n "$(tail -c 1 "$stdout_file")" ]]; then
+      ok=0
+      reasons+=("stdout does not end in a newline")
+    fi
   fi
   if [[ -f "$case_dir/expect_stderr_nonempty" && -z "$stderr_all" ]]; then
     ok=0

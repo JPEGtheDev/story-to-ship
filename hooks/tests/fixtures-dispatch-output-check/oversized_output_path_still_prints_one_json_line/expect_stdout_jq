@@ -1,0 +1,4 @@
+length == 1
+.[0].hookSpecificOutput.additionalContext | length == 70077
+.[0].hookSpecificOutput.additionalContext | startswith("Dispatch output check failed (agent hhhh00000000000q1): output file missing: docs/xxxx")
+.[0].hookSpecificOutput.additionalContext | endswith("xxxx.md")

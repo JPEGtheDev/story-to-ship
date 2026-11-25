@@ -26,11 +26,20 @@
 # path with no Dispatch id. A quotes check that cannot read its source, or
 # whose source ends mid-sentence, fails instead.
 #
-# Fail closed, never block: the hook always exits 0 with empty stdout. Missing
-# jq, unparseable stdin or a payload that is not a JSON object writes a
-# message to stderr and a fail record. A records file that cannot be written
-# gives the stderr message `cannot write records file` for a paired record
-# only; on the fail-closed path a failed write adds no output of its own.
+# Fail closed, never block: the hook always exits 0. Its stdout is empty
+# except for one JSON line when a pair checked on the PostToolUse event
+# fails (see below). Missing jq, unparseable stdin or a payload that is not
+# a JSON object writes a message to stderr and a fail record. A records
+# file that cannot be written gives the stderr message `cannot write
+# records file` for a paired record only; on the fail-closed path a failed
+# write adds no output of its own.
+#
+# Surfacing a failure: when PostToolUse is the second event and the record's
+# verdict is fail, stdout gets one compact JSON line, a hookSpecificOutput
+# with additionalContext "Dispatch output check failed (agent <id>): <failed
+# strings joined with "; ">". That line is printed even when the records file
+# cannot be written. A pass, a SubagentStop second event, a run that only
+# parks and every fail-closed path print nothing.
 #
 # The agent template for a dispatch is $DISPATCH_CHECK_AGENTS_DIR/<type>.md;
 # the directory defaults to ${CLAUDE_PLUGIN_ROOT}/agents. With neither set
@@ -403,6 +412,16 @@ append_record() {
   fi
 }
 
+# print_failure_context RECORD: prints the model-facing JSON line for a fail
+# record; prints nothing for any other record.
+print_failure_context() {
+  jq -n -c --argjson r "$1" '
+    select($r.verdict == "fail")
+    | {hookSpecificOutput:{hookEventName:"PostToolUse",
+        additionalContext:("Dispatch output check failed (agent " + $r.agent_id
+          + "): " + ($r.failed | join("; ")))}}' 2>/dev/null
+}
+
 # --- fail closed ------------------------------------------------------------
 
 # fail_closed MESSAGE REASON [AGENT_ID]: one stderr line, one fail record.
@@ -468,6 +487,10 @@ main() {
     return 0
   }
   append_record "$record"
+  if [[ "$(event_name "$payload")" == "PostToolUse" ]]; then
+    print_failure_context "$record"
+  fi
+  return 0
 }
 
 main

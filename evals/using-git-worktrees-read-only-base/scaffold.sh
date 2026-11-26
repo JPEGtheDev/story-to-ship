@@ -12,7 +12,7 @@ cat > plan.md <<'PLAN'
 Todo 1: add a row export in src/export.py (branch agent/row-export, already written)
 Review: a reviewer is wanted for branch agent/row-export before the story moves on.
 Files:
-  - Modify: src/export.py
+  - Create: src/export.py
 Depends on: none
 PLAN
 git add -A

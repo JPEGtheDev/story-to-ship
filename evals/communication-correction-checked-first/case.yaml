@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: communication-correction-checked-first
+context:
+  scaffold_script: scaffold.sh

@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^(?:(?!"command":"(?:[^"\\\n]|\\.)*worktree add)[\s\S])*I am using the using-git-worktrees skill to (?!create a worktree for \[purpose\])'
+pattern: '^(?:(?!"command":"(?:[^"\\\n]|\\.)*worktree\s+add)[\s\S])*I am using the using-git-worktrees skill to (?!create a worktree for \[purpose\])'
 match: contains
 target: trace
 ---

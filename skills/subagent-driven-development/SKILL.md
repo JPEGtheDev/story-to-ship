@@ -151,7 +151,7 @@ See `references/SDD_RATIONALE.md` for the rationale and anti-patterns.
 
 | Excuse | Reality |
 |--------|---------|
-| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the worktree creation check in the `using-git-worktrees` skill first: write-side agents run all checks, read-only agents skip the branch check. |
+| "The skill says use worktrees -- I'll follow it when I remember" | The skill is not re-read before every dispatch. The worktree PATH in the prompt is the structural check -- not re-reading the skill. No path in the prompt = no dispatch. Run the worktree creation check in the `using-git-worktrees` skill first: write-side agents run all checks, read-only agents skip the `branch --show-current` check. |
 | "I'll add the worktree after dispatching" | Worktrees MUST exist before dispatch. The agent needs the worktree path in its prompt -- it cannot create its own isolation after the fact. |
 | "I'll include the rules in the prompt instead of using a template" | Injected rules drift between sessions. Pre-built templates in `.claude/agents/` are the single source of truth. Use them. |
 | "These todos form a natural 'Phase N' -- I'll dispatch them together" | Phase is a planning label, not a dispatch unit. Compound dispatch bypasses the sizing gate -- the outlier agent cost is proportional to the bundled scope. Split unconditionally. One todo = at most one implementer dispatch (a `loop: three-role` todo uses role dispatches: an optional stub, then test-writer, pass-maker and refactorer); never bundle two todos into one dispatch. |

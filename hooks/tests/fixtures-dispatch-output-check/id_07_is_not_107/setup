@@ -1,0 +1,3 @@
+printf 'ref 107\nbody\n' >"$tmp/files/id107.md"
+printf 'ref-07.md\n' >"$tmp/files/idref.md"
+printf 'runs/07/METHOD.md\n' >"$tmp/files/iddir.md"

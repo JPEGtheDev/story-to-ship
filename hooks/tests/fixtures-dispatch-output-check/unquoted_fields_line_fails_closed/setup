@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-fields: A|B' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'Dispatch id: D-100\nA\nB\n' >"$tmp/files/out-100.md"

@@ -1,0 +1,1 @@
+.[0].subagent_type=="plug:probe-agent" and .[0].verdict=="fail"

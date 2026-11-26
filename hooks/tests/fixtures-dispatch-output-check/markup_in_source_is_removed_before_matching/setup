@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "bold text"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf '<b>bold</b> text.\n' >"$tmp/files/src.md"

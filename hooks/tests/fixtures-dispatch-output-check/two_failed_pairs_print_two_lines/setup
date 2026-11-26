@@ -1,0 +1,3 @@
+printf -- '%s\n' '---' 'output-fields: "VERDICT:"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf -- '%s\n' '---' 'output-fields: "SOURCE ECHO:"' '---' 'body' >"$tmp/agents/probe-agent.md"
+printf 'Dispatch id: D-100\nnothing useful\n' >"$tmp/files/out-100.md"

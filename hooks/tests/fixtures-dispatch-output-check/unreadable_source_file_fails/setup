@@ -1,0 +1,5 @@
+printf -- '%s\n' '---' 'output-quotes: "anything"' '---' 'body' >"$tmp/agents/reviewer.md"
+# Needs a non-root user: root can read a mode 000 file, so this case fails as root.
+mkdir -p "$STATE/cwd/docs"
+printf 'anything\n' >"$STATE/cwd/docs/src.md"
+chmod 000 "$STATE/cwd/docs/src.md"

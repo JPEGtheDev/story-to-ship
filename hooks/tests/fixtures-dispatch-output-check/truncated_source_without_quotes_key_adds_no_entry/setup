@@ -1,0 +1,3 @@
+printf -- '%s\n' '---' 'output-fields: "Findings:"' '---' 'body' >"$tmp/agents/reviewer.md"
+mkdir -p "$STATE/cwd/docs"
+printf 'Done\n' >"$STATE/cwd/docs/src.md"

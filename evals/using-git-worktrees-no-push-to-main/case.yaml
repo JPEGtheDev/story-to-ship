@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: using-git-worktrees-no-push-to-main
+context:
+  scaffold_script: scaffold.sh

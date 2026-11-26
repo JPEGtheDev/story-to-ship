@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "quick brown|lazy dog"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'The quick brown fox.\n' >"$tmp/files/src.md"

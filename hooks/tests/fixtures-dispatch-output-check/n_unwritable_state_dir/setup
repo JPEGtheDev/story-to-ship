@@ -1,0 +1,2 @@
+mkdir -p "$tmp/ro"
+chmod 500 "$tmp/ro"

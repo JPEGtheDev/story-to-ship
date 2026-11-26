@@ -1,0 +1,1 @@
+printf 'Dispatch id: 08\nbody\n' >"$tmp/files/shared.md"

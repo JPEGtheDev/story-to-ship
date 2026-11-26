@@ -1,0 +1,3 @@
+printf -- '%s\n' '---' 'output-fields: "VERDICT:"' 'output-quotes: "absent"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'something else.\n' >"$tmp/files/src.md"
+printf 'Dispatch id: D-999\nbody\n' >"$tmp/files/out-100.md"

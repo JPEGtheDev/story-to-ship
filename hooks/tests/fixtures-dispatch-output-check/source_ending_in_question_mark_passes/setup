@@ -1,0 +1,3 @@
+printf -- '%s\n' '---' 'output-quotes: "Done"' '---' 'body' >"$tmp/agents/reviewer.md"
+mkdir -p "$STATE/cwd/docs"
+printf 'Done?\n' >"$STATE/cwd/docs/src.md"

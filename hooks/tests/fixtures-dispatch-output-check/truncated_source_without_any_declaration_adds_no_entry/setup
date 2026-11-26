@@ -1,0 +1,3 @@
+printf -- '---\nname: reviewer\n---\nbody\n' >"$tmp/agents/reviewer.md"
+mkdir -p "$STATE/cwd/docs"
+printf 'Done\n' >"$STATE/cwd/docs/src.md"

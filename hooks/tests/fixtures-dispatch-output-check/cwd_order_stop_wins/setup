@@ -1,0 +1,2 @@
+mkdir -p "$tmp/files/cwd-stop/out" "$tmp/files/cwd-post"
+printf 'Dispatch id: O-9\n' >"$tmp/files/cwd-stop/out/ref-09.md"

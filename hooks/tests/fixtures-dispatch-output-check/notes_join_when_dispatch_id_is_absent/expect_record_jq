@@ -1,0 +1,1 @@
+.[0].verdict=="pass" and .[0].failed==[] and .[0].note=="ownership not checked; no template"

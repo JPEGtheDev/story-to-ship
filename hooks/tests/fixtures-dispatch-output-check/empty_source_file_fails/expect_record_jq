@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["source file is empty: docs/src.md"] and (.[0]|has("note")|not)

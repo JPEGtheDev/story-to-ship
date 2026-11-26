@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["source truncated: docs/src.md"] and (.[0]|has("note")|not)

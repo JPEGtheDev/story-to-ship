@@ -1,0 +1,4 @@
+# Needs a non-root user: root can read a mode 000 file, so this case fails as root.
+printf -- '%s\n' '---' 'output-fields: "SOURCE ECHO:|VERDICT:"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'body\n' >"$tmp/files/locked-noid.md"
+chmod 000 "$tmp/files/locked-noid.md"

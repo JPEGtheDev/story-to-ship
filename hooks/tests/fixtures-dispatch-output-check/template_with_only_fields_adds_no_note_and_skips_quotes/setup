@@ -1,0 +1,1 @@
+printf -- '%s\n' '---' 'output-fields: "Findings:"' '---' 'body' >"$tmp/agents/reviewer.md"

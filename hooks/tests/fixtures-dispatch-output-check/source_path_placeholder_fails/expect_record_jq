@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["source path has a placeholder: docs/<name>.md"] and (.[0]|has("note")|not)

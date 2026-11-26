@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and (.[0].failed|length)==1 and .[0].failed[0]==("output path has a placeholder: "+.[0].output_path) and (.[0].output_path|endswith("/out/ref-{{REF}}.md"))

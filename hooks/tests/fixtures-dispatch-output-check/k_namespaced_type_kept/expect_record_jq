@@ -1,0 +1,1 @@
+.[0].subagent_type=="myplugin:probe-agent" and .[0].agent_id=="cccc00000000000c3"

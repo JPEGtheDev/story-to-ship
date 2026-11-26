@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "alpha beta|beta    gamma"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'alpha   \t beta\n\n\ngamma.\n' >"$tmp/files/src.md"

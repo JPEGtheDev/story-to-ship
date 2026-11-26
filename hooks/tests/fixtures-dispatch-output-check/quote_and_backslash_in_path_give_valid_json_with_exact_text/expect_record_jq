@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["output file missing: docs/a\"b\\c.md"]

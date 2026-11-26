@@ -6,13 +6,21 @@
 # Checks, per hook command read from hooks/hooks.json:
 #   1. Quoting: each ${CLAUDE_PLUGIN_ROOT} is immediately preceded by a double
 #      quote character.
+#
 #   2. Runtime: the command runs with sh -c and CLAUDE_PLUGIN_ROOT set to a
 #      temp path that contains a space ("a b"), and prints exactly "ran" from
 #      a stub hook script.
 #
+#   3. Registration (pins dispatch-output-check.sh): a PostToolUse entry with
+#      matcher exactly "Agent" and a SubagentStop entry with no matcher key each
+#      hold a command that ends in hooks/dispatch-output-check.sh inside the
+#      closing quote.
+#
 # Mutation self-check: the same checks run on a copy of the commands in which
 # the first command's placeholder is unquoted. That copy must FAIL, which shows
-# the checks can fail at all.
+# the checks can fail at all. The registration check has its own mutation
+# self-check on copies of hooks.json (SubagentStop key removed, PostToolUse
+# matcher changed to "Task", SubagentStop entry given a matcher).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOKS_JSON="$SCRIPT_DIR/../hooks.json"
@@ -128,6 +136,56 @@ if [[ "$run_failures" -gt 0 ]]; then
 else
   fail "mutated commands passed the checks; the test cannot detect unquoted placeholders"
 fi
+
+# check_registration FILE
+# Prints one [+]/[-] line per registration and returns the number of failures
+# in the global reg_failures.
+check_registration() {
+  local file="$1" suffix='hooks/dispatch-output-check.sh"'
+  reg_failures=0
+
+  if jq -e --arg s "$suffix" \
+    '[.hooks.PostToolUse[]? | select(.matcher == "Agent") | .hooks[].command | endswith($s)] | any' \
+    "$file" >/dev/null 2>&1; then
+    echo "[+] PostToolUse matcher Agent runs dispatch-output-check.sh"
+  else
+    echo "[-] PostToolUse matcher Agent does not run dispatch-output-check.sh"
+    reg_failures=$((reg_failures + 1))
+  fi
+
+  if jq -e --arg s "$suffix" \
+    '[.hooks.SubagentStop[]? | select(has("matcher") | not) | .hooks[].command | endswith($s)] | any' \
+    "$file" >/dev/null 2>&1; then
+    echo "[+] SubagentStop (no matcher) runs dispatch-output-check.sh"
+  else
+    echo "[-] SubagentStop (no matcher) does not run dispatch-output-check.sh"
+    reg_failures=$((reg_failures + 1))
+  fi
+}
+
+echo "== Registration of dispatch-output-check.sh =="
+check_registration "$HOOKS_JSON"
+if [[ "$reg_failures" -eq 0 ]]; then
+  pass "dispatch-output-check.sh is registered on PostToolUse Agent and SubagentStop"
+else
+  fail "$reg_failures registration check(s) failed on hooks.json"
+fi
+
+# Mutation self-check for the registration: each broken copy must fail.
+reg_mutant() {
+  local label="$1" filter="$2" copy="$TMP_ROOT/mutant.json"
+  jq "$filter" "$HOOKS_JSON" > "$copy" || { fail "could not build mutant '$label'"; return; }
+  echo "== Registration mutation ($label) =="
+  check_registration "$copy"
+  if [[ "$reg_failures" -gt 0 ]]; then
+    pass "mutant '$label' fails the registration check"
+  else
+    fail "mutant '$label' passed the registration check; the test cannot detect it"
+  fi
+}
+reg_mutant "SubagentStop removed" 'del(.hooks.SubagentStop)'
+reg_mutant "PostToolUse matcher Task" '(.hooks.PostToolUse[] | select(.matcher == "Agent") | .matcher) = "Task"'
+reg_mutant "SubagentStop with matcher" '.hooks.SubagentStop[0].matcher = "x"'
 
 echo "Results: $pass_count passed, $fail_count failed"
 

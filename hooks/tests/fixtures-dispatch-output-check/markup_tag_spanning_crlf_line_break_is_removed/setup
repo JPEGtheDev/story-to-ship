@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "see link text"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'see <a\r\nhref="x">link</a> text.\r\n' >"$tmp/files/src.md"

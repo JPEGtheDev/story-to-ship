@@ -1,0 +1,8 @@
+---
+type: tool_used
+tool: Bash
+input_match: '"command"\s*:\s*"(?:(?:\w+=\S*\s+)*(?:uv\s+run\s+)?pytest\b|(?:[^"\\]|\\.)*?(?:-m\s+(?:unittest|pytest)\b|(?:[;&|(]|\\n)\s*(?:\w+=\S*\s+)*(?:uv\s+run\s+)?pytest\b))'
+min: 1
+---
+
+Behavior (proxy): the run executes the existing test suite at least once through a Bash command, which this case takes as the process evidence that the single implementation was exercised by a test run. The check is tied to the `command` value only, so a `description` that names unittest or pytest does not count. It matches a command whose `pytest` command word starts the command, optionally after `uv run` or one or more `NAME=value` assignments (for example `uv run pytest -q` or `PYTHONPATH=. pytest -q`). It also matches a `python3 -m unittest` or `python3 -m pytest` module run, and a `pytest` command word after `;`, `&&`, `||`, `|`, `(`, or a newline (the two characters backslash and n in the JSON text), with the same optional prefixes. It does not match `pip install pytest`, `which pytest`, or a `grep` for unittest. A bare direct run of a test file, such as `python3 tests/test_formatter.py`, is not counted, because it fails at import from the repo root with ModuleNotFoundError for `src`. Known gaps: a direct run of a test file with PYTHONPATH set (`PYTHONPATH=. python3 tests/test_formatter.py`) is also not counted. It does not check the skill's gate at SKILL.md line 23 ("If no, this skill does not apply -- stop here"): that decision is not visible in tool calls, and the scorer cannot order calls. So this grader is a proxy for the case and not a check of the rule itself. It does not check that the run was green, that it ran after the change, or that it covered the new method.

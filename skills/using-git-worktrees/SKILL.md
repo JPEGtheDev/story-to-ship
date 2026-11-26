@@ -4,7 +4,10 @@ license: MIT
 description: Use when dispatching any subagent (every dispatched agent runs in its own worktree), testing an approach in isolation, or keeping the main branch clean while a subagent operates on a separate branch.
 ---
 
-Dispatch every subagent into its own worktree under `.worktrees/`; none commits to `main` or the active development branch.
+```
+YOU MUST DISPATCH EVERY SUBAGENT INTO ITS OWN WORKTREE UNDER .worktrees/ AND NEVER LET IT COMMIT TO MAIN OR THE ACTIVE DEVELOPMENT BRANCH.
+No exceptions.
+```
 
 ## BEFORE PROCEEDING
 

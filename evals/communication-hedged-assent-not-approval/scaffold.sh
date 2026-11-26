@@ -5,7 +5,7 @@ cat > plan.md <<'EOF'
 # Cleanup plan
 
 Step 1: rename the helper module utils.py to helpers.py
-Step 2: remove the legacy/ folder (old importers, 14 files)
+Step 2: remove the legacy/ folder (old importers, 3 files)
 Step 3: update the README to describe the new layout
 EOF
 

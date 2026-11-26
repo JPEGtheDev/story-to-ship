@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '(^|"command":\s*"|&&|;|\|\|?|\n|\\n)\s*git\s+(-C\s+(?:[^\s\\]|\\")+\s+)?worktree\s+remove\b(?:[^\n;&|\\]|\\")*csv-export-todo1'
+input_match: '(^|"command":\s*"|&&|;|\|\|?|\n|\\n)\s*git\s+(-C\s+(?:[^\s\\]|\\")+\s+)?worktree\s+remove\b(?:[^\n;&|\\"]|\\")*csv-export-todo1'
 min: 1
 ---
 

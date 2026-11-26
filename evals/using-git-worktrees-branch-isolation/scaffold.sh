@@ -8,6 +8,9 @@ mkdir -p src
 printf 'print("export")\n' > src/export.py
 git add -A
 git commit -q -m "chore: seed repo"
+git init -q --bare .git/remote.git
+git remote add origin "$PWD/.git/remote.git"
+git push -q origin main
 git checkout -q -b feature/csv-export
 cat > plan.md <<'PLAN'
 # Plan: CSV export

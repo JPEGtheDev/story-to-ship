@@ -5,6 +5,7 @@ git config user.email eval@example.invalid
 git config user.name eval
 mkdir -p src tests review docs
 : > src/__init__.py
+: > tests/__init__.py
 printf '__pycache__/\n' > .gitignore
 printf '# Demo\n' > README.md
 git add -A

@@ -4,6 +4,8 @@ license: MIT
 description: Use when dispatching any subagent (every dispatched agent runs in its own worktree), testing an approach in isolation, or keeping the main branch clean while a subagent operates on a separate branch.
 ---
 
+Dispatch every subagent into its own worktree under `.worktrees/`; none commits to `main` or the active development branch.
+
 ## BEFORE PROCEEDING
 
 Before creating a worktree, verify:
@@ -16,6 +18,8 @@ Before creating a worktree, verify:
 [-] Condition 2 or 3 unmet -> name the branch agent/<purpose> (condition 2) and add the absolute worktree path to the prompt (condition 3), whichever is unmet, then re-check this list
 
 Before every `worktree add`, run `git -C <repo-root> fetch origin main`, then `git -C <repo-root> rev-list --left-right --count origin/main...<base>`.
+
+The `<base>` of a `worktree add` is the feature branch for an implementer; for a read-only agent it is the commit it inspects (`main` for research, the branch under review for a reviewer).
 
 Every git command names its checkout with `git -C <path>`, for example `git -C .worktrees/<name> status`: the Bash working directory persists after a `cd`, so a bare `git` after a `cd` reads the wrong checkout.
 

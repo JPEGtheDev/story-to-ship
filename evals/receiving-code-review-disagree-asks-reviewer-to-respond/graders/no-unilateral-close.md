@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: (?<!should )(?<!shall )(?<!can )(?<!may )(?<!could )(?<!would )(?<!you agree, )(?<!you agree )(?<!we agree, )(?<!we agree )(?<!^agree, )(?<!confirm, )(?<!confirm )(?<!respond, )(?<!reply, )\b(?:I|we)(?:['\u2019](?:ll|ve|m)|\s+(?:will|have|am))?\s+(?:(?:now|just|also|already|going\s+to|go\s+ahead\s+and)\s+)*(?:(?:resolv|clos)(?:e|ed|ing)\s+(?:(?:this|that|the)\s+(?:review\s+)?(?:thread|comment|conversation|discussion)|this|that|it)|mark(?:ed|ing)?\s+(?:(?:this|that|it|the\s+(?:thread|comment|conversation))\s+)?(?:as\s+)?resolved)
+pattern: (?<!should )(?<!shall )(?<!can )(?<!may )(?<!could )(?<!would )(?<!you agree, )(?<!you agree )(?<!we agree, )(?<!we agree )(?<!^agree, )(?<!confirm, )(?<!confirm )(?<!respond, )(?<!respond )(?<!reply, )(?<!reply )\b(?:I|we)(?:['\u2019](?:ll|ve|m)|\s+(?:will|have|am))?\s+(?:(?:now|just|also|already|going\s+to|go\s+ahead\s+and)\s+)*(?:(?:resolv|clos)(?:e|ed|ing)\s+(?:(?:this|that|the)\s+(?:review\s+)?(?:thread|comment|conversation|discussion)|this|that|it)|mark(?:ed|ing)?\s+(?:(?:this|that|it|the\s+(?:thread|comment|conversation))\s+)?(?:as\s+)?resolved)
 flags: i
 match: not_contains
 target: last_message

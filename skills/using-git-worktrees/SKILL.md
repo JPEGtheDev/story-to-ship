@@ -26,7 +26,7 @@ The `<base>` of a `worktree add` is the feature branch for an implementer; for a
 
 Every git command names its checkout with `git -C <path>`, for example `git -C .worktrees/<name> status`: the Bash working directory persists after a `cd`, so a bare `git` after a `cd` reads the wrong checkout.
 
-Before every `worktree add`, run `git -C <repo-root> check-ignore -q .worktrees/`; if it fails, append `.worktrees/` as the new last line of the top-level `.gitignore` with one Edit, then run the check again.
+Before every `worktree add`, run `git -C <repo-root> check-ignore -q .worktrees/`; if it fails, append `.worktrees/` as the new last line of the top-level `.gitignore` with one Edit of that file, without replace_all; the inline-edit guard hook allows that one added line, then run the check again.
 
 A feature branch lives in its own worktree, never in the main checkout, which stays on `main`: `git -C <repo-root> fetch origin main`, then `git -C <repo-root> worktree add .worktrees/<feature> -b <branch> origin/main`.
 

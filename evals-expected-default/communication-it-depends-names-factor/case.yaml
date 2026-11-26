@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: communication-it-depends-names-factor
+context:
+  scaffold_script: scaffold.sh
+bin: expected default behavior
+skip:
+  model: haiku
+  claude_code_version: 2.1.331
+  with_skill: 5/5
+  without_skill: 5/5
+  source: classification run 2026-11-25, 5 runs per arm (owner ruling: 5-run basis, not 30), raw run file kept under /tmp only, not in the repository

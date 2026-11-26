@@ -2,6 +2,8 @@
 set -eu
 printf 'retry_limit: 3\n' > config.yaml
 cat > job.py <<'P'
+import time
+
 import yaml
 
 
@@ -20,6 +22,7 @@ def main():
             failures += 1
             if failures >= retry_limit:
                 raise
+            time.sleep(10)
 
 
 if __name__ == "__main__":

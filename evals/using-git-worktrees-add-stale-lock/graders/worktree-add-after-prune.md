@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '"command":"(?:[^"\\\n]|\\.)*?worktree prune(?:(?:[^"\\\n]|\\.)*worktree add|[\s\S]*?"command":"(?:[^"\\\n]|\\.)*worktree add)'
+pattern: '"command":"(?:[^"\\\n]|\\.)*?worktree\s+prune(?:(?:[^"\\\n]|\\.)*worktree\s+add|[\s\S]*?"command":"(?:[^"\\\n]|\\.)*worktree\s+add)'
 match: contains
 target: trace
 ---

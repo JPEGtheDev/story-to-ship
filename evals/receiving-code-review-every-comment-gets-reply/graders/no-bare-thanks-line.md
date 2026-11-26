@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: (^|\n)[\s>*#_\-]*(\d+[.)]\s*)?[*_]*(thread\s+)?T[123]\b[*_]*(\s*\([^)\n]*\))?[^\n\w]{0,10}(thanks(\s+for\s+the\s+(feedback|review|comment))?|thank\s+you|lgtm)[\s.!,*_]*(\n|$)
+pattern: (^|\n)[\s>*#_\-]*(\d+[.)]\s*)?[*_]*(thread\s+)?T[123](?![a-z0-9])[*_]*(\s*\([^)\n]*\))?[^\n\w]{0,10}(thanks(\s+for\s+the\s+(feedback|review|comment))?|thank\s+you|lgtm)[\s.!,*_]*(\n|$)
 flags: i
 match: not_contains
 target: last_message

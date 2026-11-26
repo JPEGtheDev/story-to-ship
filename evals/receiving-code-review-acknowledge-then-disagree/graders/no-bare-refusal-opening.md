@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: ^[*>_\s]*(no|nope|wrong|incorrect)(?![a-z0-9])[\s.,!:;*_\u2014-]
+pattern: ^[*>_\s]*(no|nope|wrong|incorrect)(?![a-z0-9])(?:[\s.,!:;*_\u2014-]|$)
 flags: i
 match: not_contains
 target: last_message

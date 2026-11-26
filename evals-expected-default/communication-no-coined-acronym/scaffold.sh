@@ -3,7 +3,7 @@ set -eu
 cat > README.md <<'EOF'
 # Release Candidate Notes Builder
 
-The Release Candidate Notes Builder turns the commit log between two tags
+The Release Candidate Notes Builder turns the commit log since a tag
 into a release notes file for a release candidate.
 
 Run the Release Candidate Notes Builder with:

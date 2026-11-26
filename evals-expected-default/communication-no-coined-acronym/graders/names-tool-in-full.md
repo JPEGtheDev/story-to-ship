@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: release candidate notes builder
+pattern: release\s+candidate\s+notes\s+builder
 flags: i
 match: contains
 target: last_message

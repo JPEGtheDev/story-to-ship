@@ -34,8 +34,8 @@ If `worktree add` exits nonzero, do not dispatch and surface the error. A stale 
 
 A subagent MUST NOT push to `main`, `master` or the active development branch. A subagent's promise to stay off them is not isolation: dispatch it into its own worktree anyway. Before any merge or cherry-pick, run `git -C <repo-root> diff <base>...agent/<name>` in its own call and read it; a merge before that diff is the failure, and rejected work gets its worktree removed.
 
-After each `worktree add`, run `git -C .worktrees/agent-<name> rev-parse --show-toplevel`; it must equal the absolute path of that worktree, not the main repo root. Then run `git -C .worktrees/agent-<name> branch --show-current`; it must not equal the active development branch.
+After each `worktree add` of an agent worktree, run `git -C .worktrees/agent-<name> rev-parse --show-toplevel`; it must equal the absolute path of that worktree, not the main repo root. Then run `git -C .worktrees/agent-<name> branch --show-current`; it must not equal the active development branch.
 
-After the branch is merged or discarded, run `git -C <repo-root> worktree remove .worktrees/<name>`, then `git -C <repo-root>/.worktrees/<feature> branch -d` (`-D` for a cherry-picked or discarded branch). A worktree left alive after merge or discard is the failure.
+After the branch is merged or discarded, run `git -C <repo-root> worktree remove .worktrees/<name>`, then `git -C <repo-root>/.worktrees/<feature> branch -d agent/<name>` (`-D` for a cherry-picked or discarded branch). A worktree left alive after merge or discard is the failure.
 
 Background and A/B setup: `references/WORKTREE_PATTERNS.md`.

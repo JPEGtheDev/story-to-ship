@@ -38,6 +38,6 @@ A subagent MUST NOT push to `main`, `master` or the active development branch. A
 
 After each `worktree add` of an agent worktree, run `git -C .worktrees/agent-<name> rev-parse --show-toplevel`; it must equal the absolute path of that worktree, not the main repo root. Then run `git -C .worktrees/agent-<name> branch --show-current`; it must not equal the active development branch.
 
-After the branch is merged or discarded, run `git -C <repo-root> worktree remove .worktrees/agent-<name>`, then `git -C <repo-root>/.worktrees/<feature> branch -d agent/<name>` (`-D` for a cherry-picked or discarded branch). A worktree left alive after merge or discard is the failure.
+After the branch is merged or discarded, run `git -C <repo-root> worktree remove .worktrees/agent-<name>`, then `git -C <checkout> branch -d agent/<name>` (`-D` for a cherry-picked or discarded branch), where `<checkout>` is `<repo-root>/.worktrees/<feature>` for a branch merged into the feature branch and `<repo-root>` (on `main`) for a read-only agent's branch based on main. A worktree left alive after merge or discard is the failure.
 
 Background and A/B setup: `references/WORKTREE_PATTERNS.md`.

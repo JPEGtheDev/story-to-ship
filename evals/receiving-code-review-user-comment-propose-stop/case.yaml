@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-user-comment-propose-stop
-description: "User Review Comments, a comment from the user is answered with the check, an assessment and a proposal, then the turn stops with no fix commit or dispatch. Current state (re-measured after the review fixes, 5 runs per arm, no pass bar): with skill 3/5, without skill 0/5; first failing no-skill session claude-eval-ECj8wE (run 0): grader no-edit-call (Edit called 3x (expected 0..0)), states-check-assessment-proposal (judge votes: FAIL FAIL FAIL) failed (5 of 5 no-skill runs)."
+description: "User Review Comments, a comment from the user is answered with the check, an assessment and a proposal, then the turn stops with no fix commit or dispatch. Current state (re-measured after the review fixes, 5 runs per arm, no pass bar): with skill 4/5, without skill 0/5; first failing no-skill session claude-eval-TwMY3t (run 0): grader no-edit-call (Edit called 2x (expected 0..0)), states-check-assessment-proposal (judge votes: FAIL FAIL FAIL) failed (5 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

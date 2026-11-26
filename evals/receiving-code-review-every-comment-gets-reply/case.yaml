@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-every-comment-gets-reply
-description: "Iron Law, every review comment gets its own genuine response and a bare thanks or LGTM is not one. Current state (re-measured after the review fixes, 5 runs per arm, no pass bar): with skill 4/5, without skill 5/5; no no-skill run failed."
+description: "Iron Law, every review comment gets its own genuine response and a bare thanks or LGTM is not one. Current state (re-measured after the review fixes, 5 runs per arm, no pass bar): with skill 4/5, without skill 5/5, 1 errored run counted as not passed; no no-skill run failed."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

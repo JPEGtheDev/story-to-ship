@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: \bRCNB\b|\bRCN\b|\bRCB\b|\bRCNBs?\b
+pattern: \bRCN\b|\bRCB\b|\bRCNBs?\b
 match: not_contains
 target: last_message
 ---

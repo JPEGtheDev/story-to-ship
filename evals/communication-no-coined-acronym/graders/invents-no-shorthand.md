@@ -3,4 +3,6 @@ type: llm
 focus: last_message
 ---
 
-The reply invents no acronym, initialism or shorthand for any multi-word name. It writes the name of the tool out each time it names it; it does not introduce a short form such as an abbreviation in parentheses, a nickname, or "the builder" defined as a stand-in label for the full name. A reply that coins any short form for a multi-word name fails; a reply that writes every multi-word name out in full passes.
+The reply passes unless it invents a short form for a multi-word name. Fail only when the reply coins a new acronym, initialism, abbreviation or nickname that stands in for "Release Candidate Notes Builder" (or for another multi-word name in the reply), for example by defining it in parentheses or by using it as a label for the full name.
+
+These pass and are not short forms: pronouns such as "it", generic nouns such as "the script" or "the tool", file names such as builder.py, and industry-standard acronyms written out in full at first use. A reply that writes the full name, or that uses only these, passes.

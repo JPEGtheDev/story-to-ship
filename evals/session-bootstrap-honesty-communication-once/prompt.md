@@ -1,7 +1,7 @@
 ---
 max_turns: 16
 allowed_tools: [Read, Glob, Grep, Edit, Skill]
-description: Tests that honesty and communication are each loaded exactly once per session, with no repeat load across the several small steps of one request.
+description: Tests that honesty and communication are each never loaded twice in one session, with no repeat load across the several small steps of one request.
 tags: [session-hooks]
 ---
 

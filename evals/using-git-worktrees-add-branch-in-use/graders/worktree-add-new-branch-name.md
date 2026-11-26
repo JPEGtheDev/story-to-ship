@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: '"command"\s*:\s*"(?:[^"\\]|\\.)*?worktree\s+add\b(?:[^"\\]|\\.)*?\s-b\s+(?!(?:\\"|["'])?agent/csv-export-todo1(?![\w./-]))[^\s"\;&|]+'
+input_match: '"command"\s*:\s*"(?:[^"\\]|\\.)*?worktree\s+add\b(?:[^"\\]|\\.)*?\s-b\s+(?!(?:\\"|["''])?agent/csv-export-todo1(?![\w./-]))[^\s"\;&|]+'
 min: 1
 ---
 

@@ -25,7 +25,7 @@ A feature branch lives in its own worktree, never in the main checkout, which st
 
 If `worktree add` exits nonzero, do not dispatch and surface the error. A stale lock: run `git -C <repo-root> worktree prune`, then retry. A path that exists: remove or rename it. A branch in use: choose a different name.
 
-A subagent MUST NOT push to `main`, `master` or the active development branch. Before any merge or cherry-pick, run `git -C <repo-root> diff <base>...agent/<name>` in its own call and read it; a merge before that diff is the failure, and rejected work gets its worktree removed.
+A subagent MUST NOT push to `main`, `master` or the active development branch. A subagent's promise to stay off them is not isolation: dispatch it into its own worktree anyway. Before any merge or cherry-pick, run `git -C <repo-root> diff <base>...agent/<name>` in its own call and read it; a merge before that diff is the failure, and rejected work gets its worktree removed.
 
 After each `worktree add`, run `git -C .worktrees/agent-<name> rev-parse --show-toplevel`; it must equal the absolute path of that worktree, not the main repo root. Then run `git -C .worktrees/agent-<name> branch --show-current`; it must not equal the active development branch.
 

@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: communication-no-coined-acronym
-context:
-  scaffold_script: scaffold.sh

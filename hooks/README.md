@@ -19,8 +19,9 @@ Hook scripts and the text they inject into Claude Code sessions. This README doc
 | `workflow-model-guard.sh` | PreToolUse (matcher `Workflow`) | Only when a Workflow script has an unpinned `agent(` call, and only as a deny reason -- never as injected context |
 | `shell-write-guard.sh` | PreToolUse (matcher `Bash`) | Only when a shell command would overwrite an existing repo file, or, from the main session, create or append to a repo file that is not gitignored; and only as a deny reason -- never as injected context |
 | `inline-edit-guard.sh` | PreToolUse (matcher `Edit\|Write`) | Only when a main-session Edit or Write would change a file that is not prose or pass a changed-line cap, and only as a deny reason -- never as injected context |
+| `dispatch-output-check.sh` | PostToolUse (matcher `Agent`) and SubagentStop | Only when the check fails on the PostToolUse event: one JSON line of `additionalContext`; never on SubagentStop |
 
-Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, `workflow-model-guard.sh`, `shell-write-guard.sh`, and `inline-edit-guard.sh`, whose deny/warn text is generated inline by the scripts themselves. `pre-message-gates.sh` and `pre-message.sh` each have two paired files -- the full file and a `-loaded` variant. The full file is injected while the pending flags described in the bootstrap-gate section below exist; once they are clear, the hook injects the `-loaded` file's single line if it holds one, and nothing if it is empty or whitespace only. A missing `-loaded` file, or any doubtful case, injects the full file. Six `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, `workflow-model-guard.sh`, `shell-write-guard.sh`, and `inline-edit-guard.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout).
+Each text-injecting `.sh` script wraps its paired `.md` file in the hook JSON envelope (`additionalContext`), except the bootstrap-gate pair, `workflow-model-guard.sh`, `shell-write-guard.sh`, `inline-edit-guard.sh`, and `dispatch-output-check.sh`, whose deny/warn/check text is generated inline by the scripts themselves. `pre-message-gates.sh` and `pre-message.sh` each have two paired files -- the full file and a `-loaded` variant. The full file is injected while the pending flags described in the bootstrap-gate section below exist; once they are clear, the hook injects the `-loaded` file's single line if it holds one, and nothing if it is empty or whitespace only. A missing `-loaded` file, or any doubtful case, injects the full file. Seven `.sh` files have no paired `.md` file: `bootstrap-gate-pre.sh`, `bootstrap-gate-post.sh`, `workflow-model-guard.sh`, `shell-write-guard.sh`, `inline-edit-guard.sh`, and `dispatch-output-check.sh` (inline-generated text, as above), plus `stop-turn-log.sh` -- which is not a text-injecting script at all, but a passive logger that injects nothing (see its own section below). Registration lives in `hooks.json` (plugin path) and `.claude/settings.json` (this repo's own checkout); `dispatch-output-check.sh` is registered in `hooks.json` only.
 
 ## Provenance of the injected text
 
@@ -43,7 +44,7 @@ Current per-prompt behavior: once the required skills are loaded, the per-prompt
 
 ## Mirror in .claude/hooks
 
-`.claude/hooks/` contains only relative symlinks into this directory: the thirteen shipped `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen shipped files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). Edit files here; never edit through the mirror.
+`.claude/hooks/` contains only relative symlinks into this directory: the thirteen mirrored `.md` and `.sh` injector/gate files, plus the repo-local `stop-turn-log.sh`, for fourteen entries total. The thirteen mirrored files mean this repo dogfoods the same hooks it ships as a plugin; `stop-turn-log.sh` is the one repo-local exception (see below). `dispatch-output-check.sh` is shipped through `hooks.json` and is not mirrored in `.claude/hooks`. Edit files here; never edit through the mirror.
 
 A checkout with both the plugin registration (`hooks/hooks.json`) and the local registration (`.claude/settings.json`) active runs each hook registered in both files twice for one event. The eight scripts registered in both, each with the same event and matcher, are `session-start.sh` (SessionStart), `pre-message-gates.sh` and `pre-message.sh` (UserPromptSubmit), `bootstrap-gate-pre.sh` (PreToolUse, no matcher), `workflow-model-guard.sh` (PreToolUse, matcher `Workflow`), `shell-write-guard.sh` (PreToolUse, matcher `Bash`), `inline-edit-guard.sh` (PreToolUse, matcher `Edit|Write`), and `bootstrap-gate-post.sh` (PostToolUse, matcher `Skill`); `stop-turn-log.sh` is registered locally only. This README accounts for two effects: the inline-edit guard writes its ledger row twice, and its reader counts a row that repeats the previous row exactly once (see the inline-edit-guard.sh section below); and `session-start.sh` appends two lines per event to each of its two logs, described in the state paragraph below.
 
@@ -124,6 +125,54 @@ Script-level opt-out: a script that carries the literal marker `WORKFLOW-MODEL-I
 Subagents identify themselves via an `agent_id` field on the hook payload; this guard exempts any call carrying one, checked before any script parsing, matching the same exemption contract as `bootstrap-gate-pre.sh`.
 
 This guard is fail-open: missing `jq`, malformed stdin, and a Workflow invocation with no inline `tool_input.script` (e.g. a `scriptPath`-only invocation -- out of scope for this hook by design) all resolve to a plain allow. It never exits nonzero; deny is communicated only via `permissionDecision: deny` on stdout.
+
+## dispatch-output-check.sh
+
+A PostToolUse (matcher `Agent`) and SubagentStop hook that checks the output of each returned subagent dispatch and appends one JSON record line per pairing of a dispatch's two events. It never blocks: it always exits 0.
+
+Events and join key: PostToolUse carries the agent id as `tool_response.agentId`, SubagentStop as `agent_id`. The first event of a dispatch is parked as `.dispatch-check-pending/<agent id>` under the state directory (parked files older than 1 hour are swept on every run that gets past the state dir check); the second event claims it and runs the checks. A SubagentStop with no PostToolUse never produces a record.
+
+Dispatch message lines, each optional, read from `tool_input.prompt` on PostToolUse:
+
+- `Dispatch id: <id>`
+- `Output path: <path>`
+- `Source path: <path>`
+
+A relative path is resolved against the SubagentStop `cwd`, else the PostToolUse `cwd`, else the current directory.
+
+Checks and failure strings (the verdict is `fail` when any string is produced):
+
+- Output path: `output path has a placeholder: <path>` (the path holds `{`, `}`, `<` or `>`), `output file missing: <path>`, `output file is not readable: <path>`.
+- Ownership: `output first line is empty: <path>`, `output first line lacks Dispatch id <id>`. The id must appear on the first line as a whole token, with no letter or digit next to it.
+- Fields: `output lacks required field: <field>` for each `output-fields` item that no line of the output starts with, after optional spaces or tabs. The output is the Output path file when there is an Output path line, else the last assistant message.
+- Quotes: `output quote not found in source: <quote>` for each `output-quotes` item that is not a substring of the Source path file, both normalized (markup removed, whitespace collapsed, case kept). Also `no source path for declared quotes`, `source path has a placeholder: <path>`, `source file missing: <path>`, `source file is not readable: <path>`, `source file is empty: <path>`.
+- Truncated source: `source truncated: <path>` when the normalized source text does not end in one of `` . ! ? : ) " ` ] } * _ ``.
+- Declarations: `output-fields line is malformed in <type>.md` or `output-quotes line is malformed in <type>.md` for a declaration that does not match the format below.
+
+Notes, set instead of a failure when a check has nothing to run, joined with `; `: `ownership not checked` (an Output path line with no Dispatch id line), `no template` (no template file for the subagent type), `no declarations` (the template declares neither key).
+
+Record: one JSON line per pairing, appended to `dispatch-check-records.jsonl` under `$DISPATCH_CHECK_STATE_DIR` (default `$CLAUDE_PROJECT_DIR/.claude`), built by `jq`. Fields: `dispatch_id` (`""` with no Dispatch id line), `agent_id`, `subagent_type` (`unknown` when absent), `output_path` (omitted with no Output path line), `verdict` (`pass` or `fail`), `failed` (array of strings, empty on a pass), `note` (omitted when empty), `time` (ISO-8601 UTC). When a paired record cannot be written, the hook prints `dispatch-output-check: cannot write records file` to stderr.
+
+Template declarations: the template for a dispatch is `<type>.md` in `$DISPATCH_CHECK_AGENTS_DIR` (default `${CLAUDE_PLUGIN_ROOT}/agents`); a namespaced type such as `plugin:agent` uses the part after the last colon. Two optional frontmatter keys, each on a single line, with the value in double quotes and the items separated by a vertical bar:
+
+```
+output-fields: "Verdict|Findings"
+output-quotes: "first quote|second quote"
+```
+
+The double quotes are required, and an item cannot hold a double quote. They also keep a value that holds a colon valid YAML, for example `output-fields: "Verdict:|Findings"`. An item with a leading or trailing space or tab, an empty item, a second line for the key, or a frontmatter that opens, never closes and holds a line for the key is malformed.
+
+Fail closed: the hook writes a one-line message to stderr and a `fail` record with a single failed string, then exits 0. The string depends on the input: `jq missing` when `jq` is not installed; `bad json` when stdin is text that is not valid JSON; `bad payload` when stdin is empty or valid JSON that is not an object, or when `tool_response` of an Agent PostToolUse event is a string, a number, true or false, or an array. A `null` or missing `tool_response` passes silently: no record and nothing on stderr. A fail-closed record holds only `verdict`, `failed` and `time`, with no `agent_id`, except when the fields of a joined pair cannot be read: that `bad payload` record also holds `dispatch_id` (empty), `agent_id` and `subagent_type` (`unknown`). With `jq` missing every event writes such a record, so one dispatch leaves two records with no `agent_id`. A fail-closed record that cannot be written adds no output. If `<state dir>/.dispatch-check-pending` cannot be created, or is not a writable directory, the hook prints `dispatch-output-check: state dir <state dir>/.dispatch-check-pending is not a writable directory` to stderr, runs no check and writes no record. A read-only state dir that already holds a writable `.dispatch-check-pending` gets no such message.
+
+Stdout: one compact JSON line only when PostToolUse is the second event and the verdict is `fail`: a `hookSpecificOutput` with `additionalContext` `Dispatch output check failed (agent <id>): <failed strings joined with "; ">`. Every other run prints nothing.
+
+Limits:
+
+- A dispatcher that never writes the message lines is not caught: with no Output path line the output-path checks are skipped and the fields check runs on the last assistant message, and a template that declares `output-quotes` still fails with `no source path for declared quotes` when the message has no Source path line.
+- An output edited after its check is not re-checked.
+- A failure reaches the model only when PostToolUse is the second event; when SubagentStop is second, the record is written and nothing is printed.
+- Workflow `agent()` calls are not Agent tool calls and are never recorded.
+- Other hooks may read the records file; its fields are not yet a stable format.
 
 ## shell-write-guard.sh
 

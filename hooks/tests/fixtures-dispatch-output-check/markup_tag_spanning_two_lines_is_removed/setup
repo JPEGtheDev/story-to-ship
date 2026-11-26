@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: "before inside after"' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'before <span\nclass="x">inside</span> after.\n' >"$tmp/files/src.md"

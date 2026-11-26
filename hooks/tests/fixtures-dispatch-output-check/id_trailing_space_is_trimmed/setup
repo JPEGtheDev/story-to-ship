@@ -1,0 +1,1 @@
+printf 'Dispatch id: 07\nbody\n' >"$tmp/files/idsp.md"

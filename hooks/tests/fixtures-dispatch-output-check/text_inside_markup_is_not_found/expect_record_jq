@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["output quote not found in source: b and c"] and (.[0]|has("note")|not)

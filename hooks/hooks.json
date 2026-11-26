@@ -74,6 +74,25 @@
             "command": "BOOTSTRAP_GATE_MODE=deny \"${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap-gate-post.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/dispatch-output-check.sh\""
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/dispatch-output-check.sh\""
+          }
+        ]
       }
     ]
   }

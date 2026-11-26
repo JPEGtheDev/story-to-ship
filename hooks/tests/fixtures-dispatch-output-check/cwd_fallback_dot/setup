@@ -1,0 +1,2 @@
+mkdir -p "$tmp/files/wd"
+printf 'Dispatch id: O-10\n' >"$tmp/files/wd/rel-ref.md"

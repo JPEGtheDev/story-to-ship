@@ -1,0 +1,3 @@
+# Needs a non-root user: root can read a mode 000 file, so this case fails as root.
+printf 'Dispatch id: 07\nbody\n' >"$tmp/files/locked.md"
+chmod 000 "$tmp/files/locked.md"

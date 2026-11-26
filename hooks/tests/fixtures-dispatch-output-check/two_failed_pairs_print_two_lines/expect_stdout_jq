@@ -1,0 +1,3 @@
+length == 2
+.[0].hookSpecificOutput.additionalContext == "Dispatch output check failed (agent ffff00000000000a1): output lacks required field: VERDICT:"
+.[1].hookSpecificOutput.additionalContext == "Dispatch output check failed (agent ffff00000000000a3): output lacks required field: SOURCE ECHO:"

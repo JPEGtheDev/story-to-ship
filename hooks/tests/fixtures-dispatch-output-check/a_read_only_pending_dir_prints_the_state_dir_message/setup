@@ -1,0 +1,2 @@
+mkdir -p "$STATE/.dispatch-check-pending"
+chmod 500 "$STATE/.dispatch-check-pending"

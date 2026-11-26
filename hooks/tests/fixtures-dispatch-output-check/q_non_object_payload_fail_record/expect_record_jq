@@ -1,0 +1,1 @@
+length==6 and all(.[]; .verdict=="fail" and .failed==["bad payload"])

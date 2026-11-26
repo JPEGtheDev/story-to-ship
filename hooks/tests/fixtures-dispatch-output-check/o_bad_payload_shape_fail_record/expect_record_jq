@@ -1,0 +1,2 @@
+.[0].verdict=="fail" and .[0].failed==["bad payload"]
+.[0].agent_id=="bad1" and .[0].dispatch_id=="" and .[0].subagent_type=="unknown"

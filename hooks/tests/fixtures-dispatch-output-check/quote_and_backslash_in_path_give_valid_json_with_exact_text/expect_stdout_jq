@@ -1,0 +1,2 @@
+length == 1
+.[0].hookSpecificOutput.additionalContext == "Dispatch output check failed (agent hhhh00000000000q1): output file missing: docs/a\"b\\c.md"

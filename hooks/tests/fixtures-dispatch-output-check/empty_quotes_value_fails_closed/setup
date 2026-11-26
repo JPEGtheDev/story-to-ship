@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-quotes: ""' '---' 'body' >"$tmp/agents/reviewer.md"
+printf 'something else\n' >"$tmp/files/src.md"

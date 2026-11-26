@@ -1,0 +1,1 @@
+printf 'anything\n' >"$tmp/files/noid.md"

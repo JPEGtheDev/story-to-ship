@@ -1,0 +1,15 @@
+cp "$SCRIPT_DIR/../../agents/summarization-method.md" "$tmp/agents/summarization-method.md"
+# Echo block = the template body lines from "SOURCE ECHO:" to the line before
+# the closing code fence, indent stripped, each [...] filled with ten words.
+echo_block="$(awk '
+  !on && /^[[:space:]]*SOURCE ECHO:/ { on = 1 }
+  on && /^[[:space:]]*```/ { exit }
+  on { sub(/^[[:space:]]+/, ""); print }
+' "$tmp/agents/summarization-method.md" |
+  sed 's/\[[^]]*\]/one two three four five six seven eight nine ten/g')"
+if [[ -z "$echo_block" ]]; then
+  echo "setup: no SOURCE ECHO: block found in agents/summarization-method.md" >&2
+  return 1
+fi
+"$JQ_BIN" -n -c '{session_id:"s",cwd:"/tmp/dispatch-check-cwd",hook_event_name:"PostToolUse",tool_name:"Agent",tool_input:{description:"Summarize",prompt:"Summarize the injected source.",subagent_type:"summarization-method"},tool_response:{isAsync:true,status:"async_launched",agentId:"ffff0000000000b01",description:"Summarize",prompt:"Summarize the injected source."},tool_use_id:"toolu_summ"}' >"$tmp/out/own-post.json"
+"$JQ_BIN" -n -c --arg msg "$echo_block"$'\n\nSummary: a short made-up summary.' '{session_id:"s",cwd:"/tmp/dispatch-check-cwd",agent_id:"ffff0000000000b01",agent_type:"summarization-method",hook_event_name:"SubagentStop",stop_hook_active:false,last_assistant_message:$msg}' >"$tmp/out/own-stop.json"

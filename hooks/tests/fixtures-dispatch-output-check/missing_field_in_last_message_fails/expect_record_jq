@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["output lacks required field: VERDICT:"] and (.[0]|has("note")|not)

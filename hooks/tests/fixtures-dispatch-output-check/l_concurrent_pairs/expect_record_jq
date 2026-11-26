@@ -1,0 +1,1 @@
+length==24 and ([.[].agent_id]|unique|length)==24

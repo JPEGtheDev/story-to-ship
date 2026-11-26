@@ -1,0 +1,3 @@
+mkdir -p "$STATE/out"
+: >"$STATE/out/<x>.md"
+: >"$STATE/out/{x}.md"

@@ -1,0 +1,2 @@
+printf -- '%s\n' '---' 'output-fields: "SOURCE ECHO:|VERDICT:"' '---' 'body' >"$tmp/agents/a..b.md"
+printf 'Dispatch id: D-100\nnothing\n' >"$tmp/files/out-100.md"

@@ -1,0 +1,1 @@
+.[0].verdict=="pass" and .[0].failed==[] and .[0].agent_id=="aaaa00000000000a1" and .[0].dispatch_id=="D-100"

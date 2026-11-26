@@ -1,0 +1,3 @@
+mkdir -p "$STATE/.dispatch-check-pending"
+echo old > "$STATE/.dispatch-check-pending/stale-agent"
+touch -d "2 hours ago" "$STATE/.dispatch-check-pending/stale-agent"

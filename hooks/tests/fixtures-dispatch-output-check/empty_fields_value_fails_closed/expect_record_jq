@@ -1,0 +1,1 @@
+.[0].verdict=="fail" and .[0].failed==["output-fields line is malformed in reviewer.md"]

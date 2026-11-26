@@ -1,0 +1,3 @@
+dispatch-output-check:
+state dir
+is not a writable directory

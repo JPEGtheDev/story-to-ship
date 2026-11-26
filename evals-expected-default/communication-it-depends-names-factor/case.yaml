@@ -8,4 +8,4 @@ skip:
   claude_code_version: 2.1.331
   with_skill: 5/5
   without_skill: 5/5
-  source: classification run 2026-11-25, 5 runs per arm (owner ruling: 5-run basis, not 30), raw run file kept under /tmp only, not in the repository
+  source: classification run 2026-11-25, 5 runs per arm, raw run file not kept in the repository

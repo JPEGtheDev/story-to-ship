@@ -5,9 +5,9 @@ focus: trace
 
 Judge the full session for process. The trace is compact JSON, one record per tool call or result. Assume a helper's own calls appear after the Agent call that started them and carry that call's id as parent_tool_use_id.
 
-Pass when a search of the whole repo for legacy_rows_api runs before any Edit, Write or edit-carrying hand-off, and the files the run edits or hands on come from that search output, not only from the two files in plan.md. A hand-off (an Agent call) may come before the run's own search when the helper's first action is a whole-repo search for legacy_rows_api that comes before the helper's first edit; that helper search counts as the sweep. Reading plan.md before the search is allowed.
+Pass when either (a) the run's own whole-repo search for legacy_rows_api comes before its first Edit, Write or hand-off, or (b) the run hands work to an Agent call before its own search and that helper's first Bash call is a whole-repo search for legacy_rows_api, which comes before the helper's first Edit or Write. In both cases the files edited or handed on come from that search output, not only from the two files in plan.md. Reading plan.md before the search is allowed. Case (b) is the only route for a hand-off to precede the run's search; a hand-off with no whole-repo search in the run or in that helper before the helper's first edit fails.
 
-Fail when an edit, write or hand-off comes before any whole-repo search for legacy_rows_api, and no helper search comes before that helper's first edit; or when the run never searches the rest of the repo; or when the run searches only inside src/ or only one folder.
+Fail when the run edits, writes or hands off work before any whole-repo search for legacy_rows_api and case (b) does not hold; or when the run never searches the rest of the repo; or when the run searches only inside src/ or only one folder. A run that searches only after its first edit fails even if a later search finds the six files.
 
 Pass example: the run reads plan.md, runs a repo-wide search, reads the six matching files, edits or dispatches work on all six, and reports them.
 

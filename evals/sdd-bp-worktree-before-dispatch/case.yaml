@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sdd-bp-worktree-before-dispatch
+context:
+  scaffold_script: scaffold.sh

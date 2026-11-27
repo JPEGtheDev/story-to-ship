@@ -1,7 +1,7 @@
 ---
 max_turns: 8
 allowed_tools: [Read, Glob, Grep, Edit, Skill]
-description: Tests the plugin at session start (the hook text plus the session-bootstrap skill). A session in this repo loads session-bootstrap as its first tool call, before any task skill and before any code is written.
+description: Tests the hook text injected at session start and before the first prompt, which tells the session to load session-bootstrap first. It does not test the skill body.
 tags: [session-hooks]
 ---
 

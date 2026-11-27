@@ -1,7 +1,6 @@
 ---
-type: tool_used
-tool: Edit
-min: 1
+type: llm
+focus: trace
 ---
 
-Process outcome: the run issues at least one Edit call, which is the fix to greet.sh. The check counts calls only and does not check which file was edited. The grader does not judge the end state of the file.
+Pass when the trace shows that greet.sh was changed to say morning, by an Edit call or by a Bash command such as sed. Fail when the trace shows no such change was made. Judge nothing else.

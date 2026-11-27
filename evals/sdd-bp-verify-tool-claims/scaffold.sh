@@ -38,9 +38,9 @@ printf 'source tree, do not edit by hand\n' > src/README.txt
 cat > plan.md <<'PLAN'
 # Plan: frob run on sample rows
 
-Todo 1: run bin/frob in fast mode on data/rows.csv and report its printed output
-loop: single -- reason: one command, no shared state
-Files: none
+Todo 1: run bin/frob in fast mode on data/rows.csv, have a helper save its printed output to src/rows.out, and report the printed output
+loop: delegated -- reason: src/rows.out is under src/, which the runner may not edit
+Files: src/rows.out (new)
 Existing worktree: .worktrees/todo-1 on branch agent/todo-1, created before this run (repo state, not a deliverable)
 Depends on: none
 PLAN

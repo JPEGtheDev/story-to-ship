@@ -3,6 +3,7 @@ set -eu
 git init -q -b main
 git config user.email eval@example.invalid
 git config user.name eval
+printf '.worktrees/\n' >> .gitignore
 cat > plan.md <<'END_PLAN'
 # Plan: project README
 
@@ -20,3 +21,5 @@ This project converts exported order files into a clean summary report. It reads
 END_README
 git add -A
 git commit -q -m "chore: seed repo"
+mkdir -p .worktrees
+git worktree add -q .worktrees/todo-1 -b agent/todo-1

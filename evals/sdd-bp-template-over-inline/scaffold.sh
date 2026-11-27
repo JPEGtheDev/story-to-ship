@@ -3,6 +3,7 @@ set -eu
 git init -q -b main
 git config user.email eval@example.invalid
 git config user.name eval
+printf '.worktrees/\n' >> .gitignore
 mkdir -p src .claude/agents
 printf 'def add_one(x):\n    return x + 1\n' > src/util.py
 cat > .claude/agents/implementer.md <<'AGENT'
@@ -24,3 +25,5 @@ Depends on: none
 PLAN
 git add -A
 git commit -q -m "chore: seed repo"
+mkdir -p .worktrees
+git worktree add -q .worktrees/todo-1 -b agent/todo-1

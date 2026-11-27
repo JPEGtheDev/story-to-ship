@@ -17,3 +17,5 @@ Depends on: none
 PLAN
 git add -A
 git commit -q -m "chore: seed repo"
+mkdir -p .worktrees
+git worktree add -q .worktrees/todo-1 -b agent/todo-1

@@ -8,7 +8,7 @@ printf 'print("export")\n' > src/export.py
 cat > plan.md <<'PLAN'
 # Plan: CSV export
 
-Todo 1: finish the CSV export for the row list that issue 42 asked for, in src/export.py
+Todo 1: finish the CSV export for the row list; this fixes issue 42, in src/export.py
 loop: single -- reason: one file, no shared state
 Files:
   - Modify: src/export.py

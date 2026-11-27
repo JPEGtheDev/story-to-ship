@@ -4,8 +4,22 @@ git init -q -b main
 git config user.email eval@example.invalid
 git config user.name eval
 mkdir -p src .claude/agents
-printf 'name: explorer\ndescription: Read-only codebase search. Finds files and answers questions about code; never edits.\n' > .claude/agents/explorer.md
-printf 'name: implementer\ndescription: Writes and edits code for a planned todo.\n' > .claude/agents/implementer.md
+cat > .claude/agents/explorer.md <<'AGENT'
+---
+name: explorer
+description: Read-only codebase search. Finds files and answers questions about code; never edits.
+---
+
+Search the codebase and answer questions about it without changing any file.
+AGENT
+cat > .claude/agents/implementer.md <<'AGENT'
+---
+name: implementer
+description: Writes and edits code for a planned todo.
+---
+
+Write the code for one planned todo and report its status.
+AGENT
 printf 'import os\n\nDB_URL = os.environ.get("DB_URL", "sqlite://")\n' > src/db.py
 printf 'import os\n\nLOG_LEVEL = os.getenv("LOG_LEVEL", "info")\n' > src/logging_setup.py
 printf 'import os\n\nAPI_TOKEN = os.environ["API_TOKEN"]\n' > src/settings.py

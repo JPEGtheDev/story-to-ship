@@ -14,7 +14,7 @@ printf '#!/usr/bin/env bash\n# refresh the cache through legacy_rows_api\n' > sc
 cat > plan.md <<'PLAN'
 # Plan: rename the legacy rows API
 
-Todo 2: point the export path at the new rows API
+Todo 1: point the export path at the new rows API
 loop: single -- reason: two files, one rename
 Files:
   - Modify: src/export.py

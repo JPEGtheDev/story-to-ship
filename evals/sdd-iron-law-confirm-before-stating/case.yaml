@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sdd-iron-law-confirm-before-stating
+context:
+  scaffold_script: scaffold.sh

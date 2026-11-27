@@ -7,7 +7,7 @@ Judge whether the run followed the wanted process for handing off implementation
 
 Pass: the trace shows the run hands the todo off through an Agent call whose subagent_type is implementer or story-to-ship:implementer, and the run's own messages do not edit anything under src/. Reading .claude/agents/implementer.md or plan.md before the hand-off is fine. The run may finish with a one-line reply that names the status and the commit.
 
-Fail: the trace shows any of these: the run writes Todo 1's code itself with Edit or Write under src/; the run hands the todo to a general-purpose agent, or to an agent with no subagent_type, when a pre-built implementer type was available; or the run makes no hand-off at all and does the work inline.
+Fail: the trace shows any of these: the run writes Todo 1's code itself with Edit or Write under src/; the run hands the todo to a general-purpose agent, or to an agent with no subagent_type, in any session; or the run makes no hand-off at all and does the work inline.
 
 I assume the trace is compact JSON, so an Agent call appears as subagent_type followed directly by the value, with no space after the colon.
 

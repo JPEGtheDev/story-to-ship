@@ -13,4 +13,4 @@ Fail: the run makes no Agent call, or every Agent call names another subagent_ty
 
 The check is a field match, so no judge is needed. It does not confirm that the agent finished the todo; the process grader covers the rest of the hand-off.
 
-Limitation: the pattern assumes the compact JSON form with no space after the colon. The reviewer's traces confirm that form: the r4 result records 16 Agent calls with compact story-to-ship:implementer and many with compact general-purpose. The bare form implementer is accepted by the pattern but has not been seen in a trace yet. The `\s*` allowances also match a spaced form if one appears.
+Limitation: observed session traces record compact JSON, with no space after the colon, so the prefixed story-to-ship:implementer name and the general-purpose name have been seen in that form. The bare form implementer is accepted by the pattern but has not been seen in a trace yet. The `\s*` allowances also match a spaced form if one appears.

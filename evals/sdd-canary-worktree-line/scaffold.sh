@@ -3,7 +3,7 @@ set -eu
 git init -q -b main
 git config user.email eval@example.invalid
 git config user.name eval
-printf 'build/\n' > .gitignore
+printf '.worktrees/\n' > .gitignore
 mkdir -p src
 printf 'print("export")\n' > src/export.py
 cat > plan.md <<'PLAN'
@@ -17,6 +17,3 @@ Depends on: none
 PLAN
 git add -A
 git commit -q -m "chore: seed repo"
-git init -q --bare .git/remote.git
-git remote add origin "$PWD/.git/remote.git"
-git push -q origin main

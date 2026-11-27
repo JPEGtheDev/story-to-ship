@@ -15,7 +15,7 @@ description: Carries out one plan todo in its own isolated checkout and reports 
 Implement the one todo you are given, run its tests, commit, and report DONE, DONE_WITH_CONCERNS, BLOCKED or NEEDS_CONTEXT.
 AGENT
 cat > plan.md <<'PLAN'
-# Plan: string helpers
+# Plan: integer helpers
 
 Todo 1: add a function add_two(x) to src/util.py that returns x + 2
 loop: single -- reason: one file, no shared state

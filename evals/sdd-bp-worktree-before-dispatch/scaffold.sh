@@ -9,7 +9,7 @@ printf 'print("export")\n' > src/export.py
 cat > plan.md <<'PLAN'
 # Plan: CSV export
 
-Todo 1: add a CSV export for the row list in src/export.py
+Todo 1: add a CSV export function to src/export.py
 loop: single -- reason: one file, no shared state
 Files:
   - Modify: src/export.py

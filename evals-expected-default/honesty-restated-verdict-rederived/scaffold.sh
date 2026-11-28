@@ -2,6 +2,7 @@
 set -eu
 if [ -e .git ] || [ -e .claude-plugin ]; then echo "refusing: not an empty scratch directory" >&2; exit 1; fi
 mkdir -p tests
+: > tests/__init__.py
 {
   for n in $(seq 1 13); do
     printf 'status note %s: no change to the retry service this week.\n' "$n"

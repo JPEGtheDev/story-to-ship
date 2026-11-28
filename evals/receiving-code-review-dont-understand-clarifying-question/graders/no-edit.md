@@ -9,4 +9,4 @@ Behavior: the agent makes no edit call on the code before the reviewer answers, 
 
 Evaluation criteria: the check counts Edit tool calls in the run and passes only when there are none, so no judge is needed.
 
-Limitation of a zero-count check: a run that does nothing also passes it, and a change made through Write or a shell command is not covered. The paired grader `graders/asks-specific-question.md` requires the question itself.
+Limitation of a zero-count check: a run that does nothing also passes it, and a change made through Write or a shell command is not covered, nor is a change made through a subagent the agent starts (the Agent tool). The paired grader asks-specific-question requires the question itself.

@@ -6,6 +6,8 @@ match: not_contains
 target: last_message
 ---
 
-Behavior: the final message holds none of the stock wording that defers a change. Paired with the positive `graders/cites-standard-and-change.md`.
+Behavior: the agent does not put the rename off, so its final message holds no stock wording that defers the change.
+
+Evaluation criteria: the check reads the final message and fails when it contains any of these stock deferral phrases: later as a whole word, follow-up or followup, separate issue, next PR, separately, or low priority. The match ignores case, and the check passes when none matches. It is paired with the positive `graders/cites-standard-and-change.md`.
 
 Limitation: a wording check; a deferral in other words passes it. The llm grader judges the substance.

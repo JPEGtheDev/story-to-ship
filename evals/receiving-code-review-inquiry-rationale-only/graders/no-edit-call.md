@@ -5,6 +5,8 @@ min: 0
 max: 0
 ---
 
-Never-does check: the run makes no Edit call, because a why-question wants the rationale, not a code change. The count comes from the tool name alone.
+Behavior: the agent does not change the code, because the reviewer asked why a choice was made, and a why-question calls for the reason, not a change.
+
+Evaluation criteria: the check counts the Edit calls the run makes and passes only at zero. It is a never-does check: the run makes no Edit call, because a why-question wants the rationale, not a code change. The count comes from the tool name alone.
 
 Limitation: a zero-count check passes a run that does nothing at all. The paired grader `states-rationale-with-evidence` requires the work and the posted reply. A change made through a Bash redirect or sed is not an Edit call; `no-git-commit` covers the committed form of such a change.

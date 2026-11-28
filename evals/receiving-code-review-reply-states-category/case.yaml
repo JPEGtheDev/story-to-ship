@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-reply-states-category
-description: "reply-states-category: the reply to a valid high-signal correction names which category from the table the comment falls in. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 4/5, without skill 0/5; first failing no-skill session claude-eval-5sBYjn (run 0): category-name-present (pattern not found in last_message), names-category (judge votes: FAIL FAIL FAIL) failed (5 of 5 no-skill runs)."
+description: "reply-states-category: the reply to a valid high-signal correction names which category from the table the comment falls in. Current state (5 runs per arm, no pass bar): with skill 4/5, without skill 0/5; first failing no-skill run: category-name-present (pattern not found in last_message), names-category (judge votes: FAIL FAIL FAIL) failed (5 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-defect-not-minimized
-description: "defect-not-minimized: a real defect reported in a mild tone is treated as a defect, not framed as a nit or a preference. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 3/5, without skill 4/5; first failing no-skill session claude-eval-0qrsZZ (run 0): no-nit-or-preference-wording (pattern found (expected absent)) failed (1 of 5 no-skill runs)."
+description: "defect-not-minimized: a real defect reported in a mild tone is treated as a defect, not framed as a nit or a preference. Current state (5 runs per arm, no pass bar): with skill 3/5, without skill 4/5; first failing no-skill run: no-nit-or-preference-wording (pattern found (expected absent)) failed (1 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

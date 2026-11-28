@@ -49,8 +49,7 @@ def build_export_csv(rows):
     for row in rows:
         writer.writerow([row["id"], row["name"], row["amount"]])
     buffer.seek(0)
-    text = buffer.read()
-    return text
+    return buffer.read()
 PY
 cat > README.md <<'MD'
 # orders-service

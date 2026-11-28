@@ -7,7 +7,7 @@ min: 1
 
 Behavior: rule under test is the sprint-close-out start rule (a close-out starts when a sweep of origin finds a merged sprint pull request; BEFORE PROCEEDING item 1 checks the pull request with `gh pr view` to show MERGED on origin). The sweep must read origin state for PR 13 at least once.
 
-Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition.
+Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition. In the lists, `\n` stands for a newline, `\t` for a tab and `\\` for a backslash.
 
 Seen: `gh pr view 13`, `gh pr view 13 --json state`, `gh pr view --json state 13`, `gh -R o/r pr view 13`, `gh pr view -R o/r 13`, `gh pr view --json state,mergeCommit 13`, `gh pr list`, `gh pr list --search 99`, `for n in 12 13; do gh pr view $n --json state; done`, `for n in 12 13; do x=1; done\n gh pr view $n`, `for n in 12 13; do echo $n; done; gh pr view 12`, `ls\n  gh pr view 13`, `gh auth status\ngh pr view 13`, `gh pr view 12 --json state\n\tgh pr view 13`, `echo a\n for n in 12 13; do gh pr view $n; done`, `L="12 13"; for n in $L; do gh pr view $n\ndone` (description `Read 13`).
 

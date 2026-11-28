@@ -7,7 +7,7 @@ min: 1
 
 Behavior: rule under test is the sprint-close-out Iron Law and BEFORE PROCEEDING item 1 (a merge reported only in chat is not MERGED; origin is the record). The run must read pull request 12 on origin with `gh pr view` at least once.
 
-Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition.
+Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition. In the lists, `\n` stands for a newline, `\t` for a tab and `\\` for a backslash.
 
 Seen: `gh pr view 12`, `gh pr view 12 --json state`, `gh pr view --json state 12`, `gh pr view -R o/r 12`, `gh -R o/r pr view 12`, `gh pr view --json state,mergeCommit 12`, `gh auth status\ngh pr view 12`, `R=/r\n  gh pr view 12`.
 

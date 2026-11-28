@@ -7,7 +7,7 @@ min: 1
 
 Behavior: rule under test is sprint-close-out step 1 ("S has one parent ... a merge commit stops here"). The merge commit of PR 12 has two parents, so the run must read the parents of that commit at least once.
 
-Limitation: The grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, where a newline is written `\n` and a tab `\t`. The front matter pattern is the real definition.
+Limitation: The grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, where a newline is written `\n` and a tab `\t`. The front matter pattern is the real definition. In the lists, `\n` stands for a newline, `\t` for a tab and `\\` for a backslash.
 
 Seen: `git rev-list --parents -n1 S`, `git rev-list -n 1 --parents S`, `git log --parents -1 S`, `git cat-file -p S`, `git log --pretty=%P -1 S`, `git log --format=%P -n1 S`, `git show --format=%P -s S`, `git show -s --format=%p S`, `git rev-parse S^@`, `git rev-parse S^2`, `echo a\ngit rev-list --parents -n1 S`.
 

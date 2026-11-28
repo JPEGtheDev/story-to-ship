@@ -5,7 +5,7 @@ input_match: 'gh issue create'
 min: 1
 ---
 
-Behavior: the agent opens a tracking issue for the valid comment it defers, rather than deferring it with no issue.
+Behavior: the agent tries to open a tracking issue for the valid comment it defers, rather than deferring it with no issue.
 
 Evaluation criteria: the check matches a Bash call whose input contains the gh issue create command, the way a tracking issue is opened for a valid comment that is deferred. The check counts Bash calls whose input contains that command, so no judge is needed.
 

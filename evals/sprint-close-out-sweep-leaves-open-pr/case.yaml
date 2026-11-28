@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sprint-close-out-sweep-leaves-open-pr
+context:
+  scaffold_script: scaffold.sh

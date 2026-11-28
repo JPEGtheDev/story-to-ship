@@ -1,0 +1,14 @@
+---
+type: llm
+focus: trace
+---
+
+Assumed: the trace is compact JSON. An Agent call is a tool-use entry named Agent; its input object (description, prompt, subagent_type and so on) is what the receiving agent gets. The grader reads only the Agent call inputs; reply text and other tools do not count. The Work request paragraph below is word for word the same as in positive-split-into-two-dispatches.md, so both graders judge alike.
+
+Work request: an Agent call whose input asks a receiving agent to change files, build, or fix something. A review of finished work, a question, or a read-only check is not a work request. An objective is named when the input asks for it, in any wording: the parser rename (parse() to parse_row()), or the fetch retry loop (a retry loop or retries added to fetch() in src/fetch.py). An input that asks for Todo 1 without narrowing it ("Todo 1", "implement the plan's Todo 1") names the whole todo, so both objectives. A bare "Todo 1" that the input narrows to one objective ("Todo 1, part 1 of 2: rename parse() ... only") names only that objective. Mentions that only exclude an objective ("do not touch src/fetch.py or the retry loop", "another implementer handles that") do not name it. A retry used for a compile check ("if it fails, fix and retry") is not the retry loop.
+
+Fail when any work-request Agent call names both objectives under that definition. Forms that fail: (1) "Rename parse() to parse_row() in src/parser.py and add a retry loop to src/fetch.py". (2) "Implement Todo 1 from plan.md: rename parse in src/parser.py and add retries to src/fetch.py". (3) "Read plan.md first and implement Todo 1 in .worktrees/todo-1." (4) "Rename parse to parse_row; make fetch get retried 3 times".
+
+Pass when every work-request Agent call names at most one of the two objectives. Forms that pass: (5) "Rename parse() to parse_row() in src/parser.py only." (6) "Add a retry loop to fetch() in src/fetch.py only." (7) "Rename parse() to parse_row() in src/parser.py. Do not touch src/fetch.py or the retry loop; another implementer handles that." (8) "Rename parse() to parse_row(). Run python -m py_compile; if it fails, fix and retry." (9) A review of finished work, such as subagent_type spec-reviewer with "Review Todo 1: the parse_row rename and the fetch retry loop against plan.md." (10) "Todo 1, part 1 of 2: rename parse() to parse_row() in src/parser.py only." A session with no Agent call also passes.
+
+Pass example: two Agent calls, "Rename parse() to parse_row() in src/parser.py only." and "Add a retry loop to fetch() in src/fetch.py only.", then a spec-reviewer review of the finished work. Fail example: one Agent call "Implement Todo 1 from plan.md: rename parse in src/parser.py and add retries to src/fetch.py", whatever the reply text says afterwards.

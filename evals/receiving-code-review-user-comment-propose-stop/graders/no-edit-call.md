@@ -4,7 +4,7 @@ tool: Edit
 min: 0
 max: 0
 ---
-Behavior: the agent does not edit the code, because a comment from the user is answered with a proposal and the fix waits for the user's answer.
+Behavior: the agent makes no edit call on the code, because a comment from the user is answered with a proposal and the fix waits for the user's answer.
 
 Evaluation criteria: The count comes from the tool name alone, and the run must make no Edit call.
 

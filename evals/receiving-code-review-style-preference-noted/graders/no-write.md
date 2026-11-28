@@ -4,7 +4,7 @@ tool: Write
 min: 0
 max: 0
 ---
-Behavior: the agent does not rewrite the code wholesale to switch the quote style.
+Behavior: the agent makes no write call on any file, so no file is rewritten wholesale to switch the quote style.
 
 Evaluation criteria: The check counts Write calls by tool name alone, and the run must make none, so the file is not rewritten wholesale to switch quote style. Paired with graders/no-edit.md and the positive graders/says-preference.md.
 

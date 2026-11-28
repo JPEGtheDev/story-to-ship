@@ -4,7 +4,7 @@ tool: Edit
 min: 0
 max: 0
 ---
-Behavior: the agent makes no edit call on the code, because a quote-style preference that the style notes allow either way does not call for a change.
+Behavior: the agent makes no edit call on any file, because a quote-style preference that the style notes allow either way does not call for a change.
 
 Evaluation criteria: The check counts Edit calls by tool name alone, and passes only when that count is zero. A quote-style preference that docs/STYLE.md allows either way does not call for a change, so any Edit call fails. This is the never-does-X side; the positive side is graders/says-preference.md.
 

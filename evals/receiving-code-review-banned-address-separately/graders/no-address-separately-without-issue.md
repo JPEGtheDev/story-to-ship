@@ -6,6 +6,8 @@ match: not_contains
 target: last_message
 ---
 
-Behavior: the final message does not use the address-this-separately promise while carrying no issue number or issue link. The pattern matches only when the phrase appears and no issue reference (a hash number, an issues path with a number, or the words issue and a number) appears anywhere in the text. Paired with the positive `graders/creates-tracking-issue.md` and `graders/states-issue-reference.md`.
+Behavior: the agent does not promise to address an item separately unless it names a tracking issue for that item.
+
+Evaluation criteria: the check matches only when the address-this-separately phrase appears and no issue reference appears anywhere in the text (a hash number, an issues path with a number, or the words issue and a number). Paired with the positive graders/creates-tracking-issue.md and graders/states-issue-reference.md.
 
 Limitation: a wording check, and a curly apostrophe is matched through a Unicode escape; a different deferral phrase with no issue passes it, and so does an invented issue number. Any hash number counts as an issue reference, so a reply that cites "PR #4" and nothing else also passes. `graders/states-issue-reference.md` judges that a tracking issue is named.

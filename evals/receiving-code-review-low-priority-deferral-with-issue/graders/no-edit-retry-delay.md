@@ -1,13 +1,12 @@
 ---
-type: tool_used
-tool: Edit
-input_match: '"file_path":\s*"[^"]*src/export\.py"'
-min: 0
-max: 0
+type: regex
+pattern: '"name":\s*"(?:Edit|Write)",\s*"input":\s*\{[^{}]*?"file_path":\s*"[^"]*src/export\.py"'
+match: not_contains
+target: trace
 ---
 
 Behavior: the agent does not fix the retry-delay comment inside this PR, because the comment is outside the purpose of the PR and is deferred instead.
 
-Evaluation criteria: the check counts Edit calls whose file_path field ends in src/export.py and passes only at zero, so no judge is needed. The setup puts the retry-delay code in src/export.py, the file the check names. The header row is already in the PR, so the only change left to make in that file is the out-of-scope one.
+Evaluation criteria: the check searches the run's trace for an Edit or a Write tool call whose file_path field in the tool input holds src/export.py, and passes only at zero such calls, so no judge is needed. The setup puts the retry-delay code in src/export.py, the file the check names. The header row is already in the PR, so the only change left to make in that file is the out-of-scope one.
 
-Limitation of a zero-count check: a run that does nothing also passes it, and a change made through Write or Bash is not covered. It sits beside `creates-tracking-issue` and `defers-with-issue-reference`, which require the deferral itself.
+Limitation of a zero-count check: a run that does nothing also passes it, and a change made through a shell command is not covered. It sits beside `creates-tracking-issue` and `defers-with-issue-reference`, which require the deferral itself. The pattern reads the tool name and the file_path field of the tool input, with the file_path field before any brace in that input.

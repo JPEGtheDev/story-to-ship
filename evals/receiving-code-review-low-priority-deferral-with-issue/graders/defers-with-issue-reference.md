@@ -3,7 +3,9 @@ type: llm
 focus: last_message
 ---
 
-The final message is the reply posted on a review thread that raises a valid but low-priority point outside the purpose of the PR. It passes only when all of these hold:
+Behavior: the agent replies to the valid but low-priority comment by acknowledging it, explaining why it is deferred, and naming a tracking issue for it, without saying it was fixed in this PR.
+
+Evaluation criteria: The final message is the reply posted on a review thread that raises a valid but low-priority point outside the purpose of the PR. It passes only when all of these hold:
 
 1. It acknowledges that the point is valid.
 2. It explains why the item is deferred, for example that it is unrelated to this change and not urgent.

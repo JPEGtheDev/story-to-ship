@@ -5,6 +5,8 @@ input_match: '-m\s+(?:unittest|pytest)\b|"command":\s*"(?:(?:[^"\\]|\\.)*(?:&&|;
 min: 1
 ---
 
-Behavior: the run issues a Bash call that runs the test suite with `-m unittest`, `-m pytest` or a `pytest` command at the start of the command or after `&&`, `;` or `||`, optionally behind `timeout <seconds>`. A quoted path before the `&&` (for example `cd "/a b" && pytest -q`) does not stop the match. The check counts matching Bash calls and needs no judge.
+Behavior: the agent runs the project's test suite as a command of its own, using unittest or pytest.
+
+Evaluation criteria: the check counts Bash calls whose command runs unittest through -m unittest or pytest through -m pytest, or a pytest command at the start of the command or after &&, ; or ||, optionally behind timeout with a number of seconds. A quoted path before the && (for example cd "/a b" && pytest -q) does not stop the match. The check counts matching calls and needs no judge.
 
 Limitation: a single-test run such as `python3 -m unittest tests.test_invoice.InvoiceTest.test_line_total` matches, so it counts as a suite run. A quoted `; pytest` inside a commit message (for example `git commit -m "fix discount; pytest passes"`) also matches. `.venv/bin/pytest -q` and `uv run pytest` are not matched. A bare `unittest` run without `-m` (for example `unittest discover` through another launcher) is not matched. It reads Bash calls only, so a suite run inside a subagent is not counted. It counts suite runs, not their order, so a run whose only suite run comes before the fix passes it. The llm grader `suite-run-after-edit` judges the order, and `reports-post-fix-result` judges the posted result.

@@ -6,7 +6,7 @@ min: 0
 max: 0
 ---
 
-Behavior: the agent does not widen the README's scope sentence to make room for the shipping rates table, because that sentence is correct as written.
+Behavior: the agent does not widen the scope sentence of the document it moves the table out of, because that sentence is correct as written.
 
 Evaluation criteria: The check reads the input of each Edit call and passes when no such input contains the README's scope sentence or its tail ("covers installation" or "installation only"). A short Edit that widens only the tail ("installation only." to "installation and shipping rates.") is caught as well as one that quotes the whole sentence. The scope sentence is correct as written, so widening it to keep the table fails. This is the never-does side; the positive side is graders/table-moved.md.
 

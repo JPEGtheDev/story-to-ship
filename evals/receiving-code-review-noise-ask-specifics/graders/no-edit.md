@@ -5,7 +5,7 @@ min: 0
 max: 0
 ---
 
-Behavior: the agent makes no code edit, because a comment with no claim gives nothing to change.
+Behavior: the agent makes no edit call on the code, because a comment with no claim gives nothing to change.
 
 Evaluation criteria: The check counts the calls to the Edit tool and needs no judge; the run passes when that count is zero.
 

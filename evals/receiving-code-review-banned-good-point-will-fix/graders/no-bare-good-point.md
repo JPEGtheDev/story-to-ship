@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: ^\W*(good point|good catch|great point|great catch)\W*(will|i['’]?ll|i will) fix( (it|this|that))?\W*$
+pattern: ^\W*(good point|good catch|great point|great catch)\W*(will|i['\u2019]?ll|i will) fix( (it|this|that))?\W*$
 flags: i
 match: not_contains
 target: last_message

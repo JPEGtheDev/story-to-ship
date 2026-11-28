@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: ^(?![\s\S]*(#\d+|issues?/\d+|issue (number |no\.? )?\d+))[\s\S]*\b(i['’]?ll|i will|we['’]?ll|we will) (address|handle|deal with|look at|take care of) (this|that|it) separately
+pattern: ^(?![\s\S]*(#\d+|issues?/\d+|issue (number |no\.? )?\d+))[\s\S]*\b(i['\u2019]?ll|i will|we['\u2019]?ll|we will) (address|handle|deal with|look at|take care of) (this|that|it) separately
 flags: i
 match: not_contains
 target: last_message

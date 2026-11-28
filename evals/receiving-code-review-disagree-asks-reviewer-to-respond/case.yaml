@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-disagree-asks-reviewer-to-respond
-description: "disagree-asks-reviewer-to-respond: after disagreeing, the reply asks the reviewer to respond and does not close the thread (protocol step 3). Current state (5 runs per arm, no pass bar): with skill 3/5, without skill 1/5; first failing no-skill run: asks-reviewer-to-respond (judge votes: FAIL FAIL FAIL) failed (4 of 5 no-skill runs)."
+description: "disagree-asks-reviewer-to-respond: after disagreeing, the reply asks the reviewer to respond and does not close the thread (protocol step 3). Current state (5 runs per arm, no pass bar): with skill 3/5, without skill 1/5; failing no-skill check: asks-reviewer-to-respond (judge votes: FAIL FAIL FAIL) failed (4 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

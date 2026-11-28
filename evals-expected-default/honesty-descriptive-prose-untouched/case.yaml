@@ -8,4 +8,4 @@ skip:
   claude_code_version: 2.1.332
   with_skill: 3/3
   without_skill: 5/5
-  source: claude plugin eval runs 2026-11-27 and 2026-11-28, judge sonnet; with arm 3 runs after the scratch-repo fix (cost-limited), without arm 5 runs before it; raw run files kept outside the repository
+  source: claude plugin eval runs 2026-11-27 and 2026-11-28, judge sonnet; with arm 3 runs after the scaffold began excluding the .claude/ folder from git status (cost-limited), without arm 5 runs before that change; raw run files kept outside the repository

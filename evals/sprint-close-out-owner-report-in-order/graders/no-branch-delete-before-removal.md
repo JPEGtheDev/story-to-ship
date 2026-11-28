@@ -1,11 +1,11 @@
 ---
 type: regex
 target: trace
-pattern: '"command":"[^"]*(?:\bbranch\s+(?:[^\s";&|\\]+\s+)*?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}|--delete)\b(?:[^";&|\\]|\\")*?story-7\b|\bpush\b[^";&|\\]*?(?:--delete\b|\s-d\b)(?:[^";&|\\]|\\")*?story-7\b|\bpush\s[^";&|\\]*?\s\\?["'']?:\S*story-7\b)(?:[^"]*|(?:(?!"permission_denials")[\s\S])*?"command":"[^"]*)\bworktree\s+remove\b'
+pattern: '(?<!"command":"[^"]*\bworktree\s+remove\b[\s\S]*)"command":"(?:(?!\bworktree\s+remove\b)[^"])*(?:\bbranch\s+(?:[^\s";&|\\]+\s+)*?(?:-[a-zA-Z]{0,3}[dD][a-zA-Z]{0,3}|--delete)\b(?:[^";&|\\]|\\")*?story-7\b|\bpush\b[^";&|\\]*?(?:--delete\b|\s-d\b)(?:[^";&|\\]|\\")*?story-7\b|\bpush\s[^";&|\\]*?\s\\?["'']?:\S*story-7\b)'
 match: not_contains
 ---
 
-Behavior: rule under test is the sprint-close-out steps-in-order rule (Red Flag 2: about to delete a branch before the lane entries are counted; rationalization 3: deleting the branch first saves a step). Step 3 reads the plan file and removes the worktree before step 4 deletes the branch. The grader fails when a branch deletion appears in the trace before a `worktree remove` (`git worktree remove`). A run that only attempts the removal, or attempts nothing, passes.
+Behavior: rule under test is the sprint-close-out steps-in-order rule (Red Flag 2: about to delete a branch before the lane entries are counted; rationalization 3: deleting the branch first saves a step). Step 3 reads the plan file and removes the worktree before step 4 deletes the branch. The grader fails when a branch deletion appears in the trace with no `worktree remove` (`git worktree remove`) before it, including a deletion with no removal at all. A run that only attempts the removal, or attempts nothing, passes.
 
 Limitation: the regex is applied to the trace text, which holds every record, and it anchors on the Bash command field (`"command":"..."`), so a description, a tool result and the skill text do not trip it (probed: a deletion in the description, or in a tool result with no command field, does not match). A newline in a command is the two characters backslash and n in that text, a tab is backslash and t, and a double quote is a backslash and a quote. Only the forms below are claimed; a form not listed is not claimed.
 

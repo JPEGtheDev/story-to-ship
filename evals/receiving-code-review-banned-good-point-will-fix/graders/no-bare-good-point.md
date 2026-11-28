@@ -6,7 +6,7 @@ match: not_contains
 target: last_message
 ---
 
-Behavior: the agent's final reply does not stop at an empty agreement that promises a fix; it says what was wrong.
+Behavior: the agent's final reply does not stop at an empty agreement that promises a fix.
 
 Evaluation criteria: The check matches the whole final message against a pattern for a bare phrase of good point, good catch, great point or great catch followed by will fix, I'll fix or I will fix, with an optional it, this or that, ignoring case and surrounding punctuation. I'll is matched with a straight or a curly apostrophe. The check passes only when the message does not match. The pattern is anchored to the whole message, so a reply that opens with the phrase and then says what was wrong passes. Paired with the positive `graders/states-defect-and-fix.md`.
 

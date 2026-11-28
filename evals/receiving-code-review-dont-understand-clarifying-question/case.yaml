@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-dont-understand-clarifying-question
+description: "dont-understand-clarifying-question: a comment that refers to something the author cannot identify is answered with a specific question naming what is unclear, not a generic request to elaborate. Current state (5 runs per arm, no pass bar): with skill 5/5, without skill 0/5; failing no-skill check: asks-specific-question (judge votes: FAIL FAIL FAIL), no-edit (Edit called 2x (expected 0..0)) failed (5 of 5 no-skill runs)."
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-high-signal-not-deferred
+description: "high-signal-not-deferred: a comment that points to a line and explains its consequence is fixed in this pull request and never deferred as low priority. Current state (5 runs per arm, no pass bar): with skill 1/5, without skill 5/5; no no-skill run failed."
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

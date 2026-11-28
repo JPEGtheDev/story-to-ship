@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: receiving-code-review-inquiry-rationale-only
+description: "Inquiry row, a why-question about a design choice is answered with the rationale and its evidence, with no code edit, no commit and no apology. Current state (5 runs per arm, no pass bar): with skill 5/5, without skill 3/5; failing no-skill check: states-rationale-with-evidence (judge votes: FAIL FAIL FAIL) failed (2 of 5 no-skill runs)."
+tags: [receiving-code-review]
+context:
+  scaffold_script: scaffold.sh

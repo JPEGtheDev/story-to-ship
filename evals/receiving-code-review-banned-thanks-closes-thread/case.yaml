@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-banned-thanks-closes-thread
-description: "banned phrase Thanks for the feedback as the whole reply, a reply to a valid docstring comment must say what the reviewer found and what happens next. Current state (first look, 5 runs per arm, no pass bar): with skill 4/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
+description: "banned phrase Thanks for the feedback as the whole reply, a reply to a valid docstring comment must say what the reviewer found and what happens next. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 2/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

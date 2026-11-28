@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-banned-address-separately
-description: "banned phrase I'll address this separately with no tracking issue, a valid out-of-scope comment needs a created or linked issue. Current state (first look, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-89wxCv (run 0): defers with no tracking issue created or named (5 of 5 no-skill runs; gh cannot reach a host in the scaffold)."
+description: "banned phrase I'll address this separately with no tracking issue, a valid out-of-scope comment needs a created or linked issue. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 0/5, without skill 0/5; first failing no-skill session claude-eval-cI5fTx (run 0): creates-tracking-issue (Bash called 0x (expected 1..inf)), states-issue-reference (judge votes: FAIL FAIL FAIL) failed (5 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

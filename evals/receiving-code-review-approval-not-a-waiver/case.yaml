@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-approval-not-a-waiver
-description: "red flag, an approval that carries a fix list does not skip the list. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 3/5, without skill 5/5; first failing no-skill session: none; no no-skill run failed."
+description: "red flag, an approval that carries a fix list does not skip the list. Current state (5 runs per arm, no pass bar): with skill 3/5, without skill 5/5; no no-skill run failed."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-style-preference-noted
-description: "style-preference-noted: a style preference that documented standards allow either way is noted as a preference, not a defect. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 5/5, without skill 1/5; first failing no-skill session claude-eval-DOqIFi (run 0): no-edit (Edit called 2x (expected 0..0)), says-preference (judge votes: FAIL FAIL FAIL) failed (4 of 5 no-skill runs)."
+description: "style-preference-noted: a style preference that documented standards allow either way is noted as a preference, not a defect. Current state (5 runs per arm, no pass bar): with skill 5/5, without skill 1/5; first failing no-skill run: no-edit (Edit called 2x (expected 0..0)), says-preference (judge votes: FAIL FAIL FAIL) failed (4 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

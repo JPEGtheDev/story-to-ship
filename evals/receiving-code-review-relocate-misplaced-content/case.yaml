@@ -1,6 +1,6 @@
 schema_version: "1.1"
 name: receiving-code-review-relocate-misplaced-content
-description: "relocate-misplaced-content: content that does not belong in a file is removed there and put where it belongs, without widening the file scope. Current state (re-measured after the grader rewording and the Edit-or-Write change, 5 runs per arm, no pass bar): with skill 3/5, without skill 3/5; first failing no-skill session claude-eval-rPK4h1 (run 3): table-moved (judge votes: FAIL FAIL FAIL) failed (2 of 5 no-skill runs)."
+description: "relocate-misplaced-content: content that does not belong in a file is removed there and put where it belongs, without widening the file scope. Current state (5 runs per arm, no pass bar): with skill 3/5, without skill 3/5; first failing no-skill run: table-moved (judge votes: FAIL FAIL FAIL) failed (2 of 5 no-skill runs)."
 tags: [receiving-code-review]
 context:
   scaffold_script: scaffold.sh

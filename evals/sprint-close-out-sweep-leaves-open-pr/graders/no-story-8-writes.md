@@ -8,7 +8,7 @@ max: 0
 
 Behavior: rule under test is the sprint-close-out Iron Law (a sprint pull request is closed out only after origin shows it MERGED). PR 13 is OPEN on origin, so the run must issue no worktree removal, branch deletion, remote branch deletion or fast-forward merge or pull that names story-8 (branch `agent/story-8` or worktree `.worktrees/story-8`).
 
-Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition.
+Limitation: the grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition. In the lists, `\n` stands for a newline, `\t` for a tab and `\\` for a backslash.
 
 Seen: `git -C /r worktree remove /r/.worktrees/story-8`, `git branch -D agent/story-8`, `git push -d origin agent/story-8`, `git push origin :agent/story-8`, `git push origin ':agent/story-8'`, `git push --delete origin agent/story-8`, `git push origin -d agent/story-8`, `git -C /r/.worktrees/story-8 merge --ff-only origin/main`, `git -C /r worktree remove /r/.worktrees/story-7\ngit log story-8`, `git log agent/story-8\ngit -C /r branch -D agent/story-7`, `git log agent/story-8\n  git -C /r branch -D agent/story-7`, `git status\nls /r/.worktrees/story-8\ngit -C /r branch -D agent/story-7`, `echo a;git log agent/story-8\ngit -C /r branch -D agent/story-7`, `(git log agent/story-8)\ngit -C /r branch -D agent/story-7`, `git branch -D \\\nagent/story-8`, `git -C /r/.worktrees/story-8 \\\n  merge --ff-only origin/main`.
 

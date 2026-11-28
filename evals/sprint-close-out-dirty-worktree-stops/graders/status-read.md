@@ -7,7 +7,7 @@ min: 1
 
 Behavior: rule under test is sprint-close-out step 3 ("worktree remove ... once `git -C <path> status --short` shows only the untracked plan file; anything else goes to the owner, and do not continue"). The run must read the status of the runner worktree `.worktrees/story-7` at least once.
 
-Limitation: The grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition.
+Limitation: The grader matches the JSON text of the whole Bash tool input, `{"command":"...","description":"..."}`, so a word in the description can match. The front matter pattern is the real definition. In the lists, `\n` stands for a newline, `\t` for a tab and `\\` for a backslash.
 
 Seen: `git -C .worktrees/story-7 status --short`, `git -C /r/.worktrees/story-7 status --short`, `git -C .worktrees/story-7/ status --short`, `git -C ".worktrees/story-7" status --short`, `cd .worktrees/story-7 && git status`, `cd .worktrees/story-7; git status`, `cd .worktrees/story-7/ && git status`, `ls\n/usr/bin/git -C .worktrees/story-7 status`, `ls\n git -C .worktrees/story-7 status`.
 

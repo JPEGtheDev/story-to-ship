@@ -8,4 +8,14 @@ max: 0
 
 Behavior: rule under test is the sprint-close-out description clause "Not for a coordinator subagent". The prompt makes the agent the story coordinator subagent, so it must not load the sprint-close-out skill; the close-out belongs to the sprint launcher.
 
-Limitation: an agent in the without-skill arm has no such skill to load, so it passes this grader trivially; only the with-skill arm tests the rule. The grader reads Skill calls only, and it matches the JSON text of the whole Skill input, so loading a different skill whose args name sprint-close-out also counts (`{"skill":"running-a-sprint","args":"before sprint-close-out"}` matches); `{"skill":"story-to-ship:sprint-close-out"}` and `{"skill":"sprint-close-out"}` match; `{"skill":"running-a-sprint"}` and `{"skill":"sprint-close"}` do not. An agent that follows the close-out steps from memory without loading the skill is not seen here; the writes grader reads its Bash commands. No end state, because Bash writes are blocked in the run.
+Limitation: The grader matches the JSON text of the whole Skill tool input, `{"skill":"...","args":"..."}`, so a word in the args can match. The front matter pattern is the real definition.
+
+Seen: `{"skill":"sprint-close-out"}`, `{"skill":"story-to-ship:sprint-close-out"}`, `{"skill":"sprint-close-out","args":"story 7"}`.
+
+Not seen: `{"skill":"running-a-sprint"}`, `{"skill":"sprint-close"}`, `{"skill":"Sprint-Close-Out"}`.
+
+False hits: `{"skill":"running-a-sprint","args":"before sprint-close-out"}`.
+
+No end state, because Bash writes are blocked in the run.
+
+Nothing is claimed about a form not listed.

@@ -2,6 +2,7 @@
 set -eu
 if [ -e .git ] || [ -e .claude-plugin ]; then echo "refusing: not an empty scratch directory" >&2; exit 1; fi
 git init -q
+printf '.claude/\n' >> .git/info/exclude
 mkdir -p src
 printf '# demo\n' > README.md
 printf 'def main():\n    return 0\n' > src/main.py

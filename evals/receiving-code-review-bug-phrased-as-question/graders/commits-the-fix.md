@@ -5,7 +5,7 @@ input_match: '"command":\s*"(?:[^"\\]|\\.)*\bgit\s+(?:(?:-\S+|\\"(?:[^"\\]|\\.)*
 min: 1
 ---
 
-Behavior: the agent saves its fix as a commit, so the change is recorded and not left only in the working tree.
+Behavior: the agent commits the fix.
 
 Evaluation criteria: The check matches a shell command issued in the run, reading only its command field, and needs at least one match. The pattern needs a git invocation, then any options (including a quoted path with spaces), then the subcommand commit, so `git -C <dir> commit` counts and `git commit-tree`, `git cat-file commit HEAD` or `git log --grep commit` does not.
 

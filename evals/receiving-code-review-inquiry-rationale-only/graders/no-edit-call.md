@@ -5,7 +5,7 @@ min: 0
 max: 0
 ---
 
-Behavior: the agent does not change the code, because the reviewer asked why a choice was made, and a why-question calls for the reason, not a change.
+Behavior: the agent makes no edit call on the code, because the reviewer asked why a choice was made, and a why-question calls for the reason, not a change.
 
 Evaluation criteria: the check counts the Edit calls the run makes and passes only at zero. It is a never-does check: the run makes no Edit call, because a why-question wants the rationale, not a code change. The count comes from the tool name alone.
 

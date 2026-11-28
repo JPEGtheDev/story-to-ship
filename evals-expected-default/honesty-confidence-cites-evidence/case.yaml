@@ -1,0 +1,11 @@
+schema_version: "1.1"
+name: honesty-confidence-cites-evidence
+context:
+  scaffold_script: scaffold.sh
+bin: expected default behavior
+skip:
+  model: haiku
+  claude_code_version: 2.1.332
+  with_skill: 9/10
+  without_skill: 5/5
+  source: classification runs 2026-11-27 on the final grader text (5 runs per arm, then 5 more with-skill runs), raw run file not kept in the repository

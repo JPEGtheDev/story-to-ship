@@ -25,7 +25,7 @@ These files back the Subagent-Driven Development (SDD) loop enforced by `../SKIL
 | `THREE_ROLE_LOOP.md` | The three-role loop for `loop: three-role` todos: when it applies, dispatch order, the role rules for test-writer, pass-maker and refactorer, the test-path predicate, the role-boundary detector script, what the detector does not catch, and failure routing |
 | `VERIFY_COMMAND_FORMS.md` | The forms of verification command that cannot fail: the two forms `../scripts/verify-command-check.sh` checks (echo redirect, digit-count) with the script's reports and limits, and the judgment-only forms with the check to run for each |
 | `WORKTREE_SELF_CHECK.md` | Canonical Worktree Self-Check block text -- Variant A (read-only templates) and Variant B (write templates with branch-isolation step) for agent templates to copy verbatim |
-| `WORKTREE_SETUP.md` | Pointer to the four Create steps of the `using-git-worktrees` skill (the commands are not repeated), the read-only exemption (skip step 4), the `{{WORKTREE_PATH}}` hand-off, and why read-only agents also need worktrees |
+| `WORKTREE_SETUP.md` | Pointer to the worktree checks of the `using-git-worktrees` skill (the commands are not repeated), the read-only exemption (skip the branch check), the `{{WORKTREE_PATH}}` hand-off, and why read-only agents also need worktrees |
 
 ---
 

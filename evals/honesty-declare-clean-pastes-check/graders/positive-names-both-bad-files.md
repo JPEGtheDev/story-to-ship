@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '(?s)^(?=.*q3-04)(?=.*q3-09)'
+pattern: '^(?=[\s\S]*q3-04)(?=[\s\S]*q3-09)'
 match: contains
 target: last_message
 ---
